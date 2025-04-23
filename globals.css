@@ -1,1 +1,33 @@
 @import "tailwindcss";
+
+:root {
+    /* iframe styling */
+    --ov25-configurator-iframe-background-color: #E5E5E5;
+    --ov25-configurator-iframe-border-radius: 20px;
+
+    /* view controls that are overlayed onto the iframe, such as the dimensions button */
+    --ov25-configurator-view-controls-text-color: #282828;
+    --ov25-configurator-view-controls-background-color: #ffffff;
+    --ov25-configurator-view-controls-border-color: #e5e5e5;
+    --ov25-configurator-view-controls-border-radius: calc(infinity * 1px);
+
+    /* Product Name & price text color */
+    --ov25-configurator-title-text-color: #282828;
+    --ov25-configurator-price-text-color: #282828;
+
+    /* AR QR code popup */
+    --ov25-configurator-qr-code-popup-background-color: #E5E5E5;
+    --ov25-configurator-qr-code-popup-border-color: #282828;
+    --ov25-configurator-qr-code-popup-title-text-color: #282828;
+    --ov25-configurator-qr-code-popup-description-text-color: #282828;
+    --ov25-configurator-qr-code-popup-link-text-color: #6a7282;
+
+    /* Variant menu */
+    --ov25-configurator-variant-menu-border-color: #E5E5E5;
+    --ov25-configurator-variant-menu-border-radius: 8px;
+
+    /* Drawer Stles */
+    --ov25-configurator-variant-drawer-background-color: #ffffff;
+    --ov25-configurator-variant-drawer-handle-color: #bcbcbc;
+
+}

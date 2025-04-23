@@ -1,21 +1,33 @@
+import * as React from 'react'
 import { Button } from "./ui/button"
-import {ChevronRight} from 'lucide-react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
 } from "./ui/carousel"
-import * as React from 'react'
+import { useOV25UI } from "../contexts/ov25-ui-context"
+import { useMediaQuery } from "../hooks/use-media-query"
 
-interface ProductCarouselProps {
-  imgs: string[]
-  currentIndex: number
-  onIndexChange: (index: number) => void
-}
-
-export function ProductCarousel({ imgs = [], currentIndex, onIndexChange }: ProductCarouselProps) {
-  // Ensure imgs is always an array
-  const images = Array.isArray(imgs) ? imgs : [];
+export function ProductCarousel() {
+  // Get all required data from context
+  const {
+    currentProduct,
+    galleryIndex,
+    setGalleryIndex,
+    error
+  } = useOV25UI();
+  
+  // Get local data
+  const isMobile = useMediaQuery(1280);
+  
+  // Get the images from the current product
+  const images = currentProduct?.metadata?.images?.slice(0, -1) || [];
+  
+  // If any of these conditions are true, don't render the carousel
+  if (images.length === 0 || isMobile || error) {
+    return null;
+  }
   
   return (
     <div className="w-full relative">
@@ -23,28 +35,28 @@ export function ProductCarousel({ imgs = [], currentIndex, onIndexChange }: Prod
         <Button
           variant="ghost"
           size="icon"
-          className="rounded-none pointer-events-auto"
+          className="rounded-none  pointer-events-auto"
           onClick={() => {
-            const newIndex = currentIndex === 0 ? images.length : currentIndex - 1;
-            onIndexChange(newIndex);
+            const newIndex = galleryIndex === 0 ? images.length : galleryIndex - 1;
+            setGalleryIndex(newIndex);
           }}
         >
-          <ChevronRight className="h-12 xl:h-16 rotate-180" />
+          <ChevronLeft size={28} className=" h-12 stroke-1  stroke-muted-foreground self-center" />
         </Button>
         <Button
           variant="ghost"
           size="icon"
           className="rounded-none pointer-events-auto"
           onClick={() => {
-            const newIndex = currentIndex === images.length ? 0 : currentIndex + 1;
-            onIndexChange(newIndex);
+            const newIndex = galleryIndex === images.length ? 0 : galleryIndex + 1;
+            setGalleryIndex(newIndex);
           }}
         >
-          <ChevronRight className="h-12 xl:h-16" />
+          <ChevronRight size={28} className=" h-12 stroke-1  stroke-muted-foreground self-center" />
         </Button>
       </div>
       <div className="mt-4 text-center text-sm text-muted-foreground">
-        {currentIndex + 1}/{images.length + 1}
+        {galleryIndex + 1}/{images.length + 1}
       </div>
       <div className="mt-4 relative px-12 w-full flex items-center justify-center">
         <Carousel
@@ -57,9 +69,9 @@ export function ProductCarousel({ imgs = [], currentIndex, onIndexChange }: Prod
           <CarouselContent className="-ml-2">
             <CarouselItem className="pl-2 basis-1/3 xl:basis-[20%]">
               <button
-                onClick={() => onIndexChange(0)}
+                onClick={() => setGalleryIndex(0)}
                 className={`relative aspect-[3/2] w-full flex justify-center items-center overflow-hidden rounded-none bg-muted ${
-                  currentIndex === 0 ? "" : ""
+                  galleryIndex === 0 ? "" : ""
                 }`}
               >
                 <img
@@ -70,19 +82,18 @@ export function ProductCarousel({ imgs = [], currentIndex, onIndexChange }: Prod
                 />
               </button>
             </CarouselItem>
-            {images.map((img, index) => (
+            {images.map((img: any, index: any) => (
               <CarouselItem key={index} className="pl-2 basis-1/3 xl:basis-[20%]">
                 <button
-                  onClick={() => onIndexChange(index + 1)}
+                  onClick={() => setGalleryIndex(index + 1)}
                   className={`relative aspect-[3/2] w-full overflow-hidden rounded-none bg-muted ${
-                    currentIndex === index + 1 ? "" : ""
+                    galleryIndex === index + 1 ? "" : ""
                   }`}
                 >
                   <img
                     src={img || "/placeholder.svg"}
                     alt={`Product thumbnail ${index + 1}`}
-                    fill
-                    className="object-cover"
+                    className="object-cover w-full h-full absolute inset-0"
                   />
                 </button>
               </CarouselItem>

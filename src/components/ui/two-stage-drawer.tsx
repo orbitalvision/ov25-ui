@@ -6,6 +6,9 @@ import { cn } from "../../utils/cn"
 import { useMediaQuery } from "../../hooks/use-media-query"
 import * as React from 'react'
 
+// Cast animated.div to any to bypass TypeScript errors
+const AnimatedDiv = animated.div as any;
+
 export interface TwoStageDrawerProps {
   children: ReactNode
   isOpen: boolean
@@ -18,7 +21,8 @@ export interface TwoStageDrawerProps {
 
 export type DrawerState = 0 | 1 | 2 // 0 = closed, 1 = minified, 2 = extended
 
-export function TwoStageDrawer({
+// Fix the component definition to be a proper React FC
+const TwoStageDrawerComponent = ({ 
   children,
   isOpen,
   onOpenChange,
@@ -26,14 +30,15 @@ export function TwoStageDrawer({
   minHeightRatio = 1 / 6,
   maxHeightRatio = 5 / 6,
   onStateChange,
-}: TwoStageDrawerProps) {
+}: TwoStageDrawerProps) => {
   const [drawerState, setDrawerState] = useState<DrawerState>(0)
   const dragStartY = useRef(0)
   const isMobile = useMediaQuery(768) // md breakpoint
 
-  const minHeight = window.innerHeight - (isMobile ? window.innerWidth : window.innerWidth * (2/3))
+  const minHeight = typeof window !== 'undefined' ? 
+    window.innerHeight - (isMobile ? window.innerWidth : window.innerWidth * (2/3)) : 0
   
-  const maxHeight = window.innerHeight * 0.95
+  const maxHeight = typeof window !== 'undefined' ? window.innerHeight * 0.95 : 0
 
   const [{ height }, api] = useSpring(() => ({
     height: 0,
@@ -127,8 +132,13 @@ export function TwoStageDrawer({
     },
   )
 
-  return typeof window === 'undefined' ? null : createPortal(
-    <animated.div
+  // Only render in browser environment
+  if (typeof window === 'undefined') {
+    return null;
+  }
+
+  const drawerContent = (
+    <AnimatedDiv
       style={{
         height,
         bottom: 0,
@@ -140,20 +150,26 @@ export function TwoStageDrawer({
           e.preventDefault()
         }
       }}
-      className={`z-[100] fixed left-0 right-0 bg-[#E5E5E5] will-change-transform
+      className={`z-[100] fixed left-0 right-0   will-change-transform
         ${drawerState === 0 ? "pointer-events-none" : "pointer-events-auto"}
         ${className}`}
     >
-        <div className="w-full h-full  bg-white rounded-t-lg shadow-xl">
-      <div {...bind()} className="w-full   flex justify-center py-4 cursor-grab active:cursor-grabbing touch-none">
-        <div className="w-8 h-1 bg-muted-foreground/25 rounded-full" />
-      </div>
+      <div className="w-full h-full bg-[var(--ov25-configurator-variant-drawer-background-color)] rounded-t-lg shadow-xl">
+        <div {...bind()} className="w-full py-4 flex justify-center  cursor-grab active:cursor-grabbing touch-none">
+          <div className="w-8 h-1 bg-[var(--ov25-configurator-variant-drawer-handle-color)] rounded-full z-[2]" />
+        </div>
 
-      <div className={cn(`h-full flex  flex-col pointer-events-none`)}>{children}</div>
-
+        <div className={cn(`h-full flex flex-col pointer-events-none`)}>{children}</div>
       </div>
-    </animated.div>,
-    document.body
-  )
-}
+    </AnimatedDiv>
+  );
+  
+  return createPortal(drawerContent, document.body);
+};
+
+// Export as a named export
+export const TwoStageDrawer = TwoStageDrawerComponent;
+
+// Also add the displayName
+(TwoStageDrawer as any).displayName = "TwoStageDrawer";
 

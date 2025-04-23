@@ -1,10 +1,10 @@
-import {  Check } from "lucide-react"
 import { ChevronRight } from "lucide-react"
-import { ScrollArea } from "./ui/scroll-area"
-import { Carousel, CarouselContent,  CarouselItem } from "./ui/carousel"
+import { ScrollArea } from "../ui/scroll-area"
+import { Carousel, CarouselContent,  CarouselItem } from "../ui/carousel"
 import { useState } from "react"
-import { useMediaQuery } from "../hooks/use-media-query"
+import { useMediaQuery } from "../../hooks/use-media-query"
 import * as React from 'react'
+import { DefaultVariantCard } from "./variant-cards/DefaultVariantCard"
 interface Variant {
   id: number
   groupId?: number
@@ -56,7 +56,7 @@ export const ProductVariants = ({
   onAccordionChange,
   drawerSize,
   gridDivide = 3,
-  VariantCard = FallbackVariantCard,
+  VariantCard = DefaultVariantCard,
   basis = 'basis-[43%]',
   onNext,
   onPrevious
@@ -66,9 +66,20 @@ export const ProductVariants = ({
   const isMobile = useMediaQuery(1280)
 
   const [selectedGroupIndex, setSelectedGroupIndex] = useState(0)
+  
+  // Helper function to determine grid columns class based on gridDivide prop
+  const getGridColsClass = () => {
+    switch (gridDivide) {
+      case 2: return 'grid-cols-2';
+      case 4: return 'grid-cols-4';
+      case 5: return 'grid-cols-5';
+      case 6: return 'grid-cols-6';
+      default: return 'grid-cols-3';
+    }
+  };
 
   return (
-    <div className="xl:border mt-8 mb-4 pointer-events-auto  border-[#E5E5E5] bg-white ">
+    <div className="xl:border  mb-4 pointer-events-auto rounded-[var(--ov25-configurator-variant-menu-border-radius)]  border-[var(--ov25-configurator-variant-menu-border-color)]  ">
       {/* Desktop: Full width button */}
       <div className="hidden xl:block">
         <button 
@@ -85,7 +96,7 @@ export const ProductVariants = ({
       </div>
 
       {/* Mobile: Title with separate chevron buttons */}
-      <div className="flex xl:hidden items-center justify-between w-full border-b p-4 py-[1.125rem]">
+      <div className="flex xl:hidden items-center justify-between w-full p-4 py-[1.125rem]">
         <button 
           onClick={(e) => {
             e.stopPropagation();
@@ -95,7 +106,6 @@ export const ProductVariants = ({
         >
           <ChevronRight className="rotate-180 h-4" />
         </button>
-        <h3 className="text-base font-[400] z-10">{title}</h3>
         <button 
           onClick={(e) => {
             e.stopPropagation();
@@ -133,11 +143,11 @@ export const ProductVariants = ({
             </Carousel>
             
             {!isMobile ? (
-              <div className={`grid px-2 grid-cols-${gridDivide} gap-4`}>
+              <div className={`grid px-2 ${getGridColsClass()} gap-4`}>
                 {(variants as VariantGroup[])[selectedGroupIndex].variants.map(
                   (variant, index) => (
                     <VariantCard
-                      key={variant.id}
+                      key={`${variant.id}-${variant.isSelected ? 'selected' : 'unselected'}`}
                       variant={variant}
                       onSelect={onSelect}
                       index={index}
@@ -151,7 +161,7 @@ export const ProductVariants = ({
                 <Carousel opts={{dragFree: true, loop: false}}>
                   <CarouselContent className='ml-16'>    
                     {(variants as VariantGroup[])[selectedGroupIndex].variants.map((variant, index) => (
-                      <CarouselItem key={variant.id} className={basis}>
+                      <CarouselItem key={`${variant.id}-${variant.isSelected ? 'selected' : 'unselected'}`} className={basis}>
                         <VariantCard
                           variant={variant}
                           onSelect={onSelect}
@@ -164,10 +174,10 @@ export const ProductVariants = ({
                 </Carousel>
               ) : (
                 <ScrollArea className={`heightMinusWidth`}>
-                  <div className={`grid px-2  pb-32 grid-cols-${gridDivide}`}>
+                  <div className={`grid px-2 pb-32 ${getGridColsClass()}`}>
                     {(variants as VariantGroup[])[selectedGroupIndex].variants.map((variant, index) => (
                       <VariantCard
-                        key={variant.id}
+                        key={`${variant.id}-${variant.isSelected ? 'selected' : 'unselected'}`}
                         variant={variant}
                         onSelect={onSelect}
                         index={index}
@@ -182,10 +192,10 @@ export const ProductVariants = ({
         ) : (
           // Single group or ungrouped variants
           !isMobile ? (
-          <div className={`grid px-0 grid-cols-${gridDivide}`}>
+          <div className={`grid px-0 ${getGridColsClass()}`}>
             {(isGrouped ? (variants as VariantGroup[])[0].variants : variants as Variant[]).map((variant, index) => (
               <VariantCard
-                key={variant.id}
+                key={`${variant.id}-${variant.isSelected ? 'selected' : 'unselected'}`}
                 variant={variant}
                 onSelect={onSelect}
                 index={index}
@@ -200,7 +210,7 @@ export const ProductVariants = ({
                 {(isGrouped ? (variants as VariantGroup[])[0].variants : variants as Variant[]).map((variant, index) => (
                     <CarouselItem className={basis}>
                 <VariantCard
-                    key={variant.id}
+                    key={`${variant.id}-${variant.isSelected ? 'selected' : 'unselected'}`}
                     variant={variant}
                     onSelect={onSelect}
                     index={index}
@@ -212,10 +222,10 @@ export const ProductVariants = ({
                 </Carousel>
             ) : (
                 <ScrollArea className={`heightMinusWidth`}>
-                <div className={`grid px-0 pb-32 grid-cols-${gridDivide}`}>
+                <div className={`grid px-0 pb-32 ${getGridColsClass()}`}>
                 {(isGrouped ? (variants as VariantGroup[])[0].variants : variants as Variant[]).map((variant, index) => (
                 <VariantCard
-                    key={variant.id}
+                    key={`${variant.id}-${variant.isSelected ? 'selected' : 'unselected'}`}
                     variant={variant}
                     onSelect={onSelect}
                     index={index}
@@ -228,39 +238,5 @@ export const ProductVariants = ({
           )
         )}
     </div>
-  )
-}
-
-
-
-
-
-const FallbackVariantCard = ({ variant, onSelect, index, isMobile }: VariantCardProps) => {
-  return (
-    <button
-      onClick={() => onSelect(variant)}
-      className="relative flex flex-col items-center gap-4 w-full p-2  bg-white text-left  hover:bg-accent"
-    >
-        <div className="relative aspect-[65/47] w-full pt-2 overflow-hidden rounded-none bg-transparent">
-      
-
-          <img src={variant.image || "/placeholder.svg"} alt={variant.name} className="object-cover w-full h-full" width={100} height={100} />
-
-
-            {variant.isSelected && (
-            <div className="absolute inset-0 bg-transparent">
-              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                <div className="w-6 h-6 rounded-full bg-black/50 mt-1.5 flex items-center justify-center">
-                  <Check className="w-4 h-4 text-white" />
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        <div className="flex flex-col justify-center xl:justify-start items-center xl:items-start -mt-1 pb-2 w-full xl:px-3">
-          <h3 className="font-[350] text-[12px]">{variant.name}</h3>
-        </div>
-    </button>
   )
 }

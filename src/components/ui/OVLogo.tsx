@@ -1,5 +1,5 @@
-'use client'
 import {useRef } from "react"
+import * as React from 'react'
 
 const OVLogo = () => {
     const circleRef = useRef<HTMLDivElement>(null)
