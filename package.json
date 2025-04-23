@@ -1,5 +1,5 @@
 {
-  "name": "@orbitalvision/ov25-ui",
+  "name": "ov25-ui",
   "version": "0.1.0",
   "description": "A UI configurator for OV25 product visualization",
   "main": "dist/cjs/index.js",
