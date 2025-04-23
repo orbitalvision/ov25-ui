@@ -20,7 +20,8 @@
     "build:esm": "tsc --module esnext --outDir dist/esm",
     "build:cjs": "tsc --module commonjs --outDir dist/cjs",
     "clean": "rimraf dist",
-    "prepare": "npm run clean && npm run build:lib"
+    "prepare": "npm run clean && npm run build:lib",
+    "test": "echo \"No tests specified\" && exit 0"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.10",
