@@ -10,6 +10,8 @@ npm install ov25-ui
 
 ## Usage
 
+### ES Modules (recommended)
+
 ```javascript
 import { injectConfigurator } from 'ov25-ui';
 
@@ -22,6 +24,31 @@ injectConfigurator({
   priceNameId: '#product-price-name',    // Optional
   variantsId: '#product-variants'        // Optional
 });
+```
+
+### UMD Bundle (WordPress/vanilla JS)
+
+The package includes a UMD bundle with all dependencies (except React and ReactDOM) bundled together.
+
+```html
+<!-- First include React and ReactDOM -->
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+<!-- Then include OV25 UI bundle -->
+<script src="https://unpkg.com/ov25-ui@0.1.2/dist/bundle/ov25-ui.min.js"></script>
+
+<script>
+  // Use the global Ov25UI object
+  Ov25UI.injectConfigurator({
+    apiKey: 'your-api-key',
+    productLink: '/range/123',
+    galleryId: '#product-image-container',
+    carouselId: '#product-carousel',
+    priceNameId: '#product-price-name',
+    variantsId: '#product-variants'
+  });
+</script>
 ```
 
 ## Webpack Configuration

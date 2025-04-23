@@ -1,2 +1,4 @@
 // Export the injectConfigurator function from inject.ts
-export { injectConfigurator, type InjectConfiguratorOptions } from './utils/inject'; 
+import { injectConfigurator, InjectConfiguratorOptions } from './utils/inject';
+
+export { injectConfigurator, InjectConfiguratorOptions }; 
