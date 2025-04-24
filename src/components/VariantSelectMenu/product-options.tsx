@@ -18,7 +18,7 @@ interface ProductOptionsGroupProps {
 export function ProductOptions({ label, value, onClick }: ProductOptionsProps) {
   return (
     <button
-      onClick={onClick}
+      onClick={(e) => {e.stopPropagation(), e.preventDefault(); onClick()}}
       className="flex justify-between w-full p-4 py-4 hover:bg-accent border-b last:border-b-0 border-[var(--ov25-configurator-variant-menu-border-color)]"
     >
       <div className="flex flex-col items-start space-y-1.5 text-left text-[#282828]">

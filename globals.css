@@ -3,7 +3,7 @@
 :root {
     /* iframe styling */
     --ov25-configurator-iframe-background-color: #E5E5E5 !important;
-    --ov25-configurator-iframe-border-radius: 20px !important;
+    --ov25-configurator-iframe-border-radius: 0px !important;
 
     /* view controls that are overlayed onto the iframe, such as the dimensions button */
     --ov25-configurator-view-controls-text-color: #282828 !important;
@@ -24,7 +24,7 @@
 
     /* Variant menu */
     --ov25-configurator-variant-menu-border-color: #E5E5E5 !important;
-    --ov25-configurator-variant-menu-border-radius: 8px !important;
+    --ov25-configurator-variant-menu-border-radius: 0px !important;
 
     /* Drawer Stles */
     --ov25-configurator-variant-drawer-background-color: #ffffff !important;

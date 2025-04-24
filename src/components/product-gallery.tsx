@@ -4,6 +4,7 @@ import * as React from 'react'
 import { getIframeSrc } from '../utils/configurator-utils.js'
 import { useOV25UI } from "../contexts/ov25-ui-context.js"
 import ConfiguratorViewControls from "./ConfiguratorViewControls.js"
+import { useIframePositioning } from "../hooks/useIframePositioning.js"
 
 // Simplified props, most data now comes from context
 
@@ -19,6 +20,9 @@ export function ProductGallery() {
       productLink,
       apiKey,
     } = useOV25UI();
+
+    // Use the custom hook to handle iframe positioning
+    useIframePositioning();
 
     // Any component-specific state remains local
     const [canSeeDimensions, setCanSeeDimensions] = useState(false);

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { ProductVariants } from "./product-variants.js";
 import { TwoStageDrawer } from ".././ui/two-stage-drawer.js";
 import { useOV25UI } from "../../contexts/ov25-ui-context.js";
@@ -6,7 +6,6 @@ import { ProductOptions, ProductOptionsGroup } from "./product-options.js";
 import { MobilePriceOverlay } from "../mobile-price-overlay.js";
 import { SizeVariantCard } from "./variant-cards/SizeVariantCard.js";
 import { LegsVariantCard } from "./variant-cards/LegsVariantCard.js";
-import useIframeAlwaysInView from "../../hooks/useIframeAlwaysInView.js";
 
 // Types
 export type DrawerSizes = 'closed' | 'small' | 'large';
@@ -34,9 +33,23 @@ export const VariantSelectMenu: React.FC = () => {
     range,
     getSelectedValue
   } = useOV25UI();
+
   
-  // Use the iframe positioning hook - this will position the iframe at the top when variants are open on mobile
-  useIframeAlwaysInView();
+  // Effect to resize the parent container when variants are opened
+  useEffect(() => {
+    const resizeVariantsContainer = () => {
+      const container = document.querySelector('.ov25-configurator-variants');
+      if (container && isVariantsOpen) {
+        // Set a minimum height when open to accommodate content
+        container.setAttribute('style', 'height: auto !important; ');
+      } else if (container && !isVariantsOpen) {
+        // Reset to original height when closed
+        container.setAttribute('style', '');
+      }
+    };
+    
+    resizeVariantsContainer();
+  }, [isVariantsOpen, activeOptionId]);
 
   return (
     <div id="ov-25-configurator-variant-menu-container" className="relative">

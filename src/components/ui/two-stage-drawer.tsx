@@ -6,6 +6,7 @@ import { cn } from "../../utils/cn.js"
 import { useMediaQuery } from "../../hooks/use-media-query.js"
 import * as React from 'react'
 import { CSSProperties } from "react"
+import { useOV25UI } from "../../contexts/ov25-ui-context.js"
 
 // Cast animated.div to any to bypass TypeScript errors
 const AnimatedDiv = animated.div as any;
@@ -37,6 +38,7 @@ const TwoStageDrawerComponent = ({
   const [drawerState, setDrawerState] = useState<DrawerState>(0)
   const dragStartY = useRef(0)
   const isMobile = useMediaQuery(768) // md breakpoint
+  const { setIsDrawerOpen } = useOV25UI()
 
   const minHeight = typeof window !== 'undefined' ? 
     window.innerHeight - (isMobile ? window.innerWidth : window.innerWidth * (2/3)) : 0
@@ -54,6 +56,7 @@ const TwoStageDrawerComponent = ({
       document.body.style.position = 'fixed'
       document.body.style.width = '100%'
       document.body.style.top = `-${window.scrollY}px`
+      setIsDrawerOpen(true)
     } else {
       const scrollY = document.body.style.top
       document.body.style.overflow = ''
@@ -61,6 +64,7 @@ const TwoStageDrawerComponent = ({
       document.body.style.width = ''
       document.body.style.top = ''
       window.scrollTo(0, parseInt(scrollY || '0') * -1)
+      setIsDrawerOpen(false)
     }
 
     return () => {
@@ -68,8 +72,9 @@ const TwoStageDrawerComponent = ({
       document.body.style.position = ''
       document.body.style.width = ''
       document.body.style.top = ''
+      setIsDrawerOpen(false)
     }
-  }, [drawerState])
+  }, [drawerState, setIsDrawerOpen])
 
   const getHeightForState = (state: DrawerState) => {
     switch (state) {
