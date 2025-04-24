@@ -1,4 +1,4 @@
-import { Selection } from '../contexts/ov25-ui-context';
+import { Selection } from '../contexts/ov25-ui-context.js';
 
 /**
  * Configuration option type

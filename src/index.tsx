@@ -30,7 +30,7 @@ const MainContent = () => {
 
     return (
     <>
-      <ArPreviewQRCodeDialog arPreviewLink={arPreviewLink} setArPreviewLink={setArPreviewLink} />
+   
       <div id="ov-25-configurator-main-container" className={cn("h-screen min-h-screen w-full items-center flex-col ", !hasRequiredData && !error ? 'hidden' : 'flex')}>
         <main id="ov-25-configurator-content-wrapper" className="flex min-h-full w-full max-w-[2300px] flex-col xl:flex-row xl:gap-8 py-8 pt-0 xl:pt-8 xl:px-8 overflow-auto">
           <div id="ov-25-configurator-product-gallery-wrapper" className={cn("relative flex-grow-1 max-w-[100vh] 2xl:max-w-[120vh] w-full duration-600 transform", isMobile && isVariantsOpen ? 'sticky' : '')} style={{ top: '0rem' }}>

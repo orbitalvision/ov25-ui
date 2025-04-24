@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useOV25UI } from '../contexts/ov25-ui-context';
+import { useOV25UI } from '../contexts/ov25-ui-context.js';
 
 /**
  * Hook to make the iframe stay in view when variants menu is open on mobile

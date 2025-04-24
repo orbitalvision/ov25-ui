@@ -1,6 +1,5 @@
-
 import * as React from 'react'
-import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "./ui/dialog"
+import { Dialog, DialogContent, DialogTrigger, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "./ui/dialog.js"
 import QRCode from "react-qr-code";
 export const ArPreviewQRCodeDialog = ({arPreviewLink, setArPreviewLink}: {arPreviewLink: string | null, setArPreviewLink: (link: string | null) => void}) => {
     return (

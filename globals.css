@@ -2,32 +2,46 @@
 
 :root {
     /* iframe styling */
-    --ov25-configurator-iframe-background-color: #E5E5E5;
-    --ov25-configurator-iframe-border-radius: 20px;
+    --ov25-configurator-iframe-background-color: #E5E5E5 !important;
+    --ov25-configurator-iframe-border-radius: 20px !important;
 
     /* view controls that are overlayed onto the iframe, such as the dimensions button */
-    --ov25-configurator-view-controls-text-color: #282828;
-    --ov25-configurator-view-controls-background-color: #ffffff;
-    --ov25-configurator-view-controls-border-color: #e5e5e5;
-    --ov25-configurator-view-controls-border-radius: calc(infinity * 1px);
+    --ov25-configurator-view-controls-text-color: #282828 !important;
+    --ov25-configurator-view-controls-background-color: #ffffff !important;
+    --ov25-configurator-view-controls-border-color: #e5e5e5 !important;
+    --ov25-configurator-view-controls-border-radius: 9999999px !important;
 
     /* Product Name & price text color */
-    --ov25-configurator-title-text-color: #282828;
-    --ov25-configurator-price-text-color: #282828;
+    --ov25-configurator-title-text-color: #282828 !important;
+    --ov25-configurator-price-text-color: #282828 !important;
 
     /* AR QR code popup */
-    --ov25-configurator-qr-code-popup-background-color: #E5E5E5;
-    --ov25-configurator-qr-code-popup-border-color: #282828;
-    --ov25-configurator-qr-code-popup-title-text-color: #282828;
-    --ov25-configurator-qr-code-popup-description-text-color: #282828;
-    --ov25-configurator-qr-code-popup-link-text-color: #6a7282;
+    --ov25-configurator-qr-code-popup-background-color: #E5E5E5 !important;
+    --ov25-configurator-qr-code-popup-border-color: #282828 !important;
+    --ov25-configurator-qr-code-popup-title-text-color: #282828 !important;
+    --ov25-configurator-qr-code-popup-description-text-color: #282828 !important;
+    --ov25-configurator-qr-code-popup-link-text-color: #6a7282 !important;
 
     /* Variant menu */
-    --ov25-configurator-variant-menu-border-color: #E5E5E5;
-    --ov25-configurator-variant-menu-border-radius: 8px;
+    --ov25-configurator-variant-menu-border-color: #E5E5E5 !important;
+    --ov25-configurator-variant-menu-border-radius: 8px !important;
 
     /* Drawer Stles */
-    --ov25-configurator-variant-drawer-background-color: #ffffff;
-    --ov25-configurator-variant-drawer-handle-color: #bcbcbc;
+    --ov25-configurator-variant-drawer-background-color: #ffffff !important;
+    --ov25-configurator-variant-drawer-handle-color: #bcbcbc !important;
+}
 
+
+
+
+/* Aspect ratio media queries for configurator iframe */
+#ov25-configurator-iframe-container {
+    aspect-ratio: 1/1; /* Default square aspect ratio for mobile */
+    padding: 0px !important;
+    margin: 0px !important;
+    overflow: visible !important;
+}
+
+#ov25-configurator-iframe {
+    border: 0px !important;
 }

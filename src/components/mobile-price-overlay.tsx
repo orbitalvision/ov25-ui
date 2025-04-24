@@ -1,6 +1,6 @@
 import React from 'react';
 import { ShoppingCart } from 'lucide-react';
-import { useOV25UI } from '../contexts/ov25-ui-context';
+import { useOV25UI } from '../contexts/ov25-ui-context.js';
 import { createPortal } from 'react-dom';
 
 export const MobilePriceOverlay = () => {

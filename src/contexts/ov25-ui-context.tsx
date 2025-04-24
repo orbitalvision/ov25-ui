@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { sendMessageToIframe } from '../utils/configurator-utils';
+import { sendMessageToIframe } from '../utils/configurator-utils.js';
 
 // Define types
 export type DrawerSizes = 'closed' | 'small' | 'large';

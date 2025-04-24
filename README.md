@@ -13,6 +13,7 @@ npm install ov25-ui
 ### ES Modules (recommended)
 
 ```javascript
+// Styles are automatically imported - no need for separate import
 import { injectConfigurator } from 'ov25-ui';
 
 // Inject the configurator into your page
@@ -35,8 +36,11 @@ The package includes a UMD bundle with all dependencies (except React and ReactD
 <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
 <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
 
+<!-- Include the CSS file -->
+<link rel="stylesheet" href="https://unpkg.com/ov25-ui@0.1.14/dist/styles.css">
+
 <!-- Then include OV25 UI bundle -->
-<script src="https://unpkg.com/ov25-ui@0.1.2/dist/bundle/ov25-ui.min.js"></script>
+<script src="https://unpkg.com/ov25-ui@0.1.14/dist/bundle/ov25-ui.min.js"></script>
 
 <script>
   // Use the global Ov25UI object

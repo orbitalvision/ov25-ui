@@ -1,12 +1,12 @@
 import React from 'react';
-import { ProductVariants } from "./product-variants";
-import { TwoStageDrawer } from ".././ui/two-stage-drawer";
-import { useOV25UI } from "../../contexts/ov25-ui-context";
-import { ProductOptions, ProductOptionsGroup } from "./product-options";
-import { MobilePriceOverlay } from "../mobile-price-overlay";
-import { SizeVariantCard } from "./variant-cards/SizeVariantCard";
-import { LegsVariantCard } from "./variant-cards/LegsVariantCard";
-import useIframeAlwaysInView from "../../hooks/useIframeAlwaysInView";
+import { ProductVariants } from "./product-variants.js";
+import { TwoStageDrawer } from ".././ui/two-stage-drawer.js";
+import { useOV25UI } from "../../contexts/ov25-ui-context.js";
+import { ProductOptions, ProductOptionsGroup } from "./product-options.js";
+import { MobilePriceOverlay } from "../mobile-price-overlay.js";
+import { SizeVariantCard } from "./variant-cards/SizeVariantCard.js";
+import { LegsVariantCard } from "./variant-cards/LegsVariantCard.js";
+import useIframeAlwaysInView from "../../hooks/useIframeAlwaysInView.js";
 
 // Types
 export type DrawerSizes = 'closed' | 'small' | 'large';

@@ -1,13 +1,13 @@
 import * as React from 'react'
-import { Button } from "./ui/button"
+import { Button } from "./ui/button.js"
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-} from "./ui/carousel"
-import { useOV25UI } from "../contexts/ov25-ui-context"
-import { useMediaQuery } from "../hooks/use-media-query"
+} from "./ui/carousel.js"
+import { useOV25UI } from "../contexts/ov25-ui-context.js"
+import { useMediaQuery } from "../hooks/use-media-query.js"
 
 export function ProductCarousel() {
   // Get all required data from context

@@ -1,6 +1,6 @@
 import React from 'react'
-import { cn } from "../utils/cn"
-import { useOV25UI } from "../contexts/ov25-ui-context"
+import { cn } from "../utils/cn.js"
+import { useOV25UI } from "../contexts/ov25-ui-context.js"
 
 interface PriceAndNameProps {
   showName?: boolean

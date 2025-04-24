@@ -1,9 +1,9 @@
 import { useState, useMemo } from "react"
-import { useMediaQuery } from "../hooks/use-media-query"
+import { useMediaQuery } from "../hooks/use-media-query.js"
 import * as React from 'react'
-import { getIframeSrc } from '../utils/configurator-utils'
-import { useOV25UI } from "../contexts/ov25-ui-context"
-import ConfiguratorViewControls from "./ConfiguratorViewControls"
+import { getIframeSrc } from '../utils/configurator-utils.js'
+import { useOV25UI } from "../contexts/ov25-ui-context.js"
+import ConfiguratorViewControls from "./ConfiguratorViewControls.js"
 
 // Simplified props, most data now comes from context
 

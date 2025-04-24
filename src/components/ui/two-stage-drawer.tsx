@@ -2,9 +2,10 @@ import { useState, useRef, type ReactNode, useEffect } from "react"
 import { createPortal } from "react-dom"
 import { useDrag } from "@use-gesture/react"
 import { animated, useSpring } from "@react-spring/web"
-import { cn } from "../../utils/cn"
-import { useMediaQuery } from "../../hooks/use-media-query"
+import { cn } from "../../utils/cn.js"
+import { useMediaQuery } from "../../hooks/use-media-query.js"
 import * as React from 'react'
+import { CSSProperties } from "react"
 
 // Cast animated.div to any to bypass TypeScript errors
 const AnimatedDiv = animated.div as any;
@@ -14,6 +15,7 @@ export interface TwoStageDrawerProps {
   isOpen: boolean
   onOpenChange: (isOpen: boolean) => void
   className?: string
+  style?: CSSProperties
   minHeightRatio?: number
   maxHeightRatio?: number
   onStateChange?: (state: 0 | 1 | 2) => void
@@ -21,12 +23,13 @@ export interface TwoStageDrawerProps {
 
 export type DrawerState = 0 | 1 | 2 // 0 = closed, 1 = minified, 2 = extended
 
-// Fix the component definition to be a proper React FC
+
 const TwoStageDrawerComponent = ({ 
   children,
   isOpen,
   onOpenChange,
   className = "",
+  style = {},
   minHeightRatio = 1 / 6,
   maxHeightRatio = 5 / 6,
   onStateChange,
@@ -132,6 +135,44 @@ const TwoStageDrawerComponent = ({
     },
   )
 
+  // Define drawer content styles
+  const drawerContentStyle: CSSProperties = {
+    width: '100%',
+    height: '100%',
+    backgroundColor: 'var(--ov25-configurator-variant-drawer-background-color)',
+    borderTopLeftRadius: '0.5rem',
+    borderTopRightRadius: '0.5rem',
+    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+  };
+
+  // Define styles for the drag handle container
+  const dragHandleContainerStyle: CSSProperties = {
+    width: '100%',
+    paddingTop: '1rem',
+    paddingBottom: '1rem',
+    display: 'flex',
+    justifyContent: 'center',
+    cursor: 'grab',
+    touchAction: 'none'
+  };
+
+  // Define styles for the drag handle
+  const dragHandleStyle: CSSProperties = {
+    width: '2rem',
+    height: '0.25rem',
+    backgroundColor: 'var(--ov25-configurator-variant-drawer-handle-color)',
+    borderRadius: '9999px',
+    zIndex: 2
+  };
+
+  // Define styles for the children container
+  const childrenContainerStyle: CSSProperties = {
+    height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    pointerEvents: 'none'
+  };
+
   // Only render in browser environment
   if (typeof window === 'undefined') {
     return null;
@@ -144,22 +185,30 @@ const TwoStageDrawerComponent = ({
         bottom: 0,
         touchAction: "none",
         WebkitOverflowScrolling: 'touch',
+        zIndex: 100,
+        position: 'fixed',
+        left: 0,
+        right: 0,
+        willChange: 'transform',
+        pointerEvents: drawerState === 0 ? 'none' : 'auto',
+        ...style
       }}
       onTouchMove={(e: any) => {
         if (e.target instanceof Element && !e.target.closest('.scroll-area-viewport')) {
           e.preventDefault()
         }
       }}
-      className={`z-[100] fixed left-0 right-0   will-change-transform
-        ${drawerState === 0 ? "pointer-events-none" : "pointer-events-auto"}
-        ${className}`}
     >
-      <div className="w-full h-full bg-[var(--ov25-configurator-variant-drawer-background-color)] rounded-t-lg shadow-xl">
-        <div {...bind()} className="w-full py-4 flex justify-center  cursor-grab active:cursor-grabbing touch-none">
-          <div className="w-8 h-1 bg-[var(--ov25-configurator-variant-drawer-handle-color)] rounded-full z-[2]" />
+      <div style={drawerContentStyle}>
+        <div 
+          {...bind()} 
+          style={dragHandleContainerStyle}
+          className="active:cursor-grabbing"
+        >
+          <div style={dragHandleStyle} />
         </div>
 
-        <div className={cn(`h-full flex flex-col pointer-events-none`)}>{children}</div>
+        <div style={childrenContainerStyle}>{children}</div>
       </div>
     </AnimatedDiv>
   );

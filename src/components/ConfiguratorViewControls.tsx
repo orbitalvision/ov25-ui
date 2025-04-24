@@ -2,7 +2,7 @@ import React from 'react'
 import { Ruler as DimensionsIcon } from 'lucide-react'
 import { ExpandIcon, Rotate3D } from "lucide-react"
 import { Box as ArIcon } from 'lucide-react'
-import { toggleDimensions, toggleAnimation, toggleAR, toggleFullscreen, getAnimationButtonText } from '../utils/configurator-utils'
+import { toggleDimensions, toggleAnimation, toggleAR, toggleFullscreen, getAnimationButtonText } from '../utils/configurator-utils.js'
 
 interface ConfiguratorViewControlsProps {
   canAnimate: boolean

@@ -15,7 +15,11 @@ export const SizeVariantCard = React.memo(
     
     return (
       <button
-        onClick={() => onSelect(variant)}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onSelect(variant);
+        }}
         className={`relative flex flex-col h-[160px] md:h-[200px] xl:h-[217px] items-center gap-4 w-full p-4 text-left hover:bg-accent xl:border-t border-[#E5E5E5] text-[#282828] ${index % 2 === 0 ? 'xl:border-r border-[#E5E5E5]' : ''}`}
       >
         <div className="flex flex-1 items-center justify-between">

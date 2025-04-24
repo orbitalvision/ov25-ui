@@ -1,10 +1,10 @@
 import { ChevronRight } from "lucide-react"
-import { ScrollArea } from "../ui/scroll-area"
-import { Carousel, CarouselContent,  CarouselItem } from "../ui/carousel"
+import { ScrollArea } from "../ui/scroll-area.js"
+import { Carousel, CarouselContent,  CarouselItem } from "../ui/carousel.js"
 import { useState } from "react"
-import { useMediaQuery } from "../../hooks/use-media-query"
+import { useMediaQuery } from "../../hooks/use-media-query.js"
 import * as React from 'react'
-import { DefaultVariantCard } from "./variant-cards/DefaultVariantCard"
+import { DefaultVariantCard } from "./variant-cards/DefaultVariantCard.js"
 interface Variant {
   id: number
   groupId?: number
@@ -94,7 +94,7 @@ export const ProductVariants = ({
           </div>
         </button>
       </div>
-
+ 
       {/* Mobile: Title with separate chevron buttons */}
       <div className="flex xl:hidden items-center justify-between w-full p-4 py-[1.125rem]">
         <button 
