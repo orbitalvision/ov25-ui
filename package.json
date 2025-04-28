@@ -22,6 +22,7 @@
   "scripts": {
     "start": "vite",
     "preview": "vite preview",
+    "dev": "npm run build  && cd dev/react-test && npm run dev",
     "build": "vite build && npm run inject-css-import",
     "build:lib": "vite build && npm run inject-css-import",
     "inject-css-import": "node scripts/inject-css-import.js",
