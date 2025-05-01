@@ -5,7 +5,7 @@ import { useOV25UI } from '../contexts/ov25-ui-context.js';
  * Hook to position the iframe and its container at the top of the screen when drawer is open
  */
 export const useIframePositioning = () => {
-  const { isDrawerOpen } = useOV25UI();
+  const { isDrawerOpen, isMobile } = useOV25UI();
 
   useEffect(() => {
     // Get the iframe element and container
@@ -35,6 +35,15 @@ export const useIframePositioning = () => {
       height: iframe.style.height,
       zIndex: iframe.style.zIndex,
     };
+
+    const updateIframeWidth = () => {
+      if (!isDrawerOpen || isMobile) return;
+      
+      // TODO magic number =(
+      const remainingWidth = window.innerWidth - 384;
+      container.style.width = `${remainingWidth}px`;
+      iframe.style.width = `${remainingWidth}px`;
+    }
     
     if (isDrawerOpen) {
       // Set fixed positioning for container
@@ -44,21 +53,36 @@ export const useIframePositioning = () => {
       container.style.right = '0';
       container.style.zIndex = '10';
       container.style.borderRadius = '0';
-      container.style.height = '100vw';
-      container.style.width = '100%';
+      
+      // Only adjust width on desktop
+      if (!isMobile) {
+        updateIframeWidth();
+        container.style.height = '100%';
+        iframe.style.height = '100%';
+        window.addEventListener('resize', updateIframeWidth);
+      } else {
+        // On mobile, use full width
+        container.style.width = '100%';
+        container.style.height = '100vw';
+        iframe.style.height = '100vw';
+        container.style.right = '0';
+        iframe.style.width = '100%';
+      }
+      
       container.style.overflow = 'hidden';
       
       // Set fixed positioning for iframe
       iframe.style.position = 'fixed';
       iframe.style.top = '0';
       iframe.style.left = '0';
-      iframe.style.width = '100%';
-      iframe.style.height = '100vw';
       iframe.style.zIndex = '10';
     }
     
     // Cleanup function to restore original styles
     return () => {
+      // Always remove the resize event listener, regardless of drawer state
+      window.removeEventListener('resize', updateIframeWidth);
+      
       if (isDrawerOpen) {
         container.style.position = originalContainerStyles.position;
         container.style.top = originalContainerStyles.top;
@@ -78,7 +102,7 @@ export const useIframePositioning = () => {
         iframe.style.zIndex = originalIframeStyles.zIndex;
       }
     };
-  }, [isDrawerOpen]);
+  }, [isDrawerOpen, isMobile]);
 };
 
 export default useIframePositioning; 

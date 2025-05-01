@@ -2,10 +2,17 @@ import React, { useEffect } from 'react';
 import { ProductVariants } from "./product-variants.js";
 import { TwoStageDrawer } from ".././ui/two-stage-drawer.js";
 import { useOV25UI } from "../../contexts/ov25-ui-context.js";
-import { ProductOptions, ProductOptionsGroup } from "./product-options.js";
+import { ProductOptionsGroup } from "./product-options.js";
 import { MobilePriceOverlay } from "../mobile-price-overlay.js";
 import { SizeVariantCard } from "./variant-cards/SizeVariantCard.js";
 import { LegsVariantCard } from "./variant-cards/LegsVariantCard.js";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+} from "../ui/sheet.js";
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
 // Types
 export type DrawerSizes = 'closed' | 'small' | 'large';
@@ -16,6 +23,7 @@ export const VariantSelectMenu: React.FC = () => {
   const {
     isVariantsOpen,
     setIsVariantsOpen,
+    setIsDrawerOpen,
     isMobile,
     drawerSize,
     setDrawerSize,
@@ -73,16 +81,15 @@ export const VariantSelectMenu: React.FC = () => {
       {/* Use different layouts/styles for mobile vs desktop */}
       {isMobile ? (
         (() => {
-          const Drawer = TwoStageDrawer as any;
           return (
-            <Drawer
+            <TwoStageDrawer
               isOpen={isVariantsOpen}
               onOpenChange={setIsVariantsOpen}
               onStateChange={(value: any) => setDrawerSize(value === 0 ? 'closed' : value === 1 ? 'small' : 'large')}
               className="z-[10]"
             >
               <VariantContentMobile />
-            </Drawer>
+            </TwoStageDrawer>
           );
         })()
       ) : (
@@ -93,14 +100,58 @@ export const VariantSelectMenu: React.FC = () => {
   
   // Content component for desktop view
   function VariantContentDesktop() {
-    const containerClassName = `w-full duration-300 ease-in-out absolute top-0 left-0 ${
-      isVariantsOpen ? "opacity-100 visible translate-x-0" : "opacity-0 invisible translate-x-[100%]"
-    }`;
-    
+    // Log when isVariantsOpen changes
+    useEffect(() => {
+      
+      // Update body styles when drawer is opened/closed
+      if (isVariantsOpen) {
+        document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
+        document.body.style.top = `-${window.scrollY}px`;
+        setIsDrawerOpen(true);
+      } else {
+        const scrollY = document.body.style.top;
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+        document.body.style.top = '';
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+        setIsDrawerOpen(false);
+      }
+    }, [isVariantsOpen]);
+
+    // Cleanup function to reset body styles when component unmounts
+    useEffect(() => {
+      return () => {
+        document.body.style.overflow = '';
+        document.body.style.position = '';
+        document.body.style.width = '';
+        document.body.style.top = '';
+        setIsDrawerOpen(false);
+      };
+    }, []);
+
     return (
-      <div className={containerClassName}>
-        {renderVariantContent()}
-      </div>
+      <Sheet 
+        open={isVariantsOpen} 
+        onOpenChange={setIsVariantsOpen}
+        modal={false}
+      >
+        <SheetContent 
+          aria-describedby="" 
+          className="border-l-0 w-[90%] sm:w-[80%] md:w-[70%] lg:w-[60%] xl:w-[50%] h-full"
+        >
+          <SheetHeader>
+            <VisuallyHidden>
+              <SheetTitle>Select {activeOption?.name || 'Option'}</SheetTitle>
+            </VisuallyHidden>
+          </SheetHeader>
+          <div className="bg-white">
+            {renderVariantContent()}
+          </div>
+        </SheetContent>
+      </Sheet>
     );
   }
   
@@ -140,6 +191,7 @@ export const VariantSelectMenu: React.FC = () => {
           onSelect={handleSelectionSelect}
           onNext={handleNextOption}
           onPrevious={handlePreviousOption}
+          isMobile={isMobile}
         />
       );
     } else if (typeof activeOptionId === 'number') {
@@ -176,6 +228,7 @@ export const VariantSelectMenu: React.FC = () => {
           onSelect={handleSelectionSelect}
           onNext={handleNextOption}
           onPrevious={handlePreviousOption}
+          isMobile={isMobile}
         />
       );
     }

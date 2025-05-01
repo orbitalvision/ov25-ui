@@ -50,6 +50,16 @@ const TwoStageDrawerComponent = ({
     config: { tension: 300, friction: 26 },
   }))
 
+  // Handle drawer state changes based on isOpen prop
+  useEffect(() => {
+    
+    if (isOpen && drawerState === 0) {
+      updateDrawerState(1)
+    } else if (!isOpen && drawerState !== 0) {
+      updateDrawerState(0)
+    }
+  }, [isOpen])
+
   useEffect(() => {
     if (drawerState !== 0) {
       document.body.style.overflow = 'hidden'
@@ -98,12 +108,6 @@ const TwoStageDrawerComponent = ({
     }
 
     api.start({ height: getHeightForState(newState) })
-  }
-
-  if (isOpen && drawerState === 0) {
-    updateDrawerState(1)
-  } else if (!isOpen && drawerState !== 0) {
-    updateDrawerState(0)
   }
 
   const bind = useDrag(

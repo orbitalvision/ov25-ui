@@ -43,7 +43,7 @@ export function ProductGallery() {
 
     return (
       <div className="relative z-[3]" id="ov-25-configurator-gallery-container">
-        <div className="rounded-[var(--ov25-configurator-iframe-border-radius)] relative aspect-square md:aspect-[3/2] 2xl:aspect-video overflow-hidden  bg-[var(--ov25-configurator-iframe-background-color)] z-[3]" id="ov25-configurator-iframe-container">
+        <div id="ov25-configurator-iframe-container" className="rounded-[var(--ov25-configurator-iframe-border-radius)] relative aspect-square md:aspect-[3/2] 2xl:aspect-video overflow-hidden  bg-[var(--ov25-configurator-iframe-background-color)] z-[3]">
           <iframe 
             ref={iframeRef}
             id="ov25-configurator-iframe"

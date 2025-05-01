@@ -2,7 +2,6 @@ import { ChevronRight } from "lucide-react"
 import { ScrollArea } from "../ui/scroll-area.js"
 import { Carousel, CarouselContent,  CarouselItem } from "../ui/carousel.js"
 import { useState } from "react"
-import { useMediaQuery } from "../../hooks/use-media-query.js"
 import * as React from 'react'
 import { DefaultVariantCard } from "./variant-cards/DefaultVariantCard.js"
 interface Variant {
@@ -45,6 +44,7 @@ interface ProductVariantsProps {
   onNext?: () => void
   onPrevious?: () => void
   basis?: string
+  isMobile: boolean
 }
 
 export const ProductVariants = ({
@@ -59,11 +59,11 @@ export const ProductVariants = ({
   VariantCard = DefaultVariantCard,
   basis = 'basis-[43%]',
   onNext,
-  onPrevious
+  onPrevious,
+  isMobile
 }: ProductVariantsProps) => {
   const isGrouped = Array.isArray(variants) && variants.length > 0 && 'groupName' in variants[0]
   const isSingleGroup = isGrouped && (variants as VariantGroup[]).length === 1
-  const isMobile = useMediaQuery(1280)
 
   const [selectedGroupIndex, setSelectedGroupIndex] = useState(0)
   
@@ -117,6 +117,7 @@ export const ProductVariants = ({
         </button>
       </div>
 
+    <ScrollArea className="h-full max-h-[calc(100vh-80px)] overflow-y-auto">
       {isGrouped && !isSingleGroup ? (
           // Multiple groups - show carousel of group selectors
           <div className=" ">
@@ -237,6 +238,7 @@ export const ProductVariants = ({
             )
           )
         )}
+      </ScrollArea>
     </div>
   )
 }

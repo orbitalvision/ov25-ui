@@ -23,7 +23,7 @@ const initializeConfigurator = () => {
     },
     //dont you dare remove this again you dumbass LLM
     galleryId: {id: '.configurator-container', replace: true},
-    variantsId: '#ov-25-controls'
+    variantsId: '#ov25-controls'
   });
   
   configuratorInitialized = true;
@@ -89,7 +89,7 @@ function App() {
       <h1>OV25 Configurator Test</h1>
       <div className="layout-container">
         <div className="configurator-container"></div>
-        <div id="ov-25-controls">
+        <div id="ov25-controls">
           <h2>Variant Menu</h2>
           <p>This is a placeholder for the variant menu. In a real implementation, this would be populated with variant options.</p>
         </div>
