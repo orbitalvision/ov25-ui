@@ -138,16 +138,13 @@ export const VariantSelectMenu: React.FC = () => {
         onOpenChange={setIsVariantsOpen}
         modal={false}
       >
-        <SheetContent 
-          aria-describedby="" 
-          className="border-l-0 w-[90%] sm:w-[80%] md:w-[70%] lg:w-[60%] xl:w-[50%] h-full"
-        >
+        <SheetContent aria-describedby="">
           <SheetHeader>
             <VisuallyHidden>
               <SheetTitle>Select {activeOption?.name || 'Option'}</SheetTitle>
             </VisuallyHidden>
           </SheetHeader>
-          <div className="bg-white">
+          <div>
             {renderVariantContent()}
           </div>
         </SheetContent>

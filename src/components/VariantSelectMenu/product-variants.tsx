@@ -79,12 +79,12 @@ export const ProductVariants = ({
   };
 
   return (
-    <div className="xl:border  mb-4 pointer-events-auto rounded-[var(--ov25-configurator-variant-menu-border-radius)]  border-[var(--ov25-configurator-variant-menu-border-color)]  ">
+    <div className="xl:border mb-4 pointer-events-auto rounded-[var(--ov25-configurator-variant-menu-border-radius)]  border-[var(--ov25-configurator-variant-sheet-border-color)]  ">
       {/* Desktop: Full width button */}
       <div className="hidden xl:block">
         <button 
           onClick={onClose}
-          className="flex items-center justify-between w-full border-b xl:border-b-0 p-4 py-[1.125rem] xl:hover:bg-accent"
+          className="flex items-center justify-between w-full border-[var(--ov25-configurator-variant-sheet-border-color)] border-b-1 p-4 py-[1.125rem]"
         >
           <div className="flex items-center gap-2 justify-center w-full relative">
             <div className="absolute w-full inset-0 h-full flex items-center">
