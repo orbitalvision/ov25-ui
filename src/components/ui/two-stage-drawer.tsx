@@ -209,54 +209,39 @@ const TwoStageDrawerComponent = ({
   }
 
   const drawerContent = (
-    <>
-      <AnimatedDiv
-        style={{
-          height,
-          bottom: 0,
-          touchAction: "none",
-          WebkitOverflowScrolling: 'touch',
-          zIndex: 100,
-          position: 'fixed',
-          left: 0,
-          right: 0,
-          willChange: 'transform',
-          pointerEvents: drawerState === 0 ? 'none' : 'auto',
-          ...style
-        }}
-        onTouchMove={(e: any) => {
-          if (e.target instanceof Element && !e.target.closest('.scroll-area-viewport')) {
-            // causing error in console when scrolling drawer: Unable to preventDefault inside passive event listener invocation.
-            // e.preventDefault()
-          }
-        }}
-      >
-        <div style={drawerContentStyle}>
-          <div 
-            {...bind()} 
-            style={dragHandleContainerStyle}
-            className="active:cursor-grabbing"
-          >
-            <div style={dragHandleStyle} />
-          </div>
-
-          <div style={childrenContainerStyle}>{children}</div>
+    <AnimatedDiv
+      style={{
+        height,
+        bottom: 0,
+        touchAction: "none",
+        WebkitOverflowScrolling: 'touch',
+        zIndex: 100,
+        position: 'fixed',
+        left: 0,
+        right: 0,
+        willChange: 'transform',
+        pointerEvents: drawerState === 0 ? 'none' : 'auto',
+        ...style
+      }}
+      onTouchMove={(e: any) => {
+        if (e.target instanceof Element && !e.target.closest('.scroll-area-viewport')) {
+          // causing error in console when scrolling drawer: Unable to preventDefault inside passive event listener invocation.
+          // e.preventDefault()
+        }
+      }}
+    >
+      <div style={drawerContentStyle}>
+        <div 
+          {...bind()} 
+          style={dragHandleContainerStyle}
+          className="active:cursor-grabbing"
+        >
+          <div style={dragHandleStyle} />
         </div>
-      </AnimatedDiv>
-      <div id="drawer-background"
-        style={{
-          height: minHeight,
-          bottom: 0,
-          position: 'fixed',
-          left: 0,
-          right: 0,
-          backgroundColor: 'var(--ov25-configurator-variant-drawer-background-color)',
-          zIndex: 99,
-          pointerEvents: 'none',
-          display: drawerState === 0 ? 'none' : 'block'
-        }}
-      />
-    </>
+
+        <div style={childrenContainerStyle}>{children}</div>
+      </div>
+    </AnimatedDiv>
   );
   
   return createPortal(drawerContent, document.body);
