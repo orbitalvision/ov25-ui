@@ -78,6 +78,43 @@ export const ProductVariants = ({
     }
   };
 
+  const renderVariantsContent = (variantsToRender: Variant[]) => {
+    return (
+      <>
+        {variantsToRender.map((variant, index) => (
+          <VariantCard
+            key={`${variant.id}-${variant.isSelected ? 'selected' : 'unselected'}`}
+            variant={variant}
+            onSelect={onSelect}
+            index={index}
+            isMobile={isMobile}
+          />
+        ))}
+      </>
+    )
+  };
+
+  const renderVariantsContentWithCarousel = (variantsToRender: Variant[]) => {
+    return (
+      <>
+        <Carousel opts={{dragFree: true, loop: false}}>
+          <CarouselContent>
+            {variantsToRender.map((variant, index) => (
+              <CarouselItem key={`${variant.id}-${variant.isSelected ? 'selected' : 'unselected'}`} className={basis}>
+                <VariantCard
+                  variant={variant}
+                  onSelect={onSelect}
+                  index={index}
+                  isMobile={isMobile}
+                />
+              </CarouselItem>
+            ))}
+          </CarouselContent>
+        </Carousel>
+      </>
+    )
+  };
+
   const renderControls = () => {
     return (
       <>
@@ -121,63 +158,35 @@ export const ProductVariants = ({
     );
   };
 
-  const renderDesktop = (variantsToRender: Variant[]) => {
+  const renderDesktop = () => {
+    const variantsToRender = isGrouped ? (variants as VariantGroup[])[0].variants : variants as Variant[];
     return (
       <ScrollArea className={`h-[calc(100vh-150px)]`}>
         <div className={`grid px-0 ${getGridColsClass()}`}>
-          {variantsToRender.map((variant, index) => (
-            <VariantCard
-              key={`${variant.id}-${variant.isSelected ? 'selected' : 'unselected'}`}
-              variant={variant}
-              onSelect={onSelect}
-              index={index}
-              isMobile={isMobile}
-            />
-          ))}
+          {renderVariantsContent(variantsToRender)}
         </div>
       </ScrollArea>
     );
   };
 
-  const renderMobile = (variantsToRender: Variant[]) => {
+  const renderMobile = () => {
+    const variantsToRender = isGrouped ? (variants as VariantGroup[])[0].variants : variants as Variant[];
     if (drawerSize === 'small') {
-      return (
-        <Carousel opts={{dragFree: true, loop: false}}>
-          <CarouselContent className='ml-16'>    
-            {variantsToRender.map((variant, index) => (
-              <CarouselItem key={`${variant.id}-${variant.isSelected ? 'selected' : 'unselected'}`} className={basis}>
-                <VariantCard
-                  variant={variant}
-                  onSelect={onSelect}
-                  index={index}
-                  isMobile={isMobile}
-                />
-              </CarouselItem>
-            ))}
-          </CarouselContent>
-        </Carousel>
-      );
+      return renderVariantsContentWithCarousel(variantsToRender);
     }
     
     //drawerSize === large
     return (
       <ScrollArea className={`h-full`}>
         <div className={`grid px-0 pb-32 ${getGridColsClass()}`}>
-          {variantsToRender.map((variant, index) => (
-            <VariantCard
-              key={`${variant.id}-${variant.isSelected ? 'selected' : 'unselected'}`}
-              variant={variant}
-              onSelect={onSelect}
-              index={index}
-              isMobile={isMobile}
-            />
-          ))}
+          {renderVariantsContent(variantsToRender)}
         </div>
       </ScrollArea>
     );
   };
 
   const renderMultipleGroups = () => {
+    const variantsToRender = (variants as VariantGroup[])[selectedGroupIndex].variants;
     return (
       <div className=" ">
         <Carousel opts={{dragFree: true, loop: false}}>
@@ -204,46 +213,15 @@ export const ProductVariants = ({
         
         {!isMobile ? (
           <div className={`grid px-2 ${getGridColsClass()} gap-4`}>
-            {(variants as VariantGroup[])[selectedGroupIndex].variants.map(
-              (variant, index) => (
-                <VariantCard
-                  key={`${variant.id}-${variant.isSelected ? 'selected' : 'unselected'}`}
-                  variant={variant}
-                  onSelect={onSelect}
-                  index={index}
-                  isMobile={isMobile}
-                />
-              )
-            )}
+            {renderVariantsContent(variantsToRender)}
           </div>
         ) : (
           drawerSize === 'small' ? (
-            <Carousel opts={{dragFree: true, loop: false}}>
-              <CarouselContent className='ml-16'>    
-                {(variants as VariantGroup[])[selectedGroupIndex].variants.map((variant, index) => (
-                  <CarouselItem key={`${variant.id}-${variant.isSelected ? 'selected' : 'unselected'}`} className={basis}>
-                    <VariantCard
-                      variant={variant}
-                      onSelect={onSelect}
-                      index={index}
-                      isMobile={isMobile}
-                    />
-                  </CarouselItem>
-                ))}
-              </CarouselContent>
-            </Carousel>
+            renderVariantsContentWithCarousel(variantsToRender)
           ) : (
             <ScrollArea className={`heightMinusWidth`}>
               <div className={`grid px-2 pb-32 ${getGridColsClass()}`}>
-                {(variants as VariantGroup[])[selectedGroupIndex].variants.map((variant, index) => (
-                  <VariantCard
-                    key={`${variant.id}-${variant.isSelected ? 'selected' : 'unselected'}`}
-                    variant={variant}
-                    onSelect={onSelect}
-                    index={index}
-                    isMobile={isMobile}
-                  />
-                ))}
+                {renderVariantsContent(variantsToRender)}
               </div>
             </ScrollArea>
           )
@@ -256,13 +234,14 @@ export const ProductVariants = ({
     <div className="xl:border mb-4 pointer-events-auto h-full rounded-[var(--ov25-configurator-variant-menu-border-radius)]  border-[var(--ov25-configurator-variant-sheet-border-color)]  ">
       {renderControls()}
       {isGrouped && !isSingleGroup ? (
+        //This renders mobile or desktop, it has lots of extra css
         renderMultipleGroups()
       ) : (
         // Single group or ungrouped variants
         isMobile ? (
-          renderMobile(isGrouped ? (variants as VariantGroup[])[0].variants : variants as Variant[])
+          renderMobile()
         ) : (
-          renderDesktop(isGrouped ? (variants as VariantGroup[])[0].variants : variants as Variant[])
+          renderDesktop()
         )
       )}
     </div>
