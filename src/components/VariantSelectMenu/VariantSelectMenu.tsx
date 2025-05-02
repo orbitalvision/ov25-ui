@@ -144,9 +144,7 @@ export const VariantSelectMenu: React.FC = () => {
               <SheetTitle>Select {activeOption?.name || 'Option'}</SheetTitle>
             </VisuallyHidden>
           </SheetHeader>
-          <div>
             {renderVariantContent()}
-          </div>
         </SheetContent>
       </Sheet>
     );
@@ -154,7 +152,7 @@ export const VariantSelectMenu: React.FC = () => {
   
   // Content component for mobile view (inside the drawer)
   function VariantContentMobile() {
-    const containerClassName = "w-full absolute top-0 left-0";
+    const containerClassName = "w-full h-full absolute top-0 left-0";
     
     return (
       <div className={containerClassName}>
