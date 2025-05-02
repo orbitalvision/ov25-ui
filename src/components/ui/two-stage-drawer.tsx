@@ -40,15 +40,37 @@ const TwoStageDrawerComponent = ({
   const isMobile = useMediaQuery(768) // md breakpoint
   const { setIsDrawerOpen } = useOV25UI()
 
-  const minHeight = typeof window !== 'undefined' ? 
-    window.innerHeight - (isMobile ? window.innerWidth : window.innerWidth * (2/3)) : 0
-  
-  const maxHeight = typeof window !== 'undefined' ? window.innerHeight * 0.95 : 0
+  function getMinHeight() {
+    return window.innerHeight - (isMobile ? window.innerWidth : window.innerWidth * (2/3))
+  }
+
+  function getMaxHeight() {
+    return window.innerHeight * 0.95
+  }
+
+  const minHeight = typeof window !== 'undefined' ? getMinHeight() : 0
+  const maxHeight = typeof window !== 'undefined' ? getMaxHeight() : 0
 
   const [{ height }, api] = useSpring(() => ({
     height: 0,
     config: { tension: 300, friction: 26 },
   }))
+
+  // Effect to update drawer height on window resize
+  useEffect(() => {
+    const handleResize = () => {
+      if (drawerState !== 0) {
+        const newMinHeight = getMinHeight();
+        const newMaxHeight = getMaxHeight();
+        
+        const newHeight = drawerState === 1 ? newMinHeight : newMaxHeight;
+        api.start({ height: newHeight });
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [drawerState, api, isMobile]);
 
   // Handle drawer state changes based on isOpen prop
   useEffect(() => {
@@ -106,7 +128,6 @@ const TwoStageDrawerComponent = ({
     if (newState === 0) {
       onOpenChange(false)
     }
-
     api.start({ height: getHeightForState(newState) })
   }
 
@@ -188,38 +209,54 @@ const TwoStageDrawerComponent = ({
   }
 
   const drawerContent = (
-    <AnimatedDiv
-      style={{
-        height,
-        bottom: 0,
-        touchAction: "none",
-        WebkitOverflowScrolling: 'touch',
-        zIndex: 100,
-        position: 'fixed',
-        left: 0,
-        right: 0,
-        willChange: 'transform',
-        pointerEvents: drawerState === 0 ? 'none' : 'auto',
-        ...style
-      }}
-      onTouchMove={(e: any) => {
-        if (e.target instanceof Element && !e.target.closest('.scroll-area-viewport')) {
-          e.preventDefault()
-        }
-      }}
-    >
-      <div style={drawerContentStyle}>
-        <div 
-          {...bind()} 
-          style={dragHandleContainerStyle}
-          className="active:cursor-grabbing"
-        >
-          <div style={dragHandleStyle} />
-        </div>
+    <>
+      <AnimatedDiv
+        style={{
+          height,
+          bottom: 0,
+          touchAction: "none",
+          WebkitOverflowScrolling: 'touch',
+          zIndex: 100,
+          position: 'fixed',
+          left: 0,
+          right: 0,
+          willChange: 'transform',
+          pointerEvents: drawerState === 0 ? 'none' : 'auto',
+          ...style
+        }}
+        onTouchMove={(e: any) => {
+          if (e.target instanceof Element && !e.target.closest('.scroll-area-viewport')) {
+            // causing error in console when scrolling drawer: Unable to preventDefault inside passive event listener invocation.
+            // e.preventDefault()
+          }
+        }}
+      >
+        <div style={drawerContentStyle}>
+          <div 
+            {...bind()} 
+            style={dragHandleContainerStyle}
+            className="active:cursor-grabbing"
+          >
+            <div style={dragHandleStyle} />
+          </div>
 
-        <div style={childrenContainerStyle}>{children}</div>
-      </div>
-    </AnimatedDiv>
+          <div style={childrenContainerStyle}>{children}</div>
+        </div>
+      </AnimatedDiv>
+      <div id="drawer-background"
+        style={{
+          height: minHeight,
+          bottom: 0,
+          position: 'fixed',
+          left: 0,
+          right: 0,
+          backgroundColor: 'var(--ov25-configurator-variant-drawer-background-color)',
+          zIndex: 99,
+          pointerEvents: 'none',
+          display: drawerState === 0 ? 'none' : 'block'
+        }}
+      />
+    </>
   );
   
   return createPortal(drawerContent, document.body);
