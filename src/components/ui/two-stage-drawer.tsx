@@ -38,7 +38,7 @@ const TwoStageDrawerComponent = ({
   const [drawerState, setDrawerState] = useState<DrawerState>(0)
   const dragStartY = useRef(0)
   const isMobile = useMediaQuery(768) // md breakpoint
-  const { setIsDrawerOpen } = useOV25UI()
+  const { setIsDrawerOrDialogOpen: setIsDrawerOpen } = useOV25UI()
 
   function getMinHeight() {
     return window.innerHeight - (isMobile ? window.innerWidth : window.innerWidth * (2/3))

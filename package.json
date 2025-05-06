@@ -1,6 +1,6 @@
 {
   "name": "ov25-ui",
-  "version": "0.1.52",
+  "version": "0.2.9",
   "description": "A UI configurator for OV25 product visualization",
   "type": "module",
   "main": "dist/index.js",
@@ -10,7 +10,7 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
-    },
+    }, 
     "./index.css": "./dist/index.css"
   },
   "files": [

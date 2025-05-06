@@ -4,3 +4,4 @@ dist
 .env
 .env.dev
 .DS_Store
+.npmrc

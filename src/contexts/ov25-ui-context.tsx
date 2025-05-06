@@ -78,7 +78,7 @@ interface OV25UIContextType {
   range: any;
   drawerSize: DrawerSizes;
   isVariantsOpen: boolean;
-  isDrawerOpen: boolean;
+  isDrawerOrDialogOpen: boolean;
   arPreviewLink: string | null;
   error: Error | null;
   canAnimate: boolean;
@@ -112,7 +112,7 @@ interface OV25UIContextType {
   setRange: React.Dispatch<React.SetStateAction<any>>;
   setDrawerSize: React.Dispatch<React.SetStateAction<DrawerSizes>>;
   setIsVariantsOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  setIsDrawerOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setIsDrawerOrDialogOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setArPreviewLink: React.Dispatch<React.SetStateAction<string | null>>;
   setError: React.Dispatch<React.SetStateAction<Error | null>>;
   setCanAnimate: React.Dispatch<React.SetStateAction<boolean>>;
@@ -152,7 +152,7 @@ export const OV25UIProvider: React.FC<{ children: React.ReactNode, productLink: 
   const [range, setRange] = useState<any>(null);
   const [drawerSize, setDrawerSize] = useState<DrawerSizes>("closed");
   const [isVariantsOpen, setIsVariantsOpen] = useState(false);
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [isDrawerOrDialogOpen, setIsDrawerOrDialogOpen] = useState(false);
   const [arPreviewLink, setArPreviewLink] = useState<string | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [canAnimate, setCanAnimate] = useState<boolean>(false);
@@ -342,7 +342,7 @@ export const OV25UIProvider: React.FC<{ children: React.ReactNode, productLink: 
     range,
     drawerSize,
     isVariantsOpen,
-    isDrawerOpen,
+    isDrawerOrDialogOpen,
     arPreviewLink,
     error,
     canAnimate,
@@ -371,7 +371,7 @@ export const OV25UIProvider: React.FC<{ children: React.ReactNode, productLink: 
     setRange,
     setDrawerSize,
     setIsVariantsOpen,
-    setIsDrawerOpen,
+    setIsDrawerOrDialogOpen,
     setArPreviewLink,
     setError,
     setCanAnimate,

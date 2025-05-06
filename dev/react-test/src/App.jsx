@@ -21,7 +21,6 @@ const initializeConfigurator = () => {
     onProductChange: (product) => {
       console.log('Product changed:', product);
     },
-    //dont you dare remove this again you dumbass LLM
     galleryId: {id: '.configurator-container', replace: true},
     variantsId: '#ov25-controls'
   });

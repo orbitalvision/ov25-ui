@@ -5,7 +5,7 @@ import { useOV25UI } from '../contexts/ov25-ui-context.js';
  * Hook to position the iframe and its container at the top of the screen when drawer is open
  */
 export const useIframePositioning = () => {
-  const { isDrawerOpen, isMobile } = useOV25UI();
+  const { isDrawerOrDialogOpen, isMobile } = useOV25UI();
 
   useEffect(() => {
     // Get the iframe element and container
@@ -37,15 +37,18 @@ export const useIframePositioning = () => {
     };
 
     const updateIframeWidth = () => {
-      if (!isDrawerOpen || isMobile) return;
+      if (!isDrawerOrDialogOpen || isMobile) return;
       
-      // TODO magic number =(
-      const remainingWidth = window.innerWidth - 384;
+      const variantMenuWidth = document.getElementById('ov25-configurator-variant-menu-container')?.offsetWidth;
+      if(typeof variantMenuWidth !== 'number') {
+        console.error('Variant menu does not exist yet');
+      }
+      const remainingWidth = window.innerWidth - (variantMenuWidth || 0);
       container.style.width = `${remainingWidth}px`;
       iframe.style.width = `${remainingWidth}px`;
     }
     
-    if (isDrawerOpen) {
+    if (isDrawerOrDialogOpen) {
       // Set fixed positioning for container
       container.style.position = 'fixed';
       container.style.top = '0';
@@ -56,7 +59,10 @@ export const useIframePositioning = () => {
       
       // Only adjust width on desktop
       if (!isMobile) {
-        updateIframeWidth();
+        setTimeout(() => {
+          // on first render, wait until the variant menu exists
+          updateIframeWidth();
+        }, 100);
         container.style.height = '100%';
         iframe.style.height = '100%';
         window.addEventListener('resize', updateIframeWidth);
@@ -83,7 +89,7 @@ export const useIframePositioning = () => {
       // Always remove the resize event listener, regardless of drawer state
       window.removeEventListener('resize', updateIframeWidth);
       
-      if (isDrawerOpen) {
+      if (isDrawerOrDialogOpen) {
         container.style.position = originalContainerStyles.position;
         container.style.top = originalContainerStyles.top;
         container.style.left = originalContainerStyles.left;
@@ -102,7 +108,7 @@ export const useIframePositioning = () => {
         iframe.style.zIndex = originalIframeStyles.zIndex;
       }
     };
-  }, [isDrawerOpen, isMobile]);
+  }, [isDrawerOrDialogOpen, isMobile]);
 };
 
 export default useIframePositioning; 

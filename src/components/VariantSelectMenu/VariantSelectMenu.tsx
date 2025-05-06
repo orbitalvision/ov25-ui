@@ -23,7 +23,7 @@ export const VariantSelectMenu: React.FC = () => {
   const {
     isVariantsOpen,
     setIsVariantsOpen,
-    setIsDrawerOpen,
+    setIsDrawerOrDialogOpen,
     isMobile,
     drawerSize,
     setDrawerSize,
@@ -109,7 +109,7 @@ export const VariantSelectMenu: React.FC = () => {
         document.body.style.position = 'fixed';
         document.body.style.width = '100%';
         document.body.style.top = `-${window.scrollY}px`;
-        setIsDrawerOpen(true);
+        setIsDrawerOrDialogOpen(true);
       } else {
         const scrollY = document.body.style.top;
         document.body.style.overflow = '';
@@ -117,7 +117,7 @@ export const VariantSelectMenu: React.FC = () => {
         document.body.style.width = '';
         document.body.style.top = '';
         window.scrollTo(0, parseInt(scrollY || '0') * -1);
-        setIsDrawerOpen(false);
+        setIsDrawerOrDialogOpen(false);
       }
     }, [isVariantsOpen]);
 
@@ -128,7 +128,7 @@ export const VariantSelectMenu: React.FC = () => {
         document.body.style.position = '';
         document.body.style.width = '';
         document.body.style.top = '';
-        setIsDrawerOpen(false);
+        setIsDrawerOrDialogOpen(false);
       };
     }, []);
 

@@ -162,7 +162,7 @@ export const ProductVariants = ({
     const variantsToRender = isGrouped ? (variants as VariantGroup[])[0].variants : variants as Variant[];
     return (
       <ScrollArea className={`h-[calc(100vh-150px)]`}>
-        <div className={`grid px-0 ${getGridColsClass()}`}>
+        <div style={{display: 'grid'}} className={` px-0 ${getGridColsClass()}`}>
           {renderVariantsContent(variantsToRender)}
         </div>
       </ScrollArea>
@@ -178,7 +178,7 @@ export const ProductVariants = ({
     //drawerSize === large
     return (
       <ScrollArea className={`h-full`}>
-        <div className={`grid px-0 pb-32 ${getGridColsClass()}`}>
+        <div style={{display: 'grid'}} className={` px-0 pb-32 ${getGridColsClass()}`}>
           {renderVariantsContent(variantsToRender)}
         </div>
       </ScrollArea>
@@ -212,7 +212,7 @@ export const ProductVariants = ({
         </Carousel>
         
         {!isMobile ? (
-          <div className={`grid px-2 ${getGridColsClass()} gap-4`}>
+          <div style={{display: 'grid'}} className={` px-2 ${getGridColsClass()} gap-4`}>
             {renderVariantsContent(variantsToRender)}
           </div>
         ) : (
@@ -220,7 +220,7 @@ export const ProductVariants = ({
             renderVariantsContentWithCarousel(variantsToRender)
           ) : (
             <ScrollArea className={`heightMinusWidth`}>
-              <div className={`grid px-2 pb-32 ${getGridColsClass()}`}>
+              <div style={{display: 'grid'}} className={` px-2 pb-32 ${getGridColsClass()}`}>
                 {renderVariantsContent(variantsToRender)}
               </div>
             </ScrollArea>
