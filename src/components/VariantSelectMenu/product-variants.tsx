@@ -119,7 +119,7 @@ export const ProductVariants = ({
     return (
       <>
         {/* Desktop Controls: Full width button */}
-        <div className="hidden xl:block">
+        <div className="ov25-controls-hidden">
           <button 
             onClick={onClose}
             className="flex items-center justify-between w-full border-[var(--ov25-configurator-variant-sheet-border-color)] border-b-1 p-4 py-[1.125rem]"
@@ -160,8 +160,9 @@ export const ProductVariants = ({
 
   const renderDesktop = () => {
     const variantsToRender = isGrouped ? (variants as VariantGroup[])[0].variants : variants as Variant[];
+    // -60px to make room for the dialog controls. 95% also works.
     return (
-      <ScrollArea className={`h-[calc(100vh-150px)]`}>
+      <ScrollArea className={`h-[calc(100vh-60px)]`}>
         <div style={{display: 'grid'}} className={` px-0 ${getGridColsClass()}`}>
           {renderVariantsContent(variantsToRender)}
         </div>

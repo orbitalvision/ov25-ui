@@ -1,5 +1,28 @@
 @import "tailwindcss";
 
+/* Override Shopify's div:empty rule for ov25-ui components */
+#ov25-configurator-iframe-container div:empty,
+#ov25-configurator-iframe div:empty,
+#ov25-controls div:empty,
+.ov25-configurator div:empty,
+#ov25-provider-root div:empty,
+#ov25-drawer-content div:empty {
+  display: block !important;
+}
+
+@layer utilities {
+    /* Custom hidden class that becomes visible at xl breakpoint (1280px) */
+    .ov25-controls-hidden {
+        display: none;
+    }
+}
+
+@media (min-width: 1280px) {
+    .ov25-controls-hidden {
+        display: block;
+    }
+}
+
 :root {
     /* Base Colors */
     --ov25-color-white: #ffffff;

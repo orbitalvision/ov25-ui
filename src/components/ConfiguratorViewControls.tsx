@@ -55,7 +55,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = ({
           )}
         </button>
       </div>
-      <div className="absolute hidden md:flex w-full pointer-events-none h-full inset-0 p-4 justify-end items-start z-[9990]">
+      <div className="absolute ov25-controls-hidden md:flex w-full pointer-events-none h-full inset-0 p-4 justify-end items-start z-[9990]">
           <button className="rounded-[var(--ov25-configurator-view-controls-border-radius)] cursor-pointer  aspect-square p-2 pointer-events-auto flex gap-2 bg-[var(--ov25-configurator-view-controls-background-color)] border border-[var(--ov25-configurator-view-controls-border-color)] items-center justify-center" onClick={toggleFullscreen}>
             <ExpandIcon strokeWidth={1} className="w-4 h-4 " />
           </button>

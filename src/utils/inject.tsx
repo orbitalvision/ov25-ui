@@ -81,7 +81,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
         // Copy dimensions from original element
         const computedStyle = window.getComputedStyle(target);
         emptyDiv.style.width = computedStyle.width;
-        emptyDiv.style.height = computedStyle.height;
+        emptyDiv.style.aspectRatio = '1 / 1';
         // Replace the target with the empty div
         target.parentNode.replaceChild(emptyDiv, target);
         // Create portal into the empty div

@@ -34,7 +34,7 @@ const SheetContent = React.forwardRef<
       ref={ref}
       id={'ov25-configurator-variant-menu-container'}
       className={cn(
-        "bg-[var(--ov25-configurator-variant-sheet-background-color)] border-l-0 h-full w-md flex flex-col gap-0 fixed z-50 shadow-lg transition-all duration-500 inset-y-0 right-0",
+        "bg-[var(--ov25-configurator-variant-sheet-background-color)] border-l-0 h-full w-[384px] flex flex-col gap-0 fixed z-50 shadow-lg transition-all duration-500 inset-y-0 right-0",
         className
       )}
       {...props}

@@ -230,7 +230,7 @@ const TwoStageDrawerComponent = ({
         }
       }}
     >
-      <div style={drawerContentStyle}>
+      <div id="ov25-drawer-content" style={drawerContentStyle}>
         <div 
           {...bind()} 
           style={dragHandleContainerStyle}
