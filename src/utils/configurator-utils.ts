@@ -4,7 +4,7 @@ import { Selection } from '../contexts/ov25-ui-context.js';
  * Configuration option type
  */
 export type ConfigOption = {
-  id: number | 'size';
+  id: string;
   name: string;
   // Additional properties of a config option
 };
@@ -13,9 +13,9 @@ export type ConfigOption = {
  * Selection data structure
  */
 export type SelectionItem = {
-  optionId: number | 'size';
-  groupId?: number;
-  selectionId: number;
+  optionId: string;
+  groupId?: string;
+  selectionId: string;
 };
 
 /**
@@ -180,7 +180,7 @@ export const getIframeSrc = (
  * @returns A selection handler function
  */
 export const createSelectionHandler = (
-  activeOptionId: 'size' | number | null,
+  activeOptionId: string | null,
   currentProductId: number | undefined,
   setSelectedSelections: React.Dispatch<React.SetStateAction<SelectionItem[]>>
 ): (selection: Selection) => void => {
@@ -194,9 +194,7 @@ export const createSelectionHandler = (
         selectProduct(selection.id);
       }
       return;
-    }
-
-    if (typeof activeOptionId === 'number' && selection.groupId) {
+    } else if (selection.groupId) {
       setSelectedSelections(prev => {
         const newSelections = prev.filter(sel => sel.optionId !== activeOptionId);
         return [...newSelections, { 
@@ -227,8 +225,8 @@ export interface OptionNavigationHandlers {
  */
 export const createOptionNavigationHandlers = (
   allOptions: ConfigOption[],
-  activeOptionId: 'size' | number | null,
-  setActiveOptionId: React.Dispatch<React.SetStateAction<'size' | number | null>>
+  activeOptionId: string | null,
+  setActiveOptionId: React.Dispatch<React.SetStateAction<string | null>>
 ): OptionNavigationHandlers => {
   const handleNextOption = (): void => {
     const currentIndex = allOptions.findIndex(opt => opt.id === activeOptionId);

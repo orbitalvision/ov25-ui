@@ -8,9 +8,9 @@ import { Button } from "../ui/button.js"
 import { useOV25UI } from "../../contexts/ov25-ui-context.js"
 import { cn } from "../../lib/utils.js"
 interface Variant {
-  id: number
-  groupId?: number
-  optionId?: number | 'size'
+  id: string
+  groupId?: string
+  optionId?: string
   name: string
   price: number
   image: string

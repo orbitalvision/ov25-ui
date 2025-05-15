@@ -186,7 +186,7 @@ export const VariantSelectMenu: React.FC = () => {
           isMobile={isMobile}
         />
       );
-    } else if (typeof activeOptionId === 'number') {
+    } else if (typeof activeOptionId === 'string') {
       // Check if the option name includes "leg" (case insensitive)
       const isLegOption = activeOption?.name?.toLowerCase().includes('leg');
       

@@ -6,7 +6,7 @@ export type DrawerSizes = 'closed' | 'small' | 'large';
 export type AnimationState = 'unavailable' | 'open' | 'close' | 'loop' | 'stop';
 
 export interface Product {
-  id: number;
+  id: string;
   name: string;
   price: number;
   lowestPrice: number;
@@ -14,23 +14,23 @@ export interface Product {
 }
 
 export interface Selection {
-  id: number;
+  id: string;
   name: string;
   thumbnail?: string;
   miniThumbnails?: {small: string, medium: string, large: string}
   price: number;
   blurHash: string;
-  groupId?: number;
+  groupId?: string;
 }
 
 export interface Group {
-  id: number;
+  id: string;
   name: string;
   selections: Selection[];
 }
 
 export interface Option {
-  id: number | 'size';
+  id: string;
   name: string;
   groups: Group[];
 }
@@ -38,9 +38,9 @@ export interface Option {
 export interface ConfiguratorState {
   options: Option[];
   selectedSelections: Array<{
-    optionId: number;
-    groupId: number;
-    selectionId: number;
+    optionId: string;
+    groupId: string;
+    selectionId: string;
   }>;
 }
 
@@ -51,7 +51,7 @@ export interface SizeOption {
     id: 'size-group';
     name: 'Size Options';
     selections: Array<{
-      id: number;
+      id: string;
       name: string;
       price: number;
       thumbnail?: string;
@@ -63,14 +63,14 @@ export interface SizeOption {
 interface OV25UIContextType {
   // State
   products: Product[];
-  currentProductId?: number;
+  currentProductId?: string;
   configuratorState?: ConfiguratorState;
   selectedSelections: Array<{
-    optionId: number | 'size';
-    groupId?: number;
-    selectionId: number;
+    optionId: string;
+    groupId?: string;
+    selectionId: string;
   }>;
-  activeOptionId: 'size' | number | null;
+  activeOptionId: string | null;
   quantity: number;
   price: number;
   galleryIndex: number;
@@ -99,14 +99,14 @@ interface OV25UIContextType {
   
   // Methods
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
-  setCurrentProductId: React.Dispatch<React.SetStateAction<number | undefined>>;
+  setCurrentProductId: React.Dispatch<React.SetStateAction<string | undefined>>;
   setConfiguratorState: React.Dispatch<React.SetStateAction<ConfiguratorState | undefined>>;
   setSelectedSelections: React.Dispatch<React.SetStateAction<Array<{
-    optionId: number | 'size';
-    groupId?: number;
-    selectionId: number;
+    optionId: string;
+    groupId?: string;
+    selectionId: string;
   }>>>;
-  setActiveOptionId: React.Dispatch<React.SetStateAction<'size' | number | null>>;
+  setActiveOptionId: React.Dispatch<React.SetStateAction<string | null>>;
   setQuantity: React.Dispatch<React.SetStateAction<number>>;
   setPrice: React.Dispatch<React.SetStateAction<number>>;
   setGalleryIndex: React.Dispatch<React.SetStateAction<number>>;
@@ -122,7 +122,7 @@ interface OV25UIContextType {
   
   // Actions
   handleSelectionSelect: (selection: Selection) => void;
-  handleOptionClick: (optionId: number | 'size') => void;
+  handleOptionClick: (optionId: string) => void;
   handleNextOption: () => void;
   handlePreviousOption: () => void;
   getSelectedValue: (option: Option | SizeOption) => string;
@@ -141,14 +141,14 @@ export const OV25UIProvider: React.FC<{ children: React.ReactNode, productLink: 
 }) => {
   // State definitions
   const [products, setProducts] = useState<Product[]>([]);
-  const [currentProductId, setCurrentProductId] = useState<number>();
+  const [currentProductId, setCurrentProductId] = useState<string>();
   const [configuratorState, setConfiguratorState] = useState<ConfiguratorState>();
   const [selectedSelections, setSelectedSelections] = useState<Array<{
-    optionId: number | 'size';
-    groupId?: number;
-    selectionId: number;
+    optionId: string;
+    groupId?: string;
+    selectionId: string;
   }>>([]);
-  const [activeOptionId, setActiveOptionId] = useState<'size' | number | null>(null);
+  const [activeOptionId, setActiveOptionId] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(0);
   const [galleryIndex, setGalleryIndex] = useState(0);
@@ -232,7 +232,7 @@ export const OV25UIProvider: React.FC<{ children: React.ReactNode, productLink: 
   };
 
   // Action handlers
-  const handleOptionClick = (optionId: number | 'size') => {
+  const handleOptionClick = (optionId: string) => {
     setActiveOptionId(optionId);
     setIsVariantsOpen(true);
   };
@@ -247,13 +247,11 @@ export const OV25UIProvider: React.FC<{ children: React.ReactNode, productLink: 
         sendMessageToIframe('SELECT_PRODUCT', selection.id);
       }
       return;
-    }
-
-    if (typeof activeOptionId === 'number') {
+    } else {
       setSelectedSelections(prev => {
         const newSelections = prev.filter(sel => sel.optionId !== activeOptionId);
         return [...newSelections, { 
-          optionId: activeOptionId, 
+          optionId: activeOptionId || '', 
           groupId: selection.groupId, 
           selectionId: selection.id 
         }];

@@ -14,7 +14,7 @@ const initializeConfigurator = () => {
   // Inject the configurator
   injectConfigurator({
     apiKey: () => { return import.meta.env.VITE_OV25_API_KEY; }, 
-    productLink: () => { return '/range/12' }, 
+    productLink: () => { return '/range/1' }, 
     onSelectionChange: (selections) => {
       console.log('Selections changed:', selections);
     },
