@@ -30,7 +30,7 @@ export function ProductCarousel() {
   }
   
   return (
-    <div className="w-full relative">
+    <div className="w-full relative font-[family-name:var(--ov25-font-family)]">
       <div className="absolute bottom-4 pt-16 left-0 right-0 flex items-center justify-between px-2 z-[2] pointer-events-none h-full">
         <Button
           variant="ghost"

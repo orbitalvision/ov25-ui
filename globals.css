@@ -19,7 +19,7 @@
 
 @media (min-width: 1280px) {
     .ov25-controls-hidden {
-        display: block;
+        display: flex;
     }
 }
 
@@ -31,38 +31,51 @@
     --ov25-color-dark-gray: #282828;
     --ov25-color-handle: #bcbcbc;
 
+    /* Custom CSS Variables */
+    --ov25-background-color: var(--ov25-color-white);
+    --ov25-secondary-background-color: var(--ov25-color-light-gray);
+
+    --ov25-text-color: var(--ov25-color-dark-gray);
+    --ov25-text-color-secondary: var(--ov25-color-medium-gray);
+
+    --ov25-panel-header-background-color: var(--ov25-color-light-gray);
+    --ov25-border-color: var(--ov25-color-light-gray);
+    --ov25-border-color-secondary: var(--ov25-color-dark-gray);
+
+    --ov25-button-background-color: var(--ov25-color-white);
+    --ov25-button-hover-background-color: var(--ov25-color-light-gray);
+    --ov25-button-text-color: var(--ov25-color-dark-gray);
+    --ov25-button-hover-text-color: var(--ov25-color-dark-gray);
+    --ov25-button-border-color: var(--ov25-color-dark-gray);
+    --ov25-button-border-radius: 5px;
+    --ov25-button-border-width: 1px;
+
+    --ov25-font-family: 'sans-serif';
+    /* Custom CSS End */
+
     /* iframe styling */
-    --ov25-configurator-iframe-background-color: var(--ov25-color-light-gray) !important;
-    --ov25-configurator-iframe-border-radius: 0px !important;
+    --ov25-configurator-iframe-background-color: var(--ov25-secondary-background-color);
+    --ov25-configurator-iframe-border-radius: 0px;
 
     /* view controls that are overlayed onto the iframe, such as the dimensions button */
-    --ov25-configurator-view-controls-text-color: var(--ov25-color-dark-gray) !important;
-    --ov25-configurator-view-controls-background-color: var(--ov25-color-white) !important;
-    --ov25-configurator-view-controls-border-color: var(--ov25-color-light-gray) !important;
-    --ov25-configurator-view-controls-border-radius: 9999999px !important;
+    --ov25-configurator-view-controls-text-color: var(--ov25-text-color);
+    --ov25-overlay-button-color: var(--ov25-button-background-color);
+    --ov25-configurator-view-controls-border-color: var(--ov25-border-color);
+    --ov25-configurator-view-controls-border-radius: 9999999px;
 
     /* Product Name & price text color */
-    --ov25-configurator-title-text-color: var(--ov25-color-dark-gray) !important;
-    --ov25-configurator-price-text-color: var(--ov25-color-dark-gray) !important;
+    --ov25-configurator-title-text-color: var(--ov25-text-color);
+    --ov25-configurator-price-text-color: var(--ov25-text-color);
 
     /* AR QR code popup */
-    --ov25-configurator-qr-code-popup-background-color: var(--ov25-color-light-gray) !important;
-    --ov25-configurator-qr-code-popup-border-color: var(--ov25-color-dark-gray) !important;
-    --ov25-configurator-qr-code-popup-title-text-color: var(--ov25-color-dark-gray) !important;
-    --ov25-configurator-qr-code-popup-description-text-color: var(--ov25-color-dark-gray) !important;
-    --ov25-configurator-qr-code-popup-link-text-color: var(--ov25-color-medium-gray) !important;
-
-    /* Variant menu */
-    --ov25-configurator-variant-menu-border-color: var(--ov25-color-light-gray) !important;
-    --ov25-configurator-variant-menu-border-radius: 0px !important;
+    --ov25-configurator-qr-code-popup-background-color: var(--ov25-secondary-background-color);
+    --ov25-configurator-qr-code-popup-border-color: var(--ov25-border-color-secondary);
+    --ov25-configurator-qr-code-popup-title-text-color: var(--ov25-text-color);
+    --ov25-configurator-qr-code-popup-description-text-color: var(--ov25-text-color);
+    --ov25-configurator-qr-code-popup-link-text-color: var(--ov25-text-color-secondary);
 
     /* Drawer Styles */
-    --ov25-configurator-variant-drawer-background-color: var(--ov25-color-white) !important;
-    --ov25-configurator-variant-drawer-handle-color: var(--ov25-color-handle) !important;
-
-    /* Sheet */
-    --ov25-configurator-variant-sheet-background-color: var(--ov25-color-white) !important;
-    --ov25-configurator-variant-sheet-border-color: var(--ov25-color-light-gray) !important;
+    --ov25-configurator-variant-drawer-handle-color: var(--ov25-color-handle);
 }
 
 /* Aspect ratio media queries for configurator iframe */

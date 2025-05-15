@@ -22,7 +22,29 @@ const initializeConfigurator = () => {
       console.log('Product changed:', product);
     },
     galleryId: {id: '.configurator-container', replace: true},
-    variantsId: '#ov25-controls'
+    priceNameId: {id: '#price-name', replace: true},
+    variantsId: '#ov25-controls',
+    checkoutFunction: () => {
+      alert('Checkout function called');
+    },
+    logoURL: 'https://www.arighibianchi.co.uk/cdn/shop/files/Arighi_Bianchi_Horizontal_1854_Logo_CMYK_White_a90a3919-ad62-497c-a763-6198af0e460c_220x.png',
+    cssVariables: {
+      '--ov25-background-color': '#faf9f8',
+      // '--ov25-secondary-background-color': '#b512e9',
+      '--ov25-text-color': '#06051c',
+      '--ov25-text-color-secondary': '#ffffff',
+      '--ov25-panel-header-background-color': '#0c5358',
+      //'--ov25-border-color': '#0c5358',
+      '--ov25-button-hover-background-color': '#ffffff',
+      '--ov25-button-text-color': '#ffffff',
+      '--ov25-button-hover-text-color': '#0c5358',
+      '--ov25-button-border-color': '#0c5358',
+      '--ov25-button-border-width': '2px',
+      '--ov25-button-border-radius': '30px',
+      '--ov25-overlay-button-color': '#ffffff',
+      '--ov25-button-background-color': '#0c5358',
+      '--ov25-font-family': 'classico-urw',
+    }
   });
   
   configuratorInitialized = true;
@@ -87,8 +109,12 @@ function App() {
     <div className="app">
       <h1>OV25 Configurator Test</h1>
       <div className="layout-container">
-        <div className="configurator-container"></div>
+        <div className="configurator-container w-[700px] h-[500px]"></div>
         <div id="ov25-controls">
+          <div id="price-name" className="w-[378px] h-[96px]">
+            <div>PRICE: £123</div>
+            <div>NAME: Product Name</div>
+          </div>
           <h2>Variant Menu</h2>
           <p>This is a placeholder for the variant menu. In a real implementation, this would be populated with variant options.</p>
         </div>

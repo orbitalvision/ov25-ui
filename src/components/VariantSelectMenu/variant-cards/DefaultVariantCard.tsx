@@ -10,140 +10,40 @@ interface VariantCardProps {
   }
   
 export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobile }: VariantCardProps) => {
-    // Generate a stable image src that will be used for both rendering and as a key
-    const imgSrc = variant.image || '/placeholder.svg';
-    
-    // Button styles
-    const buttonStyle: CSSProperties = {
-      position: 'relative',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      gap: '1rem',
-      width: '100%',
-      padding: '0.5rem',
-      textAlign: 'left'
-    };
-
-    // Image container styles
-    const imageContainerStyle: CSSProperties = {
-      position: 'relative',
-      aspectRatio: '65/47',
-      width: '100%',
-      paddingTop: '0.5rem',
-      overflow: 'hidden',
-      borderRadius: 0,
-      backgroundColor: 'transparent'
-    };
-
-    // Image styles
-    const imageStyle: CSSProperties = {
-      width: '100%',
-      height: '100%',
-      objectFit: 'cover'
-    };
-
-    // Selected overlay styles
-    const selectedOverlayStyle: CSSProperties = {
-      position: 'absolute',
-      inset: 0,
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    };
-
-    // Check container styles
-    const checkContainerStyle: CSSProperties = {
-      position: 'absolute',
-      top: '50%',
-      left: '50%',
-      transform: 'translate(-50%, -50%)'
-    };
-
-    // Check circle styles
-    const checkCircleStyle: CSSProperties = {
-      width: '1.5rem',
-      height: '1.5rem',
-      borderRadius: '50%',
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center'
-    };
-
-    // Check icon styles
-    const checkIconStyle: CSSProperties = {
-      width: '1rem',
-      height: '1rem',
-      color: 'white'
-    };
-
-    // Title container styles
-    const titleContainerStyle: CSSProperties = {
-      paddingLeft: '0.5rem',
-      paddingRight: '0.5rem'
-    };
-
-    // Title text styles
-    const titleStyle: CSSProperties = {
-      fontWeight: 350,
-      fontSize: '12px'
-    };
-
-    // Add hover effect with a style tag
-    React.useEffect(() => {
-      const styleId = 'variant-card-hover-styles';
-      if (!document.getElementById(styleId)) {
-        const styleElement = document.createElement('style');
-        styleElement.id = styleId;
-        styleElement.textContent = `
-          .variant-card-hover:hover {
-            background-color: var(--accent, rgba(0, 0, 0, 0.05));
-          }
-        `;
-        document.head.appendChild(styleElement);
-      }
-      
-      return () => {
-        if (document.getElementById(styleId) && document.querySelectorAll('.variant-card-hover').length === 0) {
-          document.getElementById(styleId)?.remove();
-        }
-      };
-    }, []);
-    
     return (
-      <button
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          onSelect(variant);
-        }}
-        style={buttonStyle}
-        className="variant-card-hover"
-      >
-          <div style={imageContainerStyle}>
-              <img 
-                key={imgSrc}
-                src={imgSrc} 
-                style={imageStyle}
-                alt={variant.name}
-              />
-  
-              {variant.isSelected && (
-                <div style={selectedOverlayStyle}>
-                  <div style={checkContainerStyle}>
-                    <div style={checkCircleStyle}>
-                      <Check style={checkIconStyle}/>
+        <div 
+        className={`flex flex-col items-center ${variant.isSelected ? 'scale-110' : 'hover:scale-105'} transition-transform pt-2`}
+        key={variant.id + variant.groupId + variant.optionId}
+    >
+        <div className="relative">
+            <div 
+                className={`w-14 h-14 rounded-full overflow-hidden mb-1 cursor-pointer ${variant.isSelected ? 'border-2 border-primary shadow-lg' : 'border-transparent shadow-md'}`}
+                onClick={() => onSelect(variant)}
+            >
+                {variant.image ? (
+                    <img 
+                        src={variant.image || '/placeholder.svg'}
+                        alt={variant.name}
+                        width={56}
+                        height={56}
+                        className="w-full h-full object-cover"
+                    />
+                ) : (
+                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
+                        <span className="text-xs text-gray-500">No img</span>
                     </div>
-                  </div>
-                </div>
-              )}
-          </div>
-  
-          <div style={titleContainerStyle}>
-              <h4 style={titleStyle}>{variant.name}</h4>
-          </div>
-      </button>
+                )}
+            </div>
+        </div>
+        <div 
+            onClick={() => onSelect(variant)}
+            className="cursor-pointer"
+        >
+            <span className="text-xs text-center text-gray-600 line-clamp-2">
+                {variant.name}
+            </span>
+        </div>
+    </div>
     )
   },
   // Custom comparison function to determine when to re-render

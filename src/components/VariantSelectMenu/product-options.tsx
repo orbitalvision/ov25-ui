@@ -1,55 +1,60 @@
 import { ChevronRight } from "lucide-react"
 import React from "react"
+import { cn } from "../../lib/utils.js"
 interface ProductOptionsProps {
   label: string
   value: string
+  optionId: string
   onClick: () => void
 }
 
 interface ProductOptionsGroupProps {
   allOptions: any[]
-  isMobile: boolean
-  isVariantsOpen: boolean
   handleOptionClick: (optionId: any) => void
   range?: { name: string }
   getSelectedValue: (option: any) => string
 }
 
-export function ProductOptions({ label, value, onClick }: ProductOptionsProps) {
+export function ProductOptions({ label, value, optionId, onClick }: ProductOptionsProps) {
   return (
     <button
       onClick={(e) => {e.stopPropagation(), e.preventDefault(); onClick()}}
-      className="flex justify-between w-full p-4 py-4 hover:bg-accent border-b last:border-b-0 border-[var(--ov25-configurator-variant-menu-border-color)]"
+      className={cn(
+        'flex justify-between w-full p-3 py-2 my-2',
+        'bg-[var(--ov25-button-background-color)]',
+        'hover:bg-[var(--ov25-button-hover-background-color)]',
+        'text-[var(--ov25-button-text-color)]',
+        'hover:text-[var(--ov25-button-hover-text-color)]',
+        'border-[length:var(--ov25-button-border-width)]',
+        'border-[var(--ov25-button-border-color)]',
+        'rounded-[var(--ov25-button-border-radius)]',
+      )}
+      data-ov25-variant-option={optionId}
     >
-      <div className="flex flex-col items-start space-y-1.5 text-left text-[#282828]">
-        <span className="text-[12px] font-light uppercase  ">{label}</span>
-        <span className={`text-base  ${value === '' ? 'invisible' : ''}`}>{value === '' ? '_' : value}</span>
+      <div className="flex flex-col items-start space-y-1.5 text-left pl-4">
+        <span className="text-[12px] font-light uppercase">{label}</span>
+        <span className={`text-base ${value === '' ? 'invisible' : ''}`}>{value === '' ? '_' : value}</span>
       </div>
-      <ChevronRight size={28} className=" h-12 stroke-1  stroke-muted-foreground self-center" />
+      <ChevronRight size={28} className=" h-12 stroke-1 stroke-muted-foreground self-center"/>
     </button>
   )
 }
 
-export function ProductOptionsGroup({ 
-  allOptions, 
-  isMobile, 
-  isVariantsOpen, 
-  handleOptionClick, 
+export function ProductOptionsGroup({
+  allOptions,
+  handleOptionClick,
   range, 
   getSelectedValue 
 }: ProductOptionsGroupProps) {
   return (
-    <div
-      className={`w-full duration-300 ease-in-out ${
-        !isMobile && (isVariantsOpen ? "opacity-0 invisible translate-x-[-100%]" : "opacity-100 visible translate-x-0")
-      }`}
-    >
-      <div className="border rounded-[var(--ov25-configurator-variant-menu-border-radius)] border-[var(--ov25-configurator-variant-menu-border-color)] overflow-hidden">
+    <div>
+      <div className="overflow-hidden">
         {allOptions.map((option) => (
           <ProductOptions
             key={option?.id}
             label={'Select ' + option?.name}
             value={option?.name === 'size' ? (range?.name ? range.name + ' ' : '') + getSelectedValue(option) : getSelectedValue(option)}
+            optionId={option?.id}
             onClick={() => handleOptionClick(option?.id)}
           />
         ))}

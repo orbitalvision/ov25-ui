@@ -86,9 +86,11 @@ interface OV25UIContextType {
   iframeRef: React.RefObject<HTMLIFrameElement>;
   isMobile: boolean;
 
+  // Coming from injectConfigurator options
   productLink: string | null;
   apiKey: string;
-  
+  checkoutFunction: () => void;
+  logoURL: string;
   // Computed values
   currentProduct?: Product;
   sizeOption: SizeOption;
@@ -130,10 +132,12 @@ interface OV25UIContextType {
 const OV25UIContext = createContext<OV25UIContextType | undefined>(undefined);
 
 // Context provider component
-export const OV25UIProvider: React.FC<{ children: React.ReactNode, productLink: string | null, apiKey: string }> = ({ 
+export const OV25UIProvider: React.FC<{ children: React.ReactNode, productLink: string | null, apiKey: string, checkoutFunction: () => void, logoURL: string }> = ({ 
   children,
   productLink,
   apiKey,
+  checkoutFunction,
+  logoURL,
 }) => {
   // State definitions
   const [products, setProducts] = useState<Product[]>([]);
@@ -349,9 +353,12 @@ export const OV25UIProvider: React.FC<{ children: React.ReactNode, productLink: 
     animationState,
     iframeRef,
     isMobile,
+
+    // Coming from injectConfigurator options
     productLink,
     apiKey,
-    
+    checkoutFunction,
+    logoURL,
     // Computed values
     currentProduct,
     sizeOption,

@@ -4,6 +4,9 @@ import { Carousel, CarouselContent,  CarouselItem } from "../ui/carousel.js"
 import { useState } from "react"
 import * as React from 'react'
 import { DefaultVariantCard } from "./variant-cards/DefaultVariantCard.js"
+import { Button } from "../ui/button.js"
+import { useOV25UI } from "../../contexts/ov25-ui-context.js"
+import { cn } from "../../lib/utils.js"
 interface Variant {
   id: number
   groupId?: number
@@ -60,11 +63,12 @@ export const ProductVariants = ({
   basis = 'basis-[43%]',
   onNext,
   onPrevious,
-  isMobile
+  isMobile,
 }: ProductVariantsProps) => {
+
+  const { checkoutFunction, logoURL } = useOV25UI();
   const isGrouped = Array.isArray(variants) && variants.length > 0 && 'groupName' in variants[0]
   const isSingleGroup = isGrouped && (variants as VariantGroup[]).length === 1
-
   const [selectedGroupIndex, setSelectedGroupIndex] = useState(0)
   
   // Helper function to determine grid columns class based on gridDivide prop
@@ -122,13 +126,20 @@ export const ProductVariants = ({
         <div className="ov25-controls-hidden">
           <button 
             onClick={onClose}
-            className="flex items-center justify-between w-full border-[var(--ov25-configurator-variant-sheet-border-color)] border-b-1 p-4 py-[1.125rem]"
+            className={cn(
+              'flex items-center justify-between w-full border-b-1 p-4 py-[1.125rem]',
+              'bg-[var(--ov25-panel-header-background-color)]'
+            )}
           >
             <div className="flex items-center gap-2 justify-center w-full relative">
-              <div className="absolute w-full inset-0 h-full flex items-center">
-                <ChevronRight className="rotate-180 h-4" />
+              <div className="absolute w-full inset-0 h-full flex items-center text-[var(--ov25-button-text-color)]">
+                <ChevronRight className="rotate-180 h-4"/>
               </div>
-              <h3 className="text-base font-[400] z-10">{title}</h3>
+              {logoURL ? (
+                <img src={logoURL} alt="Logo" className="w-40 h-full"/>
+              ) : (
+                <h3 className="text-base font-[400] z-10">{title}</h3>
+              )}
             </div>
           </button>
         </div>
@@ -163,7 +174,7 @@ export const ProductVariants = ({
     // -60px to make room for the dialog controls. 95% also works.
     return (
       <ScrollArea className={`h-[calc(100vh-60px)]`}>
-        <div style={{display: 'grid'}} className={` px-0 ${getGridColsClass()}`}>
+        <div style={{display: 'grid'}} className={` px-0 py-2 ${getGridColsClass()}`}>
           {renderVariantsContent(variantsToRender)}
         </div>
       </ScrollArea>
@@ -230,9 +241,36 @@ export const ProductVariants = ({
       </div>
     );
   };
+
+  const renderCheckoutButton = () => {
+    return (
+      <div className={cn(
+        'flex flex-row p-2 border-t',
+        'bg-[var(--ov25-background-color)]',
+        'border-[var(--ov25-border-color)]',
+      )}>
+        <Button onClick={checkoutFunction}className={cn(
+          'w-full h-10',
+          'bg-[var(--ov25-button-background-color)]',
+          'hover:bg-[var(--ov25-button-hover-background-color)]',
+          'text-[var(--ov25-button-text-color)]',
+          'hover:text-[var(--ov25-button-hover-text-color)]',
+          'border-[length:var(--ov25-button-border-width)]',
+          'border-[var(--ov25-button-border-color)]',
+          'rounded-[var(--ov25-button-border-radius)]',
+        )}>
+          <span>Checkout</span>
+        </Button>
+      </div>
+    )
+  };
   
   return (
-    <div className="xl:border mb-4 pointer-events-auto h-full rounded-[var(--ov25-configurator-variant-menu-border-radius)]  border-[var(--ov25-configurator-variant-sheet-border-color)]  ">
+    <div className={cn(
+      'md:flex md:flex-col mb-4 pointer-events-auto h-full',
+      'bg-[var(--ov25-background-color)]',
+      'xl:border-[var(--ov25-border-color)]',
+    )}>
       {renderControls()}
       {isGrouped && !isSingleGroup ? (
         //This renders mobile or desktop, it has lots of extra css
@@ -245,6 +283,7 @@ export const ProductVariants = ({
           renderDesktop()
         )
       )}
+      {!isMobile ? renderCheckoutButton() : null}
     </div>
   )
 }

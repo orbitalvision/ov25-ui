@@ -17,7 +17,7 @@ const PriceAndName: React.FC<PriceAndNameProps> = ({
   const name =  currentProduct?.name ?? range?.name
   
   return (
-    <div className={cn("flex flex-col gap-2", className)}>
+    <div className={cn("flex flex-col gap-2 font-[family-name:var(--ov25-font-family)]", className)}>
       {showName && name && (
         <h1 className="text-3xl text-[var(--ov25-configurator-title-text-color)]">{name}</h1>
       )}

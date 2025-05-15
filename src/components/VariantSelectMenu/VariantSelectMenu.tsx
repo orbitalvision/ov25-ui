@@ -60,7 +60,7 @@ export const VariantSelectMenu: React.FC = () => {
   }, [isVariantsOpen, activeOptionId]);
 
   return (
-    <div id="ov-25-configurator-variant-menu-container" className="relative">
+    <div id="ov-25-configurator-variant-menu-container" className="relative font-[family-name:var(--ov25-font-family)]">
       {/* Mobile Price Overlay (uses React Portal to position over iframe) */}
       {(() => {
         const Overlay = MobilePriceOverlay as any;
@@ -70,8 +70,6 @@ export const VariantSelectMenu: React.FC = () => {
       {/* Product Options section with unified border */}
       <ProductOptionsGroup
         allOptions={allOptions}
-        isMobile={isMobile}
-        isVariantsOpen={isVariantsOpen}
         handleOptionClick={handleOptionClick}
         range={range}
         getSelectedValue={getSelectedValue}
@@ -100,7 +98,6 @@ export const VariantSelectMenu: React.FC = () => {
   
   // Content component for desktop view
   function VariantContentDesktop() {
-    // Log when isVariantsOpen changes
     useEffect(() => {
       
       // Update body styles when drawer is opened/closed

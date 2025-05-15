@@ -4,7 +4,7 @@ import { useOV25UI } from '../contexts/ov25-ui-context.js';
 import { createPortal } from 'react-dom';
 
 export const MobilePriceOverlay = () => {
-  const { price, isMobile, isVariantsOpen } = useOV25UI();
+  const { price, isMobile, isVariantsOpen, checkoutFunction } = useOV25UI();
   
   // Only show on mobile when variants are open
   if (!isMobile || !isVariantsOpen) {
@@ -23,7 +23,7 @@ export const MobilePriceOverlay = () => {
       <div className="rounded-full relative bg-white border-[#E5E5E5] shadow-sm px-4 pr-3.5 py-0 flex items-center mt-4 gap-2 pointer-events-auto">
         <p className="text-sm text-[#282828]">£{(price / 100).toFixed(2)}</p>
         <div className="w-[1px] -mt-4 h-12 bg-[#E5E5E5]"></div>
-        <ShoppingCart className="w-4 h-4 text-[#282828]" />
+        <ShoppingCart onClick={checkoutFunction} className="w-4 h-4 text-[#282828]" />
       </div>
     </div>
   );

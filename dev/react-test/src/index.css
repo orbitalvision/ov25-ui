@@ -16,3 +16,9 @@ body {
   height: 100%;
   border: 1px solid black;
 }
+
+.configurator-container {
+  width: 650px;
+  height: 650px;
+  border: 1px solid black;
+}

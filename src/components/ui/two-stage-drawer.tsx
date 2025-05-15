@@ -169,7 +169,7 @@ const TwoStageDrawerComponent = ({
   const drawerContentStyle: CSSProperties = {
     width: '100%',
     height: '100%',
-    backgroundColor: 'var(--ov25-configurator-variant-drawer-background-color)',
+    backgroundColor: 'var(--ov25-background-color)',
     borderTopLeftRadius: '0.5rem',
     borderTopRightRadius: '0.5rem',
     boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'

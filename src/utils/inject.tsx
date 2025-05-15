@@ -27,6 +27,9 @@ export interface InjectConfiguratorOptions {
   priceNameId?: ElementSelector;
   variantsId?: ElementSelector;
   carouselId?: ElementSelector;
+  checkoutFunction: () => void;
+  logoURL: string;
+  cssVariables?: JSON;
 }
 
 export function injectConfigurator(opts: InjectConfiguratorOptions) {
@@ -37,6 +40,9 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     priceNameId,
     variantsId,
     carouselId,
+    checkoutFunction,
+    logoURL,
+    cssVariables,
   } = opts;
 
   // Resolve string or function
@@ -81,7 +87,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
         // Copy dimensions from original element
         const computedStyle = window.getComputedStyle(target);
         emptyDiv.style.width = computedStyle.width;
-        emptyDiv.style.aspectRatio = '1 / 1';
+        emptyDiv.style.height = computedStyle.height;
         // Replace the target with the empty div
         target.parentNode.replaceChild(emptyDiv, target);
         // Create portal into the empty div
@@ -101,11 +107,21 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
       }
     };
 
+    const setupCSSVariables = (cssVariables: JSON) => {
+      Object.entries(cssVariables).forEach(([key, value]) => {
+        document.documentElement.style.setProperty(key, value);
+      });
+    };
+
     // Process each component
     processElement(galleryId, <ProductGallery />, 'gallery');
     processElement(priceNameId, <PriceAndName />, 'priceName');
     processElement(variantsId, <VariantSelectMenu />, 'variants');
     processElement(carouselId, <ProductCarousel />, 'carousel');
+
+    if (cssVariables) {
+      setupCSSVariables(cssVariables);
+    }
 
     // If no portals were created we can bail early
     if (portals.length === 0) return;
@@ -129,7 +145,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     const resolvedProductLink = resolveStringOrFunction(productLink);
 
     root.render(
-      <OV25UIProvider apiKey={resolvedApiKey} productLink={resolvedProductLink}>
+      <OV25UIProvider apiKey={resolvedApiKey} productLink={resolvedProductLink} checkoutFunction={checkoutFunction} logoURL={logoURL}>
         {portals}
       </OV25UIProvider>
     );
