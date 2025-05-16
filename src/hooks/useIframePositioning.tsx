@@ -1,16 +1,18 @@
-import { useEffect } from 'react';
+import { useEffect,  } from 'react';
 import { useOV25UI } from '../contexts/ov25-ui-context.js';
 
 /**
  * Hook to position the iframe and its container at the top of the screen when drawer is open
  */
 export const useIframePositioning = () => {
-  const { isDrawerOrDialogOpen, isMobile } = useOV25UI();
+  const {isDrawerOrDialogOpen , isMobile } = useOV25UI();
+
 
   useEffect(() => {
     // Get the iframe element and container
     const iframe = document.getElementById('ov25-configurator-iframe');
     const container = document.getElementById('ov25-configurator-iframe-container');
+
     
     if (!iframe || !container) return;
     
@@ -25,6 +27,8 @@ export const useIframePositioning = () => {
       height: container.style.height,
       width: container.style.width,
       overflow: container.style.overflow,
+      transform: 'translateX(0) translateY(0)',
+      transition: 'none',
     };
     
     const originalIframeStyles = {
@@ -34,6 +38,8 @@ export const useIframePositioning = () => {
       width: iframe.style.width,
       height: iframe.style.height,
       zIndex: iframe.style.zIndex,
+      transform: 'translateX(0) translateY(0)',
+      transition: 'none',
     };
 
     const updateIframeWidth = () => {
@@ -48,6 +54,7 @@ export const useIframePositioning = () => {
       iframe.style.width = `${remainingWidth}px`;
     }
     
+    
     if (isDrawerOrDialogOpen) {
       // Set fixed positioning for container
       container.style.position = 'fixed';
@@ -56,6 +63,7 @@ export const useIframePositioning = () => {
       container.style.right = '0';
       container.style.zIndex = '10';
       container.style.borderRadius = '0';
+      
       
       // Only adjust width on desktop
       if (!isMobile) {
@@ -66,6 +74,17 @@ export const useIframePositioning = () => {
         container.style.height = '100%';
         iframe.style.height = '100%';
         window.addEventListener('resize', updateIframeWidth);
+
+        container.style.transform = 'translateX(-100%)';
+
+        iframe.style.transform = 'translateX(-100%)';
+
+        setTimeout(() => {
+            iframe.style.transition = 'transform 500ms cubic-bezier(0.4, 0, 0.2, 1)';
+            container.style.transition = 'transform 500ms cubic-bezier(0.4, 0, 0.2, 1)';
+            container.style.transform = 'translateX(0%)';
+            iframe.style.transform = 'translateX(0%)';
+        }, 50)
       } else {
         // On mobile, use full width
         container.style.width = '100%';
@@ -73,6 +92,18 @@ export const useIframePositioning = () => {
         iframe.style.height = '100vw';
         container.style.right = '0';
         iframe.style.width = '100%';
+
+
+        container.style.transform = 'translateY(-100%)';
+
+        iframe.style.transform = 'translateY(-100%)';
+
+        setTimeout(() => {
+            iframe.style.transition = 'transform 400ms cubic-bezier(0.4, 0, 0.2, 1)';
+            container.style.transition = 'transform 400ms cubic-bezier(0.4, 0, 0.2, 1)';
+            container.style.transform = 'translateY(0%)';
+            iframe.style.transform = 'translateY(0%)';
+        }, 50)
       }
       
       container.style.overflow = 'hidden';
@@ -83,30 +114,76 @@ export const useIframePositioning = () => {
       iframe.style.left = '0';
       iframe.style.zIndex = '10';
     }
+
+
     
     // Cleanup function to restore original styles
     return () => {
       // Always remove the resize event listener, regardless of drawer state
       window.removeEventListener('resize', updateIframeWidth);
       
-      if (isDrawerOrDialogOpen) {
-        container.style.position = originalContainerStyles.position;
-        container.style.top = originalContainerStyles.top;
-        container.style.left = originalContainerStyles.left;
-        container.style.right = originalContainerStyles.right;
-        container.style.zIndex = originalContainerStyles.zIndex;
-        container.style.borderRadius = originalContainerStyles.borderRadius;
-        container.style.height = originalContainerStyles.height;
-        container.style.width = originalContainerStyles.width;
-        container.style.overflow = originalContainerStyles.overflow;
-        
-        iframe.style.position = originalIframeStyles.position;
-        iframe.style.top = originalIframeStyles.top;
-        iframe.style.left = originalIframeStyles.left;
-        iframe.style.width = originalIframeStyles.width;
-        iframe.style.height = originalIframeStyles.height;
-        iframe.style.zIndex = originalIframeStyles.zIndex;
+      if(isMobile){
+        if (isDrawerOrDialogOpen) {
+            container.style.transform = 'translateY(-100%)';
+
+            iframe.style.transform = 'translateY(-100%)';
+
+
+            setTimeout(() => {
+            container.style.position = originalContainerStyles.position;
+            container.style.top = originalContainerStyles.top;
+            container.style.left = originalContainerStyles.left;
+            container.style.right = originalContainerStyles.right;
+            container.style.zIndex = originalContainerStyles.zIndex;
+            container.style.borderRadius = originalContainerStyles.borderRadius;
+            container.style.height = originalContainerStyles.height;
+            container.style.width = originalContainerStyles.width;
+            container.style.overflow = originalContainerStyles.overflow;
+            container.style.transform = originalContainerStyles.transform;
+            container.style.transition = originalContainerStyles.transition;
+            
+            iframe.style.position = originalIframeStyles.position;
+            iframe.style.top = originalIframeStyles.top;
+            iframe.style.left = originalIframeStyles.left;
+            iframe.style.width = originalIframeStyles.width;
+            iframe.style.height = originalIframeStyles.height;
+            iframe.style.zIndex = originalIframeStyles.zIndex;
+            iframe.style.transform = originalIframeStyles.transform;
+            iframe.style.transition = originalIframeStyles.transition;
+        }, 400)
+          }
+      } else{
+        if (isDrawerOrDialogOpen) {
+
+            container.style.transform = 'translateX(-100%)';
+            iframe.style.transform = 'translateX(-100%)';
+            setTimeout(() => {
+
+                container.style.position = originalContainerStyles.position;
+                container.style.top = originalContainerStyles.top;
+                container.style.left = originalContainerStyles.left;
+                container.style.right = originalContainerStyles.right;
+                container.style.zIndex = originalContainerStyles.zIndex;
+                container.style.borderRadius = originalContainerStyles.borderRadius;
+                container.style.height = originalContainerStyles.height;
+                container.style.width = originalContainerStyles.width;
+                container.style.overflow = originalContainerStyles.overflow;
+                container.style.transform = originalContainerStyles.transform;
+                container.style.transition = originalContainerStyles.transition;
+                
+                iframe.style.position = originalIframeStyles.position;
+                iframe.style.top = originalIframeStyles.top;
+                iframe.style.left = originalIframeStyles.left;
+                iframe.style.width = originalIframeStyles.width;
+                iframe.style.height = originalIframeStyles.height;
+                iframe.style.zIndex = originalIframeStyles.zIndex;
+                iframe.style.transform = originalIframeStyles.transform;
+                iframe.style.transition = originalIframeStyles.transition;
+            }, 500)
+          }
       }
+      
+      
     };
   }, [isDrawerOrDialogOpen, isMobile]);
 };

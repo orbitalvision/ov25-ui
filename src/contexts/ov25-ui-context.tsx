@@ -174,7 +174,7 @@ export const OV25UIProvider: React.FC<{ children: React.ReactNode, productLink: 
   // Effect for detecting mobile devices
   useEffect(() => {
     const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768); // Typical breakpoint for mobile
+      setIsMobile(window.innerWidth < 768);
     };
     
     // Check initially

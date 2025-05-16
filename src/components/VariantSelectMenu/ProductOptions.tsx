@@ -20,8 +20,8 @@ export function ProductOptions({ label, value, optionId, onClick }: ProductOptio
     <button
       onClick={(e) => {e.stopPropagation(), e.preventDefault(); onClick()}}
       className={cn(
-        'flex justify-between w-full p-3 py-2 my-2',
-        'bg-[var(--ov25-button-background-color)]',
+        'flex justify-between w-full p-3 py-2 my-2 cursor-pointer',
+        'bg-[var(--ov25-primary-color)]',
         'hover:bg-[var(--ov25-button-hover-background-color)]',
         'text-[var(--ov25-button-text-color)]',
         'hover:text-[var(--ov25-button-hover-text-color)]',
@@ -31,7 +31,7 @@ export function ProductOptions({ label, value, optionId, onClick }: ProductOptio
       )}
       data-ov25-variant-option={optionId}
     >
-      <div className="flex flex-col items-start space-y-1.5 text-left pl-4">
+      <div className="flex flex-col items-start cursor-pointer space-y-1.5 text-left pl-4">
         <span className="text-[12px] font-light uppercase">{label}</span>
         <span className={`text-base ${value === '' ? 'invisible' : ''}`}>{value === '' ? '_' : value}</span>
       </div>

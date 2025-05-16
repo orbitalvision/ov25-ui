@@ -12,7 +12,7 @@ interface VariantCardProps {
 export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobile }: VariantCardProps) => {
     return (
         <div 
-        className={`flex flex-col items-center ${variant.isSelected ? 'scale-110' : 'hover:scale-105'} transition-transform pt-2`}
+        className={`flex flex-col items-center ${variant.isSelected ? '' : ''} transition-transform pt-2`}
         key={variant.id + variant.groupId + variant.optionId}
     >
         <div className="relative">
@@ -30,7 +30,7 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
                     />
                 ) : (
                     <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                        <span className="text-xs text-gray-500">No img</span>
+                        <span className="text-xs text-[var(--ov25-secondary-text-color)]">No img</span>
                     </div>
                 )}
             </div>
@@ -39,7 +39,7 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
             onClick={() => onSelect(variant)}
             className="cursor-pointer"
         >
-            <span className="text-xs text-center text-gray-600 line-clamp-2">
+            <span className="text-xs text-center text-[var(--ov25-secondary-text-color)] line-clamp-2">
                 {variant.name}
             </span>
         </div>

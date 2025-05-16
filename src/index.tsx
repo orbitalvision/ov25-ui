@@ -19,8 +19,6 @@ const MainContent = () => {
     currentProductId,
     configuratorState,
     isVariantsOpen,
-    arPreviewLink,
-    setArPreviewLink,
     error,
     isMobile
   } = useOV25UI();

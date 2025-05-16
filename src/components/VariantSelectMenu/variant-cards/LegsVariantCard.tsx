@@ -20,7 +20,7 @@ export const LegsVariantCard = React.memo(
           e.stopPropagation();
           onSelect(variant);
         }}
-        className={`relative flex flex-col h-[160px] md:h-[200px] xl:h-[217px] items-center gap-4 w-full p-6 py-4  text-left hover:bg-accent xl:border-t border-[#E5E5E5] text-[#282828] group ${index % 2 === 0 ? 'xl:border-r border-[#E5E5E5]' : ''}`}
+        className={`relative flex  cursor-pointer flex-col h-[160px] md:h-[200px] xl:h-[217px] items-center gap-4 w-full p-6 py-4  text-left hover:bg-accent md:border-b border-[#E5E5E5] text-[#282828] group ${index % 2 === 0 ? 'xl:border-r border-[#E5E5E5]' : ''}`}
       >
         <div className="relative aspect-square h-full  group-hover:bg-accent">
           <div className="absolute inset-0 rounded-full overflow-hidden bg-white group-hover:bg-accent">
@@ -58,7 +58,7 @@ export const LegsVariantCard = React.memo(
         </div>
         <div className="flex flex-1 items-center justify-between">
           <div className="flex flex-col justify-center items-center">
-            <h3 className="font-[350] text-[12px]">{variant.name}</h3>
+            <h3 className="font-[350] text-sm text-[var(--ov25-secondary-text-color)]">{variant.name}</h3>
           </div>
         </div>
       </button>

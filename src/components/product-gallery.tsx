@@ -41,7 +41,8 @@ export function ProductGallery() {
       getIframeSrc(apiKey, productLink), 
     [productLink, apiKey]);
 
-    return (
+    return (<>
+   
       <div className="relative z-[10] font-[family-name:var(--ov25-font-family)]" id="ov-25-configurator-gallery-container">
         <div id="ov25-configurator-iframe-container" className="rounded-[var(--ov25-configurator-iframe-border-radius)] relative aspect-square md:aspect-[3/2] 2xl:aspect-video overflow-hidden  bg-[var(--ov25-configurator-iframe-background-color)] z-[3]">
           <iframe 
@@ -51,6 +52,7 @@ export function ProductGallery() {
             className={`w-full bg-transparent h-full ${galleryIndex === 0 ? 'block' : 'hidden'}`}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; xr-spatial-tracking; fullscreen"
           />
+
           
           {/* Display selected image when galleryIndex > 0 */}
           {galleryIndex > 0 && images[galleryIndex - 1] && (
@@ -73,7 +75,7 @@ export function ProductGallery() {
             />
           )}
         </div>
-      </div>
+      </div></>
     )
 }
 

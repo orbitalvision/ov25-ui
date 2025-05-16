@@ -9,12 +9,11 @@ let configuratorInitialized = false;
 const initializeConfigurator = () => {
   if (configuratorInitialized) return;
   
-  console.log('Initializing configurator...');
   
   // Inject the configurator
   injectConfigurator({
     apiKey: () => { return import.meta.env.VITE_OV25_API_KEY; }, 
-    productLink: () => { return '/range/1' }, 
+    productLink: () => { return '/48' }, 
     onSelectionChange: (selections) => {
       console.log('Selections changed:', selections);
     },
@@ -30,19 +29,15 @@ const initializeConfigurator = () => {
     logoURL: 'https://www.arighibianchi.co.uk/cdn/shop/files/Arighi_Bianchi_Horizontal_1854_Logo_CMYK_White_a90a3919-ad62-497c-a763-6198af0e460c_220x.png',
     cssVariables: {
       '--ov25-background-color': '#faf9f8',
-      // '--ov25-secondary-background-color': '#b512e9',
       '--ov25-text-color': '#06051c',
       '--ov25-text-color-secondary': '#ffffff',
-      '--ov25-panel-header-background-color': '#0c5358',
-      //'--ov25-border-color': '#0c5358',
-      '--ov25-button-hover-background-color': '#ffffff',
+      '--ov25-primary-color': '#0c5358',
+      '--ov25-button-hover-background-color': '#0B4B4F',
       '--ov25-button-text-color': '#ffffff',
-      '--ov25-button-hover-text-color': '#0c5358',
-      '--ov25-button-border-color': '#0c5358',
+      '--ov25-button-hover-text-color': '#ffffff',
       '--ov25-button-border-width': '2px',
-      '--ov25-button-border-radius': '30px',
+      '--ov25-button-border-radius': '5px',
       '--ov25-overlay-button-color': '#ffffff',
-      '--ov25-button-background-color': '#0c5358',
       '--ov25-font-family': 'classico-urw',
     }
   });
@@ -76,23 +71,23 @@ function App() {
     switch (type) {
       case "ALL_PRODUCTS":
         // e.g. store in your state
-        console.log("All products:", data);
+        // console.log("All products:", data);
         break;
       case "CURRENT_PRICE":
-        console.log("Updated price:", data);
+        // console.log("Updated price:", data);
         break;
       case "CURRENT_PRODUCT_ID":
-        console.log("Active product ID:", data);
+        // console.log("Active product ID:", data);
         break;
       case "CONFIGURATOR_STATE":
-        console.log("Configurator state:", data);
+        // console.log("Configurator state:", data);
         handleConfiguratorState(data);
         break;
       case "RANGE":
-        console.log("Range data:", data);
+        // console.log("Range data:", data);
         break;
       case "CURRENT_SKU":
-        console.log("Current SKU:", data);
+        // console.log("Current SKU:", data);
         break;
   
       // ... handle other message types
@@ -108,7 +103,7 @@ function App() {
   return (
     <div className="app">
       <h1>OV25 Configurator Test</h1>
-      <div className="layout-container">
+      <div className=" flex flex-col md:flex-row">
         <div className="configurator-container w-[700px] h-[500px]"></div>
         <div id="ov25-controls">
           <div id="price-name" className="w-[378px] h-[96px]">

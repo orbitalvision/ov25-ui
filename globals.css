@@ -17,32 +17,28 @@
     }
 }
 
-@media (min-width: 1280px) {
-    .ov25-controls-hidden {
-        display: flex;
-    }
-}
+
 
 :root {
     /* Base Colors */
     --ov25-color-white: #ffffff;
     --ov25-color-light-gray: #E5E5E5;
-    --ov25-color-medium-gray: #6a7282;
     --ov25-color-dark-gray: #282828;
     --ov25-color-handle: #bcbcbc;
 
+    
     /* Custom CSS Variables */
-    --ov25-background-color: var(--ov25-color-white);
-    --ov25-secondary-background-color: var(--ov25-color-light-gray);
+    --ov25-background-color: white;
+    --ov25-secondary-background-color: #E5E5E5;
+    --ov25-highlight-color: #64bfb7;
 
     --ov25-text-color: var(--ov25-color-dark-gray);
-    --ov25-text-color-secondary: var(--ov25-color-medium-gray);
+    --ov25-secondary-text-color: #4a5565;
 
-    --ov25-panel-header-background-color: var(--ov25-color-light-gray);
+    --ov25-primary-color: var(--ov25-color-light-gray);
     --ov25-border-color: var(--ov25-color-light-gray);
     --ov25-border-color-secondary: var(--ov25-color-dark-gray);
 
-    --ov25-button-background-color: var(--ov25-color-white);
     --ov25-button-hover-background-color: var(--ov25-color-light-gray);
     --ov25-button-text-color: var(--ov25-color-dark-gray);
     --ov25-button-hover-text-color: var(--ov25-color-dark-gray);
@@ -59,7 +55,7 @@
 
     /* view controls that are overlayed onto the iframe, such as the dimensions button */
     --ov25-configurator-view-controls-text-color: var(--ov25-text-color);
-    --ov25-overlay-button-color: var(--ov25-button-background-color);
+    --ov25-overlay-button-color: var(----ov25-primary-color);
     --ov25-configurator-view-controls-border-color: var(--ov25-border-color);
     --ov25-configurator-view-controls-border-radius: 9999999px;
 

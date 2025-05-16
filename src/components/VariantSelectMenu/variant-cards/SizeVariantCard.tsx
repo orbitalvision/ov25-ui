@@ -20,12 +20,12 @@ export const SizeVariantCard = React.memo(
           e.stopPropagation();
           onSelect(variant);
         }}
-        className={`relative flex flex-col h-[160px] md:h-[200px] xl:h-[217px] items-center gap-4 w-full p-4 text-left hover:bg-accent xl:border-t border-[#E5E5E5] text-[#282828] ${index % 2 === 0 ? 'xl:border-r border-[#E5E5E5]' : ''}`}
+        className={`relative flex cursor-pointer flex-col h-[160px] md:h-[200px] xl:h-[217px] items-center gap-4 w-full p-4 text-left hover:bg-accent md:border-b border-[#E5E5E5] text-[#282828] ${index % 2 === 0 ? 'xl:border-r border-[#E5E5E5]' : ''}`}
       >
         <div className="flex flex-1 items-center justify-between">
           <div className="flex flex-col justify-center items-center">
-            <h3 className="font-[350] text-sm">{variant.name}</h3>
-            <p className="text-[12px] font-[350] mt-0.5 ">£{(variant?.data?.price / 100)}</p>
+            <h3 className="font-[350] text-base text-[var(--ov25-secondary-text-color)]">{variant.name}</h3>
+            <p className="text-[12px] font-[350] mt-0.5 text-[var(--ov25-secondary-text-color)]">£{(variant?.data?.price / 100)}</p>
           </div>
         </div>
         <div className="relative aspect-[3/4] max-w-[200px] w-full overflow-hidden rounded-md bg-muted">
@@ -33,7 +33,7 @@ export const SizeVariantCard = React.memo(
             key={imgSrc}
             src={imgSrc} 
             alt={variant.name} 
-            className=""
+            className="object-center object-cover"
           />
           {variant.isSelected && (
             <div className="absolute inset-0 bg-transparent">
@@ -53,7 +53,7 @@ export const SizeVariantCard = React.memo(
               <div className="w-[2px] h-3 bg-[#E5E5E5]"></div>
               <div className="h-[2px] flex-1 bg-[#E5E5E5]"></div>
             </div>
-            <span className="text-[12px] font-[350] whitespace-nowrap">{variant?.data?.dimensionX}cm</span>
+            <span className="text-[12px] font-[350] whitespace-nowrap text-[var(--ov25-secondary-text-color)]">{variant?.data?.dimensionX}cm</span>
             <div className="flex items-center flex-1">
               <div className="h-[2px] flex-1 bg-[#E5E5E5]"></div>
               <div className="w-[2px] h-3 bg-[#E5E5E5]"></div>

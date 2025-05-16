@@ -40,6 +40,7 @@ const TwoStageDrawerComponent = ({
   const isMobile = useMediaQuery(768) // md breakpoint
   const { setIsDrawerOrDialogOpen: setIsDrawerOpen } = useOV25UI()
 
+
   function getMinHeight() {
     return window.innerHeight - (isMobile ? window.innerWidth : window.innerWidth * (2/3))
   }
@@ -53,7 +54,7 @@ const TwoStageDrawerComponent = ({
 
   const [{ height }, api] = useSpring(() => ({
     height: 0,
-    config: { tension: 300, friction: 26 },
+    config: { tension: 200, friction: 30 },
   }))
 
   // Effect to update drawer height on window resize
@@ -165,44 +166,6 @@ const TwoStageDrawerComponent = ({
     },
   )
 
-  // Define drawer content styles
-  const drawerContentStyle: CSSProperties = {
-    width: '100%',
-    height: '100%',
-    backgroundColor: 'var(--ov25-background-color)',
-    borderTopLeftRadius: '0.5rem',
-    borderTopRightRadius: '0.5rem',
-    boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
-  };
-
-  // Define styles for the drag handle container
-  const dragHandleContainerStyle: CSSProperties = {
-    width: '100%',
-    paddingTop: '1rem',
-    paddingBottom: '1rem',
-    display: 'flex',
-    justifyContent: 'center',
-    cursor: 'grab',
-    touchAction: 'none'
-  };
-
-  // Define styles for the drag handle
-  const dragHandleStyle: CSSProperties = {
-    width: '2rem',
-    height: '0.25rem',
-    backgroundColor: 'var(--ov25-configurator-variant-drawer-handle-color)',
-    borderRadius: '9999px',
-    zIndex: 2
-  };
-
-  // Define styles for the children container
-  const childrenContainerStyle: CSSProperties = {
-    height: '100%',
-    display: 'flex',
-    flexDirection: 'column',
-    pointerEvents: 'none'
-  };
-
   // Only render in browser environment
   if (typeof window === 'undefined') {
     return null;
@@ -230,16 +193,15 @@ const TwoStageDrawerComponent = ({
         }
       }}
     >
-      <div id="ov25-drawer-content" style={drawerContentStyle}>
+      <div id="ov25-drawer-content" className="w-full h-full bg-[var(--ov25-background-color)] rounded-t-lg shadow-lg">
         <div 
           {...bind()} 
-          style={dragHandleContainerStyle}
-          className="active:cursor-grabbing"
+          className="w-full py-4 flex justify-center cursor-grab touch-none active:cursor-grabbing"
         >
-          <div style={dragHandleStyle} />
+          <div className="w-8 h-1 bg-[var(--ov25-configurator-variant-drawer-handle-color)] rounded-full z-10"/>
         </div>
 
-        <div style={childrenContainerStyle}>{children}</div>
+        <div className="h-full flex flex-col pointer-events-none">{children}</div>
       </div>
     </AnimatedDiv>
   );
