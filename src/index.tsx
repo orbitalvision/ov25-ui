@@ -7,7 +7,8 @@ import VariantSelectMenu from "./components/VariantSelectMenu/VariantSelectMenu"
 import ArPreviewQRCodeDialog from "./components/ar-preview-qr-code-dialog";
 import '../globals.css'
 import { ProductCarousel } from "./components/product-carousel";
-import PriceAndName from "./components/PriceAndName";
+import Price from "./components/Price";
+import Name from "./components/Name";
 
 
 export type DrawerSizes = 'closed' | 'small' | 'large'
@@ -40,9 +41,10 @@ const MainContent = () => {
             <div id="ov-25-configurator-product-details" className="flex-1 flex-shrink-0 xl:min-w-[494px] bg-white xl:px-0">
               <div id="ov-25-configurator-product-info" className="flex flex-col gap-6 pt-8 xl:pt-0">
                 <div id="ov-25-configurator-product-header" className="flex flex-col gap-2 px-4 xl:px-0.5">
-                  <PriceAndName 
-                    className="px-0"
-                  />
+                  <div className={cn("orbitalvision:flex orbitalvision:flex-col orbitalvision:gap-2 ", 'px-0')}>
+                    <Price />
+                    <Name />
+                  </div>
                 </div>
 
                 <VariantSelectMenu />
@@ -59,7 +61,12 @@ const MainContent = () => {
 // The main app component that wraps everything with the provider
 export const APP = ({productLink = null}: {productLink?: string | null}) => {
   return (
-    <OV25UIProvider productLink={'/range/12'}  apiKey='15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d'>
+    <OV25UIProvider 
+      productLink={'/range/12'}
+      apiKey='15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d'
+      checkoutFunction={() => {console.log('checkout function called')}} 
+      logoURL='https://www.arighibianchi.co.uk/cdn/shop/files/Arighi_Bianchi_Horizontal_1854_Logo_CMYK_White_a90a3919-ad62-497c-a763-6198af0e460c_220x.png'
+    >
       <MainContent />
     </OV25UIProvider>
   );

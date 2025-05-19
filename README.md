@@ -22,7 +22,8 @@ injectConfigurator({
   productLink: '/product/123',           // Required
   galleryId: '#product-image-container', // Optional
   carouselId: '#product-carousel',       // Optional
-  priceNameId: '#product-price-name',    // Optional
+  priceId: '#price-element',              // Optional
+  nameId: '#name-element',              // Optional
   variantsId: '#product-variants'        // Optional
 });
 ```

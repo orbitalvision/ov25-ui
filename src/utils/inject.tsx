@@ -3,7 +3,8 @@ import React, { ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { OV25UIProvider } from '../contexts/ov25-ui-context.js';
 import { ProductGallery } from '../components/product-gallery.js';
-import PriceAndName from '../components/PriceAndName.js';
+import Price from '../components/Price.js';
+import Name from '../components/Name.js';
 import VariantSelectMenu from '../components/VariantSelectMenu/VariantSelectMenu.js';
 import { ProductCarousel } from '../components/product-carousel.js';
 import { createPortal } from 'react-dom';
@@ -24,7 +25,8 @@ export interface InjectConfiguratorOptions {
   apiKey: StringOrFunction;
   productLink: StringOrFunction;
   galleryId?: ElementSelector;
-  priceNameId?: ElementSelector;
+  priceId?: ElementSelector;
+  nameId?: ElementSelector;
   variantsId?: ElementSelector;
   carouselId?: ElementSelector;
   checkoutFunction: () => void;
@@ -37,7 +39,8 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     apiKey,
     productLink,
     galleryId,
-    priceNameId,
+    priceId,
+    nameId,
     variantsId,
     carouselId,
     checkoutFunction,
@@ -115,7 +118,8 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
 
     // Process each component
     processElement(galleryId, <ProductGallery />, 'gallery');
-    processElement(priceNameId, <PriceAndName />, 'priceName');
+    processElement(priceId, <Price />, 'price');
+    processElement(nameId, <Name />, 'name');
     processElement(variantsId, <VariantSelectMenu />, 'variants');
     processElement(carouselId, <ProductCarousel />, 'carousel');
 

@@ -21,7 +21,8 @@ const initializeConfigurator = () => {
       console.log('Product changed:', product);
     },
     galleryId: {id: '.configurator-container', replace: true},
-    priceNameId: {id: '#price-name', replace: true},
+    priceId: {id: '#price', replace: true},
+    nameId: {id: '#name', replace: true},
     variantsId: '#ov25-controls',
     checkoutFunction: () => {
       alert('Checkout function called');
@@ -107,8 +108,8 @@ function App() {
         <div className="configurator-container orbitalvision:w-[700px] orbitalvision:h-[500px]"></div>
         <div id="ov25-controls">
           <div id="price-name" className="orbitalvision:w-[378px] orbitalvision:h-[96px]">
-            <div>PRICE: £123</div>
-            <div>NAME: Product Name</div>
+            <div id="price">PRICE: £123</div>
+            <div id="name">NAME: Product Name</div>
           </div>
           <h2>Variant Menu</h2>
           <p>This is a placeholder for the variant menu. In a real implementation, this would be populated with variant options.</p>
