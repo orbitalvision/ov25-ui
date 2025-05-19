@@ -5,6 +5,7 @@ import { getIframeSrc } from '../utils/configurator-utils.js'
 import { useOV25UI } from "../contexts/ov25-ui-context.js"
 import ConfiguratorViewControls from "./ConfiguratorViewControls.js"
 import { useIframePositioning } from "../hooks/useIframePositioning.js"
+import { cn } from "../lib/utils.js"
 
 // Simplified props, most data now comes from context
 
@@ -19,6 +20,7 @@ export function ProductGallery() {
       animationState,
       productLink,
       apiKey,
+      isDrawerOrDialogOpen,
     } = useOV25UI();
 
     // Use the custom hook to handle iframe positioning
@@ -43,8 +45,17 @@ export function ProductGallery() {
 
     return (<>
    
-      <div className="orbitalvision:relative orbitalvision:z-[10] orbitalvision:font-[family-name:var(--ov25-font-family)]" id="ov-25-configurator-gallery-container">
-        <div id="ov25-configurator-iframe-container" className="orbitalvision:rounded-[var(--ov25-configurator-iframe-border-radius)] orbitalvision:relative orbitalvision:aspect-square orbitalvision:md:aspect-[3/2] orbitalvision:2xl:aspect-video orbitalvision:overflow-hidden orbitalvision:bg-[var(--ov25-configurator-iframe-background-color)] orbitalvision:z-[3]">
+      <div className={cn("orbitalvision:relative orbitalvision:font-[family-name:var(--ov25-font-family)]", isDrawerOrDialogOpen ? "orbitalvision:z-[10]" : "orbitalvision:z-[2]")} id="ov-25-configurator-gallery-container">
+        <div id="ov25-configurator-background-color" className={cn(
+          "orbitalvision:aspect-square orbitalvision:md:aspect-[1/1] orbitalvision:z-[2] orbitalvision:absolute orbitalvision:inset-0 orbitalvision:block!",
+          "orbitalvision:rounded-[var(--ov25-configurator-iframe-border-radius)]",
+          "orbitalvision:bg-[var(--ov25-configurator-iframe-background-color)]"
+          )}></div>
+        <div id="ov25-configurator-iframe-container" 
+            className={cn(" orbitalvision:relative orbitalvision:aspect-square orbitalvision:md:aspect-[3/2] orbitalvision:2xl:aspect-video orbitalvision:overflow-hidden orbitalvision:z-[3]",
+          "orbitalvision:rounded-[var(--ov25-configurator-iframe-border-radius)]",
+          "orbitalvision:bg-[var(--ov25-configurator-iframe-background-color)]"
+        )}>
           <iframe 
             ref={iframeRef}
             id="ov25-configurator-iframe"
@@ -75,7 +86,7 @@ export function ProductGallery() {
             />
           )}
         </div>
-      </div></>
+      </div> </>
     )
 }
 
