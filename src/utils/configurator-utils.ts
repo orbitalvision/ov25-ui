@@ -60,7 +60,7 @@ export const selectProduct = (productId: number): void => {
  * @param groupId - The ID of the group the option belongs to
  * @param selectionId - The ID of the specific selection
  */
-export const selectOption = (optionId: number, groupId: number, selectionId: number): void => {
+export const selectOption = (optionId: string, groupId: string, selectionId: string): void => {
   sendMessageToIframe('SELECT_SELECTION', {
     optionId,
     groupId,
@@ -186,15 +186,15 @@ export const createSelectionHandler = (
 ): (selection: Selection) => void => {
   return (selection: Selection) => {
     if (activeOptionId === 'size') {
-      if (currentProductId !== selection.id) {
+      if ((currentProductId as any) !== selection.id) {
         setSelectedSelections(prev => {
           const newSelections = prev.filter(sel => sel.optionId !== 'size');
           return [...newSelections, { optionId: 'size', selectionId: selection.id }];
         });
-        selectProduct(selection.id);
+        selectProduct(selection.id as any);
       }
       return;
-    } else if (selection.groupId) {
+    } else if (selection.groupId && activeOptionId !== null) {
       setSelectedSelections(prev => {
         const newSelections = prev.filter(sel => sel.optionId !== activeOptionId);
         return [...newSelections, { 

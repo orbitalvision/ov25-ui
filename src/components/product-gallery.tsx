@@ -43,13 +43,13 @@ export function ProductGallery() {
 
     return (<>
    
-      <div className="relative z-[10] font-[family-name:var(--ov25-font-family)]" id="ov-25-configurator-gallery-container">
-        <div id="ov25-configurator-iframe-container" className="rounded-[var(--ov25-configurator-iframe-border-radius)] relative aspect-square md:aspect-[3/2] 2xl:aspect-video overflow-hidden  bg-[var(--ov25-configurator-iframe-background-color)] z-[3]">
+      <div className="orbitalvision:relative orbitalvision:z-[10] orbitalvision:font-[family-name:var(--ov25-font-family)]" id="ov-25-configurator-gallery-container">
+        <div id="ov25-configurator-iframe-container" className="orbitalvision:rounded-[var(--ov25-configurator-iframe-border-radius)] orbitalvision:relative orbitalvision:aspect-square orbitalvision:md:aspect-[3/2] orbitalvision:2xl:aspect-video orbitalvision:overflow-hidden orbitalvision:bg-[var(--ov25-configurator-iframe-background-color)] orbitalvision:z-[3]">
           <iframe 
             ref={iframeRef}
             id="ov25-configurator-iframe"
             src={iframeSrc}
-            className={`w-full bg-transparent h-full ${galleryIndex === 0 ? 'block' : 'ov25-controls-hidden'}`}
+            className={`orbitalvision:w-full orbitalvision:bg-transparent orbitalvision:h-full ${galleryIndex === 0 ? 'orbitalvision:block' : 'orbitalvision:ov25-controls-hidden'}`}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; xr-spatial-tracking; fullscreen"
           />
 
@@ -60,7 +60,7 @@ export function ProductGallery() {
               id={`ov-25-configurator-product-image-${galleryIndex}`}
               src={images[galleryIndex - 1]}
               alt={`Product image ${galleryIndex}`}
-              className="object-cover h-full w-full absolute inset-0"
+              className="orbitalvision:object-cover orbitalvision:h-full orbitalvision:w-full orbitalvision:absolute orbitalvision:inset-0"
             />
           )}
           

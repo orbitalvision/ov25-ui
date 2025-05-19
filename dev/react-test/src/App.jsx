@@ -38,7 +38,6 @@ const initializeConfigurator = () => {
       '--ov25-button-border-width': '2px',
       '--ov25-button-border-radius': '5px',
       '--ov25-overlay-button-color': '#ffffff',
-      '--ov25-font-family': 'classico-urw',
       '--ov25-highlight-color': '#E8927C', 
     }
   });
@@ -102,12 +101,12 @@ function App() {
   }, []);
 
   return (
-    <div className="app overflow-x-hidden">
+    <div className="app orbitalvision:overflow-x-hidden">
       <h1>OV25 Configurator Test</h1>
-      <div className=" flex flex-col md:flex-row">
-        <div className="configurator-container w-[700px] h-[500px]"></div>
+      <div className="orbitalvision:flex orbitalvision:flex-col orbitalvision:md:flex-row">
+        <div className="configurator-container orbitalvision:w-[700px] orbitalvision:h-[500px]"></div>
         <div id="ov25-controls">
-          <div id="price-name" className="w-[378px] h-[96px]">
+          <div id="price-name" className="orbitalvision:w-[378px] orbitalvision:h-[96px]">
             <div>PRICE: £123</div>
             <div>NAME: Product Name</div>
           </div>

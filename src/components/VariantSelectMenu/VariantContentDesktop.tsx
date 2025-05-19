@@ -48,7 +48,7 @@ export function VariantContentDesktop() {
     }
 
     const menuContent = (
-      <div className={`fixed top-0 right-0 h-full w-[384px] z-[11] duration-500 transition-all ${isDrawerOrDialogOpen ? 'translate-x-0' : 'translate-x-full'}`} id='ov25-configurator-variant-menu-container'>
+      <div className={`orbitalvision:fixed orbitalvision:top-0 orbitalvision:right-0 orbitalvision:h-full orbitalvision:w-[384px] orbitalvision:z-[11] orbitalvision:duration-500 orbitalvision:transition-all ${isDrawerOrDialogOpen ? 'orbitalvision:translate-x-0' : 'orbitalvision:translate-x-full'}`} id='ov25-configurator-variant-menu-container'>
         <ProductVariantsWrapper/>
       </div>
     );

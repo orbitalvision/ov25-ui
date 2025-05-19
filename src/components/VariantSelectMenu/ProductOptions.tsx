@@ -20,22 +20,22 @@ export function ProductOptions({ label, value, optionId, onClick }: ProductOptio
     <button
       onClick={(e) => {e.stopPropagation(), e.preventDefault(); onClick()}}
       className={cn(
-        'flex justify-between w-full p-3 py-2 my-2 cursor-pointer',
-        'bg-[var(--ov25-primary-color)]',
-        'hover:bg-[var(--ov25-button-hover-background-color)]',
-        'text-[var(--ov25-button-text-color)]',
-        'hover:text-[var(--ov25-button-hover-text-color)]',
-        'border-[length:var(--ov25-button-border-width)]',
-        'border-[var(--ov25-button-border-color)]',
-        'rounded-[var(--ov25-button-border-radius)]',
+        'orbitalvision:flex orbitalvision:justify-between orbitalvision:w-full orbitalvision:p-3 orbitalvision:py-2 orbitalvision:my-2 orbitalvision:cursor-pointer',
+        'orbitalvision:bg-[var(--ov25-primary-color)]',
+        'orbitalvision:hover:bg-[var(--ov25-button-hover-background-color)]',
+        'orbitalvision:text-[var(--ov25-button-text-color)]',
+        'orbitalvision:hover:text-[var(--ov25-button-hover-text-color)]',
+        'orbitalvision:border-[length:var(--ov25-button-border-width)]',
+        'orbitalvision:border-[var(--ov25-button-border-color)]',
+        'orbitalvision:rounded-[var(--ov25-button-border-radius)]',
       )}
       data-ov25-variant-option={optionId}
     >
-      <div className="flex flex-col items-start cursor-pointer space-y-1.5 text-left pl-4">
-        <span className="text-[12px] font-light uppercase">{label}</span>
-        <span className={`text-base ${value === '' ? 'invisible' : ''}`}>{value === '' ? '_' : value}</span>
+      <div className="orbitalvision:flex orbitalvision:flex-col orbitalvision:items-start orbitalvision:cursor-pointer orbitalvision:space-y-1.5 orbitalvision:text-left orbitalvision:pl-4">
+        <span className="orbitalvision:text-[12px] orbitalvision:font-light orbitalvision:uppercase">{label}</span>
+        <span className={`orbitalvision:text-base ${value === '' ? 'orbitalvision:invisible' : ''}`}>{value === '' ? '_' : value}</span>
       </div>
-      <ChevronRight size={28} className=" h-12 stroke-1 stroke-muted-foreground self-center"/>
+      <ChevronRight size={28} className="orbitalvision:h-12 orbitalvision:stroke-1 orbitalvision:stroke-muted-foreground orbitalvision:self-center"/>
     </button>
   )
 }
@@ -48,7 +48,7 @@ export function ProductOptionsGroup({
 }: ProductOptionsGroupProps) {
   return (
     <div>
-      <div className="overflow-hidden">
+      <div className="orbitalvision:overflow-hidden">
         {allOptions.map((option) => (
           <ProductOptions
             key={option?.id}

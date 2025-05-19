@@ -17,14 +17,14 @@ const SelectTrigger = React.forwardRef<
   <SelectPrimitive.Trigger
     ref={ref}
     className={cn(
-      "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-input bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-50 [&>span]:line-clamp-1",
+      "orbitalvision-flex orbitalvision-h-9 orbitalvision-w-full orbitalvision-items-center orbitalvision-justify-between orbitalvision-whitespace-nowrap orbitalvision-rounded-md orbitalvision-border orbitalvision-border-input orbitalvision-bg-transparent orbitalvision-px-3 orbitalvision-py-2 orbitalvision-text-sm orbitalvision-shadow-sm orbitalvision-ring-offset-background placeholder:orbitalvision-text-muted-foreground focus:orbitalvision-outline-none focus:orbitalvision-ring-1 focus:orbitalvision-ring-ring disabled:orbitalvision-cursor-not-allowed disabled:orbitalvision-opacity-50 [&>span]:orbitalvision-line-clamp-1",
       className
     )}
     {...props}
   >
     {children}
     <SelectPrimitive.Icon asChild>
-      <ChevronDown className="h-4 w-4 opacity-50" />
+      <ChevronDown className="orbitalvision-h-4 orbitalvision-w-4 orbitalvision-opacity-50" />
     </SelectPrimitive.Icon>
   </SelectPrimitive.Trigger>
 ))
@@ -37,12 +37,12 @@ const SelectScrollUpButton = React.forwardRef<
   <SelectPrimitive.ScrollUpButton
     ref={ref}
     className={cn(
-      "flex cursor-default items-center justify-center py-1",
+      "orbitalvision-flex orbitalvision-cursor-default orbitalvision-items-center orbitalvision-justify-center orbitalvision-py-1",
       className
     )}
     {...props}
   >
-    <ChevronUp className="h-4 w-4" />
+    <ChevronUp className="orbitalvision-h-4 orbitalvision-w-4" />
   </SelectPrimitive.ScrollUpButton>
 ))
 SelectScrollUpButton.displayName = SelectPrimitive.ScrollUpButton.displayName
@@ -54,12 +54,12 @@ const SelectScrollDownButton = React.forwardRef<
   <SelectPrimitive.ScrollDownButton
     ref={ref}
     className={cn(
-      "flex cursor-default items-center justify-center py-1",
+      "orbitalvision-flex orbitalvision-cursor-default orbitalvision-items-center orbitalvision-justify-center orbitalvision-py-1",
       className
     )}
     {...props}
   >
-    <ChevronDown className="h-4 w-4" />
+    <ChevronDown className="orbitalvision-h-4 orbitalvision-w-4" />
   </SelectPrimitive.ScrollDownButton>
 ))
 SelectScrollDownButton.displayName =
@@ -73,9 +73,9 @@ const SelectContent = React.forwardRef<
     <SelectPrimitive.Content
       ref={ref}
       className={cn(
-        "relative z-50 max-h-96 min-w-[8rem] overflow-hidden rounded-md border bg-popover text-popover-foreground shadow-md data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2",
+        "orbitalvision-relative orbitalvision-z-50 orbitalvision-max-h-96 orbitalvision-min-w-[8rem] orbitalvision-overflow-hidden orbitalvision-rounded-md orbitalvision-border orbitalvision-bg-popover orbitalvision-text-popover-foreground orbitalvision-shadow-md data-[state=open]:orbitalvision-animate-in data-[state=closed]:orbitalvision-animate-out data-[state=closed]:orbitalvision-fade-out-0 data-[state=open]:orbitalvision-fade-in-0 data-[state=closed]:orbitalvision-zoom-out-95 data-[state=open]:orbitalvision-zoom-in-95 data-[side=bottom]:orbitalvision-slide-in-from-top-2 data-[side=left]:orbitalvision-slide-in-from-right-2 data-[side=right]:orbitalvision-slide-in-from-left-2 data-[side=top]:orbitalvision-slide-in-from-bottom-2",
         position === "popper" &&
-          "data-[side=bottom]:translate-y-1 data-[side=left]:-translate-x-1 data-[side=right]:translate-x-1 data-[side=top]:-translate-y-1",
+          "data-[side=bottom]:orbitalvision-translate-y-1 data-[side=left]:orbitalvision--translate-x-1 data-[side=right]:orbitalvision-translate-x-1 data-[side=top]:orbitalvision--translate-y-1",
         className
       )}
       position={position}
@@ -84,9 +84,9 @@ const SelectContent = React.forwardRef<
       <SelectScrollUpButton />
       <SelectPrimitive.Viewport
         className={cn(
-          "p-1",
+          "orbitalvision-p-1",
           position === "popper" &&
-            "h-[var(--radix-select-trigger-height)] w-full min-w-[var(--radix-select-trigger-width)]"
+            "orbitalvision-h-[var(--radix-select-trigger-height)] orbitalvision-w-full orbitalvision-min-w-[var(--radix-select-trigger-width)]"
         )}
       >
         {children}
@@ -103,7 +103,7 @@ const SelectLabel = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SelectPrimitive.Label
     ref={ref}
-    className={cn("px-2 py-1.5 text-sm font-semibold", className)}
+    className={cn("orbitalvision-px-2 orbitalvision-py-1.5 orbitalvision-text-sm orbitalvision-font-semibold", className)}
     {...props}
   />
 ))
@@ -116,14 +116,14 @@ const SelectItem = React.forwardRef<
   <SelectPrimitive.Item
     ref={ref}
     className={cn(
-      "relative flex w-full cursor-default select-none items-center rounded-sm py-1.5 pl-2 pr-8 text-sm outline-none focus:bg-accent focus:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50",
+      "orbitalvision-relative orbitalvision-flex orbitalvision-w-full orbitalvision-cursor-default orbitalvision-select-none orbitalvision-items-center orbitalvision-rounded-sm orbitalvision-py-1.5 orbitalvision-pl-2 orbitalvision-pr-8 orbitalvision-text-sm orbitalvision-outline-none focus:orbitalvision-bg-accent focus:orbitalvision-text-accent-foreground data-[disabled]:orbitalvision-pointer-events-none data-[disabled]:orbitalvision-opacity-50",
       className
     )}
     {...props}
   >
-    <span className="absolute right-2 flex h-3.5 w-3.5 items-center justify-center">
+    <span className="orbitalvision-absolute orbitalvision-right-2 orbitalvision-flex orbitalvision-h-3.5 orbitalvision-w-3.5 orbitalvision-items-center orbitalvision-justify-center">
       <SelectPrimitive.ItemIndicator>
-        <Check className="h-4 w-4" />
+        <Check className="orbitalvision-h-4 orbitalvision-w-4" />
       </SelectPrimitive.ItemIndicator>
     </span>
     <SelectPrimitive.ItemText>{children}</SelectPrimitive.ItemText>
@@ -137,7 +137,7 @@ const SelectSeparator = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <SelectPrimitive.Separator
     ref={ref}
-    className={cn("-mx-1 my-1 h-px bg-muted", className)}
+    className={cn("orbitalvision--mx-1 orbitalvision-my-1 orbitalvision-h-px orbitalvision-bg-muted", className)}
     {...props}
   />
 ))

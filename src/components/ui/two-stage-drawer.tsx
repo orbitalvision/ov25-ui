@@ -184,7 +184,7 @@ const TwoStageDrawerComponent = ({
         pointerEvents: drawerState === 0 ? 'none' : 'auto',
         ...style
       }}
-      className={'bg-[var(--ov25-configurator-iframe-background-color)]'}
+      className={'orbitalvision:bg-[var(--ov25-configurator-iframe-background-color)]'}
       onTouchMove={(e: any) => {
         if (e.target instanceof Element && !e.target.closest('.scroll-area-viewport')) {
           // causing error in console when scrolling drawer: Unable to preventDefault inside passive event listener invocation.
@@ -192,16 +192,16 @@ const TwoStageDrawerComponent = ({
         }
       }}
     >
-      <div id="ov25-drawer-content" className="w-full h-full bg-[var(--ov25-background-color)] relative rounded-t-xl [box-shadow:0_-4px_6px_-1px_rgba(0,0,0,0.05),0_-2px_4px_-2px_rgba(0,0,0,0.03)]">
+      <div id="ov25-drawer-content" className="orbitalvision:w-full orbitalvision:h-full orbitalvision:bg-[var(--ov25-background-color)] orbitalvision:relative orbitalvision:rounded-t-xl orbitalvision:[box-shadow:0_-4px_6px_-1px_rgba(0,0,0,0.05),0_-2px_4px_-2px_rgba(0,0,0,0.03)]">
         <div 
           {...bind()} 
-          className="w-full  flex justify-center cursor-grab touch-none active:cursor-grabbing"
+          className="orbitalvision:w-full orbitalvision:flex orbitalvision:justify-center orbitalvision:cursor-grab orbitalvision:touch-none orbitalvision:active:cursor-grabbing"
         >
-        <div className="py-4 z-10">
-          <div className="w-8 h-1 mt-0 bg-[var(--ov25-border-color)] shadow-sm rounded-full "/></div>
+        <div className="orbitalvision:py-4 orbitalvision:z-10">
+          <div className="orbitalvision:w-8 orbitalvision:h-1 orbitalvision:mt-0 orbitalvision:bg-[var(--ov25-border-color)] orbitalvision:shadow-sm orbitalvision:rounded-full "/></div>
         </div>
 
-        <div className="h-full flex flex-col  pointer-events-none">{children}</div>
+        <div className="orbitalvision:h-full orbitalvision:flex orbitalvision:flex-col orbitalvision:pointer-events-none">{children}</div>
       </div>
     </AnimatedDiv>
   );

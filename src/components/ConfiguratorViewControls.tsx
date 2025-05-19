@@ -35,28 +35,28 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = ({
   return (
     <>
       <div className={cn(
-        "absolute w-full pointer-events-none h-full inset-0 gap-2 p-4 flex justify-end items-end z-[9990]",
-        " text-[var(--ov25-configurator-view-controls-text-color)] "
+        "orbitalvision:absolute orbitalvision:w-full orbitalvision:pointer-events-none orbitalvision:h-full orbitalvision:inset-0 orbitalvision:gap-2 orbitalvision:p-4 orbitalvision:flex orbitalvision:justify-end orbitalvision:items-end orbitalvision:z-[9990]",
+        "orbitalvision:text-[var(--ov25-configurator-view-controls-text-color)]"
       )}>
         {canAnimate && (
           <button onClick={toggleAnimation} className={cn(
-            'cursor-pointer pointer-events-auto flex gap-2 p-2 md:px-4 border  items-center justify-center',
-            'rounded-[var(--ov25-configurator-view-controls-border-radius)]',
-            'border-[var(--ov25-configurator-view-controls-border-color)]',
-            'bg-[var(--ov25-overlay-button-color)]',
+            'orbitalvision:cursor-pointer orbitalvision:pointer-events-auto orbitalvision:flex orbitalvision:gap-2 orbitalvision:p-2 orbitalvision:md:px-4 orbitalvision:border orbitalvision:items-center orbitalvision:justify-center',
+            'orbitalvision:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
+            'orbitalvision:border-[var(--ov25-configurator-view-controls-border-color)]',
+            'orbitalvision:bg-[var(--ov25-overlay-button-color)]',
           )}>
-              <Rotate3D strokeWidth={1} className="w-5 h-5"/>
+              <Rotate3D strokeWidth={1} className="orbitalvision:w-5 orbitalvision:h-5"/>
               {!isMobile && (
-              <p className="text-sm font-light">{handleAnimationButtonText()}</p>
+              <p className="orbitalvision:text-sm orbitalvision:font-light">{handleAnimationButtonText()}</p>
               )}
           </button>
         )}
     </div>
     <div className={cn(
-        "absolute w-full pointer-events-none h-full inset-0 gap-2 p-4 flex justify-end items-end z-[9990]",
-        " text-[var(--ov25-configurator-view-controls-text-color)] "
+        "orbitalvision:absolute orbitalvision:w-full orbitalvision:pointer-events-none orbitalvision:h-full orbitalvision:inset-0 orbitalvision:gap-2 orbitalvision:p-4 orbitalvision:flex orbitalvision:justify-end orbitalvision:items-end orbitalvision:z-[9990]",
+        "orbitalvision:text-[var(--ov25-configurator-view-controls-text-color)]"
       )}>
-        <div className="flex flex-col w-full gap-2 h-full">
+        <div className="orbitalvision:flex orbitalvision:flex-col orbitalvision:w-full orbitalvision:gap-2 orbitalvision:h-full">
           {/* <div className="self-start">
             {isVariantsOpen && !isMobile && (<>
               <button onClick={handleClosePanel} className={cn(
@@ -73,17 +73,17 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = ({
                   </>
             )}
           </div> */}
-          <div className="mt-auto self-end">
+          <div className="orbitalvision:mt-auto orbitalvision:self-end">
             {showDimensionsToggle && (
               <button onClick={handleToggleDimensions} className={cn(
-                'cursor-pointer pointer-events-auto flex gap-2 p-2 md:px-4 border items-center justify-center',
-                'rounded-[var(--ov25-configurator-view-controls-border-radius)]',
-                'border-[var(--ov25-configurator-view-controls-border-color)]',
-                'bg-[var(--ov25-overlay-button-color)]',
+                'orbitalvision:cursor-pointer orbitalvision:pointer-events-auto orbitalvision:flex orbitalvision:gap-2 orbitalvision:p-2 orbitalvision:md:px-4 orbitalvision:border orbitalvision:items-center orbitalvision:justify-center',
+                'orbitalvision:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
+                'orbitalvision:border-[var(--ov25-configurator-view-controls-border-color)]',
+                'orbitalvision:bg-[var(--ov25-overlay-button-color)]',
                 )}>
-                <DimensionsIcon strokeWidth={1} className="w-6 h-6"/>
+                <DimensionsIcon strokeWidth={1} className="orbitalvision:w-6 orbitalvision:h-6"/>
                 {!isMobile && (
-                  <p className="text-sm text-[var(--ov25-text-color)]">Dimensions</p>
+                  <p className="orbitalvision:text-sm orbitalvision:text-[var(--ov25-text-color)]">Dimensions</p>
                 )}
               </button>
             )}
@@ -91,15 +91,15 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = ({
         </div>
 
       </div>
-      {!isVariantsOpen && (<div className="absolute ov25-controls-hidden size-full  md:flex  pointer-events-none  inset-0 p-4 justify-end items-start z-[9990]">
+      {!isVariantsOpen && (<div className="orbitalvision:absolute orbitalvision:ov25-controls-hidden orbitalvision:size-full orbitalvision:md:flex orbitalvision:pointer-events-none orbitalvision:inset-0 orbitalvision:p-4 orbitalvision:justify-end orbitalvision:items-start orbitalvision:z-[9990]">
           <button className={cn(
-            'cursor-pointer  aspect-square p-2 pointer-events-auto flex gap-2 ml-auto border items-center justify-center',
-            'rounded-[var(--ov25-configurator-view-controls-border-radius)]',
-            'border-[var(--ov25-configurator-view-controls-border-color)]',
-            'bg-[var(--ov25-overlay-button-color)]',
+            'orbitalvision:cursor-pointer orbitalvision:aspect-square orbitalvision:p-2 orbitalvision:pointer-events-auto orbitalvision:flex orbitalvision:gap-2 orbitalvision:ml-auto orbitalvision:border orbitalvision:items-center orbitalvision:justify-center',
+            'orbitalvision:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
+            'orbitalvision:border-[var(--ov25-configurator-view-controls-border-color)]',
+            'orbitalvision:bg-[var(--ov25-overlay-button-color)]',
         )}
           onClick={toggleFullscreen}>
-            <ExpandIcon strokeWidth={1} className="w-4 h-4"/>
+            <ExpandIcon strokeWidth={1} className="orbitalvision:w-4 orbitalvision:h-4"/>
           </button>
       </div>)}
     </>

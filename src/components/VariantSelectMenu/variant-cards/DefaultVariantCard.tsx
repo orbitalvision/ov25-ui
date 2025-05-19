@@ -12,12 +12,12 @@ interface VariantCardProps {
 export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobile }: VariantCardProps) => {
     return (
         <div 
-        className={`flex flex-col items-center ${variant.isSelected ? '' : ''} transition-transform pt-2`}
+        className={`orbitalvision:flex orbitalvision:flex-col orbitalvision:items-center ${variant.isSelected ? '' : ''} orbitalvision:transition-transform orbitalvision:pt-2`}
         key={variant.id + variant.groupId + variant.optionId}
     >
-        <div className="relative">
+        <div className="orbitalvision:relative">
             <div 
-                className={`w-14 h-14 rounded-full overflow-hidden mb-1 cursor-pointer ${variant.isSelected ? 'border-2 border-[var(--ov25-highlight-color)] shadow-lg' : 'border-transparent shadow-md'}`}
+                className={`orbitalvision:w-14 orbitalvision:h-14 orbitalvision:rounded-full orbitalvision:overflow-hidden orbitalvision:mb-1 orbitalvision:cursor-pointer ${variant.isSelected ? 'orbitalvision:border-2 orbitalvision:border-[var(--ov25-highlight-color)] orbitalvision:shadow-lg' : 'orbitalvision:border-transparent orbitalvision:shadow-md'}`}
                 onClick={() => onSelect(variant)}
             >
                 {variant.image ? (
@@ -26,20 +26,20 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
                         alt={variant.name}
                         width={56}
                         height={56}
-                        className="w-full h-full object-cover"
+                        className="orbitalvision:w-full orbitalvision:h-full orbitalvision:object-cover"
                     />
                 ) : (
-                    <div className="w-full h-full bg-gray-200 flex items-center justify-center">
-                        <span className="text-xs text-[var(--ov25-secondary-text-color)]">No img</span>
+                    <div className="orbitalvision:w-full orbitalvision:h-full orbitalvision:bg-gray-200 orbitalvision:flex orbitalvision:items-center orbitalvision:justify-center">
+                        <span className="orbitalvision:text-xs orbitalvision:text-[var(--ov25-secondary-text-color)]">No img</span>
                     </div>
                 )}
             </div>
         </div>
         <div 
             onClick={() => onSelect(variant)}
-            className="cursor-pointer"
+            className="orbitalvision:cursor-pointer"
         >
-            <span className="text-xs text-center text-[var(--ov25-secondary-text-color)] line-clamp-2">
+            <span className="orbitalvision:text-xs orbitalvision:text-center orbitalvision:text-[var(--ov25-secondary-text-color)] orbitalvision:line-clamp-2">
                 {variant.name}
             </span>
         </div>

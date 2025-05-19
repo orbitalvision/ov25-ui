@@ -56,7 +56,7 @@ export function ProductVariantsWrapper() {
       return (
         <ProductVariants
           isOpen={isVariantsOpen}
-          basis={isMobile ? 'basis-[33%]' : undefined}
+          basis={isMobile ? 'orbitalvision:basis-[33%]' : undefined}
           gridDivide={isLegOption ? 2 : (isMobile ? 4 : 4)}
           onClose={() => setIsVariantsOpen(false)}
           title={`${activeOption?.name || ''}`}

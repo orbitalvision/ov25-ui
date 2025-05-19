@@ -17,12 +17,12 @@ const PriceAndName: React.FC<PriceAndNameProps> = ({
   const name =  currentProduct?.name ?? range?.name
   
   return (
-    <div className={cn("flex flex-col gap-2 font-[family-name:var(--ov25-font-family)]", className)}>
+    <div className={cn("orbitalvision:flex orbitalvision:flex-col orbitalvision:gap-2 ", className)}>
       {showName && name && (
-        <h1 className="text-3xl text-[var(--ov25-configurator-title-text-color)]">{name}</h1>
+        <h1 className="orbitalvision:text-3xl orbitalvision:text-[var(--ov25-configurator-title-text-color)]">{name}</h1>
       )}
       {showPrice && price && (
-        <p className="text-2xl text-[var(--ov25-configurator-price-text-color)]">£{(price / 100).toFixed(2)}</p>
+        <p className="orbitalvision:text-2xl orbitalvision:text-[var(--ov25-configurator-price-text-color)]">£{(price / 100).toFixed(2)}</p>
       )}
     </div>
   )
