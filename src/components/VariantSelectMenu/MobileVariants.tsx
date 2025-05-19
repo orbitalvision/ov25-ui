@@ -4,24 +4,39 @@ import { Variant, VariantCardProps, VariantGroup } from "./ProductVariants.js";
 import { Carousel, CarouselContent, CarouselItem } from "../ui/carousel.js"
 import { capitalizeWords, getGridColsClass } from './DesktopVariants.js';
 import { useOV25UI } from '../../contexts/ov25-ui-context.js';
-import { ScrollArea } from '@radix-ui/react-scroll-area';
 import { VariantsContent } from './VariantsContent.js';
 
 const VariantsContentWithCarousel = ({ variantsToRender, VariantCard, onSelect, isMobile }: { variantsToRender: Variant[], VariantCard: React.ComponentType<VariantCardProps>, onSelect: (variant: Variant) => void, isMobile: boolean }) => {
+    const {allOptions, activeOptionId} = useOV25UI()
+    const activeOption = allOptions.find((option) => option.id === activeOptionId)
+    const activeOptionName = activeOption?.name ?? ''
     return (
       <>
         <Carousel opts={{ dragFree: true, loop: false }}>
           <CarouselContent>
-            {variantsToRender.map((variant, index) => (
-              <CarouselItem key={`${variant.id}-${variant.isSelected ? 'selected' : 'unselected'}`} className={'basis-1/3'}>
-                <VariantCard
-                  variant={variant}
-                  onSelect={onSelect}
-                  index={index}
-                  isMobile={isMobile}
-                />
-              </CarouselItem>
-            ))}
+            <CarouselItem key={`spacer`} style={{flexBasis: `9%`}} className="cursor-pointer">
+
+                </CarouselItem>
+            {variantsToRender.map((variant, index) => {
+              const basis =   Math.min(variantsToRender.length, activeOptionName === 'size' ? 2  : activeOptionName === 'Legs' ? 3 : 5);
+              const flexBasis = {
+                1: '100%',
+                2: '50%',
+                3: '33.333%',
+                4: '25%',
+                5: '20%'
+              }[basis];
+              return (
+                <CarouselItem key={`${variant.id}-${variant.isSelected ? 'selected' : 'unselected'}`} style={{flexBasis}}   className="cursor-pointer">
+                  <VariantCard
+                    variant={variant}
+                    onSelect={onSelect}
+                    index={index}
+                    isMobile={isMobile}
+                  />
+                </CarouselItem>
+              );
+            })}
           </CarouselContent>
         </Carousel>
       </>
@@ -59,12 +74,12 @@ export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSe
       return (
         <div className=" ">
           <Carousel opts={{ dragFree: true, loop: false }}>
-            <CarouselContent className="px-4 -ml-2">
-              <CarouselItem key={'placeholder'} className="basis-1/3  py-2">
+            <CarouselContent className="px-4 -ml-2 pr-4">
+              <CarouselItem key={'placeholder'} className="basis-[37%]  py-2">
                 <div className="w-full h-full bg-transparent"></div>
               </CarouselItem>
               {(variants as VariantGroup[]).map((group, index) => (
-                <CarouselItem key={group.groupName} className="basis-1/3 py-2">
+                <CarouselItem key={group.groupName} className="basis-1/4 py-2">
                   <button
                     onClick={() => setSelectedGroupIndex(index)}
                     className={`w-full py-2 rounded-full shadow-md text-neutral-500 border  ${selectedGroupIndex === index
@@ -87,11 +102,11 @@ export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSe
               isMobile={isMobile}
             />
           ) : (
-            <ScrollArea className={`heightMinusWidth`}>
+            <div className='h-full max-h-full overflow-y-scroll'>
               <div style={{ display: 'grid' }} className={` px-2 pb-32 ${getGridColsClass(gridDivide)}`}>
                 <VariantsContent variantsToRender={variantsToRender} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
               </div>
-            </ScrollArea>
+            </div>
           )
           }
         </div>
@@ -106,11 +121,11 @@ export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSe
         />
       } else {
         return (
-          <ScrollArea className={`h-full`}>
+            <div className='h-full max-h-full overflow-y-scroll'>
             <div style={{ display: 'grid' }} className={` px-0 pb-32 ${getGridColsClass(gridDivide)}`}>
               <VariantsContent variantsToRender={variantsToRender} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
             </div>
-          </ScrollArea>
+          </div>
         );
       }
     }

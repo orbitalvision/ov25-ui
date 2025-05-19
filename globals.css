@@ -1,4 +1,4 @@
-@import "tailwindcss";
+@import "tailwindcss" prefix(orbitalvision);
 
 /* Override Shopify's div:empty rule for ov25-ui components */
 #ov25-configurator-iframe-container div:empty,
@@ -10,44 +10,43 @@
   display: block !important;
 }
 
-@layer utilities {
-    /* Custom hidden class that becomes visible at xl breakpoint (1280px) */
-    .ov25-controls-hidden {
-        display: none;
-    }
-}
 
 
 
 :root {
-    /* Base Colors */
-    --ov25-color-white: #ffffff;
-    --ov25-color-light-gray: #E5E5E5;
-    --ov25-color-dark-gray: #282828;
-    --ov25-color-handle: #bcbcbc;
 
-    
+
     /* Custom CSS Variables */
     --ov25-background-color: white;
     --ov25-secondary-background-color: #E5E5E5;
     --ov25-highlight-color: #64bfb7;
 
-    --ov25-text-color: var(--ov25-color-dark-gray);
+    --ov25-text-color:#282828;
     --ov25-secondary-text-color: #4a5565;
 
-    --ov25-primary-color: var(--ov25-color-light-gray);
-    --ov25-border-color: var(--ov25-color-light-gray);
-    --ov25-border-color-secondary: var(--ov25-color-dark-gray);
+    --ov25-primary-color: #64bfb7;
+    --ov25-border-color: #E5E5E5;
+    --ov25-border-color-secondary: #282828;
 
-    --ov25-button-hover-background-color: var(--ov25-color-light-gray);
-    --ov25-button-text-color: var(--ov25-color-dark-gray);
-    --ov25-button-hover-text-color: var(--ov25-color-dark-gray);
-    --ov25-button-border-color: var(--ov25-color-dark-gray);
+
     --ov25-button-border-radius: 5px;
     --ov25-button-border-width: 1px;
 
     --ov25-font-family: 'sans-serif';
-    /* Custom CSS End */
+    
+    /* Typography variables */
+    --ov25-text-xs-size: 0.75rem; /* 12px */
+    --ov25-text-xs-line-height: calc(1 / 0.75);
+    
+    --ov25-text-sm-size: 0.875rem; /* 14px */
+    --ov25-text-sm-line-height: calc(1.25 / 0.875);
+    
+    --ov25-text-base-size: 1rem; /* 16px */
+    --ov25-text-base-line-height: calc(1.5 / 1);
+    
+    --ov25-text-lg-size: 1.125rem; /* 18px */
+    --ov25-text-lg-line-height: calc(1.75 / 1.125);
+
 
     /* iframe styling */
     --ov25-configurator-iframe-background-color: var(--ov25-secondary-background-color);
@@ -72,6 +71,9 @@
 
     /* Drawer Styles */
     --ov25-configurator-variant-drawer-handle-color: var(--ov25-color-handle);
+
+    
+
 }
 
 /* Aspect ratio media queries for configurator iframe */

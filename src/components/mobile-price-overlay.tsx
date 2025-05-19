@@ -1,10 +1,9 @@
 import React from 'react';
-import { ShoppingCart } from 'lucide-react';
 import { useOV25UI } from '../contexts/ov25-ui-context.js';
 import { createPortal } from 'react-dom';
 
 export const MobilePriceOverlay = () => {
-  const { price, isMobile, isVariantsOpen, checkoutFunction } = useOV25UI();
+  const { price, isMobile, isVariantsOpen, drawerSize, logoURL } = useOV25UI();
   
   // Only show on mobile when variants are open
   if (!isMobile || !isVariantsOpen) {
@@ -19,11 +18,13 @@ export const MobilePriceOverlay = () => {
 
   // Create portal content
   const overlayContent = (
-    <div className="absolute inset-0 w-full h-full flex justify-center items-start z-[9999] pointer-events-none">
-      <div className="rounded-full relative bg-white border-[#E5E5E5] shadow-sm px-4 pr-3.5 py-0 flex items-center mt-4 gap-2 pointer-events-auto">
-        <p className="text-sm text-[#282828]">£{(price / 100).toFixed(2)}</p>
-        <div className="w-[1px] -mt-4 h-12 bg-[#E5E5E5]"></div>
-        <ShoppingCart onClick={checkoutFunction} className="w-4 h-4 text-[#282828]" />
+    <div className={`absolute inset-0 w-full h-full flex text-[var(--ov25-secondary-text-color)] justify-center items-start z-[9999] pointer-events-none duration-300 transition-opacity ${drawerSize === 'large' ? 'opacity-0 ' : 'opacity-100'}`}>
+      <div className="rounded-[var(--ov25-button-border-radius)] bg-[var(--ov25-primary-color)] backdrop-blur-md px-4 py-1.5 mt-4 flex items-center gap-2">
+        {logoURL ? (
+          <img src={logoURL} alt="Logo" className="h-6 w-auto" />
+        ) : (
+          <p className="text-sm font-semibold">£{(price / 100).toFixed(2)}</p>
+        )}
       </div>
     </div>
   );

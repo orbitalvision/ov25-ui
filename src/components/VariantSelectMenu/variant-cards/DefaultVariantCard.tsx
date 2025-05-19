@@ -17,7 +17,7 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
     >
         <div className="relative">
             <div 
-                className={`w-14 h-14 rounded-full overflow-hidden mb-1 cursor-pointer ${variant.isSelected ? 'border-2 border-primary shadow-lg' : 'border-transparent shadow-md'}`}
+                className={`w-14 h-14 rounded-full overflow-hidden mb-1 cursor-pointer ${variant.isSelected ? 'border-2 border-[var(--ov25-highlight-color)] shadow-lg' : 'border-transparent shadow-md'}`}
                 onClick={() => onSelect(variant)}
             >
                 {variant.image ? (

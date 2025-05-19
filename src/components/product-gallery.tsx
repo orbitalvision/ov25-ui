@@ -49,7 +49,7 @@ export function ProductGallery() {
             ref={iframeRef}
             id="ov25-configurator-iframe"
             src={iframeSrc}
-            className={`w-full bg-transparent h-full ${galleryIndex === 0 ? 'block' : 'hidden'}`}
+            className={`w-full bg-transparent h-full ${galleryIndex === 0 ? 'block' : 'ov25-controls-hidden'}`}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; xr-spatial-tracking; fullscreen"
           />
 

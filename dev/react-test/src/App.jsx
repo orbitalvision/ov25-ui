@@ -13,7 +13,7 @@ const initializeConfigurator = () => {
   // Inject the configurator
   injectConfigurator({
     apiKey: () => { return import.meta.env.VITE_OV25_API_KEY; }, 
-    productLink: () => { return '/48' }, 
+    productLink: () => { return '/range/1' }, 
     onSelectionChange: (selections) => {
       console.log('Selections changed:', selections);
     },
@@ -39,6 +39,7 @@ const initializeConfigurator = () => {
       '--ov25-button-border-radius': '5px',
       '--ov25-overlay-button-color': '#ffffff',
       '--ov25-font-family': 'classico-urw',
+      '--ov25-highlight-color': '#E8927C', 
     }
   });
   
@@ -101,7 +102,7 @@ function App() {
   }, []);
 
   return (
-    <div className="app">
+    <div className="app overflow-x-hidden">
       <h1>OV25 Configurator Test</h1>
       <div className=" flex flex-col md:flex-row">
         <div className="configurator-container w-[700px] h-[500px]"></div>

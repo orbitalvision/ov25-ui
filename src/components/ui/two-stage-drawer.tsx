@@ -2,13 +2,11 @@ import { useState, useRef, type ReactNode, useEffect } from "react"
 import { createPortal } from "react-dom"
 import { useDrag } from "@use-gesture/react"
 import { animated, useSpring } from "@react-spring/web"
-import { cn } from "../../utils/cn.js"
 import { useMediaQuery } from "../../hooks/use-media-query.js"
 import * as React from 'react'
 import { CSSProperties } from "react"
 import { useOV25UI } from "../../contexts/ov25-ui-context.js"
 
-// Cast animated.div to any to bypass TypeScript errors
 const AnimatedDiv = animated.div as any;
 
 export interface TwoStageDrawerProps {
@@ -22,7 +20,7 @@ export interface TwoStageDrawerProps {
   onStateChange?: (state: 0 | 1 | 2) => void
 }
 
-export type DrawerState = 0 | 1 | 2 // 0 = closed, 1 = minified, 2 = extended
+export type DrawerState = 0 | 1 | 2 
 
 
 const TwoStageDrawerComponent = ({ 
@@ -46,7 +44,7 @@ const TwoStageDrawerComponent = ({
   }
 
   function getMaxHeight() {
-    return window.innerHeight * 0.95
+    return window.innerHeight * 0.80
   }
 
   const minHeight = typeof window !== 'undefined' ? getMinHeight() : 0
@@ -186,6 +184,7 @@ const TwoStageDrawerComponent = ({
         pointerEvents: drawerState === 0 ? 'none' : 'auto',
         ...style
       }}
+      className={'bg-[var(--ov25-configurator-iframe-background-color)]'}
       onTouchMove={(e: any) => {
         if (e.target instanceof Element && !e.target.closest('.scroll-area-viewport')) {
           // causing error in console when scrolling drawer: Unable to preventDefault inside passive event listener invocation.
@@ -193,15 +192,16 @@ const TwoStageDrawerComponent = ({
         }
       }}
     >
-      <div id="ov25-drawer-content" className="w-full h-full bg-[var(--ov25-background-color)] rounded-t-lg shadow-lg">
+      <div id="ov25-drawer-content" className="w-full h-full bg-[var(--ov25-background-color)] relative rounded-t-xl [box-shadow:0_-4px_6px_-1px_rgba(0,0,0,0.05),0_-2px_4px_-2px_rgba(0,0,0,0.03)]">
         <div 
           {...bind()} 
-          className="w-full py-4 flex justify-center cursor-grab touch-none active:cursor-grabbing"
+          className="w-full  flex justify-center cursor-grab touch-none active:cursor-grabbing"
         >
-          <div className="w-8 h-1 bg-[var(--ov25-configurator-variant-drawer-handle-color)] rounded-full z-10"/>
+        <div className="py-4 z-10">
+          <div className="w-8 h-1 mt-0 bg-[var(--ov25-border-color)] shadow-sm rounded-full "/></div>
         </div>
 
-        <div className="h-full flex flex-col pointer-events-none">{children}</div>
+        <div className="h-full flex flex-col  pointer-events-none">{children}</div>
       </div>
     </AnimatedDiv>
   );

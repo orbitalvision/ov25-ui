@@ -73,6 +73,7 @@ interface OV25UIContextType {
   activeOptionId: string | null;
   quantity: number;
   price: number;
+  formattedPrice: string;
   galleryIndex: number;
   currentSku: any;
   range: any;
@@ -151,6 +152,7 @@ export const OV25UIProvider: React.FC<{ children: React.ReactNode, productLink: 
   const [activeOptionId, setActiveOptionId] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(0);
+  const [formattedPrice, setFormattedPrice] = useState<string>('£0.00')
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [currentSku, setCurrentSku] = useState<any>(null);
   const [range, setRange] = useState<any>(null);
@@ -307,6 +309,7 @@ export const OV25UIProvider: React.FC<{ children: React.ReactNode, productLink: 
             break;
           case 'CURRENT_PRICE':
             setPrice(data.totalPrice);
+            setFormattedPrice(data.formattedPrice)
             break;
           case 'CURRENT_SKU':
             setCurrentSku(data);
@@ -339,6 +342,7 @@ export const OV25UIProvider: React.FC<{ children: React.ReactNode, productLink: 
     activeOptionId,
     quantity,
     price,
+    formattedPrice,
     galleryIndex,
     currentSku,
     range,

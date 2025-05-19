@@ -5,7 +5,44 @@ import { useOV25UI } from '../contexts/ov25-ui-context.js';
  * Hook to position the iframe and its container at the top of the screen when drawer is open
  */
 export const useIframePositioning = () => {
-  const {isDrawerOrDialogOpen , isMobile } = useOV25UI();
+  const {isDrawerOrDialogOpen , isMobile, drawerSize } = useOV25UI();
+
+
+  useEffect(() => {
+    if(isDrawerOrDialogOpen){
+        const iframe = document.getElementById('ov25-configurator-iframe');
+        const container = document.getElementById('ov25-configurator-iframe-container');
+        if(!container || !iframe) return;
+
+
+        const originalIframeHeight = iframe.style.height;
+
+        // Add transition
+
+        iframe.style.transition = 'height 500ms cubic-bezier(0.4, 0, 0.2, 1)';
+
+
+        if(drawerSize === 'large'){
+            iframe.style.height = `${window.innerHeight * 0.2}px`;
+        } else if(drawerSize === 'small'){
+            iframe.style.height = '100vw';
+        }
+
+
+
+
+        // Remove transition after animation completes
+        setTimeout(() => {
+
+            iframe.style.transition = 'none';
+        }, 500);
+
+        return () => {
+
+            iframe.style.height = originalIframeHeight;
+        };
+    }
+  }, [drawerSize, isDrawerOrDialogOpen])
 
 
   useEffect(() => {
@@ -67,10 +104,11 @@ export const useIframePositioning = () => {
       
       // Only adjust width on desktop
       if (!isMobile) {
+
         setTimeout(() => {
-          // on first render, wait until the variant menu exists
           updateIframeWidth();
         }, 100);
+
         container.style.height = '100%';
         iframe.style.height = '100%';
         window.addEventListener('resize', updateIframeWidth);
@@ -85,6 +123,7 @@ export const useIframePositioning = () => {
             container.style.transform = 'translateX(0%)';
             iframe.style.transform = 'translateX(0%)';
         }, 50)
+
       } else {
         // On mobile, use full width
         container.style.width = '100%';

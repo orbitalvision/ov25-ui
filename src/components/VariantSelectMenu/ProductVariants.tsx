@@ -64,7 +64,7 @@ export const ProductVariants = ({
   return (
     <div className={cn(
       'md:flex md:flex-col mb-4 max-h-full h-full ',
-      'bg-[var(--ov25-background-color)]',
+      'md:bg-[var(--ov25-background-color)]',
       'xl:border-[var(--ov25-border-color)]',
       'w-full'
     )}>

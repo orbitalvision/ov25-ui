@@ -6,11 +6,11 @@ import { Variant, VariantCardProps, VariantGroup } from "./ProductVariants.js";
 
 export const getGridColsClass = (gridDivide: number) => {
   switch (gridDivide) {
-    case 2: return 'grid-cols-2';
-    case 4: return 'grid-cols-4';
-    case 5: return 'grid-cols-5';
-    case 6: return 'grid-cols-6';
-    default: return 'grid-cols-3';
+    case 2: return 'grid-cols-2!';
+    case 4: return 'grid-cols-4!';
+    case 5: return 'grid-cols-5!';
+    case 6: return 'grid-cols-6!';
+    default: return 'grid-cols-3!';
   }
 };
 
@@ -63,12 +63,12 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
 
       {(shouldDestructureGroups || !isGrouped) ? (<>
 
-        <div className={`max-h-full overflow-auto  grid  ${getGridColsClass(gridDivide)}`}>
+        <div className={`max-h-full overflow-auto  pb-8  grid  ${getGridColsClass(gridDivide)}`}>
           <VariantsContent variantsToRender={isGrouped ? (variantsToRender as VariantGroup[])[0].variants : variantsToRender as Variant[]} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
         </div></>
       ) : (
         (variantsToRender as VariantGroup[]).map((variantGroup) => (
-          <div key={variantGroup.groupName} className={`max-h-full overflow-auto`}>
+          <div key={variantGroup.groupName} className={`pt-4 pb-8 max-h-full overflow-auto`}>
             <div className="flex items-center mx-4 justify-between">
               <h3 className="text-lg text-[var(--ov25-secondary-text-color)]">{variantGroup.groupName}</h3>
             </div>

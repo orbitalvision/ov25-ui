@@ -1,12 +1,12 @@
 import React from 'react';
-
 import { TwoStageDrawer } from ".././ui/two-stage-drawer.js";
 import { useOV25UI } from "../../contexts/ov25-ui-context.js";
 import { ProductOptionsGroup } from "./ProductOptions.js";
 import { MobilePriceOverlay } from "../mobile-price-overlay.js";
-
 import { VariantContentDesktop } from './VariantContentDesktop.js';
 import { ProductVariantsWrapper } from './ProductVaraintsWrapper.js';
+import { CheckoutButton } from './CheckoutButton.js';
+import { MobileCheckoutButton } from './MobileCheckoutButton.js';
 
 
 // Types
@@ -20,6 +20,7 @@ export const VariantSelectMenu: React.FC = () => {
     setIsVariantsOpen,
     isMobile,
     setDrawerSize,
+    drawerSize,
     allOptions,
     handleOptionClick,
     range,
@@ -51,10 +52,12 @@ export const VariantSelectMenu: React.FC = () => {
               onStateChange={(value: any) => setDrawerSize(value === 0 ? 'closed' : value === 1 ? 'small' : 'large')}
               className="z-[10]"
             >
-                <div className='w-full h-full absolute top-0 left-0 pointer-events-auto'>
+                <div className='w-full h-full flex flex-col absolute top-0 left-0 pointer-events-auto'>
                     <ProductVariantsWrapper />
+                    <div className={`${drawerSize === 'large' ? 'fixed bottom-0 left-0 w-full' : '' }`}>
+                    <MobileCheckoutButton />
+                    </div>
                 </div>
-
             </TwoStageDrawer>
           );
         })()

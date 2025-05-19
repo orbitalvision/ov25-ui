@@ -1,5 +1,6 @@
 // Content component for desktop view
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 import { useOV25UI } from "../../contexts/ov25-ui-context.js";
 import { ProductVariantsWrapper } from './ProductVaraintsWrapper.js';
@@ -9,7 +10,6 @@ export function VariantContentDesktop() {
         isVariantsOpen,
         setIsDrawerOrDialogOpen,
         isDrawerOrDialogOpen,
-
       } = useOV25UI();
     
     useEffect(() => {
@@ -42,14 +42,18 @@ export function VariantContentDesktop() {
       };
     }, []);
 
-    useEffect(() => {})
+    // Only create the content element if needed
+    if (!isVariantsOpen) {
+      return null;
+    }
 
-    return (
-        <>
-        <div className={`fixed top-0 right-0 h-full  w-[384px] duration-500 transition-all ${isDrawerOrDialogOpen ? 'translate-x-0' : 'translate-x-full'}`} id='ov25-configurator-variant-menu-container'>
-            <ProductVariantsWrapper/>
-        </div>
-        </>
+    const menuContent = (
+      <div className={`fixed top-0 right-0 h-full w-[384px] z-[11] duration-500 transition-all ${isDrawerOrDialogOpen ? 'translate-x-0' : 'translate-x-full'}`} id='ov25-configurator-variant-menu-container'>
+        <ProductVariantsWrapper/>
+      </div>
     );
-  }
+
+    // Use createPortal to render this outside the normal DOM hierarchy
+    return createPortal(menuContent, document.body);
+}
 
