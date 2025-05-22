@@ -2,6 +2,35 @@ import { useEffect,  } from 'react';
 import { useOV25UI } from '../contexts/ov25-ui-context.js';
 
 /**
+ * Helper function to find an element in Shadow DOM or regular DOM
+ */
+const findElementByIdInShadowOrRegularDOM = (id: string): HTMLElement | null => {
+  // Try regular DOM first
+  const element = document.getElementById(id);
+  if (element) return element;
+  
+  // If not found, search in all shadow roots
+  const shadowHosts = document.querySelectorAll('div[class^="ov25-configurator-"]');
+  for (const host of Array.from(shadowHosts)) {
+    if (host.shadowRoot) {
+      const elementInShadow = host.shadowRoot.getElementById(id);
+      if (elementInShadow) return elementInShadow;
+      
+      // Also search nested shadow roots if needed
+      const nestedHosts = host.shadowRoot.querySelectorAll('div[class^="ov25-configurator-"]');
+      for (const nestedHost of Array.from(nestedHosts)) {
+        if (nestedHost.shadowRoot) {
+          const nestedElement = nestedHost.shadowRoot.getElementById(id);
+          if (nestedElement) return nestedElement;
+        }
+      }
+    }
+  }
+  
+  return null;
+};
+
+/**
  * Hook to position the iframe and its container at the top of the screen when drawer is open
  */
 export const useIframePositioning = () => {
@@ -10,8 +39,8 @@ export const useIframePositioning = () => {
 
   useEffect(() => {
     if(isDrawerOrDialogOpen){
-        const iframe = document.getElementById('ov25-configurator-iframe');
-        const container = document.getElementById('ov25-configurator-iframe-container');
+        const iframe = findElementByIdInShadowOrRegularDOM('ov25-configurator-iframe');
+        const container = findElementByIdInShadowOrRegularDOM('ov25-configurator-iframe-container');
         if(!container || !iframe) return;
 
 
@@ -47,8 +76,8 @@ export const useIframePositioning = () => {
 
   useEffect(() => {
     // Get the iframe element and container
-    const iframe = document.getElementById('ov25-configurator-iframe');
-    const container = document.getElementById('ov25-configurator-iframe-container');
+    const iframe = findElementByIdInShadowOrRegularDOM('ov25-configurator-iframe');
+    const container = findElementByIdInShadowOrRegularDOM('true-ov25-configurator-iframe-container');
 
     
     if (!iframe || !container) return;
@@ -67,6 +96,7 @@ export const useIframePositioning = () => {
       transform: 'translateX(0) translateY(0)',
       transition: 'none',
     };
+
     
     const originalIframeStyles = {
       position: iframe.style.position,
@@ -82,7 +112,8 @@ export const useIframePositioning = () => {
     const updateIframeWidth = () => {
       if (!isDrawerOrDialogOpen || isMobile) return;
       
-      const variantMenuWidth = document.getElementById('ov25-configurator-variant-menu-container')?.offsetWidth;
+      const variantMenuContainer = findElementByIdInShadowOrRegularDOM('ov25-configurator-variant-menu-container');
+      const variantMenuWidth = variantMenuContainer?.offsetWidth;
       if(typeof variantMenuWidth !== 'number') {
         console.error('Variant menu does not exist yet');
       }
@@ -98,9 +129,9 @@ export const useIframePositioning = () => {
       container.style.top = '0';
       container.style.left = '0';
       container.style.right = '0';
-      container.style.zIndex = '10';
+      container.style.zIndex = '0';
       container.style.borderRadius = '0';
-      
+      container.style.zIndex = '100';
       
       // Only adjust width on desktop
       if (!isMobile) {
@@ -151,7 +182,7 @@ export const useIframePositioning = () => {
       iframe.style.position = 'fixed';
       iframe.style.top = '0';
       iframe.style.left = '0';
-      iframe.style.zIndex = '10';
+      iframe.style.zIndex = '100';
     }
 
 
@@ -164,10 +195,9 @@ export const useIframePositioning = () => {
       if(isMobile){
         if (isDrawerOrDialogOpen) {
             container.style.transform = 'translateY(-100%)';
-
             iframe.style.transform = 'translateY(-100%)';
-
-
+            
+            
             setTimeout(() => {
             container.style.position = originalContainerStyles.position;
             container.style.top = originalContainerStyles.top;
@@ -193,11 +223,12 @@ export const useIframePositioning = () => {
           }
       } else{
         if (isDrawerOrDialogOpen) {
-
             container.style.transform = 'translateX(-100%)';
             iframe.style.transform = 'translateX(-100%)';
+            
+            // Remove immediate z-index reset
+            
             setTimeout(() => {
-
                 container.style.position = originalContainerStyles.position;
                 container.style.top = originalContainerStyles.top;
                 container.style.left = originalContainerStyles.left;

@@ -86,11 +86,11 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
       if (target && target.parentNode) {
         // Create an empty div to replace the target
         const emptyDiv = document.createElement('div');
-        emptyDiv.className = `ov25-configurator-${componentName}`;
+        // Preserve original classes and add our class
+        emptyDiv.className = `${target.className} ov25-configurator-${componentName}`.trim();
         // Copy dimensions from original element
         const computedStyle = window.getComputedStyle(target);
-        emptyDiv.style.width = computedStyle.width;
-        emptyDiv.style.height = computedStyle.height;
+
         // Replace the target with the empty div
         target.parentNode.replaceChild(emptyDiv, target);
         // Create portal into the empty div

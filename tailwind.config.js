@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  important: true,
+  important: false,
   prefix: 'ov25-configurator',
   content: [
     "./src/**/*.{js,jsx,ts,tsx}",

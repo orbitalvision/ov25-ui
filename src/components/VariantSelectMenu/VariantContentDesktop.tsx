@@ -42,13 +42,19 @@ export function VariantContentDesktop() {
       };
     }, []);
 
-    // Only create the content element if needed
-    if (!isVariantsOpen) {
-      return null;
-    }
-
+    // Always render the container for transform effects, but conditionally render the content
     const menuContent = (
-      <div className={`orbitalvision:fixed orbitalvision:top-0 orbitalvision:right-0 orbitalvision:h-full orbitalvision:w-[384px] orbitalvision:z-[11] orbitalvision:duration-500 orbitalvision:transition-all ${isDrawerOrDialogOpen ? 'orbitalvision:translate-x-0' : 'orbitalvision:translate-x-full'}`} id='ov25-configurator-variant-menu-container'>
+      <div className={`
+      orbitalvision:z-[100] 
+      orbitalvision:fixed 
+      orbitalvision:top-0 
+      orbitalvision:right-0 
+      orbitalvision:h-full 
+      orbitalvision:w-[384px] 
+      orbitalvision:duration-500 
+      orbitalvision:transition-all 
+      ${isDrawerOrDialogOpen ? 'orbitalvision:translate-x-0' : 'orbitalvision:translate-x-full'}`} 
+      id='ov25-configurator-variant-menu-container'>
         <ProductVariantsWrapper/>
       </div>
     );

@@ -18,6 +18,7 @@ export const VariantsHeader = () => {
       } = useOV25UI();
 
     const currentOption = allOptions.find(opt => opt.id === activeOptionId)
+    
     return (
       <>
         {/* Desktop Controls: Full width button */}

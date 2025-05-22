@@ -35,7 +35,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = ({
   return (
     <>
       <div className={cn(
-        "orbitalvision:absolute orbitalvision:w-full orbitalvision:pointer-events-none orbitalvision:h-full orbitalvision:inset-0 orbitalvision:gap-2 orbitalvision:p-4 orbitalvision:flex orbitalvision:justify-end orbitalvision:items-end orbitalvision:z-[9990]",
+        "orbitalvision:absolute orbitalvision:w-full orbitalvision:pointer-events-none orbitalvision:h-full orbitalvision:inset-0 orbitalvision:gap-2 orbitalvision:p-4 orbitalvision:flex orbitalvision:justify-end orbitalvision:items-end orbitalvision:z-[101]",
         "orbitalvision:text-[var(--ov25-configurator-view-controls-text-color)]"
       )}>
         {canAnimate && (
@@ -53,7 +53,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = ({
         )}
     </div>
     <div className={cn(
-        "orbitalvision:absolute orbitalvision:w-full orbitalvision:pointer-events-none orbitalvision:h-full orbitalvision:inset-0 orbitalvision:gap-2 orbitalvision:p-4 orbitalvision:flex orbitalvision:justify-end orbitalvision:items-end orbitalvision:z-[9990]",
+        "orbitalvision:absolute orbitalvision:w-full orbitalvision:pointer-events-none orbitalvision:h-full orbitalvision:inset-0 orbitalvision:gap-2 orbitalvision:p-4 orbitalvision:flex orbitalvision:justify-end orbitalvision:items-end orbitalvision:z-[101]",
         "orbitalvision:text-[var(--ov25-configurator-view-controls-text-color)]"
       )}>
         <div className="orbitalvision:flex orbitalvision:flex-col orbitalvision:w-full orbitalvision:gap-2 orbitalvision:h-full">
@@ -91,7 +91,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = ({
         </div>
 
       </div>
-      {!isVariantsOpen && (<div className="orbitalvision:absolute orbitalvision:ov25-controls-hidden orbitalvision:size-full orbitalvision:md:flex orbitalvision:pointer-events-none orbitalvision:inset-0 orbitalvision:p-4 orbitalvision:justify-end orbitalvision:items-start orbitalvision:z-[9990]">
+      {!isVariantsOpen && (<div className="orbitalvision:absolute orbitalvision:ov25-controls-hidden orbitalvision:size-full orbitalvision:md:flex orbitalvision:pointer-events-none orbitalvision:inset-0 orbitalvision:p-4 orbitalvision:justify-end orbitalvision:items-start orbitalvision:z-[101]">
           <button className={cn(
             'orbitalvision:cursor-pointer orbitalvision:aspect-square orbitalvision:p-2 orbitalvision:pointer-events-auto orbitalvision:flex orbitalvision:gap-2 orbitalvision:ml-auto orbitalvision:border orbitalvision:items-center orbitalvision:justify-center',
             'orbitalvision:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
