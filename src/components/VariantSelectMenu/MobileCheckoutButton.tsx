@@ -20,7 +20,7 @@ export const MobileCheckoutButton = () => {
             <h3 className='ov:mt-0.5'>{formattedPrice}</h3>
           </div>
         </div>
-        <div className="ov:grid ov:grid-rows-2 ov:gap-2">
+        <div id="ov25-checkout-button-container" className="ov:grid ov:grid-rows-2 ov:gap-2">
           {buyNowFunction && (
             <Button id="ov25-checkout-button" onClick={buyNowFunction} className={cn(
               'ov:w-full',
