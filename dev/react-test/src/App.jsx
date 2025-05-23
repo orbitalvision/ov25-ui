@@ -23,7 +23,7 @@ const initializeConfigurator = () => {
     galleryId: {id: '.configurator-container', replace: true},
     priceId: {id: '#price', replace: true},
     nameId: {id: '#name', replace: true},
-    defer3D: true,
+    deferThreeD: true,
     variantsId: '#ov25-controls',
     carouselId: true,
     checkoutFunction: () => {

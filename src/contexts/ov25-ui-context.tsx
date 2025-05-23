@@ -87,7 +87,7 @@ interface OV25UIContextType {
   iframeRef: React.RefObject<HTMLIFrameElement>;
   isMobile: boolean;
   hasSwitchedAfterDefer: boolean;
-  defer3D: boolean;
+  deferThreeD: boolean;
   // Coming from injectConfigurator options
   productLink: string | null;
   apiKey: string;
@@ -143,7 +143,7 @@ export const OV25UIProvider: React.FC<{
   buyNowFunction: () => void, 
   addToBasketFunction: () => void,
   images?: string[],
-  defer3D?: boolean,
+  deferThreeD?: boolean,
   logoURL: string 
 }> = ({ 
   children,
@@ -152,7 +152,7 @@ export const OV25UIProvider: React.FC<{
   buyNowFunction,
   addToBasketFunction,
   images,
-  defer3D = false,
+  deferThreeD = false,
   logoURL,
 }) => {
   // State definitions
@@ -280,9 +280,9 @@ export const OV25UIProvider: React.FC<{
         selectionId: selection.id
       });
     }
-    if(!hasSwitchedAfterDefer && galleryIndex === 0) {
+    if(!hasSwitchedAfterDefer && galleryIndex === 1 && deferThreeD) {
       setHasSwitchedAfterDefer(true);
-      setGalleryIndex(1);
+      setGalleryIndex(0);
     }
   };
 
@@ -356,7 +356,7 @@ export const OV25UIProvider: React.FC<{
   const productImages = currentProduct?.metadata?.images?.slice(0, -1) || [];
 
   const allImages = [...(images || []), ...productImages]
-  const [galleryIndex, setGalleryIndex] = useState(allImages.length > 0 && defer3D ? 1 : 0);
+  const [galleryIndex, setGalleryIndex] = useState((allImages.length > 0 && deferThreeD) ? 1 : 0);
 
   const contextValue: OV25UIContextType = {
     // State
@@ -381,7 +381,7 @@ export const OV25UIProvider: React.FC<{
     iframeRef,
     isMobile,
     hasSwitchedAfterDefer,
-    defer3D,
+    deferThreeD,
 
     // Coming from injectConfigurator options
     productLink,

@@ -26,6 +26,7 @@ export interface InjectConfiguratorOptions {
   productLink: StringOrFunction;
   galleryId?: ElementSelector;
   images?: string[];
+  deferThreeD?: boolean;
   priceId?: ElementSelector;
   nameId?: ElementSelector;
   variantsId?: ElementSelector;
@@ -50,7 +51,10 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     images,
     logoURL,
     cssVariables,
+    deferThreeD,
   } = opts;
+
+
 
   // Resolve string or function
   const resolveStringOrFunction = (value: StringOrFunction): string => {
@@ -195,6 +199,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
         addToBasketFunction={addToBasketFunction} 
         images={images} 
         logoURL={logoURL}
+        deferThreeD={deferThreeD}
       >
         {portals}
       </OV25UIProvider>
