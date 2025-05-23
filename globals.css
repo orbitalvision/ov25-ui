@@ -33,16 +33,16 @@
     --ov25-button-border-width: 1px;
     
     /* Typography variables */
-    --ov25-text-xs-size: 0.75rem; /* 12px */
+    --ov25-text-xs-size: 0.75em; /* 12px */
     --ov25-text-xs-line-height: calc(1 / 0.75);
     
-    --ov25-text-sm-size: 0.875rem; /* 14px */
+    --ov25-text-sm-size: 0.875em; /* 14px */
     --ov25-text-sm-line-height: calc(1.25 / 0.875);
     
-    --ov25-text-base-size: 1rem; /* 16px */
+    --ov25-text-base-size: 1em; /* 16px */
     --ov25-text-base-line-height: calc(1.5 / 1);
     
-    --ov25-text-lg-size: 1.125rem; /* 18px */
+    --ov25-text-lg-size: 1.125em; /* 18px */
     --ov25-text-lg-line-height: calc(1.75 / 1.125);
 
 

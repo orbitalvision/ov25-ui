@@ -25,7 +25,7 @@ export function ProductGallery() {
         images: passedImages,
     } = useOV25UI();
 
-    console.log('galleryIndex', galleryIndex);
+
     // Use the custom hook to handle iframe positioning
     useIframePositioning();
 
@@ -38,12 +38,7 @@ export function ProductGallery() {
     const productImages = currentProduct?.metadata?.images?.slice(0, -1) || [];
 
     const images = [...(passedImages || []), ...productImages]
-    console.log('ProductGallery: passedImages=', passedImages, 'productImages=', productImages, 'combined images=', images);
 
-    // Log when galleryIndex changes
-    useEffect(() => {
-        console.log('galleryIndex changed to:', galleryIndex);
-    }, [galleryIndex]);
 
     // Calculate showDimensionsToggle from currentProduct
     const showDimensionsToggle = !!((currentProduct as any)?.dimensionX &&
