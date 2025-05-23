@@ -102,7 +102,7 @@ export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSe
               isMobile={isMobile}
             />
           ) : (
-            <div className='ov:h-full ov:max-h-full ov:overflow-y-scroll'>
+            <div id="ov25-mobile-variants-content" className='ov:h-full ov:max-h-full ov:overflow-y-scroll'>
               <div style={{ display: 'grid' }} className={`ov:px-2 ov:pb-32 ${getGridColsClass(gridDivide)}`}>
                 <VariantsContent variantsToRender={variantsToRender} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
               </div>
@@ -121,7 +121,7 @@ export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSe
         />
       } else {
         return (
-            <div className='ov:h-full ov:max-h-full ov:overflow-y-scroll'>
+            <div id="ov25-mobile-variants-content" className='ov:h-full ov:max-h-full ov:overflow-y-scroll'>
             <div style={{ display: 'grid' }} className={`ov:px-0 ov:pb-32 ${getGridColsClass(gridDivide)}`}>
               <VariantsContent variantsToRender={variantsToRender} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
             </div>
