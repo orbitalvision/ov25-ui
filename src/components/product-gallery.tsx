@@ -22,6 +22,7 @@ export function ProductGallery() {
         productLink,
         apiKey,
         isDrawerOrDialogOpen,
+        galleryIndexToUse,
         images: passedImages,
     } = useOV25UI();
 
@@ -92,6 +93,9 @@ export function ProductGallery() {
     }, [isDrawerOrDialogOpen]);
 
 
+    
+
+
     return (<>
 
         <div className={cn("ov:relative ov:font-[family-name:var(--ov25-font-family)]",)} id="ov-25-configurator-gallery-container">
@@ -123,20 +127,23 @@ export function ProductGallery() {
                     ref={iframeRef}
                     id="ov25-configurator-iframe"
                     src={iframeSrc}
-                    className={`ov:w-full ov:bg-transparent ov:h-full ${galleryIndex === 0 ? 'ov:block' : 'ov:ov25-controls-hidden'}`}
+                    className={`ov:w-full ov:bg-transparent ov:h-full ${galleryIndex === galleryIndexToUse ? 'ov:block' : 'ov:ov25-controls-hidden'}`}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; xr-spatial-tracking; fullscreen"
                 />
-                {/* Display selected image when galleryIndex > 0 */}
-                {galleryIndex > 0 && images[galleryIndex - 1] && (
-                    <img
-                        id={`ov-25-configurator-product-image-${galleryIndex} `}
-                        src={images[galleryIndex - 1]}
-                        alt={`Product image ${galleryIndex}`}
-                        className="ov:object-cover ov:min-h-full ov:min-w-full ov:z-[5] ov:absolute ov:inset-0 ov:bg-[var(--ov25-configurator-iframe-background-color)]"
-                    />
-                )}
+                {/* Display selected image when galleryIndex is not the 3D spin */}
+                {(() => {
+                    const imageIndex = galleryIndex < galleryIndexToUse ? galleryIndex : galleryIndex - 1;
+                    return galleryIndex !== galleryIndexToUse && images[imageIndex] ? (
+                        <img
+                            id={`ov-25-configurator-product-image-${galleryIndex}`}
+                            src={images[imageIndex]}
+                            alt={`Product image ${galleryIndex}`}
+                            className="ov:object-cover ov:min-h-full ov:min-w-full ov:z-[5] ov:absolute ov:inset-0 ov:bg-[var(--ov25-configurator-iframe-background-color)]"
+                        />
+                    ) : null;
+                })()}
 
-                {galleryIndex === 0 && !error && (
+                {galleryIndex === galleryIndexToUse && !error && (
                     <ConfiguratorViewControls
                         canAnimate={canAnimate}
                         animationState={animationState}

@@ -100,7 +100,7 @@ interface OV25UIContextType {
   sizeOption: SizeOption;
   activeOption?: Option;
   allOptions: (Option | SizeOption)[];
-  
+  galleryIndexToUse: number;
   // Methods
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
   setCurrentProductId: React.Dispatch<React.SetStateAction<string | undefined>>;
@@ -284,7 +284,7 @@ export const OV25UIProvider: React.FC<{
     }
     if(!hasSwitchedAfterDefer && galleryIndex === 1 && deferThreeD) {
       setHasSwitchedAfterDefer(true);
-      setGalleryIndex(0);
+      setGalleryIndex(galleryIndexToUse);
     }
   };
 
@@ -359,14 +359,17 @@ export const OV25UIProvider: React.FC<{
 
   const allImages = [...(images || []), ...productImages]
   
-  const [galleryIndex, setGalleryIndex] = useState((allImages.length > 0 && deferThreeD) ? 1 : 0);
+  const [galleryIndex, setGalleryIndex] = useState(0);
 
+  const [galleryIndexToUse, setGalleryIndexToUse] = useState(galleryIndex);
   useEffect(() => {
-    if(deferThreeD && allImages.length > 0 && !hasDefered.current) {
-      setGalleryIndex(1);
-      hasDefered.current = true;
-    }
-  }, [allImages]);
+      if(deferThreeD && allImages.length > 0 && !hasDefered.current) {
+        setGalleryIndexToUse(1);
+        hasDefered.current = true;
+      }
+    }, [allImages]);
+
+
 
   const contextValue: OV25UIContextType = {
     // State
@@ -392,7 +395,7 @@ export const OV25UIProvider: React.FC<{
     isMobile,
     hasSwitchedAfterDefer,
     deferThreeD,
-
+    galleryIndexToUse,
     // Coming from injectConfigurator options
     productLink,
     apiKey,
