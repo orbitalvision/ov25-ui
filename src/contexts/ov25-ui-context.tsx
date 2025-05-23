@@ -182,6 +182,8 @@ export const OV25UIProvider: React.FC<{
   const [isMobile, setIsMobile] = useState(false);
   const [hasSwitchedAfterDefer, setHasSwitchedAfterDefer] = useState(false)
 
+  const hasDefered = useRef(false);
+
   // Effect: Initialize selectedSelections from configuratorState
   useEffect(() => {
     if (configuratorState?.selectedSelections) {
@@ -356,7 +358,15 @@ export const OV25UIProvider: React.FC<{
   const productImages = currentProduct?.metadata?.images?.slice(0, -1) || [];
 
   const allImages = [...(images || []), ...productImages]
+  
   const [galleryIndex, setGalleryIndex] = useState((allImages.length > 0 && deferThreeD) ? 1 : 0);
+
+  useEffect(() => {
+    if(deferThreeD && allImages.length > 0 && !hasDefered.current) {
+      setGalleryIndex(1);
+      hasDefered.current = true;
+    }
+  }, [allImages]);
 
   const contextValue: OV25UIContextType = {
     // State

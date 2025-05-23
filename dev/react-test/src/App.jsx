@@ -57,7 +57,6 @@ function App() {
   // Function to handle configurator state changes
   const handleConfiguratorState = (state) => {
     setConfiguratorState(state);
-    console.log('Configurator state updated:', state);
   };
 
   // Set up the message event listener

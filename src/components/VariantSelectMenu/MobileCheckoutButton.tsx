@@ -13,7 +13,7 @@ export const MobileCheckoutButton = () => {
         <div className="ov:flex ov:items-center ov:mr-4">
           <h3 className='ov:text-xl  ov:text-[var(--ov25-text-color)]'>{formattedPrice}</h3>
         </div>
-        <div id="ov25-checkout-button-container" className="ov:flex ov:flex-1 ov:gap-2">
+        <div id="ov25-mobile-checkout-button-container" className="ov:flex ov:flex-1 ov:gap-2">
           {addToBasketFunction && (
             <Button id="ov25-add-to-basket-button" onClick={() => {setIsVariantsOpen(false); addToBasketFunction()}} className={cn(
               'ov:flex-1',
