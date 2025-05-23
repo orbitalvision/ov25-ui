@@ -57,16 +57,16 @@ export const ProductVariants = ({
   drawerSize,
   gridDivide = 3,
   VariantCard = DefaultVariantCard,
-  basis = 'orbitalvision:basis-[43%]',
+  basis = 'ov:basis-[43%]',
   isMobile,
 }: ProductVariantsProps) => {
 
   return (
     <div className={cn(
-      'orbitalvision:md:flex orbitalvision:md:flex-col orbitalvision:mb-4 orbitalvision:max-h-full orbitalvision:h-full',
-      'orbitalvision:md:bg-[var(--ov25-background-color)]',
-      'orbitalvision:xl:border-[var(--ov25-border-color)]',
-      'orbitalvision:w-full'
+      'ov:md:flex ov:md:flex-col ov:mb-4 ov:max-h-full ov:h-full',
+      'ov:md:bg-[var(--ov25-background-color)]',
+      'ov:xl:border-[var(--ov25-border-color)]',
+      'ov:w-full'
     )}>
       <VariantsHeader />
       {isMobile ? (

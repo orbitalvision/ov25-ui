@@ -22,6 +22,7 @@ export function ProductGallery() {
         productLink,
         apiKey,
         isDrawerOrDialogOpen,
+        images: passedImages,
     } = useOV25UI();
 
     // Use the custom hook to handle iframe positioning
@@ -33,7 +34,9 @@ export function ProductGallery() {
     const containerRef = useRef<HTMLDivElement>(null);
 
     // Get the images from the current product
-    const images = currentProduct?.metadata?.images?.slice(0, -1) || [];
+    const productImages = currentProduct?.metadata?.images?.slice(0, -1) || [];
+
+    const images = [...(passedImages || []), ...productImages]
 
     // Calculate showDimensionsToggle from currentProduct
     const showDimensionsToggle = !!((currentProduct as any)?.dimensionX &&
@@ -86,46 +89,48 @@ export function ProductGallery() {
         };
     }, [isDrawerOrDialogOpen]);
 
+
     return (<>
 
-        <div className={cn("orbitalvision:relative orbitalvision:font-[family-name:var(--ov25-font-family)]",)} id="ov-25-configurator-gallery-container">
+        <div className={cn("ov:relative ov:font-[family-name:var(--ov25-font-family)]",)} id="ov-25-configurator-gallery-container">
             <div id="ov25-configurator-background-color" className={cn(
-                "orbitalvision:aspect-square orbitalvision:md:aspect-[1/1] orbitalvision:z-[2] orbitalvision:absolute orbitalvision:inset-0 orbitalvision:block!",
-                "orbitalvision:rounded-[var(--ov25-configurator-iframe-border-radius)]",
-                "orbitalvision:bg-[var(--ov25-configurator-iframe-background-color)]"
+                "ov:aspect-square ov:md:aspect-[1/1] ov:z-[2] ov:absolute ov:inset-0 ov:block!",
+                "ov:rounded-[var(--ov25-configurator-iframe-border-radius)]",
+                "ov:bg-[var(--ov25-configurator-iframe-background-color)]"
             )}></div>
             <div id="ov25-configurator-iframe-container"
                 ref={containerRef}
-                className={cn(" orbitalvision:relative orbitalvision:aspect-square orbitalvision:md:aspect-[3/2] orbitalvision:2xl:aspect-video orbitalvision:overflow-hidden orbitalvision:z-[3]",
-                    "orbitalvision:rounded-[var(--ov25-configurator-iframe-border-radius)]",
-                    "orbitalvision:bg-[var(--ov25-configurator-iframe-background-color)]"
+                className={cn(" ov:relative ov:aspect-square ov:md:aspect-[3/2] ov:2xl:aspect-video ov:overflow-hidden ov:z-[3]",
+                    "ov:rounded-[var(--ov25-configurator-iframe-border-radius)]",
+                    "ov:bg-[var(--ov25-configurator-iframe-background-color)]"
                 )}>
 
 
 
 
             </div>
+            <div id='true-carousel' ></div>
         </div>
         {createPortal(
             <div id="true-ov25-configurator-iframe-container"
-                className={cn(" orbitalvision:relative orbitalvision:aspect-square orbitalvision:md:aspect-[3/2] orbitalvision:2xl:aspect-video orbitalvision:overflow-hidden orbitalvision:z-[3]",
-                    "orbitalvision:rounded-[var(--ov25-configurator-iframe-border-radius)]",
-                    "orbitalvision:bg-[var(--ov25-configurator-iframe-background-color)]"
+                className={cn(" ov:relative ov:aspect-square ov:md:aspect-[3/2] ov:2xl:aspect-video ov:overflow-hidden ov:z-[3]",
+                    "ov:rounded-[var(--ov25-configurator-iframe-border-radius)]",
+                    "ov:bg-[var(--ov25-configurator-iframe-background-color)]"
                 )}>
                 <iframe
                     ref={iframeRef}
                     id="ov25-configurator-iframe"
                     src={iframeSrc}
-                    className={`orbitalvision:w-full orbitalvision:bg-transparent orbitalvision:h-full ${galleryIndex === 0 ? 'orbitalvision:block' : 'orbitalvision:ov25-controls-hidden'}`}
+                    className={`ov:w-full ov:bg-transparent ov:h-full ${galleryIndex === 0 ? 'ov:block' : 'ov:ov25-controls-hidden'}`}
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; xr-spatial-tracking; fullscreen"
                 />
                 {/* Display selected image when galleryIndex > 0 */}
                 {galleryIndex > 0 && images[galleryIndex - 1] && (
                     <img
-                        id={`ov-25-configurator-product-image-${galleryIndex}`}
+                        id={`ov-25-configurator-product-image-${galleryIndex} `}
                         src={images[galleryIndex - 1]}
                         alt={`Product image ${galleryIndex}`}
-                        className="orbitalvision:object-cover orbitalvision:h-full orbitalvision:w-full orbitalvision:absolute orbitalvision:inset-0"
+                        className="ov:object-cover ov:min-h-full ov:min-w-full ov:z-[5] ov:absolute ov:inset-0 ov:bg-[var(--ov25-configurator-iframe-background-color)]"
                     />
                 )}
 

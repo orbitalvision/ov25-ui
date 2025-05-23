@@ -25,11 +25,13 @@ export interface InjectConfiguratorOptions {
   apiKey: StringOrFunction;
   productLink: StringOrFunction;
   galleryId?: ElementSelector;
+  images?: string[];
   priceId?: ElementSelector;
   nameId?: ElementSelector;
   variantsId?: ElementSelector;
-  carouselId?: ElementSelector;
-  checkoutFunction: () => void;
+  carouselId?: ElementSelector | true;
+  addToBasketFunction: () => void;
+  buyNowFunction: () => void;
   logoURL: string;
   cssVariables?: JSON;
 }
@@ -43,7 +45,9 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     nameId,
     variantsId,
     carouselId,
-    checkoutFunction,
+    addToBasketFunction,
+    buyNowFunction,
+    images,
     logoURL,
     cssVariables,
   } = opts;
@@ -89,7 +93,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
         // Preserve original classes and add our class
         emptyDiv.className = `${target.className} ov25-configurator-${componentName}`.trim();
         // Copy dimensions from original element
-        const computedStyle = window.getComputedStyle(target);
+
 
         // Replace the target with the empty div
         target.parentNode.replaceChild(emptyDiv, target);
@@ -116,12 +120,47 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
       });
     };
 
+    // Function to wait for an element to appear in the DOM
+    function waitForElement(selector: string, timeout = 5000) {
+      return new Promise<Element>((resolve, reject) => {
+        const interval = 100;
+        let elapsed = 0;
+
+        const checkExist = setInterval(() => {
+          const element = document.querySelector(selector);
+          if (element) {
+            clearInterval(checkExist);
+            resolve(element);
+          } else if (elapsed >= timeout) {
+            clearInterval(checkExist);
+            reject(new Error(`Element "${selector}" not found within ${timeout}ms`));
+          }
+          elapsed += interval;
+        }, interval);
+      });
+    };
+
     // Process each component
     processElement(galleryId, <ProductGallery />, 'gallery');
     processElement(priceId, <Price />, 'price');
     processElement(nameId, <Name />, 'name');
     processElement(variantsId, <VariantSelectMenu />, 'variants');
-    processElement(carouselId, <ProductCarousel />, 'carousel');
+    
+    // Special handling for carousel - only use polling if carouselId is true
+    if (carouselId === true) {
+      // Start polling for true-carousel element
+      waitForElement('#true-carousel', 10000)
+        .then(element => {
+          console.log('[OV25-UI] #true-carousel element found after polling');
+          pushPortal('#true-carousel', <ProductCarousel />);
+        })
+        .catch(err => {
+          console.warn(`[OV25-UI] ${err.message}`);
+        });
+    } else if (carouselId) {
+      // Process normally if it's a standard ElementSelector
+      processElement(carouselId as ElementSelector, <ProductCarousel />, 'carousel');
+    }
 
     if (cssVariables) {
       setupCSSVariables(cssVariables);
@@ -149,7 +188,14 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     const resolvedProductLink = resolveStringOrFunction(productLink);
 
     root.render(
-      <OV25UIProvider apiKey={resolvedApiKey} productLink={resolvedProductLink} checkoutFunction={checkoutFunction} logoURL={logoURL}>
+      <OV25UIProvider 
+        apiKey={resolvedApiKey} 
+        productLink={resolvedProductLink} 
+        buyNowFunction={buyNowFunction} 
+        addToBasketFunction={addToBasketFunction} 
+        images={images} 
+        logoURL={logoURL}
+      >
         {portals}
       </OV25UIProvider>
     );

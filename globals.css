@@ -1,4 +1,4 @@
-@import "tailwindcss" prefix(orbitalvision);
+@import "tailwindcss" prefix(ov);
 
 /* Override Shopify's div:empty rule for ov25-ui components */
 #ov25-configurator-iframe-container div:empty,

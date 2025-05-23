@@ -7,8 +7,8 @@ const Price: React.FC = () => {
   const { price } = useOV25UI();
   
   return (
-    <div className={cn("orbitalvision:flex orbitalvision:flex-col orbitalvision:gap-2 ")}>
-      <p className="orbitalvision:text-2xl orbitalvision:text-[var(--ov25-configurator-price-text-color)]">£{(price / 100).toFixed(2)}</p>
+    <div className={cn("ov:flex ov:flex-col ov:gap-2 ")}>
+      <p className="ov:text-2xl ov:text-[var(--ov25-configurator-price-text-color)]">£{(price / 100).toFixed(2)}</p>
     </div>
   )
 }

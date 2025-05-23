@@ -14,7 +14,7 @@ const VariantsContentWithCarousel = ({ variantsToRender, VariantCard, onSelect, 
       <>
         <Carousel opts={{ dragFree: true, loop: false }}>
           <CarouselContent>
-            <CarouselItem key={`spacer`} style={{flexBasis: `9%`}} className="orbitalvision:cursor-pointer">
+            <CarouselItem key={`spacer`} style={{flexBasis: `9%`}} className="ov:cursor-pointer">
 
                 </CarouselItem>
             {variantsToRender.map((variant, index) => {
@@ -27,7 +27,7 @@ const VariantsContentWithCarousel = ({ variantsToRender, VariantCard, onSelect, 
                 5: '20%'
               }[basis];
               return (
-                <CarouselItem key={`${variant.id}-${variant.isSelected ? 'selected' : 'unselected'}`} style={{flexBasis}}   className="orbitalvision:cursor-pointer">
+                <CarouselItem key={`${variant.id}-${variant.isSelected ? 'selected' : 'unselected'}`} style={{flexBasis}}   className="ov:cursor-pointer">
                   <VariantCard
                     variant={variant}
                     onSelect={onSelect}
@@ -72,20 +72,20 @@ export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSe
     if (isGrouped && !shouldDestructureGroups) {
       const variantsToRender = (variants as VariantGroup[])[selectedGroupIndex].variants;
       return (
-        <div className="orbitalvision:">
+        <div className="ov:">
           <Carousel opts={{ dragFree: true, loop: false }}>
-            <CarouselContent className="orbitalvision:px-4 orbitalvision:-ml-2 orbitalvision:pr-4">
-              <CarouselItem key={'placeholder'} className="orbitalvision:basis-[37%] orbitalvision:py-2">
-                <div className="orbitalvision:w-full orbitalvision:h-full orbitalvision:bg-transparent"></div>
+            <CarouselContent className="ov:px-4 ov:-ml-2 ov:pr-4">
+              <CarouselItem key={'placeholder'} className="ov:basis-[37%] ov:py-2">
+                <div className="ov:w-full ov:h-full ov:bg-transparent"></div>
               </CarouselItem>
               {(variants as VariantGroup[]).map((group, index) => (
-                <CarouselItem key={group.groupName} className="orbitalvision:basis-1/4 orbitalvision:py-2">
+                <CarouselItem key={group.groupName} className="ov:basis-1/4 ov:py-2">
                   <button
                     onClick={() => setSelectedGroupIndex(index)}
-                    className={`orbitalvision:w-full orbitalvision:py-2 orbitalvision:rounded-full orbitalvision:shadow-md orbitalvision:text-neutral-500 orbitalvision:border ${selectedGroupIndex === index
-                      ? 'orbitalvision:border-neutral-900 orbitalvision:text-neutral-900'
+                    className={`ov:w-full ov:py-2 ov:rounded-full ov:shadow-md ov:text-neutral-500 ov:border ${selectedGroupIndex === index
+                      ? 'ov:border-neutral-900 ov:text-neutral-900'
                       : ''
-                      } orbitalvision:flex orbitalvision:items-center orbitalvision:justify-center orbitalvision:text-xs orbitalvision:gap-2 orbitalvision:whitespace-nowrap`}
+                      } ov:flex ov:items-center ov:justify-center ov:text-xs ov:gap-2 ov:whitespace-nowrap`}
                   >
                     <span>{capitalizeWords(group.groupName)}</span>
                   </button>
@@ -102,8 +102,8 @@ export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSe
               isMobile={isMobile}
             />
           ) : (
-            <div className='orbitalvision:h-full orbitalvision:max-h-full orbitalvision:overflow-y-scroll'>
-              <div style={{ display: 'grid' }} className={`orbitalvision:px-2 orbitalvision:pb-32 ${getGridColsClass(gridDivide)}`}>
+            <div className='ov:h-full ov:max-h-full ov:overflow-y-scroll'>
+              <div style={{ display: 'grid' }} className={`ov:px-2 ov:pb-32 ${getGridColsClass(gridDivide)}`}>
                 <VariantsContent variantsToRender={variantsToRender} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
               </div>
             </div>
@@ -121,8 +121,8 @@ export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSe
         />
       } else {
         return (
-            <div className='orbitalvision:h-full orbitalvision:max-h-full orbitalvision:overflow-y-scroll'>
-            <div style={{ display: 'grid' }} className={`orbitalvision:px-0 orbitalvision:pb-32 ${getGridColsClass(gridDivide)}`}>
+            <div className='ov:h-full ov:max-h-full ov:overflow-y-scroll'>
+            <div style={{ display: 'grid' }} className={`ov:px-0 ov:pb-32 ${getGridColsClass(gridDivide)}`}>
               <VariantsContent variantsToRender={variantsToRender} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
             </div>
           </div>

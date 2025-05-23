@@ -20,26 +20,26 @@ export const SizeVariantCard = React.memo(
           e.stopPropagation();
           onSelect(variant);
         }}
-        className={`orbitalvision:relative orbitalvision:flex orbitalvision:cursor-pointer orbitalvision:flex-col orbitalvision:h-[160px] orbitalvision:md:h-[200px] orbitalvision:xl:h-[217px] orbitalvision:items-center orbitalvision:gap-4 orbitalvision:w-full orbitalvision:p-4 orbitalvision:text-left orbitalvision:hover:bg-accent orbitalvision:md:border-b orbitalvision:border-[#E5E5E5] orbitalvision:text-[#282828] ${index % 2 === 0 ? 'orbitalvision:xl:border-r orbitalvision:border-[#E5E5E5]' : ''}`}
+        className={`ov:relative ov:flex ov:cursor-pointer ov:flex-col ov:h-[160px] ov:md:h-[200px] ov:xl:h-[217px] ov:items-center ov:gap-4 ov:w-full ov:p-4 ov:text-left ov:hover:bg-accent ov:md:border-b ov:border-[#E5E5E5] ov:text-[#282828] ${index % 2 === 0 ? 'ov:xl:border-r ov:border-[#E5E5E5]' : ''}`}
       >
-        <div className="orbitalvision:flex orbitalvision:flex-1 orbitalvision:items-center orbitalvision:justify-between">
-          <div className="orbitalvision:flex orbitalvision:flex-col orbitalvision:justify-center orbitalvision:items-center">
-            <h3 className="orbitalvision:font-[350] orbitalvision:text-base orbitalvision:text-[var(--ov25-secondary-text-color)]">{variant.name}</h3>
-            <p className="orbitalvision:text-[12px] orbitalvision:font-[350] orbitalvision:mt-0.5 orbitalvision:text-[var(--ov25-secondary-text-color)]">£{(variant?.data?.price / 100)}</p>
+        <div className="ov:flex ov:flex-1 ov:items-center ov:justify-between">
+          <div className="ov:flex ov:flex-col ov:justify-center ov:items-center">
+            <h3 className="ov:font-[350] ov:text-base ov:text-[var(--ov25-secondary-text-color)]">{variant.name}</h3>
+            <p className="ov:text-[12px] ov:font-[350] ov:mt-0.5 ov:text-[var(--ov25-secondary-text-color)]">£{(variant?.data?.price / 100)}</p>
           </div>
         </div>
-        <div className="orbitalvision:relative orbitalvision:aspect-[3/4] orbitalvision:max-w-[200px] orbitalvision:w-full orbitalvision:overflow-hidden orbitalvision:rounded-md orbitalvision:bg-muted">
+        <div className="ov:relative ov:aspect-[3/4] ov:max-w-[200px] ov:w-full ov:overflow-hidden ov:rounded-md ov:bg-muted">
           <img 
             key={imgSrc}
             src={imgSrc} 
             alt={variant.name} 
-            className="orbitalvision:object-center orbitalvision:object-cover"
+            className="ov:object-center ov:object-cover"
           />
           {variant.isSelected && (
-            <div className="orbitalvision:absolute orbitalvision:inset-0 orbitalvision:bg-transparent">
-              <div className="orbitalvision:absolute orbitalvision:top-1/2 orbitalvision:left-1/2 orbitalvision:-translate-x-1/2 orbitalvision:-translate-y-1/2">
-                <div className="orbitalvision:w-6 orbitalvision:h-6 orbitalvision:rounded-full orbitalvision:bg-black/50 orbitalvision:flex orbitalvision:items-center orbitalvision:justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="orbitalvision:w-4 orbitalvision:h-4 orbitalvision:text-white">
+            <div className="ov:absolute ov:inset-0 ov:bg-transparent">
+              <div className="ov:absolute ov:top-1/2 ov:left-1/2 ov:-translate-x-1/2 ov:-translate-y-1/2">
+                <div className="ov:w-6 ov:h-6 ov:rounded-full ov:bg-black/50 ov:flex ov:items-center ov:justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ov:w-4 ov:h-4 ov:text-white">
                     <polyline points="20 6 9 17 4 12"/>
                   </svg>
                 </div>
@@ -47,16 +47,16 @@ export const SizeVariantCard = React.memo(
             </div>
           )}
         </div>
-        <div className="orbitalvision:flex orbitalvision:items-center orbitalvision:justify-between orbitalvision:w-full orbitalvision:-mt-4">
-          <div className="orbitalvision:flex orbitalvision:items-center orbitalvision:gap-2 orbitalvision:w-full">
-            <div className="orbitalvision:flex orbitalvision:items-center orbitalvision:flex-1">
-              <div className="orbitalvision:w-[2px] orbitalvision:h-3 orbitalvision:bg-[#E5E5E5]"></div>
-              <div className="orbitalvision:h-[2px] orbitalvision:flex-1 orbitalvision:bg-[#E5E5E5]"></div>
+        <div className="ov:flex ov:items-center ov:justify-between ov:w-full ov:-mt-4">
+          <div className="ov:flex ov:items-center ov:gap-2 ov:w-full">
+            <div className="ov:flex ov:items-center ov:flex-1">
+              <div className="ov:w-[2px] ov:h-3 ov:bg-[#E5E5E5]"></div>
+              <div className="ov:h-[2px] ov:flex-1 ov:bg-[#E5E5E5]"></div>
             </div>
-            <span className="orbitalvision:text-[12px] orbitalvision:font-[350] orbitalvision:whitespace-nowrap orbitalvision:text-[var(--ov25-secondary-text-color)]">{variant?.data?.dimensionX}cm</span>
-            <div className="orbitalvision:flex orbitalvision:items-center orbitalvision:flex-1">
-              <div className="orbitalvision:h-[2px] orbitalvision:flex-1 orbitalvision:bg-[#E5E5E5]"></div>
-              <div className="orbitalvision:w-[2px] orbitalvision:h-3 orbitalvision:bg-[#E5E5E5]"></div>
+            <span className="ov:text-[12px] ov:font-[350] ov:whitespace-nowrap ov:text-[var(--ov25-secondary-text-color)]">{variant?.data?.dimensionX}cm</span>
+            <div className="ov:flex ov:items-center ov:flex-1">
+              <div className="ov:h-[2px] ov:flex-1 ov:bg-[#E5E5E5]"></div>
+              <div className="ov:w-[2px] ov:h-3 ov:bg-[#E5E5E5]"></div>
             </div>
           </div>
         </div>

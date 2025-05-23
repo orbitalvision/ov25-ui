@@ -184,7 +184,7 @@ const TwoStageDrawerComponent = ({
         pointerEvents: drawerState === 0 ? 'none' : 'auto',
         ...style
       }}
-      className={'orbitalvision:bg-[var(--ov25-configurator-iframe-background-color)]'}
+      className={'ov:bg-[var(--ov25-configurator-iframe-background-color)]'}
       onTouchMove={(e: any) => {
         if (e.target instanceof Element && !e.target.closest('.scroll-area-viewport')) {
           // causing error in console when scrolling drawer: Unable to preventDefault inside passive event listener invocation.
@@ -192,16 +192,16 @@ const TwoStageDrawerComponent = ({
         }
       }}
     >
-      <div id="ov25-drawer-content" className="orbitalvision:w-full orbitalvision:h-full orbitalvision:bg-[var(--ov25-background-color)] orbitalvision:relative orbitalvision:rounded-t-xl orbitalvision:[box-shadow:0_-4px_6px_-1px_rgba(0,0,0,0.05),0_-2px_4px_-2px_rgba(0,0,0,0.03)]">
+      <div id="ov25-drawer-content" className="ov:w-full ov:h-full ov:bg-[var(--ov25-background-color)] ov:relative ov:rounded-t-xl ov:[box-shadow:0_-4px_6px_-1px_rgba(0,0,0,0.05),0_-2px_4px_-2px_rgba(0,0,0,0.03)]">
         <div 
           {...bind()} 
-          className="orbitalvision:w-full orbitalvision:flex orbitalvision:justify-center orbitalvision:cursor-grab orbitalvision:touch-none orbitalvision:active:cursor-grabbing"
+          className="ov:w-full ov:flex ov:justify-center ov:cursor-grab ov:touch-none ov:active:cursor-grabbing"
         >
-        <div className="orbitalvision:py-4 orbitalvision:z-10">
-          <div className="orbitalvision:w-8 orbitalvision:h-1 orbitalvision:mt-0 orbitalvision:bg-[var(--ov25-border-color)] orbitalvision:shadow-sm orbitalvision:rounded-full "/></div>
+        <div className="ov:py-4 ov:z-10">
+          <div className="ov:w-8 ov:h-1 ov:mt-0 ov:bg-[var(--ov25-border-color)] ov:shadow-sm ov:rounded-full "/></div>
         </div>
 
-        <div className="orbitalvision:h-full orbitalvision:flex orbitalvision:flex-col orbitalvision:pointer-events-none">{children}</div>
+        <div className="ov:h-full ov:flex ov:flex-col ov:pointer-events-none">{children}</div>
       </div>
     </AnimatedDiv>
   );

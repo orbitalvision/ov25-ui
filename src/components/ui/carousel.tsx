@@ -135,7 +135,7 @@ const Carousel = React.forwardRef<
         <div
           ref={ref}
           onKeyDownCapture={handleKeyDown}
-          className={cn("orbitalvision:relative", className)}
+          className={cn("ov:relative", className)}
           role="region"
           aria-roledescription="carousel"
           {...props}
@@ -155,12 +155,12 @@ const CarouselContent = React.forwardRef<
   const { carouselRef, orientation } = useCarousel()
 
   return (
-    <div ref={carouselRef} className="orbitalvision:overflow-hidden">
+    <div ref={carouselRef} className="ov:overflow-hidden">
       <div
         ref={ref}
         className={cn(
-          "orbitalvision:flex",
-          orientation === "horizontal" ? "orbitalvision:-ml-4" : "orbitalvision:-mt-4 orbitalvision:flex-col",
+          "ov:flex",
+          orientation === "horizontal" ? "ov:-ml-4" : "ov:-mt-4 ov:flex-col",
           className
         )}
         {...props}
@@ -182,8 +182,8 @@ const CarouselItem = React.forwardRef<
       role="group"
       aria-roledescription="slide"
       className={cn(
-        "orbitalvision:min-w-0 orbitalvision:shrink-0 orbitalvision:grow-0 orbitalvision:basis-full",
-        orientation === "horizontal" ? "orbitalvision:pl-4" : "orbitalvision:pt-4",
+        "ov:min-w-0 ov:shrink-0 ov:grow-0 ov:basis-full",
+        orientation === "horizontal" ? "ov:pl-4" : "ov:pt-4",
         className
       )}
       {...props}
@@ -204,18 +204,18 @@ const CarouselPrevious = React.forwardRef<
       variant={variant}
       size={size}
       className={cn(
-        "orbitalvision:absolute orbitalvision:h-8 orbitalvision:w-8 orbitalvision:rounded-full",
+        "ov:absolute ov:h-8 ov:w-8 ov:rounded-full",
         orientation === "horizontal"
-          ? "orbitalvision:-left-12 orbitalvision:top-1/2 orbitalvision:-translate-y-1/2"
-          : "orbitalvision:-top-12 orbitalvision:left-1/2 orbitalvision:-translate-x-1/2 orbitalvision:rotate-90",
+          ? "ov:-left-12 ov:top-1/2 ov:-translate-y-1/2"
+          : "ov:-top-12 ov:left-1/2 ov:-translate-x-1/2 ov:rotate-90",
         className
       )}
       disabled={!canScrollPrev}
       onClick={scrollPrev}
       {...props}
     >
-      <ArrowLeft className="orbitalvision:h-4 orbitalvision:w-4" />
-      <span className="orbitalvision:sr-only">Previous slide</span>
+      <ArrowLeft className="ov:h-4 ov:w-4" />
+      <span className="ov:sr-only">Previous slide</span>
     </Button>
   )
 })
@@ -233,18 +233,18 @@ const CarouselNext = React.forwardRef<
       variant={variant}
       size={size}
       className={cn(
-        "orbitalvision:absolute orbitalvision:h-8 orbitalvision:w-8 orbitalvision:rounded-full",
+        "ov:absolute ov:h-8 ov:w-8 ov:rounded-full",
         orientation === "horizontal"
-          ? "orbitalvision:-right-12 orbitalvision:top-1/2 orbitalvision:-translate-y-1/2"
-          : "orbitalvision:-bottom-12 orbitalvision:left-1/2 orbitalvision:-translate-x-1/2 orbitalvision:rotate-90",
+          ? "ov:-right-12 ov:top-1/2 ov:-translate-y-1/2"
+          : "ov:-bottom-12 ov:left-1/2 ov:-translate-x-1/2 ov:rotate-90",
         className
       )}
       disabled={!canScrollNext}
       onClick={scrollNext}
       {...props}
     >
-      <ArrowRight className="orbitalvision:h-4 orbitalvision:w-4" />
-      <span className="orbitalvision:sr-only">Next slide</span>
+      <ArrowRight className="ov:h-4 ov:w-4" />
+      <span className="ov:sr-only">Next slide</span>
     </Button>
   )
 })

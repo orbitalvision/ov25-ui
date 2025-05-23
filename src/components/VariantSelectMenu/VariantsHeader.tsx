@@ -18,35 +18,35 @@ export const VariantsHeader = () => {
       } = useOV25UI();
 
     const currentOption = allOptions.find(opt => opt.id === activeOptionId)
-    
+
     return (
       <>
         {/* Desktop Controls: Full width button */}
-        <div className="orbitalvision:hidden orbitalvision:md:block">
+        <div className="ov:hidden ov:md:block">
           <button 
             onClick={() => setIsVariantsOpen(false)}
             className={cn(
-              'orbitalvision:flex orbitalvision:items-center orbitalvision:cursor-pointer orbitalvision:justify-between orbitalvision:w-full orbitalvision:border-b-1 orbitalvision:p-4 orbitalvision:py-[1.125rem]',
-              'orbitalvision:bg-[var(--ov25-primary-color)]'
+              'ov:flex ov:items-center ov:cursor-pointer ov:justify-between ov:w-full ov:border-b-1 ov:p-4 ov:py-[1.125rem]',
+              'ov:bg-[var(--ov25-primary-color)]'
             )}
           >
-            <div className="orbitalvision:flex orbitalvision:items-center orbitalvision:gap-2 orbitalvision:justify-center orbitalvision:w-full orbitalvision:relative">
-              <div className="orbitalvision:absolute orbitalvision:cursor-pointer orbitalvision:w-full orbitalvision:inset-0 orbitalvision:h-full orbitalvision:flex orbitalvision:items-center orbitalvision:text-[var(--ov25-background-color)]">
-                <ChevronLeft className="orbitalvision:h-4"/>
+            <div className="ov:flex ov:items-center ov:gap-2 ov:justify-center ov:w-full ov:relative">
+              <div className="ov:absolute ov:cursor-pointer ov:w-full ov:inset-0 ov:h-full ov:flex ov:items-center ov:text-[var(--ov25-background-color)]">
+                <ChevronLeft className="ov:h-4"/>
               </div>
               {logoURL ? (
-                <img src={logoURL} alt="Logo" className="orbitalvision:w-40 orbitalvision:h-full"/>
+                <img src={logoURL} alt="Logo" className="ov:w-40 ov:h-full"/>
               ) : (
-                <h3 className="orbitalvision:text-base orbitalvision:font-[400] orbitalvision:z-10">{range?.name}</h3>
+                <h3 className="ov:text-base ov:font-[400] ov:z-10">{range?.name}</h3>
               )}
             </div>
           </button>
         </div>
    
         {/* Mobile(ipad size) Controls: Title with separate chevron buttons */}
-        <div className="orbitalvision:relative orbitalvision:flex orbitalvision:cursor-pointer orbitalvision:md:hidden orbitalvision:items-center orbitalvision:justify-between orbitalvision:w-full orbitalvision:p-4 orbitalvision:py-[1.125rem] orbitalvision:pt-6">
-            <div className="orbitalvision:absolute orbitalvision:inset-0 orbitalvision:w-full orbitalvision:flex orbitalvision:justify-center orbitalvision:items-center orbitalvision:pb-5 orbitalvision:pt-10 orbitalvision:border-b orbitalvision:border-[var(--ov25-border-color)]">
-                <p className="orbitalvision:text-[var(--ov25-secondary-text-color)]">
+        <div className="ov:relative ov:flex ov:cursor-pointer ov:md:hidden ov:items-center ov:justify-between ov:w-full ov:p-4 ov:py-[1.125rem] ov:pt-6">
+            <div className="ov:absolute ov:inset-0 ov:w-full ov:flex ov:justify-center ov:items-center ov:pb-5 ov:pt-10 ov:border-b ov:border-[var(--ov25-border-color)]">
+                <p className="ov:text-[var(--ov25-secondary-text-color)]">
                 {currentOption && capitalizeWords(currentOption.name) }
                 </p>
             </div>
@@ -55,18 +55,18 @@ export const VariantsHeader = () => {
               e.stopPropagation();
               handlePreviousOption();
             }}
-            className="orbitalvision:p-2 orbitalvision:-m-2 orbitalvision:hover:bg-accent orbitalvision:rounded-full orbitalvision:cursor-pointer orbitalvision:pt-5.5"
+            className="ov:p-2 ov:-m-2 ov:hover:bg-accent ov:rounded-full ov:cursor-pointer ov:pt-5.5"
           >
-            <ChevronUp strokeWidth={1} className="orbitalvision:rotate-270 orbitalvision:fill-transparent orbitalvision:text-[var(--ov25-secondary-text-color)] orbitalvision:h-5.5" />
+            <ChevronUp strokeWidth={1} className="ov:rotate-270 ov:fill-transparent ov:text-[var(--ov25-secondary-text-color)] ov:h-5.5" />
           </button>
           <button 
             onClick={(e) => {
               e.stopPropagation();
               handleNextOption();
             }}
-            className="orbitalvision:p-2 orbitalvision:-m-2 orbitalvision:hover:bg-accent orbitalvision:hover:full orbitalvision:cursor-pointer orbitalvision:pt-5.5"
+            className="ov:p-2 ov:-m-2 ov:hover:bg-accent ov:hover:full ov:cursor-pointer ov:pt-5.5"
           >
-            <ChevronUp strokeWidth={1} className="orbitalvision:rotate-90 orbitalvision:h-5.5 orbitalvision:fill-transparent orbitalvision:text-[var(--ov25-secondary-text-color)]" />
+            <ChevronUp strokeWidth={1} className="ov:rotate-90 ov:h-5.5 ov:fill-transparent ov:text-[var(--ov25-secondary-text-color)]" />
           </button>
         </div>
       </>

@@ -6,11 +6,11 @@ import { Variant, VariantCardProps, VariantGroup } from "./ProductVariants.js";
 
 export const getGridColsClass = (gridDivide: number) => {
   switch (gridDivide) {
-    case 2: return 'orbitalvision:grid-cols-2!';
-    case 4: return 'orbitalvision:grid-cols-4!';
-    case 5: return 'orbitalvision:grid-cols-5!';
-    case 6: return 'orbitalvision:grid-cols-6!';
-    default: return 'orbitalvision:grid-cols-3!';
+    case 2: return 'ov:grid-cols-2!';
+    case 4: return 'ov:grid-cols-4!';
+    case 5: return 'ov:grid-cols-5!';
+    case 6: return 'ov:grid-cols-6!';
+    default: return 'ov:grid-cols-3!';
   }
 };
 
@@ -42,7 +42,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
     <>
       {
         allOptions.length > 1 && <Carousel opts={{ dragFree: true, loop: false }}>
-          <CarouselContent className="orbitalvision:divide-x orbitalvision:divide-[var(--ov25-border-color)] orbitalvision:border-b orbitalvision:border-[var(--ov25-border-color)]">
+          <CarouselContent className="ov:divide-x ov:divide-[var(--ov25-border-color)] ov:border-b ov:border-[var(--ov25-border-color)]">
             {allOptions.map((option, index) => {
               const isSelected = option.id === activeOptionId;
               const basis = Math.min(allOptions.length, 4);
@@ -52,8 +52,8 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
                 4: '25%'
               }[basis];
               return (
-                <CarouselItem key={`${option.id}-desktop-render`} style={{ flexBasis }} className={`orbitalvision:cursor-pointer orbitalvision:pr-4 orbitalvision:flex orbitalvision:justify-center orbitalvision:items-center`} onClick={() => handleOptionClick(option?.id)}>
-                  <div className={`orbitalvision:cursor-pointer orbitalvision:my-4 ${isSelected ? 'orbitalvision:text-[var(--ov25-primary-color)]' : 'orbitalvision:text-[var(--ov25-secondary-text-color)]'}`}  >{capitalizeWords(option.name)}</div>
+                <CarouselItem key={`${option.id}-desktop-render`} style={{ flexBasis }} className={`ov:cursor-pointer ov:pr-4 ov:flex ov:justify-center ov:items-center`} onClick={() => handleOptionClick(option?.id)}>
+                  <div className={`ov:cursor-pointer ov:my-4 ${isSelected ? 'ov:text-[var(--ov25-primary-color)]' : 'ov:text-[var(--ov25-secondary-text-color)]'}`}  >{capitalizeWords(option.name)}</div>
                 </CarouselItem>
               );
             })}
@@ -63,16 +63,16 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
 
       {(shouldDestructureGroups || !isGrouped) ? (<>
 
-        <div className={`orbitalvision:max-h-full orbitalvision:overflow-auto orbitalvision:pb-8 orbitalvision:grid ${getGridColsClass(gridDivide)}`}>
+        <div className={`ov:max-h-full ov:overflow-auto ov:pb-8 ov:grid ${getGridColsClass(gridDivide)}`}>
           <VariantsContent variantsToRender={isGrouped ? (variantsToRender as VariantGroup[])[0].variants : variantsToRender as Variant[]} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
         </div></>
       ) : (
         (variantsToRender as VariantGroup[]).map((variantGroup) => (
-          <div key={variantGroup.groupName} className={`orbitalvision:pt-4 orbitalvision:pb-8 orbitalvision:max-h-full orbitalvision:overflow-auto`}>
-            <div className="orbitalvision:flex orbitalvision:items-center orbitalvision:mx-4 orbitalvision:justify-between">
-              <h3 className="orbitalvision:text-lg orbitalvision:text-[var(--ov25-secondary-text-color)]">{variantGroup.groupName}</h3>
+          <div key={variantGroup.groupName} className={`ov:pt-4 ov:pb-8 ov:max-h-full ov:overflow-auto`}>
+            <div className="ov:flex ov:items-center ov:mx-4 ov:justify-between">
+              <h3 className="ov:text-lg ov:text-[var(--ov25-secondary-text-color)]">{variantGroup.groupName}</h3>
             </div>
-            <div className={`orbitalvision:grid ${getGridColsClass(gridDivide)}`}>
+            <div className={`ov:grid ${getGridColsClass(gridDivide)}`}>
               <VariantsContent variantsToRender={variantGroup.variants} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
             </div>
           </div>

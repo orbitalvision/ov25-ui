@@ -23,7 +23,9 @@ const initializeConfigurator = () => {
     galleryId: {id: '.configurator-container', replace: true},
     priceId: {id: '#price', replace: true},
     nameId: {id: '#name', replace: true},
+    defer3D: true,
     variantsId: '#ov25-controls',
+    carouselId: true,
     checkoutFunction: () => {
       alert('Checkout function called');
     },
@@ -71,27 +73,18 @@ function App() {
   
     switch (type) {
       case "ALL_PRODUCTS":
-        // e.g. store in your state
-        // console.log("All products:", data);
         break;
       case "CURRENT_PRICE":
-        // console.log("Updated price:", data);
         break;
       case "CURRENT_PRODUCT_ID":
-        // console.log("Active product ID:", data);
         break;
       case "CONFIGURATOR_STATE":
-        // console.log("Configurator state:", data);
         handleConfiguratorState(data);
         break;
       case "RANGE":
-        // console.log("Range data:", data);
         break;
       case "CURRENT_SKU":
-        // console.log("Current SKU:", data);
         break;
-  
-      // ... handle other message types
     }
   };
 
@@ -102,12 +95,12 @@ function App() {
   }, []);
 
   return (
-    <div className="app orbitalvision:overflow-x-hidden">
+    <div className="app ov:overflow-x-hidden">
       <h1>OV25 Configurator Test</h1>
-      <div className="orbitalvision:flex orbitalvision:flex-col orbitalvision:md:flex-row">
-        <div className="configurator-container orbitalvision:w-[700px] orbitalvision:h-[500px]"></div>
+      <div className="ov:flex ov:flex-col ov:md:flex-row">
+        <div className="configurator-container ov:w-[700px] ov:h-[500px]"></div>
         <div id="ov25-controls">
-          <div id="price-name" className="orbitalvision:w-[378px] orbitalvision:h-[96px]">
+          <div id="price-name" className="ov:w-[378px] ov:h-[96px]">
             <div id="price">PRICE: £123</div>
             <div id="name">NAME: Product Name</div>
           </div>

@@ -86,11 +86,14 @@ interface OV25UIContextType {
   animationState: AnimationState;
   iframeRef: React.RefObject<HTMLIFrameElement>;
   isMobile: boolean;
-
+  hasSwitchedAfterDefer: boolean;
+  defer3D: boolean;
   // Coming from injectConfigurator options
   productLink: string | null;
   apiKey: string;
-  checkoutFunction: () => void;
+  buyNowFunction: () => void;
+  addToBasketFunction: () => void;
+  images?: string[];
   logoURL: string;
   // Computed values
   currentProduct?: Product;
@@ -120,7 +123,7 @@ interface OV25UIContextType {
   setError: React.Dispatch<React.SetStateAction<Error | null>>;
   setCanAnimate: React.Dispatch<React.SetStateAction<boolean>>;
   setAnimationState: React.Dispatch<React.SetStateAction<AnimationState>>;
-  
+  setHasSwitchedAfterDefer: React.Dispatch<React.SetStateAction<boolean>>;
   // Actions
   handleSelectionSelect: (selection: Selection) => void;
   handleOptionClick: (optionId: string) => void;
@@ -133,11 +136,23 @@ interface OV25UIContextType {
 const OV25UIContext = createContext<OV25UIContextType | undefined>(undefined);
 
 // Context provider component
-export const OV25UIProvider: React.FC<{ children: React.ReactNode, productLink: string | null, apiKey: string, checkoutFunction: () => void, logoURL: string }> = ({ 
+export const OV25UIProvider: React.FC<{ 
+  children: React.ReactNode, 
+  productLink: string | null, 
+  apiKey: string, 
+  buyNowFunction: () => void, 
+  addToBasketFunction: () => void,
+  images?: string[],
+  defer3D?: boolean,
+  logoURL: string 
+}> = ({ 
   children,
   productLink,
   apiKey,
-  checkoutFunction,
+  buyNowFunction,
+  addToBasketFunction,
+  images,
+  defer3D = false,
   logoURL,
 }) => {
   // State definitions
@@ -153,7 +168,7 @@ export const OV25UIProvider: React.FC<{ children: React.ReactNode, productLink: 
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(0);
   const [formattedPrice, setFormattedPrice] = useState<string>('£0.00')
-  const [galleryIndex, setGalleryIndex] = useState(0);
+
   const [currentSku, setCurrentSku] = useState<any>(null);
   const [range, setRange] = useState<any>(null);
   const [drawerSize, setDrawerSize] = useState<DrawerSizes>("closed");
@@ -165,6 +180,7 @@ export const OV25UIProvider: React.FC<{ children: React.ReactNode, productLink: 
   const [animationState, setAnimationState] = useState<AnimationState>('unavailable');
   const iframeRef = useRef<HTMLIFrameElement>(null!);
   const [isMobile, setIsMobile] = useState(false);
+  const [hasSwitchedAfterDefer, setHasSwitchedAfterDefer] = useState(false)
 
   // Effect: Initialize selectedSelections from configuratorState
   useEffect(() => {
@@ -264,6 +280,10 @@ export const OV25UIProvider: React.FC<{ children: React.ReactNode, productLink: 
         selectionId: selection.id
       });
     }
+    if(!hasSwitchedAfterDefer && galleryIndex === 0) {
+      setHasSwitchedAfterDefer(true);
+      setGalleryIndex(1);
+    }
   };
 
   // Navigation functions
@@ -333,6 +353,11 @@ export const OV25UIProvider: React.FC<{ children: React.ReactNode, productLink: 
     return () => window.removeEventListener('message', handleMessage);
   }, []);
 
+  const productImages = currentProduct?.metadata?.images?.slice(0, -1) || [];
+
+  const allImages = [...(images || []), ...productImages]
+  const [galleryIndex, setGalleryIndex] = useState(allImages.length > 0 && defer3D ? 1 : 0);
+
   const contextValue: OV25UIContextType = {
     // State
     products,
@@ -355,11 +380,15 @@ export const OV25UIProvider: React.FC<{ children: React.ReactNode, productLink: 
     animationState,
     iframeRef,
     isMobile,
+    hasSwitchedAfterDefer,
+    defer3D,
 
     // Coming from injectConfigurator options
     productLink,
     apiKey,
-    checkoutFunction,
+    buyNowFunction,
+    addToBasketFunction,
+    images,
     logoURL,
     // Computed values
     currentProduct,
@@ -385,6 +414,7 @@ export const OV25UIProvider: React.FC<{ children: React.ReactNode, productLink: 
     setError,
     setCanAnimate,
     setAnimationState,
+    setHasSwitchedAfterDefer,
     
     // Actions
     handleSelectionSelect,

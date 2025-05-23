@@ -30,7 +30,7 @@ export const VariantSelectMenu: React.FC = () => {
   
 
   return (
-    <div id="ov-25-configurator-variant-menu-container" className="orbitalvision:relative orbitalvision:font-[family-name:var(--ov25-font-family)]">
+    <div id="ov-25-configurator-variant-menu-container" className="ov:relative ov:font-[family-name:var(--ov25-font-family)]">
       {(() => {
         const Overlay = MobilePriceOverlay as any;
         return <Overlay />;
@@ -50,11 +50,11 @@ export const VariantSelectMenu: React.FC = () => {
               isOpen={isVariantsOpen}
               onOpenChange={setIsVariantsOpen}
               onStateChange={(value: any) => setDrawerSize(value === 0 ? 'closed' : value === 1 ? 'small' : 'large')}
-              className="orbitalvision:z-[10]"
+              className="ov:z-[10]"
             >
-                <div className='orbitalvision:w-full orbitalvision:h-full orbitalvision:flex orbitalvision:flex-col orbitalvision:absolute orbitalvision:top-0 orbitalvision:left-0 orbitalvision:pointer-events-auto'>
+                <div className='ov:w-full ov:h-full ov:flex ov:flex-col ov:absolute ov:top-0 ov:left-0 ov:pointer-events-auto'>
                     <ProductVariantsWrapper />
-                    <div className={`${drawerSize === 'large' ? 'orbitalvision:fixed orbitalvision:bottom-0 orbitalvision:left-0 orbitalvision:w-full' : '' }`}>
+                    <div className={`${drawerSize === 'large' ? 'ov:fixed ov:bottom-0 ov:left-0 ov:w-full' : '' }`}>
                     <MobileCheckoutButton />
                     </div>
                 </div>

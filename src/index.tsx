@@ -41,7 +41,7 @@ const MainContent = () => {
             <div id="ov-25-configurator-product-details" className="flex-1 flex-shrink-0 xl:min-w-[494px] bg-white xl:px-0">
               <div id="ov-25-configurator-product-info" className="flex flex-col gap-6 pt-8 xl:pt-0">
                 <div id="ov-25-configurator-product-header" className="flex flex-col gap-2 px-4 xl:px-0.5">
-                  <div className={cn("orbitalvision:flex orbitalvision:flex-col orbitalvision:gap-2 ", 'px-0')}>
+                  <div className={cn("ov:flex ov:flex-col ov:gap-2 ", 'px-0')}>
                     <Price />
                     <Name />
                   </div>

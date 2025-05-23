@@ -15,85 +15,169 @@ export function ProductCarousel() {
     currentProduct,
     galleryIndex,
     setGalleryIndex,
-    error
+    error,
+    images: passedImages,
+    isVariantsOpen,
   } = useOV25UI();
   
   // Get local data
   const isMobile = useMediaQuery(1280);
-  
+
   // Get the images from the current product
-  const images = currentProduct?.metadata?.images?.slice(0, -1) || [];
+  const productImages = currentProduct?.metadata?.images?.slice(0, -1) || [];
+
+  const images = [...(passedImages || []), ...productImages]
+
+  React.useEffect(() => {
+    if(!images.length) return;
+    if(isVariantsOpen){
+        setGalleryIndex(0)
+    }
+  }, [isVariantsOpen])
+  
   
   // If any of these conditions are true, don't render the carousel
-  if (images.length === 0 || isMobile || error) {
+  if (images.length === 0 || error) {
     return null;
   }
-  
+
+
   return (
-    <div className="orbitalvision:w-full orbitalvision:relative ">
-      <div className="orbitalvision:absolute orbitalvision:bottom-4 orbitalvision:pt-16 orbitalvision:left-0 orbitalvision:right-0 orbitalvision:flex orbitalvision:items-center orbitalvision:justify-between orbitalvision:px-2 orbitalvision:z-[2] orbitalvision:pointer-events-none orbitalvision:h-full">
+    <div className="ov:w-full ov:relative ">
+      <div className="ov:absolute ov:bottom-4 ov:pt-16 ov:left-0 ov:right-0 ov:flex ov:items-center ov:justify-between ov:px-2 ov:z-[2] ov:pointer-events-none ov:h-full">
         <Button
           variant="ghost"
           size="icon"
-          className="orbitalvision:rounded-none orbitalvision:pointer-events-auto"
+          className="ov:rounded-none ov:pointer-events-auto"
           onClick={() => {
             const newIndex = galleryIndex === 0 ? images.length : galleryIndex - 1;
             setGalleryIndex(newIndex);
           }}
         >
-          <ChevronLeft size={28} className="orbitalvision:h-12 orbitalvision:stroke-1 orbitalvision:stroke-muted-foreground orbitalvision:self-center" />
+          <ChevronLeft size={28} className="ov:h-12 ov:stroke-1 ov:stroke-muted-foreground ov:self-center" />
         </Button>
         <Button
           variant="ghost"
           size="icon"
-          className="orbitalvision:rounded-none orbitalvision:pointer-events-auto"
+          className="ov:rounded-none ov:pointer-events-auto"
           onClick={() => {
             const newIndex = galleryIndex === images.length ? 0 : galleryIndex + 1;
             setGalleryIndex(newIndex);
           }}
         >
-          <ChevronRight size={28} className="orbitalvision:h-12 orbitalvision:stroke-1 orbitalvision:stroke-muted-foreground orbitalvision:self-center" />
+          <ChevronRight size={28} className="ov:h-12 ov:stroke-1 ov:stroke-muted-foreground ov:self-center" />
         </Button>
       </div>
-      <div className="orbitalvision:mt-4 orbitalvision:text-center orbitalvision:text-sm orbitalvision:text-muted-foreground">
+      <div className="ov:mt-4 ov:text-center ov:text-sm ov:text-muted-foreground">
         {galleryIndex + 1}/{images.length + 1}
       </div>
-      <div className="orbitalvision:mt-4 orbitalvision:relative orbitalvision:px-12 orbitalvision:w-full orbitalvision:flex orbitalvision:items-center orbitalvision:justify-center">
+      <div className="ov:mt-4 ov:relative ov:px-12 ov:w-full ov:flex ov:items-center ov:justify-center">
         <Carousel
           opts={{
             align: "start",
             loop: true,
           }}
-          className="orbitalvision:w-full orbitalvision:xl:w-[700px]"
+          className="ov:w-full ov:xl:w-[700px]"
         >
-          <CarouselContent className="orbitalvision:-ml-2">
-            <CarouselItem className="orbitalvision:pl-2 orbitalvision:basis-1/3 orbitalvision:xl:basis-[20%]">
+          <CarouselContent className="ov:-ml-2">
+            <CarouselItem className="ov:pl-2 ov:basis-1/3 ov:xl:basis-[20%]">
               <button
                 onClick={() => setGalleryIndex(0)}
-                className={`orbitalvision:relative orbitalvision:aspect-[3/2] orbitalvision:w-full orbitalvision:flex orbitalvision:justify-center orbitalvision:items-center orbitalvision:overflow-hidden orbitalvision:rounded-none orbitalvision:bg-muted ${
+                className={`ov:cursor-pointer ov:relative ov:py-2 ov:aspect-[3/2] ov:w-full ov:flex ov:justify-center ov:items-center ov:overflow-hidden ov:rounded-none ov:bg-muted ${
                   galleryIndex === 0 ? "" : ""
                 }`}
               >
-                <img
-                  src="/360.svg"
-                  alt="360 View"
-                  className="orbitalvision:w-12 orbitalvision:text-gray-400"
-                  style={{ filter: 'invert(1)' }}
-                />
+                <svg
+                  version="1.1"
+
+                  viewBox="0 0 1889.76 1889.76"
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="ov:h-full ov:aspect-square ov:text-[var(--ov25-secondary-text-color)]"
+                >
+                  <defs>
+                    <clipPath clipPathUnits="userSpaceOnUse" id="clipPath9">
+                      <path
+                        d="M 0,1417.323 H 1417.323 V 0 H 0 Z"
+                        transform="translate(-1102.4031,-314.91983)"
+                      />
+                    </clipPath>
+                    <clipPath clipPathUnits="userSpaceOnUse" id="clipPath11">
+                      <path
+                        d="M 0,1417.323 H 1417.323 V 0 H 0 Z"
+                        transform="translate(-558.10509,-698.82802)"
+                      />
+                    </clipPath>
+                    <clipPath clipPathUnits="userSpaceOnUse" id="clipPath13">
+                      <path
+                        d="M 0,1417.323 H 1417.323 V 0 H 0 Z"
+                        transform="translate(-684.98889,-674.81342)"
+                      />
+                    </clipPath>
+                    <clipPath clipPathUnits="userSpaceOnUse" id="clipPath15">
+                      <path
+                        d="M 0,1417.323 H 1417.323 V 0 H 0 Z"
+                        transform="translate(-832.54555,-692.63852)"
+                      />
+                    </clipPath>
+                    <clipPath clipPathUnits="userSpaceOnUse" id="clipPath17">
+                      <path
+                        d="M 0,1417.323 H 1417.323 V 0 H 0 Z"
+                        transform="translate(-953.85902,-735.34702)"
+                      />
+                    </clipPath>
+                  </defs>
+                  <g id="layer-MC0" transform="translate(-1909.76)">
+                    <path
+                      id="path8"
+                      d="m 0,0 c -51.148,-51.147 -110.701,-91.302 -177.005,-119.346 -2.659,-1.124 -5.326,-2.22 -7.998,-3.301 24.116,24.912 46.412,54.185 66.657,87.585 19.22,31.708 36.044,66.264 50.353,103.056 36.791,14.308 71.347,31.133 103.055,50.352 33.4,20.245 62.673,42.541 87.585,66.656 -1.082,-2.671 -2.177,-5.338 -3.301,-7.996 C 91.302,110.701 51.147,51.148 0,0 m -787.482,0 c -51.148,51.148 -91.302,110.701 -119.346,177.006 -1.124,2.658 -2.219,5.324 -3.301,7.995 24.912,-24.115 54.184,-46.41 87.584,-66.655 31.707,-19.219 66.264,-36.044 103.055,-50.352 14.309,-36.792 31.133,-71.348 50.352,-103.056 20.246,-33.4 42.542,-62.673 66.657,-87.585 -2.671,1.082 -5.338,2.177 -7.997,3.301 C -676.781,-91.302 -736.335,-51.147 -787.482,0 m 0,787.483 c 51.147,51.148 110.701,91.302 177.004,119.346 2.659,1.124 5.326,2.219 7.997,3.301 -24.115,-24.912 -46.411,-54.185 -66.657,-87.585 -19.219,-31.707 -36.043,-66.264 -50.352,-103.055 -36.791,-14.309 -71.348,-31.133 -103.055,-50.352 -33.4,-20.246 -62.673,-42.542 -87.584,-66.656 1.081,2.671 2.177,5.338 3.301,7.996 28.044,66.304 68.198,125.857 119.346,177.005 m 787.482,0 c 51.147,-51.148 91.302,-110.701 119.346,-177.005 1.124,-2.659 2.219,-5.326 3.301,-7.997 -24.912,24.115 -54.185,46.411 -87.585,66.657 -31.708,19.219 -66.264,36.043 -103.056,50.352 -14.308,36.791 -31.132,71.348 -50.352,103.055 -20.245,33.4 -42.541,62.673 -66.656,87.585 2.671,-1.082 5.339,-2.177 7.997,-3.301 C -110.701,878.785 -51.148,838.631 0,787.483 m -43.817,-140.75 c 17.171,-8.22 33.599,-17.064 49.217,-26.53 50.334,-30.511 89.643,-65.738 116.833,-104.704 27.113,-38.854 40.86,-79.82 40.86,-121.757 0,-41.938 -13.747,-82.903 -40.86,-121.758 C 95.043,233.018 55.734,197.79 5.4,167.28 c -15.618,-9.467 -32.046,-18.31 -49.217,-26.53 21.963,78.456 33.553,164.322 33.553,252.992 0,88.669 -11.59,174.534 -33.553,252.991 m -471.682,262.983 c 38.855,27.113 79.82,40.86 121.758,40.86 41.937,0 82.902,-13.747 121.757,-40.86 38.966,-27.19 74.194,-66.498 104.704,-116.833 9.467,-15.618 18.31,-32.046 26.53,-49.217 -78.456,21.963 -164.322,33.553 -252.991,33.553 -88.67,0 -174.535,-11.59 -252.992,-33.553 8.22,17.171 17.063,33.599 26.53,49.217 30.511,50.334 65.738,89.643 104.704,116.833 M -743.667,140.75 c -17.17,8.22 -33.598,17.063 -49.216,26.53 -50.335,30.51 -89.642,65.738 -116.833,104.704 -27.112,38.855 -40.859,79.82 -40.859,121.758 0,41.937 13.747,82.903 40.859,121.757 27.191,38.966 66.498,74.193 116.833,104.704 15.618,9.466 32.046,18.31 49.216,26.53 -21.962,-78.457 -33.553,-164.322 -33.553,-252.991 0,-88.67 11.591,-174.536 33.553,-252.992 m 570.702,-46.272 c -69.857,-17.911 -144.137,-26.992 -220.776,-26.992 -76.64,0 -150.92,9.081 -220.777,26.992 -20.816,5.336 -40.957,11.382 -60.375,18.112 -6.73,19.419 -12.776,39.559 -18.113,60.376 -17.91,69.856 -26.991,144.137 -26.991,220.776 0,76.639 9.081,150.919 26.991,220.776 5.337,20.817 11.383,40.956 18.113,60.375 19.418,6.73 39.559,12.776 60.375,18.113 69.857,17.91 144.137,26.991 220.777,26.991 76.639,0 150.919,-9.081 220.776,-26.991 20.817,-5.337 40.957,-11.383 60.375,-18.113 6.73,-19.418 12.776,-39.558 18.112,-60.375 17.911,-69.857 26.992,-144.137 26.992,-220.776 0,-76.639 -9.081,-150.92 -26.992,-220.776 -5.336,-20.817 -11.382,-40.957 -18.112,-60.376 -19.419,-6.73 -39.558,-12.776 -60.375,-18.112 m -99.019,-216.711 c -38.855,-27.113 -79.82,-40.86 -121.757,-40.86 -41.938,0 -82.903,13.747 -121.758,40.86 -38.966,27.19 -74.193,66.499 -104.704,116.833 -9.467,15.618 -18.31,32.047 -26.53,49.217 78.456,-21.962 164.322,-33.553 252.992,-33.553 88.669,0 174.535,11.59 252.991,33.553 -8.22,-17.17 -17.063,-33.599 -26.53,-49.217 -30.51,-50.334 -65.738,-89.643 -104.704,-116.833 M 172.048,632.769 C 141.119,705.894 96.847,771.561 40.462,827.945 -15.923,884.33 -81.589,928.602 -154.714,959.531 c -75.723,32.028 -156.142,48.267 -239.027,48.267 -82.885,0 -163.306,-16.239 -239.028,-48.267 -73.125,-30.929 -138.792,-75.201 -195.176,-131.586 -56.385,-56.384 -100.657,-122.051 -131.585,-195.176 -32.029,-75.722 -48.268,-156.143 -48.268,-239.027 0,-82.885 16.239,-163.305 48.268,-239.028 30.928,-73.124 75.2,-138.791 131.585,-195.176 56.384,-56.385 122.051,-100.657 195.176,-131.586 75.722,-32.028 156.143,-48.267 239.028,-48.267 82.885,0 163.304,16.239 239.027,48.267 73.125,30.929 138.791,75.201 195.176,131.586 56.385,56.385 100.657,122.052 131.586,195.176 32.028,75.723 48.267,156.143 48.267,239.028 0,82.884 -16.239,163.305 -48.267,239.027"
+                      style={{ fill: "var(--ov25-secondary-text-color)", fillOpacity: 1, fillRule: "nonzero", stroke: "none" }}
+                      transform="matrix(1.3333333,0,0,-1.3333333,3379.6307,1469.8669)"
+                      clipPath="url(#clipPath9)"
+                    />
+                    <path
+                      id="path10"
+                      d="m 0,0 c -3.219,3.467 -7.018,6.313 -11.389,8.542 -4.375,2.229 -9.122,3.838 -14.236,4.828 v 1.485 c 4.457,0.825 8.666,2.267 12.627,4.333 3.961,2.062 7.466,4.743 10.522,8.046 3.052,3.3 5.447,7.181 7.18,11.637 1.733,4.456 2.6,9.408 2.6,14.855 0,6.932 -1.447,13.203 -4.333,18.816 -2.89,5.609 -7.017,10.437 -12.379,14.484 -5.365,4.042 -11.803,7.137 -19.312,9.284 -7.512,2.143 -15.887,3.218 -25.129,3.218 -7.427,0 -14.112,-0.703 -20.054,-2.104 -5.942,-1.404 -11.308,-3.385 -16.093,-5.942 -4.789,-2.561 -9.079,-5.613 -12.874,-9.16 -3.799,-3.551 -7.347,-7.47 -10.647,-11.76 l 23.273,-21.788 c 4.291,6.6 9.49,11.675 15.598,15.226 6.104,3.548 12.626,5.324 19.559,5.324 7.428,0 13.16,-1.9 17.207,-5.695 4.042,-3.799 6.066,-8.832 6.066,-15.103 v -1.733 c 0,-5.284 -2.105,-9.698 -6.314,-13.245 -4.209,-3.551 -10.935,-5.323 -20.178,-5.323 H -74.398 V -2.723 h 15.597 c 9.408,0 16.793,-1.776 22.158,-5.323 5.363,-3.552 8.047,-8.874 8.047,-15.969 v -1.486 c 0,-7.265 -2.351,-12.998 -7.055,-17.206 -4.704,-4.209 -11.266,-6.314 -19.684,-6.314 -9.408,0 -16.878,2.267 -22.406,6.809 -5.531,4.537 -10.194,10.356 -13.988,17.454 l -27.482,-21.292 c 2.805,-4.456 6.065,-8.665 9.779,-12.627 3.714,-3.961 8.086,-7.469 13.122,-10.522 5.034,-3.056 10.933,-5.489 17.703,-7.304 6.765,-1.813 14.522,-2.723 23.272,-2.723 9.737,0 18.65,1.2 26.739,3.59 8.085,2.391 15.018,5.819 20.797,10.275 5.776,4.457 10.233,9.818 13.369,16.092 3.134,6.271 4.704,13.285 4.704,21.045 0,5.942 -0.909,11.265 -2.722,15.969 C 5.733,-7.551 3.219,-3.466 0,0"
+                      style={{ fill: "var(--ov25-secondary-text-color)", fillOpacity: 1, fillRule: "nonzero", stroke: "none" }}
+                      transform="matrix(1.3333333,0,0,-1.3333333,2653.9001,957.98933)"
+                      clipPath="url(#clipPath11)"
+                    />
+                    <path
+                      id="path12"
+                      d="m 0,0 c 0,-8.418 -2.313,-14.897 -6.933,-19.436 -4.623,-4.542 -11.059,-6.808 -19.311,-6.808 -8.255,0 -14.693,2.266 -19.312,6.808 -4.623,4.539 -6.931,11.018 -6.931,19.436 v 4.456 c 0,8.418 2.308,14.894 6.931,19.436 4.619,4.537 11.057,6.808 19.312,6.808 8.252,0 14.688,-2.271 19.311,-6.808 C -2.313,19.35 0,12.874 0,4.456 Z m 24.14,44.564 c -4.542,4.62 -9.905,8.209 -16.094,10.77 -6.19,2.557 -12.835,3.838 -19.93,3.838 -5.447,0 -10.236,-0.743 -14.36,-2.229 -4.128,-1.485 -7.718,-3.427 -10.77,-5.818 -3.056,-2.394 -5.613,-5.16 -7.674,-8.294 -2.067,-3.137 -3.838,-6.355 -5.324,-9.655 l -2.228,0.742 c 1.648,8.252 4.495,15.97 8.542,23.149 4.042,7.18 9.16,14.236 15.349,21.169 6.19,6.932 13.494,13.822 21.912,20.673 8.417,6.847 17.907,14.07 28.472,21.663 h -51.25 c -7.428,-4.951 -14.816,-11.06 -22.159,-18.321 -7.346,-7.265 -13.949,-15.474 -19.807,-24.634 -5.86,-9.161 -10.645,-19.149 -14.359,-29.958 -3.714,-10.812 -5.57,-22.244 -5.57,-34.29 0,-10.398 1.442,-19.806 4.332,-28.224 2.886,-8.418 7.095,-15.64 12.627,-21.664 5.528,-6.027 12.337,-10.646 20.425,-13.865 8.085,-3.218 17.246,-4.827 27.482,-4.827 9.903,0 18.816,1.485 26.739,4.456 7.923,2.971 14.731,7.138 20.426,12.503 5.694,5.362 10.065,11.761 13.122,19.188 3.052,7.427 4.58,15.597 4.58,24.51 0,8.085 -1.28,15.474 -3.838,22.159 -2.56,6.685 -6.108,12.336 -10.645,16.959"
+                      style={{ fill: "var(--ov25-secondary-text-color)", fillOpacity: 1, fillRule: "nonzero", stroke: "none" }}
+                      transform="matrix(1.3333333,0,0,-1.3333333,2823.0785,990.0088)"
+                      clipPath="url(#clipPath13)"
+                    />
+                    <path
+                      id="path14"
+                      d="m 0,0 c 0,-13.207 -1.899,-23.438 -5.694,-30.7 -3.799,-7.265 -10.647,-10.894 -20.55,-10.894 -9.903,0 -16.754,3.629 -20.549,10.894 -3.799,7.262 -5.694,17.493 -5.694,30.7 v 32.681 c 0,13.203 1.895,23.435 5.694,30.7 3.795,7.262 10.646,10.894 20.549,10.894 9.903,0 16.751,-3.632 20.55,-10.894 C -1.899,56.116 0,45.884 0,32.681 Z m -26.244,105.718 c -22.615,0 -39.365,-7.842 -50.259,-23.52 -10.893,-15.683 -16.341,-37.633 -16.341,-65.857 0,-28.225 5.448,-50.178 16.341,-65.857 10.894,-15.683 27.644,-23.52 50.259,-23.52 22.611,0 39.366,7.837 50.26,23.52 10.893,15.679 16.339,37.632 16.339,65.857 0,28.224 -5.446,50.174 -16.339,65.857 -10.894,15.678 -27.649,23.52 -50.26,23.52"
+                      style={{ fill: "var(--ov25-secondary-text-color)", fillOpacity: 1, fillRule: "nonzero", stroke: "none" }}
+                      transform="matrix(1.3333333,0,0,-1.3333333,3019.8207,966.242)"
+                      clipPath="url(#clipPath15)"
+                    />
+                    <path
+                      id="path16"
+                      d="m 0,0 c -3.799,-4.375 -8.831,-6.561 -15.103,-6.561 -6.274,0 -11.307,2.186 -15.102,6.561 -3.799,4.371 -5.694,9.86 -5.694,16.464 0,6.599 1.895,12.089 5.694,16.464 3.795,4.372 8.828,6.561 15.102,6.561 C -8.831,39.489 -3.799,37.3 0,32.928 3.795,28.553 5.694,23.063 5.694,16.464 5.694,9.86 3.795,4.371 0,0 m 17.578,49.764 c -4.127,4.209 -8.998,7.466 -14.607,9.779 -5.613,2.31 -11.636,3.466 -18.074,3.466 -6.436,0 -12.463,-1.156 -18.073,-3.466 -5.613,-2.313 -10.483,-5.57 -14.607,-9.779 -4.128,-4.209 -7.347,-9.16 -9.655,-14.855 -2.314,-5.695 -3.467,-11.846 -3.467,-18.445 0,-6.77 1.153,-12.959 3.467,-18.568 2.308,-5.614 5.527,-10.523 9.655,-14.731 4.124,-4.209 8.994,-7.471 14.607,-9.781 5.61,-2.312 11.637,-3.466 18.073,-3.466 6.438,0 12.461,1.154 18.074,3.466 5.609,2.31 10.48,5.572 14.607,9.781 4.124,4.208 7.343,9.117 9.656,14.731 2.31,5.609 3.466,11.798 3.466,18.568 0,6.599 -1.156,12.75 -3.466,18.445 -2.313,5.695 -5.532,10.646 -9.656,14.855"
+                      style={{ fill: "var(--ov25-secondary-text-color)", fillOpacity: 1, fillRule: "nonzero", stroke: "none" }}
+                      transform="matrix(1.3333333,0,0,-1.3333333,3181.572,909.29733)"
+                      clipPath="url(#clipPath17)"
+                    />
+                  </g>
+                </svg>
               </button>
             </CarouselItem>
             {images.map((img: any, index: any) => (
-              <CarouselItem key={index} className="orbitalvision:pl-2 orbitalvision:basis-1/3 orbitalvision:xl:basis-[20%]">
+              <CarouselItem key={index} className="ov:pl-2 ov:basis-1/3 ov:xl:basis-[20%]">
                 <button
                   onClick={() => setGalleryIndex(index + 1)}
-                  className={`orbitalvision:relative orbitalvision:aspect-[3/2] orbitalvision:w-full orbitalvision:overflow-hidden orbitalvision:rounded-none orbitalvision:bg-muted ${
+                  className={`ov:relative ov:aspect-[3/2] ov:w-full ov:overflow-hidden ov:rounded-none ov:bg-muted ov:cursor-pointer ${
                     galleryIndex === index + 1 ? "" : ""
                   }`}
                 >
                   <img
                     src={img || "/placeholder.svg"}
                     alt={`Product thumbnail ${index + 1}`}
-                    className="orbitalvision:object-cover orbitalvision:w-full orbitalvision:h-full orbitalvision:absolute orbitalvision:inset-0"
+                    className="ov:object-cover ov:w-full ov:h-full ov:absolute ov:inset-0"
                   />
                 </button>
               </CarouselItem>

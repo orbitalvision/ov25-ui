@@ -20,33 +20,33 @@ export const LegsVariantCard = React.memo(
           e.stopPropagation();
           onSelect(variant);
         }}
-        className={`orbitalvision:relative orbitalvision:flex orbitalvision:cursor-pointer orbitalvision:flex-col orbitalvision:h-[160px] orbitalvision:md:h-[200px] orbitalvision:xl:h-[217px] orbitalvision:items-center orbitalvision:gap-4 orbitalvision:w-full orbitalvision:p-6 orbitalvision:py-4 orbitalvision:text-left orbitalvision:hover:bg-accent orbitalvision:md:border-b orbitalvision:border-[#E5E5E5] orbitalvision:text-[#282828] orbitalvision:group ${index % 2 === 0 ? 'orbitalvision:xl:border-r orbitalvision:border-[#E5E5E5]' : ''}`}
+        className={`ov:relative ov:flex ov:cursor-pointer ov:flex-col ov:h-[160px] ov:md:h-[200px] ov:xl:h-[217px] ov:items-center ov:gap-4 ov:w-full ov:p-6 ov:py-4 ov:text-left ov:hover:bg-accent ov:md:border-b ov:border-[#E5E5E5] ov:text-[#282828] ov:group ${index % 2 === 0 ? 'ov:xl:border-r ov:border-[#E5E5E5]' : ''}`}
       >
-        <div className="orbitalvision:relative orbitalvision:aspect-square orbitalvision:h-full orbitalvision:group-hover:bg-accent">
-          <div className="orbitalvision:absolute orbitalvision:inset-0 orbitalvision:rounded-full orbitalvision:overflow-hidden orbitalvision:bg-white orbitalvision:group-hover:bg-accent">
-            <div className="orbitalvision:relative orbitalvision:w-full orbitalvision:h-full">
+        <div className="ov:relative ov:aspect-square ov:h-full ov:group-hover:bg-accent">
+          <div className="ov:absolute ov:inset-0 ov:rounded-full ov:overflow-hidden ov:bg-white ov:group-hover:bg-accent">
+            <div className="ov:relative ov:w-full ov:h-full">
               {!isMobile ? (
                 <img 
                   key={imgSrc} 
                   src={imgSrc} 
                   alt={variant.name} 
-                  className="orbitalvision:object-cover orbitalvision:w-full orbitalvision:h-full" 
+                  className="ov:object-cover ov:w-full ov:h-full" 
                 />
               ) : (
                 <img 
                   key={imgSrc} 
                   src={imgSrc} 
                   alt={variant.name} 
-                  className="orbitalvision:object-cover orbitalvision:w-full orbitalvision:h-full" 
+                  className="ov:object-cover ov:w-full ov:h-full" 
                   width={100} 
                   height={100} 
                 />
               )}
               {variant.isSelected && (
-                <div className="orbitalvision:absolute orbitalvision:inset-0">
-                  <div className="orbitalvision:absolute orbitalvision:top-1/2 orbitalvision:left-1/2 orbitalvision:-translate-x-1/2 orbitalvision:-translate-y-1/2">
-                    <div className="orbitalvision:w-6 orbitalvision:h-6 orbitalvision:rounded-full orbitalvision:bg-black/50 orbitalvision:flex orbitalvision:items-center orbitalvision:justify-center">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="orbitalvision:w-4 orbitalvision:h-4 orbitalvision:text-white">
+                <div className="ov:absolute ov:inset-0">
+                  <div className="ov:absolute ov:top-1/2 ov:left-1/2 ov:-translate-x-1/2 ov:-translate-y-1/2">
+                    <div className="ov:w-6 ov:h-6 ov:rounded-full ov:bg-black/50 ov:flex ov:items-center ov:justify-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ov:w-4 ov:h-4 ov:text-white">
                         <polyline points="20 6 9 17 4 12"/>
                       </svg>
                     </div>
@@ -56,9 +56,9 @@ export const LegsVariantCard = React.memo(
             </div>
           </div>
         </div>
-        <div className="orbitalvision:flex orbitalvision:flex-1 orbitalvision:items-center orbitalvision:justify-between">
-          <div className="orbitalvision:flex orbitalvision:flex-col orbitalvision:justify-center orbitalvision:items-center">
-            <h3 className="orbitalvision:font-[350] orbitalvision:text-sm orbitalvision:text-[var(--ov25-secondary-text-color)]">{variant.name}</h3>
+        <div className="ov:flex ov:flex-1 ov:items-center ov:justify-between">
+          <div className="ov:flex ov:flex-col ov:justify-center ov:items-center">
+            <h3 className="ov:font-[350] ov:text-sm ov:text-[var(--ov25-secondary-text-color)]">{variant.name}</h3>
           </div>
         </div>
       </button>
