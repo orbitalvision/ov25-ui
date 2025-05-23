@@ -63,7 +63,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
 
       {(shouldDestructureGroups || !isGrouped) ? (<>
 
-        <div className={`ov:max-h-full ov:overflow-auto ov:pb-8 ov:grid ${getGridColsClass(gridDivide)}`}>
+        <div id="ov25-desktop-variants-content" className={`ov:max-h-full ov:overflow-auto ov:pb-8 ov:grid ${getGridColsClass(gridDivide)}`}>
           <VariantsContent variantsToRender={isGrouped ? (variantsToRender as VariantGroup[])[0].variants : variantsToRender as Variant[]} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
         </div></>
       ) : (
