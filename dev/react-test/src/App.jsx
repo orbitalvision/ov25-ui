@@ -26,9 +26,12 @@ const initializeConfigurator = () => {
     deferThreeD: true,
     variantsId: '#ov25-controls',
     carouselId: true,
-    checkoutFunction: () => {
+    buyNowFunction: () => {
       alert('Checkout function called');
     },
+    addToBasketFunction: () => {
+        alert('Checkout function called');
+      },
     logoURL: 'https://www.arighibianchi.co.uk/cdn/shop/files/Arighi_Bianchi_Horizontal_1854_Logo_CMYK_White_a90a3919-ad62-497c-a763-6198af0e460c_220x.png',
     cssVariables: {
       '--ov25-background-color': '#faf9f8',

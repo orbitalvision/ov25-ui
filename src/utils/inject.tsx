@@ -155,7 +155,6 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
       // Start polling for true-carousel element
       waitForElement('#true-carousel', 10000)
         .then(element => {
-          console.log('[OV25-UI] #true-carousel element found after polling');
           pushPortal('#true-carousel', <ProductCarousel />);
         })
         .catch(err => {
