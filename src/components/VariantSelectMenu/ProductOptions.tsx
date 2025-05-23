@@ -20,6 +20,7 @@ export function ProductOptions({ label, value, optionId, onClick }: ProductOptio
     <button
       onClick={(e) => {e.stopPropagation(), e.preventDefault(); onClick()}}
       className={cn(
+        'ov25-variant-control',
         'ov:flex ov:justify-between ov:w-full ov:p-3 ov:py-2 ov:my-2 ov:cursor-pointer',
         'ov:bg-[var(--ov25-primary-color)]',
         'ov:hover:bg-[var(--ov25-button-hover-background-color)]',

@@ -135,6 +135,7 @@ const Carousel = React.forwardRef<
         <div
           ref={ref}
           onKeyDownCapture={handleKeyDown}
+          id="ov25-carousel-controls"
           className={cn("ov:relative", className)}
           role="region"
           aria-roledescription="carousel"
@@ -182,6 +183,7 @@ const CarouselItem = React.forwardRef<
       role="group"
       aria-roledescription="slide"
       className={cn(
+        "ov25-carousel-tab",
         "ov:min-w-0 ov:shrink-0 ov:grow-0 ov:basis-full",
         orientation === "horizontal" ? "ov:pl-4" : "ov:pt-4",
         className

@@ -72,7 +72,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
             <div className="ov:flex ov:items-center ov:mx-4 ov:justify-between">
               <h3 className="ov:text-lg ov:text-[var(--ov25-secondary-text-color)]">{variantGroup.groupName}</h3>
             </div>
-            <div className={`ov:grid ${getGridColsClass(gridDivide)}`}>
+            <div id="ov25-variant-group-content" className={`ov:grid ${getGridColsClass(gridDivide)}`}>
               <VariantsContent variantsToRender={variantGroup.variants} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
             </div>
           </div>

@@ -6,7 +6,7 @@ import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 export const MobileCheckoutButton = () => {
     const { buyNowFunction, addToBasketFunction, formattedPrice, setIsVariantsOpen } = useOV25UI();
     return (
-      <div id={'ov25-checkout-button'} className={cn(
+      <div className={cn(
         'ov:grid ov:grid-cols-2 ov:p-2 ov:border-t ov:gap-2 ov:w-full ov:mt-auto ov:bottom-0 ov:right-0',
         'ov:bg-[var(--ov25-background-color)]',
         'ov:border-[var(--ov25-border-color)] ',
@@ -22,7 +22,7 @@ export const MobileCheckoutButton = () => {
         </div>
         <div className="ov:grid ov:grid-rows-2 ov:gap-2">
           {buyNowFunction && (
-            <Button onClick={buyNowFunction} className={cn(
+            <Button id="ov25-checkout-button" onClick={buyNowFunction} className={cn(
               'ov:w-full',
               'ov:bg-[var(--ov25-primary-color)]',
               'ov:hover:bg-[var(--ov25-button-hover-background-color)]',
@@ -36,7 +36,7 @@ export const MobileCheckoutButton = () => {
             </Button>
           )}
           {addToBasketFunction && (
-            <Button onClick={() => {setIsVariantsOpen(false); addToBasketFunction()}} className={cn(
+            <Button id="ov25-add-to-basket-button" onClick={() => {setIsVariantsOpen(false); addToBasketFunction()}} className={cn(
               'ov:w-full',
               'ov:bg-[var(--ov25-primary-color)]',
               'ov:hover:bg-[var(--ov25-button-hover-background-color)]',

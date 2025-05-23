@@ -43,7 +43,7 @@ export function ProductCarousel() {
 
 
   return (
-    <div className="ov:w-full ov:relative ">
+    <div id="ov25-product-carousel" className="ov:w-full ov:relative">
       <div className="ov:absolute ov:bottom-4 ov:pt-16 ov:left-0 ov:right-0 ov:flex ov:items-center ov:justify-between ov:px-2 ov:z-[2] ov:pointer-events-none ov:h-full">
         <Button
           variant="ghost"
@@ -68,10 +68,10 @@ export function ProductCarousel() {
           <ChevronRight size={28} className="ov:h-12 ov:stroke-1 ov:stroke-muted-foreground ov:self-center" />
         </Button>
       </div>
-      <div className="ov:mt-4 ov:text-center ov:text-sm ov:text-muted-foreground">
+      <div id="ov25-product-carousel-counter" className="ov:mt-4 ov:text-center ov:text-sm ov:text-muted-foreground">
         {galleryIndex + 1}/{images.length + 1}
       </div>
-      <div className="ov:mt-4 ov:relative ov:px-12 ov:w-full ov:flex ov:items-center ov:justify-center">
+      <div id="ov25-product-carousel-controls" className="ov:mt-4 ov:relative ov:px-12 ov:w-full ov:flex ov:items-center ov:justify-center">
         <Carousel
           opts={{
             align: "start",

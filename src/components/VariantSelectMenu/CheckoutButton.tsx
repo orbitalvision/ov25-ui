@@ -6,13 +6,13 @@ import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 export const CheckoutButton = () => {
     const { buyNowFunction, addToBasketFunction, setIsVariantsOpen } = useOV25UI();
     return (
-      <div id={'ov25-checkout-button'} className={cn(
+      <div className={cn(
         'ov:flex ov:flex-row ov:p-2 ov:border-t ov:w-full ov:mt-auto ov:bottom-0 ov:right-0',
         'ov:bg-[var(--ov25-background-color)]',
         'ov:border-[var(--ov25-border-color)] ',
       )}>
         {buyNowFunction && (
-          <Button onClick={buyNowFunction} className={cn(
+          <Button id="ov25-checkout-button" onClick={buyNowFunction} className={cn(
             'ov:w-full ov:h-10',
             'ov:bg-[var(--ov25-primary-color)]',
             'ov:hover:bg-[var(--ov25-button-hover-background-color)]',
@@ -26,7 +26,7 @@ export const CheckoutButton = () => {
           </Button>
         )}
         {addToBasketFunction && (
-          <Button onClick={() => {setIsVariantsOpen(false); addToBasketFunction()}} className={cn(
+          <Button id="ov25-add-to-basket-button" onClick={() => {setIsVariantsOpen(false); addToBasketFunction()}} className={cn(
             'ov:w-full ov:h-10',
             'ov:bg-[var(--ov25-primary-color)]',
             'ov:hover:bg-[var(--ov25-button-hover-background-color)]',
