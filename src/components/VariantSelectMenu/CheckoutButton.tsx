@@ -6,8 +6,8 @@ import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 export const CheckoutButton = () => {
     const { buyNowFunction, addToBasketFunction, setIsVariantsOpen } = useOV25UI();
     return (
-      <div className={cn(
-        'ov:flex ov:flex-row ov:p-2 ov:border-t ov:w-full ov:mt-auto ov:bottom-0 ov:right-0',
+      <div id="ov25-checkout-button-container" className={cn(
+        'ov:flex ov:flex-column ov:p-2 ov:border-t ov:w-full ov:mt-auto ov:bottom-0 ov:right-0',
         'ov:bg-[var(--ov25-background-color)]',
         'ov:border-[var(--ov25-border-color)] ',
       )}>
