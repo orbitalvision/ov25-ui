@@ -7,7 +7,7 @@ export const CheckoutButton = () => {
     const { buyNowFunction, addToBasketFunction, setIsVariantsOpen } = useOV25UI();
     return (
       <div id="ov25-checkout-button-container" className={cn(
-        'ov:flex ov:flex-column ov:p-2 ov:border-t ov:w-full ov:mt-auto ov:bottom-0 ov:right-0',
+        'ov:flex ov:flex-column ov:p-2 ov:border-t ov:border-t-[var(--ov25-secondary-text-color)]/20 ov:w-full ov:mt-auto ov:bottom-0 ov:right-0',
 
 
         'ov:bg-[var(--ov25-background-color)]',

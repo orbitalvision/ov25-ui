@@ -284,7 +284,7 @@ export const OV25UIProvider: React.FC<{
     }
     if(!hasSwitchedAfterDefer && galleryIndex === 1 && deferThreeD) {
       setHasSwitchedAfterDefer(true);
-      setGalleryIndex(0);
+      setGalleryIndex(galleryIndexToUse);
     }
   };
 
