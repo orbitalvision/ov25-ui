@@ -75,7 +75,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
     )}
       {
         allOptions.length > 1 && allOptions.length <= 6 && (
-          <div className="ov:flex ov:flex-wrap ov:pr-4">
+          <div id="ov25-option-selector-tabs" className="ov:flex ov:flex-wrap">
             {allOptions.map((option, index) => {
               const isSelected = option.id === activeOptionId;
               // Determine items per row: max 3 per row
