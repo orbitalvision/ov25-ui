@@ -12,7 +12,7 @@ const initializeConfigurator = () => {
   
   // Inject the configurator
   injectConfigurator({
-    apiKey: () => { return import.meta.env.VITE_OV25_API_KEY; }, 
+    apiKey: () => { return '' }, 
     productLink: () => { return '/range/1' }, 
     onSelectionChange: (selections) => {
       console.log('Selections changed:', selections);
@@ -23,7 +23,7 @@ const initializeConfigurator = () => {
     galleryId: {id: '.configurator-container', replace: true},
     priceId: {id: '#price', replace: true},
     nameId: {id: '#name', replace: true},
-    deferThreeD: true,
+    deferThreeD: false,
     variantsId: '#ov25-controls',
     carouselId: true,
     buyNowFunction: () => {

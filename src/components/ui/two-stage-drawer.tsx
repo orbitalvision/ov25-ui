@@ -38,13 +38,19 @@ const TwoStageDrawerComponent = ({
   const isMobile = useMediaQuery(768) // md breakpoint
   const { setIsDrawerOrDialogOpen: setIsDrawerOpen } = useOV25UI()
 
+  const [viewportHeight, setViewportHeight] = useState(window.visualViewport?.height || window.innerHeight)
+  function getViewportHeight() {
+    return window.visualViewport?.height || window.innerHeight;
+  }
+
+
 
   function getMinHeight() {
-    return window.innerHeight - (isMobile ? window.innerWidth : window.innerWidth * (2/3))
+    return viewportHeight - (isMobile ? window.innerWidth : window.innerWidth * (2/3))
   }
 
   function getMaxHeight() {
-    return window.innerHeight * 0.80
+    return viewportHeight * 0.80
   }
 
   const minHeight = typeof window !== 'undefined' ? getMinHeight() : 0
@@ -66,6 +72,8 @@ const TwoStageDrawerComponent = ({
         api.start({ height: newHeight });
       }
     };
+
+    setViewportHeight(getViewportHeight())
 
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
