@@ -40,12 +40,12 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = ({
       )}>
         {canAnimate && (
           <button onClick={toggleAnimation} className={cn(
-            'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2 ov:p-2 ov:md:px-4 ov:border ov:items-center ov:justify-center',
+            'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:md:px-4 ov:border ov:items-center ov:justify-center',
             'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
             'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
             'ov:bg-[var(--ov25-overlay-button-color)]',
           )}>
-              <Rotate3D strokeWidth={1} className="ov:w-5 ov:h-5"/>
+              <Rotate3D strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1"/>
               {!isMobile && (
               <p className="ov:text-sm ov:font-light">{handleAnimationButtonText()}</p>
               )}
@@ -76,12 +76,12 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = ({
           <div className="ov:mt-auto ov:self-end">
             {showDimensionsToggle && (
               <button onClick={handleToggleDimensions} className={cn(
-                'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2 ov:p-2 ov:md:px-4 ov:border ov:items-center ov:justify-center',
+                'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:md:px-4 ov:border ov:items-center ov:justify-center',
                 'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
                 'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
                 'ov:bg-[var(--ov25-overlay-button-color)]',
                 )}>
-                <DimensionsIcon strokeWidth={1} className="ov:w-6 ov:h-6"/>
+                <DimensionsIcon strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1"/>
                 {!isMobile && (
                   <p className="ov:text-sm ov:text-[var(--ov25-text-color)]">Dimensions</p>
                 )}
@@ -93,13 +93,13 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = ({
       </div>
       {!isVariantsOpen && (<div className="ov:absolute ov:ov25-controls-hidden ov:size-full ov:md:flex ov:pointer-events-none ov:inset-0 ov:p-4 ov:justify-end ov:items-start ov:z-[101]">
           <button className={cn(
-            'ov:cursor-pointer ov:aspect-square ov:p-2 ov:pointer-events-auto ov:flex ov:gap-2 ov:ml-auto ov:border ov:items-center ov:justify-center',
+            'ov:cursor-pointer ov:aspect-square ov:p-2 ov:pointer-events-auto ov:flex ov:gap-2.5 ov:ml-auto ov:border ov:items-center ov:justify-center',
             'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
             'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
             'ov:bg-[var(--ov25-overlay-button-color)]',
         )}
           onClick={toggleFullscreen}>
-            <ExpandIcon strokeWidth={1} className="ov:w-4 ov:h-4"/>
+            <ExpandIcon strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1"/>
           </button>
       </div>)}
     </>
