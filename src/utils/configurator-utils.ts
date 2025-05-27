@@ -159,11 +159,11 @@ export const getIframeSrc = (
   const baseUrl = 'https://configurator.orbital.vision';
   
   if (!apiKey) {
-    apiKey = '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d';
+    apiKey = '';
   }
   
   if (!productLink) {
-    productLink = '/range/20';
+    productLink = '';
   }
   
   // Remove leading slash if present
