@@ -4,15 +4,19 @@ import { Button } from '../ui/button.js';
 import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 
 export const CheckoutButton = () => {
-    const { buyNowFunction, addToBasketFunction, setIsVariantsOpen } = useOV25UI();
+    const { buyNowFunction, addToBasketFunction, setIsVariantsOpen, formattedPrice } = useOV25UI();
     return (
       <div id="ov25-checkout-button-container" className={cn(
-        'ov:flex ov:flex-column ov:p-2 ov:border-t ov:border-t-[var(--ov25-secondary-text-color)]/20 ov:w-full ov:mt-auto ov:bottom-0 ov:right-0',
+        'ov:flex ov:flex-col ov:p-2 ov:px-0   ov:w-full ov:mt-auto ov:bottom-0 ov:right-0',
 
 
         'ov:bg-[var(--ov25-background-color)]',
         'ov:border-[var(--ov25-border-color)] ',
       )}>
+        <div className="ov:w-full ov:flex ov:items-center ov:justify-center ov:pb-1.5 ov:mb-2 ov:border-b ov:border-b-[var(--ov25-secondary-text-color)]/20">
+            <h3 className='ov:text-xl  text-center ov:text-[var(--ov25-text-color)]'>{formattedPrice}</h3>
+        </div>
+        <div className="ov:grid ov:grid-cols ov:grid-cols-2 ov:px-2">
         {addToBasketFunction && (
           <Button id="ov25-add-to-basket-button" onClick={() => {setIsVariantsOpen(false); addToBasketFunction()}} className={cn(
             'ov:w-full ov:h-10',
@@ -39,6 +43,7 @@ export const CheckoutButton = () => {
             <span>BUY NOW</span>
           </Button>
         )}
+        </div>
       </div>
     )
   };
