@@ -7,7 +7,7 @@ export const MobileCheckoutButton = () => {
     const { buyNowFunction, addToBasketFunction, formattedPrice, setIsVariantsOpen } = useOV25UI();
     return (
       <div className={cn(
-        'ov:flex ov:items-center ov:p-4  ov:border-t ov:border-t-[var(--ov25-secondary-text-color)]/20 ov:w-full ov:mt-auto ov:bottom-0 ov:right-0',
+        'ov:flex ov:items-center ov:px-4  ov:border-t ov:border-t-[var(--ov25-secondary-text-color)]/20 ov:w-full ov:mt-auto ov:bottom-0 ov:right-0',
         'ov:bg-[var(--ov25-background-color)]',
       )}>
         <div className="ov:flex ov:items-center ov:mr-4">
