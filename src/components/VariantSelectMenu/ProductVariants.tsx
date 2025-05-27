@@ -30,7 +30,8 @@ export interface VariantCardProps {
   variant: Variant
   onSelect: (variant: Variant) => void
   index: number
-  isMobile: boolean
+  isMobile: boolean;
+  isGrouped?: boolean;
 }
 
 interface ProductVariantsProps {

@@ -7,9 +7,10 @@ interface VariantCardProps {
     onSelect: (variant: any) => void;
     index: number;
     isMobile?: boolean;
+    isGrouped?: boolean;
   }
   
-export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobile }: VariantCardProps) => {
+export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobile, isGrouped = false }: VariantCardProps) => {
     return (
         <div 
         className={`ov:flex ov:flex-col ov:items-center ${variant.isSelected ? '' : ''} ov:transition-transform ov:pt-2`}
@@ -17,7 +18,8 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
     >
         <div className="ov:relative">
             <div 
-                className={`ov:w-14 ov:h-14 ov:rounded-full ov:overflow-hidden ov:mb-1 ov:cursor-pointer ${variant.isSelected ? 'ov:border-2 ov:border-[var(--ov25-highlight-color)] ov:shadow-lg' : 'ov:border-transparent ov:shadow-md'}`}
+                className={`${isGrouped ? 'ov:w-10 ov:h-10' : 'ov:w-14 ov:h-14'} md:ov:w-14 md:ov:h-14 ov:rounded-full ov:overflow-hidden ov:mb-1 ov:cursor-pointer ${variant.isSelected ? 'ov:border-2 ov:border-[var(--ov25-highlight-color)] ov:shadow-lg' : 'ov:border-transparent ov:shadow-md'}`}
+                {...(variant.isSelected && { selected: true })}
                 onClick={() => onSelect(variant)}
             >
                 {variant.image ? (

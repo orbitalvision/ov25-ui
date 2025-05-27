@@ -6,7 +6,7 @@ import { capitalizeWords, getGridColsClass } from './DesktopVariants.js';
 import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 import { VariantsContent } from './VariantsContent.js';
 
-const VariantsContentWithCarousel = ({ variantsToRender, VariantCard, onSelect, isMobile }: { variantsToRender: Variant[], VariantCard: React.ComponentType<VariantCardProps>, onSelect: (variant: Variant) => void, isMobile: boolean }) => {
+const VariantsContentWithCarousel = ({ variantsToRender, VariantCard, onSelect, isMobile, isGrouped = false }: { variantsToRender: Variant[], VariantCard: React.ComponentType<VariantCardProps>, onSelect: (variant: Variant) => void, isMobile: boolean, isGrouped: boolean }) => {
     const {allOptions, activeOptionId} = useOV25UI()
     const activeOption = allOptions.find((option) => option.id === activeOptionId)
     const activeOptionName = activeOption?.name ?? ''
@@ -33,6 +33,7 @@ const VariantsContentWithCarousel = ({ variantsToRender, VariantCard, onSelect, 
                     onSelect={onSelect}
                     index={index}
                     isMobile={isMobile}
+                    isGrouped={isGrouped}
                   />
                 </CarouselItem>
               );
@@ -82,7 +83,7 @@ export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSe
                 <CarouselItem key={group.groupName} className="ov:basis-1/4 ov:py-2">
                   <button
                     onClick={() => setSelectedGroupIndex(index)}
-                    className={`ov:w-full ov:py-2 ov:rounded-full ov:shadow-md ov:text-neutral-500 ov:border ${selectedGroupIndex === index
+                    className={`ov25-group-control ov:w-full ov:py-2 ov:rounded-full ov:shadow-md ov:text-neutral-500 ov:border ${selectedGroupIndex === index
                       ? 'ov:border-neutral-900 ov:text-neutral-900'
                       : ''
                       } ov:flex ov:items-center ov:justify-center ov:text-xs ov:gap-2 ov:whitespace-nowrap`}
@@ -100,6 +101,7 @@ export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSe
               VariantCard={VariantCard}
               onSelect={onSelect}
               isMobile={isMobile}
+              isGrouped={isGrouped && !shouldDestructureGroups}
             />
           ) : (
             <div id="ov25-mobile-variants-content" className='ov:h-full ov:max-h-full ov:overflow-y-scroll'>
@@ -118,6 +120,7 @@ export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSe
           VariantCard={VariantCard}
           onSelect={onSelect}
           isMobile={isMobile}
+          isGrouped={isGrouped && !shouldDestructureGroups}
         />
       } else {
         return (

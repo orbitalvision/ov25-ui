@@ -117,8 +117,9 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
           <VariantsContent variantsToRender={isGrouped ? (variantsToRender as VariantGroup[])[0].variants : variantsToRender as Variant[]} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
         </div></>
       ) : (
-        (variantsToRender as VariantGroup[]).map((variantGroup) => (
-          <div key={variantGroup.groupName} className={`ov:pt-4 ov:pb-8 ov:max-h-full ov:overflow-auto`}>
+        <div className="ov:overflow-scroll">
+        {(variantsToRender as VariantGroup[]).map((variantGroup) => (
+          <div key={variantGroup.groupName} className={`ov:max-h-full`}>
             <div className="ov:flex ov:items-center ov:mx-4 ov:justify-between">
               <h3 className="ov:text-lg ov:text-[var(--ov25-secondary-text-color)]">{variantGroup.groupName}</h3>
             </div>
@@ -126,7 +127,8 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
               <VariantsContent variantsToRender={variantGroup.variants} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
             </div>
           </div>
-        ))
+        ))}
+        </div>
       )}
     </>
   );
