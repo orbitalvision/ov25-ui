@@ -1,0 +1,92 @@
+import { useState, useMemo,  } from "react"
+import { useMediaQuery } from "../hooks/use-media-query.js"
+import * as React from 'react'
+import { getIframeSrc } from '../utils/configurator-utils.js'
+import { useOV25UI } from "../contexts/ov25-ui-context.js"
+import ConfiguratorViewControls from "./ConfiguratorViewControls.js"
+import { cn } from "../lib/utils.js"
+
+
+export const IframeContainer = ({isStacked}: {isStacked: boolean}) => {
+    // Get all required data from context
+    const {
+        iframeRef,
+        currentProduct,
+        galleryIndex,
+        error,
+        canAnimate,
+        animationState,
+        productLink,
+        apiKey,
+        galleryIndexToUse,
+        images: passedImages,
+    } = useOV25UI();
+
+    // Get the images from the current product
+    const productImages = currentProduct?.metadata?.images?.slice(0, -1) || [];
+
+    const images = [...(passedImages || []), ...productImages]
+
+
+    // Any component-specific state remains local
+    const [canSeeDimensions, setCanSeeDimensions] = useState(false);
+    const isMobile = useMediaQuery(1280);
+
+
+    // Calculate showDimensionsToggle from currentProduct
+    const showDimensionsToggle = !!((currentProduct as any)?.dimensionX &&
+        (currentProduct as any)?.dimensionY &&
+        (currentProduct as any)?.dimensionZ);
+
+    // Use the utility function to get the iframe src
+    const iframeSrc = useMemo(() =>
+        getIframeSrc(apiKey, productLink),
+        [productLink, apiKey]);
+
+    const isStackedStyles = cn(
+        "ov:relative ov:aspect-square ov:md:aspect-[3/2] ov:2xl:aspect-video ov:overflow-hidden ov:z-[3]",
+        "ov:rounded-[var(--ov25-configurator-iframe-border-radius)]",
+        "ov:bg-[var(--ov25-configurator-iframe-background-color)]"
+    )
+    const isInlineStyles = cn(
+        "ov:absolute ov:size-full ov:inset-0 ov:overflow-hidden ov:z-[3]",
+        "ov:rounded-[var(--ov25-configurator-iframe-border-radius)]",
+        "ov:bg-[var(--ov25-configurator-iframe-background-color)]"
+    )
+
+    return (
+        <div id="true-ov25-configurator-iframe-container"
+        className={cn(isStacked ? isStackedStyles : isInlineStyles)}>
+        <iframe
+            ref={iframeRef}
+            id="ov25-configurator-iframe"
+            src={iframeSrc}
+            className={`ov:w-full ov:bg-transparent ov:h-full ${galleryIndex === galleryIndexToUse ? 'ov:block' : 'ov:ov25-controls-hidden'}`}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; xr-spatial-tracking; fullscreen"
+        />
+        {/* Display selected image when galleryIndex is not the 3D spin */}
+        {(() => {
+            const imageIndex = galleryIndex < galleryIndexToUse ? galleryIndex : galleryIndex - 1;
+            return galleryIndex !== galleryIndexToUse && images[imageIndex] ? (
+                <img
+                    id={`ov-25-configurator-product-image-${galleryIndex}`}
+                    src={images[imageIndex]}
+                    alt={`Product image ${galleryIndex}`}
+                    className="ov:object-cover ov:min-h-full ov:min-w-full ov:z-[5] ov:absolute ov:inset-0 ov:bg-[var(--ov25-configurator-iframe-background-color)]"
+                />
+            ) : null;
+        })()}
+
+        {galleryIndex === galleryIndexToUse && !error && (
+            <ConfiguratorViewControls
+                canAnimate={canAnimate}
+                animationState={animationState}
+                showDimensionsToggle={showDimensionsToggle}
+                isMobile={isMobile}
+                canSeeDimensions={canSeeDimensions}
+                setCanSeeDimensions={setCanSeeDimensions}
+            />
+        )}
+    </div>
+    )
+}

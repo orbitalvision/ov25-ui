@@ -7,10 +7,13 @@ import ConfiguratorViewControls from "./ConfiguratorViewControls.js"
 import { useIframePositioning } from "../hooks/useIframePositioning.js"
 import { cn } from "../lib/utils.js"
 import { createPortal } from "react-dom"
+import { IframeContainer } from "./IframeContainer.js"
+
+
 
 // Simplified props, most data now comes from context
 
-export function ProductGallery() {
+export function ProductGallery({isStacked}: {isStacked: boolean}) {
     // Get all required data from context
     const {
         iframeRef,
@@ -30,29 +33,18 @@ export function ProductGallery() {
     // Use the custom hook to handle iframe positioning
     useIframePositioning();
 
-    // Any component-specific state remains local
-    const [canSeeDimensions, setCanSeeDimensions] = useState(false);
-    const isMobile = useMediaQuery(1280);
+
     const containerRef = useRef<HTMLDivElement>(null);
 
-    // Get the images from the current product
-    const productImages = currentProduct?.metadata?.images?.slice(0, -1) || [];
-
-    const images = [...(passedImages || []), ...productImages]
 
 
-    // Calculate showDimensionsToggle from currentProduct
-    const showDimensionsToggle = !!((currentProduct as any)?.dimensionX &&
-        (currentProduct as any)?.dimensionY &&
-        (currentProduct as any)?.dimensionZ);
 
-    // Use the utility function to get the iframe src
-    const iframeSrc = useMemo(() =>
-        getIframeSrc(apiKey, productLink),
-        [productLink, apiKey]);
 
     // Position the true iframe container to match the normal container
     useEffect(() => {
+        // Only run positioning logic when gallery is stacked
+        if (!isStacked) return;
+        
         let frameId: number;
         
         const positionIframeContainer = () => {
@@ -90,7 +82,7 @@ export function ProductGallery() {
         return () => {
             cancelAnimationFrame(frameId);
         };
-    }, [isDrawerOrDialogOpen]);
+    }, [isDrawerOrDialogOpen, isStacked]);
 
 
     
@@ -102,59 +94,22 @@ export function ProductGallery() {
             <div id="ov25-configurator-background-color" className={cn(
                 "ov:aspect-square ov:md:aspect-[1/1] ov:z-[2] ov:absolute ov:inset-0 ov:block!",
                 "ov:rounded-[var(--ov25-configurator-iframe-border-radius)]",
-                "ov:bg-[var(--ov25-configurator-iframe-background-color)]"
+                "ov:bg-[var(--ov25-configurator-iframe-background-color)]",
             )}></div>
             <div id="ov25-configurator-iframe-container"
                 ref={containerRef}
                 className={cn(" ov:relative ov:aspect-square ov:md:aspect-[3/2] ov:2xl:aspect-video ov:overflow-hidden ov:z-[3]",
                     "ov:rounded-[var(--ov25-configurator-iframe-border-radius)]",
-                    "ov:bg-[var(--ov25-configurator-iframe-background-color)]"
+                    "ov:bg-[var(--ov25-configurator-iframe-background-color)]",
                 )}>
 
-
-
+                {!isStacked && <IframeContainer isStacked={isStacked} />}
 
             </div>
             <div id='true-carousel' ></div>
         </div>
-        {createPortal(
-            <div id="true-ov25-configurator-iframe-container"
-                className={cn(" ov:relative ov:aspect-square ov:md:aspect-[3/2] ov:2xl:aspect-video ov:overflow-hidden ov:z-[3]",
-                    "ov:rounded-[var(--ov25-configurator-iframe-border-radius)]",
-                    "ov:bg-[var(--ov25-configurator-iframe-background-color)]"
-                )}>
-                <iframe
-                    ref={iframeRef}
-                    id="ov25-configurator-iframe"
-                    src={iframeSrc}
-                    className={`ov:w-full ov:bg-transparent ov:h-full ${galleryIndex === galleryIndexToUse ? 'ov:block' : 'ov:ov25-controls-hidden'}`}
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; xr-spatial-tracking; fullscreen"
-                />
-                {/* Display selected image when galleryIndex is not the 3D spin */}
-                {(() => {
-                    const imageIndex = galleryIndex < galleryIndexToUse ? galleryIndex : galleryIndex - 1;
-                    return galleryIndex !== galleryIndexToUse && images[imageIndex] ? (
-                        <img
-                            id={`ov-25-configurator-product-image-${galleryIndex}`}
-                            src={images[imageIndex]}
-                            alt={`Product image ${galleryIndex}`}
-                            className="ov:object-cover ov:min-h-full ov:min-w-full ov:z-[5] ov:absolute ov:inset-0 ov:bg-[var(--ov25-configurator-iframe-background-color)]"
-                        />
-                    ) : null;
-                })()}
-
-                {galleryIndex === galleryIndexToUse && !error && (
-                    <ConfiguratorViewControls
-                        canAnimate={canAnimate}
-                        animationState={animationState}
-                        showDimensionsToggle={showDimensionsToggle}
-                        isMobile={isMobile}
-                        canSeeDimensions={canSeeDimensions}
-                        setCanSeeDimensions={setCanSeeDimensions}
-                    />
-                )}
-            </div>
-            ,
+        {isStacked && createPortal(
+           <IframeContainer isStacked={isStacked} />,
             document.body
         )}
 
