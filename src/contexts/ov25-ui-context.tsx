@@ -181,8 +181,10 @@ export const OV25UIProvider: React.FC<{
   const iframeRef = useRef<HTMLIFrameElement>(null!);
   const [isMobile, setIsMobile] = useState(false);
   const [hasSwitchedAfterDefer, setHasSwitchedAfterDefer] = useState(false)
+  const [pendingProductId, setPendingProductId] = useState<string | null>(null);
 
   const hasDefered = useRef(false);
+  const isSelectingProduct = useRef(false);
 
   // Effect: Initialize selectedSelections from configuratorState
   useEffect(() => {
@@ -190,6 +192,14 @@ export const OV25UIProvider: React.FC<{
       setSelectedSelections(configuratorState.selectedSelections);
     }
   }, [configuratorState]);
+
+  // Effect: Clear pending product ID when current product ID updates
+  useEffect(() => {
+    if (currentProductId && pendingProductId === currentProductId) {
+      setPendingProductId(null);
+      isSelectingProduct.current = false;
+    }
+  }, [currentProductId, pendingProductId]);
 
   // Effect for detecting mobile devices
   useEffect(() => {
@@ -260,6 +270,13 @@ export const OV25UIProvider: React.FC<{
   const handleSelectionSelect = (selection: Selection) => {
     if (activeOptionId === 'size') {
       if (currentProductId !== selection.id) {
+        // Block if already selecting a product
+        if (isSelectingProduct.current) {
+          return;
+        }
+        
+        isSelectingProduct.current = true;
+        setPendingProductId(selection.id);
         setSelectedSelections(prev => {
           const newSelections = prev.filter(sel => sel.optionId !== 'size');
           return [...newSelections, { optionId: 'size', selectionId: selection.id }];
