@@ -22,6 +22,26 @@ export function ProductGallery({isStacked}: {isStacked: boolean}) {
     // Use the custom hook to handle iframe positioning
     useIframePositioning();
 
+    // Handle z-index for non-stacked gallery when drawer opens
+    useEffect(() => {
+        if (isStacked) return;
+        
+        if (isDrawerOrDialogOpen) {
+            const container = document.querySelector('.ov25-configurator-gallery') as HTMLElement;
+            const originalZIndex = container?.style.zIndex;
+            
+            if (container) {
+                container.style.zIndex = '9999999999999';
+            }
+            
+            return () => {
+                if (container) {
+                    container.style.zIndex = originalZIndex || '';
+                }
+            };
+        }
+    }, [isStacked, isDrawerOrDialogOpen]);
+
 
     const containerRef = useRef<HTMLDivElement>(null);
 
@@ -32,18 +52,7 @@ export function ProductGallery({isStacked}: {isStacked: boolean}) {
     // Position the true iframe container to match the normal container
     useEffect(() => {
         // Only run positioning logic when gallery is stacked
-        if (!isStacked){
-            const container = document.getElementById('ov25-configurator-gallery');
-            const origninalZIndex = container?.style.zIndex;
-            if(container){
-                container.style.zIndex = '9999999999999999';
-            }
-            return () => {
-                if(container){
-                    container.style.zIndex = origninalZIndex || '';
-                }
-            };
-        } 
+       if(!isStacked) return;
         
         let frameId: number;
         
