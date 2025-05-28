@@ -197,7 +197,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
         buyNowFunction={buyNowFunction} 
         addToBasketFunction={addToBasketFunction} 
         images={images} 
-        logoURL={logoURL}
+        logoURL={logoURL ?? 'https://ov25.orbital.vision/_next/image?url=%2Flogo.png&w=128&q=75'}
         deferThreeD={deferThreeD}
       >
         {portals}

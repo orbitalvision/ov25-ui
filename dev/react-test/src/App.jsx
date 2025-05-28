@@ -12,7 +12,7 @@ const initializeConfigurator = () => {
   
   // Inject the configurator
   injectConfigurator({
-    apiKey: () => { return '' }, 
+    apiKey: () => { return '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d' }, 
     productLink: () => { return '/range/1' }, 
     onSelectionChange: (selections) => {
       console.log('Selections changed:', selections);
@@ -26,26 +26,11 @@ const initializeConfigurator = () => {
     deferThreeD: false,
     variantsId: '#ov25-controls',
     carouselId: true,
-    buyNowFunction: () => {
-      alert('Checkout function called');
-    },
+
     addToBasketFunction: () => {
         alert('Checkout function called');
       },
-    logoURL: 'https://www.arighibianchi.co.uk/cdn/shop/files/Arighi_Bianchi_Horizontal_1854_Logo_CMYK_White_a90a3919-ad62-497c-a763-6198af0e460c_220x.png',
-    cssVariables: {
-      '--ov25-background-color': '#faf9f8',
-      '--ov25-text-color': '#06051c',
-      '--ov25-text-color-secondary': '#ffffff',
-      '--ov25-primary-color': '#0c5358',
-      '--ov25-button-hover-background-color': '#0B4B4F',
-      '--ov25-button-text-color': '#ffffff',
-      '--ov25-button-hover-text-color': '#ffffff',
-      '--ov25-button-border-width': '2px',
-      '--ov25-button-border-radius': '5px',
-      '--ov25-overlay-button-color': '#ffffff',
-      '--ov25-highlight-color': '#E8927C', 
-    }
+    logoURL: 'https://ov25.orbital.vision/_next/image?url=%2Flogo.png&w=128&q=75',
   });
   
   configuratorInitialized = true;

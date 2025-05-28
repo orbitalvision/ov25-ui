@@ -63,9 +63,9 @@ export const APP = ({productLink = null}: {productLink?: string | null}) => {
   return (
     <OV25UIProvider 
       productLink={'/range/12'}
-      apiKey='15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d'
+      apiKey=''
       checkoutFunction={() => {console.log('checkout function called')}} 
-      logoURL='https://www.arighibianchi.co.uk/cdn/shop/files/Arighi_Bianchi_Horizontal_1854_Logo_CMYK_White_a90a3919-ad62-497c-a763-6198af0e460c_220x.png'
+      logoURL=''
     >
       <MainContent />
     </OV25UIProvider>
