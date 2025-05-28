@@ -117,7 +117,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
           <VariantsContent variantsToRender={isGrouped ? (variantsToRender as VariantGroup[])[0].variants : variantsToRender as Variant[]} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
         </div></>
       ) : (
-        <div className="ov:overflow-y-auto">
+        <div className="ov:overflow-auto">
         {(variantsToRender as VariantGroup[]).map((variantGroup) => (
           <div key={variantGroup.groupName} className={`ov:max-h-full`}>
             <div className="ov:flex ov:items-center ov:mx-4 ov:justify-between">
