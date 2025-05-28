@@ -1,9 +1,6 @@
-import { useState, useMemo, useEffect, useRef } from "react"
-import { useMediaQuery } from "../hooks/use-media-query.js"
+import {  useEffect, useRef } from "react"
 import * as React from 'react'
-import { getIframeSrc } from '../utils/configurator-utils.js'
 import { useOV25UI } from "../contexts/ov25-ui-context.js"
-import ConfiguratorViewControls from "./ConfiguratorViewControls.js"
 import { useIframePositioning } from "../hooks/useIframePositioning.js"
 import { cn } from "../lib/utils.js"
 import { createPortal } from "react-dom"
@@ -16,14 +13,6 @@ import { IframeContainer } from "./IframeContainer.js"
 export function ProductGallery({isStacked}: {isStacked: boolean}) {
     // Get all required data from context
     const {
-        iframeRef,
-        currentProduct,
-        galleryIndex,
-        error,
-        canAnimate,
-        animationState,
-        productLink,
-        apiKey,
         isDrawerOrDialogOpen,
         galleryIndexToUse,
         images: passedImages,
@@ -37,13 +26,24 @@ export function ProductGallery({isStacked}: {isStacked: boolean}) {
     const containerRef = useRef<HTMLDivElement>(null);
 
 
-
+    
 
 
     // Position the true iframe container to match the normal container
     useEffect(() => {
         // Only run positioning logic when gallery is stacked
-        if (!isStacked) return;
+        if (!isStacked){
+            const container = document.getElementById('ov25-configurator-gallery');
+            const origninalZIndex = container?.style.zIndex;
+            if(container){
+                container.style.zIndex = '9999999999999999';
+            }
+            return () => {
+                if(container){
+                    container.style.zIndex = origninalZIndex || '';
+                }
+            };
+        } 
         
         let frameId: number;
         
