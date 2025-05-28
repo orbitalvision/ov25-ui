@@ -144,8 +144,36 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
       });
     };
 
+    // Function to check if gallery or its parents have z-index set
+    const checkForStackedGallery = (): boolean => {
+      const gallerySelector = getSelector(galleryId);
+      if (!gallerySelector) return false;
+      
+      const galleryElement = document.querySelector(gallerySelector);
+      if (!galleryElement) return false;
+      
+      // Traverse up the DOM tree checking for z-index
+      let currentElement: Element | null = galleryElement;
+      
+      while (currentElement && currentElement !== document.documentElement) {
+        const computedStyle = window.getComputedStyle(currentElement);
+        const zIndex = computedStyle.zIndex;
+        
+        // Check if z-index is explicitly set (not 'auto')
+        if (zIndex !== 'auto' && zIndex !== '') {
+          return true;
+        }
+        
+        currentElement = currentElement.parentElement;
+      }
+      
+      return false;
+    };
+
+    const isProductGalleryStacked = checkForStackedGallery();
+
     // Process each component
-    processElement(galleryId, <ProductGallery />, 'gallery');
+    processElement(galleryId, <ProductGallery isStacked={isProductGalleryStacked} />, 'gallery');
     processElement(priceId, <Price />, 'price');
     processElement(nameId, <Name />, 'name');
     processElement(variantsId, <VariantSelectMenu />, 'variants');
