@@ -137,7 +137,7 @@ export const useIframePositioning = () => {
       if (!isMobile) {
 
         setTimeout(() => {
-          updateIframeWidth();
+          updateIframeWidth();  
         }, 100);
 
         container.style.height = '100%';

@@ -29,14 +29,16 @@ export function ProductGallery({isStacked}: {isStacked: boolean}) {
         if (isDrawerOrDialogOpen) {
             const container = document.querySelector('.ov25-configurator-gallery') as HTMLElement;
             const originalZIndex = container?.style.zIndex;
-            
+            const originalPosition = container?.style.position;
             if (container) {
                 container.style.zIndex = '9999999999999';
+                container.style.position = 'fixed';
             }
             
             return () => {
                 if (container) {
                     container.style.zIndex = originalZIndex || '';
+                    container.style.position = originalPosition || '';
                 }
             };
         }
