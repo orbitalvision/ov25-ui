@@ -6,8 +6,16 @@ import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 export const CheckoutButton = () => {
     const { buyNowFunction, addToBasketFunction, setIsVariantsOpen, formattedPrice } = useOV25UI();
 
-    const secondaryStyles = cn(            
-        'ov:w-full ov:h-10',
+    const primaryStyles = cn(
+        'ov:flex-1',
+        'ov:bg-[var(--ov25-primary-color)]',
+        'ov:text-white',
+        'ov:rounded-[var(--ov25-button-border-radius)]',
+        'ov:hover:bg-[var(--ov25-primary-color)]/90',
+        'ov:cursor-pointer',
+    )
+    const secondaryStyles = cn(
+        'ov:flex-1',
         'ov:bg-[var(--ov25-background-color)]',
         'ov:text-[var(--ov25-primary-color)]',
         'ov:border-[var(--ov25-button-border-width)]',
@@ -15,15 +23,6 @@ export const CheckoutButton = () => {
         'ov:rounded-[var(--ov25-button-border-radius)]',
         'ov:hover:bg-[var(--ov25-secondary-background-color)]',
         'ov:cursor-pointer',
-    )
-
-    const primaryStyles = cn(
-            'ov:w-full ov:h-10',
-            'ov:bg-[var(--ov25-primary-color)]',
-            'ov:text-white',
-            'ov:rounded-[var(--ov25-button-border-radius)]',
-            'ov:hover:bg-[var(--ov25-primary-color)]/90',
-            'ov:cursor-pointer',
     )
     return (
       <div id="ov25-checkout-button-container" className={cn(
@@ -37,7 +36,7 @@ export const CheckoutButton = () => {
             <h3 className='ov:text-xl  text-center ov:text-[var(--ov25-text-color)]'>{formattedPrice}</h3>
         </div>
         <div className={cn(
-            'ov:grid ov:grid-cols ov:grid-cols-2 ov:px-2',
+            'ov:grid ov:grid-cols ov:grid-cols-2 ov:px-2 ov:gap-2',
             (buyNowFunction === undefined) || (addToBasketFunction === undefined) ? 'ov:grid-cols-1' : ''
         )}>
         {addToBasketFunction && (
@@ -49,7 +48,7 @@ export const CheckoutButton = () => {
         )}
         {buyNowFunction && (
           <Button id="ov25-checkout-button" onClick={buyNowFunction} className={cn(
-
+            primaryStyles
           )}>
             <span>BUY NOW</span>
           </Button>

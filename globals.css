@@ -19,17 +19,17 @@
     /* Custom CSS Variables */
     --ov25-background-color: white;
     --ov25-secondary-background-color: #E5E5E5;
-    --ov25-highlight-color: #64bfb7;
+    --ov25-highlight-color: #00fbff;
 
-    --ov25-text-color:#282828;
-    --ov25-secondary-text-color: #4a5565;
+    --ov25-text-color: black;
+    --ov25-secondary-text-color: #000000;
 
-    --ov25-primary-color: #64bfb7;
+    --ov25-primary-color: black;
     --ov25-border-color: #E5E5E5;
     --ov25-border-color-secondary: #282828;
 
 
-    --ov25-button-border-radius: 5px;
+    --ov25-button-border-radius: 0px;
     --ov25-button-border-width: 1px;
     
     /* Typography variables */
@@ -96,3 +96,195 @@
 
 /* dasdfasdfasdfasdfasdfasdfasdfasdfasdfasdf */
 
+.ov25-variant-control {
+  background: white;
+  margin-top: 1em;
+  padding: 2px;
+  border: 0px;
+}
+
+.ov25-variant-control svg {
+  height: 28px;
+  width: 28px;
+  fill: none;
+}
+
+html #ov25-configurator-variant-menu-container {
+  font-size: 100%;
+}
+
+#ov25-product-carousel svg {
+  height: 100%;
+  fill: none;
+  width: auto;
+}
+
+#ov25-product-carousel-counter {
+  font-size: 18px;
+}
+
+#ov25-product-carousel-controls #ov25-carousel-controls svg {
+  width: 100%;
+  height: 100%;
+  fill: none;
+}
+
+
+
+#true-ov25-configurator-iframe-container svg {
+  height: 24px;
+  width: 24px;
+  fill: none;
+}
+
+#ov25-variant-group-content img {
+  height: 100%;
+}
+
+
+
+#ov25-mobile-price-overlay img {
+  height: 24px;
+}
+
+#ov25-variants-header {
+  background: #0c5358;
+}
+
+#ov25-variants-header button {
+  width: 100%;
+  padding: 1.125em;
+}
+
+#ov25-variants-header img {
+  width: 220px;
+  height: 43px;
+}
+
+#ov25-variants-header svg {
+  height: 24px;
+  width: 24px;
+  fill: none;
+}
+
+#ov25-configurator-variant-menu-container {
+  font-size: 100%;
+}
+
+#ov25-configurator-variant-menu-container .ov25-carousel-tab {
+  border: 1px solid var(--ov25-border-color);
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+
+.ov25-carousel-tab {
+  padding-top: 0px;
+  padding-bottom: 0px;
+}
+
+
+
+#ov25-carousel-controls {
+  top: -15px;
+}
+
+#ov25-carousel-controls img {
+  height: 100%;
+  width: 100%;
+}
+
+#ov25-carousel-controls svg {
+  width: 28px;
+  height: 28px;
+  fill: none;
+}
+
+#ov25-carousel-controls h3 {
+  line-height: 1rem;
+}
+
+#ov25-carousel-controls button {
+  padding-top: 1rem;
+}
+
+#ov25-mobile-variants-content img {
+  height: 100%;
+  width: 100%;
+}
+
+#ov25-mobile-variants-content button {
+  padding: 1em;
+}
+
+#ov25-desktop-variants-content button {
+  padding: 1em;
+}
+
+#ov25-desktop-variants-content button svg {
+  --tw-translate-x: 50%;
+  --tw-translate-y: 50%;
+}
+#true-ov25-configurator-iframe-container button {
+    background-color: var(--ov25-primary-color);
+    border-color: var(--ov25-primary-color);
+    color: var(--ov25-background-color);
+    border: 1px solid var(--ov25-primary-color);
+    border-radius: 0px;
+    padding: 0.5rem;
+  }
+  
+  #true-ov25-configurator-iframe-container button p {
+    color: var(--ov25-background-color);
+  }
+
+.ov25-controls-text {
+    display: none;
+}
+
+#ov25-desktop-variants-content h3 {
+  line-height: 1.5em;
+}
+
+#ov25-desktop-variants-content img {
+  height: 100%;
+  width: 100%;
+}
+
+#ov25-desktop-variants-content div[data-selected="true"] div div {
+  border: 2px solid var(--ov25-highlight-color);
+}
+
+#ov25-variant-group-content div[data-selected="true"] div div {
+  border: 2px solid var(--ov25-highlight-color);
+}
+
+#ov25-desktop-variants-content .ov25-variant-selected-indicator {
+  translate: -50% -50%;
+}
+
+
+#ov25-mobile-variants-content h3 {
+  line-height: 1.5em;
+}
+
+#ov25-price {
+  border-bottom: 1px solid var(--ov25-border-color);
+}
+
+#ov25-price h3 {
+  line-height: 1.5rem;
+}
+
+#ov25-option-selector-tabs > div {
+  border: 1px solid var(--ov25-border-color);
+}
+
+#ov25-carousel-controls .ov25-group-control {
+  padding-top: .5rem;
+  padding-bottom: .5em;    
+  font-size: .75em;
+  line-height: 1em;
+  border: 1px solid gray;
+  border-radius: 30px;
+  color: rgb(115 115 115);
+}

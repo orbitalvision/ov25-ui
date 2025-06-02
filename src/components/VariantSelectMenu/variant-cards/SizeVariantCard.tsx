@@ -20,7 +20,7 @@ export const SizeVariantCard = React.memo(
           e.stopPropagation();
           onSelect(variant);
         }}
-        className={`ov:relative ov:flex ov:cursor-pointer ov:flex-col ov:items-center ov:gap-4 ov:w-full ov:p-4 ov:text-left ov:hover:bg-accent ov:md:border-b ov:border-[#E5E5E5] ov:text-[#282828] ${index % 2 === 0 ? 'ov:xl:border-r ov:border-[#E5E5E5]' : ''}`}
+        className={`ov:relative ov:flex ov:cursor-pointer ov:flex-col ov:items-center ov:gap-4 ov:w-full ov:p-4 ov:text-left ov:hover:bg-accent ov:md:border-b ov:border-[#E5E5E5]  ov:text-[#282828] ${index % 2 === 0 ? 'ov:xl:border-r ov:border-[#E5E5E5]' : ''}`}
         data-selected={variant.isSelected}
       >
         <div className="ov:flex ov:flex-1 ov:items-center ov:justify-between">

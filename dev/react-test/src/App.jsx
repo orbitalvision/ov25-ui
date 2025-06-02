@@ -30,7 +30,9 @@ const initializeConfigurator = () => {
     addToBasketFunction: () => {
         alert('Checkout function called');
       },
-    logoURL: 'https://ov25.orbital.vision/_next/image?url=%2Flogo.png&w=128&q=75',
+    buyNowFunction: () => {
+        alert('Buy now function called');
+      },
   });
   
   configuratorInitialized = true;

@@ -20,22 +20,22 @@ export const VariantsHeader = () => {
     const currentOption = allOptions.find(opt => opt.id === activeOptionId)
 
     return (
-      <>
+        <>
         {/* Desktop Controls: Full width button */}
         <div id="ov25-variants-header" className="ov:hidden ov:md:block">
           <button 
             onClick={() => setIsVariantsOpen(false)}
             className={cn(
-              'ov:flex ov:items-center ov:cursor-pointer ov:justify-between ov:w-full ov:border-b-1 ov:p-4 ov:py-[1.125rem]',
-              'ov:bg-[var(--ov25-primary-color)]'
+              'ov:flex ov:items-center ov:cursor-pointer ov:justify-between ov:w-full ov:border-none ov:p-4 ov:py-[1.125rem]',
+              'ov:bg-[var(--ov25-background-color)]'
             )}
           >
             <div className="ov:flex ov:items-center ov:gap-2 ov:justify-center ov:w-full ov:relative">
-              <div className="ov:absolute ov:cursor-pointer ov:w-full ov:inset-0 ov:h-full ov:flex ov:items-center ov:text-[var(--ov25-background-color)]">
+              <div className="ov:absolute ov:cursor-pointer ov:w-full ov:inset-0 ov:h-full ov:flex ov:items-center ov:text-[var(--ov25-text-color)]">
                 <ChevronLeft className="ov:h-4"/>
               </div>
               {logoURL ? (
-                <img src={logoURL} alt="Logo" className="ov:w-40 ov:h-full"/>
+                <img src={logoURL} alt="Logo" className="ov:h-full ov:w-auto ov:object-contain"/>
               ) : (
                 <h3 className="ov:text-base ov:font-[400] ov:z-10">{range?.name}</h3>
               )}

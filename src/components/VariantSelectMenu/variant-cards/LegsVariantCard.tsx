@@ -24,7 +24,7 @@ export const LegsVariantCard = React.memo(
         data-selected={variant.isSelected}
       >
         <div className="ov:relative ov:aspect-square ov:h-full ov:group-hover:bg-accent">
-          <div className="ov:absolute ov:inset-0 ov:rounded-full ov:overflow-hidden ov:bg-white ov:group-hover:bg-accent">
+          <div className="ov:absolute ov:inset-0 ov:rounded-full ov:overflow-hidden ov:bg-[var(--ov25-background-color)] ov:group-hover:bg-accent">
             <div className="ov:relative ov:w-full ov:h-full">
               {!isMobile ? (
                 <img 
@@ -46,7 +46,7 @@ export const LegsVariantCard = React.memo(
               {variant.isSelected && (
                 <div className="ov:absolute ov:inset-0">
                   <div className="ov25-variant-selected-indicator ov:absolute ov:top-1/2 ov:left-1/2 ov:-translate-x-1/2 ov:-translate-y-1/2">
-                    <div className="ov:w-6 ov:h-6 ov:rounded-full ov:bg-black/50 ov:flex ov:items-center ov:justify-center">
+                    <div className="ov:w-6 ov:h-6 ov:rounded-full ov:bg-black ov:flex ov:items-center ov:justify-center">
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="ov:w-4 ov:h-4 ov:text-white">
                         <polyline points="20 6 9 17 4 12"/>
                       </svg>

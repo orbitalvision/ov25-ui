@@ -19,7 +19,7 @@ export const MobilePriceOverlay = () => {
   // Create portal content
   const overlayContent = (
     <div className={`ov:absolute ov:inset-0 ov:w-full ov:h-full ov:flex ov:text-[var(--ov25-secondary-text-color)] ov:justify-center ov:items-start ov:z-[101] ov:pointer-events-none ov:duration-300 ov:transition-opacity ${drawerSize === 'large' ? 'ov:opacity-0 ' : 'ov:opacity-100'}`}>
-      <div id="ov25-mobile-price-overlay" className="ov:rounded-[var(--ov25-button-border-radius)] ov:bg-[var(--ov25-primary-color)] ov:backdrop-blur-md ov:px-4 ov:py-1.5 ov:mt-4 ov:flex ov:items-center ov:gap-2">
+      <div id="ov25-mobile-price-overlay" className="ov:rounded-[var(--ov25-button-border-radius)] ov:bg-[var(--ov25-background-color)] ov:backdrop-blur-md ov:px-4 ov:py-1.5 ov:mt-4 ov:flex ov:items-center ov:gap-2">
         {logoURL ? (
           <img src={logoURL} alt="Logo" className="ov:h-6 ov:w-auto" />
         ) : (

@@ -77,7 +77,6 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
         allOptions.length > 1 && allOptions.length <= 6 && (
           <div id="ov25-option-selector-tabs" className="ov:flex ov:flex-wrap">
             {allOptions.map((option, index) => {
-              const isSelected = option.id === activeOptionId;
               // Determine items per row: max 3 per row
               const itemsInFirstRow = Math.min(3, allOptions.length);
               const itemsInSecondRow = allOptions.length > 3 ? allOptions.length - 3 : 0;
@@ -96,11 +95,12 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
               return (
                 <div
                   key={`${option.id}-desktop-render`}
-                  className={`ov:cursor-pointer ov:flex ov:justify-center ov:items-center ov:my-0 ov:border-b ov:border-[var(--ov25-border-color)] ${widthClass} ${borderClass}`}
+                  className={`ov:cursor-pointer ov:flex ov:justify-center ov:items-center ov:my-0 ov:border-b ov:border-[var(--ov25-border-color)] ov:data-[selected=true]:bg-[var(--ov25-text-color)] ${widthClass} ${borderClass}`}
                   onClick={() => handleOptionClick(option?.id)}
                   style={{ maxWidth: itemsThisRow === 1 ? '100%' : itemsThisRow === 2 ? '50%' : '33.333%' }}
+                  data-selected={option.id === activeOptionId ? "true" : "false"}
                 >
-                  <div className={`ov:cursor-pointer ov:my-4 ${isSelected ? 'ov:text-[var(--ov25-primary-color)]' : 'ov:text-[var(--ov25-secondary-text-color)]'}`}>
+                  <div className={`ov:cursor-pointer ov:my-4  ov:data-[selected=true]:text-[var(--ov25-background-color)] ov:data-[selected=false]:text-[var(--ov25-secondary-text-color)]`} data-selected={option.id === activeOptionId ? "true" : "false"}>
                     {capitalizeWords(option.name)}
                   </div>
                 </div>
@@ -113,11 +113,11 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
 
       {(shouldDestructureGroups || !isGrouped) ? (<>
 
-        <div id="ov25-desktop-variants-content" className={`ov:max-h-full ov:overflow-auto ov:pb-8 ov:grid ${getGridColsClass(gridDivide)}`}>
+        <div id="ov25-desktop-variants-content" className={`ov:max-h-full ov:py-4 ov:overflow-auto ov:pb-8 ov:grid ${getGridColsClass(gridDivide)}`}>
           <VariantsContent variantsToRender={isGrouped ? (variantsToRender as VariantGroup[])[0].variants : variantsToRender as Variant[]} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
         </div></>
       ) : (
-        <div className="ov:overflow-auto">
+        <div className="ov:overflow-auto ov:py-4">
         {(variantsToRender as VariantGroup[]).map((variantGroup) => (
           <div key={variantGroup.groupName} className={`ov:max-h-full`}>
             <div className="ov:flex ov:items-center ov:mx-4 ov:justify-between">
