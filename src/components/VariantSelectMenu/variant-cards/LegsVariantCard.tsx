@@ -65,7 +65,8 @@ export const LegsVariantCard = React.memo(
       </button>
         <div 
         className={`ov:flex ov:md:hidden ov:flex-col ov:items-center ${variant.isSelected ? '' : ''} ov:transition-transform ov:pt-2`}
-        key={variant.id + variant.groupId + variant.optionId}
+        key={variant.id + variant.groupId + variant.optionId} 
+        data-selected={variant.isSelected}
     >
         <div className="ov:relative">
             <div 
