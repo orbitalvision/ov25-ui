@@ -34,7 +34,7 @@ const findElementByIdInShadowOrRegularDOM = (id: string): HTMLElement | null => 
  * Hook to position the iframe and its container at the top of the screen when drawer is open
  */
 export const useIframePositioning = () => {
-  const {isDrawerOrDialogOpen , isMobile, drawerSize } = useOV25UI();
+  const {isDrawerOrDialogOpen , isMobile, drawerSize, isProductGalleryStacked } = useOV25UI();
 
 
   useEffect(() => {
@@ -77,7 +77,7 @@ export const useIframePositioning = () => {
   useEffect(() => {
     // Get the iframe element and container
     const iframe = findElementByIdInShadowOrRegularDOM('ov25-configurator-iframe');
-    const container = findElementByIdInShadowOrRegularDOM('true-ov25-configurator-iframe-container');
+    const container = findElementByIdInShadowOrRegularDOM(isProductGalleryStacked ? 'true-ov25-configurator-iframe-container' : 'ov25-configurator-iframe-container');
 
     
     if (!iframe || !container) return;

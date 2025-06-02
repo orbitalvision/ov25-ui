@@ -10,12 +10,13 @@ import { IframeContainer } from "./IframeContainer.js"
 
 // Simplified props, most data now comes from context
 
-export function ProductGallery({isStacked}: {isStacked: boolean}) {
+export function ProductGallery() {
     // Get all required data from context
     const {
         isDrawerOrDialogOpen,
         galleryIndexToUse,
         images: passedImages,
+        isProductGalleryStacked
     } = useOV25UI();
 
 
@@ -24,7 +25,7 @@ export function ProductGallery({isStacked}: {isStacked: boolean}) {
 
     // Handle z-index for non-stacked gallery when drawer opens
     useEffect(() => {
-        if (isStacked) return;
+        if (!isProductGalleryStacked) return;
         
         if (isDrawerOrDialogOpen) {
             const container = document.querySelector('.ov25-configurator-gallery') as HTMLElement;
@@ -42,7 +43,7 @@ export function ProductGallery({isStacked}: {isStacked: boolean}) {
                 }
             };
         }
-    }, [isStacked, isDrawerOrDialogOpen]);
+    }, [isProductGalleryStacked, isDrawerOrDialogOpen]);
 
 
     const containerRef = useRef<HTMLDivElement>(null);
@@ -54,7 +55,7 @@ export function ProductGallery({isStacked}: {isStacked: boolean}) {
     // Position the true iframe container to match the normal container
     useEffect(() => {
         // Only run positioning logic when gallery is stacked
-       if(!isStacked) return;
+       if(!isProductGalleryStacked) return;
         
         let frameId: number;
         
@@ -93,7 +94,7 @@ export function ProductGallery({isStacked}: {isStacked: boolean}) {
         return () => {
             cancelAnimationFrame(frameId);
         };
-    }, [isDrawerOrDialogOpen, isStacked]);
+    }, [isDrawerOrDialogOpen, isProductGalleryStacked]);
 
 
     
@@ -114,13 +115,13 @@ export function ProductGallery({isStacked}: {isStacked: boolean}) {
                     "ov:bg-[var(--ov25-configurator-iframe-background-color)]",
                 )}>
 
-                {!isStacked && <IframeContainer isStacked={isStacked} />}
+                {!isProductGalleryStacked && <IframeContainer />}
 
             </div>
             <div id='true-carousel' ></div>
         </div>
-        {isStacked && createPortal(
-           <IframeContainer isStacked={isStacked} />,
+        {isProductGalleryStacked && createPortal(
+           <IframeContainer  />,
             document.body
         )}
 

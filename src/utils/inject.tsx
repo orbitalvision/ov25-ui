@@ -173,7 +173,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     const isProductGalleryStacked = checkForStackedGallery();
 
     // Process each component
-    processElement(galleryId, <ProductGallery isStacked={isProductGalleryStacked} />, 'gallery');
+    processElement(galleryId, <ProductGallery  />, 'gallery');
     processElement(priceId, <Price />, 'price');
     processElement(nameId, <Name />, 'name');
     processElement(variantsId, <VariantSelectMenu />, 'variants');
@@ -227,6 +227,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
         images={images} 
         logoURL={logoURL ?? 'https://ov25.orbital.vision/OV.png'}
         deferThreeD={deferThreeD}
+        isProductGalleryStacked={isProductGalleryStacked}
       >
         {portals}
       </OV25UIProvider>

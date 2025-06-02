@@ -7,7 +7,7 @@ import ConfiguratorViewControls from "./ConfiguratorViewControls.js"
 import { cn } from "../lib/utils.js"
 
 
-export const IframeContainer = ({isStacked}: {isStacked: boolean}) => {
+export const IframeContainer = () => {
     // Get all required data from context
     const {
         iframeRef,
@@ -20,6 +20,7 @@ export const IframeContainer = ({isStacked}: {isStacked: boolean}) => {
         apiKey,
         galleryIndexToUse,
         images: passedImages,
+        isProductGalleryStacked: isStacked
     } = useOV25UI();
 
     // Get the images from the current product
