@@ -14,7 +14,7 @@ export const SizeVariantCard = React.memo(
     const imgSrc = variant.image || "/placeholder.svg";
     
     return (
-      <button
+      <div
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -42,7 +42,7 @@ export const SizeVariantCard = React.memo(
             </div>
           </div>
         </div>
-      </button>
+      </div>
     );
   },
   // Custom comparison function to determine when to re-render

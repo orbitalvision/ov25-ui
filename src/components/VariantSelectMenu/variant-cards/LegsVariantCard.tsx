@@ -14,7 +14,7 @@ export const LegsVariantCard = React.memo(
     const imgSrc = variant.image || "/placeholder.svg";
     
     return (<>
-      <button
+      <div
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
@@ -62,7 +62,7 @@ export const LegsVariantCard = React.memo(
             <h3 className="ov:font-[350] ov:text-sm ov:text-[var(--ov25-secondary-text-color)]">{variant.name}</h3>
           </div>
         </div>
-      </button>
+      </div>
         <div 
         className={`ov:flex ov:md:hidden ov:flex-col ov:items-center ${variant.isSelected ? '' : ''} ov:transition-transform ov:pt-2`}
         key={variant.id + variant.groupId + variant.optionId} 
