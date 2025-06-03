@@ -18,7 +18,7 @@ const VariantsContentWithCarousel = ({ variantsToRender, VariantCard, onSelect, 
 
                 </CarouselItem>
             {variantsToRender.map((variant, index) => {
-              const basis =   Math.min(variantsToRender.length, activeOptionName === 'size' ? 2  : activeOptionName === 'Legs' ? 3 : 5);
+              const basis =   Math.min(variantsToRender.length, activeOptionName === 'size' ? 2  : false ? 3 : 5);
               const flexBasis = {
                 1: '100%',
                 2: '50%',
