@@ -34,6 +34,7 @@ export interface InjectConfiguratorOptions {
   addToBasketFunction: () => void;
   buyNowFunction: () => void;
   logoURL: string;
+  mobileLogoURL?: string;
   cssVariables?: JSON;
 }
 
@@ -50,6 +51,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     buyNowFunction,
     images,
     logoURL,
+    mobileLogoURL,
     cssVariables,
     deferThreeD,
   } = opts;
@@ -226,6 +228,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
         addToBasketFunction={addToBasketFunction} 
         images={images} 
         logoURL={logoURL ?? 'https://ov25.orbital.vision/OV.png'}
+        mobileLogoURL={mobileLogoURL}
         deferThreeD={deferThreeD}
         isProductGalleryStacked={isProductGalleryStacked}
       >
