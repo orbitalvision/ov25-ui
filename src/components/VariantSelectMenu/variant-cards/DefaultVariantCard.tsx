@@ -13,7 +13,7 @@ interface VariantCardProps {
 export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobile, isGrouped = false }: VariantCardProps) => {
     return (
         <div 
-        className={`ov:flex ov:flex-col ov:items-center ${variant.isSelected ? '' : ''} ov:transition-transform ov:pt-2`}
+        className={`ov25-default-variant-card ov:flex ov:flex-col ov:items-center ${variant.isSelected ? '' : ''} ov:transition-transform ov:pt-2`}
         key={variant.id + variant.groupId + variant.optionId}
         data-selected={variant.isSelected}
     >
