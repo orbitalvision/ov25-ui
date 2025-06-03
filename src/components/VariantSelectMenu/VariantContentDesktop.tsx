@@ -1,5 +1,5 @@
 // Content component for desktop view
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import { useOV25UI } from "../../contexts/ov25-ui-context.js";
@@ -14,36 +14,83 @@ export function VariantContentDesktop() {
       } = useOV25UI();
     
     const menuContainerRef = useRef<HTMLDivElement>(null);
+    const [originalStyles, setOriginalStyles] = useState<{
+      body: {
+        overflow: string;
+        position: string;
+        width: string;
+        top: string;
+      };
+      html: {
+        overflow: string;
+      };
+    } | null>(null);
     
     useEffect(() => {
       // Update body styles when drawer is opened/closed
       if (isVariantsOpen) {
+        // Store original styles before modifying
+        const bodyStyles = {
+          overflow: document.body.style.overflow,
+          position: document.body.style.position,
+          width: document.body.style.width,
+          top: document.body.style.top,
+        };
+        const htmlStyles = {
+          overflow: document.documentElement.style.overflow,
+        };
+        setOriginalStyles({ body: bodyStyles, html: htmlStyles });
+
         document.body.style.overflow = 'hidden';
         document.body.style.position = 'fixed';
         document.body.style.width = '100%';
         document.body.style.top = `-${window.scrollY}px`;
+        document.documentElement.style.overflow = 'hidden';
         setIsDrawerOrDialogOpen(true);
       } else {
         const scrollY = document.body.style.top;
-        document.body.style.overflow = '';
-        document.body.style.position = '';
-        document.body.style.width = '';
-        document.body.style.top = '';
+        
+        // Restore original styles if we have them
+        if (originalStyles) {
+          document.body.style.overflow = originalStyles.body.overflow;
+          document.body.style.position = originalStyles.body.position;
+          document.body.style.width = originalStyles.body.width;
+          document.body.style.top = originalStyles.body.top;
+          document.documentElement.style.overflow = originalStyles.html.overflow;
+        } else {
+          // Fallback to empty strings
+          document.body.style.overflow = '';
+          document.body.style.position = '';
+          document.body.style.width = '';
+          document.body.style.top = '';
+          document.documentElement.style.overflow = '';
+        }
+        
         window.scrollTo(0, parseInt(scrollY || '0') * -1);
         setIsDrawerOrDialogOpen(false);
+        setOriginalStyles(null);
       }
-    }, [isVariantsOpen]);
+    }, [isVariantsOpen, originalStyles]);
  
     // Cleanup function to reset body styles when component unmounts
     useEffect(() => {
       return () => {
-        document.body.style.overflow = '';
-        document.body.style.position = '';
-        document.body.style.width = '';
-        document.body.style.top = '';
+        if (originalStyles) {
+          document.body.style.overflow = originalStyles.body.overflow;
+          document.body.style.position = originalStyles.body.position;
+          document.body.style.width = originalStyles.body.width;
+          document.body.style.top = originalStyles.body.top;
+          document.documentElement.style.overflow = originalStyles.html.overflow;
+        } else {
+          document.body.style.overflow = '';
+          document.body.style.position = '';
+          document.body.style.width = '';
+          document.body.style.top = '';
+          document.documentElement.style.overflow = '';
+        }
         setIsDrawerOrDialogOpen(false);
       };
-    }, []);
+    }, [originalStyles]);
 
     // Animation effect for the menu container
     useEffect(() => {

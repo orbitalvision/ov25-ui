@@ -37,6 +37,17 @@ const TwoStageDrawerComponent = ({
   const dragStartY = useRef(0)
   const isMobile = useMediaQuery(768) // md breakpoint
   const { setIsDrawerOrDialogOpen: setIsDrawerOpen } = useOV25UI()
+  const [originalStyles, setOriginalStyles] = useState<{
+    body: {
+      overflow: string;
+      position: string;
+      width: string;
+      top: string;
+    };
+    html: {
+      overflow: string;
+    };
+  } | null>(null);
 
   const [viewportHeight, setViewportHeight] = useState(window.visualViewport?.height || window.innerHeight)
   function getViewportHeight() {
@@ -91,29 +102,68 @@ const TwoStageDrawerComponent = ({
 
   useEffect(() => {
     if (drawerState !== 0) {
+      // Store original styles before modifying
+      if (!originalStyles) {
+        const bodyStyles = {
+          overflow: document.body.style.overflow,
+          position: document.body.style.position,
+          width: document.body.style.width,
+          top: document.body.style.top,
+        };
+        const htmlStyles = {
+          overflow: document.documentElement.style.overflow,
+        };
+        setOriginalStyles({ body: bodyStyles, html: htmlStyles });
+      }
+
       document.body.style.overflow = 'hidden'
       document.body.style.position = 'fixed'
       document.body.style.width = '100%'
       document.body.style.top = `-${window.scrollY}px`
+      document.documentElement.style.overflow = 'hidden'
       setIsDrawerOpen(true)
     } else {
       const scrollY = document.body.style.top
-      document.body.style.overflow = ''
-      document.body.style.position = ''
-      document.body.style.width = ''
-      document.body.style.top = ''
+      
+      // Restore original styles if we have them
+      if (originalStyles) {
+        document.body.style.overflow = originalStyles.body.overflow
+        document.body.style.position = originalStyles.body.position
+        document.body.style.width = originalStyles.body.width
+        document.body.style.top = originalStyles.body.top
+        document.documentElement.style.overflow = originalStyles.html.overflow
+      } else {
+        // Fallback to empty strings
+        document.body.style.overflow = ''
+        document.body.style.position = ''
+        document.body.style.width = ''
+        document.body.style.top = ''
+        document.documentElement.style.overflow = ''
+      }
+      
       window.scrollTo(0, parseInt(scrollY || '0') * -1)
       setIsDrawerOpen(false)
+      setOriginalStyles(null)
     }
 
     return () => {
-      document.body.style.overflow = ''
-      document.body.style.position = ''
-      document.body.style.width = ''
-      document.body.style.top = ''
+      if (originalStyles) {
+        document.body.style.overflow = originalStyles.body.overflow
+        document.body.style.position = originalStyles.body.position
+        document.body.style.width = originalStyles.body.width
+        document.body.style.top = originalStyles.body.top
+        document.documentElement.style.overflow = originalStyles.html.overflow
+      } else {
+        document.body.style.overflow = ''
+        document.body.style.position = ''
+        document.body.style.width = ''
+        document.body.style.top = ''
+        document.documentElement.style.overflow = ''
+      }
       setIsDrawerOpen(false)
+      setOriginalStyles(null)
     }
-  }, [drawerState, setIsDrawerOpen])
+  }, [drawerState, setIsDrawerOpen, originalStyles])
 
   const getHeightForState = (state: DrawerState) => {
     switch (state) {
