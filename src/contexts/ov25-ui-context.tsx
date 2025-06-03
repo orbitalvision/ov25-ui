@@ -95,6 +95,7 @@ interface OV25UIContextType {
   addToBasketFunction: () => void;
   images?: string[];
   logoURL: string;
+  isProductGalleryStacked: boolean;
   mobileLogoURL?: string;
   // Computed values
   currentProduct?: Product;
@@ -146,6 +147,7 @@ export const OV25UIProvider: React.FC<{
   images?: string[],
   deferThreeD?: boolean,
   logoURL: string,
+  isProductGalleryStacked: boolean,
   mobileLogoURL?: string
 }> = ({ 
   children,
@@ -156,6 +158,7 @@ export const OV25UIProvider: React.FC<{
   images,
   deferThreeD = false,
   logoURL,
+  isProductGalleryStacked,
   mobileLogoURL
 }) => {
   // State definitions
@@ -413,6 +416,7 @@ export const OV25UIProvider: React.FC<{
     animationState,
     iframeRef,
     isMobile,
+    isProductGalleryStacked,
     hasSwitchedAfterDefer,
     deferThreeD,
     galleryIndexToUse,
