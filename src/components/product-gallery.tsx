@@ -25,7 +25,7 @@ export function ProductGallery() {
 
     // Handle z-index for non-stacked gallery when drawer opens
     useEffect(() => {
-        if (!isProductGalleryStacked) return;
+        if (isProductGalleryStacked) return;
         
         if (isDrawerOrDialogOpen) {
             const container = document.querySelector('.ov25-configurator-gallery') as HTMLElement;
