@@ -250,11 +250,11 @@ html #ov25-configurator-variant-menu-container {
   width: 100%;
 }
 
-#ov25-desktop-variants-content div[data-selected="true"] div div {
+#ov25-desktop-variants-content div[data-selected="true"] .ov25-variant-image-container {
   border: 2px solid var(--ov25-highlight-color);
 }
 
-#ov25-variant-group-content div[data-selected="true"] div div {
+#ov25-variant-group-content div[data-selected="true"] .ov25-variant-image-container {
   border: 2px solid var(--ov25-highlight-color);
 }
 
