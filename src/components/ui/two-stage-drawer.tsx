@@ -132,6 +132,7 @@ const TwoStageDrawerComponent = ({
         document.body.style.width = originalStyles.body.width
         document.body.style.top = originalStyles.body.top
         document.documentElement.style.overflow = originalStyles.html.overflow
+        setOriginalStyles(null)
       } else {
         // Fallback to empty strings
         document.body.style.overflow = ''
@@ -143,7 +144,6 @@ const TwoStageDrawerComponent = ({
       
       window.scrollTo(0, parseInt(scrollY || '0') * -1)
       setIsDrawerOpen(false)
-      setOriginalStyles(null)
     }
 
     return () => {
@@ -153,6 +153,7 @@ const TwoStageDrawerComponent = ({
         document.body.style.width = originalStyles.body.width
         document.body.style.top = originalStyles.body.top
         document.documentElement.style.overflow = originalStyles.html.overflow
+        setOriginalStyles(null)
       } else {
         document.body.style.overflow = ''
         document.body.style.position = ''
@@ -161,7 +162,6 @@ const TwoStageDrawerComponent = ({
         document.documentElement.style.overflow = ''
       }
       setIsDrawerOpen(false)
-      setOriginalStyles(null)
     }
   }, [drawerState, setIsDrawerOpen, originalStyles])
 
