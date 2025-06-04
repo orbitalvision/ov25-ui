@@ -12,14 +12,14 @@ interface VariantCardProps {
   
 export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobile, isGrouped = false }: VariantCardProps) => {
     return (
-        <div 
+    <div 
         className={`ov25-default-variant-card ov:flex ov:flex-col ov:items-center ${variant.isSelected ? '' : ''} ov:transition-transform ov:pt-2`}
         key={variant.id + variant.groupId + variant.optionId}
         data-selected={variant.isSelected}
     >
         <div className="ov:relative">
             <div 
-                className={`${isGrouped ? 'ov:w-10 ov:h-10' : 'ov:w-14 ov:h-14'} md:ov:w-14 md:ov:h-14 ov:rounded-full ov:overflow-hidden ov:mb-1 ov:cursor-pointer ${variant.isSelected ? 'ov:border-2 ov:border-[var(--ov25-highlight-color)] ov:shadow-lg' : 'ov:border-transparent ov:shadow-md'}`}
+                className={`ov25-variant-image-container ${isGrouped ? 'ov:w-10 ov:h-10' : 'ov:w-14 ov:h-14'} md:ov:w-14 md:ov:h-14 ov:rounded-full ov:overflow-hidden ov:mb-1 ov:cursor-pointer ${variant.isSelected ? 'ov:border-2 ov:border-[var(--ov25-highlight-color)] ov:shadow-lg' : 'ov:border-transparent ov:shadow-md'}`}
                 {...(variant.isSelected && { selected: true })}
                 onClick={() => onSelect(variant)}
             >

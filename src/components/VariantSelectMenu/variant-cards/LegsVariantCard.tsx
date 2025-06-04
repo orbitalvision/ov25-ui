@@ -24,7 +24,7 @@ export const LegsVariantCard = React.memo(
         data-selected={variant.isSelected}
       >
         <div className="ov:relative ov:aspect-square ov:h-full ov:group-hover:bg-accent">
-          <div className="ov:absolute ov:inset-0 ov:rounded-full ov:overflow-hidden ov:bg-[var(--ov25-background-color)] ov:group-hover:bg-accent">
+          <div className="ov25-variant-image-container ov:absolute ov:inset-0 ov:rounded-full ov:overflow-hidden ov:bg-[var(--ov25-background-color)] ov:group-hover:bg-accent">
             <div className="ov:relative ov:w-full ov:h-full">
               {!isMobile ? (
                 <img 
@@ -63,14 +63,14 @@ export const LegsVariantCard = React.memo(
           </div>
         </div>
       </div>
-        <div 
-        className={`ov:flex ov:md:hidden ov:flex-col ov:items-center ${variant.isSelected ? '' : ''} ov:transition-transform ov:pt-2`}
+      <div 
+        className={`ov25-legs-variant-card ov:flex ov:md:hidden ov:flex-col ov:items-center ${variant.isSelected ? '' : ''} ov:transition-transform ov:pt-2`}
         key={variant.id + variant.groupId + variant.optionId} 
         data-selected={variant.isSelected}
-    >
+      >
         <div className="ov:relative">
             <div 
-                className={`ov:w-14 ov:h-14 ov:rounded-full ov:overflow-hidden ov:mb-1 ov:cursor-pointer ${variant.isSelected ? 'ov:border-2 ov:border-[var(--ov25-highlight-color)] ov:shadow-lg' : 'ov:border-transparent ov:shadow-md'}`}
+                className={`ov25-variant-image-container ov:w-14 ov:h-14 ov:rounded-full ov:overflow-hidden ov:mb-1 ov:cursor-pointer ${variant.isSelected ? 'ov:border-2 ov:border-[var(--ov25-highlight-color)] ov:shadow-lg' : 'ov:border-transparent ov:shadow-md'}`}
                 {...(variant.isSelected && { selected: true })}
                 onClick={() => onSelect(variant)}
             >
