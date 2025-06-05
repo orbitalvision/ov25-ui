@@ -10,6 +10,7 @@ const VariantsContentWithCarousel = ({ variantsToRender, VariantCard, onSelect, 
     const {allOptions, activeOptionId} = useOV25UI()
     const activeOption = allOptions.find((option) => option.id === activeOptionId)
     const activeOptionName = activeOption?.name ?? ''
+
     return (
       <>
         <Carousel opts={{ dragFree: true, loop: false }}>
@@ -55,7 +56,6 @@ export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSe
     }) => {
     const [selectedGroupIndex, setSelectedGroupIndex] = useState(0)
 
-
     const isGrouped = Array.isArray(variants) && variants.length > 0 && 'groupName' in variants[0]
     const shouldDestructureGroups = isGrouped && variants.length < 2 
 
@@ -64,14 +64,13 @@ export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSe
         [isGrouped, variants]
     );
 
-
-
     const {
         drawerSize
       } = useOV25UI();
 
     if (isGrouped && !shouldDestructureGroups) {
-      const variantsToRender = (variants as VariantGroup[])[selectedGroupIndex].variants;
+      const group = (variants as VariantGroup[])[selectedGroupIndex]
+      const variantsToRender =  group ? group.variants : [] as Variant[];
       return (
         <div className="ov:">
           <Carousel opts={{ dragFree: true, loop: false }} className="ov:py-2">

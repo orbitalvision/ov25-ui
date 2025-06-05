@@ -71,7 +71,12 @@ export const ProductVariants = ({
     )}>
       <VariantsHeader />
       {isMobile ? (
-        <MobileVariants 
+        <MobileVariants
+          key={Array.isArray(variants) && variants.length > 0 // Triggers a re-render when the variants change - ensuring state is reset when groups & options are switched between
+            ? ('id' in variants[0]
+                ? variants[0].id
+                : ('groupName' in variants[0] ? variants[0].groupName : 'default'))
+            : 'default'}
           variants={variants}
           VariantCard={VariantCard}
           isMobile={isMobile}
