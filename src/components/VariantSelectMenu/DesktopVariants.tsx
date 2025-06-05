@@ -119,7 +119,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
       ) : (
         <div className="ov:overflow-auto ov:py-4">
         {(variantsToRender as VariantGroup[]).map((variantGroup) => (
-          <div key={variantGroup.groupName} className={`ov:max-h-full`}>
+          <div key={variantGroup.groupName}>
             <div className="ov:flex ov:items-center ov:mx-4 ov:justify-between">
               <h3 className="ov25-group-name ov:text-lg ov:text-[var(--ov25-secondary-text-color)]">{variantGroup.groupName}</h3>
             </div>
