@@ -281,10 +281,8 @@ html #ov25-configurator-variant-menu-container {
 
 #ov25-carousel-controls .ov25-group-control {
   padding-top: .5rem;
-  padding-bottom: .5em;    
+  padding-bottom: .5em;
   font-size: .75em;
   line-height: 1em;
-  border: 1px solid gray;
   border-radius: 30px;
-  color: rgb(115 115 115);
 }

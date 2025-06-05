@@ -74,21 +74,22 @@ export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSe
       const variantsToRender = (variants as VariantGroup[])[selectedGroupIndex].variants;
       return (
         <div className="ov:">
-          <Carousel opts={{ dragFree: true, loop: false }}>
+          <Carousel opts={{ dragFree: true, loop: false }} className="ov:py-2">
             <CarouselContent className="ov:px-4 ov:-ml-2 ov:pr-4">
               <CarouselItem key={'placeholder'} className="ov:basis-[37%] ov:py-2">
                 <div className="ov:w-full ov:h-full ov:bg-transparent"></div>
               </CarouselItem>
               {(variants as VariantGroup[]).map((group, index) => (
-                <CarouselItem key={group.groupName} className="ov:basis-1/4 ov:py-2">
+                <CarouselItem key={group.groupName} className="ov:basis-1/2 ov:py-2">
                   <button
                     onClick={() => setSelectedGroupIndex(index)}
-                    className={`ov25-group-control ov:w-full ov:py-2 ov:rounded-full ov:shadow-md ov:text-neutral-500 ov:border ${selectedGroupIndex === index
-                      ? 'ov:border-neutral-900 ov:text-neutral-900'
-                      : ''
-                      } ov:flex ov:items-center ov:justify-center ov:text-xs ov:gap-2 ov:whitespace-nowrap`}
+                    className={`ov25-group-control ov:w-full ov:py-2 ov:px-4 ov:rounded-full ov:shadow-md ov:text-neutral-500 ov:border ${
+                      selectedGroupIndex === index
+                        ? 'ov:border-neutral-900 ov:text-neutral-900'
+                        : ''
+                    } ov:flex ov:items-center ov:justify-center ov:text-xs ov:gap-2 ov:whitespace-nowrap`}
                   >
-                    <span>{capitalizeWords(group.groupName)}</span>
+                    <span className="ov:truncate">{capitalizeWords(group.groupName)}</span>
                   </button>
                 </CarouselItem>
               ))}
