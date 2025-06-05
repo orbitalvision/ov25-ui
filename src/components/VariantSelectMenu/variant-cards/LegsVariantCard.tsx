@@ -22,6 +22,7 @@ export const LegsVariantCard = React.memo(
         }}
         className={`ov25-legs-variant-card ov:**:ov:relative ov:hidden ov:md:flex ov:cursor-pointer ov:flex-col ov:h-[160px] ov:md:h-[200px] ov:xl:h-[217px] ov:items-center ov:gap-4 ov:w-full ov:p-6 ov:py-4 ov:text-left ov:hover:bg-accent ov:md:border-b ov:border-[#E5E5E5] ov:text-[#282828] ov:group ${index % 2 === 0 ? 'ov:xl:border-r ov:border-[#E5E5E5]' : ''}`}
         data-selected={variant.isSelected}
+        title={variant.name}
       >
         <div className="ov:relative ov:aspect-square ov:h-full ov:group-hover:bg-accent">
           <div className="ov25-variant-image-container ov:absolute ov:inset-0 ov:rounded-full ov:overflow-hidden ov:bg-[var(--ov25-background-color)] ov:group-hover:bg-accent">
@@ -67,6 +68,7 @@ export const LegsVariantCard = React.memo(
         className={`ov25-legs-variant-card ov:flex ov:md:hidden ov:flex-col ov:items-center ${variant.isSelected ? '' : ''} ov:transition-transform ov:pt-2`}
         key={variant.id + variant.groupId + variant.optionId} 
         data-selected={variant.isSelected}
+        title={variant.name}
       >
         <div className="ov:relative">
             <div 

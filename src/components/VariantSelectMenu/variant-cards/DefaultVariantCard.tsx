@@ -16,6 +16,7 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
         className={`ov25-default-variant-card ov:flex ov:flex-col ov:items-center ${variant.isSelected ? '' : ''} ov:transition-transform ov:pt-2`}
         key={variant.id + variant.groupId + variant.optionId}
         data-selected={variant.isSelected}
+        title={variant.name}
     >
         <div className="ov:relative">
             <div 
