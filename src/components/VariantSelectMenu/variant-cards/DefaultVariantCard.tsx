@@ -1,6 +1,5 @@
-import { Check } from 'lucide-react';
+import { BanIcon } from 'lucide-react';
 import * as React from 'react'
-import { CSSProperties } from 'react';
 
 interface VariantCardProps {
     variant: any;
@@ -24,7 +23,11 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
                 {...(variant.isSelected && { selected: true })}
                 onClick={() => onSelect(variant)}
             >
-                {variant.image ? (
+                {variant.name.toLowerCase() === "none" ? (
+                    <div className="ov:w-full ov:h-full ov:flex ov:items-center ov:justify-center" data-none="true">
+                        <BanIcon className="ov:w-10 ov:h-10 ov:text-[var(--ov25-secondary-text-color)]" />
+                    </div>
+                ) : variant.image ? (
                     <img 
                         src={variant.image || '/placeholder.svg'}
                         alt={variant.name}
