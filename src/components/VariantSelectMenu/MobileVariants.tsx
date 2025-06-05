@@ -79,10 +79,10 @@ export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSe
                 <div className="ov:w-full ov:h-full ov:bg-transparent"></div>
               </CarouselItem>
               {(variants as VariantGroup[]).map((group, index) => (
-                <CarouselItem key={group.groupName} className="ov:basis-1/2 ov:py-2">
+                <CarouselItem key={group.groupName} className="ov:py-2 ov:max-w-full ov:basis-auto">
                   <button
                     onClick={() => setSelectedGroupIndex(index)}
-                    className={`ov25-group-control ov:w-full ov:py-2 ov:px-4 ov:rounded-full ov:shadow-md ov:text-neutral-500 ov:border ${
+                    className={`ov25-group-control ov:w-auto ov:py-2 ov:px-4 ov:rounded-full ov:shadow-md ov:text-neutral-500 ov:border ${
                       selectedGroupIndex === index
                         ? 'ov:border-neutral-900 ov:text-neutral-900'
                         : ''
