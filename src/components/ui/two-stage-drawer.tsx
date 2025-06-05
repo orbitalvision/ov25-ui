@@ -251,12 +251,23 @@ const TwoStageDrawerComponent = ({
       }}
     >
       <div id="ov25-drawer-content" className="ov:w-full ov:h-full ov:bg-[var(--ov25-background-color)] ov:relative ov:rounded-t-xl ov:[box-shadow:0_-4px_6px_-1px_rgba(0,0,0,0.05),0_-2px_4px_-2px_rgba(0,0,0,0.03)]">
-        <div 
-          {...bind()} 
-          className="ov:w-full ov:flex ov:justify-center ov:cursor-grab ov:touch-none ov:active:cursor-grabbing"
-        >
-        <div className="ov:py-4 ov:z-10">
-          <div className="ov:w-8 ov:h-1 ov:mt-0 ov:bg-[var(--ov25-border-color)] ov:shadow-sm ov:rounded-full "/></div>
+        <div className="ov:w-full ov:relative ov:flex ov:justify-center">
+          {/* Invisible hitbox for drag */}
+          <div
+            {...bind()}
+            className="ov:absolute ov:top-0"
+            style={{
+              width: '150px',
+              height: '60px',
+              zIndex: 20,
+              cursor: 'grab',
+              touchAction: 'none',
+            }}
+          />
+          {/* Visible handle */}
+          <div id="ov25-draggable-icon" className="ov:py-4 ov:z-10">
+            <div className="ov:w-8 ov:h-1 ov:mt-0 ov:bg-[var(--ov25-border-color)] ov:shadow-sm ov:rounded-full "/>
+          </div>
         </div>
 
         <div className="ov:h-full ov:flex ov:flex-col ov:pointer-events-none">{children}</div>
