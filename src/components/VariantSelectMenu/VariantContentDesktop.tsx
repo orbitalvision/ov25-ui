@@ -14,7 +14,7 @@ export function VariantContentDesktop() {
       } = useOV25UI();
     
     const menuContainerRef = useRef<HTMLDivElement>(null);
-    const [originalStyles, setOriginalStyles] = useState<{
+    const originalStyles = useRef<{
       body: {
         overflow: string;
         position: string;
@@ -27,7 +27,6 @@ export function VariantContentDesktop() {
     } | null>(null);
     
     useEffect(() => {
-      // Update body styles when drawer is opened/closed
       if (isVariantsOpen) {
         // Store original styles before modifying
         const bodyStyles = {
@@ -39,7 +38,7 @@ export function VariantContentDesktop() {
         const htmlStyles = {
           overflow: document.documentElement.style.overflow,
         };
-        setOriginalStyles({ body: bodyStyles, html: htmlStyles });
+        originalStyles.current = { body: bodyStyles, html: htmlStyles };
 
         document.body.style.overflow = 'hidden';
         document.body.style.position = 'fixed';
@@ -51,12 +50,12 @@ export function VariantContentDesktop() {
         const scrollY = document.body.style.top;
         
         // Restore original styles if we have them
-        if (originalStyles) {
-          document.body.style.overflow = originalStyles.body.overflow;
-          document.body.style.position = originalStyles.body.position;
-          document.body.style.width = originalStyles.body.width;
-          document.body.style.top = originalStyles.body.top;
-          document.documentElement.style.overflow = originalStyles.html.overflow;
+        if (originalStyles.current) {
+          document.body.style.overflow = originalStyles.current.body.overflow;
+          document.body.style.position = originalStyles.current.body.position;
+          document.body.style.width = originalStyles.current.body.width;
+          document.body.style.top = originalStyles.current.body.top;
+          document.documentElement.style.overflow = originalStyles.current.html.overflow;
         } else {
           // Fallback to empty strings
           document.body.style.overflow = '';
@@ -68,19 +67,19 @@ export function VariantContentDesktop() {
         
         window.scrollTo(0, parseInt(scrollY || '0') * -1);
         setIsDrawerOrDialogOpen(false);
-        setOriginalStyles(null);
+        originalStyles.current = null;
       }
-    }, [isVariantsOpen, originalStyles]);
+    }, [isVariantsOpen]);
  
     // Cleanup function to reset body styles when component unmounts
     useEffect(() => {
       return () => {
-        if (originalStyles) {
-          document.body.style.overflow = originalStyles.body.overflow;
-          document.body.style.position = originalStyles.body.position;
-          document.body.style.width = originalStyles.body.width;
-          document.body.style.top = originalStyles.body.top;
-          document.documentElement.style.overflow = originalStyles.html.overflow;
+        if (originalStyles.current) {
+          document.body.style.overflow = originalStyles.current.body.overflow;
+          document.body.style.position = originalStyles.current.body.position;
+          document.body.style.width = originalStyles.current.body.width;
+          document.body.style.top = originalStyles.current.body.top;
+          document.documentElement.style.overflow = originalStyles.current.html.overflow;
         } else {
           document.body.style.overflow = '';
           document.body.style.position = '';
