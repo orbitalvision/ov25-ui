@@ -100,7 +100,10 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
                   style={{ maxWidth: itemsThisRow === 1 ? '100%' : itemsThisRow === 2 ? '50%' : '33.333%' }}
                   data-selected={option.id === activeOptionId ? "true" : "false"}
                 >
-                  <div className={`ov:cursor-pointer ov:my-4  ov:data-[selected=true]:text-[var(--ov25-background-color)] ov:data-[selected=false]:text-[var(--ov25-secondary-text-color)]`} data-selected={option.id === activeOptionId ? "true" : "false"}>
+                  <div
+                    className={`ov:w-full ov:text-center ov:cursor-pointer ov:my-4 ov:data-[selected=true]:text-[var(--ov25-background-color)] ov:data-[selected=false]:text-[var(--ov25-secondary-text-color)]`}
+                    data-selected={option.id === activeOptionId ? "true" : "false"}
+                  >
                     {capitalizeWords(option.name)}
                   </div>
                 </div>
