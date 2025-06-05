@@ -255,15 +255,7 @@ const TwoStageDrawerComponent = ({
           {/* Invisible hitbox for drag */}
           <div
             {...bind()}
-            className="ov:absolute ov:top-0"
-            style={{
-              width: '150px',
-              height: '60px',
-              zIndex: 20,
-              cursor: 'grab',
-              touchAction: 'none',
-            }}
-          />
+            className="ov:absolute ov:top-0 ov:w-[150px] ov:h-[60px] ov:z-[20] ov:cursor-grab ov:touch-none ov:active:cursor-grabbing" />
           {/* Visible handle */}
           <div id="ov25-draggable-icon" className="ov:py-4 ov:z-10">
             <div className="ov:w-8 ov:h-1 ov:mt-0 ov:bg-[var(--ov25-border-color)] ov:shadow-sm ov:rounded-full "/>
