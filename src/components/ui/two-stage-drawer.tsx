@@ -50,11 +50,11 @@ const TwoStageDrawerComponent = ({
   } | null>(null);
 
   const [viewportHeight, setViewportHeight] = useState(window.visualViewport?.height || window.innerHeight)
+  const [isViewportReady, setIsViewportReady] = useState(false)
+  
   function getViewportHeight() {
     return window.visualViewport?.height || window.innerHeight;
   }
-
-
 
   function getMinHeight() {
     return viewportHeight - (isMobile ? window.innerWidth : window.innerWidth * (2/3))
@@ -74,31 +74,43 @@ const TwoStageDrawerComponent = ({
 
   // Effect to update drawer height on window resize
   useEffect(() => {
-    const handleResize = () => {
+    const updateHeight = () => {
+      const newHeight = getViewportHeight();
+      setViewportHeight(newHeight);
+      setIsViewportReady(true);
+
+      // Update drawer height if it's open
       if (drawerState !== 0) {
         const newMinHeight = getMinHeight();
         const newMaxHeight = getMaxHeight();
-        
         const newHeight = drawerState === 1 ? newMinHeight : newMaxHeight;
         api.start({ height: newHeight });
       }
     };
 
-    setViewportHeight(getViewportHeight())
+    // Update height on visual viewport changes
+    window.visualViewport?.addEventListener('resize', updateHeight);
+    window.visualViewport?.addEventListener('scroll', updateHeight);
+    window.addEventListener('resize', updateHeight);
 
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [drawerState, api, isMobile]);
+    // Initial height update
+    updateHeight();
+
+    return () => {
+      window.visualViewport?.removeEventListener('resize', updateHeight);
+      window.visualViewport?.removeEventListener('scroll', updateHeight);
+      window.removeEventListener('resize', updateHeight);
+    };
+  }, [drawerState, api]);
 
   // Handle drawer state changes based on isOpen prop
   useEffect(() => {
-    
-    if (isOpen && drawerState === 0) {
+    if (isOpen && drawerState === 0 && isViewportReady) {
       updateDrawerState(1)
     } else if (!isOpen && drawerState !== 0) {
       updateDrawerState(0)
     }
-  }, [isOpen])
+  }, [isOpen, isViewportReady])
 
   useEffect(() => {
     if (drawerState !== 0) {
