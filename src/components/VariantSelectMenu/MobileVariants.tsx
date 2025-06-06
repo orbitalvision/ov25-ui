@@ -72,7 +72,7 @@ export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSe
       const group = (variants as VariantGroup[])[selectedGroupIndex]
       const variantsToRender =  group ? group.variants : [] as Variant[];
       return (
-        <div className="ov:h-full ov:pb-48">
+        <div className="ov:h-full">
           <Carousel opts={{ dragFree: true, loop: false }} className="ov:py-2">
             <CarouselContent className="ov:px-4 ov:-ml-2 ov:pr-4">
               <CarouselItem key={'placeholder'} className="ov:basis-[37%] ov:py-2">
@@ -105,7 +105,7 @@ export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSe
             />
           ) : (
             <div id="ov25-mobile-variants-content" className='ov:h-full ov:max-h-full ov:overflow-y-scroll'>
-              <div style={{ display: 'grid' }} className={`ov:px-2 ${getGridColsClass(gridDivide)}`}>
+              <div style={{ display: 'grid' }} className={`ov:px-2 ov:pb-48 ${getGridColsClass(gridDivide)}`}>
                 <VariantsContent variantsToRender={variantsToRender} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
               </div>
             </div>
@@ -125,7 +125,7 @@ export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSe
       } else {
         return (
             <div id="ov25-mobile-variants-content" className='ov:h-full ov:max-h-full ov:overflow-y-scroll'>
-            <div style={{ display: 'grid' }} className={`ov:px-0 ov:gap-2 ${getGridColsClass(gridDivide)}`}>
+            <div style={{ display: 'grid' }} className={`ov:px-0 ov:pb-48 ov:gap-2 ${getGridColsClass(gridDivide)}`}>
               <VariantsContent variantsToRender={variantsToRender} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
             </div>
           </div>
