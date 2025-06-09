@@ -73,7 +73,7 @@ export const IframeContainer = () => {
                     id={`ov-25-configurator-product-image-${galleryIndex}`}
                     src={images[imageIndex]}
                     alt={`Product image ${galleryIndex}`}
-                    className="ov:object-cover ov:min-h-full ov:min-w-full ov:z-[5] ov:absolute ov:inset-0 ov:bg-[var(--ov25-configurator-iframe-background-color)]"
+                    className="ov:object-contain ov:min-h-full ov:min-w-full ov:z-[5] ov:absolute ov:inset-0 ov:bg-[var(--ov25-configurator-iframe-background-color)]"
                 />
             ) : null;
         })()}
