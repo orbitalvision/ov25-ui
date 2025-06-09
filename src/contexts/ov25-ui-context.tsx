@@ -33,6 +33,7 @@ export interface Option {
   id: string;
   name: string;
   groups: Group[];
+  hasNonOption?: boolean;
 }
 
 export interface ConfiguratorState {
@@ -57,6 +58,7 @@ export interface SizeOption {
       thumbnail?: string;
     }>;
   }];
+  hasNonOption?: boolean;
 }
 
 // Context type
@@ -250,6 +252,14 @@ export const OV25UIProvider: React.FC<{
     ...(products?.length > 1 ? [sizeOption] : []),
     ...(configuratorState?.options || [])
   ];
+
+  allOptions.forEach(option => {
+    option.hasNonOption = option.groups.some(group => {
+      return group.selections.some(selection => {
+        return selection.name.toLowerCase() === 'none';
+      });
+    });
+  });
 
   // Helper function to get the selected value for an option
   const getSelectedValue = (option: Option | SizeOption) => {
