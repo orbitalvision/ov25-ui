@@ -49,8 +49,8 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
     {allOptions.length > 6 && (
          <div id="ov25-carousel-controls" className="ov25-desktop-variants-carousel-controls ov:relative   ov:hidden ov:cursor-pointer ov:md:flex ov:items-center ov:justify-between ov:w-full ov:p-4 ov:py-[1.125rem] pt-0 ">
          <div className="ov:absolute ov:inset-0 ov:w-full ov:flex ov:justify-center ov:items-center ov:pb-5 ov:pt-5 ov:border-b ov:border-[var(--ov25-border-color)]">
-             <p className="ov:text-[var(--ov25-secondary-text-color)]">
-             {currentOption && capitalizeWords(currentOption.hasNonOption ? currentOption.name + ' (optional)' : currentOption.name) }
+             <p data-optional={currentOption?.hasNonOption ? 'true' : 'false'} className="ov:text-[var(--ov25-secondary-text-color)]">
+             {currentOption && capitalizeWords(currentOption.name) }
              </p>
          </div>
        <button 
@@ -103,8 +103,9 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
                   <div
                     className={`ov:w-full ov:text-center ov:cursor-pointer ov:my-4 ov:data-[selected=true]:text-[var(--ov25-background-color)] ov:data-[selected=false]:text-[var(--ov25-secondary-text-color)]`}
                     data-selected={option.id === activeOptionId ? "true" : "false"}
+                    data-optional={option.hasNonOption ? 'true' : 'false'}
                   >
-                    {capitalizeWords(option.hasNonOption ? option.name + ' (optional)' : option.name)}
+                    {capitalizeWords(option.name)}
                   </div>
                 </div>
               );
