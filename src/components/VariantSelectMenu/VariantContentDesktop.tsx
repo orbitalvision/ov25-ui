@@ -3,7 +3,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import { useOV25UI } from "../../contexts/ov25-ui-context.js";
-import { ProductVariantsWrapper } from './ProductVaraintsWrapper.js';
+import { ProductVariantsWrapper } from './ProductVariantsWrapper.js';
 
 export function VariantContentDesktop() {
     const {

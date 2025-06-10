@@ -4,7 +4,7 @@ import { useOV25UI } from "../../contexts/ov25-ui-context.js";
 import { ProductOptionsGroup } from "./ProductOptions.js";
 import { MobilePriceOverlay } from "../mobile-price-overlay.js";
 import { VariantContentDesktop } from './VariantContentDesktop.js';
-import { ProductVariantsWrapper } from './ProductVaraintsWrapper.js';
+import { ProductVariantsWrapper } from './ProductVariantsWrapper.js';
 import { CheckoutButton } from './CheckoutButton.js';
 import { MobileCheckoutButton } from './MobileCheckoutButton.js';
 
