@@ -10,12 +10,7 @@
   display: block !important;
 }
 
-
-
-
 :root {
-
-
     /* Custom CSS Variables */
     --ov25-background-color: white;
     --ov25-secondary-background-color: #E5E5E5;
@@ -85,16 +80,6 @@
 #ov25-configurator-iframe {
     border: 0px !important;
 }
-
-
-
-
-
-
-
-
-
-/* dasdfasdfasdfasdfasdfasdfasdfasdfasdfasdf */
 
 .ov25-variant-control {
   background: white;

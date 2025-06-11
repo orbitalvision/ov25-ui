@@ -21,27 +21,45 @@ export const FilterContent: React.FC = () => {
     if (!availableProductFilters || !activeOption?.name) return null;
 
     const activeFilters = availableProductFilters[activeOption.name];
-    if (!activeFilters) return null;
+    if (!activeFilters) return (
+        <div className="ov:w-full ov:h-full ov:p-4 ov:pt-16 ov:flex ov:justify-center">
+            <h3 className="ov:text-lg ov:text-[var(--ov25-secondary-text-color)]">No filters available</h3>
+        </div>
+    );
 
     return (
-        <div className="ov:w-full ov:h-full ov:pr-4">
-            {Object.entries(activeFilters).map(([filterKey, options]) => (
-                <div key={filterKey} className="ov:mb-4">
-                    <h3 className="ov:text-lg ov:text-[var(--ov25-secondary-text-color)] ov:mb-2">{filterKey}</h3>
-                    <div className="ov:grid ov:grid-cols-2 ov:gap-2">
-                        {options.map((option) => (
-                            <div key={option.value} className="ov:flex ov:items-center ov:gap-2">
-                                <input 
-                                    type="checkbox" 
-                                    value={option.value}
-                                    checked={option.checked || false}
-                                    onChange={(e) => handleFilterChange(filterKey, option.value, e.target.checked)}
-                                />
-                                <label className="ov:text-[var(--ov25-secondary-text-color)] ov:truncate">{option.value}</label>
-                            </div>
-                        ))}
+        <div className="ov:w-full ov:h-full ov:pr-4 ov:overflow-y-auto">
+            {Object.entries(activeFilters)
+                .sort(([keyA], [keyB]) => {
+                    if (keyA === 'Categories') return -1;
+                    if (keyB === 'Categories') return 1;
+                    return keyA.localeCompare(keyB);
+                })
+                .map(([filterKey, options]) => (
+                options.length > 0 && (
+                    <div key={filterKey} className="ov:mb-4">
+                        <h3 className="ov:text-lg ov:text-[var(--ov25-secondary-text-color)] ov:mb-2">{filterKey}</h3>
+                        <div className="ov:flex ov:flex-wrap ov:gap-2 ov:w-full">
+                            {options.map((option) => (
+                                <button
+                                    key={option.value}
+                                    onClick={() => handleFilterChange(filterKey, option.value, !option.checked)}
+                                    className={`
+                                        ov:px-4 ov:py-2 ov:rounded-full ov:text-sm
+                                        ov:border ov:transition-all
+                                        ${option.checked 
+                                            ? 'ov:border-green-500 ov:bg-green-50 ov:text-green-700' 
+                                            : 'ov:border-[var(--ov25-border-color)] ov:text-[var(--ov25-secondary-text-color)]'
+                                        }
+                                        ov:hover:bg-gray-50
+                                    `}
+                                >
+                                    {option.value}
+                                </button>
+                            ))}
+                        </div>
                     </div>
-                </div>
+                )
             ))}
         </div>
     )

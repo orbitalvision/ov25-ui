@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useMemo } from 'react';
 import { sendMessageToIframe } from '../utils/configurator-utils.js';
+import { stringSimilarity } from 'string-similarity-js';
 
 // Define types
 export type DrawerSizes = 'closed' | 'small' | 'large';
@@ -124,6 +125,7 @@ interface OV25UIContextType {
   allOptions: (Option | SizeOption)[];
   galleryIndexToUse: number;
   filteredActiveOption?: Option | null;
+  searchQuery: string;
   // Methods
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
   setCurrentProductId: React.Dispatch<React.SetStateAction<string | undefined>>;
@@ -148,6 +150,7 @@ interface OV25UIContextType {
   setAnimationState: React.Dispatch<React.SetStateAction<AnimationState>>;
   setHasSwitchedAfterDefer: React.Dispatch<React.SetStateAction<boolean>>;
   setAvailableProductFilters: React.Dispatch<React.SetStateAction<ProductFilters>>;
+  setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
   // Actions
   handleSelectionSelect: (selection: Selection) => void;
   handleOptionClick: (optionId: string) => void;
@@ -211,6 +214,7 @@ export const OV25UIProvider: React.FC<{
   const [hasSwitchedAfterDefer, setHasSwitchedAfterDefer] = useState(false)
   const [pendingProductId, setPendingProductId] = useState<string | null>(null);
   const [availableProductFilters, setAvailableProductFilters] = useState<ProductFilters>({});
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const hasDefered = useRef(false);
   const isSelectingProduct = useRef(false);
   const hasComputedFilters = useRef(false);
@@ -269,51 +273,109 @@ export const OV25UIProvider: React.FC<{
   const baseActiveOption = configuratorState?.options?.find(opt => opt.id === activeOptionId);
   const activeOption = useMemo(() => {
     if (!baseActiveOption) return undefined;
+
+    const searchFilter = (text: string) => {
+      if (!searchQuery) return true;
+      const similarity = stringSimilarity(text.toLowerCase(), searchQuery.toLowerCase());
+      const containsQuery = text.toLowerCase().includes(searchQuery.toLowerCase());
+      return similarity > 0.4 || containsQuery; // Lower the threshold for better matches
+    };
+
+    // Checks a selection against the filters and returns true if it matches any of the filters.
+    const checkSelectionFilters = (selection: any) => {
+      const optionFilters = availableProductFilters?.[baseActiveOption.name];
+      if (!optionFilters) return true;
+      
+      let hasAnyCheckedFilters = false;
+      let matchesAnyCheckedFilter = false;
+
+      for (const filterName in optionFilters) {
+        if (filterName === 'Categories') {
+          continue;
+        }
+        const filterValues = optionFilters[filterName];
+        const checkedFilterValues = filterValues
+          .filter(filterValue => filterValue.checked)
+          .map(filterValue => filterValue.value);
+        if (checkedFilterValues.length > 0) {
+          hasAnyCheckedFilters = true;
+          const selectionFilterValues = selection.filter?.[filterName];
+          
+          if (selectionFilterValues?.some((value: string) => checkedFilterValues.includes(value))) {
+            matchesAnyCheckedFilter = true;
+            break;
+          }
+        }
+      }
+
+      return !hasAnyCheckedFilters || matchesAnyCheckedFilter;
+    };
+
+    // Checks a selection against the search query and returns true if it matches the search query.
+    const checkSelectionSearch = (selection: any) => {
+      if (!searchQuery) return true;
+      
+      // Check selection name
+      if (searchFilter(selection.name)) {
+        return true;
+      }
+      
+      // Check all filter values
+      for (const filterName in selection.filter) {
+        const filterValues = selection.filter[filterName];
+        if (filterValues?.some((value: string) => {
+          const matches = searchFilter(value);
+          return matches;
+        })) {
+          return true;
+        }
+      }
+      return false;
+    };
+
     return {
       ...baseActiveOption,
-      groups: baseActiveOption.groups.map(group => ({
+      groups: baseActiveOption.groups.filter((group) => {
+        // First check if group name matches search
+        if (searchQuery && searchFilter(group.name)) {
+          return true;
+        }
+
+        // If group name doesn't match, check if any selections in this group match
+        if (searchQuery) {
+          const hasMatchingSelections = group.selections.some(selection => checkSelectionSearch(selection));
+          if (hasMatchingSelections) {
+            return true;
+          }
+        }
+
+        // If no search query, check category filters
+        if (availableProductFilters?.[baseActiveOption.name]?.['Categories']?.some(filter => filter.checked)) {
+          return availableProductFilters?.[baseActiveOption.name]['Categories']
+            .filter(filter => filter.checked)
+            .map(filter => filter.value)
+            .includes(group.name);
+        }
+
+        return !searchQuery; // Only return true if there's no search query
+      }).map(group => ({
         ...group,
         selections: group.selections.filter(selection => {
+          const matchesSearch = checkSelectionSearch(selection);
+          const matchesFilters = checkSelectionFilters(selection);
           
-          const optionFilters = availableProductFilters?.[baseActiveOption.name];
-          if (!optionFilters) return true;
-          
-          // First, check if there are any checked filters at all
-          let hasAnyCheckedFilters = false;
-          let matchesAnyCheckedFilter = false;
-
-          for (const filterName in optionFilters) {
-            const filterValues = optionFilters[filterName];
-            const checkedFilterValues = filterValues
-              .filter(filterValue => filterValue.checked)
-              .map(filterValue => filterValue.value);
-            if (checkedFilterValues.length > 0) {
-              hasAnyCheckedFilters = true;
-              const selectionFilterValues = selection.filter?.[filterName];
-              
-              // If this selection has any of the checked values for this filter
-              if (selectionFilterValues?.some(value => checkedFilterValues.includes(value))) {
-                matchesAnyCheckedFilter = true;
-                break; // We found a match, no need to check other filters
-              }
-            }
-          }
-
-          // If there are checked filters, we need to match at least one
-          // If there are no checked filters, show everything
-          const shouldKeep = !hasAnyCheckedFilters || matchesAnyCheckedFilter;
-          return shouldKeep;
+          return matchesSearch && matchesFilters;
         })
       }))
     };
-  }, [baseActiveOption, availableProductFilters]);
+  }, [baseActiveOption, availableProductFilters, searchQuery]);
 
   // Compute filters once when we have the necessary data
   if (!hasComputedFilters.current && configuratorState?.configuratorSettings?.availableProductFilters && configuratorState.options) {
     const availableFilters = configuratorState.configuratorSettings.availableProductFilters;
     const allFilterSets: ProductFilters = {};
 
-    // Process each option
+    // Process each option, adding filters for each selection and group.
     configuratorState.options.forEach(option => {
       if (option.name && availableFilters[option.name]) {
         // Initialize filter sets for this option
@@ -345,6 +407,16 @@ export const OV25UIProvider: React.FC<{
             checked: false 
           }));
         });
+      }
+      // Add groups as the first filter for this option. If the only group is 'Default Groups' its not really a group so we should not show the filter.
+      if (option.groups && option.groups.length > 0 && (option.groups.length > 1 || option.groups[0].name !== 'Default Group')) {
+        if (!allFilterSets[option.name]) {
+          allFilterSets[option.name] = {};
+        }
+        allFilterSets[option.name]['Categories'] = option.groups.map(group => ({
+          value: group.name,
+          checked: false
+        }));
       }
     });
 
@@ -549,7 +621,7 @@ export const OV25UIProvider: React.FC<{
     activeOption: activeOption,
     availableProductFilters,
     allOptions,
-    
+    searchQuery,
     // Methods
     setProducts,
     setCurrentProductId,
@@ -570,6 +642,7 @@ export const OV25UIProvider: React.FC<{
     setAnimationState,
     setHasSwitchedAfterDefer,
     setAvailableProductFilters,
+    setSearchQuery,
     // Actions
     handleSelectionSelect,
     handleOptionClick,

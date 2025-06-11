@@ -1,10 +1,12 @@
 import * as React from 'react'
-import { useState,  useMemo } from "react";
+import { useState,  useMemo, useCallback } from "react";
 import { Variant, VariantCardProps, VariantGroup } from "./ProductVariants.js";
 import { Carousel, CarouselContent, CarouselItem } from "../ui/carousel.js"
 import { capitalizeWords, getGridColsClass } from './DesktopVariants.js';
 import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 import { VariantsContent } from './VariantsContent.js';
+import { FilterControls } from './FilterControls.js';
+import { FilterContent } from './FilterContent.js';
 
 const VariantsContentWithCarousel = ({ variantsToRender, VariantCard, onSelect, isMobile, isGrouped = false }: { variantsToRender: Variant[], VariantCard: React.ComponentType<VariantCardProps>, onSelect: (variant: Variant) => void, isMobile: boolean, isGrouped: boolean }) => {
     const {allOptions, activeOptionId} = useOV25UI()
@@ -28,7 +30,7 @@ const VariantsContentWithCarousel = ({ variantsToRender, VariantCard, onSelect, 
                 5: '20%'
               }[basis];
               return (
-                <CarouselItem key={`${variant.id}-${variant.isSelected ? 'selected' : 'unselected'}`} style={{flexBasis}}   className="ov:cursor-pointer">
+                <CarouselItem key={`${variant.id}-${variant.isSelected ? 'selected' : 'unselected'}`} style={{flexBasis}} className="ov:cursor-pointer">
                   <VariantCard
                     variant={variant}
                     onSelect={onSelect}
@@ -55,6 +57,7 @@ export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSe
         gridDivide: number,
     }) => {
     const [selectedGroupIndex, setSelectedGroupIndex] = useState(0)
+    const [isFilterOpen, setIsFilterOpen] = useState(false);
 
     const isGrouped = Array.isArray(variants) && variants.length > 0 && 'groupName' in variants[0]
     const shouldDestructureGroups = isGrouped && variants.length < 2 
@@ -65,33 +68,51 @@ export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSe
     );
 
     const {
-        drawerSize
+        drawerSize,
+        availableProductFilters,
       } = useOV25UI();
 
     if (isGrouped && !shouldDestructureGroups) {
       const group = (variants as VariantGroup[])[selectedGroupIndex]
       const variantsToRender =  group ? group.variants : [] as Variant[];
       return (
+      <>{
+          drawerSize !== 'small' && availableProductFilters && Object.keys(availableProductFilters).length > 0 && (
+            <>
+              <FilterControls 
+                isFilterOpen={isFilterOpen}
+                setIsFilterOpen={setIsFilterOpen}
+              />
+              {isFilterOpen && (
+                <div id="ov25-filter-content" className="ov:flex ov:justify-end ov:flex-wrap ov:px-4 ov:pt-2 ov:pb-52 ov:overflow-y-auto ov:h-full">
+                  <FilterContent />
+                </div>
+              )}
+            </>
+          )
+        }
         <div className="ov:h-full">
           <Carousel opts={{ dragFree: true, loop: false }} className="ov:py-2">
             <CarouselContent className="ov:px-4 ov:-ml-2 ov:pr-4">
               <CarouselItem key={'placeholder'} className="ov:basis-[37%] ov:py-2">
                 <div className="ov:w-full ov:h-full ov:bg-transparent"></div>
               </CarouselItem>
-              {(variants as VariantGroup[]).map((group, index) => (
-                <CarouselItem key={group.groupName} className="ov:py-2 ov:max-w-full ov:basis-auto">
-                  <button
-                    onClick={() => setSelectedGroupIndex(index)}
-                    className={`ov25-group-control ov:w-auto ov:py-2 ov:px-4 ov:rounded-full ov:shadow-md ov:text-neutral-500 ov:border ${
-                      selectedGroupIndex === index
-                        ? 'ov:border-neutral-900 ov:text-neutral-900'
-                        : ''
-                    } ov:flex ov:items-center ov:justify-center ov:text-xs ov:gap-2 ov:whitespace-nowrap`}
-                  >
-                    <span className="ov:truncate">{capitalizeWords(group.groupName)}</span>
-                  </button>
-                </CarouselItem>
-              ))}
+              {(variants as VariantGroup[]).map((group, index) => {
+                return group.variants.length > 0 ? (
+                  <CarouselItem key={group.groupName} className="ov:py-2 ov:max-w-full ov:basis-auto">
+                    <button
+                      onClick={() => setSelectedGroupIndex(index)}
+                      className={`ov25-group-control ov:w-auto ov:py-2 ov:px-4 ov:rounded-full ov:shadow-md ov:text-neutral-500 ov:border ${
+                        selectedGroupIndex === index
+                          ? 'ov:border-neutral-900 ov:text-neutral-900'
+                          : ''
+                      } ov:flex ov:items-center ov:justify-center ov:text-xs ov:gap-2 ov:whitespace-nowrap`}
+                    >
+                      <span className="ov:truncate">{capitalizeWords(group.groupName)}</span>
+                    </button>
+                  </CarouselItem>
+                ) : null;
+              })}
             </CarouselContent>
           </Carousel>
 
@@ -105,30 +126,48 @@ export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSe
             />
           ) : (
             <div id="ov25-mobile-variants-content" className='ov:h-full ov:max-h-full ov:overflow-y-scroll'>
-              <div style={{ display: 'grid' }} className={`ov:px-2 ov:pb-48 ${getGridColsClass(gridDivide)}`}>
+              <div style={{ display: 'grid' }} className={`ov:px-2 ov:pb-63 ${getGridColsClass(gridDivide)}`}>
                 <VariantsContent variantsToRender={variantsToRender} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
               </div>
             </div>
           )
           }
         </div>
+      </>
       );
     } else {
       if (drawerSize === 'small') {
-        return <VariantsContentWithCarousel 
-          variantsToRender={variantsToRender}
-          VariantCard={VariantCard}
-          onSelect={onSelect}
-          isMobile={isMobile}
-          isGrouped={isGrouped && !shouldDestructureGroups}
-        />
+        return (
+          <VariantsContentWithCarousel 
+            variantsToRender={variantsToRender}
+            VariantCard={VariantCard}
+            onSelect={onSelect}
+            isMobile={isMobile}
+            isGrouped={isGrouped && !shouldDestructureGroups}
+          />
+        );
       } else {
         return (
+          <>
+            {availableProductFilters && Object.keys(availableProductFilters).length > 0 && (
+              <>
+                <FilterControls 
+                  isFilterOpen={isFilterOpen}
+                  setIsFilterOpen={setIsFilterOpen}
+                />
+                {isFilterOpen && (
+                  <div id="ov25-filter-content" className="ov:flex ov:justify-end ov:flex-wrap ov:px-4 ov:pt-2 ov:pb-52 ov:overflow-y-auto ov:h-full">
+                    <FilterContent />
+                  </div>
+                )}
+              </>
+            )}
             <div id="ov25-mobile-variants-content" className='ov:h-full ov:max-h-full ov:overflow-y-scroll'>
-            <div style={{ display: 'grid' }} className={`ov:px-0 ov:pb-48 ov:gap-2 ${getGridColsClass(gridDivide)}`}>
-              <VariantsContent variantsToRender={variantsToRender} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
+              <div style={{ display: 'grid' }} className={`ov:px-0 ov:pb-63 ov:gap-2 ${getGridColsClass(gridDivide)}`}>
+                <VariantsContent variantsToRender={variantsToRender} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
+              </div>
             </div>
-          </div>
+          </>
         );
       }
     }
