@@ -1,9 +1,18 @@
-import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useMemo } from 'react';
 import { sendMessageToIframe } from '../utils/configurator-utils.js';
 
 // Define types
 export type DrawerSizes = 'closed' | 'small' | 'large';
 export type AnimationState = 'unavailable' | 'open' | 'close' | 'loop' | 'stop';
+
+export interface ProductFilters {
+  [optionName: string]: {
+    [filterKey: string]: Array<{
+      value: string;
+      checked: boolean;
+    }>;
+  };
+}
 
 export interface Product {
   id: string;
@@ -21,6 +30,9 @@ export interface Selection {
   price: number;
   blurHash: string;
   groupId?: string;
+  filter?: {
+    [key: string]: string[];
+  }
 }
 
 export interface Group {
@@ -43,6 +55,11 @@ export interface ConfiguratorState {
     groupId: string;
     selectionId: string;
   }>;
+  configuratorSettings: {
+    availableProductFilters: {
+      [key: string]: string[];
+    };
+  };
 }
 
 export interface SizeOption {
@@ -103,8 +120,10 @@ interface OV25UIContextType {
   currentProduct?: Product;
   sizeOption: SizeOption;
   activeOption?: Option;
+  availableProductFilters?: ProductFilters;
   allOptions: (Option | SizeOption)[];
   galleryIndexToUse: number;
+  filteredActiveOption?: Option | null;
   // Methods
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
   setCurrentProductId: React.Dispatch<React.SetStateAction<string | undefined>>;
@@ -128,6 +147,7 @@ interface OV25UIContextType {
   setCanAnimate: React.Dispatch<React.SetStateAction<boolean>>;
   setAnimationState: React.Dispatch<React.SetStateAction<AnimationState>>;
   setHasSwitchedAfterDefer: React.Dispatch<React.SetStateAction<boolean>>;
+  setAvailableProductFilters: React.Dispatch<React.SetStateAction<ProductFilters>>;
   // Actions
   handleSelectionSelect: (selection: Selection) => void;
   handleOptionClick: (optionId: string) => void;
@@ -190,9 +210,10 @@ export const OV25UIProvider: React.FC<{
   const [isMobile, setIsMobile] = useState(false);
   const [hasSwitchedAfterDefer, setHasSwitchedAfterDefer] = useState(false)
   const [pendingProductId, setPendingProductId] = useState<string | null>(null);
-
+  const [availableProductFilters, setAvailableProductFilters] = useState<ProductFilters>({});
   const hasDefered = useRef(false);
   const isSelectingProduct = useRef(false);
+  const hasComputedFilters = useRef(false);
 
   // Effect: Initialize selectedSelections from configuratorState
   useEffect(() => {
@@ -245,7 +266,103 @@ export const OV25UIProvider: React.FC<{
   };
 
   // Active option based on activeOptionId
-  const activeOption = configuratorState?.options?.find(opt => opt.id === activeOptionId);
+  const baseActiveOption = configuratorState?.options?.find(opt => opt.id === activeOptionId);
+  const activeOption = useMemo(() => {
+    console.log('calculating active option', baseActiveOption, availableProductFilters);
+    if (!baseActiveOption) return undefined;
+
+    return {
+      ...baseActiveOption,
+      groups: baseActiveOption.groups.map(group => ({
+        ...group,
+        selections: group.selections.filter(selection => {
+          if (!selection.filter) return true;
+          
+          const optionFilters = availableProductFilters?.[baseActiveOption.name];
+          if (!optionFilters) return true;
+
+          console.log('........................................................');
+          console.log('option filters', optionFilters);
+          console.log('selection', selection);
+          
+          // First, check if there are any checked filters at all
+          let hasAnyCheckedFilters = false;
+          let matchesAnyCheckedFilter = false;
+
+          for (const filterName in optionFilters) {
+            const filterValues = optionFilters[filterName];
+            console.log('filter values', filterValues);
+            const checkedFilterValues = filterValues
+              .filter(filterValue => filterValue.checked)
+              .map(filterValue => filterValue.value);
+            console.log('checked filter values', checkedFilterValues);
+
+            if (checkedFilterValues.length > 0) {
+              hasAnyCheckedFilters = true;
+              const selectionFilterValues = selection.filter[filterName];
+              console.log('selection filter values', selectionFilterValues);
+              
+              // If this selection has any of the checked values for this filter
+              if (selectionFilterValues?.some(value => checkedFilterValues.includes(value))) {
+                matchesAnyCheckedFilter = true;
+                break; // We found a match, no need to check other filters
+              }
+            }
+          }
+
+          // If there are checked filters, we need to match at least one
+          // If there are no checked filters, show everything
+          const shouldKeep = !hasAnyCheckedFilters || matchesAnyCheckedFilter;
+          console.log('selection shouldKeep:', shouldKeep, selection);
+          return shouldKeep;
+        })
+      }))
+    };
+  }, [baseActiveOption, availableProductFilters]);
+
+  // Compute filters once when we have the necessary data
+  if (!hasComputedFilters.current && configuratorState?.configuratorSettings?.availableProductFilters && configuratorState.options) {
+    const availableFilters = configuratorState.configuratorSettings.availableProductFilters;
+    const allFilterSets: ProductFilters = {};
+
+    // Process each option
+    configuratorState.options.forEach(option => {
+      if (option.name && availableFilters[option.name]) {
+        // Initialize filter sets for this option
+        const filterSets: { [key: string]: Set<string> } = {};
+        availableFilters[option.name].forEach((filter: string) => {
+          filterSets[filter] = new Set<string>();
+        });
+
+        // Loop through all filters for this option, adding filter values to the set
+        option.groups.forEach(group => {
+          group.selections.forEach(selection => {
+            Object.keys(selection.filter || {}).forEach((key: string) => {
+              const filterValues = selection.filter?.[key as keyof typeof selection.filter] as string[] | undefined;
+              if (Array.isArray(filterValues) && filterSets[key]) {
+                filterValues.forEach(filterValue => filterSets[key].add(filterValue));
+              }
+            });
+          });
+        });
+
+        // Convert sets to arrays for this option
+        allFilterSets[option.name] = {};
+        Object.keys(filterSets).forEach(key => {
+          if (!allFilterSets[option.name]) {
+            allFilterSets[option.name] = {};
+          }
+          allFilterSets[option.name][key] = Array.from(filterSets[key]).map(value => ({ 
+            value, 
+            checked: false 
+          }));
+        });
+      }
+    });
+
+    setAvailableProductFilters(allFilterSets);
+    hasComputedFilters.current = true;
+  }
 
   // Combine size option with configurator options, only including size option if multiple products exist
   const allOptions = [
@@ -441,7 +558,8 @@ export const OV25UIProvider: React.FC<{
     // Computed values
     currentProduct,
     sizeOption,
-    activeOption,
+    activeOption: activeOption,
+    availableProductFilters,
     allOptions,
     
     // Methods
@@ -463,7 +581,7 @@ export const OV25UIProvider: React.FC<{
     setCanAnimate,
     setAnimationState,
     setHasSwitchedAfterDefer,
-    
+    setAvailableProductFilters,
     // Actions
     handleSelectionSelect,
     handleOptionClick,
