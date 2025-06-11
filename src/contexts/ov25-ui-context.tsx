@@ -268,22 +268,15 @@ export const OV25UIProvider: React.FC<{
   // Active option based on activeOptionId
   const baseActiveOption = configuratorState?.options?.find(opt => opt.id === activeOptionId);
   const activeOption = useMemo(() => {
-    console.log('calculating active option', baseActiveOption, availableProductFilters);
     if (!baseActiveOption) return undefined;
-
     return {
       ...baseActiveOption,
       groups: baseActiveOption.groups.map(group => ({
         ...group,
         selections: group.selections.filter(selection => {
-          if (!selection.filter) return true;
           
           const optionFilters = availableProductFilters?.[baseActiveOption.name];
           if (!optionFilters) return true;
-
-          console.log('........................................................');
-          console.log('option filters', optionFilters);
-          console.log('selection', selection);
           
           // First, check if there are any checked filters at all
           let hasAnyCheckedFilters = false;
@@ -291,16 +284,12 @@ export const OV25UIProvider: React.FC<{
 
           for (const filterName in optionFilters) {
             const filterValues = optionFilters[filterName];
-            console.log('filter values', filterValues);
             const checkedFilterValues = filterValues
               .filter(filterValue => filterValue.checked)
               .map(filterValue => filterValue.value);
-            console.log('checked filter values', checkedFilterValues);
-
             if (checkedFilterValues.length > 0) {
               hasAnyCheckedFilters = true;
-              const selectionFilterValues = selection.filter[filterName];
-              console.log('selection filter values', selectionFilterValues);
+              const selectionFilterValues = selection.filter?.[filterName];
               
               // If this selection has any of the checked values for this filter
               if (selectionFilterValues?.some(value => checkedFilterValues.includes(value))) {
@@ -313,7 +302,6 @@ export const OV25UIProvider: React.FC<{
           // If there are checked filters, we need to match at least one
           // If there are no checked filters, show everything
           const shouldKeep = !hasAnyCheckedFilters || matchesAnyCheckedFilter;
-          console.log('selection shouldKeep:', shouldKeep, selection);
           return shouldKeep;
         })
       }))

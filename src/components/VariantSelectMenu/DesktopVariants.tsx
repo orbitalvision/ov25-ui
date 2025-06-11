@@ -34,7 +34,6 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
   const shouldDestructureGroups = isGrouped && variants.length < 2 && (variants as VariantGroup[])[0].groupName === 'Default Group'
 
   const variantsToRender = isGrouped ? (variants as VariantGroup[]) : variants as Variant[];
-  console.log('variantsToRender', variantsToRender);
 
   const {
     allOptions,
