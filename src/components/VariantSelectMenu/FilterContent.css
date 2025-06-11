@@ -1,0 +1,56 @@
+#ov25-filter-content {
+  width: 100%;
+  height: 100%;
+  padding-right: 1rem;
+  overflow-y: auto;
+}
+
+#ov25-filter-content .filter-group {
+  margin-bottom: 1rem;
+}
+
+#ov25-filter-content .filter-group-title {
+  font-size: 1.125rem;
+  color: var(--ov25-secondary-text-color);
+  margin-bottom: 0.5rem;
+}
+
+#ov25-filter-content .filter-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  width: 100%;
+}
+
+#ov25-filter-content .filter-option {
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  border: 1px solid var(--ov25-border-color);
+  color: var(--ov25-secondary-text-color);
+  transition: all;
+}
+
+#ov25-filter-content .filter-option:hover {
+  background-color: rgb(249 250 251);
+}
+
+#ov25-filter-content .filter-option[data-checked="true"] {
+  border-color: rgb(34 197 94);
+  background-color: rgb(240 253 244);
+  color: rgb(21 128 61);
+}
+
+#ov25-filter-empty {
+  width: 100%;
+  height: 100%;
+  padding: 1rem;
+  padding-top: 4rem;
+  display: flex;
+  justify-content: center;
+}
+
+#ov25-filter-empty h3 {
+  font-size: 1.125rem;
+  color: var(--ov25-secondary-text-color);
+} 

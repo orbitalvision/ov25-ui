@@ -7,6 +7,8 @@ import { useState } from 'react';
 import { FilterControls } from './FilterControls.js';
 import { FilterContent } from './FilterContent.js';
 
+import './DesktopVariants.css';
+
 export const getGridColsClass = (gridDivide: number) => {
   switch (gridDivide) {
     case 2: return 'ov:grid-cols-2!';
@@ -128,7 +130,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
               setIsFilterOpen={setIsFilterOpen}
             />
             {isFilterOpen && (
-              <div id="ov25-filter-content" className="ov:flex ov:justify-end ov:flex-wrap ov:px-4 ov:pt-2 ov:overflow-y-auto ov:h-full">
+              <div id="ov25-filter-content-wrapper">
                 <FilterContent />
               </div>
             )}

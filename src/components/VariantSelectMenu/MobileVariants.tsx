@@ -7,6 +7,7 @@ import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 import { VariantsContent } from './VariantsContent.js';
 import { FilterControls } from './FilterControls.js';
 import { FilterContent } from './FilterContent.js';
+import './MobileVariants.css';
 
 const VariantsContentWithCarousel = ({ variantsToRender, VariantCard, onSelect, isMobile, isGrouped = false }: { variantsToRender: Variant[], VariantCard: React.ComponentType<VariantCardProps>, onSelect: (variant: Variant) => void, isMobile: boolean, isGrouped: boolean }) => {
     const {allOptions, activeOptionId} = useOV25UI()
@@ -84,7 +85,7 @@ export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSe
                 setIsFilterOpen={setIsFilterOpen}
               />
               {isFilterOpen && (
-                <div id="ov25-filter-content" className="ov:flex ov:justify-end ov:flex-wrap ov:px-4 ov:pt-2 ov:pb-52 ov:overflow-y-auto ov:h-full">
+                <div id="ov25-filter-content-wrapper">
                   <FilterContent />
                 </div>
               )}
@@ -156,7 +157,7 @@ export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSe
                   setIsFilterOpen={setIsFilterOpen}
                 />
                 {isFilterOpen && (
-                  <div id="ov25-filter-content" className="ov:flex ov:justify-end ov:flex-wrap ov:px-4 ov:pt-2 ov:pb-52 ov:overflow-y-auto ov:h-full">
+                  <div id="ov25-filter-content-wrapper">
                     <FilterContent />
                   </div>
                 )}
