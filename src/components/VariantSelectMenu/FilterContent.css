@@ -1,7 +1,8 @@
 #ov25-filter-content {
   width: 100%;
   height: 100%;
-  padding-right: 1rem;
+  padding-right: 1em;
+  padding-bottom: 10em;
   overflow-y: auto;
 }
 
@@ -10,22 +11,22 @@
 }
 
 #ov25-filter-content .filter-group-title {
-  font-size: 1.125rem;
+  font-size: 1.125em;
   color: var(--ov25-secondary-text-color);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.5em;
 }
 
 #ov25-filter-content .filter-options {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.5em;
   width: 100%;
 }
 
 #ov25-filter-content .filter-option {
-  padding: 0.5rem 1rem;
+  padding: 0.5em 1em;
   border-radius: 9999px;
-  font-size: 0.875rem;
+  font-size: 0.875em;
   border: 1px solid var(--ov25-border-color);
   color: var(--ov25-secondary-text-color);
   transition: all;
