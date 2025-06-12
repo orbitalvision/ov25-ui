@@ -23,7 +23,7 @@ export function ProductVariantsWrapper() {
         selectedSelections,
         products,
       } = useOV25UI();
-      
+
     if (activeOptionId === 'size') {
       return (
         <ProductVariants

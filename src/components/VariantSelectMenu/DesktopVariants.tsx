@@ -1,9 +1,13 @@
-import { Carousel, CarouselContent, CarouselItem } from "../ui/carousel.js"
 import * as React from 'react'
-import { useOV25UI } from "../../contexts/ov25-ui-context.js"
+import { ProductFilters, useOV25UI } from "../../contexts/ov25-ui-context.js"
 import { VariantsContent } from "./VariantsContent.js";
 import { Variant, VariantCardProps, VariantGroup } from "./ProductVariants.js";
 import { ChevronUp } from "lucide-react";
+import { useState } from 'react';
+import { FilterControls } from './FilterControls.js';
+import { FilterContent } from './FilterContent.js';
+
+import './DesktopVariants.css';
 
 export const getGridColsClass = (gridDivide: number) => {
   switch (gridDivide) {
@@ -18,6 +22,7 @@ export const getGridColsClass = (gridDivide: number) => {
 export const capitalizeWords = (str: string) => {
   return str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 };
+
 export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gridDivide }
   : {
     variants: VariantGroup[] | Variant[],
@@ -27,21 +32,26 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
     gridDivide: number,
 
   }) => {
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   const isGrouped = Array.isArray(variants) && variants.length > 0 && 'groupName' in variants[0]
   const shouldDestructureGroups = isGrouped && variants.length < 2 && (variants as VariantGroup[])[0].groupName === 'Default Group'
 
   const variantsToRender = isGrouped ? (variants as VariantGroup[]) : variants as Variant[];
+
   const {
     allOptions,
     handleOptionClick,
     activeOptionId,
     handlePreviousOption,
     handleNextOption,
-    
+    availableProductFilters,
   } = useOV25UI();
 
   const currentOption = allOptions.find(opt => opt.id === activeOptionId)
+
+  const showFilters = ((isGrouped && !shouldDestructureGroups) && (variantsToRender as VariantGroup[]).some(group => group.variants.length > 0)) || 
+    (availableProductFilters && Object.keys(availableProductFilters).length > 0 && Object.keys(availableProductFilters).some(key => Object.keys(availableProductFilters[key]).length > 0));
 
   return (
     <>
@@ -112,28 +122,43 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
             })}
           </div>
         )
-      }
-     
-
-      {(shouldDestructureGroups || !isGrouped) ? (<>
-
-        <div id="ov25-desktop-variants-content" className={`ov:max-h-full ov:py-4 ov:overflow-auto ov:pb-8 ov:grid ${getGridColsClass(gridDivide)}`}>
-          <VariantsContent variantsToRender={isGrouped ? (variantsToRender as VariantGroup[])[0].variants : variantsToRender as Variant[]} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
-        </div></>
-      ) : (
-        <div className="ov:overflow-auto ov:py-4">
-        {(variantsToRender as VariantGroup[]).map((variantGroup) => (
-          <div key={variantGroup.groupName}>
-            <div className="ov:flex ov:items-center ov:mx-4 ov:justify-between">
-              <h3 className="ov25-group-name ov:text-lg ov:text-[var(--ov25-secondary-text-color)]">{variantGroup.groupName}</h3>
-            </div>
-            <div id="ov25-variant-group-content" className={`ov:grid ${getGridColsClass(gridDivide)}`}>
-              <VariantsContent variantsToRender={variantGroup.variants} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
-            </div>
+      }{
+        <div id="ov25-filter-container">
+          {showFilters && (
+            <FilterControls 
+              isFilterOpen={isFilterOpen}
+              setIsFilterOpen={setIsFilterOpen}
+            />
+          )}
+          <div id="ov25-content-area">
+            {((shouldDestructureGroups || !isGrouped) ? (
+              <div id="ov25-desktop-variants-content" className={`ov:py-4 ov:pb-8 ov:grid ${getGridColsClass(gridDivide)}`}>
+                <VariantsContent variantsToRender={isGrouped ? (variantsToRender as VariantGroup[])[0].variants : variantsToRender as Variant[]} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
+              </div>
+            ) : (
+              <div id="ov25-desktop-variants-content" className="ov:py-4">
+                {(variantsToRender as VariantGroup[]).map((variantGroup) => (
+                  variantGroup.variants.length > 0 && (
+                    <div key={variantGroup.groupName}>
+                      <div className="ov:flex ov:items-center ov:mx-4 ov:justify-between">
+                        <h3 className="ov25-group-name ov:text-lg ov:text-[var(--ov25-secondary-text-color)]">{variantGroup.groupName}</h3>
+                      </div>
+                      <div id="ov25-variant-group-content" className={`ov:grid ${getGridColsClass(gridDivide)}`}>
+                        <VariantsContent variantsToRender={variantGroup.variants} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
+                      </div>
+                    </div>
+                  )
+                ))}
+              </div>
+            ))}
+            {showFilters && (
+              <div data-open={isFilterOpen} id="ov25-filter-content-wrapper-desktop">
+                <FilterContent />
+              </div>
+            )}
           </div>
-        ))}
         </div>
-      )}
+      }
     </>
   );
 };

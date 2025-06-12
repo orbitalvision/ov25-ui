@@ -13,12 +13,13 @@ const initializeConfigurator = () => {
   // Inject the configurator
   injectConfigurator({
     apiKey: () => { return '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d' }, 
-    productLink: () => { return '217' }, 
+    productLink: () => { return '501' }, 
+    // 217 = Woodbros Pickering-3 Seater (Grouped)
+    // range/2 Aughton (Non Grouped)
+    // 501 Westbridge/glenwood/grand split option (no filters)
     onSelectionChange: (selections) => {
-      console.log('Selections changed:', selections);
     },
     onProductChange: (product) => {
-      console.log('Product changed:', product);
     },
     images: [
       'https://demo.orbital.vision/_next/image?url=https%3A%2F%2Flondon-website-general-purpose.s3.eu-west-2.amazonaws.com%2Fassets%2Forganizations%2F15%2Fproducts%2FTamarisk%2F45%2FWindrush-Large-Sofa-Front.png&w=1920&q=75',

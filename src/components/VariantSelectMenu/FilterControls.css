@@ -1,0 +1,66 @@
+#ov25-filter-controls {
+  display: flex;
+  flex-wrap: nowrap;
+  padding-left: 1rem;
+  padding-right: 1rem;
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#ov25-filter-controls-button {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid var(--ov25-border-color);
+  color: var(--ov25-secondary-text-color);
+  white-space: nowrap;
+}
+
+#ov25-filter-controls-button span {
+  padding-left: 1rem;
+  padding-right: 1rem;
+  color: var(--ov25-secondary-text-color);
+}
+
+#ov25-filter-controls-button[data-open="true"] {
+  border-color: var(--ov25-neutral-900);
+  color: var(--ov25-neutral-900);
+}
+
+#ov25-filter-controls-button:hover {
+  background-color: var(--ov25-accent-color);
+}
+
+#ov25-filter-controls-search {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid var(--ov25-border-color);
+  flex: 1;
+}
+
+#ov25-filter-controls-search:hover {
+  background-color: var(--ov25-accent-color);
+}
+
+#ov25-filter-controls-search svg {
+  min-width: 24px;
+}
+
+#ov25-filter-controls-search svg:last-child {
+  padding-right: 0.5rem;
+  cursor: pointer;
+}
+
+#ov25-filter-controls-search input {
+  padding-left: 0.5rem;
+  margin-left: 0.5rem;
+  color: var(--ov25-secondary-text-color);
+  width: 100%;
+  background-color: transparent;
+  outline: none;
+} 
