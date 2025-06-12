@@ -50,7 +50,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
 
   const currentOption = allOptions.find(opt => opt.id === activeOptionId)
 
-  const showFilters = (isGrouped && (variantsToRender as VariantGroup[]).some(group => group.variants.length > 0)) || 
+  const showFilters = ((isGrouped && !shouldDestructureGroups) && (variantsToRender as VariantGroup[]).some(group => group.variants.length > 0)) || 
     (availableProductFilters && Object.keys(availableProductFilters).length > 0 && Object.keys(availableProductFilters).some(key => Object.keys(availableProductFilters[key]).length > 0));
 
   return (
