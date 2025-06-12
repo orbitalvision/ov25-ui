@@ -5,6 +5,7 @@ import { VariantsHeader } from "./VariantsHeader.js"
 import { CheckoutButton } from "./CheckoutButton.js"
 import DesktopVariants from "./DesktopVariants.js"
 import { MobileVariants } from "./MobileVariants.js"
+import { useOV25UI } from "../../contexts/ov25-ui-context.js"
 
 export interface Variant {
   id: string
@@ -50,8 +51,6 @@ interface ProductVariantsProps {
   isMobile: boolean
 }
 
-
-
 export const ProductVariants = ({
   variants,
   onSelect,
@@ -61,6 +60,7 @@ export const ProductVariants = ({
   basis = 'ov:basis-[43%]',
   isMobile,
 }: ProductVariantsProps) => {
+  const { activeOptionId } = useOV25UI();
 
   return (
     <div className={cn(
@@ -72,11 +72,7 @@ export const ProductVariants = ({
       <VariantsHeader />
       {isMobile ? (
         <MobileVariants
-          key={Array.isArray(variants) && variants.length > 0 // Triggers a re-render when the variants change - ensuring state is reset when groups & options are switched between
-            ? ('id' in variants[0]
-                ? variants[0].id
-                : ('groupName' in variants[0] ? variants[0].groupName : 'default'))
-            : 'default'}
+          key={activeOptionId}
           variants={variants}
           VariantCard={VariantCard}
           isMobile={isMobile}
