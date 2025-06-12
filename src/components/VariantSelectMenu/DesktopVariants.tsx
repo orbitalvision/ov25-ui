@@ -123,40 +123,41 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
           </div>
         )
       }{
-        showFilters && (
-          <>
+        <div id="ov25-filter-container">
+          {showFilters && (
             <FilterControls 
               isFilterOpen={isFilterOpen}
               setIsFilterOpen={setIsFilterOpen}
             />
-            {isFilterOpen && (
-              <div id="ov25-filter-content-wrapper">
+          )}
+          <div id="ov25-content-area">
+            {((shouldDestructureGroups || !isGrouped) ? (
+              <div id="ov25-desktop-variants-content" className={`ov:py-4 ov:pb-8 ov:grid ${getGridColsClass(gridDivide)}`}>
+                <VariantsContent variantsToRender={isGrouped ? (variantsToRender as VariantGroup[])[0].variants : variantsToRender as Variant[]} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
+              </div>
+            ) : (
+              <div id="ov25-desktop-variants-content" className="ov:py-4">
+                {(variantsToRender as VariantGroup[]).map((variantGroup) => (
+                  variantGroup.variants.length > 0 && (
+                    <div key={variantGroup.groupName}>
+                      <div className="ov:flex ov:items-center ov:mx-4 ov:justify-between">
+                        <h3 className="ov25-group-name ov:text-lg ov:text-[var(--ov25-secondary-text-color)]">{variantGroup.groupName}</h3>
+                      </div>
+                      <div id="ov25-variant-group-content" className={`ov:grid ${getGridColsClass(gridDivide)}`}>
+                        <VariantsContent variantsToRender={variantGroup.variants} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
+                      </div>
+                    </div>
+                  )
+                ))}
+              </div>
+            ))}
+            {showFilters && (
+              <div data-open={isFilterOpen} id="ov25-filter-content-wrapper-desktop">
                 <FilterContent />
               </div>
             )}
-          </>
-        )
-      }
-     {!isFilterOpen && ((shouldDestructureGroups || !isGrouped) ? (<>
-          <div id="ov25-desktop-variants-content" className={`ov:max-h-full ov:py-4 ov:overflow-auto ov:pb-8 ov:grid ${getGridColsClass(gridDivide)}`}>
-            <VariantsContent variantsToRender={isGrouped ? (variantsToRender as VariantGroup[])[0].variants : variantsToRender as Variant[]} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
-          </div></>
-        ) : (
-          <div className="ov:overflow-auto ov:py-4">
-            {(variantsToRender as VariantGroup[]).map((variantGroup) => (
-              variantGroup.variants.length > 0 && (
-                <div key={variantGroup.groupName}>
-                  <div className="ov:flex ov:items-center ov:mx-4 ov:justify-between">
-                    <h3 className="ov25-group-name ov:text-lg ov:text-[var(--ov25-secondary-text-color)]">{variantGroup.groupName}</h3>
-                  </div>
-                  <div id="ov25-variant-group-content" className={`ov:grid ${getGridColsClass(gridDivide)}`}>
-                    <VariantsContent variantsToRender={variantGroup.variants} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
-                  </div>
-                </div>
-              )
-            ))}
           </div>
-        ))
+        </div>
       }
     </>
   );

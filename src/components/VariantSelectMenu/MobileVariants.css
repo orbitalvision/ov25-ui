@@ -1,11 +1,11 @@
-#ov25-filter-content-wrapper {
+#ov25-filter-content-wrapper-mobile {
   display: flex;
   justify-content: flex-end;
   flex-wrap: wrap;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  padding-top: 0.5rem;
-  padding-bottom: 13rem;
+  padding-left: 1em;
+  padding-right: 1em;
+  padding-top: 0.5em;
+  padding-bottom: 13em;
   overflow-y: auto;
   height: 100%;
 } 

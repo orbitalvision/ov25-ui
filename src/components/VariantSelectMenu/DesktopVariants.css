@@ -1,10 +1,43 @@
-#ov25-filter-content-wrapper {
+#ov25-filter-container {
+  position: relative;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+}
+
+#ov25-content-area {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  height: 100%;
+}
+
+#ov25-desktop-variants-content {
+  height: 100%;
+  overflow-y: auto;
+}
+
+#ov25-filter-content-wrapper-desktop {
   display: flex;
   justify-content: flex-end;
   flex-wrap: wrap;
-  padding-left: 1rem;
-  padding-right: 1rem;
-  padding-top: 0.5rem;
   overflow-y: auto;
+  position: absolute;
+  inset: 0;
   height: 100%;
-} 
+  padding: 0.5em 1em;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(100%);
+  transition: transform 0.3s ease-in-out, opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+  background: var(--ov25-background-color);
+}
+
+#ov25-filter-content-wrapper-desktop[data-open="true"] {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}

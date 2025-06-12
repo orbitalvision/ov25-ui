@@ -85,7 +85,7 @@ export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSe
                 setIsFilterOpen={setIsFilterOpen}
               />
               {isFilterOpen && (
-                <div id="ov25-filter-content-wrapper">
+                <div id="ov25-filter-content-wrapper-mobile">
                   <FilterContent />
                 </div>
               )}
@@ -157,7 +157,7 @@ export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSe
                   setIsFilterOpen={setIsFilterOpen}
                 />
                 {isFilterOpen && (
-                  <div id="ov25-filter-content-wrapper">
+                  <div id="ov25-filter-content-wrapper-mobile">
                     <FilterContent />
                   </div>
                 )}
