@@ -15,9 +15,18 @@
   height: 100%;
 }
 
-#ov25-desktop-variants-content {
+#ov25-desktop-variants-content-ungrouped {
+  display: grid;
+  height: fit-content;
+  overflow-y: auto;
+  padding-top: 1em;
+  padding-bottom: 2em;
+}
+
+#ov25-desktop-variants-content-grouped {
   height: 100%;
   overflow-y: auto;
+  padding-block: 1em;
 }
 
 #ov25-filter-content-wrapper-desktop {
