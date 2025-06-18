@@ -1,0 +1,13 @@
+#ov25-no-results{
+  width: 100%;
+  height: 100%;
+  padding: 1rem;
+  padding-top: 4rem;
+  display: flex;
+  justify-content: center;
+}
+
+#ov25-no-results h3 {
+  font-size: 1.125rem;
+  color: var(--ov25-secondary-text-color);
+} 

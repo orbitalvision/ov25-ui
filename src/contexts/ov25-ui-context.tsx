@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useRef, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { sendMessageToIframe } from '../utils/configurator-utils.js';
 import { stringSimilarity } from 'string-similarity-js';
 
@@ -125,7 +125,7 @@ interface OV25UIContextType {
   allOptions: (Option | SizeOption)[];
   galleryIndexToUse: number;
   filteredActiveOption?: Option | null;
-  searchQuery: string;
+  searchQueries: { [optionId: string]: string };
   // Methods
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
   setCurrentProductId: React.Dispatch<React.SetStateAction<string | undefined>>;
@@ -150,7 +150,7 @@ interface OV25UIContextType {
   setAnimationState: React.Dispatch<React.SetStateAction<AnimationState>>;
   setHasSwitchedAfterDefer: React.Dispatch<React.SetStateAction<boolean>>;
   setAvailableProductFilters: React.Dispatch<React.SetStateAction<ProductFilters>>;
-  setSearchQuery: React.Dispatch<React.SetStateAction<string>>;
+  setSearchQuery: (optionId: string, query: string) => void;
   // Actions
   handleSelectionSelect: (selection: Selection) => void;
   handleOptionClick: (optionId: string) => void;
@@ -214,7 +214,7 @@ export const OV25UIProvider: React.FC<{
   const [hasSwitchedAfterDefer, setHasSwitchedAfterDefer] = useState(false)
   const [pendingProductId, setPendingProductId] = useState<string | null>(null);
   const [availableProductFilters, setAvailableProductFilters] = useState<ProductFilters>({});
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [searchQueries, setSearchQueries] = useState<{ [optionId: string]: string }>({});
   const hasDefered = useRef(false);
   const isSelectingProduct = useRef(false);
   const hasComputedFilters = useRef(false);
@@ -250,6 +250,13 @@ export const OV25UIProvider: React.FC<{
     return () => window.removeEventListener('resize', checkIfMobile);
   }, []);
 
+  const setSearchQuery = useCallback((optionId: string, query: string) => {
+    setSearchQueries(prev => ({
+      ...prev,
+      [optionId]: query
+    }));
+  }, []);
+
   // Computed values
   const currentProduct = products?.find(p => p.id === currentProductId);
 
@@ -275,9 +282,10 @@ export const OV25UIProvider: React.FC<{
     if (!baseActiveOption) return undefined;
 
     const searchFilter = (text: string) => {
-      if (!searchQuery) return true;
-      const similarity = stringSimilarity(text.toLowerCase(), searchQuery.toLowerCase());
-      const containsQuery = text.toLowerCase().includes(searchQuery.toLowerCase());
+      const currentSearchQuery = searchQueries[baseActiveOption.id];
+      if (!currentSearchQuery) return true;
+      const similarity = stringSimilarity(text.toLowerCase(), currentSearchQuery.toLowerCase());
+      const containsQuery = text.toLowerCase().includes(currentSearchQuery.toLowerCase());
       return similarity > 0.4 || containsQuery; // Lower the threshold for better matches
     };
 
@@ -313,7 +321,8 @@ export const OV25UIProvider: React.FC<{
 
     // Checks a selection against the search query and returns true if it matches the search query.
     const checkSelectionSearch = (selection: any) => {
-      if (!searchQuery) return true;
+      const currentSearchQuery = searchQueries[baseActiveOption.id];
+      if (!currentSearchQuery) return true;
       
       // Check selection name
       if (searchFilter(selection.name)) {
@@ -336,13 +345,14 @@ export const OV25UIProvider: React.FC<{
     return {
       ...baseActiveOption,
       groups: baseActiveOption.groups.filter((group) => {
+        const currentSearchQuery = searchQueries[baseActiveOption.id];
         // First check if group name matches search
-        if (searchQuery && searchFilter(group.name)) {
+        if (currentSearchQuery && searchFilter(group.name)) {
           return true;
         }
 
         // If group name doesn't match, check if any selections in this group match
-        if (searchQuery) {
+        if (currentSearchQuery) {
           const hasMatchingSelections = group.selections.some(selection => checkSelectionSearch(selection));
           if (hasMatchingSelections) {
             return true;
@@ -357,18 +367,20 @@ export const OV25UIProvider: React.FC<{
             .includes(group.name);
         }
 
-        return !searchQuery; // Only return true if there's no search query
+        return !currentSearchQuery; // Only return true if there's no search query
       }).map(group => ({
         ...group,
-        selections: group.selections.filter(selection => {
-          const matchesSearch = checkSelectionSearch(selection);
-          const matchesFilters = checkSelectionFilters(selection);
-          
-          return matchesSearch && matchesFilters;
-        })
+        selections: searchQueries[baseActiveOption.id] && !searchFilter(group.name) 
+          ? group.selections.filter(selection => {
+              const matchesSearch = checkSelectionSearch(selection);
+              const matchesFilters = checkSelectionFilters(selection);
+              
+              return matchesSearch && matchesFilters;
+            })
+          : group.selections.filter(selection => checkSelectionFilters(selection))
       }))
     };
-  }, [baseActiveOption, availableProductFilters, searchQuery]);
+  }, [baseActiveOption, availableProductFilters, searchQueries]);
 
   // Compute filters once when we have the necessary data
   if (!hasComputedFilters.current && configuratorState?.configuratorSettings?.availableProductFilters && configuratorState.options) {
@@ -621,7 +633,7 @@ export const OV25UIProvider: React.FC<{
     activeOption: activeOption,
     availableProductFilters,
     allOptions,
-    searchQuery,
+    searchQueries,
     // Methods
     setProducts,
     setCurrentProductId,

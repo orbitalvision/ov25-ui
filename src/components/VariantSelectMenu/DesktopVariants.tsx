@@ -6,6 +6,7 @@ import { ChevronUp } from "lucide-react";
 import { useState } from 'react';
 import { FilterControls } from './FilterControls.js';
 import { FilterContent } from './FilterContent.js';
+import { NoResults } from './NoResults.js';
 
 import './DesktopVariants.css';
 
@@ -131,6 +132,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
             />
           )}
           <div id="ov25-content-area">
+            {variantsToRender.length === 0 && <NoResults />}
             {((shouldDestructureGroups || !isGrouped) ? (
               <div id="ov25-desktop-variants-content-ungrouped" className={`${getGridColsClass(gridDivide)}`}>
                 <VariantsContent variantsToRender={isGrouped ? (variantsToRender as VariantGroup[])[0].variants : variantsToRender as Variant[]} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />

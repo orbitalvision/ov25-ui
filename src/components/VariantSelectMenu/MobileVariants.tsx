@@ -7,6 +7,7 @@ import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 import { VariantsContent } from './VariantsContent.js';
 import { FilterControls } from './FilterControls.js';
 import { FilterContent } from './FilterContent.js';
+import { NoResults } from './NoResults.js';
 import './MobileVariants.css';
 
 const VariantsContentWithCarousel = React.memo(({ variantsToRender, VariantCard, onSelect, isMobile, isGrouped = false }: { variantsToRender: Variant[], VariantCard: React.ComponentType<VariantCardProps>, onSelect: (variant: Variant) => void, isMobile: boolean, isGrouped: boolean }) => {
@@ -56,20 +57,35 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
   isFilterOpen: boolean,
   setIsFilterOpen: (isOpen: boolean) => void
 }) => {
+  const {
+      drawerSize,
+      availableProductFilters,
+      activeOption,
+  } = useOV25UI();
+
+  // When filters change, we need to select the first group selected in the filters. 
+  React.useEffect(() => {
+    if (isGrouped) {
+      const firstGroupSelectedInFilters = availableProductFilters?.[activeOption?.name || '']?.['Categories']?.filter((a) => a.checked)?.some((a) => a.value === (variants[0] as VariantGroup).groupName)
+      if (firstGroupSelectedInFilters) {
+        setSelectedGroupIndex(availableProductFilters?.[activeOption?.name || '']?.['Categories']?.filter((a) => a.checked)?.findIndex((a) => a.value === (variants[0] as VariantGroup).groupName) || 0);
+      }
+    }
+  }, [availableProductFilters]);
+
   const [selectedGroupIndex, setSelectedGroupIndex] = useState(0);
 
   const isGrouped = Array.isArray(variants) && variants.length > 0 && 'groupName' in variants[0]
-  const shouldDestructureGroups = isGrouped && variants.length < 2 
+  // If the singular group is selected in the filters, dont destructure
+  const singleGroupIsSelectedInFilters = activeOption?.name ? (availableProductFilters && activeOption && availableProductFilters[activeOption.name] 
+    && availableProductFilters[activeOption.name]['Categories'].filter((a) => a.checked)?.some((a) => a.value === (variants[0] as VariantGroup).groupName)) : false
+  const shouldDestructureGroups = isGrouped && variants.length < 2 && !singleGroupIsSelectedInFilters
 
   const variantsToRender = useMemo(() => 
       isGrouped ? (variants as VariantGroup[])[0].variants : variants as Variant[],
       [isGrouped, variants]
   );
 
-  const {
-      drawerSize,
-      availableProductFilters,
-  } = useOV25UI();
 
   const showFilters = ((isGrouped && !shouldDestructureGroups) && variants.length > 0 && (variants as VariantGroup[]).some(group => group.variants.length > 0)) || 
     (availableProductFilters && Object.keys(availableProductFilters).length > 0 && Object.keys(availableProductFilters).some(key => Object.keys(availableProductFilters[key]).length > 0));
@@ -86,6 +102,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
           />
         )}
         <div id="ov25-mobile-content-area">
+          {variantsToRender.length === 0 && <NoResults />}
           <Carousel opts={{ dragFree: true, loop: false }} className="ov:py-2">
             <CarouselContent className="ov:px-4 ov:-ml-2 ov:pr-4">
               <CarouselItem key={'placeholder'} className="ov:basis-[37%] ov:py-2">
@@ -156,6 +173,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
             />
           )}
           <div id="ov25-mobile-content-area">
+            {variantsToRender.length === 0 && <NoResults />}
             <div id="ov25-mobile-variants-content">
               <div style={{ display: 'grid' }} className={`ov:px-0 ov:pb-63 ov:gap-2 ${getGridColsClass(gridDivide)}`}>
                 <VariantsContent variantsToRender={variantsToRender} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />

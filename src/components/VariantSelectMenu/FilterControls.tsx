@@ -13,13 +13,39 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
     isFilterOpen,
     setIsFilterOpen,
 }) => {
-    const { searchQuery, setSearchQuery } = useOV25UI();
-    const [localSearchQuery, setLocalSearchQuery] = React.useState(searchQuery);
+    const { searchQueries, setSearchQuery, activeOptionId } = useOV25UI();
+    const [localSearchQuery, setLocalSearchQuery] = React.useState('');
     const debouncedSearchQuery = useDebounce(localSearchQuery, 500);
-
+    const previousOptionIdRef = React.useRef<string | null>(null);
+    const isUserInputRef = React.useRef(false);
+    
+    // Effect for updating local search query when activeOptionId changes
     React.useEffect(() => {
-        setSearchQuery(debouncedSearchQuery);
-    }, [debouncedSearchQuery, setSearchQuery]);
+        if (activeOptionId && activeOptionId !== previousOptionIdRef.current) {
+            const newQuery = searchQueries[activeOptionId] || '';
+            setLocalSearchQuery(newQuery);
+            previousOptionIdRef.current = activeOptionId;
+            isUserInputRef.current = false;
+        }
+    }, [activeOptionId, searchQueries]);
+
+    // Effect for syncing local state to global state
+    React.useEffect(() => {
+        if (activeOptionId) {
+            if (!isUserInputRef.current) {
+                // Immediate update when activeOptionId changes
+                setSearchQuery(activeOptionId, localSearchQuery);
+            } else {
+                // Debounced update when user types
+                setSearchQuery(activeOptionId, debouncedSearchQuery);
+            }
+        }
+    }, [activeOptionId, localSearchQuery, debouncedSearchQuery, setSearchQuery, isUserInputRef]);
+
+    const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setLocalSearchQuery(e.target.value);
+        isUserInputRef.current = true;
+    };
 
     return (
         <div id="ov25-filter-controls">
@@ -31,7 +57,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
                 !isFilterOpen && (
                     <div id="ov25-filter-controls-search">
                         <Search size={24} />
-                        <input value={localSearchQuery} onChange={(e) => setLocalSearchQuery(e.target.value)} type="text" placeholder="Search" />
+                        <input value={localSearchQuery} onChange={handleSearchInputChange} type="text" placeholder="Search" />
                         {localSearchQuery && (<X size={24} onClick={() => setLocalSearchQuery('')} />)}
                     </div>
                 )

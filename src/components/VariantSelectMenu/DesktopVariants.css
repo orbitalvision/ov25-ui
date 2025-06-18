@@ -17,10 +17,11 @@
 
 #ov25-desktop-variants-content-ungrouped {
   display: grid;
-  height: fit-content;
+  height: 100%;
   overflow-y: auto;
   padding-top: 1em;
   padding-bottom: 2em;
+  align-content: start;
 }
 
 #ov25-desktop-variants-content-grouped {
@@ -39,10 +40,10 @@
   height: 100%;
   padding: 0.5em 1em;
   background: var(--ov25-background-color);
-  transform: translateY(100%);
+  transform: translateY(-100%);
   transition: transform 0.5s ease-in-out;
 }
 
 #ov25-filter-content-wrapper-desktop[data-open="true"] {
   transform: translateY(0);
-}
+} 
