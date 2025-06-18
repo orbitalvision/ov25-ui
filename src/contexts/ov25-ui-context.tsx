@@ -122,6 +122,7 @@ interface OV25UIContextType {
   sizeOption: SizeOption;
   activeOption?: Option;
   availableProductFilters?: ProductFilters;
+  showFilters?: boolean;
   allOptions: (Option | SizeOption)[];
   galleryIndexToUse: number;
   filteredActiveOption?: Option | null;
@@ -214,6 +215,7 @@ export const OV25UIProvider: React.FC<{
   const [hasSwitchedAfterDefer, setHasSwitchedAfterDefer] = useState(false)
   const [pendingProductId, setPendingProductId] = useState<string | null>(null);
   const [availableProductFilters, setAvailableProductFilters] = useState<ProductFilters>({});
+  const [showFilters, setShowFilters] = useState<boolean>(false);
   const [searchQueries, setSearchQueries] = useState<{ [optionId: string]: string }>({});
   const hasDefered = useRef(false);
   const isSelectingProduct = useRef(false);
@@ -433,6 +435,7 @@ export const OV25UIProvider: React.FC<{
     });
 
     setAvailableProductFilters(allFilterSets);
+    setShowFilters(Object.keys(allFilterSets).length > 0 && Object.keys(allFilterSets).some(key => Object.keys(allFilterSets[key]).some(key2 => Object.keys(allFilterSets[key][key2]).length > 0)));
     hasComputedFilters.current = true;
   }
 
@@ -632,6 +635,7 @@ export const OV25UIProvider: React.FC<{
     sizeOption,
     activeOption: activeOption,
     availableProductFilters,
+    showFilters,
     allOptions,
     searchQueries,
     // Methods

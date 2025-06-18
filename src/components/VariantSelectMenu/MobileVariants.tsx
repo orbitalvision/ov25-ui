@@ -60,6 +60,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
   const {
       drawerSize,
       availableProductFilters,
+      showFilters,
       activeOption,
   } = useOV25UI();
 
@@ -86,17 +87,14 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
       isGrouped ? (variants as VariantGroup[])[0].variants : variants as Variant[],
       [isGrouped, variants]
   );
-
-
-  const showFilters = ((isGrouped && !shouldDestructureGroups) && variants.length > 0 && (variants as VariantGroup[]).some(group => group.variants.length > 0)) || 
-    (availableProductFilters && Object.keys(availableProductFilters).length > 0 && Object.keys(availableProductFilters).some(key => Object.keys(availableProductFilters[key]).length > 0));
+  const shouldShowFilters = ((isGrouped && !shouldDestructureGroups) && variants.length > 0 && (variants as VariantGroup[]).some(group => group.variants.length > 0)) || showFilters;
 
   if (isGrouped && !shouldDestructureGroups) {
     const group = (variants as VariantGroup[])[selectedGroupIndex]
     const variantsToRender =  group ? group.variants : [] as Variant[];
     return (
       <div id="ov25-mobile-filter-container">
-        {drawerSize !== 'small' && showFilters && (
+        {drawerSize !== 'small' && shouldShowFilters && (
           <FilterControls 
             isFilterOpen={isFilterOpen}
             setIsFilterOpen={setIsFilterOpen}
@@ -143,7 +141,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
                   <VariantsContent variantsToRender={variantsToRender} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
                 </div>
               </div>
-              {showFilters && (
+              {shouldShowFilters && (
                 <div data-open={isFilterOpen} id="ov25-filter-content-wrapper-mobile">
                   <FilterContent />
                 </div>
@@ -167,7 +165,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
     } else {
       return (
         <div id="ov25-mobile-filter-container">
-          {showFilters && (
+          {shouldShowFilters && (
             <FilterControls 
               isFilterOpen={isFilterOpen}
               setIsFilterOpen={setIsFilterOpen}
@@ -180,7 +178,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
                 <VariantsContent variantsToRender={variantsToRender} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
               </div>
             </div>
-            {showFilters && (
+            {shouldShowFilters && (
               <div data-open={isFilterOpen} id="ov25-filter-content-wrapper-mobile">
                 <FilterContent />
               </div>

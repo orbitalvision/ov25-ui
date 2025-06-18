@@ -46,13 +46,12 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
     activeOptionId,
     handlePreviousOption,
     handleNextOption,
-    availableProductFilters,
+    showFilters,
   } = useOV25UI();
 
   const currentOption = allOptions.find(opt => opt.id === activeOptionId)
 
-  const showFilters = ((isGrouped && !shouldDestructureGroups) && (variantsToRender as VariantGroup[]).some(group => group.variants.length > 0)) || 
-    (availableProductFilters && Object.keys(availableProductFilters).length > 0 && Object.keys(availableProductFilters).some(key => Object.keys(availableProductFilters[key]).length > 0));
+  const shouldShowFilters = ((isGrouped && !shouldDestructureGroups) && (variantsToRender as VariantGroup[]).some(group => group.variants.length > 0)) || showFilters;
 
   return (
     <>
@@ -125,7 +124,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
         )
       }{
         <div id="ov25-filter-container">
-          {showFilters && (
+          {shouldShowFilters && (
             <FilterControls 
               isFilterOpen={isFilterOpen}
               setIsFilterOpen={setIsFilterOpen}
@@ -153,7 +152,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
                 ))}
               </div>
             ))}
-            {showFilters && (
+            {shouldShowFilters && (
               <div data-open={isFilterOpen} id="ov25-filter-content-wrapper-desktop">
                 <FilterContent />
               </div>
