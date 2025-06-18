@@ -54,7 +54,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
                 <span>Filters</span>
             </button>
             {
-                !isFilterOpen && (
+                (
                     <div id="ov25-filter-controls-search">
                         <Search size={24} />
                         <input value={localSearchQuery} onChange={handleSearchInputChange} type="text" placeholder="Search" />

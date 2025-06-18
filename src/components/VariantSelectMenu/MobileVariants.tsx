@@ -77,8 +77,9 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
 
   const isGrouped = Array.isArray(variants) && variants.length > 0 && 'groupName' in variants[0]
   // If the singular group is selected in the filters, dont destructure
-  const singleGroupIsSelectedInFilters = activeOption?.name ? (availableProductFilters && activeOption && availableProductFilters[activeOption.name] 
-    && availableProductFilters[activeOption.name]['Categories'].filter((a) => a.checked)?.some((a) => a.value === (variants[0] as VariantGroup).groupName)) : false
+  const singleGroupIsSelectedInFilters = activeOption?.name ? (
+    availableProductFilters?.[activeOption.name]?.['Categories']?.filter((a) => a.checked)?.some((a) => a.value === (variants[0] as VariantGroup).groupName)
+  ) : false;
   const shouldDestructureGroups = isGrouped && variants.length < 2 && !singleGroupIsSelectedInFilters
 
   const variantsToRender = useMemo(() => 
