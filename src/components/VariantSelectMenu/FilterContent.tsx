@@ -19,10 +19,13 @@ export const FilterContent: React.FC = () => {
         }));
     }, [activeOption, availableProductFilters, setAvailableProductFilters]);
 
-    if (!availableProductFilters || !activeOption?.name) return null;
+    if (!availableProductFilters || !activeOption?.name) return (
+        <div id="ov25-filter-empty">
+            <h3>No filters available</h3>
+        </div>
+    );
 
     const activeFilters = availableProductFilters[activeOption.name];
-    
     const doAnyFiltersExist = activeFilters && Object.keys(activeFilters).length > 0 && Object.keys(activeFilters).some(key => activeFilters[key]?.length > 0)
     if (!doAnyFiltersExist) return (
         <div id="ov25-filter-empty">

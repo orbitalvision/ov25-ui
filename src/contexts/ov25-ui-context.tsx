@@ -385,8 +385,8 @@ export const OV25UIProvider: React.FC<{
   }, [baseActiveOption, availableProductFilters, searchQueries]);
 
   // Compute filters once when we have the necessary data
-  if (!hasComputedFilters.current && configuratorState?.configuratorSettings?.availableProductFilters && configuratorState.options) {
-    const availableFilters = configuratorState.configuratorSettings.availableProductFilters;
+  if (!hasComputedFilters.current && configuratorState && configuratorState.options && configuratorState.options.length > 0) {
+    const availableFilters = configuratorState.configuratorSettings?.availableProductFilters || {};
     const allFilterSets: ProductFilters = {};
 
     // Process each option, adding filters for each selection and group.
@@ -433,7 +433,6 @@ export const OV25UIProvider: React.FC<{
         }));
       }
     });
-
     setAvailableProductFilters(allFilterSets);
     setShowFilters(Object.keys(allFilterSets).length > 0 && Object.keys(allFilterSets).some(key => Object.keys(allFilterSets[key]).some(key2 => Object.keys(allFilterSets[key][key2]).length > 0)));
     hasComputedFilters.current = true;
