@@ -99,4 +99,5 @@
 
 #ov25-filter-controls-pills #ov25-filter-pill-all {
   cursor: default;
+  display: none;
 }
