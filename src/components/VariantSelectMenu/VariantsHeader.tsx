@@ -14,7 +14,8 @@ export const VariantsHeader = () => {
         handleNextOption,
         handlePreviousOption,
         activeOptionId,
-        allOptions
+        allOptions,
+        showOptional
       } = useOV25UI();
 
     const currentOption = allOptions.find(opt => opt.id === activeOptionId)
@@ -47,7 +48,7 @@ export const VariantsHeader = () => {
         <div id="ov25-carousel-controls" className="ov25-mobile-variants-carousel-controls ov:relative ov:flex ov:cursor-pointer ov:md:hidden ov:items-center ov:justify-between ov:w-full ov:p-4 ov:py-[1.125rem] ov:pt-6">
             <div className="ov:absolute ov:inset-0 ov:w-full ov:flex ov:justify-center ov:items-center ov:pb-5 ov:pt-10 ov:border-b ov:border-[var(--ov25-border-color)]">
                 <p data-optional={currentOption?.hasNonOption ? 'true' : 'false'} className="ov:text-[var(--ov25-secondary-text-color)]">
-                {currentOption && capitalizeWords(currentOption.name) }
+                {currentOption && capitalizeWords(currentOption.name + ((currentOption.hasNonOption && showOptional) ? ' (Optional)' : '')) }
                 </p>
             </div>
           <button 

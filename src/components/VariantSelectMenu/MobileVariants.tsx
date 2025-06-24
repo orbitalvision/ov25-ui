@@ -67,9 +67,9 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
   // When filters change, we need to select the first group selected in the filters. 
   React.useEffect(() => {
     if (isGrouped) {
-      const firstGroupSelectedInFilters = availableProductFilters?.[activeOption?.name || '']?.['Categories']?.filter((a) => a.checked)?.some((a) => a.value === (variants[0] as VariantGroup).groupName)
+      const firstGroupSelectedInFilters = availableProductFilters?.[activeOption?.name || '']?.['Collections']?.filter((a) => a.checked)?.some((a) => a.value === (variants[0] as VariantGroup).groupName)
       if (firstGroupSelectedInFilters) {
-        setSelectedGroupIndex(availableProductFilters?.[activeOption?.name || '']?.['Categories']?.filter((a) => a.checked)?.findIndex((a) => a.value === (variants[0] as VariantGroup).groupName) || 0);
+        setSelectedGroupIndex(availableProductFilters?.[activeOption?.name || '']?.['Collections']?.filter((a) => a.checked)?.findIndex((a) => a.value === (variants[0] as VariantGroup).groupName) || 0);
       }
     }
   }, [availableProductFilters]);
@@ -79,7 +79,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
   const isGrouped = Array.isArray(variants) && variants.length > 0 && 'groupName' in variants[0]
   // If the singular group is selected in the filters, dont destructure
   const singleGroupIsSelectedInFilters = activeOption?.name ? (
-    availableProductFilters?.[activeOption.name]?.['Categories']?.filter((a) => a.checked)?.some((a) => a.value === (variants[0] as VariantGroup).groupName)
+    availableProductFilters?.[activeOption.name]?.['Collections']?.filter((a) => a.checked)?.some((a) => a.value === (variants[0] as VariantGroup).groupName)
   ) : false;
   const shouldDestructureGroups = isGrouped && variants.length < 2 && !singleGroupIsSelectedInFilters
 

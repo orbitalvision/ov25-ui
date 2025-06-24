@@ -37,8 +37,8 @@ export const FilterContent: React.FC = () => {
         <div id="ov25-filter-content">
             {Object.entries(activeFilters)
                 .sort(([keyA], [keyB]) => {
-                    if (keyA === 'Categories') return -1;
-                    if (keyB === 'Categories') return 1;
+                    if (keyA === 'Collections') return -1;
+                    if (keyB === 'Collections') return 1;
                     return keyA.localeCompare(keyB);
                 })
                 .map(([filterKey, options]) => (

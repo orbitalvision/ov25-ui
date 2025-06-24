@@ -47,6 +47,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
     handlePreviousOption,
     handleNextOption,
     showFilters,
+    showOptional,
   } = useOV25UI();
 
   const currentOption = allOptions.find(opt => opt.id === activeOptionId)
@@ -105,7 +106,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
               return (
                 <div
                   key={`${option.id}-desktop-render`}
-                  className={`ov:cursor-pointer ov:flex ov:justify-center ov:items-center ov:my-0 ov:border-b ov:border-[var(--ov25-border-color)] ov:data-[selected=true]:bg-[var(--ov25-text-color)] ${widthClass} ${borderClass}`}
+                  className={`ov:cursor-pointer ov:flex ov:justify-center ov:items-center ov:px-[5px] ov:py-[5px] ov:my-0 ov:border-b ov:border-[var(--ov25-border-color)] ov:data-[selected=true]:bg-[var(--ov25-text-color)] ${widthClass} ${borderClass}`}
                   onClick={() => handleOptionClick(option?.id)}
                   style={{ maxWidth: itemsThisRow === 1 ? '100%' : itemsThisRow === 2 ? '50%' : '33.333%' }}
                   data-selected={option.id === activeOptionId ? "true" : "false"}
@@ -115,7 +116,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
                     data-selected={option.id === activeOptionId ? "true" : "false"}
                     data-optional={option.hasNonOption ? 'true' : 'false'}
                   >
-                    {capitalizeWords(option.name)}
+                    {capitalizeWords(option.name + ((option.hasNonOption && showOptional) ? ' (Optional)' : ''))}
                   </div>
                 </div>
               );

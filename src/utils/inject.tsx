@@ -27,6 +27,7 @@ export interface InjectConfiguratorOptions {
   galleryId?: ElementSelector;
   images?: string[];
   deferThreeD?: boolean;
+  showOptional?: boolean;
   priceId?: ElementSelector;
   nameId?: ElementSelector;
   variantsId?: ElementSelector;
@@ -54,6 +55,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     mobileLogoURL,
     cssVariables,
     deferThreeD,
+    showOptional,
   } = opts;
 
 
@@ -230,6 +232,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
         logoURL={logoURL ?? 'https://ov25.orbital.vision/OV.png'}
         mobileLogoURL={mobileLogoURL}
         deferThreeD={deferThreeD}
+        showOptional={showOptional}
         isProductGalleryStacked={isProductGalleryStacked}
       >
         {portals}

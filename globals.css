@@ -195,14 +195,6 @@ html #ov25-configurator-variant-menu-container {
   padding: 1em;
 }
 
-#ov25-desktop-variants-content button {
-  padding: 1em;
-}
-
-#ov25-desktop-variants-content button svg {
-  --tw-translate-x: 50%;
-  --tw-translate-y: 50%;
-}
 #true-ov25-configurator-iframe-container button {
     background-color: var(--ov25-primary-color);
     border-color: var(--ov25-primary-color);
@@ -220,27 +212,9 @@ html #ov25-configurator-variant-menu-container {
     display: none;
 }
 
-#ov25-desktop-variants-content h3 {
-  line-height: 1.5em;
-}
-
-#ov25-desktop-variants-content img {
-  height: 100%;
-  width: 100%;
-}
-
-#ov25-desktop-variants-content div[data-selected="true"] .ov25-variant-image-container {
-  border: 2px solid var(--ov25-highlight-color);
-}
-
 #ov25-variant-group-content div[data-selected="true"] .ov25-variant-image-container {
   border: 2px solid var(--ov25-highlight-color);
 }
-
-#ov25-desktop-variants-content .ov25-variant-selected-indicator {
-  translate: -50% -50%;
-}
-
 
 #ov25-mobile-variants-content h3 {
   line-height: 1.5em;

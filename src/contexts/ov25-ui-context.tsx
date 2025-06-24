@@ -108,6 +108,7 @@ interface OV25UIContextType {
   isMobile: boolean;
   hasSwitchedAfterDefer: boolean;
   deferThreeD: boolean;
+  showOptional: boolean;
   // Coming from injectConfigurator options
   productLink: string | null;
   apiKey: string;
@@ -172,6 +173,7 @@ export const OV25UIProvider: React.FC<{
   addToBasketFunction: () => void,
   images?: string[],
   deferThreeD?: boolean,
+  showOptional?: boolean,
   logoURL: string,
   isProductGalleryStacked: boolean,
   mobileLogoURL?: string
@@ -183,6 +185,7 @@ export const OV25UIProvider: React.FC<{
   addToBasketFunction,
   images,
   deferThreeD = false,
+  showOptional = false,
   logoURL,
   isProductGalleryStacked,
   mobileLogoURL
@@ -300,7 +303,7 @@ export const OV25UIProvider: React.FC<{
       let matchesAnyCheckedFilter = false;
 
       for (const filterName in optionFilters) {
-        if (filterName === 'Categories') {
+        if (filterName === 'Collections') {
           continue;
         }
         const filterValues = optionFilters[filterName];
@@ -362,8 +365,8 @@ export const OV25UIProvider: React.FC<{
         }
 
         // If no search query, check category filters
-        if (availableProductFilters?.[baseActiveOption.name]?.['Categories']?.some(filter => filter.checked)) {
-          return availableProductFilters?.[baseActiveOption.name]['Categories']
+        if (availableProductFilters?.[baseActiveOption.name]?.['Collections']?.some(filter => filter.checked)) {
+          return availableProductFilters?.[baseActiveOption.name]['Collections']
             .filter(filter => filter.checked)
             .map(filter => filter.value)
             .includes(group.name);
@@ -427,7 +430,7 @@ export const OV25UIProvider: React.FC<{
         if (!allFilterSets[option.name]) {
           allFilterSets[option.name] = {};
         }
-        allFilterSets[option.name]['Categories'] = option.groups.map(group => ({
+        allFilterSets[option.name]['Collections'] = option.groups.map(group => ({
           value: group.name,
           checked: false
         }));
@@ -620,6 +623,7 @@ export const OV25UIProvider: React.FC<{
     isProductGalleryStacked,
     hasSwitchedAfterDefer,
     deferThreeD,
+    showOptional,
     galleryIndexToUse,
     // Coming from injectConfigurator options
     productLink,
