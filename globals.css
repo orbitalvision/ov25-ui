@@ -216,6 +216,11 @@ html #ov25-configurator-variant-menu-container {
   border: 2px solid var(--ov25-highlight-color);
 }
 
+.ov25-variant-image-container img {
+  width: 100%;
+  height: 100%;
+}
+
 #ov25-mobile-variants-content h3 {
   line-height: 1.5em;
 }
