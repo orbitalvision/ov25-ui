@@ -35,7 +35,7 @@ const initializeConfigurator = () => {
     variantsId: '#ov25-controls',
     carouselId: true,
     showOptional: true,
-    // logoURL: 'https://ov25.orbital.vision/OV.png',
+    logoURL: 'https://ov25.orbital.vision/OV.png',
     addToBasketFunction: () => {
         alert('Checkout function called');
       },
