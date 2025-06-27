@@ -47,7 +47,7 @@ export const useIframePositioning = () => {
         const originalIframeHeight = iframe.style.height;
         const originalContainerHeight = container.style.height;
 
-        // Add transition
+        // Add transition immediately and keep it
         iframe.style.transition = 'height 500ms cubic-bezier(0.4, 0, 0.2, 1)';
         container.style.transition = 'height 500ms cubic-bezier(0.4, 0, 0.2, 1)';
 
@@ -60,15 +60,14 @@ export const useIframePositioning = () => {
             container.style.height = '100vw';
         }
 
-        // Remove transition after animation completes
-        setTimeout(() => {
-            iframe.style.transition = 'none';
-            container.style.transition = 'none';
-        }, 500);
-
         return () => {
-            iframe.style.height = originalIframeHeight;
-            container.style.height = originalContainerHeight;
+            // Only remove transitions and restore heights when drawer closes
+            if (!isDrawerOrDialogOpen) {
+                iframe.style.transition = 'none';
+                container.style.transition = 'none';
+                iframe.style.height = originalIframeHeight;
+                container.style.height = originalContainerHeight;
+            }
         };
     }
   }, [drawerSize, isDrawerOrDialogOpen])
