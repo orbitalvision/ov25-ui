@@ -115,7 +115,7 @@ interface OV25UIContextType {
   buyNowFunction: () => void;
   addToBasketFunction: () => void;
   images?: string[];
-  logoURL: string;
+  logoURL?: string;
   isProductGalleryStacked: boolean;
   mobileLogoURL?: string;
   // Computed values
@@ -174,7 +174,7 @@ export const OV25UIProvider: React.FC<{
   images?: string[],
   deferThreeD?: boolean,
   showOptional?: boolean,
-  logoURL: string,
+  logoURL?: string,
   isProductGalleryStacked: boolean,
   mobileLogoURL?: string
 }> = ({ 

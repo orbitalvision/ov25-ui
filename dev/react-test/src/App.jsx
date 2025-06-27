@@ -35,7 +35,7 @@ const initializeConfigurator = () => {
     variantsId: '#ov25-controls',
     carouselId: true,
     showOptional: true,
-
+    // logoURL: 'https://ov25.orbital.vision/OV.png',
     addToBasketFunction: () => {
         alert('Checkout function called');
       },
@@ -48,12 +48,6 @@ const initializeConfigurator = () => {
 };
 
 function App() {
-  const [configuratorState, setConfiguratorState] = useState(null);
-
-  // Function to handle configurator state changes
-  const handleConfiguratorState = (state) => {
-    setConfiguratorState(state);
-  };
 
   // Set up the message event listener
   const handleMessage = (event) => {
@@ -71,13 +65,16 @@ function App() {
   
     switch (type) {
       case "ALL_PRODUCTS":
+        console.log("ALL_PRODUCTS", data);
         break;
       case "CURRENT_PRICE":
+        console.log("CURRENT_PRICE", data);
         break;
       case "CURRENT_PRODUCT_ID":
+        console.log("CURRENT_PRODUCT_ID", data);
         break;
       case "CONFIGURATOR_STATE":
-        handleConfiguratorState(data);
+        console.log("CONFIGURATOR_STATE", data);
         break;
       case "RANGE":
         break;

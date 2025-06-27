@@ -51,7 +51,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = ({
         )}
     </div> */}
     <div className={cn(
-        "ov:absolute ov:w-full ov:h-full ov:inset-0 ov:gap-2 ov:p-4 ov:flex ov:justify-end ov:items-end ov:z-[101]",
+        "ov:pointer-events-none ov:absolute ov:w-full ov:h-full ov:inset-0 ov:gap-2 ov:p-4 ov:flex ov:justify-end ov:items-end ov:z-[101]",
         "ov:text-[var(--ov25-configurator-view-controls-text-color)]",
         "ov:transition-[height] ov:duration-500 ov:ease-[cubic-bezier(0.4,0,0.2,1)]"
       )}>

@@ -34,7 +34,7 @@ export interface InjectConfiguratorOptions {
   carouselId?: ElementSelector | true;
   addToBasketFunction: () => void;
   buyNowFunction: () => void;
-  logoURL: string;
+  logoURL?: string;
   mobileLogoURL?: string;
   cssVariables?: JSON;
 }
@@ -229,7 +229,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
         buyNowFunction={buyNowFunction} 
         addToBasketFunction={addToBasketFunction} 
         images={images} 
-        logoURL={logoURL ?? 'https://ov25.orbital.vision/OV.png'}
+        logoURL={logoURL}
         mobileLogoURL={mobileLogoURL}
         deferThreeD={deferThreeD}
         showOptional={showOptional}
