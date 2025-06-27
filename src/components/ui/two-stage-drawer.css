@@ -23,3 +23,10 @@
   border-radius: 9999px;
   backdrop-filter: opacity(0.9);
 } 
+
+#ov25-drawer-toggle-button svg {
+    stroke-width: 1px;
+    fill: none;
+    width: 24px;
+    height: 24px;
+}
