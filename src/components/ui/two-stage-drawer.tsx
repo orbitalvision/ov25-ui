@@ -6,6 +6,7 @@ import { CSSProperties } from "react"
 import { useOV25UI } from "../../contexts/ov25-ui-context.js"
 import { DRAWER_HEIGHT_RATIO } from "../../utils/configurator-utils.js"
 import { ChevronUpIcon, ChevronDownIcon } from "lucide-react"
+import './two-stage-drawer.css';
 
 const AnimatedDiv = animated.div as any;
 
@@ -232,9 +233,8 @@ const TwoStageDrawerComponent = ({
           {drawerState !== 0 && <button 
             id="ov25-drawer-toggle-button"
             onClick={toggleDrawerState}
-            className="ov:flex ov:justify-center ov:items-center ov:z-[99999999999992] ov:cursor-pointer ov:absolute ov:w-24 ov:h-16 ov:top-[-32px]"
           >
-            <div className="ov:min-w-[32px] ov:min-h-[32px] ov:w-8 ov:h-8 ov:flex ov:items-center ov:justify-center ov:bg-white ov:border-[1px] ov:border-[var(--ov25-border-color)] ov:rounded-full ov:backdrop-opacity-90">
+            <div>
               {drawerState === 1 ? 
                 <ChevronUpIcon strokeWidth={1} className="ov:w-8 ov:h-8"/> 
                 : (drawerState === 2 ? <ChevronDownIcon strokeWidth={1} className="ov:w-8 ov:h-8"/> : null)
