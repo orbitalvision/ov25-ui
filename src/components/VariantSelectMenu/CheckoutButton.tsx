@@ -4,7 +4,8 @@ import { Button } from '../ui/button.js';
 import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 
 export const CheckoutButton = () => {
-    const { buyNowFunction, addToBasketFunction, setIsVariantsOpen, formattedPrice } = useOV25UI();
+    const { buyNowFunction, addToBasketFunction, setIsVariantsOpen, formattedPrice, discount, formattedDiscountedPrice } = useOV25UI();
+    console.log("DISCOUNT", discount);
 
     const primaryStyles = cn(
         'ov:flex-1',
@@ -33,7 +34,15 @@ export const CheckoutButton = () => {
         'ov:border-[var(--ov25-border-color)] ',
       )}>
         <div id="ov25-price" className="ov:w-full ov:flex ov:items-center ov:justify-center ov:pb-1.5 ov:mb-2 ov:border-b ov:border-b-[var(--ov25-secondary-text-color)]/20">
-            <h3 className='ov:text-xl  text-center ov:text-[var(--ov25-text-color)]'>{formattedPrice}</h3>
+            {discount > 0 ? (
+              <div className='ov:flex ov:flex-row ov:items-center ov:justify-center'>
+                <h3 className='ov:text-xl ov:text-red-500 text-center ov:line-through'>{formattedPrice}</h3>
+                <span className='ov:text-xl text-center ov:text-[var(--ov25-text-color)]'> / </span>
+                <h3 className='ov:text-xl text-center ov:text-[var(--ov25-text-color)]'>{formattedDiscountedPrice}</h3>
+              </div>
+            ) : (
+              <h3 className='ov:text-xl  text-center ov:text-[var(--ov25-text-color)]'>{formattedPrice}</h3>
+            )}
         </div>
         <div className={cn(
             'ov:grid ov:grid-cols ov:grid-cols-2 ov:px-2 ov:gap-2',

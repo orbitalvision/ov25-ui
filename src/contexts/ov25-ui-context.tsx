@@ -19,6 +19,7 @@ export interface Product {
   id: string;
   name: string;
   price: number;
+  discount: number;
   lowestPrice: number;
   metadata: any;
 }
@@ -94,6 +95,8 @@ interface OV25UIContextType {
   quantity: number;
   price: number;
   formattedPrice: string;
+  formattedDiscountedPrice: string;
+  discount: number;
   galleryIndex: number;
   currentSku: any;
   range: any;
@@ -140,6 +143,7 @@ interface OV25UIContextType {
   setActiveOptionId: React.Dispatch<React.SetStateAction<string | null>>;
   setQuantity: React.Dispatch<React.SetStateAction<number>>;
   setPrice: React.Dispatch<React.SetStateAction<number>>;
+  setDiscount: React.Dispatch<React.SetStateAction<number>>;
   setGalleryIndex: React.Dispatch<React.SetStateAction<number>>;
   setCurrentSku: React.Dispatch<React.SetStateAction<any>>;
   setRange: React.Dispatch<React.SetStateAction<any>>;
@@ -202,8 +206,9 @@ export const OV25UIProvider: React.FC<{
   const [activeOptionId, setActiveOptionId] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(0);
+  const [discount, setDiscount] = useState<number>(0);
   const [formattedPrice, setFormattedPrice] = useState<string>('£0.00')
-
+  const [formattedDiscountedPrice, setFormattedDiscountedPrice] = useState<string>('£0.00')
   const [currentSku, setCurrentSku] = useState<any>(null);
   const [range, setRange] = useState<any>(null);
   const [drawerSize, setDrawerSize] = useState<DrawerSizes>("closed");
@@ -265,6 +270,17 @@ export const OV25UIProvider: React.FC<{
   // Computed values
   const currentProduct = products?.find(p => p.id === currentProductId);
 
+  useEffect(() => {
+    if (currentProduct) {
+      console.log('currentProduct', currentProduct);
+      setDiscount(currentProduct?.discount || 0);
+      console.log(price);
+      console.log(currentProduct?.discount);
+      console.log(price - (price * ((currentProduct as any).discount / 100)));
+      setFormattedDiscountedPrice('£' + (price - (price * ((currentProduct as any).discount / 100))).toFixed(2))
+    }
+  }, [currentProduct, price]);
+
   // Create a virtual size option from products
   const sizeOption: SizeOption = {
     id: 'size',
@@ -276,6 +292,7 @@ export const OV25UIProvider: React.FC<{
         id: p?.id,
         name: p?.name,
         price: p?.price,
+        discount: p?.discount,
         thumbnail: p?.metadata?.images?.length > 0 ? p?.metadata?.images[p?.metadata?.images?.length - 1] : null
       })) || []
     }]
@@ -557,6 +574,13 @@ export const OV25UIProvider: React.FC<{
             setConfiguratorState(data);
             break;
           case 'CURRENT_PRICE':
+            console.log('CURRENT_PRICE', data);
+            if (currentProduct && (currentProduct as any).discount) {
+              console.log('in the IF');
+              // setDiscount((currentProduct as any).discount || 0);
+              // setFormattedDiscountedPrice('£' + (data.totalPrice - (data.totalPrice * ((currentProduct as any).discount / 100))).toFixed(2))
+              console.log("DISCOUNT", (currentProduct as any).discount);
+            }
             setPrice(data.totalPrice);
             setFormattedPrice(data.formattedPrice)
             break;
@@ -608,6 +632,8 @@ export const OV25UIProvider: React.FC<{
     quantity,
     price,
     formattedPrice,
+    discount,
+    formattedDiscountedPrice,
     galleryIndex,
     currentSku,
     range,
@@ -649,6 +675,7 @@ export const OV25UIProvider: React.FC<{
     setActiveOptionId,
     setQuantity,
     setPrice,
+    setDiscount,
     setGalleryIndex,
     setCurrentSku,
     setRange,

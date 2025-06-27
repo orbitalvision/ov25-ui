@@ -39,6 +39,8 @@ export const IframeContainer = () => {
         (currentProduct as any)?.dimensionY &&
         (currentProduct as any)?.dimensionZ);
 
+    const discount = (currentProduct as any)?.discount;
+
     // Use the utility function to get the iframe src
     const iframeSrc = useMemo(() =>
         getIframeSrc(apiKey, productLink),
