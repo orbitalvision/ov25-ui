@@ -31,7 +31,6 @@ export const IframeContainer = () => {
 
     // Any component-specific state remains local
     const [canSeeDimensions, setCanSeeDimensions] = useState(false);
-    const isMobile = useMediaQuery(1280);
 
 
     // Calculate showDimensionsToggle from currentProduct
@@ -56,7 +55,7 @@ export const IframeContainer = () => {
     )
 
     return (
-        <div id="true-ov25-configurator-iframe-container"
+    <div id="true-ov25-configurator-iframe-container"
         className={cn(isStacked ? isStackedStyles : isInlineStyles)}>
         <iframe
             ref={iframeRef}
@@ -83,7 +82,6 @@ export const IframeContainer = () => {
                 canAnimate={canAnimate}
                 animationState={animationState}
                 showDimensionsToggle={showDimensionsToggle}
-                isMobile={isMobile}
                 canSeeDimensions={canSeeDimensions}
                 setCanSeeDimensions={setCanSeeDimensions}
             />

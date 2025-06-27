@@ -6,6 +6,7 @@ import { useMediaQuery } from "../../hooks/use-media-query.js"
 import * as React from 'react'
 import { CSSProperties } from "react"
 import { useOV25UI } from "../../contexts/ov25-ui-context.js"
+import { DRAWER_HEIGHT_RATIO } from "../../utils/configurator-utils.js"
 
 const AnimatedDiv = animated.div as any;
 
@@ -35,8 +36,7 @@ const TwoStageDrawerComponent = ({
 }: TwoStageDrawerProps) => {
   const [drawerState, setDrawerState] = useState<DrawerState>(0)
   const dragStartY = useRef(0)
-  const isMobile = useMediaQuery(768) // md breakpoint
-  const { setIsDrawerOrDialogOpen: setIsDrawerOpen } = useOV25UI()
+  const { setIsDrawerOrDialogOpen: setIsDrawerOpen, isMobile } = useOV25UI()
   const [originalStyles, setOriginalStyles] = useState<{
     body: {
       overflow: string;
@@ -61,7 +61,7 @@ const TwoStageDrawerComponent = ({
   }
 
   function getMaxHeight() {
-    return viewportHeight * 0.80
+    return viewportHeight * DRAWER_HEIGHT_RATIO
   }
 
   const minHeight = typeof window !== 'undefined' ? getMinHeight() : 0

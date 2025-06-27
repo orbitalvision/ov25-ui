@@ -20,9 +20,6 @@ export function ProductCarousel() {
     isVariantsOpen,
     galleryIndexToUse,
   } = useOV25UI();
-  
-  // Get local data
-  const isMobile = useMediaQuery(1280);
 
   // Get the images from the current product
   const productImages = currentProduct?.metadata?.images?.slice(0, -1) || [];

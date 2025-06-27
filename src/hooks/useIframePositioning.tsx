@@ -1,5 +1,6 @@
 import { useEffect,  } from 'react';
 import { useOV25UI } from '../contexts/ov25-ui-context.js';
+import { IFRAME_HEIGHT_RATIO } from '../utils/configurator-utils.js';
 
 /**
  * Helper function to find an element in Shadow DOM or regular DOM
@@ -43,32 +44,31 @@ export const useIframePositioning = () => {
         const container = findElementByIdInShadowOrRegularDOM('ov25-configurator-iframe-container');
         if(!container || !iframe) return;
 
-
         const originalIframeHeight = iframe.style.height;
+        const originalContainerHeight = container.style.height;
 
         // Add transition
-
         iframe.style.transition = 'height 500ms cubic-bezier(0.4, 0, 0.2, 1)';
-
+        container.style.transition = 'height 500ms cubic-bezier(0.4, 0, 0.2, 1)';
 
         if(drawerSize === 'large'){
-            iframe.style.height = `${window.innerHeight * 0.2}px`;
+            const newHeight = `${window.innerHeight * IFRAME_HEIGHT_RATIO}px`;
+            iframe.style.height = newHeight;
+            container.style.height = newHeight;
         } else if(drawerSize === 'small'){
             iframe.style.height = '100vw';
+            container.style.height = '100vw';
         }
-
-
-
 
         // Remove transition after animation completes
         setTimeout(() => {
-
             iframe.style.transition = 'none';
+            container.style.transition = 'none';
         }, 500);
 
         return () => {
-
             iframe.style.height = originalIframeHeight;
+            container.style.height = originalContainerHeight;
         };
     }
   }, [drawerSize, isDrawerOrDialogOpen])
