@@ -46,7 +46,7 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
             onClick={() => onSelect(variant)}
             className="ov:cursor-pointer ov:max-w-full"
         >
-            <span className="ov:text-xs ov:text-center ov:text-[var(--ov25-secondary-text-color)] ov:line-clamp-2">
+            <span className="ov:text-xs ov:text-center ov:text-[var(--ov25-secondary-text-color)] ov:line-clamp-3">
                 {variant.name}
             </span>
         </div>

@@ -95,7 +95,7 @@ export const LegsVariantCard = React.memo(
             onClick={() => onSelect(variant)}
             className="ov:cursor-pointer"
         >
-            <span className="ov:text-xs ov:text-center ov:text-[var(--ov25-secondary-text-color)] ov:line-clamp-2">
+            <span className="ov:text-xs ov:text-center ov:text-[var(--ov25-secondary-text-color)] ov:line-clamp-3">
                 {variant.name}
             </span>
         </div>

@@ -1,12 +1,11 @@
-import { useState, useRef, type ReactNode, useEffect } from "react"
+import { useState, type ReactNode, useEffect } from "react"
 import { createPortal } from "react-dom"
-import { useDrag } from "@use-gesture/react"
 import { animated, useSpring } from "@react-spring/web"
-import { useMediaQuery } from "../../hooks/use-media-query.js"
 import * as React from 'react'
 import { CSSProperties } from "react"
 import { useOV25UI } from "../../contexts/ov25-ui-context.js"
 import { DRAWER_HEIGHT_RATIO } from "../../utils/configurator-utils.js"
+import { ChevronUpIcon, ChevronDownIcon } from "lucide-react"
 
 const AnimatedDiv = animated.div as any;
 
@@ -23,7 +22,6 @@ export interface TwoStageDrawerProps {
 
 export type DrawerState = 0 | 1 | 2 
 
-
 const TwoStageDrawerComponent = ({ 
   children,
   isOpen,
@@ -35,7 +33,6 @@ const TwoStageDrawerComponent = ({
   onStateChange,
 }: TwoStageDrawerProps) => {
   const [drawerState, setDrawerState] = useState<DrawerState>(0)
-  const dragStartY = useRef(0)
   const { setIsDrawerOrDialogOpen: setIsDrawerOpen, isMobile } = useOV25UI()
   const [originalStyles, setOriginalStyles] = useState<{
     body: {
@@ -200,39 +197,13 @@ const TwoStageDrawerComponent = ({
     api.start({ height: getHeightForState(newState) })
   }
 
-  const bind = useDrag(
-    ({ movement, last, first, velocity }) => {
-      if (first) {
-        dragStartY.current = getHeightForState(drawerState)
-      }
-
-      if (last) {
-        const dragDistance = movement[1]
-        const dragVelocity = velocity[1]
-
-        const isDraggingUp = dragDistance < 0 || dragVelocity < -0.5
-
-        if (isDraggingUp && drawerState === 1) {
-          updateDrawerState(2)
-        } else if (!isDraggingUp && drawerState === 2) {
-          updateDrawerState(1)
-        } else if (!isDraggingUp && drawerState === 1 && (dragDistance > 50 || dragVelocity > 0.5)) {
-          updateDrawerState(0)
-        } else {
-          updateDrawerState(drawerState)
-        }
-      } else {
-        const newHeight = Math.max(0, Math.min(maxHeight, dragStartY.current - movement[1]))
-        api.start({ height: newHeight, immediate: true })
-      }
-    },
-    {
-      from: () => [0, 0],
-      filterTaps: true,
-      bounds: { top: -maxHeight, bottom: maxHeight },
-      rubberband: true,
-    },
-  )
+  const toggleDrawerState = () => {
+    if (drawerState === 1) {
+      updateDrawerState(2)
+    } else if (drawerState === 2) {
+      updateDrawerState(1)
+    }
+  }
 
   // Only render in browser environment
   if (typeof window === 'undefined') {
@@ -255,23 +226,21 @@ const TwoStageDrawerComponent = ({
         ...style
       }}
       className={'ov:bg-[var(--ov25-configurator-iframe-background-color)]'}
-      onTouchMove={(e: any) => {
-        if (e.target instanceof Element && !e.target.closest('.scroll-area-viewport')) {
-          // causing error in console when scrolling drawer: Unable to preventDefault inside passive event listener invocation.
-          // e.preventDefault()
-        }
-      }}
     >
       <div id="ov25-drawer-content" className="ov:w-full ov:h-full ov:bg-[var(--ov25-background-color)] ov:relative ov:rounded-t-xl ov:[box-shadow:0_-4px_6px_-1px_rgba(0,0,0,0.05),0_-2px_4px_-2px_rgba(0,0,0,0.03)]">
         <div className="ov:w-full ov:relative ov:flex ov:justify-center">
-          {/* Invisible hitbox for drag */}
-          <div
-            {...bind()}
-            className="ov:absolute ov:top-0 ov:w-[150px] ov:h-[60px] ov:z-[20] ov:cursor-grab ov:touch-none ov:active:cursor-grabbing" />
-          {/* Visible handle */}
-          <div id="ov25-draggable-icon" className="ov:py-4 ov:z-10">
-            <div className="ov:w-8 ov:h-1 ov:mt-0 ov:bg-[var(--ov25-border-color)] ov:shadow-sm ov:rounded-full "/>
-          </div>
+          {drawerState !== 0 && <button 
+            id="ov25-drawer-toggle-button"
+            onClick={toggleDrawerState}
+            className="ov:flex ov:justify-center ov:items-center ov:z-[99999999999992] ov:cursor-pointer ov:absolute ov:w-24 ov:h-16 ov:top-[-32px]"
+          >
+            <div className="ov:min-w-[32px] ov:min-h-[32px] ov:w-8 ov:h-8 ov:flex ov:items-center ov:justify-center ov:bg-white ov:border-[1px] ov:border-[var(--ov25-border-color)] ov:rounded-full ov:backdrop-opacity-90">
+              {drawerState === 1 ? 
+                <ChevronUpIcon strokeWidth={1} className="ov:w-8 ov:h-8"/> 
+                : (drawerState === 2 ? <ChevronDownIcon strokeWidth={1} className="ov:w-8 ov:h-8"/> : null)
+              }
+            </div>
+          </button>}
         </div>
 
         <div className="ov:h-full ov:flex ov:flex-col ov:pointer-events-none">{children}</div>
