@@ -25,7 +25,7 @@ export const MobileCheckoutButton = () => {
     )
     return (
       <div id="ov25-mobile-checkout-and-price-button-container" className={cn(
-        'ov:flex ov:items-center ov:border-t ov:border-t-[var(--ov25-secondary-text-color)]/20 ov:w-full ov:mt-auto ov:bottom-0 ov:right-0',
+        'ov:flex ov:items-center ov:p-2 ov:border-t ov:border-t-[var(--ov25-secondary-text-color)]/20 ov:w-full ov:mt-auto ov:bottom-0 ov:right-0',
         'ov:bg-[var(--ov25-background-color)]',
         discount.percentage > 0 ? 'ov:p-2' : 'ov:p-4'
       )}>
