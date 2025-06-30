@@ -29,7 +29,7 @@ export const MobileCheckoutButton = () => {
         'ov:bg-[var(--ov25-background-color)]',
         discount.percentage > 0 ? 'ov:p-2' : 'ov:p-4'
       )}>
-        {discount.percentage > 0 ? (
+        {discount.percentage > 0 && (formattedPrice !== formattedSubtotal) ? (
           <div id="ov25-mobile-price-container" className='ov:flex ov:flex-col ov:items-center ov:pr-2'>
             <h3 id="ov25-mobile-savings-amount" className='ov:text-md ov:hidden text-center ov:px-2 ov:text-[var(--ov25-text-color)]'>{discount.formattedAmount}</h3>
             <h3 id="ov25-mobile-subtotal" className='ov:text-sm ov:text-red-500 text-center ov:line-through'>{formattedSubtotal}</h3>
