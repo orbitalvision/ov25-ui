@@ -19,6 +19,7 @@ export interface Product {
   id: string;
   name: string;
   price: number;
+  discount: number;
   lowestPrice: number;
   metadata: any;
 }
@@ -79,6 +80,12 @@ export interface SizeOption {
   hasNonOption?: boolean;
 }
 
+export interface Discount {
+  percentage: number;
+  amount: number;
+  formattedAmount: string;
+}
+
 // Context type
 interface OV25UIContextType {
   // State
@@ -93,7 +100,10 @@ interface OV25UIContextType {
   activeOptionId: string | null;
   quantity: number;
   price: number;
+  subtotal: number;
   formattedPrice: string;
+  formattedSubtotal: string;
+  discount: Discount;
   galleryIndex: number;
   currentSku: any;
   range: any;
@@ -140,6 +150,8 @@ interface OV25UIContextType {
   setActiveOptionId: React.Dispatch<React.SetStateAction<string | null>>;
   setQuantity: React.Dispatch<React.SetStateAction<number>>;
   setPrice: React.Dispatch<React.SetStateAction<number>>;
+  setSubtotal: React.Dispatch<React.SetStateAction<number>>;
+  setDiscount: React.Dispatch<React.SetStateAction<Discount>>;
   setGalleryIndex: React.Dispatch<React.SetStateAction<number>>;
   setCurrentSku: React.Dispatch<React.SetStateAction<any>>;
   setRange: React.Dispatch<React.SetStateAction<any>>;
@@ -202,8 +214,14 @@ export const OV25UIProvider: React.FC<{
   const [activeOptionId, setActiveOptionId] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(0);
+  const [subtotal, setSubtotal] = useState(0);
+  const [discount, setDiscount] = useState<Discount>({
+    percentage: 0,
+    amount: 0,
+    formattedAmount: '£0.00'
+  });
   const [formattedPrice, setFormattedPrice] = useState<string>('£0.00')
-
+  const [formattedSubtotal, setFormattedSubtotal] = useState<string>('£0.00')
   const [currentSku, setCurrentSku] = useState<any>(null);
   const [range, setRange] = useState<any>(null);
   const [drawerSize, setDrawerSize] = useState<DrawerSizes>("closed");
@@ -276,6 +294,7 @@ export const OV25UIProvider: React.FC<{
         id: p?.id,
         name: p?.name,
         price: p?.price,
+        discount: p?.discount,
         thumbnail: p?.metadata?.images?.length > 0 ? p?.metadata?.images[p?.metadata?.images?.length - 1] : null
       })) || []
     }]
@@ -558,7 +577,10 @@ export const OV25UIProvider: React.FC<{
             break;
           case 'CURRENT_PRICE':
             setPrice(data.totalPrice);
+            setSubtotal(data.subtotal)
+            setFormattedSubtotal(data.formattedSubtotal)
             setFormattedPrice(data.formattedPrice)
+            setDiscount(data.discount)
             break;
           case 'CURRENT_SKU':
             setCurrentSku(data);
@@ -607,7 +629,10 @@ export const OV25UIProvider: React.FC<{
     activeOptionId,
     quantity,
     price,
+    subtotal,
     formattedPrice,
+    discount,
+    formattedSubtotal,
     galleryIndex,
     currentSku,
     range,
@@ -649,6 +674,8 @@ export const OV25UIProvider: React.FC<{
     setActiveOptionId,
     setQuantity,
     setPrice,
+    setSubtotal,
+    setDiscount,
     setGalleryIndex,
     setCurrentSku,
     setRange,
