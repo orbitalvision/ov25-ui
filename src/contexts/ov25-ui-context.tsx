@@ -272,12 +272,8 @@ export const OV25UIProvider: React.FC<{
 
   useEffect(() => {
     if (currentProduct) {
-      console.log('currentProduct', currentProduct);
       setDiscount(currentProduct?.discount || 0);
-      console.log(price);
-      console.log(currentProduct?.discount);
-      console.log(price - (price * ((currentProduct as any).discount / 100)));
-      setFormattedDiscountedPrice('£' + (price - (price * ((currentProduct as any).discount / 100))).toFixed(2))
+      setFormattedDiscountedPrice('£' + ((price / 100) - (price * ((currentProduct as any).discount / 100)) / 100).toFixed(2))
     }
   }, [currentProduct, price]);
 
@@ -574,13 +570,6 @@ export const OV25UIProvider: React.FC<{
             setConfiguratorState(data);
             break;
           case 'CURRENT_PRICE':
-            console.log('CURRENT_PRICE', data);
-            if (currentProduct && (currentProduct as any).discount) {
-              console.log('in the IF');
-              // setDiscount((currentProduct as any).discount || 0);
-              // setFormattedDiscountedPrice('£' + (data.totalPrice - (data.totalPrice * ((currentProduct as any).discount / 100))).toFixed(2))
-              console.log("DISCOUNT", (currentProduct as any).discount);
-            }
             setPrice(data.totalPrice);
             setFormattedPrice(data.formattedPrice)
             break;

@@ -5,7 +5,6 @@ import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 
 export const CheckoutButton = () => {
     const { buyNowFunction, addToBasketFunction, setIsVariantsOpen, formattedPrice, discount, formattedDiscountedPrice } = useOV25UI();
-    console.log("DISCOUNT", discount);
 
     const primaryStyles = cn(
         'ov:flex-1',

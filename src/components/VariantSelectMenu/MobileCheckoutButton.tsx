@@ -4,7 +4,7 @@ import { Button } from '../ui/button.js';
 import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 
 export const MobileCheckoutButton = () => {
-    const { buyNowFunction, addToBasketFunction, formattedPrice, setIsVariantsOpen } = useOV25UI();
+    const { buyNowFunction, addToBasketFunction, formattedPrice, setIsVariantsOpen, discount, formattedDiscountedPrice } = useOV25UI();
     const primaryStyles = cn(
         'ov:flex-1',
         'ov:bg-[var(--ov25-primary-color)]',
@@ -25,13 +25,21 @@ export const MobileCheckoutButton = () => {
     )
     return (
       <div id="ov25-mobile-checkout-and-price-button-container" className={cn(
-        'ov:flex ov:items-center ov:p-4  ov:border-t ov:border-t-[var(--ov25-secondary-text-color)]/20 ov:w-full ov:mt-auto ov:bottom-0 ov:right-0',
+        'ov:flex ov:items-center ov:border-t ov:border-t-[var(--ov25-secondary-text-color)]/20 ov:w-full ov:mt-auto ov:bottom-0 ov:right-0',
         'ov:bg-[var(--ov25-background-color)]',
+        discount > 0 ? 'ov:p-2' : 'ov:p-4'
       )}>
-        <div className="ov:flex ov:items-center ov:mr-4">
-          <h3 className='ov:text-xl  ov:text-[var(--ov25-text-color)]'>{formattedPrice}</h3>
-        </div>
-        <div id="ov25-mobile-checkout-button-container" className="ov:flex ov:flex-1 ov:gap-2">
+        {discount > 0 ? (
+          <div className='ov:flex ov:flex-col ov:items-center ov:pr-2'>
+            <h3 className='ov:text-lg ov:text-red-500 text-center ov:line-through'>{formattedPrice}</h3>
+            <h3 className='ov:text-lg text-center ov:text-[var(--ov25-text-color)]'>{formattedDiscountedPrice}</h3>
+          </div>
+        ) : (
+          <div className="ov:flex ov:items-center ov:mr-4">
+            <h3 className='ov:text-xl  ov:text-[var(--ov25-text-color)]'>{formattedPrice}</h3>
+          </div>
+        )}
+        <div id="ov25-mobile-checkout-button-container" className="ov:flex ov:flex-col ov:flex-1 ov:gap-2 ov:min-[350px]:flex-row">
           {addToBasketFunction && (
             <Button id="ov25-add-to-basket-button" onClick={() => {setIsVariantsOpen(false); addToBasketFunction()}} className={cn(
                 (buyNowFunction === undefined && primaryStyles) || secondaryStyles
