@@ -225,11 +225,11 @@ html #ov25-configurator-variant-menu-container {
   line-height: 1.5em;
 }
 
-#ov25-price {
+#ov25-price-container {
   border-bottom: 1px solid var(--ov25-border-color);
 }
 
-#ov25-price h3 {
+#ov25-price-container h3 {
   line-height: 1.5rem;
 }
 

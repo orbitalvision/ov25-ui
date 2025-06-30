@@ -32,7 +32,7 @@ export const CheckoutButton = () => {
         'ov:bg-[var(--ov25-background-color)]',
         'ov:border-[var(--ov25-border-color)] ',
       )}>
-        <div id="ov25-price" className="ov:w-full ov:flex ov:items-center ov:justify-center ov:pb-1.5 ov:mb-2 ov:border-b ov:border-b-[var(--ov25-secondary-text-color)]/20">
+        <div id="ov25-price-container" className="ov:w-full ov:flex ov:items-center ov:justify-center ov:pb-1.5 ov:mb-2 ov:border-b ov:border-b-[var(--ov25-secondary-text-color)]/20">
             {discount.percentage > 0 && formattedPrice !== formattedSubtotal ? (
               <div className='ov:flex ov:flex-row ov:items-center ov:justify-center'>
                 <h3 id="ov25-savings-amount" className='ov:text-md ov:hidden  text-center ov:px-2 ov:text-[var(--ov25-text-color)]'>{discount.formattedAmount}</h3>
