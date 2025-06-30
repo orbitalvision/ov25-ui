@@ -6,7 +6,6 @@ import { CSSProperties } from "react"
 import { useOV25UI } from "../../contexts/ov25-ui-context.js"
 import { DRAWER_HEIGHT_RATIO } from "../../utils/configurator-utils.js"
 import { ChevronUpIcon, ChevronDownIcon } from "lucide-react"
-import './two-stage-drawer.css';
 
 const AnimatedDiv = animated.div as any;
 
@@ -47,23 +46,20 @@ const TwoStageDrawerComponent = ({
     };
   } | null>(null);
 
-  const [viewportHeight, setViewportHeight] = useState(window.visualViewport?.height || window.innerHeight)
+  const [viewportHeight, setViewportHeight] = useState(window.visualViewport?.height !== undefined ? window.visualViewport?.height :  window.innerHeight)
   const [isViewportReady, setIsViewportReady] = useState(false)
   
-  function getViewportHeight() {
-    return window.visualViewport?.height || window.innerHeight;
-  }
 
-  function getMinHeight() {
+  function getMinHeight(viewPortHeight: number) {
     return viewportHeight - (isMobile ? window.innerWidth : window.innerWidth * (2/3))
   }
 
-  function getMaxHeight() {
-    return viewportHeight * DRAWER_HEIGHT_RATIO
+  function getMaxHeight(viewPortHeight: number) {
+    return viewPortHeight * DRAWER_HEIGHT_RATIO
   }
 
-  const minHeight = typeof window !== 'undefined' ? getMinHeight() : 0
-  const maxHeight = typeof window !== 'undefined' ? getMaxHeight() : 0
+  const minHeight = typeof window !== 'undefined' ? getMinHeight(viewportHeight) : 0
+  const maxHeight = typeof window !== 'undefined' ? getMaxHeight(viewportHeight) : 0
 
   const [{ height }, api] = useSpring(() => ({
     height: 0,
@@ -73,16 +69,16 @@ const TwoStageDrawerComponent = ({
   // Effect to update drawer height on window resize
   useEffect(() => {
     const updateHeight = () => {
-      const newHeight = getViewportHeight();
+      const newHeight = window.visualViewport?.height !== undefined ? window.visualViewport?.height :  window.innerHeight;
       setViewportHeight(newHeight);
       setIsViewportReady(true);
 
       // Update drawer height if it's open
       if (drawerState !== 0) {
-        const newMinHeight = getMinHeight();
-        const newMaxHeight = getMaxHeight();
-        const newHeight = drawerState === 1 ? newMinHeight : newMaxHeight;
-        api.start({ height: newHeight });
+        const newMinHeight = getMinHeight(newHeight);
+        const newMaxHeight = getMaxHeight(newHeight);
+        const newHeightx = drawerState === 1 ? newMinHeight : newMaxHeight;
+        api.start({ height: newHeightx });
       }
     };
 
@@ -229,9 +225,10 @@ const TwoStageDrawerComponent = ({
       className={'ov:bg-[var(--ov25-configurator-iframe-background-color)]'}
     >
       <div id="ov25-drawer-content" className="ov:w-full ov:h-full ov:bg-[var(--ov25-background-color)] ov:relative ov:rounded-t-xl ov:[box-shadow:0_-4px_6px_-1px_rgba(0,0,0,0.05),0_-2px_4px_-2px_rgba(0,0,0,0.03)]">
-        <div className="ov:w-full ov:relative ov:flex ov:justify-center">
+        <div className="ov:w-full ov:relative  ov:flex ov:justify-center ">
           {drawerState !== 0 && <button 
             id="ov25-drawer-toggle-button"
+            className=""
             onClick={toggleDrawerState}
           >
             <div>
@@ -256,4 +253,3 @@ export const TwoStageDrawer = TwoStageDrawerComponent;
 
 // Also add the displayName
 (TwoStageDrawer as any).displayName = "TwoStageDrawer";
-

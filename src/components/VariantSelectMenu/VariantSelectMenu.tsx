@@ -54,7 +54,7 @@ export const VariantSelectMenu: React.FC = () => {
             >
                 <div className='ov:w-full ov:h-full ov:flex ov:flex-col ov:absolute ov:top-0 ov:left-0 ov:pointer-events-auto'>
                     <ProductVariantsWrapper />
-                    <div className={`${drawerSize === 'large' ? 'ov:fixed ov:bottom-0 ov:left-0 ov:w-full' : '' }`}>
+                    <div className={`${drawerSize === 'large' || drawerSize === 'small' ? 'ov:fixed ov:bottom-0 ov:left-0 ov:w-full' : '' }`}>
                     <MobileCheckoutButton />
                     </div>
                 </div>

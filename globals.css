@@ -244,3 +244,37 @@ html #ov25-configurator-variant-menu-container {
   line-height: 1em;
   border-radius: 30px;
 }
+
+
+#ov25-drawer-toggle-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999999999992;
+    cursor: pointer;
+    position: absolute;
+    width: 6rem;
+    height: 4rem;
+    top: -32px;
+  }
+  
+  #ov25-drawer-toggle-button > div {
+    min-width: 32px;
+    min-height: 32px;
+    width: 2rem;
+    height: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    border: 1px solid var(--ov25-border-color);
+    border-radius: 9999px;
+    backdrop-filter: opacity(0.9);
+  } 
+  
+  #ov25-drawer-toggle-button svg {
+      stroke-width: 1px;
+      fill: none;
+      width: 24px;
+      height: 24px;
+  }
