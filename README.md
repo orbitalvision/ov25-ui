@@ -28,6 +28,33 @@ injectConfigurator({
 });
 ```
 
+### Screenshot Generation
+
+After injecting the configurator, you can generate thumbnails using the `window.ov25GenerateThumbnail()` function:
+
+```javascript
+// Generate a screenshot and get the URL
+window.ov25GenerateThumbnail()
+  .then(screenshotUrl => {
+    console.log('Screenshot URL:', screenshotUrl);
+    // Use the URL for thumbnails, social sharing, etc.
+  })
+  .catch(error => {
+    console.error('Screenshot generation failed:', error);
+  });
+
+// Using async/await
+async function captureThumbnail() {
+  try {
+    const url = await window.ov25GenerateThumbnail();
+    return url;
+  } catch (error) {
+    console.error('Failed to capture thumbnail:', error);
+  }
+}
+```
+
+The function returns a Promise that resolves with the uploaded screenshot URL from S3. Screenshots are automatically uploaded and the returned URL can be used immediately.
 
 ## Updating the node pacakge
 

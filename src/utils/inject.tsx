@@ -58,7 +58,42 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     showOptional,
   } = opts;
 
+  // Add generateThumbnail function to window object
+  (window as any).ov25GenerateThumbnail = () => {
+    return new Promise<string>((resolve, reject) => {
+      // Find the iframe element
+      const iframe = document.querySelector('iframe[src*="configurator"]') as HTMLIFrameElement;
+      if (!iframe || !iframe.contentWindow) {
+        reject(new Error('Configurator iframe not found'));
+        return;
+      }
 
+      // Set up message listener for screenshot response
+      const messageHandler = (event: MessageEvent) => {
+        if (event.data.type === 'SCREENSHOT_URL') {
+          window.removeEventListener('message', messageHandler);
+          resolve(event.data.payload.url);
+        } else if (event.data.type === 'ERROR') {
+          window.removeEventListener('message', messageHandler);
+          reject(new Error(event.data.payload.message || 'Screenshot capture failed'));
+        }
+      };
+
+      window.addEventListener('message', messageHandler);
+
+      // Send capture screenshot message to iframe
+      iframe.contentWindow.postMessage({
+        type: 'CAPTURE_SCREENSHOT',
+        payload: ''
+      }, '*');
+
+      // Set timeout for screenshot capture
+      setTimeout(() => {
+        window.removeEventListener('message', messageHandler);
+        reject(new Error('Screenshot capture timeout'));
+      }, 10000);
+    });
+  };
 
   // Resolve string or function
   const resolveStringOrFunction = (value: StringOrFunction): string => {
