@@ -38,7 +38,7 @@ export const CheckoutButton = () => {
                 <h3 id="ov25-savings-amount" className='ov:text-md ov:hidden  text-center ov:px-2 ov:text-[var(--ov25-text-color)]'>{discount.formattedAmount}</h3>
                 <h3 id="ov25-savings-percentage" className='ov:text-md ov:hidden text-center ov:px-2 ov:text-[var(--ov25-text-color)]'>{discount.percentage}%</h3>
                 <h3 id="ov25-subtotal" className='ov:text-md ov:px-2 ov:text-red-500 text-center ov:line-through'>{formattedSubtotal}</h3>
-                <h3 id="ov25-price" className='ov:text-xl text-center ov:shadow-none ov:border-0 ov:px-2 ov:text-[var(--ov25-text-color)]'>{formattedPrice}</h3>
+                <h3 id="ov25-price" className='ov:text-xl text-center ov:shadow-none ov:border-0 ov:px-2 ov:text-[var(--ov25-text-color)]' data-sale="true">{formattedPrice}</h3>
               </div>
             ) : (
               <h3 id="ov25-price" className='ov:text-xl  text-center ov:text-[var(--ov25-text-color)]'>{formattedPrice}</h3>

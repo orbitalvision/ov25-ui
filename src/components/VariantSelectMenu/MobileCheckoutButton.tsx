@@ -33,7 +33,7 @@ export const MobileCheckoutButton = () => {
           <div id="ov25-mobile-price-container">
             <h3 id="ov25-mobile-savings-amount">{discount.formattedAmount}</h3>
             <h3 id="ov25-mobile-subtotal">{formattedSubtotal}</h3>
-            <h3 id="ov25-mobile-price">{formattedPrice}</h3>
+            <h3 id="ov25-mobile-price" data-sale="true">{formattedPrice}</h3>
           </div>
         ) : (
           <div id="ov25-mobile-price-container">
