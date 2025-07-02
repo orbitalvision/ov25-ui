@@ -1,6 +1,5 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { injectConfigurator } from 'ov25-ui';
-import './App.css';
 
 // Set up a global state for the configurator
 let configuratorInitialized = false;
@@ -8,7 +7,6 @@ let configuratorInitialized = false;
 // Function to initialize the configurator
 const initializeConfigurator = () => {
   if (configuratorInitialized) return;
-  
   
   // Inject the configurator
   injectConfigurator({
@@ -26,7 +24,6 @@ const initializeConfigurator = () => {
       'https://demo.orbital.vision/_next/image?url=https%3A%2F%2Flondon-website-general-purpose.s3.eu-west-2.amazonaws.com%2Fassets%2Forganizations%2F15%2Fproducts%2FTamarisk%2F45%2FWindrush-Large-Sofa-Angled.png&w=1920&q=75',
       'https://demo.orbital.vision/_next/image?url=https%3A%2F%2Flondon-website-general-purpose.s3.eu-west-2.amazonaws.com%2Fassets%2Forganizations%2F15%2Fproducts%2FTamarisk%2F45%2FWindrush-Large-Sofa-Side.png&w=1920&q=75',
       'https://demo.orbital.vision/_next/image?url=https%3A%2F%2Flondon-website-general-purpose.s3.eu-west-2.amazonaws.com%2Fassets%2Forganizations%2F15%2Fproducts%2FTamarisk%2F45%2FWindrush-Large-Sofa-Back.png&w=1920&q=75',
-      
     ],
     galleryId: {id: '.configurator-container', replace: true},
     priceId: {id: '#price', replace: true},
@@ -48,7 +45,6 @@ const initializeConfigurator = () => {
 };
 
 function App() {
-
   // Set up the message event listener
   const handleMessage = (event) => {
     const { type, payload } = event.data;
@@ -93,14 +89,13 @@ function App() {
     <div className="app ov:overflow-x-hidden">
       <h1>OV25 Configurator Test</h1>
       <div className="ov:flex ov:flex-col ov:md:flex-row">
-        <div className="configurator-container ov:w-[700px] ov:h-[500px]"></div>
-        <div id="ov25-controls">
-          <div id="price-name" className="ov:w-[378px] ov:h-[96px]">
+        <div className="configurator-container ov:w-full ov:aspect-square ov:md:w-[700px] ov:md:h-[500px]"></div>
+        <div id="ov25-controls" className="ov:w-full ov:md:w-[35%] ov:h-full ov:md:h-[600px] ov:md:mt-0 ov:md:ml-4 ov:mt-[100px]">
+          <div id="price-name" className="ov:w-full ov:md:w-[378px] ov:h-[96px]">
             <div id="price">PRICE: £123</div>
             <div id="name">NAME: Product Name</div>
           </div>
-          <h2>Variant Menu</h2>
-          <p>This is a placeholder for the variant menu. In a real implementation, this would be populated with variant options.</p>
+          <p>This is a description of the product. Words will go here - it might continue for a few lines. It might be a few sentences long. </p>
         </div>
       </div>
     </div>
