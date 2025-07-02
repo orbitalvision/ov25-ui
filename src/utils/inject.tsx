@@ -72,7 +72,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
       const messageHandler = (event: MessageEvent) => {
         if (event.data.type === 'SCREENSHOT_URL') {
           window.removeEventListener('message', messageHandler);
-          resolve(event.data.payload.url);
+          resolve(JSON.parse(event.data.payload).url);
         } else if (event.data.type === 'ERROR') {
           window.removeEventListener('message', messageHandler);
           reject(new Error(event.data.payload.message || 'Screenshot capture failed'));
