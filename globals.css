@@ -248,6 +248,54 @@ html #ov25-configurator-variant-menu-container {
 
 #ov25-drawer-toggle-button {
     display: flex;
+}
+
+/* Mobile Price Container Styles */
+#ov25-mobile-price-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-right: 0.5em;
+}
+
+#ov25-mobile-savings-amount {
+    font-size: var(--ov25-text-md-size);
+    display: none;
+    text-align: center;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    color: var(--ov25-text-color);
+    line-height: 1.2em;
+}
+
+#ov25-mobile-subtotal {
+    font-size: var(--ov25-text-sm-size);
+    color: rgb(239 68 68); /* text-red-500 */
+    text-align: center;
+    text-decoration-line: line-through;
+    line-height: 1.2em;
+}
+
+#ov25-mobile-price {
+    font-size: var(--ov25-text-lg-size);
+    text-align: center;
+    color: var(--ov25-text-color);
+    line-height: 1.2em;
+}
+
+/* Non-discounted price container styles */
+#ov25-mobile-price-container:not(:has(#ov25-mobile-subtotal)) {
+    display: flex;
+    align-items: center;
+    margin-right: 1em;
+}
+
+#ov25-mobile-price-container:not(:has(#ov25-mobile-subtotal)) #ov25-mobile-price {
+    font-size: var(--ov25-text-xl-size);
+}
+
+#ov25-drawer-toggle-button {
+    display: flex;
     justify-content: center;
     align-items: center;
     z-index: 99999999999992;
