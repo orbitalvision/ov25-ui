@@ -27,7 +27,6 @@ export const SizeVariantCard = React.memo(
         <div className="ov:flex ov:flex-1 ov:items-center ov:justify-between">
           <div className="ov:flex ov:flex-col ov:justify-center ov:items-center">
             <h3 className="ov:font-[350] ov:text-base ov:text-[var(--ov25-secondary-text-color)]">{variant.name}</h3>
-            <p className="ov:text-[12px] ov:font-[350] ov:mt-0.5 ov:text-[var(--ov25-secondary-text-color)]">£{(variant?.data?.price / 100)}</p>
           </div>
         </div>
         <div className="ov:flex ov:items-center ov:justify-between ov:w-full ov:-mt-4">
