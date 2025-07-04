@@ -20,13 +20,13 @@ export const SizeVariantCard = React.memo(
           e.stopPropagation();
           onSelect(variant);
         }}
-        className={`ov25-size-variant-card ov:relative ov:flex ov:cursor-pointer ov:flex-col ov:items-center ov:gap-4 ov:w-full ov:p-4 ov:text-left ov:hover:bg-accent ov:md:border-b ov:border-[#E5E5E5]  ov:text-[#282828] ${index % 2 === 0 ? 'ov:xl:border-r ov:border-[#E5E5E5]' : ''}`}
+        className={`ov25-size-variant-card ov:relative ov:flex ov:cursor-pointer ov:flex-col ov:items-center ov:gap-4 ov:w-full ov:p-4 ov:text-left ov:hover:bg-accent ov:md:border ov:border-[#E5E5E5]  ov:text-[#282828] ${index % 2 === 0 ? 'ov:xl:border-r ov:border-[#E5E5E5]' : ''}`}
         data-selected={variant.isSelected}
         title={variant.name}
       >
         <div className="ov:flex ov:flex-1 ov:items-center ov:justify-between">
           <div className="ov:flex ov:flex-col ov:justify-center ov:items-center">
-            <h3 className="ov:font-[350] ov:text-base ov:text-[var(--ov25-secondary-text-color)]">{variant.name}</h3>
+            <h3 className="ov:font-[350] ov:text-base ov:text-center ov:leading-[2em] ov:text-[var(--ov25-secondary-text-color)]">{variant.name}</h3>
           </div>
         </div>
         <div className="ov:flex ov:items-center ov:justify-between ov:w-full ov:-mt-4">
