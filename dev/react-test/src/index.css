@@ -1,13 +1,18 @@
 :root {
+  height: 100%;
   line-height: 1.5;
   font-weight: 400;
 }
 
-body {
+html, body {
+  height: 100%;
   margin: 0;
-  padding: 20px;
+  padding: 0;
+}
+
+body {
   min-width: 320px;
-  min-height: 100vh;
+  padding: 20px;
 }
 
 .app {
@@ -49,5 +54,4 @@ h1 {
 
 #ov25-product-carousel-controls {
   padding: 0;
-  width: 80%;
 }
