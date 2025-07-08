@@ -243,5 +243,5 @@ export const createOptionNavigationHandlers = (
   return { handleNextOption, handlePreviousOption };
 };
 
-export const IFRAME_HEIGHT_RATIO = 0.333; // 1/3 of viewport height for iframe, leaving 2/3 for drawer
+export const IFRAME_HEIGHT_RATIO = 0.42 // 1/3 of viewport height for iframe, leaving 2/3 for drawer
 export const DRAWER_HEIGHT_RATIO = 1 - IFRAME_HEIGHT_RATIO; // ~0.66, complementary to iframe ratio

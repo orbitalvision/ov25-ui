@@ -4,7 +4,7 @@ import { animated, useSpring } from "@react-spring/web"
 import * as React from 'react'
 import { CSSProperties } from "react"
 import { useOV25UI } from "../../contexts/ov25-ui-context.js"
-import { DRAWER_HEIGHT_RATIO } from "../../utils/configurator-utils.js"
+import { DRAWER_HEIGHT_RATIO, IFRAME_HEIGHT_RATIO } from "../../utils/configurator-utils.js"
 import { ChevronUpIcon, ChevronDownIcon } from "lucide-react"
 
 const AnimatedDiv = animated.div as any;
@@ -46,20 +46,20 @@ const TwoStageDrawerComponent = ({
     };
   } | null>(null);
 
-  const [viewportHeight, setViewportHeight] = useState(window.visualViewport?.height !== undefined ? window.visualViewport?.height :  window.innerHeight)
+  const [viewportHeightState, setViewportHeightState] = useState(window.visualViewport?.height !== undefined ? window.visualViewport?.height :  window.innerHeight)
   const [isViewportReady, setIsViewportReady] = useState(false)
   
 
   function getMinHeight(viewPortHeight: number) {
-    return viewportHeight - (isMobile ? window.innerWidth : window.innerWidth * (2/3))
+    return viewPortHeight - (isMobile ? viewPortHeight * DRAWER_HEIGHT_RATIO : window.innerWidth * (2/3))
   }
 
   function getMaxHeight(viewPortHeight: number) {
     return viewPortHeight * DRAWER_HEIGHT_RATIO
   }
 
-  const minHeight = typeof window !== 'undefined' ? getMinHeight(viewportHeight) : 0
-  const maxHeight = typeof window !== 'undefined' ? getMaxHeight(viewportHeight) : 0
+  const minHeight = typeof window !== 'undefined' ? getMinHeight(viewportHeightState) : 0
+  const maxHeight = typeof window !== 'undefined' ? getMaxHeight(viewportHeightState) : 0
 
   const [{ height }, api] = useSpring(() => ({
     height: 0,
@@ -70,7 +70,7 @@ const TwoStageDrawerComponent = ({
   useEffect(() => {
     const updateHeight = () => {
       const newHeight = window.visualViewport?.height !== undefined ? window.visualViewport?.height :  window.innerHeight;
-      setViewportHeight(newHeight);
+      setViewportHeightState(newHeight);
       setIsViewportReady(true);
 
       // Update drawer height if it's open
