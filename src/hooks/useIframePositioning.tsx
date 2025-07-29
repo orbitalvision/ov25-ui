@@ -81,6 +81,11 @@ export const useIframePositioning = () => {
       transform: string;
       transition: string;
     };
+    parent: {
+      height: string;
+      width: string;
+      overflow: string;
+    };
   } | null>(null);
 
   // This useEffect handles drawer opening and closing - saving and restoring original styles
@@ -88,8 +93,9 @@ export const useIframePositioning = () => {
     // Get the iframe element and container
     const iframe = findElementByIdInShadowOrRegularDOM('ov25-configurator-iframe');
     const container = findElementByIdInShadowOrRegularDOM(isProductGalleryStacked ? 'true-ov25-configurator-iframe-container' : 'ov25-configurator-iframe-container');
+    const parent = container?.parentElement;
 
-    if (!iframe || !container) return;
+    if (!iframe || !container || !parent) return;
 
     const updateIframeWidth = () => {
       if (!isDrawerOrDialogOpen || isMobile) return;
@@ -121,6 +127,7 @@ export const useIframePositioning = () => {
         setTimeout(() => {
           Object.assign(container.style, styles.container);
           Object.assign(iframe.style, styles.iframe);
+          Object.assign(parent.style, styles.parent);
         }, 400);
       } else {
         iframe.style.transition = 'transform 500ms cubic-bezier(0.4, 0, 0.2, 1)';
@@ -131,6 +138,7 @@ export const useIframePositioning = () => {
         setTimeout(() => {
           Object.assign(container.style, styles.container);
           Object.assign(iframe.style, styles.iframe);
+          Object.assign(parent.style, styles.parent);
         }, 500);
       }
     };
@@ -161,9 +169,21 @@ export const useIframePositioning = () => {
             zIndex: iframe.style.zIndex,
             transform: 'translateX(0) translateY(0)',
             transition: 'none',
+          },
+          parent: {
+            height: parent.style.height,
+            width: parent.style.width,
+            overflow: parent.style.overflow,
           }
         };
       }
+
+      // Lock parent size to container's original dimensions before any changes
+      const containerOriginalHeight = container.offsetHeight;
+      const containerOriginalWidth = container.offsetWidth;
+      parent.style.height = `${containerOriginalHeight}px`;
+      parent.style.width = `${containerOriginalWidth}px`;
+      parent.style.overflow = 'hidden';
 
       // Opening animation code
       if (isMobile) {
