@@ -153,6 +153,30 @@ export function VariantContentDesktop() {
     );
 
     // Use createPortal to render this outside the normal DOM hierarchy
-    return createPortal(menuContent, document.body);
+    // Variants always use Shadow DOM isolation (hard-coded)
+    // Create or find Shadow DOM container
+    let shadowContainer = document.getElementById('ov25-variants-shadow-container');
+    if (!shadowContainer) {
+      shadowContainer = document.createElement('div');
+      shadowContainer.id = 'ov25-variants-shadow-container';
+      shadowContainer.style.position = 'fixed';
+      shadowContainer.style.top = '0';
+      shadowContainer.style.left = '0';
+      shadowContainer.style.width = '100%';
+      shadowContainer.style.height = '100%';
+      shadowContainer.style.pointerEvents = 'none';
+      shadowContainer.style.zIndex = '9999999999999';
+      document.body.appendChild(shadowContainer);
+      
+      // Create Shadow DOM root
+      if (!shadowContainer.shadowRoot) {
+        const shadowRoot = shadowContainer.attachShadow({ mode: 'open' });
+        // Inject CSS into the Shadow DOM using adoptedStyleSheets
+        // Use the shared stylesheet from the main document
+        shadowRoot.adoptedStyleSheets = document.adoptedStyleSheets;
+      }
+    }
+    
+    return createPortal(menuContent, shadowContainer.shadowRoot!);
 }
 

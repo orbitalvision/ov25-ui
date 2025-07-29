@@ -6,23 +6,44 @@ import { DRAWER_HEIGHT_RATIO, IFRAME_HEIGHT_RATIO } from '../utils/configurator-
  * Helper function to find an element in Shadow DOM or regular DOM
  */
 const findElementByIdInShadowOrRegularDOM = (id: string): HTMLElement | null => {
+  
   // Try regular DOM first
   const element = document.getElementById(id);
-  if (element) return element;
+  if (element) {
+    return element;
+  }
+  
+  // Special case for variant menu container - look in the variants shadow container
+  if (id === 'ov25-configurator-variant-menu-container') {
+    const variantsShadowContainer = document.getElementById('ov25-variants-shadow-container');
+
+    
+    if (variantsShadowContainer?.shadowRoot) {
+      const elementInShadow = variantsShadowContainer.shadowRoot.getElementById(id);
+      if (elementInShadow) {
+        return elementInShadow;
+      }
+    }
+  }
   
   // If not found, search in all shadow roots
   const shadowHosts = document.querySelectorAll('div[class^="ov25-configurator-"]');
+  
   for (const host of Array.from(shadowHosts)) {
     if (host.shadowRoot) {
       const elementInShadow = host.shadowRoot.getElementById(id);
-      if (elementInShadow) return elementInShadow;
+      if (elementInShadow) {
+        return elementInShadow;
+      }
       
       // Also search nested shadow roots if needed
       const nestedHosts = host.shadowRoot.querySelectorAll('div[class^="ov25-configurator-"]');
       for (const nestedHost of Array.from(nestedHosts)) {
         if (nestedHost.shadowRoot) {
           const nestedElement = nestedHost.shadowRoot.getElementById(id);
-          if (nestedElement) return nestedElement;
+          if (nestedElement) {
+            return nestedElement;
+          }
         }
       }
     }
@@ -74,11 +95,14 @@ export const useIframePositioning = () => {
       if (!isDrawerOrDialogOpen || isMobile) return;
       
       const variantMenuContainer = findElementByIdInShadowOrRegularDOM('ov25-configurator-variant-menu-container');
+      
       const variantMenuWidth = variantMenuContainer?.offsetWidth;
+      
       if (typeof variantMenuWidth !== 'number') {
         console.error('Variant menu does not exist yet');
       }
       const remainingWidth = window.innerWidth - (variantMenuWidth || 0);
+      
       container.style.width = `${remainingWidth}px`;
       iframe.style.width = `${remainingWidth}px`;
     }
@@ -200,7 +224,9 @@ export const useIframePositioning = () => {
         };
       } else {
         // Desktop opening animation code remains the same
+        console.log('[useIframePositioning] Desktop opening - scheduling updateIframeWidth');
         setTimeout(() => {
+          console.log('[useIframePositioning] Calling updateIframeWidth after timeout');
           updateIframeWidth();
         }, 100);
 

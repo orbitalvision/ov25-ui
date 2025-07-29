@@ -11,7 +11,7 @@ const initializeConfigurator = () => {
   // Inject the configurator
   injectConfigurator({
     apiKey: () => { return '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d' }, 
-    productLink: () => { return 'range/1' }, 
+    productLink: () => { return '576' }, 
     // 217 = Woodbros Pickering-3 Seater (Grouped)
     // range/2 Aughton (Non Grouped)
     // 501 Westbridge/glenwood/grand split option (no filters)
@@ -39,6 +39,7 @@ const initializeConfigurator = () => {
     buyNowFunction: () => {
         alert('Buy now function called');
       },
+
   });
   
   configuratorInitialized = true;
@@ -86,16 +87,19 @@ function App() {
   }, []);
 
   return (
-    <div className="app ov:overflow-x-hidden">
+    <div className="app ">
       <h1>OV25 Configurator Test</h1>
       <div className="ov:flex ov:flex-col ov:md:flex-row">
         <div className="configurator-container ov:w-full ov:aspect-square ov:md:w-[700px] ov:md:h-[500px]"></div>
-        <div id="ov25-controls" className="ov:w-full ov:md:w-[35%] ov:h-full ov:md:h-[600px] ov:md:mt-0 ov:md:ml-4 ov:mt-[100px]">
+        <div id="ov25-aside-menu" className="ov:w-full ov:md:w-[35%] ov:h-full ov:md:h-[600px] ov:md:mt-0 ov:md:ml-4 ov:mt-[100px]">
           <div id="price-name" className="ov:w-full ov:md:w-[378px] ov:h-[96px]">
             <div id="price">PRICE: £123</div>
             <div id="name">NAME: Product Name</div>
           </div>
-          <p>This is a description of the product. Words will go here - it might continue for a few lines. It might be a few sentences long. </p>
+          <div id='ov25-controls' >
+
+          </div>
+          <p className='ov:mt-4'>This is a description of the product. Words will go here - it might continue for a few lines. It might be a few sentences long. </p>
         </div>
       </div>
     </div>

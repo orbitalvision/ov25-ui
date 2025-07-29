@@ -1,25 +1,33 @@
 // inject.ts
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useState } from 'react';
 import { createRoot } from 'react-dom/client';
-import { OV25UIProvider } from '../contexts/ov25-ui-context.js';
+import { OV25UIProvider, useOV25UI } from '../contexts/ov25-ui-context.js';
 import { ProductGallery } from '../components/product-gallery.js';
 import Price from '../components/Price.js';
 import Name from '../components/Name.js';
 import VariantSelectMenu from '../components/VariantSelectMenu/VariantSelectMenu.js';
 import { ProductCarousel } from '../components/product-carousel.js';
+import ConfiguratorViewControls from '../components/ConfiguratorViewControls.js';
 import { createPortal } from 'react-dom';
 
-// Import styles directly
-import '../styles.css';
+// Import CSS as string for adoptedStyleSheets
+import cssText from '../styles.css?inline';
 
-type StringOrFunction = string | (() => string);
+// Create shared stylesheet
+const sharedStylesheet = new CSSStyleSheet();
+sharedStylesheet.replaceSync(cssText);
 
-type ElementConfig = {
+// Apply to main document
+document.adoptedStyleSheets = [sharedStylesheet];
+
+export type StringOrFunction = string | (() => string);
+
+export type ElementConfig = {
   id: string;
   replace?: boolean;
 };
 
-type ElementSelector = string | ElementConfig;
+export type ElementSelector = string | ElementConfig;
 
 export interface InjectConfiguratorOptions {
   apiKey: StringOrFunction;
@@ -103,7 +111,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
   // Get selector string from ElementSelector
   const getSelector = (elementSelector: ElementSelector | undefined): string | undefined => {
     if (!elementSelector) return undefined;
-    return typeof elementSelector === 'string' ? elementSelector : elementSelector.id;
+    return typeof elementSelector === 'string' ? elementSelector : 'id' in elementSelector ? elementSelector.id : undefined;
   };
 
   // Check if replacement is needed
@@ -112,48 +120,130 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     return elementSelector.replace === true;
   };
 
+  // Check if component should be isolated in Shadow DOM
+  // Gallery, price, and name inherit styles from main document
+  const shouldCreateShadowDOM = (componentName: string): boolean => {
+    return !['gallery', 'price', 'name'].includes(componentName);
+  };
+
+  // Function to inject CSS into Shadow DOM using adoptedStyleSheets
+  const injectCSSIntoShadowDOM = (shadowRoot: ShadowRoot) => {
+    // Apply the shared stylesheet to the Shadow DOM
+    shadowRoot.adoptedStyleSheets = [sharedStylesheet];
+  };
+
   const ensureLoaded = () => {
+    // Create mobile drawer Shadow DOM container
+    const mobileDrawerContainer = document.createElement('div');
+    mobileDrawerContainer.id = 'ov25-mobile-drawer-container';
+    mobileDrawerContainer.style.position = 'fixed';
+    mobileDrawerContainer.style.top = '0';
+    mobileDrawerContainer.style.left = '0';
+    mobileDrawerContainer.style.width = '100%';
+    mobileDrawerContainer.style.height = '100%';
+    mobileDrawerContainer.style.pointerEvents = 'none';
+    mobileDrawerContainer.style.zIndex = '99999999999991';
+    document.body.appendChild(mobileDrawerContainer);
+    
+    // Create Shadow DOM root for mobile drawer
+    const mobileDrawerShadowRoot = mobileDrawerContainer.attachShadow({ mode: 'open' });
+    mobileDrawerShadowRoot.adoptedStyleSheets = [sharedStylesheet];
+    
+    // Create configurator view controls Shadow DOM container
+    const configuratorViewControlsContainer = document.createElement('div');
+    configuratorViewControlsContainer.id = 'ov25-configurator-view-controls-container';
+    configuratorViewControlsContainer.style.position = 'absolute';
+    configuratorViewControlsContainer.style.top = '0';
+    configuratorViewControlsContainer.style.left = '0';
+    configuratorViewControlsContainer.style.width = '100%';
+    configuratorViewControlsContainer.style.height = '100%';
+    configuratorViewControlsContainer.style.pointerEvents = 'none';
+    configuratorViewControlsContainer.style.zIndex = '101';
+    document.body.appendChild(configuratorViewControlsContainer);
+    
+    // Create Shadow DOM root for configurator view controls
+    const configuratorViewControlsShadowRoot = configuratorViewControlsContainer.attachShadow({ mode: 'open' });
+    configuratorViewControlsShadowRoot.adoptedStyleSheets = [sharedStylesheet];
+    
     // Make sure the portal targets are in the DOM *now*
     const portals: ReactNode[] = [];
 
-    const pushPortal = (selector: string | undefined, el: ReactNode) => {
-      if (!selector) return;
-      const target = document.querySelector(selector);
-      if (target) {
-        portals.push(createPortal(el, target));
-      } else {
-        console.warn(`[OV25-UI] Element not found for selector "${selector}"`);
+    const pushPortal = (selector: string | undefined, el: ReactNode, createShadow: boolean = false) => {
+      if (createShadow && selector) {
+        const target = document.querySelector(selector);
+        if (target) {
+          // Create Shadow DOM root if it doesn't exist
+          if (!target.shadowRoot) {
+            const shadowRoot = target.attachShadow({ mode: 'open' });
+            // Inject CSS into the new Shadow DOM
+            injectCSSIntoShadowDOM(shadowRoot);
+          }
+          portals.push(createPortal(el, target.shadowRoot!));
+        } else {
+          console.warn(`[OV25-UI] Element not found for selector "${selector}"`);
+        }
+      } else if (selector) {
+        const target = document.querySelector(selector);
+        if (target) {
+          portals.push(createPortal(el, target));
+        } else {
+          console.warn(`[OV25-UI] Element not found for selector "${selector}"`);
+        }
       }
     };
 
     // New function to completely remove target element and portal into its parent
-    const portalReplaceElement = (selector: string | undefined, el: ReactNode, componentName: string) => {
-      if (!selector) return;
-      const target = document.querySelector(selector);
-      if (target && target.parentNode) {
-        // Create an empty div to replace the target
-        const emptyDiv = document.createElement('div');
-        // Preserve original classes and add our class
-        emptyDiv.className = `${target.className} ov25-configurator-${componentName}`.trim();
-        // Copy dimensions from original element
+    const portalReplaceElement = (selector: string | undefined, el: ReactNode, componentName: string, createShadow: boolean = false) => {
+      if (createShadow && selector) {
+        const target = document.querySelector(selector);
+        if (target && target.parentNode) {
+          // Create an empty div to replace the target
+          const emptyDiv = document.createElement('div');
+          // Preserve original classes and add our class
+          emptyDiv.className = `${target.className} ov25-configurator-${componentName}`.trim();
+          
+          // Create Shadow DOM root
+          if (!emptyDiv.shadowRoot) {
+            const shadowRoot = emptyDiv.attachShadow({ mode: 'open' });
+            // Inject CSS into the new Shadow DOM
+            injectCSSIntoShadowDOM(shadowRoot);
+          }
+          
+          // Replace the target with the empty div
+          target.parentNode.replaceChild(emptyDiv, target);
+          // Create portal into the Shadow DOM root
+          portals.push(createPortal(el, emptyDiv.shadowRoot!));
+        } else {
+          console.warn(`[OV25-UI] Element or parent not found for selector "${selector}"`);
+        }
+      } else if (selector) {
+        const target = document.querySelector(selector);
+        if (target && target.parentNode) {
+          // Create an empty div to replace the target
+          const emptyDiv = document.createElement('div');
+          // Preserve original classes and add our class
+          emptyDiv.className = `${target.className} ov25-configurator-${componentName}`.trim();
+          // Copy dimensions from original element
 
-
-        // Replace the target with the empty div
-        target.parentNode.replaceChild(emptyDiv, target);
-        // Create portal into the empty div
-        portals.push(createPortal(el, emptyDiv));
-      } else {
-        console.warn(`[OV25-UI] Element or parent not found for selector "${selector}"`);
+          // Replace the target with the empty div
+          target.parentNode.replaceChild(emptyDiv, target);
+          // Create portal into the empty div
+          portals.push(createPortal(el, emptyDiv));
+        } else {
+          console.warn(`[OV25-UI] Element or parent not found for selector "${selector}"`);
+        }
       }
     };
 
     // Process each element with appropriate method based on replace flag
     const processElement = (elementSelector: ElementSelector | undefined, component: ReactNode, componentName: string) => {
       const selector = getSelector(elementSelector);
+      const useShadowDOM = shouldCreateShadowDOM(componentName);
+      
       if (shouldReplace(elementSelector)) {
-        portalReplaceElement(selector, component, componentName);
+        portalReplaceElement(selector, component, componentName, useShadowDOM);
       } else {
-        pushPortal(selector, component);
+        pushPortal(selector, component, useShadowDOM);
       }
     };
 
@@ -222,7 +312,8 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
       // Start polling for true-carousel element
       waitForElement('#true-carousel', 10000)
         .then(element => {
-          pushPortal('#true-carousel', <ProductCarousel />);
+          const useShadowDOM = shouldCreateShadowDOM('carousel');
+          pushPortal('#true-carousel', <ProductCarousel />, useShadowDOM);
         })
         .catch(err => {
           console.warn(`[OV25-UI] ${err.message}`);
@@ -231,6 +322,21 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
       // Process normally if it's a standard ElementSelector
       processElement(carouselId as ElementSelector, <ProductCarousel />, 'carousel');
     }
+
+    // Special handling for configurator view controls - wait for the specific container
+    waitForElement('#true-configurator-view-controls-container', 10000)
+      .then(element => {
+        // Create Shadow DOM on the configurator view controls container
+        if (!element.shadowRoot) {
+          const shadowRoot = element.attachShadow({ mode: 'open' });
+          shadowRoot.adoptedStyleSheets = [sharedStylesheet];
+        }
+        // Portal ConfiguratorViewControls into the Shadow DOM
+        portals.push(createPortal(<ConfiguratorViewControls />, element.shadowRoot!));
+      })
+      .catch(err => {
+        console.warn(`[OV25-UI] ${err.message}`);
+      });
 
     if (cssVariables) {
       setupCSSVariables(cssVariables);
@@ -269,6 +375,10 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
         deferThreeD={deferThreeD}
         showOptional={showOptional}
         isProductGalleryStacked={isProductGalleryStacked}
+        shadowDOMs={{
+          mobileDrawer: mobileDrawerShadowRoot,
+          configuratorViewControls: configuratorViewControlsShadowRoot
+        }}
       >
         {portals}
       </OV25UIProvider>

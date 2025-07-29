@@ -5,9 +5,7 @@ import { ProductOptionsGroup } from "./ProductOptions.js";
 import { MobilePriceOverlay } from "../mobile-price-overlay.js";
 import { VariantContentDesktop } from './VariantContentDesktop.js';
 import { ProductVariantsWrapper } from './ProductVariantsWrapper.js';
-import { CheckoutButton } from './CheckoutButton.js';
 import { MobileCheckoutButton } from './MobileCheckoutButton.js';
-
 
 // Types
 export type DrawerSizes = 'closed' | 'small' | 'large';

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { sendMessageToIframe } from '../utils/configurator-utils.js';
+import { sendMessageToIframe, toggleAR } from '../utils/configurator-utils.js';
 import { stringSimilarity } from 'string-similarity-js';
 
 // Define types
@@ -88,6 +88,11 @@ export interface Discount {
 
 // Context type
 interface OV25UIContextType {
+  // Shadow DOM references
+  shadowDOMs?: {
+    mobileDrawer?: ShadowRoot;
+    configuratorViewControls?: ShadowRoot;
+  };
   // State
   products: Product[];
   currentProductId?: string;
@@ -128,6 +133,7 @@ interface OV25UIContextType {
   logoURL?: string;
   isProductGalleryStacked: boolean;
   mobileLogoURL?: string;
+
   // Computed values
   currentProduct?: Product;
   sizeOption: SizeOption;
@@ -171,6 +177,7 @@ interface OV25UIContextType {
   handleNextOption: () => void;
   handlePreviousOption: () => void;
   getSelectedValue: (option: Option | SizeOption) => string;
+  toggleAR: () => void;
 }
 
 // Create the context
@@ -188,7 +195,11 @@ export const OV25UIProvider: React.FC<{
   showOptional?: boolean,
   logoURL?: string,
   isProductGalleryStacked: boolean,
-  mobileLogoURL?: string
+  mobileLogoURL?: string,
+  shadowDOMs?: {
+    mobileDrawer?: ShadowRoot;
+    configuratorViewControls?: ShadowRoot;
+  }
 }> = ({ 
   children,
   productLink,
@@ -200,7 +211,8 @@ export const OV25UIProvider: React.FC<{
   showOptional = false,
   logoURL,
   isProductGalleryStacked,
-  mobileLogoURL
+  mobileLogoURL,
+  shadowDOMs
 }) => {
   // State definitions
   const [products, setProducts] = useState<Product[]>([]);
@@ -621,6 +633,8 @@ export const OV25UIProvider: React.FC<{
 
 
   const contextValue: OV25UIContextType = {
+    // Shadow DOM references
+    shadowDOMs,
     // State
     products,
     currentProductId,
@@ -695,6 +709,7 @@ export const OV25UIProvider: React.FC<{
     handleNextOption,
     handlePreviousOption,
     getSelectedValue,
+    toggleAR,
   };
 
   return (

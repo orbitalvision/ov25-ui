@@ -13,9 +13,6 @@ export const IframeContainer = () => {
         iframeRef,
         currentProduct,
         galleryIndex,
-        error,
-        canAnimate,
-        animationState,
         productLink,
         apiKey,
         galleryIndexToUse,
@@ -77,15 +74,9 @@ export const IframeContainer = () => {
             ) : null;
         })()}
 
-        {galleryIndex === galleryIndexToUse && !error && (
-            <ConfiguratorViewControls
-                canAnimate={canAnimate}
-                animationState={animationState}
-                showDimensionsToggle={showDimensionsToggle}
-                canSeeDimensions={canSeeDimensions}
-                setCanSeeDimensions={setCanSeeDimensions}
-            />
-        )}
+        {/* Container for ConfiguratorViewControls portal */}
+        <div id="true-configurator-view-controls-container" className="ov:absolute ov:inset-0 ov:w-full ov:h-full ov:pointer-events-none"></div>
+
     </div>
     )
 }

@@ -47,7 +47,7 @@
 
     /* view controls that are overlayed onto the iframe, such as the dimensions button */
     --ov25-configurator-view-controls-text-color: var(--ov25-text-color);
-    --ov25-overlay-button-color: var(----ov25-primary-color);
+    --ov25-overlay-button-color: var(--ov25-background-color);
     --ov25-configurator-view-controls-border-color: var(--ov25-border-color);
     --ov25-configurator-view-controls-border-radius: 9999999px;
 
@@ -64,8 +64,6 @@
 
     /* Drawer Styles */
     --ov25-configurator-variant-drawer-handle-color: var(--ov25-color-handle);
-
-    
 
 }
 
@@ -114,8 +112,6 @@ html #ov25-configurator-variant-menu-container {
   fill: none;
 }
 
-
-
 #true-ov25-configurator-iframe-container svg {
   height: 24px;
   width: 24px;
@@ -125,8 +121,6 @@ html #ov25-configurator-variant-menu-container {
 #ov25-variant-group-content img {
   height: 100%;
 }
-
-
 
 #ov25-mobile-price-overlay img {
   height: 24px;
@@ -326,3 +320,12 @@ html #ov25-configurator-variant-menu-container {
       width: 24px;
       height: 24px;
   }
+
+
+
+/* 
+Filter content
+filter content
+filter content */
+
+

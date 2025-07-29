@@ -29,5 +29,11 @@ export const MobilePriceOverlay = () => {
   );
 
   // Use React Portal to inject the overlay into the iframe container
+  // Carousel always uses Shadow DOM isolation (hard-coded)
+  // Check if container has Shadow DOM
+  if (container.shadowRoot) {
+    return createPortal(overlayContent, container.shadowRoot);
+  }
+  
   return createPortal(overlayContent, container);
 }; 

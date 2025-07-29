@@ -245,7 +245,13 @@ const TwoStageDrawerComponent = ({
     </AnimatedDiv>
   );
   
-  return createPortal(drawerContent, document.body);
+  // Get Shadow DOM reference from context
+  const { shadowDOMs } = useOV25UI();
+  
+  // Use Shadow DOM if available, otherwise fallback to document.body
+  const portalTarget = shadowDOMs?.mobileDrawer || document.body;
+  
+  return createPortal(drawerContent, portalTarget);
 };
 
 // Export as a named export
