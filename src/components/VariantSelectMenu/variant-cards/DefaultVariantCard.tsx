@@ -71,7 +71,7 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
                     </div>
                 )}
                 {shouldShowSwatch && (
-                    <div className="ov25-variant-swatch-overlay" onClick={handleSwatchClick} title="View swatch">
+                    <div className="ov25-variant-swatch-overlay ov:absolute ov:inset-0 ov:flex ov:items-start ov:justify-end ov:cursor-pointer ov:transition-all" onClick={handleSwatchClick} title="View swatch">
                         <div className="ov:w-10 ov:h-10 ov:p-0.5 ov:bg-white ov:hover:bg-gray-100 ov:text-black ov:border-2 ov:border-black ov:background-white ov:rounded-full ov:flex ov:items-center ov:justify-center">
                             {variant.swatch && isSwatchSelected(variant.swatch) ? <Minus className="ov:w-3 ov:h-3"/> : <Plus className="ov:w-3 ov:h-3"/>}
                         </div>

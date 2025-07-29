@@ -91,11 +91,11 @@ function App() {
 
   return (
     <div className="app ov:overflow-x-hidden">
-      <div className="ov:flex ov:flex-col ov:md:flex-row">
+      <div className="ov:flex ov:flex-col ov:md:flex-row ov:justify-between">
         <div className="configurator-container ov:w-full ov:aspect-square ov:md:w-[764px] ov:md:h-[764px]">
           IFRAME GETS INSERTED HERE
         </div>
-        <div id="ov25-controls-container" className="ov:flex ov:flex-col ov:w-full ov:md:pt-12 ov:md:mt-0 ov:md:ml-4 ov:mt-[100px]">
+        <div id="ov25-controls-container" className="ov:flex ov:flex-col ov:md:pt-12 ov:md:mt-0 ov:md:ml-4 ov:mt-[100px] ov:max-w-[800px]">
           <div id="ov25-controls">
             <div id="price-name" className="ov:w-full ov:md:w-[378px] ov:h-[96px]">
               <div id="price">PRICE: £123</div>
