@@ -7,11 +7,11 @@ let configuratorInitialized = false;
 // Function to initialize the configurator
 const initializeConfigurator = () => {
   if (configuratorInitialized) return;
-  
+
   // Inject the configurator
   injectConfigurator({
-    apiKey: () => { return '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d' }, 
-    productLink: () => { return 'range/1' }, 
+    apiKey: () => { return '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d' },
+    productLink: () => { return '217' },
     // 217 = Woodbros Pickering-3 Seater (Grouped)
     // range/2 Aughton (Non Grouped)
     // 501 Westbridge/glenwood/grand split option (no filters)
@@ -25,22 +25,26 @@ const initializeConfigurator = () => {
       'https://demo.orbital.vision/_next/image?url=https%3A%2F%2Flondon-website-general-purpose.s3.eu-west-2.amazonaws.com%2Fassets%2Forganizations%2F15%2Fproducts%2FTamarisk%2F45%2FWindrush-Large-Sofa-Side.png&w=1920&q=75',
       'https://demo.orbital.vision/_next/image?url=https%3A%2F%2Flondon-website-general-purpose.s3.eu-west-2.amazonaws.com%2Fassets%2Forganizations%2F15%2Fproducts%2FTamarisk%2F45%2FWindrush-Large-Sofa-Back.png&w=1920&q=75',
     ],
-    galleryId: {id: '.configurator-container', replace: true},
-    priceId: {id: '#price', replace: true},
-    nameId: {id: '#name', replace: true},
+    galleryId: { id: '.configurator-container', replace: true },
+    priceId: { id: '#price', replace: true },
+    nameId: { id: '#name', replace: true },
     deferThreeD: false,
     variantsId: '#ov25-controls',
+    swatchesId: '#ov25-swatches',
     carouselId: true,
     showOptional: true,
     logoURL: 'https://ov25.orbital.vision/OV.png',
     addToBasketFunction: () => {
-        alert('Checkout function called');
-      },
+      alert('Checkout function called');
+    },
     buyNowFunction: () => {
-        alert('Buy now function called');
-      },
+      alert('Buy now function called');
+    },
+    addSwatchesToCartFunction: () => {
+      alert('Add swatches to cart function called');
+    },
   });
-  
+
   configuratorInitialized = true;
 };
 
@@ -49,7 +53,7 @@ function App() {
   const handleMessage = (event) => {
     const { type, payload } = event.data;
     if (!type) return;
-  
+
     // Safely parse payload
     let data;
     try {
@@ -58,7 +62,7 @@ function App() {
       console.error("Failed to parse configurator message payload:", payload);
       return;
     }
-  
+
     switch (type) {
       case "ALL_PRODUCTS":
         console.log("ALL_PRODUCTS", data);
@@ -87,15 +91,19 @@ function App() {
 
   return (
     <div className="app ov:overflow-x-hidden">
-      <h1>OV25 Configurator Test</h1>
       <div className="ov:flex ov:flex-col ov:md:flex-row">
-        <div className="configurator-container ov:w-full ov:aspect-square ov:md:w-[700px] ov:md:h-[500px]"></div>
-        <div id="ov25-controls" className="ov:w-full ov:md:w-[35%] ov:h-full ov:md:h-[600px] ov:md:mt-0 ov:md:ml-4 ov:mt-[100px]">
-          <div id="price-name" className="ov:w-full ov:md:w-[378px] ov:h-[96px]">
-            <div id="price">PRICE: £123</div>
-            <div id="name">NAME: Product Name</div>
+        <div className="configurator-container ov:w-full ov:aspect-square ov:md:w-[764px] ov:md:h-[764px]">
+          IFRAME GETS INSERTED HERE
+        </div>
+        <div id="ov25-controls-container" className="ov:flex ov:flex-col ov:w-full ov:md:pt-12 ov:md:mt-0 ov:md:ml-4 ov:mt-[100px]">
+          <div id="ov25-controls">
+            <div id="price-name" className="ov:w-full ov:md:w-[378px] ov:h-[96px]">
+              <div id="price">PRICE: £123</div>
+              <div id="name">NAME: Product Name</div>
+            </div>
+            <p>This is a description of the product. Words will go here - it might continue for a few lines. It might be a few sentences long. </p>
           </div>
-          <p>This is a description of the product. Words will go here - it might continue for a few lines. It might be a few sentences long. </p>
+          <div id="ov25-swatches"></div>
         </div>
       </div>
     </div>

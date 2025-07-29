@@ -6,6 +6,7 @@ import { CheckoutButton } from "./CheckoutButton.js"
 import DesktopVariants from "./DesktopVariants.js"
 import { MobileVariants } from "./MobileVariants.js"
 import { useOV25UI } from "../../contexts/ov25-ui-context.js"
+import { Swatch } from '../../contexts/ov25-ui-context.js';
 
 export interface Variant {
   id: string
@@ -17,6 +18,7 @@ export interface Variant {
   blurHash: string
   data?: any
   isSelected?: boolean
+  swatch?: Swatch
 }
 
 export type DrawerSizes = 'closed' | 'small' | 'large'

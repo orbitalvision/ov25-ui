@@ -6,6 +6,7 @@ import { ProductGallery } from '../components/product-gallery.js';
 import Price from '../components/Price.js';
 import Name from '../components/Name.js';
 import VariantSelectMenu from '../components/VariantSelectMenu/VariantSelectMenu.js';
+import { SwatchesContainer } from '../components/SwatchesContainer.js';
 import { ProductCarousel } from '../components/product-carousel.js';
 import { createPortal } from 'react-dom';
 
@@ -31,9 +32,11 @@ export interface InjectConfiguratorOptions {
   priceId?: ElementSelector;
   nameId?: ElementSelector;
   variantsId?: ElementSelector;
+  swatchesId?: ElementSelector;
   carouselId?: ElementSelector | true;
   addToBasketFunction: () => void;
   buyNowFunction: () => void;
+  addSwatchesToCartFunction: () => void;
   logoURL?: string;
   mobileLogoURL?: string;
   cssVariables?: JSON;
@@ -47,9 +50,11 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     priceId,
     nameId,
     variantsId,
+    swatchesId,
     carouselId,
     addToBasketFunction,
     buyNowFunction,
+    addSwatchesToCartFunction,
     images,
     logoURL,
     mobileLogoURL,
@@ -216,6 +221,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     processElement(priceId, <Price />, 'price');
     processElement(nameId, <Name />, 'name');
     processElement(variantsId, <VariantSelectMenu />, 'variants');
+    processElement(swatchesId, <SwatchesContainer />, 'swatches');
     
     // Special handling for carousel - only use polling if carouselId is true
     if (carouselId === true) {
@@ -261,7 +267,8 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
       <OV25UIProvider 
         apiKey={resolvedApiKey} 
         productLink={resolvedProductLink} 
-        buyNowFunction={buyNowFunction} 
+        buyNowFunction={buyNowFunction}
+        addSwatchesToCartFunction={addSwatchesToCartFunction}
         addToBasketFunction={addToBasketFunction} 
         images={images} 
         logoURL={logoURL}
