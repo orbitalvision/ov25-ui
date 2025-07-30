@@ -50,7 +50,7 @@ export const FilterContent: React.FC = () => {
                                 <button
                                     key={option.value}
                                     onClick={() => handleFilterChange(filterKey, option.value, !option.checked)}
-                                    className="ov:px-4 ov:py-2 ov:rounded-full ov:text-sm ov:border ov:border-[var(--ov25-border-color)] ov:text-[var(--ov25-secondary-text-color)] ov:transition-all ov:cursor-pointer hover:ov:bg-gray-50 data-[checked=true]:ov:border-[var(--ov25-highlight-color)] data-[checked=true]:ov:bg-[color-mix(in_srgb,var(--ov25-highlight-color)_20%,transparent)]"
+                                    className={`ov:px-4 ov:py-2 ov:rounded-full ov:text-sm ov:border ov:text-[var(--ov25-secondary-text-color)] ov:transition-all ov:cursor-pointer hover:ov:bg-gray-50 ${option.checked ? 'ov:border-[var(--ov25-highlight-color)] ov:bg-[color-mix(in_srgb,var(--ov25-highlight-color)_20%,transparent)]' : 'ov:border-[var(--ov25-border-color)]'}`}
                                     data-checked={option.checked}
                                 >
                                     {option.value}
