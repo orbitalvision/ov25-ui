@@ -19,8 +19,15 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
     setSelectedSwatches([]);
   };
 
+  const handleDialogOpenChange = (open: boolean) => {
+    setIsSwatchBookOpen(open);
+    if (!open) {
+      setZoomedSwatch(null);
+    }
+  };
+
   return (
-    <Dialog open={isSwatchBookOpen} onOpenChange={setIsSwatchBookOpen}>
+    <Dialog open={isSwatchBookOpen} onOpenChange={handleDialogOpenChange}>
       <DialogContent id="ov25-swatchbook" className="ov:flex ov:flex-col ov:p-6 ov:bg-white ov:border-none ov:max-w-[700px] ov:h-[800px]" aria-describedby={undefined}>
         {zoomedSwatch ? (
           <>
