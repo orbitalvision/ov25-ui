@@ -68,7 +68,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
                   <span>Free samples included:</span>
                   <span className='ov25-swatchbook-info-value ov:text-black ov:font-medium'>{swatchRulesData.freeSwatchLimit}</span>
                 </div>
-                {swatchRulesData.pricePerSwatch > 0 && (
+                {swatchRulesData.pricePerSwatch > 0 && swatchRulesData.canExeedFreeLimit && (
                   <div id="ov25-swatchbook-samples-price" className="ov:flex ov:justify-between ov:items-center">
                     <span>Additional samples:</span>
                     <span className='ov25-swatchbook-info-value ov:text-black ov:font-medium'>£{swatchRulesData.pricePerSwatch.toFixed(2)} each</span>
@@ -76,7 +76,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
                 )}
                 <div id="ov25-swatchbook-samples-range" className="ov:flex ov:justify-between ov:items-center">
                   <span>Selection range:</span>
-                  <span className={`ov25-swatchbook-info-value ov:text-black ov:font-medium ${selectedSwatches.length < swatchRulesData.minSwatches ? 'ov:text-red-500' : ''}`}>{swatchRulesData.minSwatches} - {swatchRulesData.maxSwatches} swatches</span>
+                  <span className={`ov25-swatchbook-info-value ov:text-black ov:font-medium ${selectedSwatches.length < (swatchRulesData.canExeedFreeLimit ? swatchRulesData.minSwatches : swatchRulesData.freeSwatchLimit) ? 'ov:text-red-500' : ''}`}>{(swatchRulesData.canExeedFreeLimit ? swatchRulesData.minSwatches : 0)} - {(swatchRulesData.canExeedFreeLimit ? swatchRulesData.maxSwatches : swatchRulesData.freeSwatchLimit)} swatches</span>
                 </div>
               </div>
             </div>
