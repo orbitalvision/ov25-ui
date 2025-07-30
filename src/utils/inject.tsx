@@ -77,7 +77,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
   (window as any).ov25GenerateThumbnail = () => {
     return new Promise<string>((resolve, reject) => {
       // Find the iframe element
-      const iframe = document.querySelector('iframe[src*="configurator"]') as HTMLIFrameElement;
+      const iframe = document.getElementById('ov25-configurator-iframe') as HTMLIFrameElement;
       if (!iframe || !iframe.contentWindow) {
         reject(new Error('Configurator iframe not found'));
         return;
@@ -159,7 +159,12 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     
     // Create Shadow DOM root for mobile drawer
     const mobileDrawerShadowRoot = mobileDrawerContainer.attachShadow({ mode: 'open' });
-    mobileDrawerShadowRoot.adoptedStyleSheets = [sharedStylesheet];
+    const mobileDrawerStylesheets = [sharedStylesheet];
+    if (cssString) {
+      const cssVariablesStylesheet = createCSSVariablesStylesheet(cssString);
+      mobileDrawerStylesheets.push(cssVariablesStylesheet);
+    }
+    mobileDrawerShadowRoot.adoptedStyleSheets = mobileDrawerStylesheets;
     
     // Create configurator view controls Shadow DOM container
     const configuratorViewControlsContainer = document.createElement('div');
@@ -175,7 +180,12 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     
     // Create Shadow DOM root for configurator view controls
     const configuratorViewControlsShadowRoot = configuratorViewControlsContainer.attachShadow({ mode: 'open' });
-    configuratorViewControlsShadowRoot.adoptedStyleSheets = [sharedStylesheet];
+    const configuratorViewControlsStylesheets = [sharedStylesheet];
+    if (cssString) {
+      const cssVariablesStylesheet = createCSSVariablesStylesheet(cssString);
+      configuratorViewControlsStylesheets.push(cssVariablesStylesheet);
+    }
+    configuratorViewControlsShadowRoot.adoptedStyleSheets = configuratorViewControlsStylesheets;
     
     // Make sure the portal targets are in the DOM *now*
     const portals: ReactNode[] = [];
@@ -341,7 +351,12 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
         // Create Shadow DOM on the configurator view controls container
         if (!element.shadowRoot) {
           const shadowRoot = element.attachShadow({ mode: 'open' });
-          shadowRoot.adoptedStyleSheets = [sharedStylesheet];
+          const configuratorViewControlsStylesheets = [sharedStylesheet];
+          if (cssString) {
+            const cssVariablesStylesheet = createCSSVariablesStylesheet(cssString);
+            configuratorViewControlsStylesheets.push(cssVariablesStylesheet);
+          }
+          shadowRoot.adoptedStyleSheets = configuratorViewControlsStylesheets;
         }
         // Portal ConfiguratorViewControls into the Shadow DOM
         portals.push(createPortal(<ConfiguratorViewControls />, element.shadowRoot!));

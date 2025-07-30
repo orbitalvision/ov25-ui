@@ -244,9 +244,7 @@ export const useIframePositioning = () => {
         };
       } else {
         // Desktop opening animation code remains the same
-        console.log('[useIframePositioning] Desktop opening - scheduling updateIframeWidth');
         setTimeout(() => {
-          console.log('[useIframePositioning] Calling updateIframeWidth after timeout');
           updateIframeWidth();
         }, 100);
 

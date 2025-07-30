@@ -620,7 +620,6 @@ export const OV25UIProvider: React.FC<{
           setArPreviewLink(data);
           break;
         case 'AVAILABLE_CAMERAS':
-          console.log('Available cameras received:', data);
           setAvailableCameras(data);
           break;
         case 'ERROR':
