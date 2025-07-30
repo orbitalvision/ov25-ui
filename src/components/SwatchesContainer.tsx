@@ -19,7 +19,7 @@ export const SwatchesContainer: React.FC = () => {
         <div id="ov25-selected-swatches" className="ov:grid ov:grid-cols-3 ov:md:grid-cols-4 ov:gap-1 ov:md:gap-2 ov:w-full ov:px-2 ov:md:px-3 ov:py-2 ov:mt-2 ov:tems-center ov:overflow-hidden">
           {selectedSwatches.slice(0, 7).map((swatch) => (
             <div key={`${swatch.manufacturerId}-${swatch.name}-${swatch.option}`} className="ov:flex ov:flex-col ov:h-full ov:items-center ov:gap-2">
-              <img src={swatch.thumbnail.thumbnail} alt={swatch.name} className="ov:w-full ov:h-auto  ov:max-w-20 ov:md:max-w-24 ov:aspect-square ov:object-cover ov:rounded-lg"/>
+              <img src={swatch.thumbnail.miniThumbnails.medium} alt={swatch.name} className="ov:w-full ov:h-auto  ov:max-w-20 ov:md:max-w-24 ov:aspect-square ov:object-cover ov:rounded-lg"/>
               <span className="ov:text-[12px] ov:font-light ov:uppercase ov:text-center">{swatch.name}</span>
             </div>
           ))}

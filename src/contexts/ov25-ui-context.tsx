@@ -89,12 +89,10 @@ export interface Discount {
 }
 
 export interface Swatch {
-  id: string;
   name: string;
   option: string;
   manufacturerId: string;
   description: string;
-  image: string;
   thumbnail: {
     blurHash: string;
     thumbnail: string;

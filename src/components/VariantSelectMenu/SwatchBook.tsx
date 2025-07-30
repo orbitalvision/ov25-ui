@@ -28,7 +28,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
 
   return (
     <Dialog open={isSwatchBookOpen} onOpenChange={handleDialogOpenChange}>
-      <DialogContent id="ov25-swatchbook" className="ov:flex ov:flex-col ov:p-6 ov:bg-white ov:border-none ov:max-w-[700px] ov:h-[800px]" aria-describedby={undefined}>
+      <DialogContent id="ov25-swatchbook" className="ov:flex ov:flex-col ov:p-4 ov:md:p-6 ov:bg-white ov:border-none ov:max-w-[95vw] ov:md:max-w-[700px] ov:h-[90vh] ov:md:h-[800px] ov:m-2 ov:md:m-0" aria-describedby={undefined}>
         {zoomedSwatch ? (
           <>
             <div id="ov25-swatchbook-title" className="ov:flex-shrink-0 ov:mb-4 ov:text-black ov:text-[1.5em] ov:font-normal">
@@ -39,7 +39,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
                 <img
                   src={isMobile ? zoomedSwatch.thumbnail.miniThumbnails.large : zoomedSwatch.thumbnail.thumbnail}
                   alt={zoomedSwatch.name}
-                  className='ov25-swatch-image ov:w-full ov:h-full ov:object-cover ov:border-1 ov:border-black'
+                  className='ov25-swatch-image ov:w-full ov:h-full ov:object-cover ov:border-1 ov:border-black ov:rounded-lg ov:aspect-square'
                 />
                 <button
                   onClick={() => setZoomedSwatch(null)}
@@ -52,7 +52,8 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
                 </button>
               </div>
               <div id="ov25-swatchbook-description" className="ov:text-[--ov25-secondary-text-color] ov:text-sm ov:mt-2 ov:text-center ov:max-w-[28em]">
-                <p className='ov25-swatchbook-description-text ov:text-black ov:mb-2'>{zoomedSwatch.description}</p>
+                <span className='ov25-swatch-option ov:text-gray-600 ov:text-xs ov:italic ov:overflow-hidden ov:line-clamp-1'>{zoomedSwatch.option}</span>
+                <span className='ov25-swatchbook-description-text ov:text-black ov:text-sm ov:font-normal ov:mb-2'>{zoomedSwatch.description}</span>
               </div>
             </div>
           </>
@@ -75,17 +76,17 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
                 )}
                 <div id="ov25-swatchbook-samples-range" className="ov:flex ov:justify-between ov:items-center">
                   <span>Selection range:</span>
-                  <span className='ov25-swatchbook-info-value ov:text-black ov:font-medium'>{swatchRulesData.minSwatches} - {swatchRulesData.maxSwatches} swatches</span>
+                  <span className={`ov25-swatchbook-info-value ov:text-black ov:font-medium ${selectedSwatches.length < swatchRulesData.minSwatches ? 'ov:text-red-500' : ''}`}>{swatchRulesData.minSwatches} - {swatchRulesData.maxSwatches} swatches</span>
                 </div>
               </div>
             </div>
             <div id="ov25-swatchbook-content" className="ov:flex-1 ov:overflow-y-auto ov:overflow-x-hidden">
               {selectedSwatches.length > 0 ? (
-                <div id="ov25-swatchbook-swatches-list" className="ov:grid ov:grid-cols-3 ov:md:grid-cols-4 ov:gap-2 ov:md:gap-4 ov:w-full ov:p-4">
+                <div id="ov25-swatchbook-swatches-list" className="ov:grid ov:grid-cols-2 ov:sm:grid-cols-3 ov:md:grid-cols-4 ov:gap-2 ov:md:gap-4 ov:w-full ov:p-4">
                   {selectedSwatches.map((swatch) => (
                     <div key={`${swatch.manufacturerId}-${swatch.name}-${swatch.option}`} className='ov25-swatch-item ov:flex ov:flex-col ov:gap-2 ov:items-center ov:text-center ov:w-full ov:h-full ov:md:w-auto ov:md:h-auto'>
                       <div className='ov25-swatch-image-container ov:relative ov:w-[100px] ov:h-[100px] ov:md:w-[120px] ov:md:h-[120px] group'>
-                        <img src={swatch.thumbnail.miniThumbnails.medium} alt={swatch.name} className='ov25-swatch-image ov:w-full ov:h-full ov:object-cover ov:border-1 ov:border-black'/>
+                        <img src={swatch.thumbnail.miniThumbnails.medium} alt={swatch.name} className='ov25-swatch-image ov:w-full ov:h-full ov:object-cover ov:border-1 ov:rounded-lg ov:border-black'/>
                         <button
                           onClick={() => toggleSwatch(swatch)}
                           className='ov25-swatch-remove-button ov:flex ov:items-center ov:justify-center ov:absolute ov:top-1 ov:right-1 ov:w-6 ov:h-6 ov:bg-white ov:rounded-full ov:cursor-pointer ov:shadow-md ov:transition-colors ov:z-[10] ov:opacity-40 ov:hover:opacity-80 ov:hover:bg-gray-100'
@@ -103,8 +104,9 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
                           </div>
                         </button>
                       </div>
-                      <span className='ov25-swatch-name ov:text-black ov:text-sm ov:font-medium ov:overflow-hidden ov:line-clamp-2'>{swatch.name}</span>
-                      <span className='ov25-swatch-description ov:text-black ov:text-xs ov:overflow-hidden ov:line-clamp-3'>{swatch.description}</span>
+                      <div className='ov25-swatch-name ov:text-black ov:text-sm ov:font-normal ov:overflow-hidden ov:line-clamp-3 ov:md:line-clamp-2 ov:text-center ov:leading-tight'>{swatch.name}</div>
+                      <span className='ov25-swatch-option ov:hidden md:ov:block ov:text-gray-600 ov:text-xs ov:italic ov:overflow-hidden ov:line-clamp-1'>{swatch.option}</span>
+                      <span className='ov25-swatch-description ov:hidden md:ov:block ov:text-blacsk ov:text-xs ov:overflow-hidden ov:line-clamp-3'>{swatch.description}</span>
                     </div>
                   ))}
                 </div>

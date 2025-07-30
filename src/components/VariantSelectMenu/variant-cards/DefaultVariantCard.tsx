@@ -3,6 +3,7 @@ import * as React from 'react'
 import { cn } from '../../../lib/utils.js';
 import { useOV25UI } from '../../../contexts/ov25-ui-context.js';
 import { Variant } from '../ProductVariants.js';
+import { toast } from 'sonner';
 
 interface VariantCardProps {
     variant: Variant;
@@ -22,14 +23,17 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
             return;
         }
         if (selectedSwatches.length >= swatchRulesData.maxSwatches && !isSwatchSelected(variant.swatch)) {
-            // TODO: notify the user that they have reached the max swatches
-            alert('You have reached the maximum number of swatches');
+            toast.error('You have reached the maximum number of swatches');
             return;
         }
         if (!swatchRulesData.canExeedFreeLimit && selectedSwatches.length >= swatchRulesData.freeSwatchLimit && !isSwatchSelected(variant.swatch)) {
-            // TODO: notify the user that they have reached the free swatch limit
-            alert('You have reached the free swatch limit');
+            toast.error('You have reached the free swatch limit');
             return;
+        }
+        if (isSwatchSelected(variant.swatch)) {
+            toast.success('Swatch removed from swatchbook');
+        } else {
+            toast.success('Swatch added to swatchbook');
         }
         toggleSwatch(variant.swatch);
     };
@@ -45,9 +49,7 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
             <div 
                 className={cn(
                     'ov25-variant-image-container',
-                    isGrouped ? 'ov:w-10 ov:h-10' : 'ov:w-14 ov:h-14',
-                    'md:ov:w-14 md:ov:h-14',
-                    'ov:rounded-full ov:overflow-hidden ov:mb-1 ov:cursor-pointer',
+                    'ov:w-14 ov:h-14 ov:rounded-full ov:overflow-hidden ov:mb-1 ov:cursor-pointer',
                     variant.isSelected ? 'ov:border-2 ov:border-[var(--ov25-highlight-color)] ov:shadow-lg' : 'ov:border-transparent ov:shadow-md',
                 )}
                 {...(variant.isSelected && { selected: true })}
@@ -73,7 +75,7 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
                 {shouldShowSwatch && (
                     <div className="ov25-variant-swatch-overlay ov:absolute ov:inset-0 ov:flex ov:items-start ov:justify-end ov:cursor-pointer ov:transition-all" onClick={handleSwatchClick} title="View swatch">
                         <div className="ov:w-10 ov:h-10 ov:p-0.5 ov:bg-white ov:hover:bg-gray-100 ov:text-black ov:border-2 ov:border-black ov:background-white ov:rounded-full ov:flex ov:items-center ov:justify-center">
-                            {variant.swatch && isSwatchSelected(variant.swatch) ? <Minus className="ov:w-3 ov:h-3"/> : <Plus className="ov:w-3 ov:h-3"/>}
+                            <SwatchBook />{variant.swatch && isSwatchSelected(variant.swatch) ? <Minus className="ov:w-3 ov:h-3"/> : <Plus className="ov:w-3 ov:h-3"/>}
                         </div>
                     </div>
                 )}

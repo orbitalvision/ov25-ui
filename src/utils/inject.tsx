@@ -12,6 +12,7 @@ import { createPortal } from 'react-dom';
 
 // Import styles directly
 import '../styles.css';
+import { Toaster } from 'sonner';
 
 type StringOrFunction = string | (() => string);
 
@@ -277,6 +278,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
         showOptional={showOptional}
         isProductGalleryStacked={isProductGalleryStacked}
       >
+      <Toaster position="top-center" richColors style={{ zIndex: 999999999999999 }} />
         {portals}
       </OV25UIProvider>
     );
