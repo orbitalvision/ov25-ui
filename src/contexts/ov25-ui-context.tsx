@@ -144,6 +144,7 @@ interface OV25UIContextType {
   galleryIndexToUse: number;
   filteredActiveOption?: Option | null;
   searchQueries: { [optionId: string]: string };
+  availableCameras: string[];
   // Methods
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
   setCurrentProductId: React.Dispatch<React.SetStateAction<string | undefined>>;
@@ -171,6 +172,8 @@ interface OV25UIContextType {
   setHasSwitchedAfterDefer: React.Dispatch<React.SetStateAction<boolean>>;
   setAvailableProductFilters: React.Dispatch<React.SetStateAction<ProductFilters>>;
   setSearchQuery: (optionId: string, query: string) => void;
+  setAvailableCameras: React.Dispatch<React.SetStateAction<string[]>>;
+  selectCamera: (cameraId: string) => void;
   // Actions
   handleSelectionSelect: (selection: Selection) => void;
   handleOptionClick: (optionId: string) => void;
@@ -250,6 +253,7 @@ export const OV25UIProvider: React.FC<{
   const [availableProductFilters, setAvailableProductFilters] = useState<ProductFilters>({});
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [searchQueries, setSearchQueries] = useState<{ [optionId: string]: string }>({});
+  const [availableCameras, setAvailableCameras] = useState<string[]>([]);
   const hasDefered = useRef(false);
   const isSelectingProduct = useRef(false);
   const hasComputedFilters = useRef(false);
@@ -290,6 +294,18 @@ export const OV25UIProvider: React.FC<{
       ...prev,
       [optionId]: query
     }));
+  }, []);
+
+  const selectCamera = useCallback((cameraId: string) => {
+    try {
+      const message = {
+        type: 'SELECT_CAMERA',
+        payload: JSON.stringify(cameraId)
+      };
+      window.postMessage(message, '*');
+    } catch (error) {
+      console.error('Error sending camera selection message:', error);
+    }
   }, []);
 
   // Computed values
@@ -597,15 +613,19 @@ export const OV25UIProvider: React.FC<{
           case 'CURRENT_SKU':
             setCurrentSku(data);
             break;
-          case 'RANGE':
-            setRange(data);
-            break;
-          case 'AR_PREVIEW_LINK':
-            setArPreviewLink(data);
-            break;
-          case 'ERROR':
-            setError(new Error(data));
-            break;
+                  case 'RANGE':
+          setRange(data);
+          break;
+        case 'AR_PREVIEW_LINK':
+          setArPreviewLink(data);
+          break;
+        case 'AVAILABLE_CAMERAS':
+          console.log('Available cameras received:', data);
+          setAvailableCameras(data);
+          break;
+        case 'ERROR':
+          setError(new Error(data));
+          break;
         }
       } catch (error) {
         console.error('Error handling message:', error, 'Event data:', event.data);
@@ -680,6 +700,7 @@ export const OV25UIProvider: React.FC<{
     showFilters,
     allOptions,
     searchQueries,
+    availableCameras,
     // Methods
     setProducts,
     setCurrentProductId,
@@ -703,6 +724,8 @@ export const OV25UIProvider: React.FC<{
     setHasSwitchedAfterDefer,
     setAvailableProductFilters,
     setSearchQuery,
+    setAvailableCameras,
+    selectCamera,
     // Actions
     handleSelectionSelect,
     handleOptionClick,

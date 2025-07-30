@@ -1,11 +1,11 @@
 import React, { useState } from 'react'
-import { X as CloseIcon } from 'lucide-react'
+import { X as CloseIcon, Camera } from 'lucide-react'
 import { ExpandIcon, Rotate3D } from "lucide-react"
 import { DimensionsIcon } from '../lib/svgs/DimensionsIcon.js'
-import { ArIcon } from '../lib/svgs/ArIcon.js'
 import { toggleDimensions, toggleAnimation,  toggleFullscreen, getAnimationButtonText } from '../utils/configurator-utils.js'
 import { useOV25UI } from '../contexts/ov25-ui-context.js'
 import { cn } from '../lib/utils.js'
+import { Popover, PopoverContent, PopoverTrigger } from './ui/popover.js'
 
 interface ConfiguratorViewControlsProps {
   // All props now come from context, so no props needed
@@ -20,12 +20,14 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
     canAnimate,
     animationState,
     currentProduct,
-
-    toggleAR
+    availableCameras,
+    selectCamera,
   } = useOV25UI();
 
   // Local state for dimensions
   const [canSeeDimensions, setCanSeeDimensions] = useState(false);
+  // Local state for camera popover
+  const [isCameraPopoverOpen, setIsCameraPopoverOpen] = useState(false);
 
   // Calculate showDimensionsToggle from currentProduct
   const showDimensionsToggle = !!((currentProduct as any)?.dimensionX &&
@@ -79,6 +81,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
                 )}
             </button>
           )}
+          
 {/* 
           <button id="ov25-ar-toggle-button" onClick={toggleAR} className={cn(
             'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:border ov:items-center ov:justify-center',
@@ -105,6 +108,48 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
               )}
             </button>
           )}
+
+          {/* {availableCameras.length > 1 && (
+            <Popover open={isCameraPopoverOpen} onOpenChange={setIsCameraPopoverOpen}>
+              <PopoverTrigger asChild>
+                <button id="ov25-camera-toggle-button" className={cn(
+                  'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:border ov:items-center ov:justify-center',
+                  'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
+                  'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
+                  'ov:bg-[var(--ov25-overlay-button-color)]',
+                )}>
+                  <Camera strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1"/>
+                  {!isMobile && (
+                    <p className="ov25-controls-text ov:text-sm ov:text-[var(--ov25-text-color)]">Camera</p>
+                  )}
+                </button>
+              </PopoverTrigger>
+              <PopoverContent 
+                side="top" 
+                align="center" 
+                className="ov:min-w-[120px]"
+              >
+                <div className="ov:flex ov:flex-col ov:gap-1">
+                  {availableCameras.map((cameraId) => (
+                    <button
+                      key={cameraId}
+                      onClick={() => {
+                        selectCamera(cameraId);
+                        setIsCameraPopoverOpen(false);
+                      }}
+                      className={cn(
+                        'ov:px-3 ov:py-2 ov:text-sm ov:rounded ov:cursor-pointer ov:hover:bg-gray-100',
+                        'ov:transition-colors ov:duration-200 ov:text-left ov:w-full ov:bg-transparent ov:border-none'
+                      )}
+                    >
+                      {cameraId}
+                    </button>
+                  ))}
+                </div>
+              </PopoverContent>
+            </Popover>
+          )} */}
+
         </div>
       </div>
       {!isVariantsOpen && !isMobile && (

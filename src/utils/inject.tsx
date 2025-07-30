@@ -17,6 +17,13 @@ import cssText from '../styles.css?inline';
 const sharedStylesheet = new CSSStyleSheet();
 sharedStylesheet.replaceSync(cssText);
 
+// Function to create CSS variables stylesheet from CSS string
+const createCSSVariablesStylesheet = (cssVariables: string): CSSStyleSheet => {
+  const cssVariablesStylesheet = new CSSStyleSheet();
+  cssVariablesStylesheet.replaceSync(cssVariables);
+  return cssVariablesStylesheet;
+};
+
 // Apply to main document
 document.adoptedStyleSheets = [sharedStylesheet];
 
@@ -44,7 +51,7 @@ export interface InjectConfiguratorOptions {
   buyNowFunction: () => void;
   logoURL?: string;
   mobileLogoURL?: string;
-  cssVariables?: JSON;
+  cssString?: string;
 }
 
 export function injectConfigurator(opts: InjectConfiguratorOptions) {
@@ -61,7 +68,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     images,
     logoURL,
     mobileLogoURL,
-    cssVariables,
+    cssString,
     deferThreeD,
     showOptional,
   } = opts;
@@ -128,8 +135,13 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
 
   // Function to inject CSS into Shadow DOM using adoptedStyleSheets
   const injectCSSIntoShadowDOM = (shadowRoot: ShadowRoot) => {
-    // Apply the shared stylesheet to the Shadow DOM
-    shadowRoot.adoptedStyleSheets = [sharedStylesheet];
+    // Apply the shared stylesheet and CSS variables to the Shadow DOM
+    const stylesheets = [sharedStylesheet];
+    if (cssString) {
+      const cssVariablesStylesheet = createCSSVariablesStylesheet(cssString);
+      stylesheets.push(cssVariablesStylesheet);
+    }
+    shadowRoot.adoptedStyleSheets = stylesheets;
   };
 
   const ensureLoaded = () => {
@@ -247,10 +259,10 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
       }
     };
 
-    const setupCSSVariables = (cssVariables: JSON) => {
-      Object.entries(cssVariables).forEach(([key, value]) => {
-        document.documentElement.style.setProperty(key, value);
-      });
+    const setupCSSVariables = (cssVariables: string) => {
+      // Create CSS variables stylesheet and add to document
+      const cssVariablesStylesheet = createCSSVariablesStylesheet(cssVariables);
+      document.adoptedStyleSheets = [...document.adoptedStyleSheets, cssVariablesStylesheet];
     };
 
     // Function to wait for an element to appear in the DOM
@@ -338,8 +350,8 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
         console.warn(`[OV25-UI] ${err.message}`);
       });
 
-    if (cssVariables) {
-      setupCSSVariables(cssVariables);
+    if (cssString) {
+      setupCSSVariables(cssString);
     }
 
     // If no portals were created we can bail early

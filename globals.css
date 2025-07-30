@@ -40,7 +40,6 @@
     --ov25-text-lg-size: 1.125em; /* 18px */
     --ov25-text-lg-line-height: calc(1.75 / 1.125);
 
-
     /* iframe styling */
     --ov25-configurator-iframe-background-color: var(--ov25-secondary-background-color);
     --ov25-configurator-iframe-border-radius: 0px;
@@ -328,4 +327,34 @@ Filter content
 filter content
 filter content */
 
+/* Popover Content Styles */
+[data-slot="popover-content"] {
+  background-color: var(--ov25-background-color) !important;
+  border: 1px solid var(--ov25-border-color) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !important;
+  z-index: 99999999999999 !important;
+  color: var(--ov25-text-color) !important;
+}
 
+/* Popover Content Button Styles */
+[data-slot="popover-content"] button {
+  background-color: transparent !important;
+  border: none !important;
+  padding: 8px 12px !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  color: var(--ov25-text-color) !important;
+  font-size: 14px !important;
+  transition: background-color 0.2s ease !important;
+  width: 100% !important;
+  text-align: left !important;
+}
+
+[data-slot="popover-content"] button:hover {
+  background-color: var(--ov25-secondary-background-color) !important;
+}
+
+[data-slot="popover-content"] button:active {
+  background-color: #d1d5db !important;
+}
