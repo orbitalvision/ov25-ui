@@ -61,7 +61,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
           <>
             <div className='ov25-swatchbook-header ov:flex-shrink-0 ov:mb-4'>
               <div id="ov25-swatchbook-title">
-                <DialogTitle className='ov25-swatchbook-title'>Selected Swatches</DialogTitle>
+                <DialogTitle className='ov25-swatchbook-title'>Swatch Book</DialogTitle>
               </div>
               <div id="ov25-swatchbook-information" className="ov:color-[--ov25-secondary-text-color] ov:text-sm ov:mt-2">
                 <div id="ov25-swatchbook-samples-free" className="ov:flex ov:justify-between ov:items-center">
