@@ -63,13 +63,13 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
     return (
         <div id="ov25-filter-controls-container" className="ov:flex ov:flex-col ov:gap-2 ov:px-4">
             <div id="ov25-filter-controls" className="ov:flex ov:flex-nowrap ov:py-2 ov:items-center ov:gap-2">
-                <button id="ov25-filter-controls-button" onClick={() => setIsFilterOpen(!isFilterOpen)} data-open={isFilterOpen} className="ov:flex ov:items-center ov:p-2 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:text-[var(--ov25-secondary-text-color)] ov:whitespace-nowrap hover:ov:bg-[var(--ov25-accent-color)] data-[open=true]:ov:border-[var(--ov25-neutral-900)] data-[open=true]:ov:text-[var(--ov25-neutral-900)]" >
+                <button id="ov25-filter-controls-button" onClick={() => setIsFilterOpen(!isFilterOpen)} data-open={isFilterOpen} className="ov:flex ov:items-center ov:p-2 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:text-[var(--ov25-secondary-text-color)] ov:whitespace-nowrap ov:hover:bg-[var(--ov25-accent-color)] data-[open=true]:ov:border-[var(--ov25-neutral-900)] data-[open=true]:ov:text-[var(--ov25-neutral-900)]" >
                     <ListFilter size={24} />
                     <span className="ov:px-4 ov:text-[var(--ov25-secondary-text-color)]">Filters</span>
                 </button>
                 {
                     (
-                        <div id="ov25-filter-controls-search" className="ov:flex ov:items-center ov:p-2 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:flex-1 hover:ov:bg-[var(--ov25-accent-color)]">
+                        <div id="ov25-filter-controls-search" className="ov:flex ov:items-center ov:p-2 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:flex-1 ov:hover:bg-[var(--ov25-accent-color)]">
                             <Search size={24} className="ov:min-w-6" />
                             <input value={localSearchQuery} onChange={handleSearchInputChange} type="text" placeholder="Search" className="ov:pl-2 ov:ml-2 ov:text-[var(--ov25-secondary-text-color)] ov:w-full ov:bg-transparent ov:outline-none" />
                             {localSearchQuery && (<X size={24} onClick={() => setLocalSearchQuery('')} className="ov:pr-2 ov:cursor-pointer" />)}
