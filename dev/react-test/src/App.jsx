@@ -63,16 +63,12 @@ function App() {
   
     switch (type) {
       case "ALL_PRODUCTS":
-        console.log("ALL_PRODUCTS", data);
         break;
       case "CURRENT_PRICE":
-        console.log("CURRENT_PRICE", data);
         break;
       case "CURRENT_PRODUCT_ID":
-        console.log("CURRENT_PRODUCT_ID", data);
         break;
       case "CONFIGURATOR_STATE":
-        console.log("CONFIGURATOR_STATE", data);
         break;
       case "RANGE":
         break;

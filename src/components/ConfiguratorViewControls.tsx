@@ -28,6 +28,25 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
   const [canSeeDimensions, setCanSeeDimensions] = useState(false);
   // Local state for camera popover
   const [isCameraPopoverOpen, setIsCameraPopoverOpen] = useState(false);
+  const cameraButtonRef = React.useRef<HTMLButtonElement>(null);
+
+  // Click outside handler to close popover
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (isCameraPopoverOpen && !target.closest('[data-popover]')) {
+        setIsCameraPopoverOpen(false);
+      }
+    };
+
+    if (isCameraPopoverOpen) {
+      document.addEventListener('click', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('click', handleClickOutside);
+    };
+  }, [isCameraPopoverOpen]);
 
   // Calculate showDimensionsToggle from currentProduct
   const showDimensionsToggle = !!((currentProduct as any)?.dimensionX &&
@@ -42,8 +61,11 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
     return getAnimationButtonText(canAnimate, animationState);
   }
 
+
+
   return (
     <>
+    
       {/* <div className={cn(
         "ov:absolute ov:w-full ov:pointer-events-none ov:h-full ov:inset-0 ov:gap-2 ov:p-4 ov:flex ov:justify-end ov:items-end ov:z-[101]",
         "ov:text-[var(--ov25-configurator-view-controls-text-color)]"
@@ -62,6 +84,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
           </button>
         )}
     </div> */}
+
     <div className={cn(
         "ov:pointer-events-none ov:absolute ov:w-full ov:h-full ov:inset-0 ov:gap-2 ov:p-4 ov:flex ov:justify-end ov:items-end ov:z-[101]",
         "ov:text-[var(--ov25-configurator-view-controls-text-color)]",
@@ -109,46 +132,52 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
             </button>
           )}
 
-          {/* {availableCameras.length > 1 && (
-            <Popover open={isCameraPopoverOpen} onOpenChange={setIsCameraPopoverOpen}>
-              <PopoverTrigger asChild>
-                <button id="ov25-camera-toggle-button" className={cn(
-                  'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:border ov:items-center ov:justify-center',
-                  'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
-                  'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
-                  'ov:bg-[var(--ov25-overlay-button-color)]',
-                )}>
-                  <Camera strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1"/>
-                  {!isMobile && (
-                    <p className="ov25-controls-text ov:text-sm ov:text-[var(--ov25-text-color)]">Camera</p>
-                  )}
-                </button>
-              </PopoverTrigger>
-              <PopoverContent 
-                side="top" 
-                align="center" 
-                className="ov:min-w-[120px]"
-              >
-                <div className="ov:flex ov:flex-col ov:gap-1">
-                  {availableCameras.map((cameraId) => (
-                    <button
-                      key={cameraId}
-                      onClick={() => {
-                        selectCamera(cameraId);
-                        setIsCameraPopoverOpen(false);
-                      }}
-                      className={cn(
-                        'ov:px-3 ov:py-2 ov:text-sm ov:rounded ov:cursor-pointer ov:hover:bg-gray-100',
-                        'ov:transition-colors ov:duration-200 ov:text-left ov:w-full ov:bg-transparent ov:border-none'
-                      )}
-                    >
-                      {cameraId}
-                    </button>
-                  ))}
-                </div>
-              </PopoverContent>
-            </Popover>
-          )} */}
+          {availableCameras.length > 1 && (
+            <div data-popover>
+              <Popover open={isCameraPopoverOpen} onOpenChange={setIsCameraPopoverOpen}>
+                <PopoverTrigger onClick={() => setIsCameraPopoverOpen(!isCameraPopoverOpen)}>
+                  <button 
+                    ref={cameraButtonRef}
+                    id="ov25-camera-toggle-button" 
+                    className={cn(
+                      'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:border ov:items-center ov:justify-center',
+                      'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
+                      'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
+                      'ov:bg-[var(--ov25-overlay-button-color)]',
+                    )}
+                  >
+                    <Camera strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1"/>
+                    {!isMobile && (
+                      <p className="ov25-controls-text ov:text-sm ov:text-[var(--ov25-text-color)]">Camera</p>
+                    )}
+                  </button>
+                </PopoverTrigger>
+                {isCameraPopoverOpen && (
+                  <PopoverContent triggerRef={cameraButtonRef}>
+                    <div className="ov:flex ov:flex-col ov:gap-1">
+                      {availableCameras.map((cameraId, index) => (
+                        <button
+                          key={cameraId}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            selectCamera(cameraId);
+                            setIsCameraPopoverOpen(false);
+                          }}
+                          className={cn(
+                            'ov:px-3 ov:py-2 ov:text-sm ov:rounded ov:cursor-pointer ov:hover:bg-gray-100',
+                            'ov:transition-colors ov:duration-200 ov:text-left ov:w-full ov:bg-transparent ov:border-none'
+                          )}
+                        >
+                          Camera {index + 1}
+                        </button>
+                      ))}
+                    </div>
+                  </PopoverContent>
+                )}
+              </Popover>
+            </div>
+          )}
 
         </div>
       </div>

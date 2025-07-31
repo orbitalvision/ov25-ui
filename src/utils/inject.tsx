@@ -187,6 +187,27 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     }
     configuratorViewControlsShadowRoot.adoptedStyleSheets = configuratorViewControlsStylesheets;
     
+    // Create popover portal Shadow DOM container
+    const popoverPortalContainer = document.createElement('div');
+    popoverPortalContainer.id = 'ov25-popover-portal-container';
+    popoverPortalContainer.style.position = 'fixed';
+    popoverPortalContainer.style.top = '0';
+    popoverPortalContainer.style.left = '0';
+    popoverPortalContainer.style.width = '100%';
+    popoverPortalContainer.style.height = '100%';
+    popoverPortalContainer.style.pointerEvents = 'none';
+    popoverPortalContainer.style.zIndex = '99999999999992';
+    document.body.appendChild(popoverPortalContainer);
+    
+    // Create Shadow DOM root for popover portal
+    const popoverPortalShadowRoot = popoverPortalContainer.attachShadow({ mode: 'open' });
+    const popoverPortalStylesheets = [sharedStylesheet];
+    if (cssString) {
+      const cssVariablesStylesheet = createCSSVariablesStylesheet(cssString);
+      popoverPortalStylesheets.push(cssVariablesStylesheet);
+    }
+    popoverPortalShadowRoot.adoptedStyleSheets = popoverPortalStylesheets;
+    
     // Make sure the portal targets are in the DOM *now*
     const portals: ReactNode[] = [];
 
@@ -404,7 +425,8 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
         isProductGalleryStacked={isProductGalleryStacked}
         shadowDOMs={{
           mobileDrawer: mobileDrawerShadowRoot,
-          configuratorViewControls: configuratorViewControlsShadowRoot
+          configuratorViewControls: configuratorViewControlsShadowRoot,
+          popoverPortal: popoverPortalShadowRoot
         }}
       >
         {portals}

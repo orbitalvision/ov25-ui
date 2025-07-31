@@ -1,50 +1,87 @@
 "use client"
 
 import * as React from "react"
-import * as PopoverPrimitive from "@radix-ui/react-popover"
+import { createPortal } from "react-dom"
 import { cn } from "../../lib/utils.js"
-import cssText from '../../styles.css?inline';
+import { useOV25UI } from "../../contexts/ov25-ui-context.js"
 
-// Create shared stylesheet for shadow DOM
-const sharedStylesheet = new CSSStyleSheet();
-sharedStylesheet.replaceSync(cssText);
-
-function Popover({
-  ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Root>) {
-  return <PopoverPrimitive.Root data-slot="popover" {...props} />
+interface PopoverProps {
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  children: React.ReactNode;
 }
 
-function PopoverTrigger({
-  ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Trigger>) {
-  return <PopoverPrimitive.Trigger data-slot="popover-trigger" {...props} />
+interface PopoverTriggerProps {
+  asChild?: boolean;
+  children: React.ReactNode;
+  onClick?: () => void;
 }
 
-function PopoverContent({
-  className,
-  align = "center",
-  sideOffset = 4,
-  ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Content>) {
-  return (
-    <PopoverPrimitive.Content
-      data-slot="popover-content"
-      align={align}
-      sideOffset={sideOffset}
-              className={cn(
-          "bg-white border border-gray-200 rounded-lg shadow-lg data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-[99999999999999] w-72 origin-(--radix-popover-content-transform-origin) p-2 outline-hidden",
-          className
-        )}
-      {...props}
-    />
-  )
+interface PopoverContentProps {
+  children: React.ReactNode;
+  className?: string;
+  triggerRef?: React.RefObject<HTMLElement>;
 }
 
-function PopoverAnchor({
-  ...props
-}: React.ComponentProps<typeof PopoverPrimitive.Anchor>) {
-  return <PopoverPrimitive.Anchor data-slot="popover-anchor" {...props} />
+function Popover({ open, onOpenChange, children }: PopoverProps) {
+  return <div className="ov:relative ov:inline-block">{children}</div>
+}
+
+function PopoverTrigger({ asChild, children, onClick }: PopoverTriggerProps) {
+  const child = React.Children.only(children) as React.ReactElement;
+  return React.cloneElement(child, {
+    onClick: (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      child.props.onClick?.(e);
+      onClick?.();
+    }
+  });
+}
+
+function PopoverContent({ children, className, triggerRef }: PopoverContentProps) {
+  const { shadowDOMs } = useOV25UI();
+  const [position, setPosition] = React.useState({ top: 0, left: 0 });
+  const [isVisible, setIsVisible] = React.useState(false);
+
+  React.useEffect(() => {
+    if (triggerRef?.current) {
+      const rect = triggerRef.current.getBoundingClientRect();
+      setPosition({
+        top: rect.top - 8, // Position just above the trigger
+        left: rect.left + rect.width / 2
+      });
+      // Small delay to ensure positioning is set before showing
+      setTimeout(() => setIsVisible(true), 10);
+    }
+  }, [triggerRef]);
+
+  if (!shadowDOMs?.popoverPortal) return null;
+
+  return createPortal(
+    <div
+      className={cn(
+        "ov:fixed ov:bg-white ov:border ov:border-gray-200 ov:rounded-lg ov:shadow-lg ov:p-2 ov:z-[1000] ov:min-w-[120px] ov:pointer-events-auto",
+        "ov:transition-opacity ov:duration-200 ov:ease-out",
+        "ov:transform ov:origin-bottom",
+        className
+      )}
+      style={{
+        top: `${position.top}px`,
+        left: `${position.left}px`,
+        transform: 'translateX(-50%) translateY(-100%)',
+        opacity: isVisible ? 1 : 0
+      }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      {children}
+    </div>,
+    shadowDOMs.popoverPortal
+  );
+}
+
+function PopoverAnchor({ children }: { children: React.ReactNode }) {
+  return <>{children}</>
 }
 
 export { Popover, PopoverTrigger, PopoverContent, PopoverAnchor }

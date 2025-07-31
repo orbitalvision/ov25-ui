@@ -92,6 +92,7 @@ interface OV25UIContextType {
   shadowDOMs?: {
     mobileDrawer?: ShadowRoot;
     configuratorViewControls?: ShadowRoot;
+    popoverPortal?: ShadowRoot;
   };
   // State
   products: Product[];
@@ -202,6 +203,7 @@ export const OV25UIProvider: React.FC<{
   shadowDOMs?: {
     mobileDrawer?: ShadowRoot;
     configuratorViewControls?: ShadowRoot;
+    popoverPortal?: ShadowRoot;
   }
 }> = ({ 
   children,
@@ -296,17 +298,11 @@ export const OV25UIProvider: React.FC<{
     }));
   }, []);
 
-  const selectCamera = useCallback((cameraId: string) => {
-    try {
-      const message = {
-        type: 'SELECT_CAMERA',
-        payload: JSON.stringify(cameraId)
-      };
-      window.postMessage(message, '*');
-    } catch (error) {
-      console.error('Error sending camera selection message:', error);
-    }
-  }, []);
+  const selectCamera = (cameraId: string) => {
+
+
+    sendMessageToIframe('SELECT_CAMERA', cameraId);
+  }
 
   // Computed values
   const currentProduct = products?.find(p => p.id === currentProductId);
