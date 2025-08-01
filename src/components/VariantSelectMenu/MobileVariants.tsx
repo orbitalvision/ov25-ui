@@ -179,7 +179,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
               </div>
             </div>
             {shouldShowFilters && (
-              <div data-open={isFilterOpen} id="ov25-filter-content-wrapper-mobile" className="ov:absolute ov:inset-0 ov:flex ov:flex-wrap ov:p-2 ov:px-4 ov:overflow-y-auto ov:bg-[var(--ov25-background-color)] ov:translate-y-full ov:transition-transform ov:duration-500 ov:ease-in-out data-[open=true]:ov:translate-y-0">
+              <div data-open={isFilterOpen} id="ov25-filter-content-wrapper-mobile" className={`ov:absolute ov:inset-0 ov:flex ov:flex-wrap ov:p-2 ov:px-4 ov:overflow-y-auto ov:bg-[var(--ov25-background-color)] ov:transition-transform ov:duration-500 ov:ease-in-out ${isFilterOpen ? 'ov:translate-y-0' : 'ov:translate-y-full'}`}>
                 <FilterContent />
               </div>
             )}
