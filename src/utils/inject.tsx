@@ -215,6 +215,18 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
       popoverPortalStylesheets.push(cssVariablesStylesheet);
     }
     popoverPortalShadowRoot.adoptedStyleSheets = popoverPortalStylesheets;
+
+    // Create toaster portal container
+    const toasterContainer = document.createElement('div');
+    toasterContainer.id = 'ov25-toaster-container';
+    toasterContainer.style.position = 'fixed';
+    toasterContainer.style.top = '0';
+    toasterContainer.style.left = '0';
+    toasterContainer.style.width = '100%';
+    toasterContainer.style.height = '100%';
+    toasterContainer.style.pointerEvents = 'none';
+    toasterContainer.style.zIndex = '999999999999999';
+    document.body.appendChild(toasterContainer);
     
     // Make sure the portal targets are in the DOM *now*
     const portals: ReactNode[] = [];
@@ -359,6 +371,9 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     processElement(variantsId, <VariantSelectMenu />, 'variants');
     processElement(swatchesId, <SwatchesContainer />, 'swatches');
     
+    // Add toaster to portals
+    portals.push(createPortal(<Toaster position="top-center" richColors style={{ zIndex: 999999999999999 }} />, toasterContainer));
+    
     // Special handling for carousel - only use polling if carouselId is true
     if (carouselId === true) {
       // Start polling for true-carousel element
@@ -420,29 +435,28 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     const resolvedApiKey = resolveStringOrFunction(apiKey);
     const resolvedProductLink = resolveStringOrFunction(productLink);
 
-    root.render(
-      <OV25UIProvider 
-        apiKey={resolvedApiKey} 
-        productLink={resolvedProductLink} 
-        buyNowFunction={buyNowFunction}
-        addSwatchesToCartFunction={addSwatchesToCartFunction}
-        addToBasketFunction={addToBasketFunction} 
-        images={images} 
-        logoURL={logoURL}
-        mobileLogoURL={mobileLogoURL}
-        deferThreeD={deferThreeD}
-        showOptional={showOptional}
-        isProductGalleryStacked={isProductGalleryStacked}
-        shadowDOMs={{
-          mobileDrawer: mobileDrawerShadowRoot,
-          configuratorViewControls: configuratorViewControlsShadowRoot,
-          popoverPortal: popoverPortalShadowRoot
-        }}
-      >
-      <Toaster position="top-center" richColors style={{ zIndex: 999999999999999 }} />
-        {portals}
-      </OV25UIProvider>
-    );
+         root.render(
+       <OV25UIProvider 
+         apiKey={resolvedApiKey} 
+         productLink={resolvedProductLink} 
+         buyNowFunction={buyNowFunction}
+         addSwatchesToCartFunction={addSwatchesToCartFunction}
+         addToBasketFunction={addToBasketFunction} 
+         images={images} 
+         logoURL={logoURL}
+         mobileLogoURL={mobileLogoURL}
+         deferThreeD={deferThreeD}
+         showOptional={showOptional}
+         isProductGalleryStacked={isProductGalleryStacked}
+         shadowDOMs={{
+           mobileDrawer: mobileDrawerShadowRoot,
+           configuratorViewControls: configuratorViewControlsShadowRoot,
+           popoverPortal: popoverPortalShadowRoot
+         }}
+       >
+         {portals}
+       </OV25UIProvider>
+     );
   };
 
   // Run now if DOM ready, otherwise wait
