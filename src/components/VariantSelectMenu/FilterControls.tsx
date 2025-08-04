@@ -72,7 +72,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
                 <button 
                     id="ov25-filter-controls-button"
                     className={cn(
-                        "ov:flex ov:items-center ov:p-2 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:whitespace-nowrap ov:hover:bg-[var(--ov25-accent-color)]",
+                        "ov:flex ov:items-center ov:p-2 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:whitespace-nowrap ov:hover:bg-[var(--ov25-hover-color)]",
                         isFilterOpen ? "ov:bg-gray-50" : ""
                     )}
                     onClick={() => setIsFilterOpen(!isFilterOpen)} 
@@ -81,7 +81,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
                     <ListFilter size={24} />
                     <span className="ov:px-4 ov:color-[var(--ov25-secondary-text-color)]">Filters</span>
                 </button>
-                <div id="ov25-filter-controls-search" className="ov:flex ov:flex-1 ov:items-center ov:p-2 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:hover:bg-[var(--ov25-accent-color)]">
+                <div id="ov25-filter-controls-search" className="ov:flex ov:flex-1 ov:items-center ov:p-2 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:hover:bg-[var(--ov25-hover-color)]">
                     <Search size={24} className="ov:min-w-[24px]"/>
                     <input value={localSearchQuery} onChange={handleSearchInputChange} type="text" placeholder="Search" className="ov:w-full ov:pl-2 ov:ml-2 ov:text-[var(--ov25-secondary-text-color)] ov:bg-transparent ov:outline-none" />
                     {localSearchQuery && (<X size={24} className="ov:min-w-[24px] ov:pr-2 ov:cursor-pointer" onClick={() => setLocalSearchQuery('')} />)}

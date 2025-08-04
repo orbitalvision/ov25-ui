@@ -23,8 +23,7 @@
     --ov25-border-color: #E5E5E5;
     --ov25-border-color-secondary: #282828;
     
-    --ov25-neutral-900: #171717;
-    --ov25-accent-color: #f9fafb;
+    --ov25-hover-color: oklch(98.5% .002 247.839);
     --ov25-color-handle: #000000;
 
 
