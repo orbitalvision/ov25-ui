@@ -35,6 +35,7 @@ export interface Selection {
   filter?: {
     [key: string]: string[];
   }
+  swatch?: Swatch;
 }
 
 export interface Group {
@@ -58,6 +59,7 @@ export interface ConfiguratorState {
     selectionId: string;
   }>;
   configuratorSettings: {
+    swatchSettings: SwatchRulesData;
     availableProductFilters: {
       [key: string]: string[];
     };
@@ -84,6 +86,31 @@ export interface Discount {
   percentage: number;
   amount: number;
   formattedAmount: string;
+}
+
+export interface Swatch {
+  name: string;
+  option: string;
+  manufacturerId: string;
+  description: string;
+  thumbnail: {
+    blurHash: string;
+    thumbnail: string;
+    miniThumbnails: {
+      large: string;
+      medium: string;
+      small: string;
+    }
+  };
+}
+
+export type SwatchRulesData = {
+  freeSwatchLimit: number; 
+  canExeedFreeLimit: boolean;
+  pricePerSwatch: number; 
+  minSwatches: number;
+  maxSwatches: number;
+  enabled: boolean; 
 }
 
 // Context type
@@ -130,6 +157,7 @@ interface OV25UIContextType {
   apiKey: string;
   buyNowFunction: () => void;
   addToBasketFunction: () => void;
+  addSwatchesToCartFunction: () => void;
   images?: string[];
   logoURL?: string;
   isProductGalleryStacked: boolean;
@@ -145,6 +173,9 @@ interface OV25UIContextType {
   galleryIndexToUse: number;
   filteredActiveOption?: Option | null;
   searchQueries: { [optionId: string]: string };
+  selectedSwatches: Swatch[];
+  swatchRulesData: SwatchRulesData;
+  isSwatchBookOpen: boolean;
   availableCameras: string[];
   // Methods
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
@@ -173,6 +204,11 @@ interface OV25UIContextType {
   setHasSwitchedAfterDefer: React.Dispatch<React.SetStateAction<boolean>>;
   setAvailableProductFilters: React.Dispatch<React.SetStateAction<ProductFilters>>;
   setSearchQuery: (optionId: string, query: string) => void;
+  setSelectedSwatches: React.Dispatch<React.SetStateAction<Swatch[]>>;
+  setSwatchRulesData: React.Dispatch<React.SetStateAction<SwatchRulesData>>;
+  toggleSwatch: (swatch: Swatch) => void;
+  isSwatchSelected: (swatch: Swatch) => boolean;
+  setIsSwatchBookOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setAvailableCameras: React.Dispatch<React.SetStateAction<string[]>>;
   selectCamera: (cameraId: string) => void;
   // Actions
@@ -192,8 +228,9 @@ export const OV25UIProvider: React.FC<{
   children: React.ReactNode, 
   productLink: string | null, 
   apiKey: string, 
-  buyNowFunction: () => void, 
+  buyNowFunction: () => void,
   addToBasketFunction: () => void,
+  addSwatchesToCartFunction: () => void,
   images?: string[],
   deferThreeD?: boolean,
   showOptional?: boolean,
@@ -211,6 +248,7 @@ export const OV25UIProvider: React.FC<{
   apiKey,
   buyNowFunction,
   addToBasketFunction,
+  addSwatchesToCartFunction,
   images,
   deferThreeD = false,
   showOptional = false,
@@ -260,10 +298,51 @@ export const OV25UIProvider: React.FC<{
   const isSelectingProduct = useRef(false);
   const hasComputedFilters = useRef(false);
 
+  const useLocalStorage = <T,>(key: string, initialValue: T): [T, React.Dispatch<React.SetStateAction<T>>] => {
+    const [storedValue, setStoredValue] = useState<T>(() => {
+      try {
+        const item = window.localStorage.getItem(key);
+        return item ? JSON.parse(item) : initialValue;
+      } catch (error) {
+        console.error(`Error reading localStorage key "${key}":`, error);
+        return initialValue;
+      }
+    });
+
+    const setValue = useCallback((value: T | ((val: T) => T)) => {
+      setStoredValue(prevValue => {
+        try {
+          const valueToStore = value instanceof Function ? value(prevValue) : value;
+          window.localStorage.setItem(key, JSON.stringify(valueToStore));
+          return valueToStore;
+        } catch (error) {
+          console.error(`Error setting localStorage key "${key}":`, error);
+          return prevValue;
+        }
+      });
+    }, [key]);
+
+    return [storedValue, setValue];
+  };
+
+  const [selectedSwatches, setSelectedSwatches] = useLocalStorage<Swatch[]>('ov25-selected-swatches', []);
+  const [isSwatchBookOpen, setIsSwatchBookOpen] = useState<boolean>(false);
+  const [swatchRulesData, setSwatchRulesData] = useState<SwatchRulesData>({
+    freeSwatchLimit: 0,
+    canExeedFreeLimit: false,
+    pricePerSwatch: 0,
+    minSwatches: 0,
+    maxSwatches: 0,
+    enabled: false,
+  });
+
   // Effect: Initialize selectedSelections from configuratorState
   useEffect(() => {
     if (configuratorState?.selectedSelections) {
       setSelectedSelections(configuratorState.selectedSelections);
+    }
+    if (configuratorState?.configuratorSettings?.swatchSettings) {
+      setSwatchRulesData(configuratorState.configuratorSettings.swatchSettings);
     }
   }, [configuratorState]);
 
@@ -298,9 +377,21 @@ export const OV25UIProvider: React.FC<{
     }));
   }, []);
 
+  const toggleSwatch = useCallback((swatch: Swatch) => {
+    setSelectedSwatches(prev => {
+      const index = prev.findIndex(s => s.manufacturerId === swatch.manufacturerId && s.name === swatch.name && s.option === swatch.option);
+      if (index === -1) {
+        return [...prev, swatch];
+      }
+      return prev.filter(s => s.manufacturerId !== swatch.manufacturerId || s.name !== swatch.name || s.option !== swatch.option);
+    });
+  }, []);
+
+  const isSwatchSelected = useCallback((swatch: Swatch) => {
+    return selectedSwatches.some(s => s.manufacturerId === swatch.manufacturerId && s.name === swatch.name && s.option === swatch.option);
+  }, [selectedSwatches]);
+
   const selectCamera = (cameraId: string) => {
-
-
     sendMessageToIframe('SELECT_CAMERA', cameraId);
   }
 
@@ -684,6 +775,7 @@ export const OV25UIProvider: React.FC<{
     apiKey,
     buyNowFunction,
     addToBasketFunction,
+    addSwatchesToCartFunction,
     images,
     logoURL,
     mobileLogoURL,
@@ -695,6 +787,9 @@ export const OV25UIProvider: React.FC<{
     showFilters,
     allOptions,
     searchQueries,
+    selectedSwatches,
+    swatchRulesData,
+    isSwatchBookOpen,
     availableCameras,
     // Methods
     setProducts,
@@ -719,6 +814,11 @@ export const OV25UIProvider: React.FC<{
     setHasSwitchedAfterDefer,
     setAvailableProductFilters,
     setSearchQuery,
+    setSelectedSwatches,
+    toggleSwatch,
+    isSwatchSelected,
+    setSwatchRulesData,
+    setIsSwatchBookOpen,
     setAvailableCameras,
     selectCamera,
     // Actions

@@ -22,6 +22,9 @@
     --ov25-primary-color: black;
     --ov25-border-color: #E5E5E5;
     --ov25-border-color-secondary: #282828;
+    
+    --ov25-hover-color: oklch(98.5% .002 247.839);
+    --ov25-color-handle: #000000;
 
 
     --ov25-button-border-radius: 0px;
@@ -39,6 +42,9 @@
     
     --ov25-text-lg-size: 1.125em; /* 18px */
     --ov25-text-lg-line-height: calc(1.75 / 1.125);
+    
+    --ov25-text-xl-size: 1.25em; /* 20px */
+    --ov25-text-xl-line-height: calc(1.75 / 1.25);
 
     /* iframe styling */
     --ov25-configurator-iframe-background-color: var(--ov25-secondary-background-color);
@@ -165,18 +171,8 @@ html #ov25-configurator-variant-menu-container {
   width: 100%;
 }
 
-#ov25-carousel-controls svg {
-  width: 28px;
-  height: 28px;
-  fill: none;
-}
-
 #ov25-carousel-controls h3 {
   line-height: 1rem;
-}
-
-#ov25-carousel-controls button {
-  padding-top: 1rem;
 }
 
 #ov25-mobile-variants-content img {
@@ -297,34 +293,54 @@ html #ov25-configurator-variant-menu-container {
     width: 6rem;
     height: 4rem;
     top: -32px;
+}
+
+#ov25-drawer-toggle-button > div {
+  min-width: 32px;
+  min-height: 32px;
+  width: 2rem;
+  height: 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: white;
+  border: 1px solid var(--ov25-border-color);
+  border-radius: 9999px;
+  backdrop-filter: opacity(0.9);
+} 
+
+#ov25-drawer-toggle-button svg {
+    stroke-width: 1px;
+    fill: none;
+    width: 24px;
+    height: 24px;
+}
+
+.group:hover .ov25-swatch-zoom-in-icon,
+.group:hover .ov25-swatch-zoom-out-icon {
+  opacity: 0.8;
+}
+
+#ov25-variant-swatch-icon-container div img {
+  width: 80%;
+  height: 80%;
+}
+
+.ov25-swatch-icon {
+  fill: white;
+  stroke-width: 1px;
+  stroke: black;
+}
+
+/* Plus icon animation for swatch changes */
+@keyframes plusIconAnimation {
+  0% {
+    opacity: 0;
   }
-  
-  #ov25-drawer-toggle-button > div {
-    min-width: 32px;
-    min-height: 32px;
-    width: 2rem;
-    height: 2rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: white;
-    border: 1px solid var(--ov25-border-color);
-    border-radius: 9999px;
-    backdrop-filter: opacity(0.9);
-  } 
-  
-  #ov25-drawer-toggle-button svg {
-      stroke-width: 1px;
-      fill: none;
-      width: 24px;
-      height: 24px;
+  50% {
+    opacity: 1;
   }
-
-
-
-/* 
-Filter content
-filter content
-filter content */
-
-/* Popover Content Styles */
+  100% {
+    opacity: 0;
+  }
+}

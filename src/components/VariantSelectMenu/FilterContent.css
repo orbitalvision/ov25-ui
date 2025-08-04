@@ -96,13 +96,8 @@
     color: var(--ov25-secondary-text-color);
   }
   
-  #ov25-filter-controls-button[data-open="true"] {
-    border-color: var(--ov25-neutral-900);
-    color: var(--ov25-neutral-900);
-  }
-  
   #ov25-filter-controls-button:hover {
-    background-color: var(--ov25-accent-color);
+    background-color: var(--ov25-hover-color);
   }
   
   #ov25-filter-controls-search {
@@ -115,7 +110,7 @@
   }
   
   #ov25-filter-controls-search:hover {
-    background-color: var(--ov25-accent-color);
+    background-color: var(--ov25-hover-color);
   }
   
   #ov25-filter-controls-search svg {

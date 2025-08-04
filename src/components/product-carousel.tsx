@@ -56,7 +56,7 @@ export function ProductCarousel() {
         <Button
             variant="ghost"
             size="icon"
-            className="ov:rounded-none ov:pointer-events-auto"
+            className="ov:rounded-none ov:pointer-events-auto ov:cursor-pointer"
             onClick={() => {
               const newIndex = galleryIndex === 0 ? images.length : galleryIndex - 1;
               setGalleryIndex(newIndex);
@@ -180,7 +180,7 @@ export function ProductCarousel() {
         <Button
           variant="ghost"
           size="icon"
-          className="ov:rounded-none ov:pointer-events-auto"
+          className="ov:rounded-none ov:pointer-events-auto ov:cursor-pointer"
           onClick={() => {
             const newIndex = galleryIndex === images.length ? 0 : galleryIndex + 1;
             setGalleryIndex(newIndex);

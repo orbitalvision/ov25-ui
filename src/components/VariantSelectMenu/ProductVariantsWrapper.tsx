@@ -74,7 +74,8 @@ export function ProductVariantsWrapper() {
                 sel => sel.optionId === activeOption.id && 
                       sel.groupId === group.id && 
                       sel.selectionId === selection.id
-              )
+              ),
+              swatch: selection?.swatch
             })).sort((a, b) => a.name.localeCompare(b.name))
           })) || []}
           VariantCard={isLegOption ? LegsVariantCard : undefined}

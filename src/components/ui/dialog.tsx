@@ -19,7 +19,7 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "orbitalvision-fixed orbitalvision-inset-0 orbitalvision-z-50 orbitalvision-bg-black/80  data-[state=open]:orbitalvision-animate-in data-[state=closed]:orbitalvision-animate-out data-[state=closed]:orbitalvision-fade-out-0 data-[state=open]:orbitalvision-fade-in-0",
+      "ov:fixed ov:inset-0 ov:z-50 ov:bg-black/80  data-[state=open]:ov:animate-in data-[state=closed]:ov:animate-out data-[state=closed]:ov:fade-out-0 data-[state=open]:ov:fade-in-0",
       className
     )}
     {...props}
@@ -36,15 +36,15 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "orbitalvision-fixed orbitalvision-left-[50%] orbitalvision-top-[50%] orbitalvision-z-50 orbitalvision-grid orbitalvision-w-full orbitalvision-max-w-lg orbitalvision-translate-x-[-50%] orbitalvision-translate-y-[-50%] orbitalvision-gap-4 orbitalvision-border orbitalvision-bg-background orbitalvision-p-6 orbitalvision-shadow-lg orbitalvision-duration-200 data-[state=open]:orbitalvision-animate-in data-[state=closed]:orbitalvision-animate-out data-[state=closed]:orbitalvision-fade-out-0 data-[state=open]:orbitalvision-fade-in-0 data-[state=closed]:orbitalvision-zoom-out-95 data-[state=open]:orbitalvision-zoom-in-95 data-[state=closed]:orbitalvision-slide-out-to-left-1/2 data-[state=closed]:orbitalvision-slide-out-to-top-[48%] data-[state=open]:orbitalvision-slide-in-from-left-1/2 data-[state=open]:orbitalvision-slide-in-from-top-[48%] orbitalvision-sm:rounded-lg",
+        "ov:fixed ov:left-[50%] ov:top-[50%] ov:z-50 ov:grid ov:w-full ov:max-w-lg ov:translate-x-[-50%] ov:translate-y-[-50%] ov:gap-4 ov:border ov:bg-background ov:p-6 ov:shadow-lg ov:duration-200 data-[state=open]:ov:animate-in data-[state=closed]:ov:animate-out data-[state=closed]:ov:fade-out-0 data-[state=open]:ov:fade-in-0 data-[state=closed]:ov:zoom-out-95 data-[state=open]:ov:zoom-in-95 data-[state=closed]:ov:slide-out-to-left-1/2 data-[state=closed]:ov:slide-out-to-top-[48%] data-[state=open]:ov:slide-in-from-left-1/2 data-[state=open]:ov:slide-in-from-top-[48%] ov:rounded-lg",
         className
       )}
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="orbitalvision-absolute orbitalvision-right-4 orbitalvision-top-4 orbitalvision-rounded-sm orbitalvision-opacity-70 orbitalvision-ring-offset-background orbitalvision-transition-opacity hover:orbitalvision-opacity-100 focus:orbitalvision-outline-none focus:orbitalvision-ring-2 focus:orbitalvision-ring-ring focus:orbitalvision-ring-offset-2 disabled:orbitalvision-pointer-events-none data-[state=open]:orbitalvision-bg-accent data-[state=open]:orbitalvision-text-muted-foreground">
-        <X className="orbitalvision-h-4 orbitalvision-w-4" />
-        <span className="orbitalvision-sr-only">Close</span>
+      <DialogPrimitive.Close className="ov:absolute ov:right-4 ov:top-4 ov:rounded-sm ov:opacity-70 ov:ring-offset-background ov:transition-opacity hover:ov:opacity-100 focus:ov:outline-none focus:ov:ring-2 focus:ov:ring-ring focus:ov:ring-offset-2 disabled:ov:pointer-events-none data-[state=open]:ov:bg-accent data-[state=open]:ov:text-muted-foreground">
+        <X className="ov:h-6 ov:w-6" />
+        <span className="ov:sr-only">Close</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>
   </DialogPortal>
@@ -57,7 +57,7 @@ const DialogHeader = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "orbitalvision-flex orbitalvision-flex-col orbitalvision-space-y-1.5 orbitalvision-text-center sm:orbitalvision-text-left",
+      "ov:flex ov:flex-col ov:space-y-1.5 ov:text-center ov:sm:text-left",
       className
     )}
     {...props}
@@ -71,7 +71,7 @@ const DialogFooter = ({
 }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "orbitalvision-flex orbitalvision-flex-col-reverse sm:orbitalvision-flex-row sm:orbitalvision-justify-end sm:orbitalvision-space-x-2",
+      "ov:flex ov:flex-col-reverse ov:sm:flex-row ov:sm:justify-end ov:sm:space-x-2",
       className
     )}
     {...props}
@@ -86,7 +86,7 @@ const DialogTitle = React.forwardRef<
   <DialogPrimitive.Title
     ref={ref}
     className={cn(
-      "orbitalvision-text-lg orbitalvision-font-semibold orbitalvision-leading-none orbitalvision-tracking-tight",
+      "ov:text-lg ov:font-semibold ov:leading-none ov:tracking-tight",
       className
     )}
     {...props}
@@ -100,7 +100,7 @@ const DialogDescription = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DialogPrimitive.Description
     ref={ref}
-    className={cn("orbitalvision-text-sm orbitalvision-text-muted-foreground", className)}
+    className={cn("ov:text-sm ov:text-muted-foreground", className)}
     {...props}
   />
 ))

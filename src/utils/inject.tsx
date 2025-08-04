@@ -6,10 +6,14 @@ import { ProductGallery } from '../components/product-gallery.js';
 import Price from '../components/Price.js';
 import Name from '../components/Name.js';
 import VariantSelectMenu from '../components/VariantSelectMenu/VariantSelectMenu.js';
+import { SwatchesContainer } from '../components/SwatchesContainer.js';
 import { ProductCarousel } from '../components/product-carousel.js';
 import ConfiguratorViewControls from '../components/ConfiguratorViewControls.js';
 import { createPortal } from 'react-dom';
 
+// Import styles directly
+import '../styles.css';
+import { Toaster } from 'sonner';
 // Import CSS as string for adoptedStyleSheets
 import cssText from '../styles.css?inline';
 
@@ -46,9 +50,11 @@ export interface InjectConfiguratorOptions {
   priceId?: ElementSelector;
   nameId?: ElementSelector;
   variantsId?: ElementSelector;
+  swatchesId?: ElementSelector;
   carouselId?: ElementSelector | true;
   addToBasketFunction: () => void;
   buyNowFunction: () => void;
+  addSwatchesToCartFunction: () => void;
   logoURL?: string;
   mobileLogoURL?: string;
   cssString?: string;
@@ -62,9 +68,11 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     priceId,
     nameId,
     variantsId,
+    swatchesId,
     carouselId,
     addToBasketFunction,
     buyNowFunction,
+    addSwatchesToCartFunction,
     images,
     logoURL,
     mobileLogoURL,
@@ -207,6 +215,18 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
       popoverPortalStylesheets.push(cssVariablesStylesheet);
     }
     popoverPortalShadowRoot.adoptedStyleSheets = popoverPortalStylesheets;
+
+    // Create toaster portal container
+    const toasterContainer = document.createElement('div');
+    toasterContainer.id = 'ov25-toaster-container';
+    toasterContainer.style.position = 'fixed';
+    toasterContainer.style.top = '0';
+    toasterContainer.style.left = '0';
+    toasterContainer.style.width = '100%';
+    toasterContainer.style.height = '100%';
+    toasterContainer.style.pointerEvents = 'none';
+    toasterContainer.style.zIndex = '999999999999999';
+    document.body.appendChild(toasterContainer);
     
     // Make sure the portal targets are in the DOM *now*
     const portals: ReactNode[] = [];
@@ -349,6 +369,10 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     processElement(priceId, <Price />, 'price');
     processElement(nameId, <Name />, 'name');
     processElement(variantsId, <VariantSelectMenu />, 'variants');
+    processElement(swatchesId, <SwatchesContainer />, 'swatches');
+    
+    // Add toaster to portals
+    portals.push(createPortal(<Toaster position="top-center" richColors style={{ zIndex: 999999999999999 }} />, toasterContainer));
     
     // Special handling for carousel - only use polling if carouselId is true
     if (carouselId === true) {
@@ -411,27 +435,28 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     const resolvedApiKey = resolveStringOrFunction(apiKey);
     const resolvedProductLink = resolveStringOrFunction(productLink);
 
-    root.render(
-      <OV25UIProvider 
-        apiKey={resolvedApiKey} 
-        productLink={resolvedProductLink} 
-        buyNowFunction={buyNowFunction} 
-        addToBasketFunction={addToBasketFunction} 
-        images={images} 
-        logoURL={logoURL}
-        mobileLogoURL={mobileLogoURL}
-        deferThreeD={deferThreeD}
-        showOptional={showOptional}
-        isProductGalleryStacked={isProductGalleryStacked}
-        shadowDOMs={{
-          mobileDrawer: mobileDrawerShadowRoot,
-          configuratorViewControls: configuratorViewControlsShadowRoot,
-          popoverPortal: popoverPortalShadowRoot
-        }}
-      >
-        {portals}
-      </OV25UIProvider>
-    );
+         root.render(
+       <OV25UIProvider 
+         apiKey={resolvedApiKey} 
+         productLink={resolvedProductLink} 
+         buyNowFunction={buyNowFunction}
+         addSwatchesToCartFunction={addSwatchesToCartFunction}
+         addToBasketFunction={addToBasketFunction} 
+         images={images} 
+         logoURL={logoURL}
+         mobileLogoURL={mobileLogoURL}
+         deferThreeD={deferThreeD}
+         showOptional={showOptional}
+         isProductGalleryStacked={isProductGalleryStacked}
+         shadowDOMs={{
+           mobileDrawer: mobileDrawerShadowRoot,
+           configuratorViewControls: configuratorViewControlsShadowRoot,
+           popoverPortal: popoverPortalShadowRoot
+         }}
+       >
+         {portals}
+       </OV25UIProvider>
+     );
   };
 
   // Run now if DOM ready, otherwise wait
