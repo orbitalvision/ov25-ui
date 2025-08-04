@@ -1,9 +1,35 @@
-import { BanIcon, Plus, Minus, SwatchBook } from 'lucide-react';
+import { BanIcon, X } from 'lucide-react';
 import * as React from 'react'
 import { cn } from '../../../lib/utils.js';
 import { useOV25UI } from '../../../contexts/ov25-ui-context.js';
 import { Variant } from '../ProductVariants.js';
 import { toast } from 'sonner';
+import { SwatchIcon } from '../../ui/SwatchIcon.js';
+
+const SwatchIconOverlay = ({ isSelected, onClick }: { isSelected: boolean; onClick: (e: React.MouseEvent) => void }) => {
+    return (
+        <div 
+            id="ov25-variant-swatch-icon-container"
+            className="ov:absolute ov:inset-0 ov:flex ov:items-start ov:justify-end ov:cursor-pointer ov:transition-all" 
+            onClick={onClick} 
+            title="Order a swatch sample"
+        >
+            <div className=" ov:flex ov:items-center ov:justify-center ov:relative ov:w-10 ov:h-10 ov:p-0.5">
+                <SwatchIcon 
+                    fill="white"
+                    stroke="black"
+                    strokeWidth="5"
+                    size={40}
+                    className="ov:absolute ov:inset-0 ov:m-auto"
+                />
+                <X className={cn(
+                    "ov:w-5 ov:h-5 ov:relative ov:transition-transform ov:duration-300 ov:ease-in-out",
+                    isSelected ? "ov:rotate-0 ov:text-red-500" : "ov:rotate-45 ov:text-green-500"
+                )} />
+            </div>
+        </div>
+    );
+};
 
 interface VariantCardProps {
     variant: Variant;
@@ -68,12 +94,8 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
                         <span className="ov:text-xs ov:text-[var(--ov25-secondary-text-color)]">No img</span>
                     </div>
                 )}
-                {shouldShowSwatch && (
-                    <div className="ov25-variant-swatch-overlay ov:absolute ov:inset-0 ov:flex ov:items-start ov:justify-end ov:cursor-pointer ov:transition-all" onClick={handleSwatchClick} title="Order a swatch sample">
-                        <div className="ov:w-10 ov:h-10 ov:p-0.5 ov:bg-white ov:hover:bg-gray-100 ov:text-black ov:border-2 ov:border-black ov:background-white ov:rounded-full ov:flex ov:items-center ov:justify-center">
-                            <SwatchBook />{variant.swatch && isSwatchSelected(variant.swatch) ? <Minus className="ov:w-3 ov:h-3"/> : <Plus className="ov:w-3 ov:h-3"/>}
-                        </div>
-                    </div>
+                {shouldShowSwatch && variant.swatch && (
+                    <SwatchIconOverlay isSelected={isSwatchSelected(variant.swatch)} onClick={handleSwatchClick} />
                 )}
             </div>
         </div>

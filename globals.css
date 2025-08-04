@@ -121,8 +121,6 @@ html #ov25-configurator-variant-menu-container {
   fill: none;
 }
 
-
-
 #true-ov25-configurator-iframe-container svg {
   height: 24px;
   width: 24px;
@@ -132,8 +130,6 @@ html #ov25-configurator-variant-menu-container {
 #ov25-variant-group-content img {
   height: 100%;
 }
-
-
 
 #ov25-mobile-price-overlay img {
   height: 24px;
@@ -177,12 +173,6 @@ html #ov25-configurator-variant-menu-container {
 #ov25-carousel-controls img {
   height: 100%;
   width: 100%;
-}
-
-#ov25-carousel-controls svg {
-  width: 28px;
-  height: 28px;
-  fill: none;
 }
 
 #ov25-carousel-controls h3 {
@@ -338,4 +328,15 @@ html #ov25-configurator-variant-menu-container {
 .group:hover .ov25-swatch-zoom-in-icon,
 .group:hover .ov25-swatch-zoom-out-icon {
   opacity: 0.8;
+}
+
+#ov25-variant-swatch-icon-container div img {
+  width: 80%;
+  height: 80%;
+}
+
+.ov25-swatch-icon {
+  fill: white;
+  stroke-width: 1px;
+  stroke: black;
 }
