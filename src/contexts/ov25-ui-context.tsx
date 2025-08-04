@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { sendMessageToIframe } from '../utils/configurator-utils.js';
+import { sendMessageToIframe, toggleAR } from '../utils/configurator-utils.js';
 import { stringSimilarity } from 'string-similarity-js';
 
 // Define types
@@ -115,6 +115,12 @@ export type SwatchRulesData = {
 
 // Context type
 interface OV25UIContextType {
+  // Shadow DOM references
+  shadowDOMs?: {
+    mobileDrawer?: ShadowRoot;
+    configuratorViewControls?: ShadowRoot;
+    popoverPortal?: ShadowRoot;
+  };
   // State
   products: Product[];
   currentProductId?: string;
@@ -156,6 +162,7 @@ interface OV25UIContextType {
   logoURL?: string;
   isProductGalleryStacked: boolean;
   mobileLogoURL?: string;
+
   // Computed values
   currentProduct?: Product;
   sizeOption: SizeOption;
@@ -169,6 +176,7 @@ interface OV25UIContextType {
   selectedSwatches: Swatch[];
   swatchRulesData: SwatchRulesData;
   isSwatchBookOpen: boolean;
+  availableCameras: string[];
   // Methods
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
   setCurrentProductId: React.Dispatch<React.SetStateAction<string | undefined>>;
@@ -201,12 +209,15 @@ interface OV25UIContextType {
   toggleSwatch: (swatch: Swatch) => void;
   isSwatchSelected: (swatch: Swatch) => boolean;
   setIsSwatchBookOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  setAvailableCameras: React.Dispatch<React.SetStateAction<string[]>>;
+  selectCamera: (cameraId: string) => void;
   // Actions
   handleSelectionSelect: (selection: Selection) => void;
   handleOptionClick: (optionId: string) => void;
   handleNextOption: () => void;
   handlePreviousOption: () => void;
   getSelectedValue: (option: Option | SizeOption) => string;
+  toggleAR: () => void;
 }
 
 // Create the context
@@ -225,7 +236,12 @@ export const OV25UIProvider: React.FC<{
   showOptional?: boolean,
   logoURL?: string,
   isProductGalleryStacked: boolean,
-  mobileLogoURL?: string
+  mobileLogoURL?: string,
+  shadowDOMs?: {
+    mobileDrawer?: ShadowRoot;
+    configuratorViewControls?: ShadowRoot;
+    popoverPortal?: ShadowRoot;
+  }
 }> = ({ 
   children,
   productLink,
@@ -238,7 +254,8 @@ export const OV25UIProvider: React.FC<{
   showOptional = false,
   logoURL,
   isProductGalleryStacked,
-  mobileLogoURL
+  mobileLogoURL,
+  shadowDOMs
 }) => {
   // State definitions
   const [products, setProducts] = useState<Product[]>([]);
@@ -276,6 +293,7 @@ export const OV25UIProvider: React.FC<{
   const [availableProductFilters, setAvailableProductFilters] = useState<ProductFilters>({});
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [searchQueries, setSearchQueries] = useState<{ [optionId: string]: string }>({});
+  const [availableCameras, setAvailableCameras] = useState<string[]>([]);
   const hasDefered = useRef(false);
   const isSelectingProduct = useRef(false);
   const hasComputedFilters = useRef(false);
@@ -372,6 +390,10 @@ export const OV25UIProvider: React.FC<{
   const isSwatchSelected = useCallback((swatch: Swatch) => {
     return selectedSwatches.some(s => s.manufacturerId === swatch.manufacturerId && s.name === swatch.name && s.option === swatch.option);
   }, [selectedSwatches]);
+
+  const selectCamera = (cameraId: string) => {
+    sendMessageToIframe('SELECT_CAMERA', cameraId);
+  }
 
   // Computed values
   const currentProduct = products?.find(p => p.id === currentProductId);
@@ -678,15 +700,18 @@ export const OV25UIProvider: React.FC<{
           case 'CURRENT_SKU':
             setCurrentSku(data);
             break;
-          case 'RANGE':
-            setRange(data);
-            break;
-          case 'AR_PREVIEW_LINK':
-            setArPreviewLink(data);
-            break;
-          case 'ERROR':
-            setError(new Error(data));
-            break;
+                  case 'RANGE':
+          setRange(data);
+          break;
+        case 'AR_PREVIEW_LINK':
+          setArPreviewLink(data);
+          break;
+        case 'AVAILABLE_CAMERAS':
+          setAvailableCameras(data);
+          break;
+        case 'ERROR':
+          setError(new Error(data));
+          break;
         }
       } catch (error) {
         console.error('Error handling message:', error, 'Event data:', event.data);
@@ -714,6 +739,8 @@ export const OV25UIProvider: React.FC<{
 
 
   const contextValue: OV25UIContextType = {
+    // Shadow DOM references
+    shadowDOMs,
     // State
     products,
     currentProductId,
@@ -763,6 +790,7 @@ export const OV25UIProvider: React.FC<{
     selectedSwatches,
     swatchRulesData,
     isSwatchBookOpen,
+    availableCameras,
     // Methods
     setProducts,
     setCurrentProductId,
@@ -791,12 +819,15 @@ export const OV25UIProvider: React.FC<{
     isSwatchSelected,
     setSwatchRulesData,
     setIsSwatchBookOpen,
+    setAvailableCameras,
+    selectCamera,
     // Actions
     handleSelectionSelect,
     handleOptionClick,
     handleNextOption,
     handlePreviousOption,
     getSelectedValue,
+    toggleAR,
   };
 
   return (

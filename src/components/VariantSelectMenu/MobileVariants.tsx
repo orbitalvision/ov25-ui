@@ -8,7 +8,7 @@ import { VariantsContent } from './VariantsContent.js';
 import { FilterControls } from './FilterControls.js';
 import { FilterContent } from './FilterContent.js';
 import { NoResults } from './NoResults.js';
-import './MobileVariants.css';
+
 
 const VariantsContentWithCarousel = React.memo(({ variantsToRender, VariantCard, onSelect, isMobile, isGrouped = false }: { variantsToRender: Variant[], VariantCard: React.ComponentType<VariantCardProps>, onSelect: (variant: Variant) => void, isMobile: boolean, isGrouped: boolean }) => {
     const {allOptions, activeOptionId} = useOV25UI()
@@ -93,14 +93,14 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
     const group = (variants as VariantGroup[])[selectedGroupIndex]
     const variantsToRender =  group ? group.variants : [] as Variant[];
     return (
-      <div id="ov25-mobile-filter-container">
+      <div id="ov25-mobile-filter-container" className="ov:relative ov:w-full ov:h-full ov:flex ov:flex-col">
         {drawerSize !== 'small' && shouldShowFilters && (
           <FilterControls 
             isFilterOpen={isFilterOpen}
             setIsFilterOpen={setIsFilterOpen}
           />
         )}
-        <div id="ov25-mobile-content-area">
+        <div id="ov25-mobile-content-area" className="ov:relative ov:flex-1 ov:overflow-hidden">
           {variantsToRender.length === 0 && <NoResults />}
           <Carousel opts={{ dragFree: true, loop: false }} className="ov:py-2">
             <CarouselContent className="ov:px-4 ov:-ml-2 ov:pr-4">
@@ -136,13 +136,13 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
             />
           ) : (
             <>
-              <div id="ov25-mobile-variants-content">
+              <div id="ov25-mobile-variants-content" className="ov:h-full ov:overflow-y-auto">
                 <div style={{ display: 'grid' }} className={`ov:px-2 ov:pb-63 ${getGridColsClass(gridDivide)}`}>
                   <VariantsContent variantsToRender={variantsToRender} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
                 </div>
               </div>
               {shouldShowFilters && (
-                <div data-open={isFilterOpen} id="ov25-filter-content-wrapper-mobile">
+                <div data-open={isFilterOpen} id="ov25-filter-content-wrapper-mobile" className={`ov:absolute ov:inset-0 ov:flex ov:flex-wrap ov:p-2 ov:px-4 ov:overflow-y-auto ov:bg-[var(--ov25-background-color)] ov:transition-transform ov:duration-500 ov:ease-in-out ${isFilterOpen ? 'ov:translate-y-0' : 'ov:translate-y-full'}`}>
                   <FilterContent />
                 </div>
               )}
@@ -164,22 +164,22 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
       );
     } else {
       return (
-        <div id="ov25-mobile-filter-container">
+        <div id="ov25-mobile-filter-container" className="ov:relative ov:w-full ov:h-full ov:flex ov:flex-col">
           {shouldShowFilters && (
             <FilterControls 
               isFilterOpen={isFilterOpen}
               setIsFilterOpen={setIsFilterOpen}
             />
           )}
-          <div id="ov25-mobile-content-area">
+          <div id="ov25-mobile-content-area" className="ov:relative ov:flex-1 ov:overflow-hidden">
             {variantsToRender.length === 0 && <NoResults />}
-            <div id="ov25-mobile-variants-content">
+            <div id="ov25-mobile-variants-content" className="ov:h-full ov:overflow-y-auto">
               <div style={{ display: 'grid' }} className={`ov:px-0 ov:pb-63 ov:gap-2 ${getGridColsClass(gridDivide)}`}>
                 <VariantsContent variantsToRender={variantsToRender} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
               </div>
             </div>
             {shouldShowFilters && (
-              <div data-open={isFilterOpen} id="ov25-filter-content-wrapper-mobile">
+              <div data-open={isFilterOpen} id="ov25-filter-content-wrapper-mobile" className={`ov:absolute ov:inset-0 ov:flex ov:flex-wrap ov:p-2 ov:px-4 ov:overflow-y-auto ov:bg-[var(--ov25-background-color)] ov:transition-transform ov:duration-500 ov:ease-in-out ${isFilterOpen ? 'ov:translate-y-0' : 'ov:translate-y-full'}`}>
                 <FilterContent />
               </div>
             )}

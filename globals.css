@@ -47,14 +47,13 @@
     --ov25-text-xl-size: 1.25em; /* 20px */
     --ov25-text-xl-line-height: calc(1.75 / 1.25);
 
-
     /* iframe styling */
     --ov25-configurator-iframe-background-color: var(--ov25-secondary-background-color);
     --ov25-configurator-iframe-border-radius: 0px;
 
     /* view controls that are overlayed onto the iframe, such as the dimensions button */
     --ov25-configurator-view-controls-text-color: var(--ov25-text-color);
-    --ov25-overlay-button-color: var(----ov25-primary-color);
+    --ov25-overlay-button-color: var(--ov25-background-color);
     --ov25-configurator-view-controls-border-color: var(--ov25-border-color);
     --ov25-configurator-view-controls-border-radius: 9999999px;
 
@@ -71,8 +70,6 @@
 
     /* Drawer Styles */
     --ov25-configurator-variant-drawer-handle-color: var(--ov25-color-handle);
-
-    
 
 }
 
@@ -324,7 +321,6 @@ html #ov25-configurator-variant-menu-container {
     height: 24px;
 }
 
-/* Swatch hover effects */
 .group:hover .ov25-swatch-zoom-in-icon,
 .group:hover .ov25-swatch-zoom-out-icon {
   opacity: 0.8;

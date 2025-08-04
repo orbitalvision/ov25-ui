@@ -8,7 +8,6 @@ import { ProductVariantsWrapper } from './ProductVariantsWrapper.js';
 import { MobileCheckoutButton } from './MobileCheckoutButton.js';
 import { SwatchBook } from './SwatchBook.js';
 
-
 // Types
 export type DrawerSizes = 'closed' | 'small' | 'large';
 

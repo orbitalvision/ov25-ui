@@ -52,7 +52,7 @@ export function ProductCarousel() {
       <div id="ov25-product-carousel-counter" className="ov:mt-4 ov:text-center ov:text-sm ov:text-muted-foreground">
         {galleryIndex + 1}/{images.length + 1}
       </div>
-      <div id="ov25-product-carousel-controls" className="ov:mt-4 ov:relative ov:px-12 ov:w-full ov:flex ov:justify-between ov:items-center">
+      <div id="ov25-product-carousel-controls" className="ov:mt-4 ov:relative v:w-full ov:flex ov:justify-between ov:items-center">
         <Button
             variant="ghost"
             size="icon"

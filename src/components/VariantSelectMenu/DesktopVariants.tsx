@@ -8,7 +8,7 @@ import { FilterControls } from './FilterControls.js';
 import { FilterContent } from './FilterContent.js';
 import { NoResults } from './NoResults.js';
 
-import './DesktopVariants.css';
+
 
 export const getGridColsClass = (gridDivide: number) => {
   switch (gridDivide) {
@@ -124,21 +124,21 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
           </div>
         )
       }{
-        <div id="ov25-filter-container">
+        <div id="ov25-filter-container" className="ov:relative ov:w-full ov:flex ov:flex-col ov:min-h-0 ov:h-full">
           {shouldShowFilters && (
             <FilterControls 
               isFilterOpen={isFilterOpen}
               setIsFilterOpen={setIsFilterOpen}
             />
           )}
-          <div id="ov25-content-area">
+          <div id="ov25-content-area" className="ov:relative ov:flex-1 ov:min-h-0 ov:overflow-hidden ov:h-full">
             {variantsToRender.length === 0 && <NoResults />}
             {((shouldDestructureGroups || !isGrouped) ? (
-              <div id="ov25-desktop-variants-content-ungrouped" className={`${getGridColsClass(gridDivide)}`}>
+              <div id="ov25-desktop-variants-content-ungrouped" className={`ov:grid ov:h-full ov:overflow-y-auto ov:pb-8 ov:content-start ${getGridColsClass(gridDivide)}`}>
                 <VariantsContent variantsToRender={isGrouped ? (variantsToRender as VariantGroup[])[0].variants : variantsToRender as Variant[]} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
               </div>
             ) : (
-              <div id="ov25-desktop-variants-content-grouped">
+              <div id="ov25-desktop-variants-content-grouped" className="ov:h-full ov:overflow-y-auto ov:py-4">
                 {(variantsToRender as VariantGroup[]).map((variantGroup) => (
                   variantGroup.variants.length > 0 && (
                     <div key={variantGroup.groupName}>
@@ -154,7 +154,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
               </div>
             ))}
             {shouldShowFilters && (
-              <div data-open={isFilterOpen} id="ov25-filter-content-wrapper-desktop">
+              <div data-open={isFilterOpen} id="ov25-filter-content-wrapper-desktop" className={`ov:flex ov:justify-end ov:flex-wrap ov:overflow-y-auto ov:absolute ov:inset-0 ov:h-full ov:p-2 ov:px-4 ov:bg-[var(--ov25-background-color)] ov:transition-transform ov:duration-500 ov:ease-in-out ${isFilterOpen ? 'ov:translate-y-0' : 'ov:-translate-y-full'}`}>
                 <FilterContent />
               </div>
             )}
