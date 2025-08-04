@@ -331,3 +331,16 @@ html #ov25-configurator-variant-menu-container {
   stroke-width: 1px;
   stroke: black;
 }
+
+/* Plus icon animation for swatch changes */
+@keyframes plusIconAnimation {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}

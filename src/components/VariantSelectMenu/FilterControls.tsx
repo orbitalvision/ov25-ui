@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ListFilter, Search, X } from "lucide-react";
+import { ListFilter, Search, X, Plus, Minus } from "lucide-react";
 import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 import { useDebounce } from '../../hooks/useDebounce.js';
 import { SwatchIcon } from '../ui/SwatchIcon.js';
@@ -14,11 +14,14 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
     isFilterOpen,
     setIsFilterOpen,
 }) => {
-    const { searchQueries, setSearchQuery, activeOptionId, availableProductFilters, activeOption, isMobile, setAvailableProductFilters, setIsVariantsOpen, setIsSwatchBookOpen, swatchRulesData } = useOV25UI();
+    const { searchQueries, setSearchQuery, activeOptionId, availableProductFilters, activeOption, isMobile, setAvailableProductFilters, setIsVariantsOpen, setIsSwatchBookOpen, swatchRulesData, selectedSwatches } = useOV25UI();
     const [localSearchQuery, setLocalSearchQuery] = React.useState('');
     const debouncedSearchQuery = useDebounce(localSearchQuery, 500);
     const previousOptionIdRef = React.useRef<string | null>(null);
     const isUserInputRef = React.useRef(false);
+    const [isAnimating, setIsAnimating] = React.useState(false);
+    const [isAdding, setIsAdding] = React.useState(true);
+    const previousSelectedSwatchesRef = React.useRef(selectedSwatches);
     
     // Effect for updating local search query when activeOptionId changes
     React.useEffect(() => {
@@ -42,6 +45,20 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
             }
         }
     }, [activeOptionId, localSearchQuery, debouncedSearchQuery, setSearchQuery, isUserInputRef]);
+
+    // Effect for triggering animation when selectedSwatches changes
+    React.useEffect(() => {
+        if (selectedSwatches.length !== previousSelectedSwatchesRef.current.length) {
+            const wasAdding = selectedSwatches.length > previousSelectedSwatchesRef.current.length;
+            setIsAdding(wasAdding);
+            setIsAnimating(true);
+            const timer = setTimeout(() => {
+                setIsAnimating(false);
+            }, 1000); // Animation duration: 1 second
+            previousSelectedSwatchesRef.current = selectedSwatches;
+            return () => clearTimeout(timer);
+        }
+    }, [selectedSwatches]);
 
     const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setLocalSearchQuery(e.target.value);
@@ -89,7 +106,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
                 {swatchRulesData.enabled && (
                 <button 
                     id="ov25-filter-controls-swatches"
-                    className="ov:flex ov:items-center ov:p-2 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:whitespace-nowrap"
+                    className="ov:flex ov:items-center ov:p-2 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:whitespace-nowrap ov:cursor-pointer"
                     onClick={() => handleSwatchButtonClick()}
                 >
                     <div className="ov:relative">
@@ -99,6 +116,17 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
                             strokeWidth="8"
                             size={24}
                         />
+                        {isAnimating ? (
+                            isAdding ? (
+                                <Plus size={16} className="ov:absolute ov:top-1/2 ov:left-1/2 ov:transform ov:-translate-x-1/2 ov:-translate-y-1/2 ov:animate-[plusIconAnimation_1s_ease-in-out] ov:text-green-600" />
+                            ) : (
+                                <Minus size={16} className="ov:absolute ov:top-1/2 ov:left-1/2 ov:transform ov:-translate-x-1/2 ov:-translate-y-1/2 ov:animate-[plusIconAnimation_1s_ease-in-out] ov:text-red-600" />
+                            )
+                        ) : selectedSwatches.length > 0 && (
+                            <div className="ov:absolute ov:top-1/2 ov:left-1/2 ov:transform ov:-translate-x-1/2 ov:-translate-y-1/2 ov:text-black ov:font-bold ov:text-sm">
+                                {selectedSwatches.length}
+                            </div>
+                        )}
                     </div>
                 </button>
                 )}
