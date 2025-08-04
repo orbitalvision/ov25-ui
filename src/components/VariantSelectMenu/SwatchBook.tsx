@@ -12,6 +12,22 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
   isMobile,
 }) => {
   const { addSwatchesToCartFunction, toggleSwatch, selectedSwatches, swatchRulesData, isSwatchBookOpen, setIsSwatchBookOpen, setSelectedSwatches } = useOV25UI();
+  
+  // Calculate empty squares to show
+  const calculateEmptySquares = () => {
+    const maxSwatches = swatchRulesData.canExeedFreeLimit ? swatchRulesData.maxSwatches : swatchRulesData.freeSwatchLimit;
+    const selectedCount = selectedSwatches.length;
+    const remainingSlots = maxSwatches - selectedCount;
+    
+    if (remainingSlots <= 0) return [];
+    
+    return Array.from({ length: remainingSlots }, (_, index) => ({
+      id: `empty-${index}`,
+      isLast: index === remainingSlots - 1
+    }));
+  };
+  
+  const emptySquares = calculateEmptySquares();
   const [zoomedSwatch, setZoomedSwatch] = useState<Swatch | null>(null);
 
   useEffect(() => {
@@ -84,6 +100,12 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
                           <ZoomIn className='ov25-swatch-icon ov:w-4 ov:h-4'/>
                         </div>
                       </button>
+                    </div>
+                  </div>
+                ))}
+                {emptySquares.map((emptySquare) => (
+                  <div key={emptySquare.id} className='ov25-swatch-item ov:flex ov:flex-col ov:gap-2 ov:items-center ov:text-center ov:w-full ov:h-full ov:md:w-auto ov:md:h-auto'>
+                    <div className='ov25-swatch-image-container ov:relative ov:w-[100px] ov:h-[100px] ov:md:w-[120px] ov:md:h-[120px] ov:border-2 ov:border-dashed ov:border-gray-300 ov:rounded-lg ov:flex ov:items-center ov:justify-center ov:bg-gray-50'>
                     </div>
                   </div>
                 ))}
