@@ -24,8 +24,9 @@ const SwatchIconOverlay = ({ isSelected, onClick }: { isSelected: boolean; onCli
                     className="ov:absolute ov:inset-0 ov:m-auto"
                 />
                 <X className={cn(
-                    "ov:w-5 ov:h-5 ov:relative ov:transition-transform ov:duration-300 ov:ease-in-out",
-                    isSelected ? "ov:rotate-0" : "ov:rotate-45"
+                    "ov:w-4 ov:h-4 ov:relative ov:transition-transform ov:duration-300 ov:ease-in-out ov:text-[#79ae3c]",
+                    isSelected ? "ov:rotate-0" : "ov:rotate-45",
+                    isSelected ? "ov:text-red-500" : "ov:text-[#79ae3c]"
                 )} />
             </div>
         </div>

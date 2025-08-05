@@ -115,7 +115,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
                 {swatchRulesData.enabled && (
                 <button 
                     id="ov25-filter-controls-swatches"
-                    className="ov:flex ov:items-center ov:p-2 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:whitespace-nowrap ov:cursor-pointer ov:bg-black/50"
+                    className="ov:flex ov:items-center ov:p-2 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:whitespace-nowrap ov:cursor-pointer ov:bg-black/30"
                     onClick={() => handleSwatchButtonClick()}
                 >
                     <div className="ov:relative">
@@ -127,7 +127,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
                         />
                         {selectedSwatches.length > 0 && (
                             <div className={cn(
-                                "ov:absolute ov:top-1/2 ov:left-1/2 ov:transform ov:-translate-x-1/2 ov:-translate-y-1/2 ov:text-black ov:font-bold ov:text-sm ov:transition-opacity ov:duration-250",
+                                "ov:absolute ov:top-1/2 ov:left-1/2 ov:transform ov:-translate-x-1/2 ov:-translate-y-1/2 ov:text-black ov:font-base ov:text-sm ov:transition-opacity ov:duration-250",
                                 isAnimating && "ov:opacity-20"
                             )}>
                                 {displayCount}
