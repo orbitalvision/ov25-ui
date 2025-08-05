@@ -78,12 +78,17 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
             </div>
           )}
           
-          <div id="ov25-swatchbook-content" className="ov:flex-1 ov:overflow-y-auto ov:overflow-x-hidden ov:min-h-[120px]">
+          <div 
+            id="ov25-swatchbook-content" 
+            className="ov:flex-1 ov:overflow-y-auto ov:overflow-x-hidden ov:min-h-[120px] ov:focus:outline-none"
+            tabIndex={0}
+            onWheel={(e) => e.currentTarget.scrollTop += e.deltaY}
+          >
             {selectedSwatches.length === 0 && (
               <div id="ov25-swatchbook-empty" className="ov:flex ov:flex-col ov:items-center ov:justify-center ov:py-8 ov:px-4">
                 <p className='ov25-swatchbook-empty-title ov:text-black ov:text-lg ov:font-medium ov:mb-2'>No swatches selected</p>
                 <p className='ov25-swatchbook-empty-description ov:text-gray-600 ov:text-sm ov:text-center'>Use the 3D Configurator to view fabrics and select swatch samples</p>
-              </div>
+              </div>  
             )}
             <div id="ov25-swatchbook-swatches-list" className="ov:grid ov:grid-cols-2 ov:sm:grid-cols-3 ov:md:grid-cols-4 ov:gap-2 ov:md:gap-4 ov:w-full ov:px-4 ov:py-2">
               {selectedSwatches.map((swatch) => (
