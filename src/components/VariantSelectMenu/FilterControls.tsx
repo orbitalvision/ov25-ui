@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ListFilter, Search, X, Plus, Minus } from "lucide-react";
+import { ListFilter, Search, X } from "lucide-react";
 import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 import { useDebounce } from '../../hooks/useDebounce.js';
 import { SwatchIcon } from '../ui/SwatchIcon.js';
@@ -20,7 +20,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
     const previousOptionIdRef = React.useRef<string | null>(null);
     const isUserInputRef = React.useRef(false);
     const [isAnimating, setIsAnimating] = React.useState(false);
-    const [isAdding, setIsAdding] = React.useState(true);
+    const [displayCount, setDisplayCount] = React.useState(selectedSwatches.length);
     const previousSelectedSwatchesRef = React.useRef(selectedSwatches);
     
     // Effect for updating local search query when activeOptionId changes
@@ -49,14 +49,23 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
     // Effect for triggering animation when selectedSwatches changes
     React.useEffect(() => {
         if (selectedSwatches.length !== previousSelectedSwatchesRef.current.length) {
-            const wasAdding = selectedSwatches.length > previousSelectedSwatchesRef.current.length;
-            setIsAdding(wasAdding);
             setIsAnimating(true);
-            const timer = setTimeout(() => {
+            
+            // First fade out the old number
+            const fadeOutTimer = setTimeout(() => {
+                setDisplayCount(selectedSwatches.length);
+            }, 250); // Half the animation duration
+            
+            // Then complete the animation
+            const completeTimer = setTimeout(() => {
                 setIsAnimating(false);
-            }, 1000); // Animation duration: 1 second
+            }, 500); // Full animation duration
+            
             previousSelectedSwatchesRef.current = selectedSwatches;
-            return () => clearTimeout(timer);
+            return () => {
+                clearTimeout(fadeOutTimer);
+                clearTimeout(completeTimer);
+            };
         }
     }, [selectedSwatches]);
 
@@ -106,7 +115,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
                 {swatchRulesData.enabled && (
                 <button 
                     id="ov25-filter-controls-swatches"
-                    className="ov:flex ov:items-center ov:p-2 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:whitespace-nowrap ov:cursor-pointer"
+                    className="ov:flex ov:items-center ov:p-2 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:whitespace-nowrap ov:cursor-pointer ov:bg-black/50"
                     onClick={() => handleSwatchButtonClick()}
                 >
                     <div className="ov:relative">
@@ -116,15 +125,12 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
                             strokeWidth="0"
                             size={24}
                         />
-                        {isAnimating ? (
-                            isAdding ? (
-                                <Plus size={16} className="ov:absolute ov:top-1/2 ov:left-1/2 ov:transform ov:-translate-x-1/2 ov:-translate-y-1/2 ov:animate-[plusIconAnimation_1s_ease-in-out] ov:text-green-600" />
-                            ) : (
-                                <Minus size={16} className="ov:absolute ov:top-1/2 ov:left-1/2 ov:transform ov:-translate-x-1/2 ov:-translate-y-1/2 ov:animate-[plusIconAnimation_1s_ease-in-out] ov:text-red-600" />
-                            )
-                        ) : selectedSwatches.length > 0 && (
-                            <div className="ov:absolute ov:top-1/2 ov:left-1/2 ov:transform ov:-translate-x-1/2 ov:-translate-y-1/2 ov:text-black ov:font-bold ov:text-sm">
-                                {selectedSwatches.length}
+                        {selectedSwatches.length > 0 && (
+                            <div className={cn(
+                                "ov:absolute ov:top-1/2 ov:left-1/2 ov:transform ov:-translate-x-1/2 ov:-translate-y-1/2 ov:text-black ov:font-bold ov:text-sm ov:transition-opacity ov:duration-250",
+                                isAnimating && "ov:opacity-20"
+                            )}>
+                                {displayCount}
                             </div>
                         )}
                     </div>

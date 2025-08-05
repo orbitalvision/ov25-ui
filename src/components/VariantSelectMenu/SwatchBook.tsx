@@ -80,7 +80,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
           
           <div 
             id="ov25-swatchbook-content" 
-            className="ov:flex-1 ov:overflow-y-auto ov:overflow-x-hidden ov:min-h-[120px] ov:focus:outline-none"
+            className="ov:flex-1 ov:overflow-y-auto ov:overflow-x-hidden ov:min-h-[120px] ov:md:min-h-[240px] ov:focus:outline-none"
             tabIndex={0}
             onWheel={(e) => e.currentTarget.scrollTop += e.deltaY}
           >
@@ -90,9 +90,9 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
                 <p className='ov25-swatchbook-empty-description ov:text-gray-600 ov:text-sm ov:text-center'>Use the 3D Configurator to view fabrics and select swatch samples</p>
               </div>  
             )}
-            <div id="ov25-swatchbook-swatches-list" className="ov:grid ov:grid-cols-2 ov:sm:grid-cols-3 ov:md:grid-cols-4 ov:gap-2 ov:md:gap-4 ov:w-full ov:px-4 ov:py-2">
+            <div id="ov25-swatchbook-swatches-list" className="ov:grid ov:grid-cols-2 ov:sm:grid-cols-3 ov:md:grid-cols-4 ov:gap-2 ov:md:gap-2 ov:w-full ov:px-4 ov:py-2">
               {selectedSwatches.map((swatch) => (
-                <div key={`${swatch.manufacturerId}-${swatch.name}-${swatch.option}`} className='ov25-swatch-item ov:flex ov:flex-col ov:gap-2 ov:items-center ov:text-center ov:w-full ov:min-h-[120px] ov:md:w-auto ov:md:h-auto'>
+                <div key={`${swatch.manufacturerId}-${swatch.name}-${swatch.option}`} className='ov25-swatch-item ov:flex ov:flex-col ov:gap-2 ov:items-center ov:text-center ov:w-full ov:min-h-[100px] ov:md:w-auto ov:md:h-auto'>
                   <div className='ov25-swatch-image-container ov:relative ov:w-[100px] ov:h-[100px] ov:md:w-[120px] ov:md:h-[120px] group'>
                     <img src={swatch.thumbnail.miniThumbnails.medium} alt={swatch.name} className='ov25-swatch-image ov:w-full ov:h-full ov:object-cover ov:border-1 ov:rounded-lg ov:border-black'/>
                     <button
@@ -115,7 +115,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
                 </div>
               ))}
               {emptySquares.map((emptySquare) => (
-                <div key={emptySquare.id} className='ov25-swatch-item ov:flex ov:flex-col ov:gap-2 ov:items-center ov:text-center ov:w-full ov:min-h-[120px] ov:md:w-auto ov:md:h-auto'>
+                <div key={emptySquare.id} className='ov25-swatch-item ov:flex ov:flex-col ov:gap-2 ov:items-center ov:text-center ov:w-full ov:min-h-[100px] ov:md:w-auto ov:md:h-auto'>
                   <div className='ov25-swatch-image-container ov:relative ov:w-[100px] ov:h-[100px] ov:md:w-[120px] ov:md:h-[120px] ov:border-2 ov:border-dashed ov:border-gray-300 ov:rounded-lg ov:flex ov:items-center ov:justify-center ov:bg-gray-50'>
                   </div>
                 </div>

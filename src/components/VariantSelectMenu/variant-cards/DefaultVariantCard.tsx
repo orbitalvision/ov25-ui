@@ -10,12 +10,12 @@ const SwatchIconOverlay = ({ isSelected, onClick }: { isSelected: boolean; onCli
     return (
         <div 
             id="ov25-variant-swatch-icon-container"
-            className="ov:absolute ov:inset-0 ov:flex ov:items-start ov:justify-end ov:cursor-pointer ov:transition-all" 
+            className="ov:absolute ov:inset-0 ov:flex ov:items-center ov:justify-center ov:cursor-pointer ov:transition-all ov:bg-black/50 ov:rounded-full" 
             onClick={onClick} 
             title="Order a swatch sample"
             data-selected={isSelected}
         >
-            <div className="ov:flex ov:items-center ov:justify-center ov:relative ov:w-10 ov:h-10 ov:p-0.5 ov:inset-x-[3px] ov:inset-y-[-3px]">
+            <div className="ov:flex ov:items-center ov:justify-center ov:relative ov:w-10 ov:h-10 ov:p-0.5">
                 <SwatchIcon 
                     fill="white"
                     stroke="#6E6E6E"
@@ -25,7 +25,7 @@ const SwatchIconOverlay = ({ isSelected, onClick }: { isSelected: boolean; onCli
                 />
                 <X className={cn(
                     "ov:w-5 ov:h-5 ov:relative ov:transition-transform ov:duration-300 ov:ease-in-out",
-                    isSelected ? "ov:rotate-0 ov:text-red-500" : "ov:rotate-45 ov:text-green-500"
+                    isSelected ? "ov:rotate-0" : "ov:rotate-45"
                 )} />
             </div>
         </div>
@@ -72,7 +72,7 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
             <div 
                 className={cn(
                     'ov25-variant-image-container',
-                    'ov:w-14 ov:h-14 ov:rounded-full ov:overflow-hidden ov:mb-1 ov:cursor-pointer',
+                    'ov:w-14 ov:h-14 ov:rounded-full ov:overflow-hidden ov:cursor-pointer',
                     variant.isSelected ? 'ov:border-2 ov:border-[var(--ov25-highlight-color)] ov:shadow-lg' : 'ov:border-transparent ov:shadow-md',
                 )}
                 {...(variant.isSelected && { selected: true })}
