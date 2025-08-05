@@ -112,8 +112,8 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
                     <div className="ov:relative">
                         <SwatchIcon 
                             fill="white"
-                            stroke="black"
-                            strokeWidth="8"
+                            stroke="#6E6E6E"
+                            strokeWidth="0"
                             size={24}
                         />
                         {isAnimating ? (

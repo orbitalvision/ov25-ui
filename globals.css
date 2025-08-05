@@ -332,6 +332,16 @@ html #ov25-configurator-variant-menu-container {
   stroke: black;
 }
 
+/* Swatch icon shadow styles */
+#ov25-variant-swatch-icon-container svg {
+  filter: drop-shadow(0 0 8px rgba(0, 0, 0, 1));
+}
+
+/* Filter controls swatch icon shadow */
+#ov25-filter-controls-swatches svg {
+  filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.8));
+}
+
 /* Plus icon animation for swatch changes */
 @keyframes plusIconAnimation {
   0% {

@@ -91,7 +91,7 @@ function App() {
       <h1>OV25 Configurator Test</h1>
       <div className="ov:flex ov:flex-col ov:md:flex-row">
         <div className="configurator-container ov:w-full ov:aspect-square ov:md:w-[700px] ov:md:h-[500px]"></div>
-        <div id="ov25-aside-menu" className="ov:w-full ov:md:w-[35%] ov:h-full ov:md:h-[600px] ov:md:mt-0 ov:md:ml-4 ov:mt-[100px]">
+        <div id="ov25-aside-menu" className="ov:w-full ov:md:w-[35%] ov:h-full ov:md:h-[600px] ov:md:mt-0 ov:md:ml-4">
           <div id="price-name" className="ov:w-full ov:md:w-[378px] ov:h-[96px]">
             <div id="price">PRICE: £123</div>
             <div id="name">NAME: Product Name</div>

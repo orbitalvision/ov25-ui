@@ -13,12 +13,13 @@ const SwatchIconOverlay = ({ isSelected, onClick }: { isSelected: boolean; onCli
             className="ov:absolute ov:inset-0 ov:flex ov:items-start ov:justify-end ov:cursor-pointer ov:transition-all" 
             onClick={onClick} 
             title="Order a swatch sample"
+            data-selected={isSelected}
         >
-            <div className=" ov:flex ov:items-center ov:justify-center ov:relative ov:w-10 ov:h-10 ov:p-0.5 ov:inset-x-[3px] ov:inset-y-[-3px]">
+            <div className="ov:flex ov:items-center ov:justify-center ov:relative ov:w-10 ov:h-10 ov:p-0.5 ov:inset-x-[3px] ov:inset-y-[-3px]">
                 <SwatchIcon 
                     fill="white"
-                    stroke="black"
-                    strokeWidth="8"
+                    stroke="#6E6E6E"
+                    strokeWidth="0"
                     size={30}
                     className="ov:absolute ov:inset-0 ov:m-auto"
                 />
