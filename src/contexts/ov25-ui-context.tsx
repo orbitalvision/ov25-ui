@@ -709,6 +709,11 @@ export const OV25UIProvider: React.FC<{
         case 'AVAILABLE_CAMERAS':
           setAvailableCameras(data);
           break;
+        case 'CURRENT_QUERY_STRING':
+          const currentUrl = new URL(window.location.href);
+          currentUrl.search = data;
+          window.history.replaceState(window.history.state, '', currentUrl.toString());
+          break;
         case 'ERROR':
           setError(new Error(data));
           break;

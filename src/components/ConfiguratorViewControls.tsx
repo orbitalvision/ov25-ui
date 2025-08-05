@@ -1,11 +1,12 @@
 import React, { useState } from 'react'
-import { X as CloseIcon, Camera } from 'lucide-react'
+import { X as CloseIcon, Camera, Upload } from 'lucide-react'
 import { ExpandIcon, Rotate3D } from "lucide-react"
 import { DimensionsIcon } from '../lib/svgs/DimensionsIcon.js'
 import { toggleDimensions, toggleAnimation,  toggleFullscreen, getAnimationButtonText } from '../utils/configurator-utils.js'
 import { useOV25UI } from '../contexts/ov25-ui-context.js'
 import { cn } from '../lib/utils.js'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover.js'
+import { toast } from 'sonner'
 
 interface ConfiguratorViewControlsProps {
   // All props now come from context, so no props needed
@@ -62,6 +63,49 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
   }
 
 
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast.success('Share link copied to clipboard!');
+    } catch (error) {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      toast.success('Share link copied to clipboard!');
+    }
+  };
+
+
+
+
+  const handleShare = async () => {
+    const currentUrl = window.location.href;
+    const productName = currentProduct?.name || 'product';
+    const shareTitle = `Share this ${productName} configuration with your friends!`;
+    const shareText = `I just designed this ${productName} — take a look!`;
+    // Check if Web Share API is available (mobile devices)
+    if (navigator.share && isMobile) {
+        try {
+          await navigator.share({
+            title: shareTitle,
+            text: shareText,
+            url: currentUrl,
+          });
+        } catch (error) {
+          // User cancelled or share failed — fallback
+          await copyToClipboard(currentUrl);
+        }
+      } else {
+        // Web Share API not available or desktop — fallback
+        await copyToClipboard(currentUrl);
+      }
+
+    }
+
 
   return (
     <>
@@ -91,6 +135,17 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
         "ov:transition-[height] ov:duration-500 ov:ease-[cubic-bezier(0.4,0,0.2,1)] "
       )}>
         <div className="ov:flex ov:flex-row ov:gap-2 ov:items-end">
+          <button id="ov25-share-button" onClick={handleShare} className={cn(
+            'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:border ov:items-center ov:justify-center',
+            'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
+            'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
+            'ov:bg-[var(--ov25-overlay-button-color)]',
+          )}>
+            <Upload strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1"/>
+            {!isMobile && (
+              <p className="ov25-controls-text ov:text-sm ov:text-[var(--ov25-text-color)]">Share</p>
+            )}
+          </button>
           {canAnimate && (
             <button id="ov25-animation-toggle-button" onClick={toggleAnimation} className={cn(
               'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2  ov:border ov:items-center ov:justify-center',
