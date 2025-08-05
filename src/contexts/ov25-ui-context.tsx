@@ -120,6 +120,7 @@ interface OV25UIContextType {
     mobileDrawer?: ShadowRoot;
     configuratorViewControls?: ShadowRoot;
     popoverPortal?: ShadowRoot;
+    swatchbookPortal?: ShadowRoot;
   };
   // State
   products: Product[];
@@ -241,6 +242,7 @@ export const OV25UIProvider: React.FC<{
     mobileDrawer?: ShadowRoot;
     configuratorViewControls?: ShadowRoot;
     popoverPortal?: ShadowRoot;
+    swatchbookPortal?: ShadowRoot;
   }
 }> = ({ 
   children,

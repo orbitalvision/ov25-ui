@@ -6,7 +6,6 @@ import { MobilePriceOverlay } from "../mobile-price-overlay.js";
 import { VariantContentDesktop } from './VariantContentDesktop.js';
 import { ProductVariantsWrapper } from './ProductVariantsWrapper.js';
 import { MobileCheckoutButton } from './MobileCheckoutButton.js';
-import { SwatchBook } from './SwatchBook.js';
 
 // Types
 export type DrawerSizes = 'closed' | 'small' | 'large';
@@ -28,9 +27,6 @@ export const VariantSelectMenu: React.FC = () => {
   
   return (
     <>
-      <SwatchBook
-        isMobile={isMobile}
-      />
       <div id="ov-25-configurator-variant-menu-container" className="ov:relative ov:font-[family-name:var(--ov25-font-family)]">
         {(() => {
           const Overlay = MobilePriceOverlay as any;

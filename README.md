@@ -24,7 +24,8 @@ injectConfigurator({
   carouselId: '#product-carousel',       // Optional
   priceId: '#price-element',              // Optional
   nameId: '#name-element',              // Optional
-  variantsId: '#product-variants'        // Optional
+  variantsId: '#product-variants',        // Optional
+  swatchesId: 'ov25-swatches'           // Optional
 });
 ```
 

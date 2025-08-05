@@ -9,6 +9,7 @@ import VariantSelectMenu from '../components/VariantSelectMenu/VariantSelectMenu
 import { SwatchesContainer } from '../components/SwatchesContainer.js';
 import { ProductCarousel } from '../components/product-carousel.js';
 import ConfiguratorViewControls from '../components/ConfiguratorViewControls.js';
+import { SwatchBook } from '../components/VariantSelectMenu/SwatchBook.js';
 import { createPortal } from 'react-dom';
 
 // Import styles directly
@@ -228,6 +229,27 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     toasterContainer.style.zIndex = '999999999999999';
     document.body.appendChild(toasterContainer);
     
+    // Create swatchbook portal Shadow DOM container
+    const swatchbookPortalContainer = document.createElement('div');
+    swatchbookPortalContainer.id = 'ov25-swatchbook-portal-container';
+    swatchbookPortalContainer.style.position = 'fixed';
+    swatchbookPortalContainer.style.top = '0';
+    swatchbookPortalContainer.style.left = '0';
+    swatchbookPortalContainer.style.width = '100%';
+    swatchbookPortalContainer.style.height = '100%';
+    swatchbookPortalContainer.style.pointerEvents = 'none';
+    swatchbookPortalContainer.style.zIndex = '99999999999993';
+    document.body.appendChild(swatchbookPortalContainer);
+    
+    // Create Shadow DOM root for swatchbook portal
+    const swatchbookPortalShadowRoot = swatchbookPortalContainer.attachShadow({ mode: 'open' });
+    const swatchbookPortalStylesheets = [sharedStylesheet];
+    if (cssString) {
+      const cssVariablesStylesheet = createCSSVariablesStylesheet(cssString);
+      swatchbookPortalStylesheets.push(cssVariablesStylesheet);
+    }
+    swatchbookPortalShadowRoot.adoptedStyleSheets = swatchbookPortalStylesheets;
+    
     // Make sure the portal targets are in the DOM *now*
     const portals: ReactNode[] = [];
 
@@ -374,6 +396,9 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     // Add toaster to portals
     portals.push(createPortal(<Toaster position="top-center" richColors style={{ zIndex: 999999999999999 }} />, toasterContainer));
     
+    // Add swatchbook to portals
+    portals.push(createPortal(<SwatchBook isMobile={false} />, swatchbookPortalShadowRoot));
+    
     // Special handling for carousel - only use polling if carouselId is true
     if (carouselId === true) {
       // Start polling for true-carousel element
@@ -451,7 +476,8 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
          shadowDOMs={{
            mobileDrawer: mobileDrawerShadowRoot,
            configuratorViewControls: configuratorViewControlsShadowRoot,
-           popoverPortal: popoverPortalShadowRoot
+           popoverPortal: popoverPortalShadowRoot,
+           swatchbookPortal: swatchbookPortalShadowRoot
          }}
        >
          {portals}
