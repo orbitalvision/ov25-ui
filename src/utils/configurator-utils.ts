@@ -169,7 +169,14 @@ export const getIframeSrc = (
   // Remove leading slash if present
   const cleanedLink = productLink.startsWith('/') ? productLink.substring(1) : productLink;
   
-  return `${baseUrl}/${apiKey}/${cleanedLink}`;
+  // Get current URL query parameters
+  const currentUrl = new URL(window.location.href);
+  const queryParams = currentUrl.search;
+  
+  // Append query parameters to the product link if they exist
+  const linkWithParams = queryParams ? `${cleanedLink}${queryParams}` : cleanedLink;
+  
+  return `${baseUrl}/${apiKey}/${linkWithParams}`;
 };
 
 /**
