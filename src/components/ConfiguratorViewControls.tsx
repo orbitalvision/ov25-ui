@@ -210,13 +210,13 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
                 {isCameraPopoverOpen && (
                   <PopoverContent triggerRef={cameraButtonRef}>
                     <div className="ov:flex ov:flex-col ov:gap-1">
-                      {availableCameras.map((cameraId, index) => (
+                      {availableCameras.map((camera, index) => (
                         <button
-                          key={cameraId}
+                          key={camera.id}
                           onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
-                            selectCamera(cameraId);
+                            selectCamera(camera.id);
                             setIsCameraPopoverOpen(false);
                           }}
                           className={cn(
@@ -224,7 +224,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
                             'ov:transition-colors ov:duration-200 ov:text-left ov:w-full ov:bg-transparent ov:border-none'
                           )}
                         >
-                          Camera {index + 1}
+                          {camera.displayName && camera.displayName.trim() !== '' ? camera.displayName : `Camera ${index + 1}`}
                         </button>
                       ))}
                     </div>

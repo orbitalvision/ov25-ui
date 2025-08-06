@@ -177,7 +177,10 @@ interface OV25UIContextType {
   selectedSwatches: Swatch[];
   swatchRulesData: SwatchRulesData;
   isSwatchBookOpen: boolean;
-  availableCameras: string[];
+  availableCameras: Array<{
+    id: string;
+    displayName: string;
+  }>;
   // Methods
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
   setCurrentProductId: React.Dispatch<React.SetStateAction<string | undefined>>;
@@ -210,7 +213,10 @@ interface OV25UIContextType {
   toggleSwatch: (swatch: Swatch) => void;
   isSwatchSelected: (swatch: Swatch) => boolean;
   setIsSwatchBookOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  setAvailableCameras: React.Dispatch<React.SetStateAction<string[]>>;
+  setAvailableCameras: React.Dispatch<React.SetStateAction<Array<{
+    id: string;
+    displayName: string;
+  }>>>;
   selectCamera: (cameraId: string) => void;
   // Actions
   handleSelectionSelect: (selection: Selection) => void;
@@ -295,7 +301,10 @@ export const OV25UIProvider: React.FC<{
   const [availableProductFilters, setAvailableProductFilters] = useState<ProductFilters>({});
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [searchQueries, setSearchQueries] = useState<{ [optionId: string]: string }>({});
-  const [availableCameras, setAvailableCameras] = useState<string[]>([]);
+  const [availableCameras, setAvailableCameras] = useState<Array<{
+    id: string;
+    displayName: string;
+  }>>([]);
   const hasDefered = useRef(false);
   const isSelectingProduct = useRef(false);
   const hasComputedFilters = useRef(false);
