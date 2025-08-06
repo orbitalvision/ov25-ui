@@ -115,7 +115,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
                 {swatchRulesData.enabled && (
                 <button 
                     id="ov25-filter-controls-swatches"
-                    className="ov:flex ov:items-center ov:p-2 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:whitespace-nowrap ov:cursor-pointer ov:bg-black/30"
+                    className="ov:flex ov:items-center ov:p-2 ov:rounded-full ov:border ov:border-transparent ov:whitespace-nowrap ov:cursor-pointer ov:bg-black/30"
                     onClick={() => handleSwatchButtonClick()}
                 >
                     <div className="ov:relative">

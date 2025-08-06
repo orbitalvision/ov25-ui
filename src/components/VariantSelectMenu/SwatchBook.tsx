@@ -64,7 +64,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
                   <img
                     src={zoomedSwatch.thumbnail.miniThumbnails.large}
                     alt={zoomedSwatch.name}
-                    className='ov25-swatch-image ov:w-full ov:h-full ov:object-cover ov:border-1 ov:border-black ov:rounded-lg ov:aspect-square'
+                    className='ov25-swatch-image ov:w-full ov:h-full ov:object-cover ov:rounded-lg ov:aspect-square'
                   />
                 </div>
                 <div className="ov:text-center">
@@ -94,7 +94,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
               {selectedSwatches.map((swatch) => (
                 <div key={`${swatch.manufacturerId}-${swatch.name}-${swatch.option}`} className='ov25-swatch-item ov:flex ov:flex-col ov:gap-2 ov:items-center ov:text-center ov:w-full ov:min-h-[100px] ov:md:w-auto ov:md:h-auto'>
                   <div className='ov25-swatch-image-container ov:relative ov:w-[100px] ov:h-[100px] ov:md:w-[120px] ov:md:h-[120px] group'>
-                    <img src={swatch.thumbnail.miniThumbnails.medium} alt={swatch.name} className='ov25-swatch-image ov:w-full ov:h-full ov:object-cover ov:border-1 ov:rounded-lg ov:border-black'/>
+                    <img src={swatch.thumbnail.miniThumbnails.medium} alt={swatch.name} className='ov25-swatch-image ov:w-full ov:h-full ov:object-cover ov:rounded-lg'/>
                     <button
                       onClick={() => toggleSwatch(swatch)}
                       className='ov25-swatch-remove-button ov:flex ov:items-center ov:justify-center ov:absolute ov:top-1 ov:right-1 ov:w-6 ov:h-6 ov:bg-white ov:rounded-full ov:cursor-pointer ov:shadow-md ov:transition-colors ov:z-[10] ov:opacity-40 ov:hover:opacity-80 ov:hover:bg-gray-100'

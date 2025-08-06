@@ -87,8 +87,9 @@
 .ov25-variant-control {
   background: white;
   margin-top: 1em;
-  padding: 2px;
-  border: 0px;
+  padding: .5em;
+  border: 1px solid var(--ov25-border-color);
+  border-radius: .375em;
 }
 
 .ov25-variant-control svg {
@@ -348,4 +349,21 @@ html #ov25-configurator-variant-menu-container {
   100% {
     opacity: 0;
   }
+}
+
+/* Hide any border or background on the track */
+::-webkit-scrollbar-track-piece,
+::-webkit-scrollbar-track {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
 }
