@@ -417,6 +417,7 @@ export const OV25UIProvider: React.FC<{
       }
     });
     addSwatchesToCartFunction(swatchCartData);
+    setSelectedSwatches([]);
   }, [addSwatchesToCartFunction]);
 
   const selectCamera = (cameraId: string) => {
