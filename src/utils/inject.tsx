@@ -18,6 +18,13 @@ import { Toaster } from 'sonner';
 // Import CSS as string for adoptedStyleSheets
 import cssText from '../styles.css?inline';
 
+// Import sonner CSS as string
+import sonnerCssText from 'sonner/dist/styles.css?inline';
+// Create sonner stylesheet
+const sonnerStylesheet = new CSSStyleSheet();
+sonnerStylesheet.replaceSync(sonnerCssText);
+
+
 // Create shared stylesheet
 const sharedStylesheet = new CSSStyleSheet();
 sharedStylesheet.replaceSync(cssText);
@@ -229,6 +236,15 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     toasterContainer.style.zIndex = '999999999999999';
     document.body.appendChild(toasterContainer);
     
+    // Create Shadow DOM root for toaster portal
+    const toasterPortalShadowRoot = toasterContainer.attachShadow({ mode: 'open' });
+    const toasterPortalStylesheets = [sharedStylesheet, sonnerStylesheet];
+    if (cssString) {
+      const cssVariablesStylesheet = createCSSVariablesStylesheet(cssString);
+      toasterPortalStylesheets.push(cssVariablesStylesheet);
+    }
+    toasterPortalShadowRoot.adoptedStyleSheets = toasterPortalStylesheets;
+    
     // Create swatchbook portal Shadow DOM container
     const swatchbookPortalContainer = document.createElement('div');
     swatchbookPortalContainer.id = 'ov25-swatchbook-portal-container';
@@ -394,7 +410,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     processElement(swatchesId, <SwatchesContainer />, 'swatches');
     
     // Add toaster to portals
-    portals.push(createPortal(<Toaster position="top-center" richColors style={{ zIndex: 999999999999999 }} />, toasterContainer));
+    portals.push(createPortal(<Toaster position="top-center" richColors style={{ zIndex: 999999999999999 }} />, toasterPortalShadowRoot));
     
     // Add swatchbook to portals
     portals.push(createPortal(<SwatchBook isMobile={false} />, swatchbookPortalShadowRoot));
