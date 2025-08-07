@@ -38,7 +38,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
   }, [selectedSwatches, isSwatchBookOpen]);
 
   const handleAddSwatchesToCart = () => {
-    addSwatchesToCartFunction();
+    addSwatchesToCartFunction(selectedSwatches, swatchRulesData);
     setSelectedSwatches([]);
   };
 

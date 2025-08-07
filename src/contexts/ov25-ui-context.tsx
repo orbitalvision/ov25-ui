@@ -158,7 +158,7 @@ interface OV25UIContextType {
   apiKey: string;
   buyNowFunction: () => void;
   addToBasketFunction: () => void;
-  addSwatchesToCartFunction: () => void;
+  addSwatchesToCartFunction: (swatches: Swatch[], swatchRulesData: SwatchRulesData) => void;
   images?: string[];
   logoURL?: string;
   isProductGalleryStacked: boolean;
@@ -237,7 +237,7 @@ export const OV25UIProvider: React.FC<{
   apiKey: string, 
   buyNowFunction: () => void,
   addToBasketFunction: () => void,
-  addSwatchesToCartFunction: () => void,
+  addSwatchesToCartFunction: (swatches: Swatch[], swatchRulesData: SwatchRulesData) => void,
   images?: string[],
   deferThreeD?: boolean,
   showOptional?: boolean,
