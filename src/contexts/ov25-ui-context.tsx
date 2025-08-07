@@ -408,7 +408,7 @@ export const OV25UIProvider: React.FC<{
     return selectedSwatches.some(s => s.manufacturerId === swatch.manufacturerId && s.name === swatch.name && s.option === swatch.option);
   }, [selectedSwatches]);
 
-  const addSwatchesToCart = useCallback(() => {
+  const addSwatchesToCart = () => {
     const swatchCartData: SwatchCartData[] = selectedSwatches.map((swatch: Swatch) => {
       return {
         manufacturerId: swatch.manufacturerId,
@@ -418,7 +418,7 @@ export const OV25UIProvider: React.FC<{
     });
     addSwatchesToCartFunction(swatchCartData);
     setSelectedSwatches([]);
-  }, [addSwatchesToCartFunction]);
+  };
 
   const selectCamera = (cameraId: string) => {
     sendMessageToIframe('SELECT_CAMERA', cameraId);
