@@ -11,7 +11,7 @@ interface SwatchBookProps {
 export const SwatchBook: React.FC<SwatchBookProps> = ({
   isMobile,
 }) => {
-  const { addSwatchesToCartFunction, toggleSwatch, selectedSwatches, swatchRulesData, isSwatchBookOpen, setIsSwatchBookOpen, setSelectedSwatches } = useOV25UI();
+  const { addSwatchesToCart, toggleSwatch, selectedSwatches, swatchRulesData, isSwatchBookOpen, setIsSwatchBookOpen, setSelectedSwatches } = useOV25UI();
 
   const calculateEmptySquares = () => {
     const maxSwatches = swatchRulesData.canExeedFreeLimit ? swatchRulesData.maxSwatches : swatchRulesData.freeSwatchLimit;
@@ -38,7 +38,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
   }, [selectedSwatches, isSwatchBookOpen]);
 
   const handleAddSwatchesToCart = () => {
-    addSwatchesToCartFunction(selectedSwatches, swatchRulesData);
+    addSwatchesToCart();
     setSelectedSwatches([]);
   };
 
@@ -135,7 +135,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
                 disabled={selectedSwatches.length < swatchRulesData.minSwatches}
                 onClick={() => handleAddSwatchesToCart()}
               >
-                Add Swatches to Cart
+                Order Samples
               </button>
             </div>
           </div>

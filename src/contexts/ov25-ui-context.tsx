@@ -113,6 +113,12 @@ export type SwatchRulesData = {
   enabled: boolean; 
 }
 
+export type SwatchCartData = {
+  manufacturerId: string;
+  name: string;
+  option: string;
+}
+
 // Context type
 interface OV25UIContextType {
   // Shadow DOM references
@@ -158,7 +164,7 @@ interface OV25UIContextType {
   apiKey: string;
   buyNowFunction: () => void;
   addToBasketFunction: () => void;
-  addSwatchesToCartFunction: (swatches: Swatch[], swatchRulesData: SwatchRulesData) => void;
+  addSwatchesToCart: () => void;
   images?: string[];
   logoURL?: string;
   isProductGalleryStacked: boolean;
@@ -237,7 +243,7 @@ export const OV25UIProvider: React.FC<{
   apiKey: string, 
   buyNowFunction: () => void,
   addToBasketFunction: () => void,
-  addSwatchesToCartFunction: (swatches: Swatch[], swatchRulesData: SwatchRulesData) => void,
+  addSwatchesToCartFunction: (swatches: SwatchCartData[]) => void,
   images?: string[],
   deferThreeD?: boolean,
   showOptional?: boolean,
@@ -401,6 +407,17 @@ export const OV25UIProvider: React.FC<{
   const isSwatchSelected = useCallback((swatch: Swatch) => {
     return selectedSwatches.some(s => s.manufacturerId === swatch.manufacturerId && s.name === swatch.name && s.option === swatch.option);
   }, [selectedSwatches]);
+
+  const addSwatchesToCart = useCallback(() => {
+    const swatchCartData: SwatchCartData[] = selectedSwatches.map((swatch: Swatch) => {
+      return {
+        manufacturerId: swatch.manufacturerId,
+        name: swatch.name,
+        option: swatch.option,
+      }
+    });
+    addSwatchesToCartFunction(swatchCartData);
+  }, [addSwatchesToCartFunction]);
 
   const selectCamera = (cameraId: string) => {
     sendMessageToIframe('SELECT_CAMERA', cameraId);
@@ -791,7 +808,7 @@ export const OV25UIProvider: React.FC<{
     apiKey,
     buyNowFunction,
     addToBasketFunction,
-    addSwatchesToCartFunction,
+    addSwatchesToCart,
     images,
     logoURL,
     mobileLogoURL,
