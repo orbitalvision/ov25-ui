@@ -187,6 +187,10 @@ interface OV25UIContextType {
     id: string;
     displayName: string;
   }>;
+  availableLights: Array<{
+    id: string;
+    displayName: string;
+  }>;
   // Methods
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
   setCurrentProductId: React.Dispatch<React.SetStateAction<string | undefined>>;
@@ -224,6 +228,11 @@ interface OV25UIContextType {
     displayName: string;
   }>>>;
   selectCamera: (cameraId: string) => void;
+  setAvailableLights: React.Dispatch<React.SetStateAction<Array<{
+    id: string;
+    displayName: string;
+  }>>>;
+  selectLightGroup: (subGroupId: string) => void;
   // Actions
   handleSelectionSelect: (selection: Selection) => void;
   handleOptionClick: (optionId: string) => void;
@@ -308,6 +317,10 @@ export const OV25UIProvider: React.FC<{
   const [showFilters, setShowFilters] = useState<boolean>(false);
   const [searchQueries, setSearchQueries] = useState<{ [optionId: string]: string }>({});
   const [availableCameras, setAvailableCameras] = useState<Array<{
+    id: string;
+    displayName: string;
+  }>>([]);
+  const [availableLights, setAvailableLights] = useState<Array<{
     id: string;
     displayName: string;
   }>>([]);
@@ -422,6 +435,10 @@ export const OV25UIProvider: React.FC<{
 
   const selectCamera = (cameraId: string) => {
     sendMessageToIframe('SELECT_CAMERA', cameraId);
+  }
+
+  const selectLightGroup = (subGroupId: string) => {
+    sendMessageToIframe('SELECT_LIGHT', subGroupId);
   }
 
   // Computed values
@@ -738,6 +755,9 @@ export const OV25UIProvider: React.FC<{
         case 'AVAILABLE_CAMERAS':
           setAvailableCameras(data);
           break;
+        case 'AVAILABLE_LIGHTS':
+          setAvailableLights(data);
+          break;
         case 'CURRENT_QUERY_STRING':
           const currentUrl = new URL(window.location.href);
           currentUrl.search = data;
@@ -825,6 +845,7 @@ export const OV25UIProvider: React.FC<{
     swatchRulesData,
     isSwatchBookOpen,
     availableCameras,
+    availableLights,
     // Methods
     setProducts,
     setCurrentProductId,
@@ -855,6 +876,8 @@ export const OV25UIProvider: React.FC<{
     setIsSwatchBookOpen,
     setAvailableCameras,
     selectCamera,
+    setAvailableLights,
+    selectLightGroup,
     // Actions
     handleSelectionSelect,
     handleOptionClick,

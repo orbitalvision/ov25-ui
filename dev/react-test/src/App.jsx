@@ -11,7 +11,7 @@ const initializeConfigurator = () => {
   // Inject the configurator
   injectConfigurator({
     apiKey: () => { return '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d' }, 
-    productLink: () => { return '217' }, 
+    productLink: () => { return '576' }, 
     // 217 = Woodbros Pickering-3 Seater (Grouped)
     // range/2 Aughton (Non Grouped)
     // 501 Westbridge/glenwood/grand split option (no filters)
