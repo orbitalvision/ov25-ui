@@ -1,4 +1,6 @@
 import React from 'react';
+import { SwatchIconOverlay } from './SwatchIconOverlay.js';
+import { useSwatchActions } from '../../../hooks/useSwatchActions.js';
 
 interface VariantCardProps {
   variant: any;
@@ -12,6 +14,9 @@ export const LegsVariantCard = React.memo(
   ({ variant, onSelect, index, isMobile }: VariantCardProps) => {
     // Generate a stable image src that will be used for both rendering and as a key
     const imgSrc = variant.image || "/placeholder.svg";
+    const { shouldShowSwatch, isSwatchSelectedFor, getSwatchClickHandler } = useSwatchActions();
+    const swatchVisible = shouldShowSwatch(!!variant.isSelected, variant.swatch);
+    const handleSwatchClick = getSwatchClickHandler(!!variant.isSelected, variant.swatch);
     
     return (<>
       <div
@@ -44,7 +49,13 @@ export const LegsVariantCard = React.memo(
                   height={100} 
                 />
               )}
-              {variant.isSelected && (
+              {swatchVisible && variant.swatch && (
+                <SwatchIconOverlay
+                  isSelected={isSwatchSelectedFor(variant.swatch)}
+                  onClick={handleSwatchClick}
+                />
+              )}
+              {!swatchVisible && variant.isSelected && (
                 <div className="ov:absolute ov:inset-0">
                   <div className="ov25-variant-selected-indicator ov:absolute ov:top-1/2 ov:left-1/2 ov:-translate-x-1/2 ov:-translate-y-1/2">
                     <div className="ov:w-6 ov:h-6 ov:rounded-full ov:bg-black ov:flex ov:items-center ov:justify-center">
@@ -88,6 +99,12 @@ export const LegsVariantCard = React.memo(
                     <div className="ov:w-full ov:h-full ov:bg-gray-200 ov:flex ov:items-center ov:justify-center">
                         <span className="ov:text-xs ov:text-[var(--ov25-secondary-text-color)]">No img</span>
                     </div>
+                )}
+                {swatchVisible && variant.swatch && (
+                  <SwatchIconOverlay
+                    isSelected={isSwatchSelectedFor(variant.swatch)}
+                    onClick={handleSwatchClick}
+                  />
                 )}
             </div>
         </div>
