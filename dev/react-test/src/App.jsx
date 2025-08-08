@@ -41,8 +41,8 @@ const initializeConfigurator = () => {
     buyNowFunction: () => {
       alert('Buy now function called');
     },
-    addSwatchesToCartFunction: (swatches) => {
-      console.log('Add swatches to cart function called with:', { swatches });
+    addSwatchesToCartFunction: (swatches, swatchRulesData) => {
+      console.log('Add swatches to cart function called with:', { swatches, swatchRulesData });
       alert(`Add swatches to cart function called with ${swatches.length} swatches`);
     },
   });
