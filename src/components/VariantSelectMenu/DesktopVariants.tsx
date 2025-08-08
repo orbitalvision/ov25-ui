@@ -125,12 +125,10 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
         )
       }{
         <div id="ov25-filter-container" className="ov:relative ov:w-full ov:flex ov:flex-col ov:min-h-0 ov:h-full">
-          {shouldShowFilters && (
-            <FilterControls 
-              isFilterOpen={isFilterOpen}
-              setIsFilterOpen={setIsFilterOpen}
-            />
-          )}
+          <FilterControls 
+            isFilterOpen={isFilterOpen}
+            setIsFilterOpen={setIsFilterOpen}
+          />
           <div id="ov25-content-area" className="ov:relative ov:flex-1 ov:min-h-0 ov:overflow-hidden ov:h-full">
             {variantsToRender.length === 0 && <NoResults />}
             {((shouldDestructureGroups || !isGrouped) ? (

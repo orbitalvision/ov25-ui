@@ -92,21 +92,30 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
         }));
     }, [activeOption, availableProductFilters, setAvailableProductFilters]);
 
+    const shouldShowFilterButton = React.useMemo(() => {
+        if (!activeOption?.name) return false;
+        const optionFilters = availableProductFilters?.[activeOption.name];
+        if (!optionFilters) return false;
+        return Object.keys(optionFilters).some((key) => optionFilters[key]?.length > 0);
+    }, [activeOption?.name, availableProductFilters]);
+
     return (
         <div id="ov25-filter-controls-container" className="ov:flex ov:flex-col ov:gap-2 ov:px-4">
             <div id="ov25-filter-controls" className="ov:flex ov:flex-nowrap ov:items-center ov:gap-2 ov:py-2">
-                <button 
-                    id="ov25-filter-controls-button"
-                    className={cn(
-                        "ov:flex ov:items-center ov:p-2 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:whitespace-nowrap ov:hover:bg-[var(--ov25-hover-color)]",
-                        isFilterOpen ? "ov:bg-gray-50" : ""
-                    )}
-                    onClick={() => setIsFilterOpen(!isFilterOpen)} 
-                    data-open={isFilterOpen}
-                >
-                    <ListFilter size={24} />
-                    <span className="ov:px-4 ov:color-[var(--ov25-secondary-text-color)]">Filters</span>
-                </button>
+                {shouldShowFilterButton && (
+                    <button 
+                        id="ov25-filter-controls-button"
+                        className={cn(
+                            "ov:flex ov:items-center ov:p-2 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:whitespace-nowrap ov:hover:bg-[var(--ov25-hover-color)]",
+                            isFilterOpen ? "ov:bg-gray-50" : ""
+                        )}
+                        onClick={() => setIsFilterOpen(!isFilterOpen)} 
+                        data-open={isFilterOpen}
+                    >
+                        <ListFilter size={24} />
+                        <span className="ov:px-4 ov:color-[var(--ov25-secondary-text-color)]">Filters</span>
+                    </button>
+                )}
                 <div id="ov25-filter-controls-search" className="ov:flex ov:flex-1 ov:items-center ov:p-2 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:hover:bg-[var(--ov25-hover-color)]">
                     <Search size={24} className="ov:min-w-[24px]"/>
                     <input value={localSearchQuery} onChange={handleSearchInputChange} type="text" placeholder="Search" className="ov:w-full ov:pl-2 ov:ml-2 ov:text-[var(--ov25-secondary-text-color)] ov:bg-transparent ov:outline-none" />

@@ -94,7 +94,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
     const variantsToRender =  group ? group.variants : [] as Variant[];
     return (
       <div id="ov25-mobile-filter-container" className="ov:relative ov:w-full ov:h-full ov:flex ov:flex-col">
-        {drawerSize !== 'small' && shouldShowFilters && (
+        {drawerSize !== 'small' && (
           <FilterControls 
             isFilterOpen={isFilterOpen}
             setIsFilterOpen={setIsFilterOpen}
@@ -165,12 +165,10 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
     } else {
       return (
         <div id="ov25-mobile-filter-container" className="ov:relative ov:w-full ov:h-full ov:flex ov:flex-col">
-          {shouldShowFilters && (
-            <FilterControls 
-              isFilterOpen={isFilterOpen}
-              setIsFilterOpen={setIsFilterOpen}
-            />
-          )}
+          <FilterControls 
+            isFilterOpen={isFilterOpen}
+            setIsFilterOpen={setIsFilterOpen}
+          />
           <div id="ov25-mobile-content-area" className="ov:relative ov:flex-1 ov:overflow-hidden">
             {variantsToRender.length === 0 && <NoResults />}
             <div id="ov25-mobile-variants-content" className="ov:h-full ov:overflow-y-auto">
