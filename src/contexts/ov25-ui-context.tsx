@@ -113,12 +113,6 @@ export type SwatchRulesData = {
   enabled: boolean; 
 }
 
-export type SwatchCartData = {
-  manufacturerId: string;
-  name: string;
-  option: string;
-}
-
 // Context type
 interface OV25UIContextType {
   // Shadow DOM references
@@ -252,7 +246,7 @@ export const OV25UIProvider: React.FC<{
   apiKey: string, 
   buyNowFunction: () => void,
   addToBasketFunction: () => void,
-  addSwatchesToCartFunction: (swatches: SwatchCartData[], swatchRulesData: SwatchRulesData) => void,
+  addSwatchesToCartFunction: (swatches: Swatch[], swatchRulesData: SwatchRulesData) => void,
   images?: string[],
   deferThreeD?: boolean,
   showOptional?: boolean,
@@ -422,14 +416,7 @@ export const OV25UIProvider: React.FC<{
   }, [selectedSwatches]);
 
   const addSwatchesToCart = () => {
-    const swatchCartData: SwatchCartData[] = selectedSwatches.map((swatch: Swatch) => {
-      return {
-        manufacturerId: swatch.manufacturerId,
-        name: swatch.name,
-        option: swatch.option,
-      }
-    });
-    addSwatchesToCartFunction(swatchCartData, swatchRulesData);
+    addSwatchesToCartFunction(selectedSwatches, swatchRulesData);
     setSelectedSwatches([]);
   };
 

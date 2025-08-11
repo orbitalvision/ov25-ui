@@ -1,7 +1,7 @@
 // inject.ts
 import React, { ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { OV25UIProvider, SwatchCartData, SwatchRulesData } from '../contexts/ov25-ui-context.js';
+import { OV25UIProvider, Swatch, SwatchRulesData } from '../contexts/ov25-ui-context.js';
 import { ProductGallery } from '../components/product-gallery.js';
 import Price from '../components/Price.js';
 import Name from '../components/Name.js';
@@ -62,7 +62,7 @@ export interface InjectConfiguratorOptions {
   carouselId?: ElementSelector | true;
   addToBasketFunction: () => void;
   buyNowFunction: () => void;
-  addSwatchesToCartFunction: (swatches: SwatchCartData[], swatchRulesData: SwatchRulesData) => void;
+  addSwatchesToCartFunction: (swatches: Swatch[], swatchRulesData: SwatchRulesData) => void;
   logoURL?: string;
   mobileLogoURL?: string;
   cssString?: string;
