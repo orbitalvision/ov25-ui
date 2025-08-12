@@ -373,3 +373,7 @@ html #ov25-configurator-variant-menu-container {
 ::-webkit-scrollbar {
   width: 8px;
 }
+
+[data-sonner-toast] {
+  pointer-events: all;
+}

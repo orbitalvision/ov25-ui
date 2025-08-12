@@ -55,3 +55,11 @@ h1 {
 #ov25-product-carousel-controls {
   padding: 0;
 }
+
+.ov25-configurator-name h1 {
+  font-size: 3em;
+}
+
+#ov25-price-product-page, #ov25-subtotal-product-page, #ov25-savings-amount-product-page, #ov25-savings-percentage-product-page {
+  font-size: 1.5em;
+}

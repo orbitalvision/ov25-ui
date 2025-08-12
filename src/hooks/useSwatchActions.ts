@@ -3,7 +3,7 @@ import { toast } from 'sonner';
 import { useOV25UI } from '../contexts/ov25-ui-context.js';
 
 export function useSwatchActions() {
-  const { swatchRulesData, toggleSwatch, isSwatchSelected, selectedSwatches } = useOV25UI();
+  const { swatchRulesData, toggleSwatch, isSwatchSelected, selectedSwatches, setIsVariantsOpen, setIsSwatchBookOpen } = useOV25UI();
 
   const shouldShowSwatch = (isSelected: boolean, swatch: any): boolean => {
     return Boolean(isSelected && swatchRulesData.enabled && swatch);
@@ -29,9 +29,27 @@ export function useSwatchActions() {
     }
 
     if (isSwatchSelected(swatch)) {
-      toast.success('Swatch removed from swatchbook');
+      toast.success('Swatch removed', {
+        action: {
+          label: 'Open Swatchbook',
+          onClick: () => {
+            setIsVariantsOpen(false);
+            setIsSwatchBookOpen(true);
+          }
+        },
+        duration: 5000,
+      });
     } else {
-      toast.success('Swatch added to swatchbook');
+      toast.success('Swatch added', {
+        action: {
+          label: 'Open Swatchbook',
+          onClick: () => {
+            setIsVariantsOpen(false);
+            setIsSwatchBookOpen(true);
+          }
+        },
+        duration: 5000,
+      });
     }
     toggleSwatch(swatch);
   };
@@ -42,5 +60,4 @@ export function useSwatchActions() {
     getSwatchClickHandler,
   };
 }
-
 
