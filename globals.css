@@ -10,9 +10,12 @@
   display: block !important;
 }
 
-/* Set default font sizes - if the shadow DOM does not have a font size set, it can inherit certain properties from the host.
-This is good for some things, like font-family, since we want to use the parent site's font. But for font-size it resizes a lot of elements in the UI - so we must override it. */
-* {
+/* Set default font sizes for OV25-UI only. In Shadow DOM, scope with :host; in light DOM, scope to OV25 ids. */
+:host, :host * {
+  font-size: initial;
+}
+
+[id^="ov25-"], [id^="ov25-"] * {
   font-size: initial;
 }
 
