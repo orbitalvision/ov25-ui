@@ -659,6 +659,7 @@ export const OV25UIProvider: React.FC<{
           return [...newSelections, { optionId: 'size', selectionId: selection.id }];
         });
         sendMessageToIframe('SELECT_PRODUCT', selection.id);
+        setCurrentProductId(selection.id);
       }
       return;
     } else {
