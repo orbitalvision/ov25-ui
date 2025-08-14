@@ -45,7 +45,7 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
                         alt={variant.name}
                         width={56}
                         height={56}
-                        className="ov:w-full ov:h-full ov:object-cover"
+                        className="ov:w-full ov:h-full ov:object-fill"
                     />
                 ) : (
                     <div className="ov:w-full ov:h-full ov:bg-gray-200 ov:flex ov:items-center ov:justify-center">

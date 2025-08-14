@@ -37,14 +37,14 @@ export const LegsVariantCard = React.memo(
                   key={imgSrc} 
                   src={imgSrc} 
                   alt={variant.name} 
-                  className="ov:object-cover ov:w-full ov:h-full" 
+                  className="ov:object-fill ov:w-full ov:h-full" 
                 />
               ) : (
                 <img 
                   key={imgSrc} 
                   src={imgSrc} 
                   alt={variant.name} 
-                  className="ov:object-cover ov:w-full ov:h-full" 
+                  className="ov:object-fill ov:w-full ov:h-full" 
                   width={100} 
                   height={100} 
                 />
@@ -93,7 +93,7 @@ export const LegsVariantCard = React.memo(
                         alt={variant.name}
                         width={56}
                         height={56}
-                        className="ov:w-full ov:h-full ov:object-cover"
+                        className="ov:w-full ov:h-full ov:object-fill"
                     />
                 ) : (
                     <div className="ov:w-full ov:h-full ov:bg-gray-200 ov:flex ov:items-center ov:justify-center">
