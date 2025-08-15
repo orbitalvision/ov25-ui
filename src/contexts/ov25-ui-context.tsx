@@ -2,16 +2,20 @@ import React, { createContext, useContext, useState, useEffect, useRef, useMemo,
 import { sendMessageToIframe, toggleAR } from '../utils/configurator-utils.js';
 import { stringSimilarity } from 'string-similarity-js';
 
-// Debounce utility function
-function debounce<T extends (...args: any[]) => void>(
+function throttle<T extends (...args: any[]) => void>(
   fn: T,
   delay: number
 ): (...args: Parameters<T>) => void {
-  let timeoutId: ReturnType<typeof setTimeout>;
+  let isThrottled = false;
 
   return (...args: Parameters<T>) => {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => fn(...args), delay);
+    if (!isThrottled) {
+      fn(...args);
+      isThrottled = true;
+      setTimeout(() => {
+        isThrottled = false;
+      }, delay);
+    }
   };
 }
 
@@ -657,7 +661,7 @@ export const OV25UIProvider: React.FC<{
     setIsVariantsOpen(true);
   };
 
-  const handleSelectionSelect = debounce((selection: Selection) => {
+  const handleSelectionSelect = throttle((selection: Selection) => {
     if (activeOptionId === 'size') {
       if (currentProductId !== selection.id) {
         // Block if already selecting a product
