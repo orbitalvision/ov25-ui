@@ -8,11 +8,13 @@ import { cn } from '../../lib/utils.js';
 interface FilterControlsProps {
     isFilterOpen: boolean;
     setIsFilterOpen: (isOpen: boolean) => void;
+    isGrouped: boolean;
 }
 
 export const FilterControls: React.FC<FilterControlsProps> = ({
     isFilterOpen,
     setIsFilterOpen,
+    isGrouped,
 }) => {
     const { searchQueries, setSearchQuery, activeOptionId, availableProductFilters, activeOption, isMobile, setAvailableProductFilters, setIsVariantsOpen, setIsSwatchBookOpen, swatchRulesData, selectedSwatches } = useOV25UI();
     const [localSearchQuery, setLocalSearchQuery] = React.useState('');
@@ -150,6 +152,9 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
                 {
                     (() => {
                         if (!activeOption || !availableProductFilters || !availableProductFilters[activeOption.name]) {
+                            if (!isGrouped) {
+                                return null;
+                            }
                             return (
                                 <div className="ov25-filter-pill ov:flex ov:flex-row ov:gap-2 ov:px-2 ov:py-3 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:whitespace-nowrap ov:cursor-pointer ov:transition-all ov:text-sm">
                                     All Collections

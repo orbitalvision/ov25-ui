@@ -98,6 +98,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
           <FilterControls 
             isFilterOpen={isFilterOpen}
             setIsFilterOpen={setIsFilterOpen}
+            isGrouped={isGrouped && !shouldDestructureGroups}
           />
         )}
         <div id="ov25-mobile-content-area" className="ov:relative ov:flex-1 ov:overflow-hidden">
@@ -168,6 +169,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
           <FilterControls 
             isFilterOpen={isFilterOpen}
             setIsFilterOpen={setIsFilterOpen}
+            isGrouped={isGrouped && !shouldDestructureGroups}
           />
           <div id="ov25-mobile-content-area" className="ov:relative ov:flex-1 ov:overflow-hidden">
             {variantsToRender.length === 0 && <NoResults />}

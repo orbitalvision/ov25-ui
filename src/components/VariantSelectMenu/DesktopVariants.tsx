@@ -128,6 +128,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
           {currentOption?.name.toLowerCase() !== 'size' && <FilterControls 
             isFilterOpen={isFilterOpen}
             setIsFilterOpen={setIsFilterOpen}
+            isGrouped={isGrouped && !shouldDestructureGroups}
           />}
           <div id="ov25-content-area" className="ov:relative ov:flex-1 ov:min-h-0 ov:overflow-hidden ov:h-full">
             {variantsToRender.length === 0 && <NoResults />}
