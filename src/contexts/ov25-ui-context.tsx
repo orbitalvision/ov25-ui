@@ -2,6 +2,19 @@ import React, { createContext, useContext, useState, useEffect, useRef, useMemo,
 import { sendMessageToIframe, toggleAR } from '../utils/configurator-utils.js';
 import { stringSimilarity } from 'string-similarity-js';
 
+// Debounce utility function
+function debounce<T extends (...args: any[]) => void>(
+  fn: T,
+  delay: number
+): (...args: Parameters<T>) => void {
+  let timeoutId: ReturnType<typeof setTimeout>;
+
+  return (...args: Parameters<T>) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => fn(...args), delay);
+  };
+}
+
 // Define types
 export type DrawerSizes = 'closed' | 'small' | 'large';
 export type AnimationState = 'unavailable' | 'open' | 'close' | 'loop' | 'stop';
@@ -644,7 +657,7 @@ export const OV25UIProvider: React.FC<{
     setIsVariantsOpen(true);
   };
 
-  const handleSelectionSelect = (selection: Selection) => {
+  const handleSelectionSelect = debounce((selection: Selection) => {
     if (activeOptionId === 'size') {
       if (currentProductId !== selection.id) {
         // Block if already selecting a product
@@ -681,7 +694,7 @@ export const OV25UIProvider: React.FC<{
       setHasSwitchedAfterDefer(true);
       setGalleryIndex(galleryIndexToUse);
     }
-  };
+  }, 500)
 
   // Navigation functions
   const handleNextOption = () => {
