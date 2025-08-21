@@ -33,7 +33,6 @@ export function ProductGallery() {
             const originalPosition = container?.style.position;
             if (container) {
                 container.style.zIndex = '9999999999999';
-                container.style.position = 'fixed';
             }
             
             return () => {
