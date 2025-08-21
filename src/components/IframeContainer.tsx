@@ -54,7 +54,7 @@ export const IframeContainer = () => {
     return (
     <div id="true-ov25-configurator-iframe-container"
         className={cn(isStacked ? isStackedStyles : isInlineStyles)}>
-        <iframe id="ov25-dummy-iframe" style={{ display: 'none !important; height: 0 !important; width: 0 !important;' }}></iframe> {/* Used as bait to stop Trustpilot from hijacking our iframe. it looks for first iframe in the DOM */}
+        <iframe id="ov25-dummy-iframe" style={{ display: 'none !important', height: '0 !important', width: '0 !important' }}></iframe> {/* Used as bait to stop Trustpilot from hijacking our iframe. it looks for first iframe in the DOM */}
         <iframe
             ref={iframeRef}
             id="ov25-configurator-iframe"
