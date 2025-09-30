@@ -7,6 +7,7 @@ import { useOV25UI } from '../contexts/ov25-ui-context.js'
 import { cn } from '../lib/utils.js'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover.js'
 import { toast } from 'sonner'
+import Snap2Controls from './Snap2Controls.js'
 
 interface ConfiguratorViewControlsProps {
   // All props now come from context, so no props needed
@@ -25,6 +26,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
     selectCamera,
     availableLights,
     selectLightGroup,
+    isSnap2Mode,
   } = useOV25UI();
 
   // Local state for dimensions
@@ -73,7 +75,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
   }, [isLightPopoverOpen]);
 
   // Calculate showDimensionsToggle from currentProduct
-  const showDimensionsToggle = !!((currentProduct as any)?.dimensionX &&
+  const showDimensionsToggle = !isSnap2Mode && !!((currentProduct as any)?.dimensionX &&
     (currentProduct as any)?.dimensionY &&
     (currentProduct as any)?.dimensionZ);
 
@@ -132,6 +134,8 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
 
   return (
     <>
+      {/* Snap2 Controls - shown only in snap2 mode */}
+      {isSnap2Mode && <Snap2Controls />}
     
       {/* <div className={cn(
         "ov:absolute ov:w-full ov:pointer-events-none ov:h-full ov:inset-0 ov:gap-2 ov:p-4 ov:flex ov:justify-end ov:items-end ov:z-[101]",
@@ -183,7 +187,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
             </button>
           )}
           
-{/* 
+        {/* 
           <button id="ov25-ar-toggle-button" onClick={toggleAR} className={cn(
             'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:border ov:items-center ov:justify-center',
             'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',

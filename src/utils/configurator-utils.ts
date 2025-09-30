@@ -97,6 +97,24 @@ export const toggleDimensions = (
 };
 
 /**
+ * Toggle mini dimensions in the 3D viewer
+ */
+export const toggleMiniDimensions = (
+  canSeeMiniDimensions: boolean,
+  setCanSeeMiniDimensions: React.Dispatch<React.SetStateAction<boolean>>
+): void => {
+  sendMessageToIframe('VIEW_MINI_DIMENSIONS', { miniDimensions: !canSeeMiniDimensions });
+  setCanSeeMiniDimensions(prev => !prev);
+};
+
+/**
+ * Request iframe to save snap2 configuration and return URL info
+ */
+export const requestSnap2Save = (): void => {
+  sendMessageToIframe('REQUEST_SNAP2_SAVE', {});
+};
+
+/**
  * Toggle animation in the 3D viewer
  */
 export const toggleAnimation = (): void => {

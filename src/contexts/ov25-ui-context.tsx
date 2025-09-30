@@ -202,6 +202,8 @@ interface OV25UIContextType {
     id: string;
     displayName: string;
   }>;
+  isSnap2Mode: boolean;
+  snap2SaveResponse: { success: boolean; shareUrl?: string; error?: string } | null;
   // Methods
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
   setCurrentProductId: React.Dispatch<React.SetStateAction<string | undefined>>;
@@ -244,6 +246,7 @@ interface OV25UIContextType {
     displayName: string;
   }>>>;
   selectLightGroup: (subGroupId: string) => void;
+  setSnap2SaveResponse: React.Dispatch<React.SetStateAction<{ success: boolean; shareUrl?: string; error?: string } | null>>;
   // Actions
   handleSelectionSelect: (selection: Selection) => void;
   handleOptionClick: (optionId: string) => void;
@@ -376,6 +379,7 @@ export const OV25UIProvider: React.FC<{
     maxSwatches: 0,
     enabled: false,
   });
+  const [snap2SaveResponse, setSnap2SaveResponse] = useState<{ success: boolean; shareUrl?: string; error?: string } | null>(null);
 
   // Effect: Initialize selectedSelections from configuratorState
   useEffect(() => {
@@ -447,6 +451,11 @@ export const OV25UIProvider: React.FC<{
 
   // Computed values
   const currentProduct = products?.find(p => p.id === currentProductId);
+  
+  // Check if we're in snap2 mode based on productLink
+  const isSnap2Mode = useMemo(() => {
+    return productLink?.startsWith('snap2/') || false;
+  }, [productLink]);
 
   // Create a virtual size option from products
   const sizeOption: SizeOption = {
@@ -625,9 +634,9 @@ export const OV25UIProvider: React.FC<{
     hasComputedFilters.current = true;
   }
 
-  // Combine size option with configurator options, only including size option if multiple products exist
+  // Combine size option with configurator options, only including size option if multiple products exist and not in snap2 mode
   const allOptions = [
-    ...(products?.length > 1 ? [sizeOption] : []),
+    ...(products?.length > 1 && !isSnap2Mode ? [sizeOption] : []),
     ...(configuratorState?.options || [])
   ];
 
@@ -771,6 +780,17 @@ export const OV25UIProvider: React.FC<{
         case 'ERROR':
           setError(new Error(data));
           break;
+        case 'SNAP2_SAVE_RESPONSE':
+          // Handle save response from iframe
+          if (data.success) {
+            console.log('SNAP2_SAVE_RESPONSE data', data);
+            const currentUrl = window.location.origin + window.location.pathname;
+            const shareableUrl = `${currentUrl}?configuration_uuid=${data.uuid}`;
+            setSnap2SaveResponse({ success: true, shareUrl: shareableUrl });
+          } else {
+            setSnap2SaveResponse({ success: false, error: data.error || 'Failed to save configuration' });
+          }
+          break;
         }
       } catch (error) {
         console.error('Error handling message:', error, 'Event data:', event.data);
@@ -851,6 +871,8 @@ export const OV25UIProvider: React.FC<{
     isSwatchBookOpen,
     availableCameras,
     availableLights,
+    isSnap2Mode,
+    snap2SaveResponse,
     // Methods
     setProducts,
     setCurrentProductId,
@@ -883,6 +905,7 @@ export const OV25UIProvider: React.FC<{
     selectCamera,
     setAvailableLights,
     selectLightGroup,
+    setSnap2SaveResponse,
     // Actions
     handleSelectionSelect,
     handleOptionClick,
