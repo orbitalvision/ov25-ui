@@ -27,6 +27,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
     availableLights,
     selectLightGroup,
     isSnap2Mode,
+    controlsHidden,
   } = useOV25UI();
 
   // Local state for dimensions
@@ -162,7 +163,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
         "ov:transition-[height] ov:duration-500 ov:ease-[cubic-bezier(0.4,0,0.2,1)] "
       )}>
         <div className="ov:flex ov:flex-row ov:gap-2 ov:items-end">
-          <button id="ov25-share-button" onClick={handleShare} className={cn(
+          {!controlsHidden && <button id="ov25-share-button" onClick={handleShare} className={cn(
             'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:border ov:items-center ov:justify-center',
             'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
             'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
@@ -172,7 +173,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
             {!isMobile && (
               <p className="ov25-controls-text ov:text-sm ov:text-[var(--ov25-text-color)]">Share</p>
             )}
-          </button>
+          </button>}
           {canAnimate && (
             <button id="ov25-animation-toggle-button" onClick={toggleAnimation} className={cn(
               'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2  ov:border ov:items-center ov:justify-center',
@@ -310,7 +311,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
 
         </div>
       </div>
-      {!isVariantsOpen && !isMobile && (
+      {!isVariantsOpen && !isMobile && !controlsHidden && (
         <div className="ov:absolute ov:ov25-controls-hidden ov:size-full ov:md:flex ov:pointer-events-none ov:inset-0 ov:p-4 ov:justify-end ov:items-start ov:z-[101]">
             <button id="ov25-desktop-fullscreen-button" className={cn(
               'ov:cursor-pointer ov:aspect-square ov:p-2 ov:pointer-events-auto ov:flex ov:gap-2.5 ov:ml-auto ov:border ov:items-center ov:justify-center',

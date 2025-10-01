@@ -21,7 +21,7 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "ov:fixed ov:inset-0 ov:z-50 ov:bg-black/80  data-[state=open]:ov:animate-in data-[state=closed]:ov:animate-out data-[state=closed]:ov:fade-out-0 data-[state=open]:ov:fade-in-0",
+      "ov:fixed ov:inset-0 ov:z-[1000] ov:bg-black/80  data-[state=open]:ov:animate-in data-[state=closed]:ov:animate-out data-[state=closed]:ov:fade-out-0 data-[state=open]:ov:fade-in-0",
       className
     )}
     {...props}
@@ -35,29 +35,37 @@ const DialogContent = React.forwardRef<
 >(({ className, children, ...props }, ref) => {
   const { shadowDOMs } = useOV25UI();
   
-  if (!shadowDOMs?.swatchbookPortal) {
-    throw new Error('Shadow DOM portal not found');
+  // Snap2 dialogs need special handling for fullscreen compatibility
+  const isSnap2Dialog = className?.includes('snap2');
+  const portalTarget = isSnap2Dialog 
+    ? (document.querySelector('iframe')?.parentElement || document.body)
+    : (shadowDOMs?.configuratorViewControls || shadowDOMs?.swatchbookPortal);
+  
+  if (!portalTarget) {
+    throw new Error('Portal target not found');
   }
   
-  return createPortal(
+  return (
     <>
-      <DialogOverlay />
-      <DialogPrimitive.Content
-        ref={ref}
-        className={cn(
-          "ov:fixed ov:left-[50%] ov:top-[50%] ov:z-50 ov:grid ov:w-full ov:max-w-lg ov:translate-x-[-50%] ov:translate-y-[-50%] ov:gap-4 ov:border ov:bg-background ov:p-6 ov:shadow-lg ov:duration-200 data-[state=open]:ov:animate-in data-[state=closed]:ov:animate-out data-[state=closed]:ov:fade-out-0 data-[state=open]:ov:fade-in-0 data-[state=closed]:ov:zoom-out-95 data-[state=open]:ov:zoom-in-95 data-[state=closed]:ov:slide-out-to-left-1/2 data-[state=closed]:ov:slide-out-to-top-[48%] data-[state=open]:ov:slide-in-from-left-1/2 data-[state=open]:ov:slide-in-from-top-[48%] ov:rounded-lg",
-          className
-        )}
-        {...props}
-      >
-        {children}
-        <DialogPrimitive.Close className="ov:absolute ov:right-4 ov:top-4 ov:rounded-sm ov:opacity-70 ov:ring-offset-background ov:transition-opacity hover:ov:opacity-100 focus:ov:outline-none focus:ov:ring-2 focus:ov:ring-ring focus:ov:ring-offset-2 disabled:ov:pointer-events-none data-[state=open]:ov:bg-accent data-[state=open]:ov:text-muted-foreground">
-          <X className="ov:h-6 ov:w-6" />
-          <span className="ov:sr-only">Close</span>
-        </DialogPrimitive.Close>
-      </DialogPrimitive.Content>
-    </>,
-    shadowDOMs.swatchbookPortal
+      {createPortal(<DialogOverlay />, portalTarget)}
+      {createPortal(
+        <DialogPrimitive.Content
+          ref={ref}
+          className={cn(
+            "ov:fixed ov:left-[50%] ov:top-[50%] ov:z-[2147483647] ov:grid ov:w-full ov:max-w-lg ov:translate-x-[-50%] ov:translate-y-[-50%] ov:gap-4 ov:border ov:bg-background ov:p-6 ov:shadow-lg ov:duration-200 data-[state=open]:ov:animate-in data-[state=closed]:ov:animate-out data-[state=closed]:ov:fade-out-0 data-[state=open]:ov:fade-in-0 data-[state=closed]:ov:zoom-out-95 data-[state=open]:ov:zoom-in-95 data-[state=closed]:ov:slide-out-to-left-1/2 data-[state=closed]:ov:slide-out-to-top-[48%] data-[state=open]:ov:slide-in-from-left-1/2 data-[state=open]:ov:slide-in-from-top-[48%] ov:rounded-lg",
+            className
+          )}
+          {...props}
+        >
+          {children}
+          <DialogPrimitive.Close className="ov:absolute ov:right-4 ov:top-4 ov:rounded-sm ov:opacity-70 ov:ring-offset-background ov:transition-opacity hover:ov:opacity-100 focus:ov:outline-none focus:ov:ring-2 focus:ov:ring-ring focus:ov:ring-offset-2 disabled:ov:pointer-events-none data-[state=open]:ov:bg-accent data-[state=open]:ov:text-muted-foreground">
+            <X className="ov:h-6 ov:w-6" />
+            <span className="ov:sr-only">Close</span>
+          </DialogPrimitive.Close>
+        </DialogPrimitive.Content>,
+        portalTarget
+      )}
+    </>
   );
 })
 DialogContent.displayName = DialogPrimitive.Content.displayName

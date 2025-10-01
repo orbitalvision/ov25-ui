@@ -204,6 +204,7 @@ interface OV25UIContextType {
   }>;
   isSnap2Mode: boolean;
   snap2SaveResponse: { success: boolean; shareUrl?: string; error?: string } | null;
+  controlsHidden: boolean;
   // Methods
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
   setCurrentProductId: React.Dispatch<React.SetStateAction<string | undefined>>;
@@ -247,6 +248,8 @@ interface OV25UIContextType {
   }>>>;
   selectLightGroup: (subGroupId: string) => void;
   setSnap2SaveResponse: React.Dispatch<React.SetStateAction<{ success: boolean; shareUrl?: string; error?: string } | null>>;
+  setControlsHidden: React.Dispatch<React.SetStateAction<boolean>>;
+  toggleHideAll: () => void;
   // Actions
   handleSelectionSelect: (selection: Selection) => void;
   handleOptionClick: (optionId: string) => void;
@@ -380,6 +383,7 @@ export const OV25UIProvider: React.FC<{
     enabled: false,
   });
   const [snap2SaveResponse, setSnap2SaveResponse] = useState<{ success: boolean; shareUrl?: string; error?: string } | null>(null);
+  const [controlsHidden, setControlsHidden] = useState(false);
 
   // Effect: Initialize selectedSelections from configuratorState
   useEffect(() => {
@@ -670,6 +674,12 @@ export const OV25UIProvider: React.FC<{
     setIsVariantsOpen(true);
   };
 
+  const toggleHideAll = useCallback(() => {
+    const newHiddenState = !controlsHidden;
+    setControlsHidden(newHiddenState);
+    sendMessageToIframe('TOGGLE_HIDE_ALL', { hideAll: newHiddenState });
+  }, [controlsHidden, setControlsHidden]);
+
   const handleSelectionSelect = throttle((selection: Selection) => {
     if (activeOptionId === 'size') {
       if (currentProductId !== selection.id) {
@@ -873,6 +883,7 @@ export const OV25UIProvider: React.FC<{
     availableLights,
     isSnap2Mode,
     snap2SaveResponse,
+    controlsHidden,
     // Methods
     setProducts,
     setCurrentProductId,
@@ -906,6 +917,8 @@ export const OV25UIProvider: React.FC<{
     setAvailableLights,
     selectLightGroup,
     setSnap2SaveResponse,
+    setControlsHidden,
+    toggleHideAll,
     // Actions
     handleSelectionSelect,
     handleOptionClick,

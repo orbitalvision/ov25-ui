@@ -63,9 +63,8 @@ export const SaveSnap2Menu: React.FC = () => {
       <button 
         onClick={handleSave}
         className={cn(
-          'ov:cursor-pointer ov:flex ov:gap-2 ov:px-3 ov:py-2 ov:border ov:items-center ov:justify-center',
-          'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
-          'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
+          'ov:cursor-pointer ov:w-8 ov:h-8 ov:flex ov:items-center ov:justify-center',
+          'ov:border ov:border-[var(--ov25-configurator-view-controls-border-color)] ov:rounded-full',
           'ov:bg-[var(--ov25-overlay-button-color)]',
           'ov:transition-all ov:duration-200 ov:hover:opacity-80'
         )}
@@ -75,7 +74,7 @@ export const SaveSnap2Menu: React.FC = () => {
 
       {/* Share Dialog */}
       <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
-        <DialogContent aria-describedby={undefined} className="ov:bg-[var(--ov25-background-color)] ov:border-[var(--ov25-border-color)]">
+        <DialogContent aria-describedby={undefined} className="snap2-dialog ov:bg-[var(--ov25-background-color)] ov:border-[var(--ov25-border-color)] ov:z-[9999]">
           <DialogHeader>
             <DialogTitle className="ov:text-[var(--ov25-text-color)]">
               Share Configuration
