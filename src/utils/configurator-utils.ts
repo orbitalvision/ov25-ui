@@ -172,7 +172,8 @@ export const getAnimationButtonText = (
  */
 export const getIframeSrc = (
   apiKey: string | null,
-  productLink: string | null
+  productLink: string | null,
+  configurationUuid: string | null
 ): string => {
   const baseUrl = 'https://configurator.orbital.vision';
   
@@ -184,6 +185,10 @@ export const getIframeSrc = (
     productLink = '';
   }
   
+  if (!configurationUuid) {
+    configurationUuid = '';
+  }
+  
   // Remove leading slash if present
   const cleanedLink = productLink.startsWith('/') ? productLink.substring(1) : productLink;
   
@@ -191,10 +196,21 @@ export const getIframeSrc = (
   const currentUrl = new URL(window.location.href);
   const queryParams = currentUrl.search;
   
-  // Append query parameters to the product link if they exist
-  const linkWithParams = queryParams ? `${cleanedLink}${queryParams}` : cleanedLink;
+  // Build the final URL with proper query parameter handling
+  let finalUrl = `${baseUrl}/${apiKey}/${cleanedLink}`;
   
-  return `${baseUrl}/${apiKey}/${linkWithParams}`;
+  // Add existing query parameters if they exist
+  if (queryParams) {
+    finalUrl += queryParams;
+  }
+  
+  // Add configuration_uuid parameter with proper separator
+  if (configurationUuid) {
+    const separator = queryParams ? '&' : '?';
+    finalUrl += `${separator}configuration_uuid=${configurationUuid}`;
+  }
+  
+  return finalUrl;
 };
 
 /**

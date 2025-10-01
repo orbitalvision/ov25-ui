@@ -51,6 +51,7 @@ export type ElementSelector = string | ElementConfig;
 export interface InjectConfiguratorOptions {
   apiKey: StringOrFunction;
   productLink: StringOrFunction;
+  configurationUuid: StringOrFunction;
   galleryId?: ElementSelector;
   images?: string[];
   deferThreeD?: boolean;
@@ -72,6 +73,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
   const {
     apiKey,
     productLink,
+    configurationUuid,
     galleryId,
     priceId,
     nameId,
@@ -475,11 +477,13 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     // Resolve apiKey and productLink when rendering
     const resolvedApiKey = resolveStringOrFunction(apiKey);
     const resolvedProductLink = resolveStringOrFunction(productLink);
-
-         root.render(
+    const resolvedConfigurationUuid = resolveStringOrFunction(configurationUuid);
+    
+    root.render(
        <OV25UIProvider 
          apiKey={resolvedApiKey} 
          productLink={resolvedProductLink} 
+         configurationUuid={resolvedConfigurationUuid}
          buyNowFunction={buyNowFunction}
          addSwatchesToCartFunction={addSwatchesToCartFunction}
          addToBasketFunction={addToBasketFunction} 

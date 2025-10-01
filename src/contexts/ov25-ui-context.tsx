@@ -173,6 +173,7 @@ interface OV25UIContextType {
   // Coming from injectConfigurator options
   productLink: string | null;
   apiKey: string;
+  configurationUuid: string | null;
   buyNowFunction: () => void;
   addToBasketFunction: () => void;
   addSwatchesToCart: () => void;
@@ -267,6 +268,7 @@ export const OV25UIProvider: React.FC<{
   children: React.ReactNode, 
   productLink: string | null, 
   apiKey: string, 
+  configurationUuid: string,
   buyNowFunction: () => void,
   addToBasketFunction: () => void,
   addSwatchesToCartFunction: (swatches: Swatch[], swatchRulesData: SwatchRulesData) => void,
@@ -286,6 +288,7 @@ export const OV25UIProvider: React.FC<{
   children,
   productLink,
   apiKey,
+  configurationUuid,
   buyNowFunction,
   addToBasketFunction,
   addSwatchesToCartFunction,
@@ -862,6 +865,7 @@ export const OV25UIProvider: React.FC<{
     // Coming from injectConfigurator options
     productLink,
     apiKey,
+    configurationUuid,
     buyNowFunction,
     addToBasketFunction,
     addSwatchesToCart,
