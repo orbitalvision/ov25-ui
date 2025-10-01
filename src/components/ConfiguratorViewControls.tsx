@@ -163,7 +163,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
         "ov:transition-[height] ov:duration-500 ov:ease-[cubic-bezier(0.4,0,0.2,1)] "
       )}>
         <div className="ov:flex ov:flex-row ov:gap-2 ov:items-end">
-          {!controlsHidden && <button id="ov25-share-button" onClick={handleShare} className={cn(
+          {!controlsHidden && !isSnap2Mode && <button id="ov25-share-button" onClick={handleShare} className={cn(
             'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:border ov:items-center ov:justify-center',
             'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
             'ov:border-[var(--ov25-configurator-view-controls-border-color)]',

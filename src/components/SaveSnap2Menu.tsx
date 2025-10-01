@@ -91,7 +91,7 @@ export const SaveSnap2Menu: React.FC = () => {
             ) : (
               <>
                 <p className="ov:text-sm ov:text-[var(--ov25-secondary-text-color)]">
-                  Copy this link to show others orsave your custom configuration for later:
+                  Copy this link to show others or save your custom configuration for later:
                 </p>
                 <div className="ov:space-y-2">
                   <textarea
