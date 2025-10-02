@@ -62,7 +62,7 @@ export const ProductVariants = ({
   basis = 'ov:basis-[43%]',
   isMobile,
 }: ProductVariantsProps) => {
-  const { activeOptionId } = useOV25UI();
+  const { activeOptionId, hidePricing } = useOV25UI();
 
   return (
     <div className={cn(
@@ -90,7 +90,7 @@ export const ProductVariants = ({
           gridDivide={gridDivide}
         />
       )}
-      {!isMobile ? <CheckoutButton /> : null}
+      {!isMobile && !hidePricing ? <CheckoutButton /> : null}
     </div>
   )
 }

@@ -170,6 +170,7 @@ interface OV25UIContextType {
   hasSwitchedAfterDefer: boolean;
   deferThreeD: boolean;
   showOptional: boolean;
+  hidePricing: boolean;
   // Coming from injectConfigurator options
   productLink: string | null;
   apiKey: string;
@@ -277,6 +278,7 @@ export const OV25UIProvider: React.FC<{
   images?: string[],
   deferThreeD?: boolean,
   showOptional?: boolean,
+  hidePricing?: boolean,
   logoURL?: string,
   isProductGalleryStacked: boolean,
   mobileLogoURL?: string,
@@ -297,6 +299,7 @@ export const OV25UIProvider: React.FC<{
   images,
   deferThreeD = false,
   showOptional = false,
+  hidePricing = false,
   logoURL,
   isProductGalleryStacked,
   mobileLogoURL,
@@ -864,6 +867,7 @@ export const OV25UIProvider: React.FC<{
     hasSwitchedAfterDefer,
     deferThreeD,
     showOptional,
+    hidePricing,
     galleryIndexToUse,
     // Coming from injectConfigurator options
     productLink,

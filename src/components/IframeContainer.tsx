@@ -13,6 +13,7 @@ export const IframeContainer = () => {
         galleryIndex,
         productLink,
         apiKey,
+        configurationUuid,
         galleryIndexToUse,
         images: passedImages,
         isProductGalleryStacked: isStacked
@@ -35,8 +36,8 @@ export const IframeContainer = () => {
 
     // Use the utility function to get the iframe src
     const iframeSrc = useMemo(() =>
-        getIframeSrc(apiKey, productLink),
-        [productLink, apiKey]);
+        getIframeSrc(apiKey, productLink, configurationUuid),
+        [productLink, apiKey, configurationUuid]);
 
     const isStackedStyles = cn(
         "ov:relative ov:aspect-square ov:md:aspect-[3/2] ov:2xl:aspect-video ov:overflow-hidden ov:z-[3]",
