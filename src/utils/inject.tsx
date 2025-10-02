@@ -10,6 +10,7 @@ import { SwatchesContainer } from '../components/SwatchesContainer.js';
 import { ProductCarousel } from '../components/product-carousel.js';
 import ConfiguratorViewControls from '../components/ConfiguratorViewControls.js';
 import { SwatchBook } from '../components/VariantSelectMenu/SwatchBook.js';
+import { Snap2ConfigureButton } from '../components/Snap2ConfigureButton.js';
 import { createPortal } from 'react-dom';
 
 // Import styles directly
@@ -61,6 +62,7 @@ export interface InjectConfiguratorOptions {
   variantsId?: ElementSelector;
   swatchesId?: ElementSelector;
   carouselId?: ElementSelector | true;
+  snap2FullscreenButtonId?: ElementSelector;
   addToBasketFunction: () => void;
   buyNowFunction: () => void;
   addSwatchesToCartFunction: (swatches: Swatch[], swatchRulesData: SwatchRulesData) => void;
@@ -80,6 +82,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     variantsId,
     swatchesId,
     carouselId,
+    snap2FullscreenButtonId,
     addToBasketFunction,
     buyNowFunction,
     addSwatchesToCartFunction,
@@ -411,11 +414,21 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     const isProductGalleryStacked = checkForStackedGallery();
 
     // Process each component
-    processElement(galleryId, <ProductGallery  />, 'gallery');
+    // Only show gallery and variants if snap2FullscreenButtonId is not provided
+    if (!snap2FullscreenButtonId) {
+      processElement(galleryId, <ProductGallery  />, 'gallery');
+      processElement(variantsId, <VariantSelectMenu />, 'variants');
+    }
+    
+    // Always show price, name, and swatches
     processElement(priceId, <Price />, 'price');
     processElement(nameId, <Name />, 'name');
-    processElement(variantsId, <VariantSelectMenu />, 'variants');
     processElement(swatchesId, <SwatchesContainer />, 'swatches');
+    
+    // Show snap2 configure button if provided
+    if (snap2FullscreenButtonId) {
+      processElement(snap2FullscreenButtonId, <Snap2ConfigureButton />, 'snap2-configure-button');
+    }
     
     // Add toaster to portals
     portals.push(createPortal(<Toaster position="top-center" richColors style={{ zIndex: 999999999999999 }} />, toasterPortalShadowRoot));

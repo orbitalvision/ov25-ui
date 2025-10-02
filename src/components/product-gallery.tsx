@@ -9,8 +9,11 @@ import { IframeContainer } from "./IframeContainer.js"
 
 
 // Simplified props, most data now comes from context
+interface ProductGalleryProps {
+  isInModal?: boolean;
+}
 
-export function ProductGallery() {
+export function ProductGallery({ isInModal = false }: ProductGalleryProps = {}) {
     // Get all required data from context
     const {
         isDrawerOrDialogOpen,
@@ -18,7 +21,6 @@ export function ProductGallery() {
         images: passedImages,
         isProductGalleryStacked
     } = useOV25UI();
-
 
     // Use the custom hook to handle iframe positioning
     useIframePositioning();
@@ -101,15 +103,18 @@ export function ProductGallery() {
 
     return (<>
 
-        <div className={cn("ov:relative ov:font-[family-name:var(--ov25-font-family)]",)} id="ov-25-configurator-gallery-container">
+        <div className={cn("ov:relative ov:font-[family-name:var(--ov25-font-family)]", isInModal && "ov:h-full")} id="ov-25-configurator-gallery-container">
             <div id="ov25-configurator-background-color" className={cn(
-                "ov:aspect-square ov:md:aspect-[1/1] ov:z-[2] ov:absolute ov:inset-0 ov:block!",
+                isInModal ? "ov:h-full" : "ov:aspect-square ov:md:aspect-[1/1]",
+                "ov:z-[2] ov:absolute ov:inset-0 ov:block!",
                 "ov:rounded-[var(--ov25-configurator-iframe-border-radius)]",
                 "ov:bg-[var(--ov25-configurator-iframe-background-color)]",
             )}></div>
             <div id="ov25-configurator-iframe-container"
                 ref={containerRef}
-                className={cn(" ov:relative ov:aspect-square ov:md:aspect-[3/2] ov:2xl:aspect-video ov:overflow-hidden ov:z-[3]",
+                className={cn(
+                    "ov:relative ov:overflow-hidden ov:z-[3]",
+                    isInModal ? "ov:h-full ov:w-full" : "ov:aspect-square ov:md:aspect-[3/2] ov:2xl:aspect-video",
                     "ov:rounded-[var(--ov25-configurator-iframe-border-radius)]",
                     "ov:bg-[var(--ov25-configurator-iframe-background-color)]",
                 )}>
