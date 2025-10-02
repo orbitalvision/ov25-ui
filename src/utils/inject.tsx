@@ -133,6 +133,12 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     return typeof value === 'function' ? value() : value;
   };
 
+  // Get configuration_uuid from query parameters with precedence over injected value
+  const getConfigurationUuidFromQueryParams = (): string | null => {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('configuration_uuid');
+  };
+
   // Get selector string from ElementSelector
   const getSelector = (elementSelector: ElementSelector | undefined): string | undefined => {
     if (!elementSelector) return undefined;
@@ -477,7 +483,10 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     // Resolve apiKey and productLink when rendering
     const resolvedApiKey = resolveStringOrFunction(apiKey);
     const resolvedProductLink = resolveStringOrFunction(productLink);
-    const resolvedConfigurationUuid = resolveStringOrFunction(configurationUuid);
+    
+    // Check query parameters first, then fall back to injected configurationUuid
+    const queryConfigUuid = getConfigurationUuidFromQueryParams();
+    const resolvedConfigurationUuid = queryConfigUuid || resolveStringOrFunction(configurationUuid);
     
     root.render(
        <OV25UIProvider 
