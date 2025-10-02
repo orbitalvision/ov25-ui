@@ -3,11 +3,11 @@ import { DimensionsIcon } from '../lib/svgs/DimensionsIcon.js';
 import { toggleDimensions, toggleMiniDimensions } from '../utils/configurator-utils.js';
 import { useOV25UI } from '../contexts/ov25-ui-context.js';
 import { cn } from '../lib/utils.js';
-import { Eye, EyeClosed } from 'lucide-react';
+import { Eye, EyeClosed, TableRowsSplit } from 'lucide-react';
 import SaveSnap2Menu from './SaveSnap2Menu.js';
 
 const Snap2Controls: React.FC = () => {
-  const { isMobile, controlsHidden, toggleHideAll } = useOV25UI();
+  const { controlsHidden, toggleHideAll, allOptions, handleOptionClick, isVariantsOpen, setIsVariantsOpen } = useOV25UI();
   
   // Local state for dimensions
   const [canSeeDimensions, setCanSeeDimensions] = useState(false);
@@ -19,6 +19,16 @@ const Snap2Controls: React.FC = () => {
 
   const handleToggleMiniDimensionsClick = () => {
     toggleMiniDimensions(canSeeMiniDimensions, setCanSeeMiniDimensions);
+  };
+
+  const handleVariantsClick = () => {
+    if (isVariantsOpen) {
+      setIsVariantsOpen(false);
+    } else {
+      if (allOptions.length > 0) {
+        handleOptionClick(allOptions[0].id);
+      }
+    }
   };
 
   return (
@@ -67,6 +77,25 @@ const Snap2Controls: React.FC = () => {
               </button>
             )}
           </div>
+        )}
+
+        {/* Variants Button */}
+        {!controlsHidden && allOptions.length > 0 && (
+          <button 
+            id="ov25-snap2-variants-button" 
+            onClick={handleVariantsClick} 
+            className={cn(
+              "ov:cursor-pointer ov:w-8 ov:h-8 ov:flex ov:items-center ov:justify-center ov:transition-all ov:duration-200 ov:hover:opacity-80 ov:border ov:rounded-full",
+              isVariantsOpen 
+                ? "ov:border-[var(--ov25-text-color)] ov:bg-gray-200" 
+                : "ov:border-[var(--ov25-configurator-view-controls-border-color)]"
+            )}
+          >
+            <TableRowsSplit 
+              className="ov:w-[16px] ov:h-[16px]"
+              color="var(--ov25-text-color)"
+            />
+          </button>
         )}
 
         {/* Save Snap2 Menu - only shown when not all hidden */}

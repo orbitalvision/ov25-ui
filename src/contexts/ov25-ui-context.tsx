@@ -205,6 +205,7 @@ interface OV25UIContextType {
   }>;
   isSnap2Mode: boolean;
   snap2SaveResponse: { success: boolean; shareUrl?: string; error?: string } | null;
+  isModalOpen: boolean;
   controlsHidden: boolean;
   // Methods
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
@@ -249,6 +250,7 @@ interface OV25UIContextType {
   }>>>;
   selectLightGroup: (subGroupId: string) => void;
   setSnap2SaveResponse: React.Dispatch<React.SetStateAction<{ success: boolean; shareUrl?: string; error?: string } | null>>;
+  setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setControlsHidden: React.Dispatch<React.SetStateAction<boolean>>;
   toggleHideAll: () => void;
   // Actions
@@ -386,6 +388,7 @@ export const OV25UIProvider: React.FC<{
     enabled: false,
   });
   const [snap2SaveResponse, setSnap2SaveResponse] = useState<{ success: boolean; shareUrl?: string; error?: string } | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [controlsHidden, setControlsHidden] = useState(false);
 
   // Effect: Initialize selectedSelections from configuratorState
@@ -887,6 +890,7 @@ export const OV25UIProvider: React.FC<{
     availableLights,
     isSnap2Mode,
     snap2SaveResponse,
+    isModalOpen,
     controlsHidden,
     // Methods
     setProducts,
@@ -921,6 +925,7 @@ export const OV25UIProvider: React.FC<{
     setAvailableLights,
     selectLightGroup,
     setSnap2SaveResponse,
+    setIsModalOpen,
     setControlsHidden,
     toggleHideAll,
     // Actions

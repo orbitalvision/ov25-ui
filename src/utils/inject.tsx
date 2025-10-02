@@ -414,11 +414,11 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     const isProductGalleryStacked = checkForStackedGallery();
 
     // Process each component
-    // Only show gallery and variants if snap2FullscreenButtonId is not provided
+    // Only show gallery if snap2FullscreenButtonId is not provided
     if (!snap2FullscreenButtonId) {
       processElement(galleryId, <ProductGallery  />, 'gallery');
-      processElement(variantsId, <VariantSelectMenu />, 'variants');
     }
+    processElement(variantsId, <VariantSelectMenu />, 'variants');
     
     // Always show price, name, and swatches
     processElement(priceId, <Price />, 'price');

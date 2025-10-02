@@ -23,6 +23,8 @@ export const VariantSelectMenu: React.FC = () => {
     handleOptionClick,
     range,
     getSelectedValue,
+    isSnap2Mode,
+    isModalOpen,
   } = useOV25UI();
   
   return (
@@ -32,32 +34,36 @@ export const VariantSelectMenu: React.FC = () => {
           const Overlay = MobilePriceOverlay as any;
           return <Overlay />;
         })()}
-        <ProductOptionsGroup
-          allOptions={allOptions}
-          handleOptionClick={handleOptionClick}
-          range={range}
-          getSelectedValue={getSelectedValue}
-        />
-        {isMobile ? (
-          (() => {
-            return (
-              <TwoStageDrawer
-                isOpen={isVariantsOpen}
-                onOpenChange={setIsVariantsOpen}
-                onStateChange={(value: any) => setDrawerSize(value === 0 ? 'closed' : value === 1 ? 'small' : 'large')}
-                className="ov:z-[10]"
-              >
-                  <div className='ov:w-full ov:h-full ov:flex ov:flex-col ov:absolute ov:top-0 ov:left-0 ov:pointer-events-auto'>
-                      <ProductVariantsWrapper />
-                      <div className={`${drawerSize === 'large' || drawerSize === 'small' ? 'ov:fixed ov:bottom-0 ov:left-0 ov:w-full' : '' }`}>
-                      <MobileCheckoutButton />
-                      </div>
-                  </div>
-              </TwoStageDrawer>
-            );
-          })()
-        ) : (
-          <VariantContentDesktop />
+        {!isSnap2Mode && (
+          <ProductOptionsGroup
+            allOptions={allOptions}
+            handleOptionClick={handleOptionClick}
+            range={range}
+            getSelectedValue={getSelectedValue}
+          />
+        )}
+        {!isModalOpen && (
+          isMobile ? (
+            (() => {
+              return (
+                <TwoStageDrawer
+                  isOpen={isVariantsOpen}
+                  onOpenChange={setIsVariantsOpen}
+                  onStateChange={(value: any) => setDrawerSize(value === 0 ? 'closed' : value === 1 ? 'small' : 'large')}
+                  className="ov:z-[10]"
+                >
+                    <div className='ov:w-full ov:h-full ov:flex ov:flex-col ov:absolute ov:top-0 ov:left-0 ov:pointer-events-auto'>
+                        <ProductVariantsWrapper />
+                        <div className={`${drawerSize === 'large' || drawerSize === 'small' ? 'ov:fixed ov:bottom-0 ov:left-0 ov:w-full' : '' }`}>
+                        <MobileCheckoutButton />
+                        </div>
+                    </div>
+                </TwoStageDrawer>
+              );
+            })()
+          ) : (
+            <VariantContentDesktop />
+          )
         )}
       </div>
     </>
