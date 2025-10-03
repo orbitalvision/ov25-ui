@@ -97,6 +97,7 @@ function App() {
             <div id="price">PRICE: £123</div>
             <div id="name">NAME: Product Name</div>
           </div>
+          <div id="ov25-snap2-fullscreen-button"></div>
           <div id='ov25-controls' ></div>
           <div id="ov25-swatches"></div>
           <p className='ov:mt-4'>This is a description of the product. Words will go here - it might continue for a few lines. It might be a few sentences long. </p>
