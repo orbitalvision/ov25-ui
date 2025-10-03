@@ -56,7 +56,7 @@ const findElementByIdInShadowOrRegularDOM = (id: string): HTMLElement | null => 
  * Hook to position the iframe and its container at the top of the screen when drawer is open
  */
 export const useIframePositioning = () => {
-  const {isDrawerOrDialogOpen, isMobile, drawerSize, isProductGalleryStacked } = useOV25UI();
+  const {isDrawerOrDialogOpen, isMobile, drawerSize, isProductGalleryStacked, isSnap2Mode } = useOV25UI();
   const originalStyles = useRef<{
     container: {
       position: string;
@@ -289,7 +289,7 @@ export const useIframePositioning = () => {
     return () => {
       window.removeEventListener('resize', updateIframeWidth);
     };
-  }, [isDrawerOrDialogOpen, isMobile]);
+  }, [isDrawerOrDialogOpen, isMobile, isSnap2Mode]);
 
   // This useEffect handles drawer size changes
   useEffect(() => {
@@ -325,7 +325,7 @@ export const useIframePositioning = () => {
             }
         };
     }
-  }, [drawerSize, isDrawerOrDialogOpen])
+  }, [drawerSize, isDrawerOrDialogOpen, isSnap2Mode, isMobile])
 };
 
 export default useIframePositioning;

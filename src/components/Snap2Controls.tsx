@@ -7,7 +7,7 @@ import { Eye, EyeClosed, TableRowsSplit } from 'lucide-react';
 import SaveSnap2Menu from './SaveSnap2Menu.js';
 
 const Snap2Controls: React.FC = () => {
-  const { controlsHidden, toggleHideAll, allOptions, handleOptionClick, isVariantsOpen, setIsVariantsOpen } = useOV25UI();
+  const { controlsHidden, toggleHideAll, allOptions, isVariantsOpen, setIsVariantsOpen, setActiveOptionId } = useOV25UI();
   
   // Local state for dimensions
   const [canSeeDimensions, setCanSeeDimensions] = useState(false);
@@ -25,8 +25,10 @@ const Snap2Controls: React.FC = () => {
     if (isVariantsOpen) {
       setIsVariantsOpen(false);
     } else {
+      // Show the first available option (which will include modules if in snap2 mode)
       if (allOptions.length > 0) {
-        handleOptionClick(allOptions[0].id);
+        setActiveOptionId(allOptions[0].id);
+        setIsVariantsOpen(true);
       }
     }
   };

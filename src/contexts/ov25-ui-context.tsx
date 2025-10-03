@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { sendMessageToIframe, toggleAR } from '../utils/configurator-utils.js';
+import { sendMessageToIframe, toggleAR, CompatibleModule } from '../utils/configurator-utils.js';
 import { stringSimilarity } from 'string-similarity-js';
 
 function throttle<T extends (...args: any[]) => void>(
@@ -208,6 +208,10 @@ interface OV25UIContextType {
   snap2SaveResponse: { success: boolean; shareUrl?: string; error?: string } | null;
   isModalOpen: boolean;
   controlsHidden: boolean;
+  // Module selection state
+  compatibleModules: CompatibleModule[] | null;
+  isModuleSelectionLoading: boolean;
+  selectedModuleType: 'all' | 'middle' | 'corner' | 'end';
   // Methods
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
   setCurrentProductId: React.Dispatch<React.SetStateAction<string | undefined>>;
@@ -254,6 +258,10 @@ interface OV25UIContextType {
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setControlsHidden: React.Dispatch<React.SetStateAction<boolean>>;
   toggleHideAll: () => void;
+  // Module selection methods
+  setCompatibleModules: React.Dispatch<React.SetStateAction<CompatibleModule[] | null>>;
+  setIsModuleSelectionLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  setSelectedModuleType: React.Dispatch<React.SetStateAction<'all' | 'middle' | 'corner' | 'end'>>;
   // Actions
   handleSelectionSelect: (selection: Selection) => void;
   handleOptionClick: (optionId: string) => void;
@@ -393,6 +401,10 @@ export const OV25UIProvider: React.FC<{
   const [snap2SaveResponse, setSnap2SaveResponse] = useState<{ success: boolean; shareUrl?: string; error?: string } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [controlsHidden, setControlsHidden] = useState(false);
+  // Module selection state
+  const [compatibleModules, setCompatibleModules] = useState<CompatibleModule[] | null>(null);
+  const [isModuleSelectionLoading, setIsModuleSelectionLoading] = useState<boolean>(false);
+  const [selectedModuleType, setSelectedModuleType] = useState<'all' | 'middle' | 'corner' | 'end'>('all');
 
   // Effect: Initialize selectedSelections from configuratorState
   useEffect(() => {
@@ -649,6 +661,16 @@ export const OV25UIProvider: React.FC<{
 
   // Combine size option with configurator options, only including size option if multiple products exist and not in snap2 mode
   const allOptions = [
+    // Add modules option first in snap2 mode
+    ...(isSnap2Mode ? [{
+      id: 'modules',
+      name: 'Modules',
+      groups: [{
+        id: 'modules-group',
+        name: 'Compatible Modules',
+        selections: []
+      }]
+    }] : []),
     ...(products?.length > 1 && !isSnap2Mode ? [sizeOption] : []),
     ...(configuratorState?.options || [])
   ];
@@ -810,6 +832,14 @@ export const OV25UIProvider: React.FC<{
             setSnap2SaveResponse({ success: false, error: data.error || 'Failed to save configuration' });
           }
           break;
+        case 'COMPATIBLE_MODULES':
+          setCompatibleModules(data.modules || []);
+          setIsVariantsOpen(true);
+          setActiveOptionId('modules');
+          break;
+        case 'SELECT_MODULE_RECEIVED':
+          setIsModuleSelectionLoading(false);
+          break;
         }
       } catch (error) {
         console.error('Error handling message:', error, 'Event data:', event.data);
@@ -896,6 +926,10 @@ export const OV25UIProvider: React.FC<{
     snap2SaveResponse,
     isModalOpen,
     controlsHidden,
+    // Module selection state
+    compatibleModules,
+    isModuleSelectionLoading,
+    selectedModuleType,
     // Methods
     setProducts,
     setCurrentProductId,
@@ -932,6 +966,10 @@ export const OV25UIProvider: React.FC<{
     setIsModalOpen,
     setControlsHidden,
     toggleHideAll,
+    // Module selection methods
+    setCompatibleModules,
+    setIsModuleSelectionLoading,
+    setSelectedModuleType,
     // Actions
     handleSelectionSelect,
     handleOptionClick,

@@ -63,7 +63,7 @@ export interface InjectConfiguratorOptions {
   variantsId?: ElementSelector;
   swatchesId?: ElementSelector;
   carouselId?: ElementSelector | true;
-  snap2FullscreenButtonId?: ElementSelector;
+  configureButtonId?: ElementSelector;
   addToBasketFunction: () => void;
   buyNowFunction: () => void;
   addSwatchesToCartFunction: (swatches: Swatch[], swatchRulesData: SwatchRulesData) => void;
@@ -83,7 +83,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     variantsId,
     swatchesId,
     carouselId,
-    snap2FullscreenButtonId,
+    configureButtonId,
     addToBasketFunction,
     buyNowFunction,
     addSwatchesToCartFunction,
@@ -416,8 +416,8 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     const isProductGalleryStacked = checkForStackedGallery();
 
     // Process each component
-    // Only show gallery if snap2FullscreenButtonId is not provided
-    if (!snap2FullscreenButtonId) {
+    // Only show gallery if no configure button (Snap2 mode)
+    if (!configureButtonId) {
       processElement(galleryId, <ProductGallery  />, 'gallery');
     }
     processElement(variantsId, <VariantSelectMenu />, 'variants');
@@ -428,8 +428,8 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     processElement(swatchesId, <SwatchesContainer />, 'swatches');
     
     // Show snap2 configure button if provided
-    if (snap2FullscreenButtonId) {
-      processElement(snap2FullscreenButtonId, <Snap2ConfigureButton />, 'snap2-configure-button');
+    if (configureButtonId) {
+      processElement(configureButtonId, <Snap2ConfigureButton />, 'snap2-configure-button');
     }
     
     // Add toaster to portals

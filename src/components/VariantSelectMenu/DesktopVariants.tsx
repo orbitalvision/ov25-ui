@@ -24,14 +24,14 @@ export const capitalizeWords = (str: string) => {
   return str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 };
 
-export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gridDivide }
+export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gridDivide, moduleTypeTabs }
   : {
     variants: VariantGroup[] | Variant[],
     VariantCard: React.ComponentType<VariantCardProps>,
     isMobile: boolean,
     onSelect: (variant: Variant) => void
     gridDivide: number,
-
+    moduleTypeTabs?: React.ReactNode
   }) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
@@ -106,7 +106,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
               return (
                 <div
                   key={`${option.id}-desktop-render`}
-                  className={`ov:cursor-pointer ov:flex ov:justify-center ov:items-center ov:px-[5px] ov:py-[5px] ov:my-0 ov:border-b ov:border-[var(--ov25-border-color)] ov:data-[selected=true]:bg-[var(--ov25-text-color)] ${widthClass} ${borderClass}`}
+                  className={`ov:cursor-pointer ov:flex ov:justify-center ov:items-center ov:my-0 ov:border-b ov:border-[var(--ov25-border-color)] ov:data-[selected=true]:bg-[var(--ov25-text-color)] ${widthClass} ${borderClass}`}
                   onClick={() => handleOptionClick(option?.id)}
                   style={{ maxWidth: itemsThisRow === 1 ? '100%' : itemsThisRow === 2 ? '50%' : '33.333%' }}
                   data-selected={option.id === activeOptionId ? "true" : "false"}
@@ -123,15 +123,24 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
             })}
           </div>
         )
-      }{
+      }
+      {/* Module type tabs - only show for modules option */}
+      {moduleTypeTabs && currentOption?.name.toLowerCase() === 'modules' && (
+        <div className="ov:w-full">
+          {moduleTypeTabs}
+        </div>
+      )}
+      {
         <div id="ov25-filter-container" className="ov:relative ov:w-full ov:flex ov:flex-col ov:min-h-0 ov:h-full">
-          {currentOption?.name.toLowerCase() !== 'size' && <FilterControls 
+          {currentOption?.name.toLowerCase() !== 'size' && currentOption?.name.toLowerCase() !== 'modules' && <FilterControls 
             isFilterOpen={isFilterOpen}
             setIsFilterOpen={setIsFilterOpen}
             isGrouped={isGrouped && !shouldDestructureGroups}
           />}
           <div id="ov25-content-area" className="ov:relative ov:flex-1 ov:min-h-0 ov:overflow-hidden ov:h-full">
-            {variantsToRender.length === 0 && <NoResults />}
+            {variantsToRender.length === 0 && (
+              <NoResults />
+            )}
             {((shouldDestructureGroups || !isGrouped) ? (
               <div id="ov25-desktop-variants-content-ungrouped" className={`ov:grid ov:h-full ov:overflow-y-auto ov:pb-8 ov:content-start ${getGridColsClass(gridDivide)}`}>
                 <VariantsContent variantsToRender={isGrouped ? (variantsToRender as VariantGroup[])[0].variants : variantsToRender as Variant[]} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />

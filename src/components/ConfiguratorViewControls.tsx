@@ -311,7 +311,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
 
         </div>
       </div>
-      {!isVariantsOpen && !isMobile && !controlsHidden && (
+      {!isVariantsOpen && !isMobile && !controlsHidden && !isSnap2Mode && (
         <div className="ov:absolute ov:ov25-controls-hidden ov:size-full ov:md:flex ov:pointer-events-none ov:inset-0 ov:p-4 ov:justify-end ov:items-start ov:z-[101]">
             <button id="ov25-desktop-fullscreen-button" className={cn(
               'ov:cursor-pointer ov:aspect-square ov:p-2 ov:pointer-events-auto ov:flex ov:gap-2.5 ov:ml-auto ov:border ov:items-center ov:justify-center',

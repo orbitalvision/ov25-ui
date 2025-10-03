@@ -1,11 +1,11 @@
 import React  from 'react';
-import { ProductVariants } from './ProductVariants.js';
-
+import { ProductVariants, Variant } from './ProductVariants.js';
 import { useOV25UI } from "../../contexts/ov25-ui-context.js";
-
+import { selectModule, CompatibleModule, closeModuleSelectMenu } from '../../utils/configurator-utils.js';
 import { SizeVariantCard } from "./variant-cards/SizeVariantCard.js";
 import { LegsVariantCard } from "./variant-cards/LegsVariantCard.js";
-
+import { ModuleVariantCard } from "./variant-cards/ModuleVariantCard.js";
+import { ModuleTypeTabs } from './ModuleTypeTabs.js';
 
 export type DrawerSizes = 'closed' | 'small' | 'large';
 
@@ -22,14 +22,89 @@ export function ProductVariantsWrapper() {
         currentProductId,
         selectedSelections,
         products,
+        compatibleModules,
+        isSnap2Mode,
+        isModuleSelectionLoading,
+        setIsModuleSelectionLoading,
+        selectedModuleType,
+        setSelectedModuleType,
       } = useOV25UI();
+
+    const handleModuleSelect = (variant: Variant) => {
+      if (isModuleSelectionLoading) {
+        return;
+      }
+      
+      const module = variant.data as CompatibleModule;
+      const modelPath = module?.model?.modelPath;
+      const modelId = module?.model?.modelId;
+      
+      if (!modelPath || !modelId) {
+        return;
+      }
+      
+      setIsModuleSelectionLoading(true);
+      selectModule(modelPath, modelId);
+    };
+
+    const handleCloseVariants = () => {
+      // If we're closing the modules option, send message to iframe
+      if (activeOptionId === 'modules') {
+        closeModuleSelectMenu();
+      }
+      setIsVariantsOpen(false);
+    };
+
+    // Check if we should show module selection (Snap2 mode)
+    if (isSnap2Mode && activeOptionId === 'modules') {
+      const filteredModules = compatibleModules && compatibleModules.length > 0 ? 
+        compatibleModules.filter(module => {
+          if (selectedModuleType === 'all') return true;
+          const position = module.position.toLowerCase();
+          return position.includes(selectedModuleType);
+        }) : [];
+
+      return (
+        <ProductVariants
+          isOpen={isVariantsOpen}
+          gridDivide={2}
+          onClose={handleCloseVariants}
+          title="Modules"
+          variants={filteredModules.map(module => ({
+            id: `${module.productId}-${module.model.modelId}`,
+            name: module.product.name,
+            price: 0,
+            image: module.product.hasImage ? module.product.imageUrl : '/placeholder.svg?height=200&width=200',
+            blurHash: '',
+            data: module,
+            isSelected: false
+          } as Variant))}
+          VariantCard={(props) => (
+            <ModuleVariantCard 
+              {...props} 
+              isLoading={isModuleSelectionLoading}
+            />
+          )}
+          drawerSize={drawerSize}
+          onSelect={handleModuleSelect}
+          isMobile={isMobile}
+          moduleTypeTabs={
+            <ModuleTypeTabs 
+              selectedType={selectedModuleType}
+              onTypeChange={setSelectedModuleType}
+              compatibleModules={compatibleModules}
+            />
+          }
+        />
+      );
+    }
 
     if (activeOptionId === 'size') {
       return (
         <ProductVariants
           isOpen={isVariantsOpen}
           gridDivide={2}
-          onClose={() => setIsVariantsOpen(false)}
+          onClose={handleCloseVariants}
           title="Size"
           variants={sizeOption.groups[0].selections.map(selection => ({
             id: selection?.id,
@@ -58,7 +133,7 @@ export function ProductVariantsWrapper() {
           isOpen={isVariantsOpen}
           basis={isMobile ? 'ov:basis-[33%]' : undefined}
           gridDivide={isLegOption ? 2 : (isMobile ? 4 : 4)}
-          onClose={() => setIsVariantsOpen(false)}
+          onClose={handleCloseVariants}
           title={`${activeOption?.name || ''}`}
           variants={activeOption?.groups?.map(group => ({
             groupName: group?.name,

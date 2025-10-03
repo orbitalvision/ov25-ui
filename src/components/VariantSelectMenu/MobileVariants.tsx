@@ -22,7 +22,7 @@ const VariantsContentWithCarousel = React.memo(({ variantsToRender, VariantCard,
             <CarouselItem key={`spacer`} style={{flexBasis: `9%`}} className="ov:cursor-pointer">
             </CarouselItem>
             {variantsToRender.map((variant, index) => {
-              const basis =  activeOptionName === 'size' ? 2  : 5
+              const basis =  activeOptionName.toLowerCase() === 'size' ? 2  : (activeOptionName.toLowerCase() === 'modules' ? 2 : 5)
               const flexBasis = {
                 1: '100%',
                 2: '50%',
@@ -48,20 +48,23 @@ const VariantsContentWithCarousel = React.memo(({ variantsToRender, VariantCard,
     )
   });
 
-const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onSelect, gridDivide, isFilterOpen, setIsFilterOpen }: {
+const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onSelect, gridDivide, isFilterOpen, setIsFilterOpen, moduleTypeTabs }: {
   variants: VariantGroup[] | Variant[],
   VariantCard: React.ComponentType<VariantCardProps>,
   isMobile: boolean,
   onSelect: (variant: Variant) => void,
   gridDivide: number,
   isFilterOpen: boolean,
-  setIsFilterOpen: (isOpen: boolean) => void
+  setIsFilterOpen: (isOpen: boolean) => void,
+  moduleTypeTabs?: React.ReactNode
 }) => {
   const {
       drawerSize,
       availableProductFilters,
       showFilters,
       activeOption,
+      allOptions,
+      activeOptionId,
   } = useOV25UI();
 
   // When filters change, we need to select the first group selected in the filters. 
@@ -89,20 +92,29 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
   );
   const shouldShowFilters = ((isGrouped && !shouldDestructureGroups) && variants.length > 0 && (variants as VariantGroup[]).some(group => group.variants.length > 0)) || showFilters;
 
+  const currentOption = allOptions.find(opt => opt.id === activeOptionId);
+
   if (isGrouped && !shouldDestructureGroups) {
     const group = (variants as VariantGroup[])[selectedGroupIndex]
     const variantsToRender =  group ? group.variants : [] as Variant[];
     return (
       <div id="ov25-mobile-filter-container" className="ov:relative ov:w-full ov:h-full ov:flex ov:flex-col">
-        {drawerSize !== 'small' && (
+        {drawerSize !== 'small' && currentOption?.name.toLowerCase() !== 'modules' && (
           <FilterControls 
             isFilterOpen={isFilterOpen}
             setIsFilterOpen={setIsFilterOpen}
             isGrouped={isGrouped && !shouldDestructureGroups}
           />
         )}
-        <div id="ov25-mobile-content-area" className="ov:relative ov:flex-1 ov:overflow-hidden">
-          {variantsToRender.length === 0 && <NoResults />}
+        {moduleTypeTabs && currentOption?.name.toLowerCase() === 'modules' && (
+          <div className="ov:w-full ov:flex-shrink-0">
+            {moduleTypeTabs}
+          </div>
+        )}
+        <div id="ov25-mobile-content-area" className="ov:relative ov:flex-1 ov:overflow-hidden ov:min-h-0">
+          {variantsToRender.length === 0 && (
+            <NoResults />
+          )}
           <Carousel opts={{ dragFree: true, loop: false }} className="ov:py-2">
             <CarouselContent className="ov:px-4 ov:-ml-2 ov:pr-4">
               <CarouselItem key={'placeholder'} className="ov:basis-[37%] ov:py-2">
@@ -155,24 +167,43 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
   } else {
     if (drawerSize === 'small') {
       return (
-        <VariantsContentWithCarousel 
-          variantsToRender={variantsToRender}
-          VariantCard={VariantCard}
-          onSelect={onSelect}
-          isMobile={isMobile}
-          isGrouped={isGrouped && !shouldDestructureGroups}
-        />
+        <div id="ov25-mobile-filter-container" className="ov:relative ov:w-full ov:h-full ov:flex ov:flex-col">
+          {moduleTypeTabs && currentOption?.name.toLowerCase() === 'modules' && (
+            <div className="ov:w-full ov:flex-shrink-0">
+              {moduleTypeTabs}
+            </div>
+          )}
+          <div id="ov25-mobile-content-area" className="ov:relative ov:flex-1 ov:overflow-hidden ov:min-h-0">
+            {variantsToRender.length === 0 && (
+            <NoResults />
+            )}
+            <VariantsContentWithCarousel 
+              variantsToRender={variantsToRender}
+              VariantCard={VariantCard}
+              onSelect={onSelect}
+              isMobile={isMobile}
+              isGrouped={isGrouped && !shouldDestructureGroups}
+            />
+          </div>
+        </div>
       );
     } else {
       return (
         <div id="ov25-mobile-filter-container" className="ov:relative ov:w-full ov:h-full ov:flex ov:flex-col">
-          <FilterControls 
+          {currentOption?.name.toLowerCase() !== 'modules' && <FilterControls 
             isFilterOpen={isFilterOpen}
             setIsFilterOpen={setIsFilterOpen}
             isGrouped={isGrouped && !shouldDestructureGroups}
-          />
-          <div id="ov25-mobile-content-area" className="ov:relative ov:flex-1 ov:overflow-hidden">
-            {variantsToRender.length === 0 && <NoResults />}
+          />}
+          {moduleTypeTabs && currentOption?.name.toLowerCase() === 'modules' && (
+            <div className="ov:w-full ov:flex-shrink-0">
+              {moduleTypeTabs}
+            </div>
+          )}
+          <div id="ov25-mobile-content-area" className="ov:relative ov:flex-1 ov:overflow-hidden ov:min-h-0">
+            {variantsToRender.length === 0 && (
+            <NoResults />
+            )}
             <div id="ov25-mobile-variants-content" className="ov:h-full ov:overflow-y-auto">
               <div style={{ display: 'grid' }} className={`ov:px-0 ov:pb-63 ov:gap-2 ${getGridColsClass(gridDivide)}`}>
                 <VariantsContent variantsToRender={variantsToRender} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
@@ -190,13 +221,14 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
   }
 });
 
-export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSelect, gridDivide} 
+export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSelect, gridDivide, moduleTypeTabs} 
   : {
       variants: VariantGroup[] | Variant[], 
       VariantCard: React.ComponentType<VariantCardProps>,
       isMobile: boolean,
       onSelect: (variant: Variant) => void
       gridDivide: number,
+      moduleTypeTabs?: React.ReactNode
   }) => {
     const [isFilterOpen, setIsFilterOpen] = useState(false);
 
@@ -209,6 +241,7 @@ export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSe
         gridDivide={gridDivide}
         isFilterOpen={isFilterOpen}
         setIsFilterOpen={setIsFilterOpen}
+        moduleTypeTabs={moduleTypeTabs}
       />
     );
 });

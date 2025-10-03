@@ -24,6 +24,35 @@ export type SelectionItem = {
 export type AnimationState = 'unavailable' | 'open' | 'close' | 'loop' | 'stop';
 
 /**
+ * Module selection types for Snap2
+ */
+export type CompatibleModule = {
+  productId: number;
+  position: string;
+  product: {
+    id: number;
+    name: string;
+    imageUrl: string;
+    hasImage: boolean;
+  };
+  model: {
+    modelPath: string;
+    modelId: number;
+  };
+  dimensions: {
+    x: number;
+    y: number;
+    z: number;
+  }
+};
+
+export type SelectModuleReceivedMessage = {
+  success: boolean;
+  modelPath: string;
+  modelId: number;
+};
+
+/**
  * Get the iframe element by ID
  */
 const getConfiguratorIframe = (): HTMLIFrameElement | null => {
@@ -112,6 +141,23 @@ export const toggleMiniDimensions = (
  */
 export const requestSnap2Save = (): void => {
   sendMessageToIframe('REQUEST_SNAP2_SAVE', {});
+};
+
+/**
+ * Send SELECT_MODULE message to iframe
+ */
+export const selectModule = (modelPath: string, modelId: number): void => {
+  sendMessageToIframe('SELECT_MODULE', {
+    modelPath,
+    modelId
+  });
+};
+
+/**
+ * This will deselect the model and attachment point
+ */
+export const closeModuleSelectMenu = (): void => {
+  sendMessageToIframe('CLOSE_MODULE_SELECT_MENU', {});
 };
 
 /**
