@@ -7,7 +7,7 @@ import { Eye, EyeClosed, TableRowsSplit } from 'lucide-react';
 import SaveSnap2Menu from './SaveSnap2Menu.js';
 
 const Snap2Controls: React.FC = () => {
-  const { controlsHidden, toggleHideAll, allOptions, isVariantsOpen, setIsVariantsOpen, setActiveOptionId } = useOV25UI();
+  const { controlsHidden, toggleHideAll, allOptions, isVariantsOpen, setIsVariantsOpen, setActiveOptionId, isMobile } = useOV25UI();
   
   // Local state for dimensions
   const [canSeeDimensions, setCanSeeDimensions] = useState(false);
@@ -81,8 +81,8 @@ const Snap2Controls: React.FC = () => {
           </div>
         )}
 
-        {/* Variants Button */}
-        {!controlsHidden && allOptions.length > 0 && (
+        {/* Variants Button - only show on desktop */}
+        {!controlsHidden && allOptions.length > 0 && !isMobile && (
           <button 
             id="ov25-snap2-variants-button" 
             onClick={handleVariantsClick} 

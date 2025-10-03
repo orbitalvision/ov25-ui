@@ -518,6 +518,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
          showOptional={showOptional}
          hidePricing={hidePricing}
          isProductGalleryStacked={isProductGalleryStacked}
+         hasConfigureButton={!!configureButtonId}
          shadowDOMs={{
            mobileDrawer: mobileDrawerShadowRoot,
            configuratorViewControls: configuratorViewControlsShadowRoot,

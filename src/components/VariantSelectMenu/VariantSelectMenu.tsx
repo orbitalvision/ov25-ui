@@ -25,6 +25,7 @@ export const VariantSelectMenu: React.FC = () => {
     getSelectedValue,
     isSnap2Mode,
     isModalOpen,
+    hasConfigureButton,
   } = useOV25UI();
   
   return (
@@ -34,7 +35,7 @@ export const VariantSelectMenu: React.FC = () => {
           const Overlay = MobilePriceOverlay as any;
           return <Overlay />;
         })()}
-        {!isSnap2Mode && (
+        {!hasConfigureButton && (
           <ProductOptionsGroup
             allOptions={allOptions}
             handleOptionClick={handleOptionClick}

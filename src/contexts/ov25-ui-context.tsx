@@ -208,6 +208,7 @@ interface OV25UIContextType {
   snap2SaveResponse: { success: boolean; shareUrl?: string; error?: string } | null;
   isModalOpen: boolean;
   controlsHidden: boolean;
+  hasConfigureButton: boolean;
   // Module selection state
   compatibleModules: CompatibleModule[] | null;
   isModuleSelectionLoading: boolean;
@@ -257,6 +258,7 @@ interface OV25UIContextType {
   setSnap2SaveResponse: React.Dispatch<React.SetStateAction<{ success: boolean; shareUrl?: string; error?: string } | null>>;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setControlsHidden: React.Dispatch<React.SetStateAction<boolean>>;
+  setHasConfigureButton: React.Dispatch<React.SetStateAction<boolean>>;
   toggleHideAll: () => void;
   // Module selection methods
   setCompatibleModules: React.Dispatch<React.SetStateAction<CompatibleModule[] | null>>;
@@ -289,6 +291,7 @@ export const OV25UIProvider: React.FC<{
   hidePricing?: boolean,
   logoURL?: string,
   isProductGalleryStacked: boolean,
+  hasConfigureButton: boolean,
   mobileLogoURL?: string,
   shadowDOMs?: {
     mobileDrawer?: ShadowRoot;
@@ -310,6 +313,7 @@ export const OV25UIProvider: React.FC<{
   hidePricing = false,
   logoURL,
   isProductGalleryStacked,
+  hasConfigureButton,
   mobileLogoURL,
   shadowDOMs
 }) => {
@@ -401,6 +405,7 @@ export const OV25UIProvider: React.FC<{
   const [snap2SaveResponse, setSnap2SaveResponse] = useState<{ success: boolean; shareUrl?: string; error?: string } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [controlsHidden, setControlsHidden] = useState(false);
+  const [hasConfigureButtonState, setHasConfigureButton] = useState(hasConfigureButton);
   // Module selection state
   const [compatibleModules, setCompatibleModules] = useState<CompatibleModule[] | null>(null);
   const [isModuleSelectionLoading, setIsModuleSelectionLoading] = useState<boolean>(false);
@@ -926,6 +931,7 @@ export const OV25UIProvider: React.FC<{
     snap2SaveResponse,
     isModalOpen,
     controlsHidden,
+    hasConfigureButton: hasConfigureButtonState,
     // Module selection state
     compatibleModules,
     isModuleSelectionLoading,
@@ -965,6 +971,7 @@ export const OV25UIProvider: React.FC<{
     setSnap2SaveResponse,
     setIsModalOpen,
     setControlsHidden,
+    setHasConfigureButton,
     toggleHideAll,
     // Module selection methods
     setCompatibleModules,

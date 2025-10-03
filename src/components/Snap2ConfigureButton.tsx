@@ -57,7 +57,10 @@ export const Snap2ConfigureButton: React.FC = () => {
       
       {/* Render iframe on mobile when needed */}
       {isMobile && shouldRenderIframe && createPortal(
-        <ProductGallery />,
+        <div className="ov:relative ov:w-full ov:h-full">
+          <ProductGallery />
+          <ConfiguratorViewControls />
+        </div>,
         document.body
       )}
       
