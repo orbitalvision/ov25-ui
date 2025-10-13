@@ -23,10 +23,19 @@ export const VariantSelectMenu: React.FC = () => {
     handleOptionClick,
     range,
     getSelectedValue,
-    isSnap2Mode,
     isModalOpen,
     hasConfigureButton,
+    setShareDialogTrigger,
   } = useOV25UI();
+
+
+  const handleMobileDrawerClose = (open: boolean) => {
+    if (!open && hasConfigureButton && isMobile) {
+      setShareDialogTrigger('modal-close');
+    } else {
+      setIsVariantsOpen(open);
+    }
+  };
   
   return (
     <>
@@ -49,7 +58,7 @@ export const VariantSelectMenu: React.FC = () => {
               return (
                 <TwoStageDrawer
                   isOpen={isVariantsOpen}
-                  onOpenChange={setIsVariantsOpen}
+                  onOpenChange={handleMobileDrawerClose}
                   onStateChange={(value: any) => setDrawerSize(value === 0 ? 'closed' : value === 1 ? 'small' : 'large')}
                   className="ov:z-[10]"
                 >

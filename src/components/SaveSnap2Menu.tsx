@@ -9,7 +9,11 @@ import { requestSnap2Save } from '../utils/configurator-utils.js';
 export const SaveSnap2Menu: React.FC = () => {
   const { 
     snap2SaveResponse,
-    setSnap2SaveResponse
+    setSnap2SaveResponse,
+    shareDialogTrigger,
+    setShareDialogTrigger,
+    setIsModalOpen,
+    setIsVariantsOpen,
   } = useOV25UI();
   
   const [isSaving, setIsSaving] = useState(false);
@@ -32,6 +36,14 @@ export const SaveSnap2Menu: React.FC = () => {
     }
   }, [snap2SaveResponse, setSnap2SaveResponse]);
 
+  // Handle auto-open share dialog from context
+  React.useEffect(() => {
+    if (shareDialogTrigger !== 'none') {
+      setIsSaving(true);
+      setShowShareDialog(true);
+      requestSnap2Save();
+    }
+  }, [shareDialogTrigger]);
 
   const handleSave = async () => {
     setIsSaving(true);
@@ -57,6 +69,17 @@ export const SaveSnap2Menu: React.FC = () => {
     }
   };
 
+  const handleShareDialogClose = (open: boolean) => {
+    setShowShareDialog(open);
+    if (!open) {
+      if (shareDialogTrigger === 'modal-close') {
+        setIsModalOpen(false);
+        setIsVariantsOpen(false);
+      }
+      setShareDialogTrigger('none');
+    }
+  };
+
   return (
     <>
       {/* Save Button - styled to match ov25-ui patterns */}
@@ -73,11 +96,11 @@ export const SaveSnap2Menu: React.FC = () => {
       </button>
 
       {/* Share Dialog */}
-      <Dialog open={showShareDialog} onOpenChange={setShowShareDialog}>
+      <Dialog open={showShareDialog} onOpenChange={handleShareDialogClose}>
         <DialogContent aria-describedby={undefined} className="snap2-dialog ov:bg-[var(--ov25-background-color)] ov:border-[var(--ov25-border-color)] ov:z-[9999]">
           <DialogHeader>
             <DialogTitle className="ov:text-[var(--ov25-text-color)]">
-              Share Configuration
+              {shareDialogTrigger === 'modal-close' ? 'Save Your Configuration' : 'Share Configuration'}
             </DialogTitle>
           </DialogHeader>
           <div className="ov:space-y-4">
@@ -91,7 +114,9 @@ export const SaveSnap2Menu: React.FC = () => {
             ) : (
               <>
                 <p className="ov:text-sm ov:text-[var(--ov25-secondary-text-color)]">
-                  Copy this link to show others or save your custom configuration for later:
+                  {shareDialogTrigger === 'modal-close' 
+                    ? 'Save this link to return to your configuration later. Without it, your progress will be lost:'
+                    : 'Copy this link to share with others or save your custom configuration for later:'}
                 </p>
                 <div className="ov:space-y-2">
                   <textarea

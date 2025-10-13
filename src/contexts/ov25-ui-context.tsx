@@ -209,6 +209,7 @@ interface OV25UIContextType {
   isModalOpen: boolean;
   controlsHidden: boolean;
   hasConfigureButton: boolean;
+  shareDialogTrigger: 'none' | 'save-button' | 'modal-close';
   // Module selection state
   compatibleModules: CompatibleModule[] | null;
   isModuleSelectionLoading: boolean;
@@ -259,6 +260,7 @@ interface OV25UIContextType {
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setControlsHidden: React.Dispatch<React.SetStateAction<boolean>>;
   setHasConfigureButton: React.Dispatch<React.SetStateAction<boolean>>;
+  setShareDialogTrigger: React.Dispatch<React.SetStateAction<'none' | 'save-button' | 'modal-close'>>;
   toggleHideAll: () => void;
   // Module selection methods
   setCompatibleModules: React.Dispatch<React.SetStateAction<CompatibleModule[] | null>>;
@@ -406,6 +408,7 @@ export const OV25UIProvider: React.FC<{
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [controlsHidden, setControlsHidden] = useState(false);
   const [hasConfigureButtonState, setHasConfigureButton] = useState(hasConfigureButton);
+  const [shareDialogTrigger, setShareDialogTrigger] = useState<'none' | 'save-button' | 'modal-close'>('none');
   // Module selection state
   const [compatibleModules, setCompatibleModules] = useState<CompatibleModule[] | null>(null);
   const [isModuleSelectionLoading, setIsModuleSelectionLoading] = useState<boolean>(false);
@@ -932,6 +935,7 @@ export const OV25UIProvider: React.FC<{
     isModalOpen,
     controlsHidden,
     hasConfigureButton: hasConfigureButtonState,
+    shareDialogTrigger,
     // Module selection state
     compatibleModules,
     isModuleSelectionLoading,
@@ -972,6 +976,7 @@ export const OV25UIProvider: React.FC<{
     setIsModalOpen,
     setControlsHidden,
     setHasConfigureButton,
+    setShareDialogTrigger,
     toggleHideAll,
     // Module selection methods
     setCompatibleModules,

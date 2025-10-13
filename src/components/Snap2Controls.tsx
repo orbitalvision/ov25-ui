@@ -71,7 +71,7 @@ const Snap2Controls: React.FC = () => {
                 )}
               >
                 <div className={cn(
-                  'ov:absolute ov:top-0.5 ov:left-0.5 ov:w-3 ov:h-3 ov:rounded-full ov:transition-all ov:duration-200',
+                  'ov:absolute ov:top-[1px] ov:left-[1px] ov:w-3 ov:h-3 ov:rounded-full ov:transition-all ov:duration-200',
                   canSeeMiniDimensions 
                     ? 'ov:translate-x-4 ov:bg-[var(--ov25-overlay-button-color)]' 
                     : 'ov:translate-x-0 ov:bg-[var(--ov25-text-color)] ov:opacity-60'
