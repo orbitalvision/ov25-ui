@@ -2,6 +2,7 @@ import React from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { cn } from '../lib/utils.js';
+import { useOV25UI } from '../contexts/ov25-ui-context.js';
 
 interface ConfiguratorModalProps {
   isOpen: boolean;
@@ -10,6 +11,9 @@ interface ConfiguratorModalProps {
 }
 
 export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({ isOpen, onClose, children }) => {
+  const { shareDialogTrigger } = useOV25UI();
+  const isShareDialogOpen = shareDialogTrigger !== 'none';
+  
   if (!isOpen) return null;
 
   const handleBackdropClick = (e: React.MouseEvent) => {
@@ -49,7 +53,8 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({ isOpen, on
             'ov:w-8 ov:h-8 ov:rounded-full ov:bg-white/80 ov:shadow-md',
             'ov:flex ov:items-center ov:justify-center',
             'ov:text-gray-600 ov:hover:text-gray-800',
-            'ov:transition-colors ov:cursor-pointer'
+            'ov:transition-all ov:duration-200 ov:cursor-pointer',
+            isShareDialogOpen && 'ov:opacity-0 ov:pointer-events-none'
           )}
           aria-label="Close modal"
         >

@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { DimensionsIcon } from '../lib/svgs/DimensionsIcon.js';
-import { toggleDimensions, toggleMiniDimensions } from '../utils/configurator-utils.js';
+import { toggleDimensions, toggleFullscreen, toggleMiniDimensions } from '../utils/configurator-utils.js';
 import { useOV25UI } from '../contexts/ov25-ui-context.js';
 import { cn } from '../lib/utils.js';
 import { Eye, EyeClosed, TableRowsSplit } from 'lucide-react';
 import SaveSnap2Menu from './SaveSnap2Menu.js';
 
 const Snap2Controls: React.FC = () => {
-  const { controlsHidden, toggleHideAll, allOptions, isVariantsOpen, setIsVariantsOpen, setActiveOptionId, isMobile } = useOV25UI();
+  const { controlsHidden, toggleHideAll, allOptions, isVariantsOpen, setIsVariantsOpen, setActiveOptionId, isMobile, shareDialogTrigger } = useOV25UI();
   
   // Local state for dimensions
   const [canSeeDimensions, setCanSeeDimensions] = useState(false);
@@ -22,12 +22,19 @@ const Snap2Controls: React.FC = () => {
   };
 
   const handleVariantsClick = () => {
+    if (document.fullscreenElement) {
+      toggleFullscreen();
+    }
     if (isVariantsOpen) {
       setIsVariantsOpen(false);
     } else {
-      // Show the first available option (which will include modules if in snap2 mode)
       if (allOptions.length > 0) {
-        setActiveOptionId(allOptions[0].id);
+        const firstNonModulesOption = allOptions.find(opt => opt.id !== 'modules');
+        if (firstNonModulesOption) {
+          setActiveOptionId(firstNonModulesOption.id);
+        } else if (allOptions.length > 0) {
+          setActiveOptionId(allOptions[0].id);
+        }
         setIsVariantsOpen(true);
       }
     }
@@ -36,7 +43,8 @@ const Snap2Controls: React.FC = () => {
   return (
     <div className={cn(
       "ov:absolute ov:top-4 ov:left-1/2 ov:transform ov:-translate-x-1/2 ov:z-[102]",
-      "ov:flex ov:gap-2 ov:pointer-events-none"
+      "ov:flex ov:gap-2 ov:pointer-events-none ov:transition-opacity ov:duration-200",
+      (shareDialogTrigger !== 'none') && "ov:opacity-0 ov:pointer-events-none"
     )}>
       <div className={cn(
         'ov:flex ov:gap-2 ov:pointer-events-auto ov:items-center ov:px-2 ov:py-1 ov:border',

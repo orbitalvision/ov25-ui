@@ -455,24 +455,27 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     }
 
     // Special handling for configurator view controls - wait for the specific container
-    waitForElement('#true-configurator-view-controls-container', 10000)
-      .then(element => {
-        // Create Shadow DOM on the configurator view controls container
-        if (!element.shadowRoot) {
-          const shadowRoot = element.attachShadow({ mode: 'open' });
-          const configuratorViewControlsStylesheets = [sharedStylesheet];
-          if (cssString) {
-            const cssVariablesStylesheet = createCSSVariablesStylesheet(cssString);
-            configuratorViewControlsStylesheets.push(cssVariablesStylesheet);
+    // Only render if not in configure button mode (Snap2ConfigureButton handles it in that case)
+    if (!configureButtonId) {
+      waitForElement('#true-configurator-view-controls-container', 10000)
+        .then(element => {
+          // Create Shadow DOM on the configurator view controls container
+          if (!element.shadowRoot) {
+            const shadowRoot = element.attachShadow({ mode: 'open' });
+            const configuratorViewControlsStylesheets = [sharedStylesheet];
+            if (cssString) {
+              const cssVariablesStylesheet = createCSSVariablesStylesheet(cssString);
+              configuratorViewControlsStylesheets.push(cssVariablesStylesheet);
+            }
+            shadowRoot.adoptedStyleSheets = configuratorViewControlsStylesheets;
           }
-          shadowRoot.adoptedStyleSheets = configuratorViewControlsStylesheets;
-        }
-        // Portal ConfiguratorViewControls into the Shadow DOM
-        portals.push(createPortal(<ConfiguratorViewControls />, element.shadowRoot!));
-      })
-      .catch(err => {
-        console.warn(`[OV25-UI] ${err.message}`);
-      });
+          // Portal ConfiguratorViewControls into the Shadow DOM
+          portals.push(createPortal(<ConfiguratorViewControls />, element.shadowRoot!));
+        })
+        .catch(err => {
+          console.warn(`[OV25-UI] ${err.message}`);
+        });
+    }
 
     if (cssString) {
       setupCSSVariables(cssString);

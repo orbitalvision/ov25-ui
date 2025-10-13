@@ -28,6 +28,9 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
     selectLightGroup,
     isSnap2Mode,
     controlsHidden,
+    shareDialogTrigger,
+    configuratorState,
+    hasConfigureButton,
   } = useOV25UI();
 
   // Local state for dimensions
@@ -136,7 +139,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
   return (
     <>
       {/* Snap2 Controls - shown only in snap2 mode */}
-      {isSnap2Mode && <Snap2Controls />}
+      {isSnap2Mode && (configuratorState?.snap2Objects?.length ?? 0) > 0 && <Snap2Controls />}
     
       {/* <div className={cn(
         "ov:absolute ov:w-full ov:pointer-events-none ov:h-full ov:inset-0 ov:gap-2 ov:p-4 ov:flex ov:justify-end ov:items-end ov:z-[101]",
@@ -160,7 +163,8 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
     <div className={cn(
         "ov:pointer-events-none ov:absolute ov:w-full ov:h-full ov:inset-0 ov:gap-2 ov:p-4 ov:flex ov:justify-end ov:items-end ov:z-[101]",
         "ov:text-[var(--ov25-configurator-view-controls-text-color)]",
-        "ov:transition-[height] ov:duration-500 ov:ease-[cubic-bezier(0.4,0,0.2,1)] "
+        "ov:transition-all ov:duration-200",
+        shareDialogTrigger !== 'none' && "!ov:opacity-0 !ov:pointer-events-none"
       )}>
         <div className="ov:flex ov:flex-row ov:gap-2 ov:items-end">
           {!controlsHidden && !isSnap2Mode && <button id="ov25-share-button" onClick={handleShare} className={cn(
@@ -311,7 +315,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
 
         </div>
       </div>
-      {!isVariantsOpen && !isMobile && !controlsHidden && !isSnap2Mode && (
+      {!isVariantsOpen && !isMobile && !controlsHidden && (!isSnap2Mode || !hasConfigureButton) && (
         <div className="ov:absolute ov:ov25-controls-hidden ov:size-full ov:md:flex ov:pointer-events-none ov:inset-0 ov:p-4 ov:justify-end ov:items-start ov:z-[101]">
             <button id="ov25-desktop-fullscreen-button" className={cn(
               'ov:cursor-pointer ov:aspect-square ov:p-2 ov:pointer-events-auto ov:flex ov:gap-2.5 ov:ml-auto ov:border ov:items-center ov:justify-center',
@@ -325,7 +329,11 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
         </div>
       )}
       {isMobile && isVariantsOpen && (
-        <div className="ov:absolute ov:w-full ov:pointer-events-none ov:h-full ov:inset-0 ov:gap-2 ov:p-4 ov:flex ov:justify-end ov:items-start ov:z-[101]">
+        <div className={cn(
+          "ov:absolute ov:w-full ov:pointer-events-none ov:h-full ov:inset-0 ov:gap-2 ov:p-4 ov:flex ov:justify-end ov:items-start ov:z-[101]",
+          "ov:transition-opacity ov:duration-200",
+          shareDialogTrigger !== 'none' && "ov:opacity-0"
+        )}>
           <button 
             id="ov25-mobile-close-button"
             onClick={() => setIsVariantsOpen(false)}

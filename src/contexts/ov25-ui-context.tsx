@@ -81,6 +81,7 @@ export interface ConfiguratorState {
       [key: string]: string[];
     };
   };
+  snap2Objects: any[];
 }
 
 export interface SizeOption {
@@ -809,45 +810,45 @@ export const OV25UIProvider: React.FC<{
           case 'CURRENT_SKU':
             setCurrentSku(data);
             break;
-                  case 'RANGE':
-          setRange(data);
-          break;
-        case 'AR_PREVIEW_LINK':
-          setArPreviewLink(data);
-          break;
-        case 'AVAILABLE_CAMERAS':
-          setAvailableCameras(data);
-          break;
-        case 'AVAILABLE_LIGHTS':
-          setAvailableLights(data);
-          break;
-        case 'CURRENT_QUERY_STRING':
-          const currentUrl = new URL(window.location.href);
-          currentUrl.search = data;
-          window.history.replaceState(window.history.state, '', currentUrl.toString());
-          break;
-        case 'ERROR':
-          setError(new Error(data));
-          break;
-        case 'SNAP2_SAVE_RESPONSE':
-          // Handle save response from iframe
-          if (data.success) {
-            console.log('SNAP2_SAVE_RESPONSE data', data);
-            const currentUrl = window.location.origin + window.location.pathname;
-            const shareableUrl = `${currentUrl}?configuration_uuid=${data.uuid}`;
-            setSnap2SaveResponse({ success: true, shareUrl: shareableUrl });
-          } else {
-            setSnap2SaveResponse({ success: false, error: data.error || 'Failed to save configuration' });
-          }
-          break;
-        case 'COMPATIBLE_MODULES':
-          setCompatibleModules(data.modules || []);
-          setIsVariantsOpen(true);
-          setActiveOptionId('modules');
-          break;
-        case 'SELECT_MODULE_RECEIVED':
-          setIsModuleSelectionLoading(false);
-          break;
+          case 'RANGE':
+            setRange(data);
+            break;
+          case 'AR_PREVIEW_LINK':
+            setArPreviewLink(data);
+            break;
+          case 'AVAILABLE_CAMERAS':
+            setAvailableCameras(data);
+            break;
+          case 'AVAILABLE_LIGHTS':
+            setAvailableLights(data);
+            break;
+          case 'CURRENT_QUERY_STRING':
+            const currentUrl = new URL(window.location.href);
+            currentUrl.search = data;
+            window.history.replaceState(window.history.state, '', currentUrl.toString());
+            break;
+          case 'ERROR':
+            setError(new Error(data));
+            break;
+          case 'SNAP2_SAVE_RESPONSE':
+            // Handle save response from iframe
+            if (data.success) {
+              console.log('SNAP2_SAVE_RESPONSE data', data);
+              const currentUrl = window.location.origin + window.location.pathname;
+              const shareableUrl = `${currentUrl}?configuration_uuid=${data.uuid}`;
+              setSnap2SaveResponse({ success: true, shareUrl: shareableUrl });
+            } else {
+              setSnap2SaveResponse({ success: false, error: data.error || 'Failed to save configuration' });
+            }
+            break;
+          case 'COMPATIBLE_MODULES':
+            setCompatibleModules(data.modules || []);
+            setIsVariantsOpen(true);
+            setActiveOptionId('modules');
+            break;
+          case 'SELECT_MODULE_RECEIVED':
+            setIsModuleSelectionLoading(false);
+            break;
         }
       } catch (error) {
         console.error('Error handling message:', error, 'Event data:', event.data);

@@ -38,16 +38,17 @@ export const SaveSnap2Menu: React.FC = () => {
 
   // Handle auto-open share dialog from context
   React.useEffect(() => {
-    if (shareDialogTrigger !== 'none') {
+    if (shareDialogTrigger !== 'none' && !showShareDialog && !isSaving) {
       setIsSaving(true);
       setShowShareDialog(true);
       requestSnap2Save();
     }
-  }, [shareDialogTrigger]);
+  }, [shareDialogTrigger, showShareDialog, isSaving]);
 
   const handleSave = async () => {
     setIsSaving(true);
     setShowShareDialog(true);
+    setShareDialogTrigger('save-button');
     
     try {
       // Request iframe to save configuration and return URL info
@@ -57,6 +58,7 @@ export const SaveSnap2Menu: React.FC = () => {
       toast.error('Failed to save configuration');
       setShowShareDialog(false);
       setIsSaving(false);
+      setShareDialogTrigger('none');
     }
   };
 
@@ -97,7 +99,7 @@ export const SaveSnap2Menu: React.FC = () => {
 
       {/* Share Dialog */}
       <Dialog open={showShareDialog} onOpenChange={handleShareDialogClose}>
-        <DialogContent aria-describedby={undefined} className="snap2-dialog ov:bg-[var(--ov25-background-color)] ov:border-[var(--ov25-border-color)] ov:z-[9999]">
+        <DialogContent aria-describedby={undefined} className="snap2-dialog ov:bg-[var(--ov25-background-color)] ov:border-[var(--ov25-border-color)]">
           <DialogHeader>
             <DialogTitle className="ov:text-[var(--ov25-text-color)]">
               {shareDialogTrigger === 'modal-close' ? 'Save Your Configuration' : 'Share Configuration'}
