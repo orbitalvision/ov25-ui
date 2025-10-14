@@ -22,7 +22,7 @@ interface ModelViewerElement extends HTMLElement {
   };
   
 
-export const launchARWithGLBBlob = async (
+const launchARWithGLBBlobInner = async (
     glbBlob: Blob,
     onClose?: () => void,
     overlayId: string = 'ar-model-viewer-overlay'
@@ -71,7 +71,7 @@ export const launchARWithGLBBlob = async (
       modelViewer.setAttribute('alt', '3D Model');
       modelViewer.setAttribute('camera-controls', '');
       modelViewer.setAttribute('ar', '');
-      modelViewer.setAttribute('ar-modes', 'webxr scene-viewer');
+      modelViewer.setAttribute('ar-modes', 'webxr scene-viewer ');
       modelViewer.setAttribute('ar-scale', 'auto');
       modelViewer.setAttribute('ar-placement', 'floor');
       modelViewer.setAttribute('environment-image', 'neutral');
@@ -94,7 +94,6 @@ export const launchARWithGLBBlob = async (
         
         if (canAR) {
           try {
-            await new Promise(resolve => setTimeout(resolve, 1000));
             
             if (typeof modelViewer.activateAR === 'function') {
               await modelViewer.activateAR();
@@ -131,3 +130,44 @@ export const launchARWithGLBBlob = async (
       if (onClose) onClose();
     }
   };
+
+export const launchARWithGLBBlob = async (
+  glbBlob: Blob,
+  onClose?: () => void,
+  overlayId: string = 'ar-model-viewer-overlay'
+) => {
+  const promptOverlay = document.createElement('div');
+  promptOverlay.id = 'ar-prompt-overlay';
+  promptOverlay.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 100001;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  `;
+
+  const message = document.createElement('div');
+  message.textContent = 'Click anywhere to continue';
+  message.style.cssText = `
+    color: white;
+    font-size: 24px;
+    font-weight: 600;
+    text-align: center;
+    padding: 40px;
+  `;
+
+  promptOverlay.appendChild(message);
+  document.body.appendChild(promptOverlay);
+
+  promptOverlay.addEventListener('click', async () => {
+    promptOverlay.remove();
+    await launchARWithGLBBlobInner(glbBlob, onClose, overlayId);
+  });
+};
