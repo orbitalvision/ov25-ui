@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { sendMessageToIframe, toggleAR } from '../utils/configurator-utils.js';
+import { sendMessageToIframe, toggleAR, detectUserAgent } from '../utils/configurator-utils.js';
 import { stringSimilarity } from 'string-similarity-js';
+import { launchARWithGLBBlob } from '../utils/launchARWithGLBBlob.js';
 
 function throttle<T extends (...args: any[]) => void>(
   fn: T,
@@ -170,6 +171,7 @@ interface OV25UIContextType {
   hasSwitchedAfterDefer: boolean;
   deferThreeD: boolean;
   showOptional: boolean;
+  hideAr: boolean;
   // Coming from injectConfigurator options
   productLink: string | null;
   apiKey: string;
@@ -267,6 +269,7 @@ export const OV25UIProvider: React.FC<{
   images?: string[],
   deferThreeD?: boolean,
   showOptional?: boolean,
+  hideAr?: boolean,
   logoURL?: string,
   isProductGalleryStacked: boolean,
   mobileLogoURL?: string,
@@ -286,6 +289,7 @@ export const OV25UIProvider: React.FC<{
   images,
   deferThreeD = false,
   showOptional = false,
+  hideAr = false,
   logoURL,
   isProductGalleryStacked,
   mobileLogoURL,
@@ -713,6 +717,22 @@ export const OV25UIProvider: React.FC<{
     setActiveOptionId(allOptions[newIndex].id);
   };
 
+  // Handler for AR GLB data
+  const handleARGLBData = useCallback(async (base64Data: string) => {
+    try {
+      const binaryString = atob(base64Data);
+      const bytes = new Uint8Array(binaryString.length);
+      for (let i = 0; i < binaryString.length; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      
+      const blob = new Blob([bytes], { type: 'model/gltf-binary' });
+      await launchARWithGLBBlob(blob, undefined, 'ar-model-viewer-overlay');
+    } catch (error) {
+      console.error('Error handling AR GLB data:', error);
+    }
+  }, []);
+
   // Message handler for iframe communication
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
@@ -724,8 +744,8 @@ export const OV25UIProvider: React.FC<{
           return;
         }
         
-        // Handle empty payload as empty object
-        const data = payload ? JSON.parse(payload) : {};
+        // AR_GLB_DATA sends raw base64 string, don't parse it
+        const data = (type === 'AR_GLB_DATA' || !payload) ? {} : JSON.parse(payload);
 
         switch (type) {
           case 'ALL_PRODUCTS':
@@ -755,13 +775,21 @@ export const OV25UIProvider: React.FC<{
           setRange(data);
           break;
         case 'AR_PREVIEW_LINK':
-          setArPreviewLink(data);
+          const userAgent = detectUserAgent();
+          if (userAgent === 'ios' || userAgent === 'android') {
+            window.location.href = data;
+          } else {
+            setArPreviewLink(data);
+          }
           break;
         case 'AVAILABLE_CAMERAS':
           setAvailableCameras(data);
           break;
         case 'AVAILABLE_LIGHTS':
           setAvailableLights(data);
+          break;
+        case 'AR_GLB_DATA':
+          handleARGLBData(payload);
           break;
         case 'CURRENT_QUERY_STRING':
           const currentUrl = new URL(window.location.href);
@@ -779,7 +807,7 @@ export const OV25UIProvider: React.FC<{
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, []);
+  }, [handleARGLBData]);
 
   const productImages = currentProduct?.metadata?.images?.slice(0, -1) || [];
 
@@ -828,6 +856,7 @@ export const OV25UIProvider: React.FC<{
     hasSwitchedAfterDefer,
     deferThreeD,
     showOptional,
+    hideAr,
     galleryIndexToUse,
     // Coming from injectConfigurator options
     productLink,

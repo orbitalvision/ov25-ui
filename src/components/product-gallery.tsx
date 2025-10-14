@@ -5,6 +5,7 @@ import { useIframePositioning } from "../hooks/useIframePositioning.js"
 import { cn } from "../lib/utils.js"
 import { createPortal } from "react-dom"
 import { IframeContainer } from "./IframeContainer.js"
+import { ArPreviewQRCodeDialog } from "./ar-preview-qr-code-dialog.js"
 
 
 
@@ -16,7 +17,9 @@ export function ProductGallery() {
         isDrawerOrDialogOpen,
         galleryIndexToUse,
         images: passedImages,
-        isProductGalleryStacked
+        isProductGalleryStacked,
+        arPreviewLink,
+        setArPreviewLink
     } = useOV25UI();
 
 
@@ -123,6 +126,7 @@ export function ProductGallery() {
            <IframeContainer  />,
             document.body
         )}
+        <ArPreviewQRCodeDialog arPreviewLink={arPreviewLink} setArPreviewLink={setArPreviewLink} />
 
     </>
     )

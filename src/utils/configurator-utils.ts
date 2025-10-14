@@ -252,3 +252,35 @@ export const createOptionNavigationHandlers = (
 
 export const IFRAME_HEIGHT_RATIO = 0.42 // 1/3 of viewport height for iframe, leaving 2/3 for drawer
 export const DRAWER_HEIGHT_RATIO = 1 - IFRAME_HEIGHT_RATIO; // ~0.66, complementary to iframe ratio
+
+/**
+ * User agent types
+ */
+export type USER_AGENT = 'ios' | 'android' | 'windows' | 'mac' | 'unknown';
+
+/**
+ * Detect the user's device/platform
+ * @returns The detected user agent type
+ */
+export const detectUserAgent = (): USER_AGENT => {
+  const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+  
+  const isMobile = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+  
+  if (isMobile) {
+    if (/iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream) {
+      return 'ios';
+    }
+    return 'android';
+  }
+  
+  if (/Win/i.test(userAgent)) {
+    return 'windows';
+  }
+  
+  if (/Mac/i.test(userAgent)) {
+    return 'mac';
+  }
+  
+  return 'unknown';
+};

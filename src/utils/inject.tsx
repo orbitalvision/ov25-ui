@@ -55,6 +55,7 @@ export interface InjectConfiguratorOptions {
   images?: string[];
   deferThreeD?: boolean;
   showOptional?: boolean;
+  hideAr?: boolean;
   priceId?: ElementSelector;
   nameId?: ElementSelector;
   variantsId?: ElementSelector;
@@ -87,6 +88,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     cssString,
     deferThreeD,
     showOptional,
+    hideAr,
   } = opts;
 
   // Add generateThumbnail function to window object
@@ -477,28 +479,29 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     const resolvedProductLink = resolveStringOrFunction(productLink);
 
          root.render(
-       <OV25UIProvider 
-         apiKey={resolvedApiKey} 
-         productLink={resolvedProductLink} 
-         buyNowFunction={buyNowFunction}
-         addSwatchesToCartFunction={addSwatchesToCartFunction}
-         addToBasketFunction={addToBasketFunction} 
-         images={images} 
-         logoURL={logoURL}
-         mobileLogoURL={mobileLogoURL}
-         deferThreeD={deferThreeD}
-         showOptional={showOptional}
-         isProductGalleryStacked={isProductGalleryStacked}
-         shadowDOMs={{
-           mobileDrawer: mobileDrawerShadowRoot,
-           configuratorViewControls: configuratorViewControlsShadowRoot,
-           popoverPortal: popoverPortalShadowRoot,
-           swatchbookPortal: swatchbookPortalShadowRoot
-         }}
-       >
-         {portals}
-       </OV25UIProvider>
-     );
+      <OV25UIProvider 
+        apiKey={resolvedApiKey} 
+        productLink={resolvedProductLink} 
+        buyNowFunction={buyNowFunction}
+        addSwatchesToCartFunction={addSwatchesToCartFunction}
+        addToBasketFunction={addToBasketFunction} 
+        images={images} 
+        logoURL={logoURL}
+        mobileLogoURL={mobileLogoURL}
+        deferThreeD={deferThreeD}
+        showOptional={showOptional}
+        hideAr={hideAr}
+        isProductGalleryStacked={isProductGalleryStacked}
+        shadowDOMs={{
+          mobileDrawer: mobileDrawerShadowRoot,
+          configuratorViewControls: configuratorViewControlsShadowRoot,
+          popoverPortal: popoverPortalShadowRoot,
+          swatchbookPortal: swatchbookPortalShadowRoot
+        }}
+      >
+        {portals}
+      </OV25UIProvider>
+    );
   };
 
   // Run now if DOM ready, otherwise wait

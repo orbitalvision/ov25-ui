@@ -54,13 +54,14 @@ export const IframeContainer = () => {
     return (
     <div id="true-ov25-configurator-iframe-container"
         className={cn(isStacked ? isStackedStyles : isInlineStyles)}>
-        <iframe id="ov25-dummy-iframe" style={{ display: 'none !important', height: '0 !important', width: '0 !important' }}></iframe> {/* Used as bait to stop Trustpilot from hijacking our iframe. it looks for first iframe in the DOM */}
+        <iframe id="ov25-dummy-iframe" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; xr-spatial-tracking; fullscreen" style={{ display: 'none !important', height: '0 !important', width: '0 !important' }}></iframe> {/* Used as bait to stop Trustpilot from hijacking our iframe. it looks for first iframe in the DOM */}
         <iframe
             ref={iframeRef}
             id="ov25-configurator-iframe"
             src={iframeSrc}
             className={`ov:w-full ov:bg-transparent ov:h-full ${galleryIndex === galleryIndexToUse ? 'ov:block' : 'ov:ov25-controls-hidden'}`}
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; xr-spatial-tracking; fullscreen"
+            
         />
         {/* Display selected image when galleryIndex is not the 3D spin */}
         {(() => {

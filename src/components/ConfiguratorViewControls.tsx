@@ -2,6 +2,7 @@ import React, { useState } from 'react'
 import { X as CloseIcon, Camera, Upload, Lightbulb } from 'lucide-react'
 import { ExpandIcon, Rotate3D } from "lucide-react"
 import { DimensionsIcon } from '../lib/svgs/DimensionsIcon.js'
+import { ArIcon } from '../lib/svgs/ArIcon.js'
 import { toggleDimensions, toggleAnimation,  toggleFullscreen, getAnimationButtonText } from '../utils/configurator-utils.js'
 import { useOV25UI } from '../contexts/ov25-ui-context.js'
 import { cn } from '../lib/utils.js'
@@ -25,6 +26,8 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
     selectCamera,
     availableLights,
     selectLightGroup,
+    toggleAR,
+    hideAr,
   } = useOV25UI();
 
   // Local state for dimensions
@@ -302,6 +305,20 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
                 )}
               </Popover>
             </div>
+          )}
+
+          {!hideAr && (
+            <button id="ov25-ar-toggle-button" onClick={toggleAR} className={cn(
+              'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:border ov:items-center ov:justify-center',
+              'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
+              'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
+              'ov:bg-[var(--ov25-overlay-button-color)]',
+            )}>
+              <ArIcon className="ov:w-[19px] ov:h-[19px] p-1" color="var(--ov25-text-color)"/>
+              {!isMobile && (
+                <p className="ov25-controls-text ov:text-sm ov:text-[var(--ov25-text-color)]">View in your room</p>
+              )}
+            </button>
           )}
 
         </div>
