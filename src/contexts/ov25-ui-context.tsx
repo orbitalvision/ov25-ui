@@ -776,7 +776,7 @@ export const OV25UIProvider: React.FC<{
           break;
         case 'AR_PREVIEW_LINK':
           const userAgent = detectUserAgent();
-          if (userAgent === 'ios' || userAgent === 'android') {
+          if (userAgent !== 'windows' && userAgent !== 'mac') {
             window.location.href = data;
           } else {
             setArPreviewLink(data);
