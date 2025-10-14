@@ -19,7 +19,8 @@ export function ProductGallery() {
         images: passedImages,
         isProductGalleryStacked,
         arPreviewLink,
-        setArPreviewLink
+        setArPreviewLink,
+        isVariantsOpen
     } = useOV25UI();
 
 
@@ -111,6 +112,7 @@ export function ProductGallery() {
                 "ov:bg-[var(--ov25-configurator-iframe-background-color)]",
             )}></div>
             <div id="ov25-configurator-iframe-container"
+                data-fullscreen={isVariantsOpen}
                 ref={containerRef}
                 className={cn(" ov:relative ov:aspect-square ov:md:aspect-[3/2] ov:2xl:aspect-video ov:overflow-hidden ov:z-[3]",
                     "ov:rounded-[var(--ov25-configurator-iframe-border-radius)]",
