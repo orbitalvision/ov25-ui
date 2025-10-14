@@ -26,11 +26,12 @@ export const VariantSelectMenu: React.FC = () => {
     isModalOpen,
     hasConfigureButton,
     setShareDialogTrigger,
+    isSnap2Mode,
   } = useOV25UI();
 
 
   const handleMobileDrawerClose = (open: boolean) => {
-    if (!open && hasConfigureButton && isMobile) {
+    if (!open && hasConfigureButton && isMobile && isSnap2Mode) {
       setShareDialogTrigger('modal-close');
     } else {
       setIsVariantsOpen(open);

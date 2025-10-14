@@ -9,7 +9,7 @@ import { closeModuleSelectMenu } from '../utils/configurator-utils.js';
 import { createPortal } from 'react-dom';
 
 export const Snap2ConfigureButton: React.FC = () => {
-  const { isVariantsOpen, isModalOpen, setIsModalOpen, setIsVariantsOpen, isMobile, allOptions, setActiveOptionId, setShareDialogTrigger, shareDialogTrigger } = useOV25UI();
+  const { isVariantsOpen, isModalOpen, setIsModalOpen, setIsVariantsOpen, isMobile, allOptions, setActiveOptionId, setShareDialogTrigger, shareDialogTrigger, isSnap2Mode } = useOV25UI();
   const [shouldRenderIframe, setShouldRenderIframe] = useState(false);
 
   // Clean up iframe when drawer closes on mobile
@@ -41,7 +41,14 @@ export const Snap2ConfigureButton: React.FC = () => {
     if (isVariantsOpen) {
       closeModuleSelectMenu();
     }
-    setShareDialogTrigger('modal-close');
+    
+    // Only show save dialog for snap2 configurators
+    if (isSnap2Mode) {
+      setShareDialogTrigger('modal-close');
+    } else {
+      setIsModalOpen(false);
+      setIsVariantsOpen(false);
+    }
   };
 
   return (
