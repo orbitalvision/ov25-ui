@@ -11,7 +11,7 @@ import { closeModuleSelectMenu, DRAWER_HEIGHT_RATIO, IFRAME_HEIGHT_RATIO } from 
 import { createPortal } from 'react-dom';
 
 export const Snap2ConfigureButton: React.FC = () => {
-  const { isVariantsOpen, isModalOpen, setIsModalOpen, setIsVariantsOpen, isMobile, allOptions, setActiveOptionId, setShareDialogTrigger, shareDialogTrigger, isSnap2Mode, drawerSize, setDrawerSize, configuratorState } = useOV25UI();
+  const { isVariantsOpen, isModalOpen, setIsModalOpen, setIsVariantsOpen, isMobile, allOptions, setActiveOptionId, setShareDialogTrigger, shareDialogTrigger, isSnap2Mode, drawerSize, setDrawerSize, configuratorState, skipNextDrawerCloseRef } = useOV25UI();
   const [shouldRenderIframe, setShouldRenderIframe] = useState(false);
   const [pendingOpen, setPendingOpen] = useState(false);
 
@@ -34,13 +34,22 @@ export const Snap2ConfigureButton: React.FC = () => {
   const handleMobileDrawerClose = (open: boolean) => {
     if (!open) {
       setPendingOpen(false);
+      
+      // If this is a programmatic close from save dialog, skip the save dialog trigger
+      if (skipNextDrawerCloseRef.current) {
+        skipNextDrawerCloseRef.current = false;
+        setShouldRenderIframe(false);
+        setIsVariantsOpen(false);
+        return;
+      }
+      
       // TwoStageDrawer will automatically set isDrawerOrDialogOpen to false
       if (isSnap2Mode && shareDialogTrigger === 'none' && (configuratorState?.snap2Objects?.length ?? 0) > 0) {
         // Trigger save dialog, but keep iframe rendered until save dialog closes
         setShareDialogTrigger('modal-close');
       } else {
         setShouldRenderIframe(false);
-        setIsVariantsOpen(open);
+        setIsVariantsOpen(false);
       }
     } else {
       setIsVariantsOpen(open);

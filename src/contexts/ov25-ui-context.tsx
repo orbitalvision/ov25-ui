@@ -214,6 +214,7 @@ interface OV25UIContextType {
   controlsHidden: boolean;
   hasConfigureButton: boolean;
   shareDialogTrigger: 'none' | 'save-button' | 'modal-close';
+  skipNextDrawerCloseRef: React.MutableRefObject<boolean>;
   // Module selection state
   compatibleModules: CompatibleModule[] | null;
   isModuleSelectionLoading: boolean;
@@ -415,6 +416,7 @@ export const OV25UIProvider: React.FC<{
   const [controlsHidden, setControlsHidden] = useState(false);
   const [hasConfigureButtonState, setHasConfigureButton] = useState(hasConfigureButton);
   const [shareDialogTrigger, setShareDialogTrigger] = useState<'none' | 'save-button' | 'modal-close'>('none');
+  const skipNextDrawerCloseRef = useRef(false);
   // Module selection state
   const [compatibleModules, setCompatibleModules] = useState<CompatibleModule[] | null>(null);
   const [isModuleSelectionLoading, setIsModuleSelectionLoading] = useState<boolean>(false);
@@ -966,6 +968,7 @@ export const OV25UIProvider: React.FC<{
     controlsHidden,
     hasConfigureButton: hasConfigureButtonState,
     shareDialogTrigger,
+    skipNextDrawerCloseRef,
     // Module selection state
     compatibleModules,
     isModuleSelectionLoading,

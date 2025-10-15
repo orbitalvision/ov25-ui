@@ -15,6 +15,7 @@ export const SaveSnap2Menu: React.FC = () => {
     setShareDialogTrigger,
     setIsModalOpen,
     setIsVariantsOpen,
+    skipNextDrawerCloseRef,
   } = useOV25UI();
   
   const [isSaving, setIsSaving] = useState(false);
@@ -75,15 +76,15 @@ export const SaveSnap2Menu: React.FC = () => {
   const handleShareDialogClose = (open: boolean) => {
     setShowShareDialog(open);
     if (!open) {
-      // Clean up all dialog state
+      setShareDialogTrigger('none');
       setIsSaving(false);
       setShareUrl('');
       
       if (shareDialogTrigger === 'modal-close') {
         setIsModalOpen(false);
+        skipNextDrawerCloseRef.current = true;
         setIsVariantsOpen(false);
       }
-      setShareDialogTrigger('none');
     }
   };
 
