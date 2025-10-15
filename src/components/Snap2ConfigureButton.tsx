@@ -11,7 +11,7 @@ import { closeModuleSelectMenu, DRAWER_HEIGHT_RATIO, IFRAME_HEIGHT_RATIO } from 
 import { createPortal } from 'react-dom';
 
 export const Snap2ConfigureButton: React.FC = () => {
-  const { isVariantsOpen, isModalOpen, setIsModalOpen, setIsVariantsOpen, isMobile, allOptions, setActiveOptionId, setShareDialogTrigger, shareDialogTrigger, isSnap2Mode, drawerSize, setDrawerSize } = useOV25UI();
+  const { isVariantsOpen, isModalOpen, setIsModalOpen, setIsVariantsOpen, isMobile, allOptions, setActiveOptionId, setShareDialogTrigger, shareDialogTrigger, isSnap2Mode, drawerSize, setDrawerSize, configuratorState } = useOV25UI();
   const [shouldRenderIframe, setShouldRenderIframe] = useState(false);
   const [pendingOpen, setPendingOpen] = useState(false);
 
@@ -24,14 +24,22 @@ export const Snap2ConfigureButton: React.FC = () => {
     }
   }, [pendingOpen, allOptions, isVariantsOpen, setActiveOptionId, setIsVariantsOpen]);
 
+  // Clean up iframe on mobile when variants close and share dialog is not active
+  useEffect(() => {
+    if (isMobile && !isVariantsOpen && shareDialogTrigger === 'none') {
+      setShouldRenderIframe(false);
+    }
+  }, [isMobile, isVariantsOpen, shareDialogTrigger]);
+
   const handleMobileDrawerClose = (open: boolean) => {
     if (!open) {
-      setShouldRenderIframe(false);
       setPendingOpen(false);
       // TwoStageDrawer will automatically set isDrawerOrDialogOpen to false
-      if (isSnap2Mode) {
+      if (isSnap2Mode && shareDialogTrigger === 'none' && (configuratorState?.snap2Objects?.length ?? 0) > 0) {
+        // Trigger save dialog, but keep iframe rendered until save dialog closes
         setShareDialogTrigger('modal-close');
       } else {
+        setShouldRenderIframe(false);
         setIsVariantsOpen(open);
       }
     } else {
@@ -65,8 +73,8 @@ export const Snap2ConfigureButton: React.FC = () => {
       closeModuleSelectMenu();
     }
     
-    // Only show save dialog for snap2 configurators
-    if (isSnap2Mode) {
+    // Only show save dialog for snap2 configurators with a configuration (has snap2Objects)
+    if (isSnap2Mode && (configuratorState?.snap2Objects?.length ?? 0) > 0) {
       setShareDialogTrigger('modal-close');
     } else {
       setIsModalOpen(false);

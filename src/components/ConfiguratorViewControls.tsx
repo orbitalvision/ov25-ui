@@ -29,6 +29,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
     isSnap2Mode,
     controlsHidden,
     shareDialogTrigger,
+    setShareDialogTrigger,
     configuratorState,
     hasConfigureButton,
   } = useOV25UI();
@@ -336,7 +337,13 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
         )}>
           <button 
             id="ov25-mobile-close-button"
-            onClick={() => setIsVariantsOpen(false)}
+            onClick={() => {
+              if (isSnap2Mode && hasConfigureButton && shareDialogTrigger === 'none' && (configuratorState?.snap2Objects?.length ?? 0) > 0) {
+                setShareDialogTrigger('modal-close');
+              } else {
+                setIsVariantsOpen(false);
+              }
+            }}
             className={cn(
               'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:border ov:items-center ov:justify-center',
               'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',

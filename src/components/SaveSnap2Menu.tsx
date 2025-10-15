@@ -74,6 +74,10 @@ export const SaveSnap2Menu: React.FC = () => {
   const handleShareDialogClose = (open: boolean) => {
     setShowShareDialog(open);
     if (!open) {
+      // Clean up all dialog state
+      setIsSaving(false);
+      setShareUrl('');
+      
       if (shareDialogTrigger === 'modal-close') {
         setIsModalOpen(false);
         setIsVariantsOpen(false);
@@ -98,48 +102,50 @@ export const SaveSnap2Menu: React.FC = () => {
       </button>
 
       {/* Share Dialog */}
-      <Dialog open={showShareDialog} onOpenChange={handleShareDialogClose}>
-        <DialogContent aria-describedby={undefined} className="snap2-dialog ov:bg-[var(--ov25-background-color)] ov:border-[var(--ov25-border-color)]">
-          <DialogHeader>
-            <DialogTitle className="ov:text-[var(--ov25-text-color)]">
-              {shareDialogTrigger === 'modal-close' ? 'Save Your Configuration' : 'Share Configuration'}
-            </DialogTitle>
-          </DialogHeader>
-          <div className="ov:space-y-4">
-            {isSaving ? (
-              <div className="ov:flex ov:flex-col ov:items-center ov:justify-center ov:py-8 ov:space-y-4">
-                <Loader2 className="ov:w-8 ov:h-8 ov:animate-spin ov:text-[var(--ov25-text-color)]" />
-                <p className="ov:text-sm ov:text-[var(--ov25-secondary-text-color)]">
-                  Saving configuration...
-                </p>
-              </div>
-            ) : (
-              <>
-                <p className="ov:text-sm ov:text-[var(--ov25-secondary-text-color)]">
-                  {shareDialogTrigger === 'modal-close' 
-                    ? 'Save this link to return to your configuration later. Without it, your progress will be lost:'
-                    : 'Copy this link to share with others or save your custom configuration for later:'}
-                </p>
-                <div className="ov:space-y-2">
-                  <textarea
-                    value={shareUrl}
-                    rows={2}
-                    readOnly
-                    className="ov:min-h-[80px] ov:w-full ov:resize-none ov:bg-[var(--ov25-background-color)] ov:border-[var(--ov25-border-color)] ov:text-[var(--ov25-text-color)]"
-                    placeholder="Shareable link will appear here..."
-                  />
-                  <button 
-                    onClick={copyToClipboard} 
-                    className="ov:w-full ov:px-4 ov:py-2 ov:border ov:border-[var(--ov25-border-color)] ov:bg-[var(--ov25-background-color)] ov:text-[var(--ov25-text-color)] ov:rounded-md ov:cursor-pointer"
-                  >
-                    Copy Link
-                  </button>
+      {(showShareDialog || shareDialogTrigger !== 'none') && (
+        <Dialog open={showShareDialog} onOpenChange={handleShareDialogClose}>
+          <DialogContent aria-describedby={undefined} className="snap2-dialog ov:bg-[var(--ov25-background-color)] ov:border-[var(--ov25-border-color)]">
+            <DialogHeader>
+              <DialogTitle className="ov:text-[var(--ov25-text-color)]">
+                {shareDialogTrigger === 'modal-close' ? 'Save Your Configuration' : 'Share Configuration'}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="ov:space-y-4">
+              {isSaving ? (
+                <div className="ov:flex ov:flex-col ov:items-center ov:justify-center ov:py-8 ov:space-y-4">
+                  <Loader2 className="ov:w-8 ov:h-8 ov:animate-spin ov:text-[var(--ov25-text-color)]" />
+                  <p className="ov:text-sm ov:text-[var(--ov25-secondary-text-color)]">
+                    Saving configuration...
+                  </p>
                 </div>
-              </>
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
+              ) : (
+                <>
+                  <p className="ov:text-sm ov:text-[var(--ov25-secondary-text-color)]">
+                    {shareDialogTrigger === 'modal-close' 
+                      ? 'Save this link to return to your configuration later. Without it, your progress will be lost:'
+                      : 'Copy this link to share with others or save your custom configuration for later:'}
+                  </p>
+                  <div className="ov:space-y-2">
+                    <textarea
+                      value={shareUrl}
+                      rows={2}
+                      readOnly
+                      className="ov:min-h-[80px] ov:w-full ov:resize-none ov:bg-[var(--ov25-background-color)] ov:border-[var(--ov25-border-color)] ov:text-[var(--ov25-text-color)]"
+                      placeholder="Shareable link will appear here..."
+                    />
+                    <button 
+                      onClick={copyToClipboard} 
+                      className="ov:w-full ov:px-4 ov:py-2 ov:border ov:border-[var(--ov25-border-color)] ov:bg-[var(--ov25-background-color)] ov:text-[var(--ov25-text-color)] ov:rounded-md ov:cursor-pointer"
+                    >
+                      Copy Link
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </>
   );
 };
