@@ -1,5 +1,4 @@
 import React from 'react';
-import { cn } from '../../lib/utils.js';
 import { ChevronsRight, CornerDownRight, Layers, Sofa } from 'lucide-react';
 import { CompatibleModule } from '../../utils/configurator-utils.js';
 
@@ -61,7 +60,7 @@ export const ModuleTypeTabs: React.FC<ModuleTypeTabsProps> = ({ selectedType, on
             data-selected={selectedType === type.id ? "true" : "false"}
           >
             <div
-              className={`ov:flex ov:items-center ov:justify-center ov:w-full ov:text-center ov:cursor-pointer ov:my-4 ov:data-[selected=true]:text-[var(--ov25-background-color)] ov:data-[selected=false]:text-[var(--ov25-secondary-text-color)]`}
+              className={`ov:flex ov:items-center ov:justify-center ov:w-full ov:text-center ov:cursor-pointer ov:py-2 ov:data-[selected=true]:text-[var(--ov25-background-color)] ov:data-[selected=false]:text-[var(--ov25-secondary-text-color)]`}
               data-selected={selectedType === type.id ? "true" : "false"}
             >   
               {type.icon}

@@ -47,7 +47,7 @@ const TwoStageDrawerComponent = ({
   } | null>(null);
 
   const [viewportHeightState, setViewportHeightState] = useState(window.visualViewport?.height !== undefined ? window.visualViewport?.height :  window.innerHeight)
-  const [isViewportReady, setIsViewportReady] = useState(false)
+  const [isViewportReady, setIsViewportReady] = useState(true)
   
 
   function getMinHeight(viewPortHeight: number) {
@@ -214,7 +214,7 @@ const TwoStageDrawerComponent = ({
         bottom: 0,
         touchAction: "none",
         WebkitOverflowScrolling: 'touch',
-        zIndex: 99999999999991,
+        zIndex: 2147483647,
         position: 'fixed',
         left: 0,
         right: 0,

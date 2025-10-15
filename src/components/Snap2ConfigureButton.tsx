@@ -5,27 +5,50 @@ import { ProductGallery } from './product-gallery.js';
 import ConfiguratorViewControls from './ConfiguratorViewControls.js';
 import { useOV25UI } from '../contexts/ov25-ui-context.js';
 import { ProductVariantsWrapper } from './VariantSelectMenu/ProductVariantsWrapper.js';
-import { closeModuleSelectMenu } from '../utils/configurator-utils.js';
+import { MobileCheckoutButton } from './VariantSelectMenu/MobileCheckoutButton.js';
+import { TwoStageDrawer } from './ui/two-stage-drawer.js';
+import { closeModuleSelectMenu, DRAWER_HEIGHT_RATIO, IFRAME_HEIGHT_RATIO } from '../utils/configurator-utils.js';
 import { createPortal } from 'react-dom';
 
 export const Snap2ConfigureButton: React.FC = () => {
-  const { isVariantsOpen, isModalOpen, setIsModalOpen, setIsVariantsOpen, isMobile, allOptions, setActiveOptionId, setShareDialogTrigger, shareDialogTrigger, isSnap2Mode } = useOV25UI();
+  const { isVariantsOpen, isModalOpen, setIsModalOpen, setIsVariantsOpen, isMobile, allOptions, setActiveOptionId, setShareDialogTrigger, shareDialogTrigger, isSnap2Mode, drawerSize, setDrawerSize } = useOV25UI();
   const [shouldRenderIframe, setShouldRenderIframe] = useState(false);
+  const [pendingOpen, setPendingOpen] = useState(false);
 
-  // Clean up iframe when drawer closes on mobile
+  // Auto-open drawer once options are loaded
   useEffect(() => {
-    if (isMobile && !isVariantsOpen && shouldRenderIframe) {
-      setShouldRenderIframe(false);
+    if (pendingOpen && allOptions.length > 0 && !isVariantsOpen) {
+      setActiveOptionId(allOptions[0].id);
+      setIsVariantsOpen(true);
+      setPendingOpen(false);
     }
-  }, [isMobile, isVariantsOpen, shouldRenderIframe]);
+  }, [pendingOpen, allOptions, isVariantsOpen, setActiveOptionId, setIsVariantsOpen]);
+
+  const handleMobileDrawerClose = (open: boolean) => {
+    if (!open) {
+      setShouldRenderIframe(false);
+      setPendingOpen(false);
+      // TwoStageDrawer will automatically set isDrawerOrDialogOpen to false
+      if (isSnap2Mode) {
+        setShareDialogTrigger('modal-close');
+      } else {
+        setIsVariantsOpen(open);
+      }
+    } else {
+      setIsVariantsOpen(open);
+    }
+  };
 
   const handleClick = () => {
     if (isMobile) {
       // On mobile, create iframe and open the variants drawer
+      // TwoStageDrawer will automatically manage isDrawerOrDialogOpen state
       setShouldRenderIframe(true);
       if (allOptions.length > 0) {
         setActiveOptionId(allOptions[0].id);
         setIsVariantsOpen(true);
+      } else {
+        setPendingOpen(true);
       }
     } else {
       // On desktop, open the modal
@@ -54,7 +77,7 @@ export const Snap2ConfigureButton: React.FC = () => {
   return (
     <>
       <button 
-        className={cn('ov25-snap2-configure-button ov:p-3 ov:py-2 ov:my-2 ov:cursor-pointer ov:bg-white ov:text-black ov:border ov:rounded-md ov:border-[var(--ov25-border-color)]')}
+        className={cn('ov25-configure-button ov:p-3 ov:py-2 ov:my-2 ov:cursor-pointer ov:bg-white ov:text-black ov:border ov:rounded-md ov:border-[var(--ov25-border-color)]')}
         onClick={handleClick}
       >
         Configure
@@ -62,11 +85,39 @@ export const Snap2ConfigureButton: React.FC = () => {
       
       {/* Render iframe on mobile when needed */}
       {isMobile && shouldRenderIframe && createPortal(
-        <div className="ov:relative ov:w-full ov:h-full">
-          <ProductGallery />
-          <ConfiguratorViewControls />
-        </div>,
+        <>
+          <div className="ov:fixed ov:inset-0 ov:w-full ov:h-full ov:z-[2147483646]">
+            <ProductGallery />
+          </div>
+          <div 
+            className="ov:fixed ov:top-0 ov:left-0 ov:w-full ov:z-[2147483646] ov:pointer-events-none ov:transition-[height] ov:duration-500"
+            style={{ 
+              height: drawerSize === 'large' 
+                ? `${window.innerHeight * IFRAME_HEIGHT_RATIO}px` 
+                : `${window.innerHeight * DRAWER_HEIGHT_RATIO}px`
+            }}
+          >
+            <ConfiguratorViewControls />
+          </div>
+        </>,
         document.body
+      )}
+      
+      {/* Always render drawer on mobile (just keep it closed until needed) */}
+      {isMobile && (
+        <TwoStageDrawer
+          isOpen={isVariantsOpen}
+          onOpenChange={handleMobileDrawerClose}
+          onStateChange={(value: any) => setDrawerSize(value === 0 ? 'closed' : value === 1 ? 'small' : 'large')}
+          className="ov:z-[10]"
+        >
+          <div className='ov:w-full ov:h-full ov:flex ov:flex-col ov:absolute ov:top-0 ov:left-0 ov:pointer-events-auto'>
+            <ProductVariantsWrapper />
+            <div className={`${drawerSize === 'large' || drawerSize === 'small' ? 'ov:fixed ov:bottom-0 ov:left-0 ov:w-full' : '' }`}>
+              <MobileCheckoutButton />
+            </div>
+          </div>
+        </TwoStageDrawer>
       )}
       
       {/* Only show modal on desktop */}
@@ -94,3 +145,4 @@ export const Snap2ConfigureButton: React.FC = () => {
     </>
   );
 };
+

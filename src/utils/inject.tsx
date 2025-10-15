@@ -427,9 +427,9 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     processElement(nameId, <Name />, 'name');
     processElement(swatchesId, <SwatchesContainer />, 'swatches');
     
-    // Show snap2 configure button if provided
+    // Show configure button if provided
     if (configureButtonId) {
-      processElement(configureButtonId, <Snap2ConfigureButton />, 'snap2-configure-button');
+      processElement(configureButtonId, <Snap2ConfigureButton />, 'configure-button');
     }
     
     // Add toaster to portals
@@ -455,7 +455,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     }
 
     // Special handling for configurator view controls - wait for the specific container
-    // Only render if not in configure button mode (Snap2ConfigureButton handles it in that case)
+    // Only render if not in configure button mode (ConfigureButton handles it in that case)
     if (!configureButtonId) {
       waitForElement('#true-configurator-view-controls-container', 10000)
         .then(element => {
