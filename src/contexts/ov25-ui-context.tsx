@@ -205,6 +205,7 @@ interface OV25UIContextType {
     id: string;
     displayName: string;
   }>;
+  // Snap2 state
   isSnap2Mode: boolean;
   snap2SaveResponse: { success: boolean; shareUrl?: string; error?: string } | null;
   isModalOpen: boolean;
@@ -831,7 +832,6 @@ export const OV25UIProvider: React.FC<{
             setError(new Error(data));
             break;
           case 'SNAP2_SAVE_RESPONSE':
-            // Handle save response from iframe
             if (data.success) {
               console.log('SNAP2_SAVE_RESPONSE data', data);
               const currentUrl = window.location.origin + window.location.pathname;

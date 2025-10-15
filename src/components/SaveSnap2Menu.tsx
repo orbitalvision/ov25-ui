@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { Share, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useOV25UI } from '../contexts/ov25-ui-context.js';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from './ui/dialog.js';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog.js';
 import { cn } from '../utils/cn.js';
 import { requestSnap2Save } from '../utils/configurator-utils.js';
 
+// Component for saving snap2 configuration (generating a shareable link). Opens automatically when main dialog is closed.
 export const SaveSnap2Menu: React.FC = () => {
   const { 
     snap2SaveResponse,
@@ -88,7 +89,7 @@ export const SaveSnap2Menu: React.FC = () => {
 
   return (
     <>
-      {/* Save Button - styled to match ov25-ui patterns */}
+      {/* Save Button */}
       <button 
         onClick={handleSave}
         className={cn(

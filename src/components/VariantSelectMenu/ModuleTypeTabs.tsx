@@ -18,11 +18,9 @@ const moduleTypes = [
 export const ModuleTypeTabs: React.FC<ModuleTypeTabsProps> = ({ selectedType, onTypeChange, compatibleModules }) => {
   // Filter module types based on what's available in compatibleModules
   const availableModuleTypes = moduleTypes.filter(type => {
-    
     if (!compatibleModules || compatibleModules.length === 0) return false;
     if (type.id === 'all') return true;
-    
-    // Check if any module has this type in its position
+
     return compatibleModules.some(module => {
       const position = module.position.toLowerCase();
       return position.includes(type.id);
@@ -47,7 +45,6 @@ export const ModuleTypeTabs: React.FC<ModuleTypeTabsProps> = ({ selectedType, on
         else if (availableModuleTypes.length === 3) widthClass = 'ov:basis-1/3';
         else widthClass = 'ov:basis-1/4';
         
-        // Add right border except for last item
         let borderClass = '';
         if (index < availableModuleTypes.length - 1) borderClass = 'ov:border-r ov:border-[var(--ov25-border-color)]';
         

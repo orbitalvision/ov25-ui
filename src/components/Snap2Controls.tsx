@@ -9,7 +9,6 @@ import SaveSnap2Menu from './SaveSnap2Menu.js';
 const Snap2Controls: React.FC = () => {
   const { controlsHidden, toggleHideAll, allOptions, isVariantsOpen, setIsVariantsOpen, setActiveOptionId, isMobile, shareDialogTrigger } = useOV25UI();
   
-  // Local state for dimensions
   const [canSeeDimensions, setCanSeeDimensions] = useState(false);
   const [canSeeMiniDimensions, setCanSeeMiniDimensions] = useState(false);
 
@@ -53,7 +52,7 @@ const Snap2Controls: React.FC = () => {
         'ov:bg-[var(--ov25-overlay-button-color)]',
         'ov:transition-all ov:duration-200'
       )}>
-        {/* Dimensions Button with integrated mini toggle - only shown when not all hidden */}
+        {/* Dimensions Button with integrated mini toggle */}
         {!controlsHidden && (
           <div className="ov:flex ov:items-center ov:gap-1">
             <button 
@@ -64,7 +63,7 @@ const Snap2Controls: React.FC = () => {
               <DimensionsIcon className="ov:w-[16px] ov:h-[16px]" color="var(--ov25-text-color)"/>
             </button>
 
-            {/* Mini Dimensions Switch - only shown when dimensions are on */}
+            {/* Mini Dimensions Switch */}
             {canSeeDimensions && (
               <button 
                 id="ov25-snap2-mini-dimensions-switch" 
@@ -108,10 +107,10 @@ const Snap2Controls: React.FC = () => {
           </button>
         )}
 
-        {/* Save Snap2 Menu - only shown when not all hidden */}
+        {/* Save Snap2 Menu */}
         {!controlsHidden && <SaveSnap2Menu />}
 
-        {/* Hide All Toggle Button - always visible on the right */}
+        {/* Hide All Toggle Button */}
         <button 
           id="ov25-snap2-hide-all-button" 
           onClick={toggleHideAll} 
