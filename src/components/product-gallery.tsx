@@ -5,6 +5,7 @@ import { useIframePositioning } from "../hooks/useIframePositioning.js"
 import { cn } from "../lib/utils.js"
 import { createPortal } from "react-dom"
 import { IframeContainer } from "./IframeContainer.js"
+import { ArPreviewQRCodeDialog } from "./ar-preview-qr-code-dialog.js"
 
 
 
@@ -19,7 +20,10 @@ export function ProductGallery({ isInModal = false }: ProductGalleryProps = {}) 
         isDrawerOrDialogOpen,
         galleryIndexToUse,
         images: passedImages,
-        isProductGalleryStacked
+        isProductGalleryStacked,
+        arPreviewLink,
+        setArPreviewLink,
+        isVariantsOpen
     } = useOV25UI();
 
     // Use the custom hook to handle iframe positioning
@@ -111,6 +115,7 @@ export function ProductGallery({ isInModal = false }: ProductGalleryProps = {}) 
                 "ov:bg-[var(--ov25-configurator-iframe-background-color)]",
             )}></div>
             <div id="ov25-configurator-iframe-container"
+                data-fullscreen={isVariantsOpen}
                 ref={containerRef}
                 className={cn(
                     "ov:relative ov:overflow-hidden ov:z-[3]",
@@ -128,6 +133,7 @@ export function ProductGallery({ isInModal = false }: ProductGalleryProps = {}) 
            <IframeContainer  />,
             document.body
         )}
+        <ArPreviewQRCodeDialog arPreviewLink={arPreviewLink} setArPreviewLink={setArPreviewLink} />
 
     </>
     )

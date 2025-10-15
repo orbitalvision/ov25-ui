@@ -58,6 +58,7 @@ export interface InjectConfiguratorOptions {
   deferThreeD?: boolean;
   showOptional?: boolean;
   hidePricing?: boolean;
+  hideAr?: boolean;
   priceId?: ElementSelector;
   nameId?: ElementSelector;
   variantsId?: ElementSelector;
@@ -94,6 +95,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     deferThreeD,
     showOptional,
     hidePricing,
+    hideAr,
   } = opts;
 
   // Add generateThumbnail function to window object
@@ -519,6 +521,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
          mobileLogoURL={mobileLogoURL}
          deferThreeD={deferThreeD}
          showOptional={showOptional}
+         hideAr={hideAr}
          hidePricing={hidePricing}
          isProductGalleryStacked={isProductGalleryStacked}
          hasConfigureButton={!!configureButtonId}

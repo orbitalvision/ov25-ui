@@ -60,11 +60,12 @@ function App() {
   // Set up the message event listener
   const handleMessage = (event) => {
     const { type, payload } = event.data;
-    if (!type) return;
+    if (!type || type === 'AR_GLB_DATA') return;
 
     // Safely parse payload
     let data;
     try {
+
       data = JSON.parse(payload);
     } catch (error) {
       console.error("Failed to parse configurator message payload:", payload);
