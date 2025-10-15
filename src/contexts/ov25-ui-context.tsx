@@ -863,7 +863,6 @@ export const OV25UIProvider: React.FC<{
             break;
           case 'SNAP2_SAVE_RESPONSE':
             if (data.success) {
-              console.log('SNAP2_SAVE_RESPONSE data', data);
               const currentUrl = window.location.origin + window.location.pathname;
               const shareableUrl = `${currentUrl}?configuration_uuid=${data.uuid}`;
               setSnap2SaveResponse({ success: true, shareUrl: shareableUrl });
@@ -873,8 +872,10 @@ export const OV25UIProvider: React.FC<{
             break;
           case 'COMPATIBLE_MODULES':
             setCompatibleModules(data.modules || []);
-            setIsVariantsOpen(true);
-            setActiveOptionId('modules');
+            if (data.modules.length > 0) {
+              setIsVariantsOpen(true);
+              setActiveOptionId('modules');
+            }
             break;
           case 'SELECT_MODULE_RECEIVED':
             setIsModuleSelectionLoading(false);
