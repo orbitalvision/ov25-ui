@@ -16,11 +16,14 @@ export const SaveSnap2Menu: React.FC = () => {
     setIsModalOpen,
     setIsVariantsOpen,
     skipNextDrawerCloseRef,
+    setCompatibleModules,
+    setConfiguratorState,
   } = useOV25UI();
   
   const [isSaving, setIsSaving] = useState(false);
   const [showShareDialog, setShowShareDialog] = useState(false);
   const [shareUrl, setShareUrl] = useState('');
+  const [showConfirmation, setShowConfirmation] = useState(false);
 
   // Handle save response from context
   React.useEffect(() => {
@@ -40,17 +43,35 @@ export const SaveSnap2Menu: React.FC = () => {
 
   // Handle auto-open share dialog from context
   React.useEffect(() => {
-    if (shareDialogTrigger !== 'none' && !showShareDialog && !isSaving) {
-      setIsSaving(true);
+    if (shareDialogTrigger !== 'none' && !showShareDialog && !isSaving && !showConfirmation) {
+      if (shareDialogTrigger === 'modal-close') {
+        setShowConfirmation(true);
+      } else {
+        setIsSaving(true);
+      }
       setShowShareDialog(true);
-      requestSnap2Save();
     }
-  }, [shareDialogTrigger, showShareDialog, isSaving]);
+  }, [shareDialogTrigger, showShareDialog, isSaving, showConfirmation]);
 
   const handleSave = async () => {
-    setIsSaving(true);
-    setShowShareDialog(true);
     setShareDialogTrigger('save-button');
+    setShowShareDialog(true);
+    setIsSaving(true);
+    
+    try {
+      requestSnap2Save();
+    } catch (error) {
+      console.error('Save error:', error);
+      toast.error('Failed to save configuration');
+      setShowShareDialog(false);
+      setIsSaving(false);
+      setShareDialogTrigger('none');
+    }
+  };
+
+  const handleConfirmSave = async () => {
+    setIsSaving(true);
+    setShowConfirmation(false);
     
     try {
       // Request iframe to save configuration and return URL info
@@ -79,11 +100,14 @@ export const SaveSnap2Menu: React.FC = () => {
       setShareDialogTrigger('none');
       setIsSaving(false);
       setShareUrl('');
+      setShowConfirmation(false);
       
       if (shareDialogTrigger === 'modal-close') {
         setIsModalOpen(false);
         skipNextDrawerCloseRef.current = true;
         setIsVariantsOpen(false);
+        setCompatibleModules(null);
+        setConfiguratorState(undefined);
       }
     }
   };
@@ -113,7 +137,29 @@ export const SaveSnap2Menu: React.FC = () => {
               </DialogTitle>
             </DialogHeader>
             <div className="ov:space-y-4">
-              {isSaving ? (
+              {showConfirmation ? (
+                <>
+                  <p className="ov:text-sm ov:text-[var(--ov25-secondary-text-color)]">
+                    {shareDialogTrigger === 'modal-close' 
+                      ? 'Do you want to save your progress? Without saving, your configuration will be lost.'
+                      : 'Do you want to save your configuration?'}
+                  </p>
+                  <div className="ov:flex ov:space-x-2">
+                    <button 
+                      onClick={handleConfirmSave}
+                      className="ov:flex-1 ov:px-4 ov:py-2 ov:bg-[var(--ov25-primary-color)] ov:text-white ov:rounded-md ov:cursor-pointer ov:hover:opacity-90"
+                    >
+                      Yes
+                    </button>
+                    <button 
+                      onClick={() => handleShareDialogClose(false)}
+                      className="ov:flex-1 ov:px-4 ov:py-2 ov:border ov:border-[var(--ov25-border-color)] ov:bg-[var(--ov25-background-color)] ov:text-[var(--ov25-text-color)] ov:rounded-md ov:cursor-pointer ov:hover:opacity-90"
+                    >
+                      No
+                    </button>
+                  </div>
+                </>
+              ) : isSaving ? (
                 <div className="ov:flex ov:flex-col ov:items-center ov:justify-center ov:py-8 ov:space-y-4">
                   <Loader2 className="ov:w-8 ov:h-8 ov:animate-spin ov:text-[var(--ov25-text-color)]" />
                   <p className="ov:text-sm ov:text-[var(--ov25-secondary-text-color)]">

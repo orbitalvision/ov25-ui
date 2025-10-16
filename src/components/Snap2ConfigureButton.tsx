@@ -11,7 +11,7 @@ import { closeModuleSelectMenu, DRAWER_HEIGHT_RATIO, IFRAME_HEIGHT_RATIO } from 
 import { createPortal } from 'react-dom';
 
 export const Snap2ConfigureButton: React.FC = () => {
-  const { isVariantsOpen, isModalOpen, setIsModalOpen, setIsVariantsOpen, isMobile, allOptions, setActiveOptionId, setShareDialogTrigger, shareDialogTrigger, isSnap2Mode, drawerSize, setDrawerSize, configuratorState, skipNextDrawerCloseRef } = useOV25UI();
+  const { isVariantsOpen, isModalOpen, setIsModalOpen, setIsVariantsOpen, isMobile, allOptions, setActiveOptionId, setShareDialogTrigger, shareDialogTrigger, isSnap2Mode, drawerSize, setDrawerSize, configuratorState, skipNextDrawerCloseRef, setCompatibleModules, setConfiguratorState } = useOV25UI();
   const [shouldRenderIframe, setShouldRenderIframe] = useState(false);
   const [pendingOpen, setPendingOpen] = useState(false);
 
@@ -68,8 +68,9 @@ export const Snap2ConfigureButton: React.FC = () => {
         setPendingOpen(true);
       }
     } else {
-      // On desktop, open the modal
       setIsModalOpen(true);
+      setIsVariantsOpen(true);
+      setActiveOptionId('modules');
     }
   };
 
@@ -88,12 +89,15 @@ export const Snap2ConfigureButton: React.FC = () => {
     } else {
       setIsModalOpen(false);
       setIsVariantsOpen(false);
+      setCompatibleModules(null);
+      setConfiguratorState(undefined);
     }
   };
 
   return (
     <>
       <button 
+        id="ov25-configure-button"
         className={cn('ov25-configure-button ov:p-3 ov:py-2 ov:my-2 ov:cursor-pointer ov:bg-white ov:text-black ov:border ov:rounded-md ov:border-[var(--ov25-border-color)]')}
         onClick={handleClick}
       >

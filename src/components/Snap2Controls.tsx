@@ -7,7 +7,7 @@ import { Eye, EyeClosed, TableRowsSplit } from 'lucide-react';
 import SaveSnap2Menu from './SaveSnap2Menu.js';
 
 const Snap2Controls: React.FC = () => {
-  const { controlsHidden, toggleHideAll, allOptions, isVariantsOpen, setIsVariantsOpen, setActiveOptionId, isMobile, shareDialogTrigger } = useOV25UI();
+  const { controlsHidden, toggleHideAll, allOptions, isVariantsOpen, setIsVariantsOpen, setActiveOptionId, isMobile, shareDialogTrigger, configuratorState } = useOV25UI();
   
   const [canSeeDimensions, setCanSeeDimensions] = useState(false);
   const [canSeeMiniDimensions, setCanSeeMiniDimensions] = useState(false);
@@ -29,7 +29,7 @@ const Snap2Controls: React.FC = () => {
     } else {
       if (allOptions.length > 0) {
         const firstNonModulesOption = allOptions.find(opt => opt.id !== 'modules');
-        if (firstNonModulesOption) {
+        if (firstNonModulesOption && configuratorState?.snap2Objects?.length) {
           setActiveOptionId(firstNonModulesOption.id);
         } else if (allOptions.length > 0) {
           setActiveOptionId(allOptions[0].id);
@@ -40,7 +40,7 @@ const Snap2Controls: React.FC = () => {
   };
 
   return (
-    <div className={cn(
+    <div id="ov25-snap2-controls" className={cn(
       "ov:absolute ov:top-4 ov:left-1/2 ov:transform ov:-translate-x-1/2 ov:z-[102]",
       "ov:flex ov:gap-2 ov:pointer-events-none ov:transition-opacity ov:duration-200",
       (shareDialogTrigger !== 'none') && "ov:opacity-0 ov:pointer-events-none"

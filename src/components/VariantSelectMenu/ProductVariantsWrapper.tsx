@@ -6,6 +6,7 @@ import { SizeVariantCard } from "./variant-cards/SizeVariantCard.js";
 import { LegsVariantCard } from "./variant-cards/LegsVariantCard.js";
 import { ModuleVariantCard } from "./variant-cards/ModuleVariantCard.js";
 import { ModuleTypeTabs } from './ModuleTypeTabs.js';
+import { Loader2 } from 'lucide-react';
 
 export type DrawerSizes = 'closed' | 'small' | 'large';
 
@@ -28,6 +29,7 @@ export function ProductVariantsWrapper() {
         setIsModuleSelectionLoading,
         selectedModuleType,
         setSelectedModuleType,
+        configuratorState,
       } = useOV25UI();
 
     const handleModuleSelect = (variant: Variant) => {
@@ -63,6 +65,20 @@ export function ProductVariantsWrapper() {
           const position = module.position.toLowerCase();
           return position.includes(selectedModuleType);
         }) : [];
+
+      const shouldShowLoading = (!compatibleModules || compatibleModules.length === 0) && 
+                                (!configuratorState?.snap2Objects || configuratorState.snap2Objects.length === 0);
+
+      if (shouldShowLoading) {
+        return (
+          <div className="ov:flex ov:flex-col ov:items-center ov:justify-center ov:py-8 ov:space-y-4">
+            <Loader2 className="ov:w-8 ov:h-8 ov:animate-spin ov:text-[var(--ov25-text-color)]" />
+            <p className="ov:text-sm ov:text-[var(--ov25-secondary-text-color)]">
+              Loading...
+            </p>
+          </div>
+        );
+      }
 
       return (
         <ProductVariants
@@ -160,6 +176,5 @@ export function ProductVariantsWrapper() {
         />
       );
     }
-    
     return null;
   }

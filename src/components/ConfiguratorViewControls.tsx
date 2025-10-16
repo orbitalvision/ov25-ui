@@ -143,7 +143,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
   return (
     <>
       {/* Snap2 Controls - shown only in snap2 mode */}
-      {isSnap2Mode && (configuratorState?.snap2Objects?.length ?? 0) > 0 && <Snap2Controls />}
+      {isSnap2Mode && <Snap2Controls />}
     
       {/* <div className={cn(
         "ov:absolute ov:w-full ov:pointer-events-none ov:h-full ov:inset-0 ov:gap-2 ov:p-4 ov:flex ov:justify-end ov:items-end ov:z-[101]",
