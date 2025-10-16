@@ -11,7 +11,7 @@ import { closeModuleSelectMenu, DRAWER_HEIGHT_RATIO, IFRAME_HEIGHT_RATIO } from 
 import { createPortal } from 'react-dom';
 
 export const Snap2ConfigureButton: React.FC = () => {
-  const { isVariantsOpen, isModalOpen, setIsModalOpen, setIsVariantsOpen, isMobile, allOptions, setActiveOptionId, setShareDialogTrigger, shareDialogTrigger, isSnap2Mode, drawerSize, setDrawerSize, configuratorState, skipNextDrawerCloseRef, setCompatibleModules, setConfiguratorState, setPreloading, preloading, iframeResetKey } = useOV25UI();
+  const { isVariantsOpen, isModalOpen, setIsModalOpen, setIsVariantsOpen, isMobile, allOptions, setActiveOptionId, setShareDialogTrigger, shareDialogTrigger, isSnap2Mode, drawerSize, setDrawerSize, configuratorState, skipNextDrawerCloseRef, setCompatibleModules, setConfiguratorState, setPreloading, preloading, iframeResetKey, resetIframe } = useOV25UI();
   const [shouldRenderIframe, setShouldRenderIframe] = useState(false);
   const [pendingOpen, setPendingOpen] = useState(false);
 
@@ -89,6 +89,7 @@ export const Snap2ConfigureButton: React.FC = () => {
 
     if (!shouldShowSaveDialog) {
       setIsModalOpen(false);
+      resetIframe();
     }
     setIsVariantsOpen(false);
     setCompatibleModules(null);
