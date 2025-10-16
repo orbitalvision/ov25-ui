@@ -215,6 +215,10 @@ interface OV25UIContextType {
   hasConfigureButton: boolean;
   shareDialogTrigger: 'none' | 'save-button' | 'modal-close';
   skipNextDrawerCloseRef: React.MutableRefObject<boolean>;
+  preloading: boolean;
+  setPreloading: (preloading: boolean) => void;
+  resetIframe: () => void;
+  iframeResetKey: number;
   // Module selection state
   compatibleModules: CompatibleModule[] | null;
   isModuleSelectionLoading: boolean;
@@ -356,7 +360,7 @@ export const OV25UIProvider: React.FC<{
   const [canAnimate, setCanAnimate] = useState<boolean>(false);
   const [animationState, setAnimationState] = useState<AnimationState>('unavailable');
   const iframeRef = useRef<HTMLIFrameElement>(null!);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [hasSwitchedAfterDefer, setHasSwitchedAfterDefer] = useState(false)
   const [pendingProductId, setPendingProductId] = useState<string | null>(null);
   const [availableProductFilters, setAvailableProductFilters] = useState<ProductFilters>({});
@@ -417,6 +421,9 @@ export const OV25UIProvider: React.FC<{
   const [hasConfigureButtonState, setHasConfigureButton] = useState(hasConfigureButton);
   const [shareDialogTrigger, setShareDialogTrigger] = useState<'none' | 'save-button' | 'modal-close'>('none');
   const skipNextDrawerCloseRef = useRef(false);
+  const [preloading, setPreloading] = useState(window.innerWidth < 768);
+  const [iframeResetKey, setIframeResetKey] = useState(0);
+  
   // Module selection state
   const [compatibleModules, setCompatibleModules] = useState<CompatibleModule[] | null>(null);
   const [isModuleSelectionLoading, setIsModuleSelectionLoading] = useState<boolean>(false);
@@ -872,7 +879,7 @@ export const OV25UIProvider: React.FC<{
             break;
           case 'COMPATIBLE_MODULES':
             setCompatibleModules(data.modules || []);
-            if (data.modules.length > 0 && (configuratorState?.snap2Objects?.length || hasConfigureButton)) {
+            if (data.modules.length > 0 && (configuratorState?.snap2Objects?.length || hasConfigureButton) && !preloading && !isMobile) {
               setIsVariantsOpen(true);
               setActiveOptionId('modules');
             }
@@ -970,6 +977,10 @@ export const OV25UIProvider: React.FC<{
     hasConfigureButton: hasConfigureButtonState,
     shareDialogTrigger,
     skipNextDrawerCloseRef,
+    preloading,
+    setPreloading,
+    resetIframe: () => setIframeResetKey(prev => prev + 1),
+    iframeResetKey,
     // Module selection state
     compatibleModules,
     isModuleSelectionLoading,

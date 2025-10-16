@@ -11,9 +11,17 @@ import { closeModuleSelectMenu, DRAWER_HEIGHT_RATIO, IFRAME_HEIGHT_RATIO } from 
 import { createPortal } from 'react-dom';
 
 export const Snap2ConfigureButton: React.FC = () => {
-  const { isVariantsOpen, isModalOpen, setIsModalOpen, setIsVariantsOpen, isMobile, allOptions, setActiveOptionId, setShareDialogTrigger, shareDialogTrigger, isSnap2Mode, drawerSize, setDrawerSize, configuratorState, skipNextDrawerCloseRef, setCompatibleModules, setConfiguratorState } = useOV25UI();
+  const { isVariantsOpen, isModalOpen, setIsModalOpen, setIsVariantsOpen, isMobile, allOptions, setActiveOptionId, setShareDialogTrigger, shareDialogTrigger, isSnap2Mode, drawerSize, setDrawerSize, configuratorState, skipNextDrawerCloseRef, setCompatibleModules, setConfiguratorState, setPreloading, preloading, iframeResetKey } = useOV25UI();
   const [shouldRenderIframe, setShouldRenderIframe] = useState(false);
   const [pendingOpen, setPendingOpen] = useState(false);
+
+  // Preload iframe on component mount for mobile
+  useEffect(() => {
+    if (isMobile) {
+      setShouldRenderIframe(true);
+      setIsVariantsOpen(false);
+    }
+  }, [isMobile, setIsVariantsOpen]);
 
   // Auto-open drawer once options are loaded
   useEffect(() => {
@@ -24,21 +32,15 @@ export const Snap2ConfigureButton: React.FC = () => {
     }
   }, [pendingOpen, allOptions, isVariantsOpen, setActiveOptionId, setIsVariantsOpen]);
 
-  // Clean up iframe on mobile when variants close and share dialog is not active
-  useEffect(() => {
-    if (isMobile && !isVariantsOpen && shareDialogTrigger === 'none') {
-      setShouldRenderIframe(false);
-    }
-  }, [isMobile, isVariantsOpen, shareDialogTrigger]);
 
   const handleMobileDrawerClose = (open: boolean) => {
     if (!open) {
       setPendingOpen(false);
+      setPreloading(false);
       
       // If this is a programmatic close from save dialog, skip the save dialog trigger
       if (skipNextDrawerCloseRef.current) {
         skipNextDrawerCloseRef.current = false;
-        setShouldRenderIframe(false);
         setIsVariantsOpen(false);
         return;
       }
@@ -48,7 +50,6 @@ export const Snap2ConfigureButton: React.FC = () => {
         // Trigger save dialog, but keep iframe rendered until save dialog closes
         setShareDialogTrigger('modal-close');
       } else {
-        setShouldRenderIframe(false);
         setIsVariantsOpen(false);
       }
     } else {
@@ -58,9 +59,8 @@ export const Snap2ConfigureButton: React.FC = () => {
 
   const handleClick = () => {
     if (isMobile) {
-      // On mobile, create iframe and open the variants drawer
       // TwoStageDrawer will automatically manage isDrawerOrDialogOpen state
-      setShouldRenderIframe(true);
+      setPreloading(false);
       if (allOptions.length > 0) {
         setActiveOptionId(allOptions[0].id);
         setIsVariantsOpen(true);
@@ -78,19 +78,24 @@ export const Snap2ConfigureButton: React.FC = () => {
     if (shareDialogTrigger !== 'none') {
       return;
     }
+    
     // If variants panel is open and showing modules, send close message to iframe
     if (isVariantsOpen) {
       closeModuleSelectMenu();
     }
     
-    // Only show save dialog for snap2 configurators with a configuration (has snap2Objects)
-    if (isSnap2Mode && (configuratorState?.snap2Objects?.length ?? 0) > 0) {
-      setShareDialogTrigger('modal-close');
-    } else {
+    // Check if we should show save dialog BEFORE clearing state
+    const shouldShowSaveDialog = isSnap2Mode && (configuratorState?.snap2Objects?.length ?? 0) > 0;
+
+    if (!shouldShowSaveDialog) {
       setIsModalOpen(false);
-      setIsVariantsOpen(false);
-      setCompatibleModules(null);
-      setConfiguratorState(undefined);
+    }
+    setIsVariantsOpen(false);
+    setCompatibleModules(null);
+    setConfiguratorState(undefined);
+
+    if (shouldShowSaveDialog) {
+      setShareDialogTrigger('modal-close');
     }
   };
 
@@ -107,11 +112,17 @@ export const Snap2ConfigureButton: React.FC = () => {
       {/* Render iframe on mobile when needed */}
       {isMobile && shouldRenderIframe && createPortal(
         <>
-          <div className="ov:fixed ov:inset-0 ov:w-full ov:h-full ov:z-[2147483646]">
-            <ProductGallery />
+          <div className={cn(
+            "ov:fixed ov:inset-0 ov:w-full ov:h-full ov:z-[2147483646]",
+            !isVariantsOpen && "ov:opacity-0 ov:pointer-events-none"
+          )}>
+            <ProductGallery key={`gallery-${iframeResetKey}`} isInModal={false} isPreloading={preloading} />
           </div>
           <div 
-            className="ov:fixed ov:top-0 ov:left-0 ov:w-full ov:z-[2147483646] ov:pointer-events-none ov:transition-[height] ov:duration-500"
+            className={cn(
+              "ov:fixed ov:top-0 ov:left-0 ov:w-full ov:z-[2147483646] ov:pointer-events-none ov:transition-[height] ov:duration-500",
+              !isVariantsOpen && "ov:opacity-0 ov:pointer-events-none"
+            )}
             style={{ 
               height: drawerSize === 'large' 
                 ? `${window.innerHeight * IFRAME_HEIGHT_RATIO}px` 
@@ -144,22 +155,15 @@ export const Snap2ConfigureButton: React.FC = () => {
       {/* Only show modal on desktop */}
       {!isMobile && (
         <ConfiguratorModal isOpen={isModalOpen} onClose={handleCloseModal}>
-          <div className="ov:relative ov:w-full ov:h-full ov:flex">
-            {/* Main content area */}
-            <div className={cn(
-              "ov:relative ov:flex-1 ov:transition-all ov:duration-300",
-              isVariantsOpen ? "ov:w-[calc(100%-384px)]" : "ov:w-full"
-            )}>
-              <ProductGallery isInModal={isModalOpen} />
+          <div className={cn(
+            "ov:relative ov:w-full ov:h-full ov:flex",
+            !isModalOpen && "ov:hidden"
+          )}>
+            {/* Main content area - always full width since variants are in modal */}
+            <div className="ov:relative ov:flex-1 ov:min-h-0">
+              <ProductGallery key={`gallery-${iframeResetKey}`} isInModal={isModalOpen} isPreloading={preloading} />
               <ConfiguratorViewControls />
             </div>
-            
-            {/* Variants panel - only shown when variants are open */}
-            {isVariantsOpen && (
-              <div className="ov:w-[384px] ov:h-full ov:bg-white ov:border-l ov:border-gray-200 ov:overflow-y-auto">
-                <ProductVariantsWrapper />
-              </div>
-            )}
           </div>
         </ConfiguratorModal>
       )}

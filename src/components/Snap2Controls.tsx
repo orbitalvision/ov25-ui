@@ -1,13 +1,13 @@
 import React, { useState } from 'react';
 import { DimensionsIcon } from '../lib/svgs/DimensionsIcon.js';
-import { toggleDimensions, toggleFullscreen, toggleMiniDimensions } from '../utils/configurator-utils.js';
+import { toggleDimensions, toggleMiniDimensions } from '../utils/configurator-utils.js';
 import { useOV25UI } from '../contexts/ov25-ui-context.js';
 import { cn } from '../lib/utils.js';
-import { Eye, EyeClosed, TableRowsSplit } from 'lucide-react';
+import { Eye, EyeClosed } from 'lucide-react';
 import SaveSnap2Menu from './SaveSnap2Menu.js';
 
 const Snap2Controls: React.FC = () => {
-  const { controlsHidden, toggleHideAll, allOptions, isVariantsOpen, setIsVariantsOpen, setActiveOptionId, isMobile, shareDialogTrigger, configuratorState } = useOV25UI();
+  const { controlsHidden, toggleHideAll, shareDialogTrigger } = useOV25UI();
   
   const [canSeeDimensions, setCanSeeDimensions] = useState(false);
   const [canSeeMiniDimensions, setCanSeeMiniDimensions] = useState(false);
@@ -20,24 +20,6 @@ const Snap2Controls: React.FC = () => {
     toggleMiniDimensions(canSeeMiniDimensions, setCanSeeMiniDimensions);
   };
 
-  const handleVariantsClick = () => {
-    if (document.fullscreenElement) {
-      toggleFullscreen();
-    }
-    if (isVariantsOpen) {
-      setIsVariantsOpen(false);
-    } else {
-      if (allOptions.length > 0) {
-        const firstNonModulesOption = allOptions.find(opt => opt.id !== 'modules');
-        if (firstNonModulesOption && configuratorState?.snap2Objects?.length) {
-          setActiveOptionId(firstNonModulesOption.id);
-        } else if (allOptions.length > 0) {
-          setActiveOptionId(allOptions[0].id);
-        }
-        setIsVariantsOpen(true);
-      }
-    }
-  };
 
   return (
     <div id="ov25-snap2-controls" className={cn(
@@ -88,24 +70,6 @@ const Snap2Controls: React.FC = () => {
           </div>
         )}
 
-        {/* Variants Button - only show on desktop */}
-        {!controlsHidden && allOptions.length > 0 && !isMobile && (
-          <button 
-            id="ov25-snap2-variants-button" 
-            onClick={handleVariantsClick} 
-            className={cn(
-              "ov:cursor-pointer ov:w-8 ov:h-8 ov:flex ov:items-center ov:justify-center ov:transition-all ov:duration-200 ov:hover:opacity-80 ov:border ov:rounded-full",
-              isVariantsOpen 
-                ? "ov:border-[var(--ov25-text-color)] ov:bg-gray-200" 
-                : "ov:border-[var(--ov25-configurator-view-controls-border-color)]"
-            )}
-          >
-            <TableRowsSplit 
-              className="ov:w-[16px] ov:h-[16px]"
-              color="var(--ov25-text-color)"
-            />
-          </button>
-        )}
 
         {/* Save Snap2 Menu */}
         {!controlsHidden && <SaveSnap2Menu />}

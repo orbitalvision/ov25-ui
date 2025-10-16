@@ -18,6 +18,7 @@ export const SaveSnap2Menu: React.FC = () => {
     skipNextDrawerCloseRef,
     setCompatibleModules,
     setConfiguratorState,
+    resetIframe,
   } = useOV25UI();
   
   const [isSaving, setIsSaving] = useState(false);
@@ -108,6 +109,7 @@ export const SaveSnap2Menu: React.FC = () => {
         setIsVariantsOpen(false);
         setCompatibleModules(null);
         setConfiguratorState(undefined);
+        resetIframe();
       }
     }
   };

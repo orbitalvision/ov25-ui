@@ -12,9 +12,10 @@ import { ArPreviewQRCodeDialog } from "./ar-preview-qr-code-dialog.js"
 // Simplified props, most data now comes from context
 interface ProductGalleryProps {
   isInModal?: boolean;
+  isPreloading?: boolean;
 }
 
-export function ProductGallery({ isInModal = false }: ProductGalleryProps = {}) {
+export function ProductGallery({ isInModal = false, isPreloading = false }: ProductGalleryProps = {}) {
     // Get all required data from context
     const {
         isDrawerOrDialogOpen,
@@ -107,7 +108,11 @@ export function ProductGallery({ isInModal = false }: ProductGalleryProps = {}) 
 
     return (<>
 
-        <div className={cn("ov:relative ov:font-[family-name:var(--ov25-font-family)]", isInModal && "ov:h-full")} id="ov-25-configurator-gallery-container">
+        <div className={cn(
+            "ov:relative ov:font-[family-name:var(--ov25-font-family)]", 
+            isInModal && "ov:h-full",
+            isPreloading && "ov:hidden"
+        )} id="ov-25-configurator-gallery-container">
             <div id="ov25-configurator-background-color" className={cn(
                 isInModal ? "ov:h-full" : "ov:aspect-square ov:md:aspect-[1/1]",
                 "ov:z-[2] ov:absolute ov:inset-0 ov:block!",
