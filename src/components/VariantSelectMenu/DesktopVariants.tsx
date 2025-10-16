@@ -151,7 +151,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
                   variantGroup.variants.length > 0 && (
                     <div key={variantGroup.groupName}>
                       <div className="ov:flex ov:items-center ov:mx-4 ov:justify-between">
-                        <h3 className="ov25-group-name ov:text-lg ov:text-[var(--ov25-secondary-text-color)]">{variantGroup.groupName}</h3>
+                        <h3 className="ov25-group-name ov:text-lg ov:py-2 ov:text-[var(--ov25-secondary-text-color)]">{variantGroup.groupName}</h3>
                       </div>
                       <div id="ov25-variant-group-content" className={`ov:grid ${getGridColsClass(gridDivide)}`}>
                         <VariantsContent variantsToRender={variantGroup.variants} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />

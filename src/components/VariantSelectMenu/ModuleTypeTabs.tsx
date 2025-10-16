@@ -51,7 +51,7 @@ export const ModuleTypeTabs: React.FC<ModuleTypeTabsProps> = ({ selectedType, on
         return (
           <div
             key={`${type.id}-module-type-tab`}
-            className={`ov:cursor-pointer ov:flex ov:justify-center ov:items-center ov:my-0 ov:border-b ov:border-[var(--ov25-border-color)] ov:data-[selected=true]:bg-[var(--ov25-text-color)] ${widthClass} ${borderClass}`}
+            className={`ov:cursor-pointer ov:flex ov:justify-center ov:items-center ov:my-0 ov:border-b ov:border-t ov:border-[var(--ov25-border-color)] ov:data-[selected=true]:bg-[var(--ov25-text-color)] ${widthClass} ${borderClass}`}
             onClick={() => onTypeChange(type.id)}
             style={{ maxWidth: availableModuleTypes.length === 1 ? '100%' : availableModuleTypes.length === 2 ? '50%' : availableModuleTypes.length === 3 ? '33.333%' : '25%' }}
             data-selected={selectedType === type.id ? "true" : "false"}

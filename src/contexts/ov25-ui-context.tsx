@@ -694,8 +694,11 @@ export const OV25UIProvider: React.FC<{
         selections: []
       }]
     }] : []),
-    ...(products?.length > 1 && !isSnap2Mode ? [sizeOption] : []),
-    ...(configuratorState?.options || [])
+    // Only show other options if we have snap2Objects or we're not in snap2 mode
+    ...(isSnap2Mode && (!configuratorState?.snap2Objects || configuratorState.snap2Objects.length === 0) ? [] : [
+      ...(products?.length > 1 && !isSnap2Mode ? [sizeOption] : []),
+      ...(configuratorState?.options || [])
+    ])
   ];
 
   allOptions.forEach(option => {
