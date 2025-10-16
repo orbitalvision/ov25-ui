@@ -41,7 +41,7 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({ isOpen, on
       <div
         className={cn(
           'ov:relative ov:bg-white ov:rounded-lg ov:shadow-xl',
-          'ov:w-[90vw] ov:h-[90vh] ov:max-w-none ov:max-h-none',
+          'ov:w-[90vw] ov:h-[90vh] ov:max-w-[1980px] ov:max-h-none',
           'ov:overflow-hidden'
         )}
       >
