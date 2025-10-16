@@ -872,7 +872,7 @@ export const OV25UIProvider: React.FC<{
             break;
           case 'COMPATIBLE_MODULES':
             setCompatibleModules(data.modules || []);
-            if (data.modules.length > 0 && configuratorState?.snap2Objects?.length) {
+            if (data.modules.length > 0 && (configuratorState?.snap2Objects?.length || hasConfigureButton)) {
               setIsVariantsOpen(true);
               setActiveOptionId('modules');
             }
