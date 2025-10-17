@@ -49,12 +49,13 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({ isOpen, on
         <button
           onClick={onClose}
           className={cn(
-            'ov:absolute ov:-right-12 ov:z-10',
+            'ov:absolute ov:z-10',
             'ov:w-10 ov:h-10 ov:rounded-full ov:bg-white ov:shadow-lg',
             'ov:flex ov:items-center ov:justify-center',
             'ov:text-gray-600 ov:hover:text-gray-800 ov:hover:bg-gray-50',
             'ov:transition-all ov:duration-200 ov:cursor-pointer',
             'ov:border ov:border-gray-200',
+            'ov:top-4 ov:right-4 ov:xl:-right-12',
             isShareDialogOpen && 'ov:opacity-0 ov:pointer-events-none'
           )}
           aria-label="Close modal"
