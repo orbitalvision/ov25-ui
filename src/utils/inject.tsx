@@ -52,7 +52,7 @@ export type ElementSelector = string | ElementConfig;
 export interface InjectConfiguratorOptions {
   apiKey: StringOrFunction;
   productLink: StringOrFunction;
-  configurationUuid: StringOrFunction;
+  configurationUuid?: StringOrFunction;
   galleryId?: ElementSelector;
   images?: string[];
   deferThreeD?: boolean;
@@ -506,13 +506,13 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     
     // Check query parameters first, then fall back to injected configurationUuid
     const queryConfigUuid = getConfigurationUuidFromQueryParams();
-    const resolvedConfigurationUuid = queryConfigUuid || resolveStringOrFunction(configurationUuid);
+    const resolvedConfigurationUuid = queryConfigUuid || (configurationUuid ? resolveStringOrFunction(configurationUuid) : undefined);
     
     root.render(
        <OV25UIProvider 
          apiKey={resolvedApiKey} 
          productLink={resolvedProductLink} 
-         configurationUuid={resolvedConfigurationUuid}
+         configurationUuid={resolvedConfigurationUuid || ''}
          buyNowFunction={buyNowFunction}
          addSwatchesToCartFunction={addSwatchesToCartFunction}
          addToBasketFunction={addToBasketFunction} 
