@@ -42,18 +42,19 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({ isOpen, on
         className={cn(
           'ov:relative ov:bg-white ov:rounded-lg ov:shadow-xl',
           'ov:w-auto ov:h-[90vh] ov:max-w-[1980px] ov:max-h-none',
-          'ov:overflow-hidden ov:flex'
+          'ov:flex'
         )}
       >
         {/* Close button */}
         <button
           onClick={onClose}
           className={cn(
-            'ov:absolute ov:top-4 ov:right-4 ov:z-10',
-            'ov:w-8 ov:h-8 ov:rounded-full ov:bg-white/80 ov:shadow-md',
+            'ov:absolute ov:-right-12 ov:z-10',
+            'ov:w-10 ov:h-10 ov:rounded-full ov:bg-white ov:shadow-lg',
             'ov:flex ov:items-center ov:justify-center',
-            'ov:text-gray-600 ov:hover:text-gray-800',
+            'ov:text-gray-600 ov:hover:text-gray-800 ov:hover:bg-gray-50',
             'ov:transition-all ov:duration-200 ov:cursor-pointer',
+            'ov:border ov:border-gray-200',
             isShareDialogOpen && 'ov:opacity-0 ov:pointer-events-none'
           )}
           aria-label="Close modal"
@@ -62,7 +63,7 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({ isOpen, on
         </button>
 
         {/* Modal content */}
-        <div className="ov:w-full ov:h-full ov:overflow-hidden ov:flex">
+        <div className="ov:w-full ov:h-full ov:overflow-hidden ov:flex ov:rounded-lg">
           {/* Main content area with square aspect ratio */}
           <div className="ov:relative ov:flex ov:items-center ov:justify-center ov:overflow-hidden ov:w-[90vh] ov:h-[90vh]">
             <div className="ov:w-full ov:h-full">
