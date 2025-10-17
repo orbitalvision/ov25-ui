@@ -10,7 +10,7 @@ import { SwatchesContainer } from '../components/SwatchesContainer.js';
 import { ProductCarousel } from '../components/product-carousel.js';
 import ConfiguratorViewControls from '../components/ConfiguratorViewControls.js';
 import { SwatchBook } from '../components/VariantSelectMenu/SwatchBook.js';
-import { Snap2ConfigureButton } from '../components/Snap2ConfigureButton.js';
+import { Snap2ConfigureButton, Snap2ConfigureUI } from '../components/Snap2ConfigureButton.js';
 import { createPortal } from 'react-dom';
 
 // Import styles directly
@@ -134,6 +134,9 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
       }, 10000);
     });
   };
+
+  // Storage for configure handler that will be set by the context
+  (window as any).ov25ConfigureHandlerRef = { current: null };
 
   // Resolve string or function
   const resolveStringOrFunction = (value: StringOrFunction): string => {
@@ -431,7 +434,30 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     
     // Show configure button if provided
     if (configureButtonId) {
-      processElement(configureButtonId, <Snap2ConfigureButton />, 'configure-button');
+      if (shouldReplace(configureButtonId)) {
+        // Replace mode: portal the component
+        processElement(configureButtonId, <Snap2ConfigureButton />, 'configure-button');
+      } else {
+        // Listener mode: attach click handler to existing button and render UI separately
+        const selector = getSelector(configureButtonId);
+        if (selector) {
+          waitForElement(selector, 5000)
+            .then(element => {
+              const handleClick = () => {
+                const handlerRef = (window as any).ov25ConfigureHandlerRef;
+                if (handlerRef?.current) {
+                  handlerRef.current();
+                }
+              };
+              element.addEventListener('click', handleClick);
+            })
+            .catch(err => {
+              console.warn(`[OV25-UI] Configure button element not found: ${err.message}`);
+            });
+        }
+        // Add Snap2ConfigureUI to portals to render modal/drawer
+        portals.push(<Snap2ConfigureUI key="snap2-configure-ui" />);
+      }
     }
     
     // Add toaster to portals
