@@ -10,7 +10,7 @@ import { TwoStageDrawer } from './ui/two-stage-drawer.js';
 import { closeModuleSelectMenu, DRAWER_HEIGHT_RATIO, IFRAME_HEIGHT_RATIO } from '../utils/configurator-utils.js';
 import { createPortal } from 'react-dom';
 
-export const Snap2ConfigureButton: React.FC = () => {
+export const Snap2ConfigureUI: React.FC = () => {
   const { isVariantsOpen, isModalOpen, setIsModalOpen, setIsVariantsOpen, isMobile, allOptions, setActiveOptionId, setShareDialogTrigger, shareDialogTrigger, isSnap2Mode, drawerSize, setDrawerSize, configuratorState, skipNextDrawerCloseRef, setCompatibleModules, setConfiguratorState, setPreloading, preloading, iframeResetKey, resetIframe } = useOV25UI();
   const [shouldRenderIframe, setShouldRenderIframe] = useState(false);
   const [pendingOpen, setPendingOpen] = useState(false);
@@ -57,23 +57,6 @@ export const Snap2ConfigureButton: React.FC = () => {
     }
   };
 
-  const handleClick = () => {
-    if (isMobile) {
-      // TwoStageDrawer will automatically manage isDrawerOrDialogOpen state
-      setPreloading(false);
-      if (allOptions.length > 0) {
-        setActiveOptionId(allOptions[0].id);
-        setIsVariantsOpen(true);
-      } else {
-        setPendingOpen(true);
-      }
-    } else {
-      setIsModalOpen(true);
-      setIsVariantsOpen(true);
-      setActiveOptionId('modules');
-    }
-  };
-
   const handleCloseModal = () => {
     if (shareDialogTrigger !== 'none') {
       return;
@@ -102,14 +85,6 @@ export const Snap2ConfigureButton: React.FC = () => {
 
   return (
     <>
-      <button 
-        id="ov25-configure-button"
-        className={cn('ov25-configure-button ov:p-3 ov:py-2 ov:my-2 ov:cursor-pointer ov:bg-white ov:text-black ov:border ov:rounded-md ov:border-[var(--ov25-border-color)]')}
-        onClick={handleClick}
-      >
-        Configure
-      </button>
-      
       {/* Render iframe on mobile when needed */}
       {isMobile && shouldRenderIframe && createPortal(
         <>
@@ -168,6 +143,23 @@ export const Snap2ConfigureButton: React.FC = () => {
           </div>
         </ConfiguratorModal>
       )}
+    </>
+  );
+};
+
+export const Snap2ConfigureButton: React.FC = () => {
+  const { configureHandlerRef } = useOV25UI();
+
+  return (
+    <>
+      <button 
+        id="ov25-configure-button"
+        className={cn('ov25-configure-button ov:p-3 ov:py-2 ov:my-2 ov:cursor-pointer ov:bg-white ov:text-black ov:border ov:rounded-md ov:border-[var(--ov25-border-color)]')}
+        onClick={() => configureHandlerRef.current?.()}
+      >
+        Configure
+      </button>
+      <Snap2ConfigureUI />
     </>
   );
 };

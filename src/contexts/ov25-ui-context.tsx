@@ -219,6 +219,7 @@ interface OV25UIContextType {
   setPreloading: (preloading: boolean) => void;
   resetIframe: () => void;
   iframeResetKey: number;
+  configureHandlerRef: React.MutableRefObject<(() => void) | null>;
   // Module selection state
   compatibleModules: CompatibleModule[] | null;
   isModuleSelectionLoading: boolean;
@@ -428,6 +429,9 @@ export const OV25UIProvider: React.FC<{
   const [compatibleModules, setCompatibleModules] = useState<CompatibleModule[] | null>(null);
   const [isModuleSelectionLoading, setIsModuleSelectionLoading] = useState<boolean>(false);
   const [selectedModuleType, setSelectedModuleType] = useState<'all' | 'middle' | 'corner' | 'end'>('all');
+
+  // Configure handler ref for external access
+  const configureHandlerRef = useRef<(() => void) | null>(null);
 
   // Effect: Initialize selectedSelections from configuratorState
   useEffect(() => {
@@ -789,6 +793,30 @@ export const OV25UIProvider: React.FC<{
     setActiveOptionId(allOptions[newIndex].id);
   };
 
+  // Configure button handler for Snap2 mode
+  const handleConfigureClick = useCallback(() => {
+    if (isMobile) {
+      setPreloading(false);
+      if (allOptions.length > 0) {
+        setActiveOptionId(allOptions[0].id);
+        setIsVariantsOpen(true);
+      }
+    } else {
+      setIsModalOpen(true);
+      setIsVariantsOpen(true);
+      setActiveOptionId('modules');
+    }
+  }, [isMobile, allOptions, setPreloading, setActiveOptionId, setIsVariantsOpen, setIsModalOpen]);
+
+  // Expose configure handler ref
+  useEffect(() => {
+    configureHandlerRef.current = handleConfigureClick;
+    // Also sync to window object for external access
+    if ((window as any).ov25ConfigureHandlerRef) {
+      (window as any).ov25ConfigureHandlerRef.current = handleConfigureClick;
+    }
+  }, [handleConfigureClick]);
+
   // Handler for AR GLB data
   const handleARGLBData = useCallback(async (base64Data: string) => {
     try {
@@ -986,6 +1014,7 @@ export const OV25UIProvider: React.FC<{
     setPreloading,
     resetIframe: () => setIframeResetKey(prev => prev + 1),
     iframeResetKey,
+    configureHandlerRef,
     // Module selection state
     compatibleModules,
     isModuleSelectionLoading,
