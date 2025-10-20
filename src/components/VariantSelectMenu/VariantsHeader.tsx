@@ -26,7 +26,7 @@ export const VariantsHeader = () => {
         {/* Desktop Controls: Full width button */}
         <div id="ov25-variants-header" className="ov:hidden ov:md:block">
           <button 
-            onClick={isModalOpen ? undefined : () => setIsVariantsOpen(false)}
+            onClick={() => setIsVariantsOpen(false)}
             className={cn(
               'ov:flex ov:items-center ov:cursor-pointer ov:justify-between ov:w-full ov:border-none ov:p-4 ov:py-[1.125rem]',
               'ov:bg-[var(--ov25-background-color)]',
@@ -34,11 +34,9 @@ export const VariantsHeader = () => {
             )}
           >
             <div className="ov:flex ov:items-center ov:gap-2 ov:justify-center ov:w-full ov:relative">
-              {!isModalOpen && (
-                <div className="ov:absolute ov:cursor-pointer ov:w-full ov:inset-0 ov:h-full ov:flex ov:items-center ov:text-[var(--ov25-text-color)]">
-                  <ChevronLeft className="ov:h-4"/>
-                </div>
-              )}
+              <div className="ov:absolute ov:cursor-pointer ov:w-full ov:inset-0 ov:h-full ov:flex ov:items-center ov:text-[var(--ov25-text-color)]">
+                <ChevronLeft className="ov:h-4"/>
+              </div>
               {logoURL ? (
                 <img src={logoURL} alt="Logo" className="ov:h-full ov:w-auto ov:object-contain"/>
               ) : (

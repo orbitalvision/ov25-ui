@@ -114,8 +114,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
             isPreloading && "ov:hidden"
         )} id="ov-25-configurator-gallery-container">
             <div id="ov25-configurator-background-color" className={cn(
-                isInModal ? "ov:h-full" : "ov:aspect-square ov:md:aspect-[1/1]",
-                "ov:z-[2] ov:absolute ov:inset-0 ov:block!",
+                "ov:h-full ov:w-full ov:z-[2] ov:absolute ov:inset-0 ov:block!",
                 "ov:rounded-[var(--ov25-configurator-iframe-border-radius)]",
                 "ov:bg-[var(--ov25-configurator-iframe-background-color)]",
             )}></div>
@@ -123,8 +122,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
                 data-fullscreen={isVariantsOpen}
                 ref={containerRef}
                 className={cn(
-                    "ov:relative ov:overflow-hidden ov:z-[3]",
-                    isInModal ? "ov:h-full ov:w-full" : "ov:aspect-square ov:md:aspect-[3/2] ov:2xl:aspect-video",
+                    "ov:h-full ov:w-full ov:relative ov:overflow-hidden ov:z-[3]",
                     "ov:rounded-[var(--ov25-configurator-iframe-border-radius)]",
                     "ov:bg-[var(--ov25-configurator-iframe-background-color)]",
                 )}>

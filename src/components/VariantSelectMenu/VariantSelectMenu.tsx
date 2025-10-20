@@ -6,6 +6,7 @@ import { MobilePriceOverlay } from "../mobile-price-overlay.js";
 import { VariantContentDesktop } from './VariantContentDesktop.js';
 import { ProductVariantsWrapper } from './ProductVariantsWrapper.js';
 import { MobileCheckoutButton } from './MobileCheckoutButton.js';
+import { ModuleBottomPanel } from './ModuleBottomPanel.js';
 
 // Types
 export type DrawerSizes = 'closed' | 'small' | 'large';
@@ -19,7 +20,7 @@ export const VariantSelectMenu: React.FC = () => {
     isMobile,
     setDrawerSize,
     drawerSize,
-    allOptions,
+    allOptionsWithoutModules,
     handleOptionClick,
     range,
     getSelectedValue,
@@ -47,7 +48,7 @@ export const VariantSelectMenu: React.FC = () => {
         })()}
         {!hasConfigureButton && (
           <ProductOptionsGroup
-            allOptions={allOptions}
+            allOptions={allOptionsWithoutModules}
             handleOptionClick={handleOptionClick}
             range={range}
             getSelectedValue={getSelectedValue}
@@ -76,6 +77,7 @@ export const VariantSelectMenu: React.FC = () => {
             <VariantContentDesktop />
           )
         )}
+        <ModuleBottomPanel />
       </div>
     </>
   );

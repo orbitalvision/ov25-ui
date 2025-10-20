@@ -1,5 +1,5 @@
 import * as React from 'react'
-import { ProductFilters, useOV25UI } from "../../contexts/ov25-ui-context.js"
+import { useOV25UI } from "../../contexts/ov25-ui-context.js"
 import { VariantsContent } from "./VariantsContent.js";
 import { Variant, VariantCardProps, VariantGroup } from "./ProductVariants.js";
 import { ChevronUp } from "lucide-react";
@@ -7,8 +7,6 @@ import { useState } from 'react';
 import { FilterControls } from './FilterControls.js';
 import { FilterContent } from './FilterContent.js';
 import { NoResults } from './NoResults.js';
-
-
 
 export const getGridColsClass = (gridDivide: number) => {
   switch (gridDivide) {
@@ -24,14 +22,13 @@ export const capitalizeWords = (str: string) => {
   return str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 };
 
-export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gridDivide, moduleTypeTabs }
+export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gridDivide }
   : {
     variants: VariantGroup[] | Variant[],
     VariantCard: React.ComponentType<VariantCardProps>,
     isMobile: boolean,
     onSelect: (variant: Variant) => void
-    gridDivide: number,
-    moduleTypeTabs?: React.ReactNode
+    gridDivide: number
   }) => {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
 
@@ -41,7 +38,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
   const variantsToRender = isGrouped ? (variants as VariantGroup[]) : variants as Variant[];
 
   const {
-    allOptions,
+    allOptionsWithoutModules,
     handleOptionClick,
     activeOptionId,
     handlePreviousOption,
@@ -50,14 +47,14 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
     showOptional,
   } = useOV25UI();
 
-  const currentOption = allOptions.find(opt => opt.id === activeOptionId)
+  const currentOption = allOptionsWithoutModules.find(opt => opt.id === activeOptionId)
 
   const shouldShowFilters = ((isGrouped && !shouldDestructureGroups) && (variantsToRender as VariantGroup[]).some(group => group.variants.length > 0)) || showFilters;
 
   return (
     <>
 
-    {allOptions.length > 6 && (
+    {allOptionsWithoutModules.length > 6 && (
          <div id="ov25-carousel-controls" className="ov25-desktop-variants-carousel-controls ov:relative   ov:hidden ov:cursor-pointer ov:md:flex ov:items-center ov:justify-between ov:w-full ov:p-4 ov:py-[1.125rem] pt-0 ">
          <div className="ov:absolute ov:inset-0 ov:w-full ov:flex ov:justify-center ov:items-center ov:pb-5 ov:pt-5 ov:border-b ov:border-[var(--ov25-border-color)]">
              <p data-optional={currentOption?.hasNonOption ? 'true' : 'false'} className="ov:text-[var(--ov25-secondary-text-color)]">
@@ -85,12 +82,12 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
      </div>
     )}
       {
-        allOptions.length > 1 && allOptions.length <= 6 && (
+        allOptionsWithoutModules.length > 1 && allOptionsWithoutModules.length <= 6 && (
           <div id="ov25-option-selector-tabs" className="ov:flex ov:flex-wrap">
-            {allOptions.map((option, index) => {
+            {allOptionsWithoutModules.map((option, index) => {
               // Determine items per row: max 3 per row
-              const itemsInFirstRow = Math.min(3, allOptions.length);
-              const itemsInSecondRow = allOptions.length > 3 ? allOptions.length - 3 : 0;
+              const itemsInFirstRow = Math.min(3, allOptionsWithoutModules.length);
+              const itemsInSecondRow = allOptionsWithoutModules.length > 3 ? allOptionsWithoutModules.length - 3 : 0;
               // Figure out if this item is in the first or second row
               const isFirstRow = index < 3;
               const itemsThisRow = isFirstRow ? itemsInFirstRow : itemsInSecondRow;
@@ -124,15 +121,9 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
           </div>
         )
       }
-      {/* Module type tabs - only show for modules option */}
-      {moduleTypeTabs && currentOption?.name.toLowerCase() === 'modules' && (
-        <div className="ov:w-full">
-          {moduleTypeTabs}
-        </div>
-      )}
       {
         <div id="ov25-filter-container" className="ov:relative ov:w-full ov:flex ov:flex-col ov:min-h-0 ov:h-full">
-          {currentOption?.name.toLowerCase() !== 'size' && currentOption?.name.toLowerCase() !== 'modules' && <FilterControls 
+          {currentOption?.name.toLowerCase() !== 'size' && <FilterControls 
             isFilterOpen={isFilterOpen}
             setIsFilterOpen={setIsFilterOpen}
             isGrouped={isGrouped && !shouldDestructureGroups}

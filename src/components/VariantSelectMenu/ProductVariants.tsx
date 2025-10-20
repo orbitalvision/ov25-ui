@@ -51,7 +51,6 @@ interface ProductVariantsProps {
   onPrevious?: () => void
   basis?: string
   isMobile: boolean
-  moduleTypeTabs?: React.ReactNode
 }
 
 export const ProductVariants = ({
@@ -62,7 +61,6 @@ export const ProductVariants = ({
   VariantCard = DefaultVariantCard,
   basis = 'ov:basis-[43%]',
   isMobile,
-  moduleTypeTabs,
 }: ProductVariantsProps) => {
   const { activeOptionId, hidePricing } = useOV25UI();
 
@@ -82,7 +80,6 @@ export const ProductVariants = ({
           isMobile={isMobile}
           onSelect={onSelect}
           gridDivide={gridDivide}
-          moduleTypeTabs={moduleTypeTabs}
         />
       ) : (
         <DesktopVariants 
@@ -91,7 +88,6 @@ export const ProductVariants = ({
           isMobile={isMobile}
           onSelect={onSelect}
           gridDivide={gridDivide}
-          moduleTypeTabs={moduleTypeTabs}
         />
       )}
       {!isMobile && !hidePricing ? <CheckoutButton /> : null}

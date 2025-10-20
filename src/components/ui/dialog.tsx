@@ -21,7 +21,7 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "ov:fixed ov:inset-0 ov:z-[1000] ov:bg-black/80  data-[state=open]:ov:animate-in data-[state=closed]:ov:animate-out data-[state=closed]:ov:fade-out-0 data-[state=open]:ov:fade-in-0",
+      "ov:fixed ov:inset-0 ov:z-[2147483646] ov:bg-black/80  data-[state=open]:ov:animate-in data-[state=closed]:ov:animate-out data-[state=closed]:ov:fade-out-0 data-[state=open]:ov:fade-in-0",
       className
     )}
     {...props}
@@ -37,9 +37,10 @@ const DialogContent = React.forwardRef<
   
   // Snap2 dialogs need special handling for fullscreen compatibility
   const isSnap2Dialog = className?.includes('snap2');
+  // Always use document.body for snap2 dialogs to ensure top-most stacking above modals
   const portalTarget = isSnap2Dialog 
-    ? (document.querySelector('iframe')?.parentElement || document.body)
-    : (shadowDOMs?.configuratorViewControls || shadowDOMs?.swatchbookPortal);
+    ? document.body
+    : (shadowDOMs?.configuratorViewControls || shadowDOMs?.swatchbookPortal || document.body);
   
   if (!portalTarget) {
     throw new Error('Portal target not found');

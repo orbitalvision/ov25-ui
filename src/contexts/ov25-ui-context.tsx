@@ -193,6 +193,7 @@ interface OV25UIContextType {
   availableProductFilters?: ProductFilters;
   showFilters?: boolean;
   allOptions: (Option | SizeOption)[];
+  allOptionsWithoutModules: (Option | SizeOption)[];
   galleryIndexToUse: number;
   filteredActiveOption?: Option | null;
   searchQueries: { [optionId: string]: string };
@@ -224,6 +225,7 @@ interface OV25UIContextType {
   compatibleModules: CompatibleModule[] | null;
   isModuleSelectionLoading: boolean;
   selectedModuleType: 'all' | 'middle' | 'corner' | 'end';
+  isModulePanelOpen: boolean;
   // Methods
   setProducts: React.Dispatch<React.SetStateAction<Product[]>>;
   setCurrentProductId: React.Dispatch<React.SetStateAction<string | undefined>>;
@@ -276,6 +278,7 @@ interface OV25UIContextType {
   setCompatibleModules: React.Dispatch<React.SetStateAction<CompatibleModule[] | null>>;
   setIsModuleSelectionLoading: React.Dispatch<React.SetStateAction<boolean>>;
   setSelectedModuleType: React.Dispatch<React.SetStateAction<'all' | 'middle' | 'corner' | 'end'>>;
+  setIsModulePanelOpen: React.Dispatch<React.SetStateAction<boolean>>;
   // Actions
   handleSelectionSelect: (selection: Selection) => void;
   handleOptionClick: (optionId: string) => void;
@@ -429,9 +432,24 @@ export const OV25UIProvider: React.FC<{
   const [compatibleModules, setCompatibleModules] = useState<CompatibleModule[] | null>(null);
   const [isModuleSelectionLoading, setIsModuleSelectionLoading] = useState<boolean>(false);
   const [selectedModuleType, setSelectedModuleType] = useState<'all' | 'middle' | 'corner' | 'end'>('all');
+  const [isModulePanelOpen, setIsModulePanelOpen] = useState<boolean>(false);
 
   // Configure handler ref for external access
   const configureHandlerRef = useRef<(() => void) | null>(null);
+
+  // When variants open, auto-close bottom modules panel
+  useEffect(() => {
+    if (isVariantsOpen) {
+      setIsModulePanelOpen(false);
+    }
+  }, [isVariantsOpen]);
+
+  useEffect(() => {
+    // auto-close variants when module panel opens on desktop
+    if (isModulePanelOpen && !isMobile) {
+      setIsVariantsOpen(false);
+    }
+  }, [isModulePanelOpen, isMobile]);
 
   // Effect: Initialize selectedSelections from configuratorState
   useEffect(() => {
@@ -440,6 +458,12 @@ export const OV25UIProvider: React.FC<{
     }
     if (configuratorState?.configuratorSettings?.swatchSettings) {
       setSwatchRulesData(configuratorState.configuratorSettings.swatchSettings);
+    }
+    if (configuratorState?.snap2Objects && configuratorState.snap2Objects.length > 0) {
+      const firstNonModulesOption = allOptions.find(opt => opt.id !== 'modules');
+      if (firstNonModulesOption) {
+        setActiveOptionId(firstNonModulesOption.id);
+      }
     }
   }, [configuratorState]);
 
@@ -705,6 +729,8 @@ export const OV25UIProvider: React.FC<{
     ])
   ];
 
+  const allOptionsWithoutModules = allOptions.filter(option => option.id !== 'modules');
+
   allOptions.forEach(option => {
     option.hasNonOption = option.groups.some(group => {
       return group.selections.some(selection => {
@@ -797,16 +823,20 @@ export const OV25UIProvider: React.FC<{
   const handleConfigureClick = useCallback(() => {
     if (isMobile) {
       setPreloading(false);
-      if (allOptions.length > 0) {
-        setActiveOptionId(allOptions[0].id);
-        setIsVariantsOpen(true);
+      // On mobile, open variants drawer.
+      // Prefer first non-modules option; otherwise fall back to 'modules' so user can pick in the drawer.
+      const firstNonModulesOption = allOptions.find(opt => opt.id !== 'modules');
+      if (firstNonModulesOption) {
+        setActiveOptionId(firstNonModulesOption.id);
+      } else {
+        setActiveOptionId('modules');
       }
+      setIsVariantsOpen(true);
     } else {
       setIsModalOpen(true);
-      setIsVariantsOpen(true);
-      setActiveOptionId('modules');
+      setIsModulePanelOpen(true);
     }
-  }, [isMobile, allOptions, setPreloading, setActiveOptionId, setIsVariantsOpen, setIsModalOpen]);
+  }, [isMobile, allOptions, setPreloading, setActiveOptionId, setIsVariantsOpen, setIsModalOpen, compatibleModules, setIsModulePanelOpen]);
 
   // Expose configure handler ref
   useEffect(() => {
@@ -911,10 +941,14 @@ export const OV25UIProvider: React.FC<{
           case 'COMPATIBLE_MODULES':
             setCompatibleModules(data.modules || []);
             if (data.modules.length > 0) {
-              if (!hasConfigureButton && !data.isInitialLoad) {
-                setIsVariantsOpen(true);
+              setIsModulePanelOpen(true);
+              if (isMobile) {
+                setActiveOptionId('modules');
+                // Open drawer on mobile only when appropriate
+                if (!hasConfigureButton && !data.isInitialLoad) {
+                  setIsVariantsOpen(true);
+                }
               }
-              setActiveOptionId('modules');
             }
             break;
           case 'SELECT_MODULE_RECEIVED':
@@ -997,6 +1031,7 @@ export const OV25UIProvider: React.FC<{
     availableProductFilters,
     showFilters,
     allOptions,
+    allOptionsWithoutModules,
     searchQueries,
     selectedSwatches,
     swatchRulesData,
@@ -1019,6 +1054,7 @@ export const OV25UIProvider: React.FC<{
     compatibleModules,
     isModuleSelectionLoading,
     selectedModuleType,
+    isModulePanelOpen,
     // Methods
     setProducts,
     setCurrentProductId,
@@ -1061,6 +1097,7 @@ export const OV25UIProvider: React.FC<{
     setCompatibleModules,
     setIsModuleSelectionLoading,
     setSelectedModuleType,
+    setIsModulePanelOpen,
     // Actions
     handleSelectionSelect,
     handleOptionClick,

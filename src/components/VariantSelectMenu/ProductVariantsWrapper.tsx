@@ -1,12 +1,10 @@
 import React  from 'react';
 import { ProductVariants, Variant } from './ProductVariants.js';
 import { useOV25UI } from "../../contexts/ov25-ui-context.js";
-import { selectModule, CompatibleModule, closeModuleSelectMenu } from '../../utils/configurator-utils.js';
+import { closeModuleSelectMenu, selectModule, CompatibleModule } from '../../utils/configurator-utils.js';
 import { SizeVariantCard } from "./variant-cards/SizeVariantCard.js";
 import { LegsVariantCard } from "./variant-cards/LegsVariantCard.js";
 import { ModuleVariantCard } from "./variant-cards/ModuleVariantCard.js";
-import { ModuleTypeTabs } from './ModuleTypeTabs.js';
-import { Loader2 } from 'lucide-react';
 
 export type DrawerSizes = 'closed' | 'small' | 'large';
 
@@ -24,30 +22,10 @@ export function ProductVariantsWrapper() {
         selectedSelections,
         products,
         compatibleModules,
-        isSnap2Mode,
         isModuleSelectionLoading,
         setIsModuleSelectionLoading,
-        selectedModuleType,
-        setSelectedModuleType,
         configuratorState,
       } = useOV25UI();
-
-    const handleModuleSelect = (variant: Variant) => {
-      if (isModuleSelectionLoading) {
-        return;
-      }
-      
-      const module = variant.data as CompatibleModule;
-      const modelPath = module?.model?.modelPath;
-      const modelId = module?.model?.modelId;
-      
-      if (!modelPath || !modelId) {
-        return;
-      }
-      
-      setIsModuleSelectionLoading(true);
-      selectModule(modelPath, modelId);
-    };
 
     const handleCloseVariants = () => {
       // If we're closing the modules option, send message to iframe
@@ -57,25 +35,25 @@ export function ProductVariantsWrapper() {
       setIsVariantsOpen(false);
     };
 
-    // Check if we should show module selection (Snap2 mode)
-    if (isSnap2Mode && activeOptionId === 'modules') {
-      const filteredModules = compatibleModules && compatibleModules.length > 0 ? 
-        compatibleModules.filter(module => {
-          if (selectedModuleType === 'all') return true;
-          const position = module.position.toLowerCase();
-          return position.includes(selectedModuleType);
-        }) : [];
+    // Mobile-only: show modules list in the drawer when modules option is active
+    if (isMobile && activeOptionId === 'modules') {
+      const isLoading = (!compatibleModules || compatibleModules.length === 0) && 
+        (!configuratorState?.snap2Objects || configuratorState.snap2Objects.length === 0);
 
-      const shouldShowLoading = (!compatibleModules || compatibleModules.length === 0) && 
-                                (!configuratorState?.snap2Objects || configuratorState.snap2Objects.length === 0);
+      const handleModuleSelect = (variant: Variant) => {
+        if (isModuleSelectionLoading) return;
+        const module = variant.data as CompatibleModule;
+        const modelPath = module?.model?.modelPath;
+        const modelId = module?.model?.modelId;
+        if (!modelPath || !modelId) return;
+        setIsModuleSelectionLoading(true);
+        selectModule(modelPath, modelId);
+      };
 
-      if (shouldShowLoading) {
+      if (isLoading) {
         return (
           <div className="ov:flex ov:flex-col ov:items-center ov:justify-center ov:py-8 ov:space-y-4">
-            <Loader2 className="ov:w-8 ov:h-8 ov:animate-spin ov:text-[var(--ov25-text-color)]" />
-            <p className="ov:text-sm ov:text-[var(--ov25-secondary-text-color)]">
-              Loading...
-            </p>
+            <p className="ov:text-sm ov:text-[var(--ov25-secondary-text-color)]">Loading...</p>
           </div>
         );
       }
@@ -86,7 +64,7 @@ export function ProductVariantsWrapper() {
           gridDivide={2}
           onClose={handleCloseVariants}
           title="Modules"
-          variants={filteredModules.map(module => ({
+          variants={(compatibleModules || []).map(module => ({
             id: `${module.productId}-${module.model.modelId}`,
             name: module.product.name,
             price: 0,
@@ -104,13 +82,6 @@ export function ProductVariantsWrapper() {
           drawerSize={drawerSize}
           onSelect={handleModuleSelect}
           isMobile={isMobile}
-          moduleTypeTabs={
-            <ModuleTypeTabs 
-              selectedType={selectedModuleType}
-              onTypeChange={setSelectedModuleType}
-              compatibleModules={compatibleModules}
-            />
-          }
         />
       );
     }
@@ -144,6 +115,8 @@ export function ProductVariantsWrapper() {
       const isLegOption = activeOption?.name?.toLowerCase().includes('leg');
       
       // Handle all non-size options the same way, but use LegsVariantCard when appropriate
+      console.log("WOAH");
+      console.log('activeOption', activeOption);
       return (
         <ProductVariants
           isOpen={isVariantsOpen}
