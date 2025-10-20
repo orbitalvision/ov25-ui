@@ -17,11 +17,11 @@ export const Snap2ConfigureUI: React.FC = () => {
 
   // Preload iframe on component mount for mobile
   useEffect(() => {
-    if (isMobile) {
+    if (window.innerWidth < 1024) {
       setShouldRenderIframe(true);
       setIsVariantsOpen(false);
     }
-  }, [isMobile, setIsVariantsOpen]);
+  }, [setIsVariantsOpen]);
 
   // Auto-open drawer once options are loaded
   useEffect(() => {
@@ -86,17 +86,17 @@ export const Snap2ConfigureUI: React.FC = () => {
   return (
     <>
       {/* Render iframe on mobile when needed */}
-      {isMobile && shouldRenderIframe && createPortal(
+      {window.innerWidth < 1024 && shouldRenderIframe && createPortal(
         <>
           <div className={cn(
-            "ov:fixed ov:inset-0 ov:w-full ov:h-full ov:z-[2147483646]",
+            "ov:fixed ov:inset-0 ov:w-full ov:h-full ov:z-[2147483645]",
             !isVariantsOpen && "ov:opacity-0 ov:pointer-events-none"
           )}>
             <ProductGallery key={`gallery-${iframeResetKey}`} isInModal={false} isPreloading={preloading} />
           </div>
           <div 
             className={cn(
-              "ov:fixed ov:top-0 ov:left-0 ov:w-full ov:z-[2147483646] ov:pointer-events-none ov:transition-[height] ov:duration-500",
+              "ov:fixed ov:top-0 ov:left-0 ov:w-full ov:z-[2147483645] ov:pointer-events-none ov:transition-[height] ov:duration-500",
               !isVariantsOpen && "ov:opacity-0 ov:pointer-events-none"
             )}
             style={{ 
@@ -112,7 +112,7 @@ export const Snap2ConfigureUI: React.FC = () => {
       )}
       
       {/* Always render drawer on mobile (just keep it closed until needed) */}
-      {isMobile && (
+      {window.innerWidth < 1024 && (
         <TwoStageDrawer
           isOpen={isVariantsOpen}
           onOpenChange={handleMobileDrawerClose}
@@ -129,7 +129,7 @@ export const Snap2ConfigureUI: React.FC = () => {
       )}
       
       {/* Only show modal on desktop */}
-      {!isMobile && (
+      {window.innerWidth >= 1024 && (
         <ConfiguratorModal isOpen={isModalOpen} onClose={handleCloseModal}>
           <div className={cn(
             "ov:relative ov:w-full ov:h-full ov:flex",

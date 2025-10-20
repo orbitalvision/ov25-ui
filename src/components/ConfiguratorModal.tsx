@@ -41,7 +41,7 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({ isOpen, on
       <div
         className={cn(
           'ov:relative ov:bg-white ov:rounded-lg ov:shadow-xl',
-          'ov:w-auto ov:h-[90vh] ov:max-w-[1980px] ov:max-h-none',
+          'ov:w-auto ov:h-[60vh] ov:lg:h-[70vh] ov:xl:h-[90vh] ov:max-w-[1980px] ov:max-h-none',
           'ov:flex'
         )}
       >
@@ -55,7 +55,7 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({ isOpen, on
             'ov:text-gray-600 ov:hover:text-gray-800 ov:hover:bg-gray-50',
             'ov:transition-all ov:duration-200 ov:cursor-pointer',
             'ov:border ov:border-gray-200',
-            'ov:top-4 ov:right-4 ov:xl:-right-12',
+            'ov:top-4 ov:right-4 ov:min-[1325px]:-right-12',
             isShareDialogOpen && 'ov:opacity-0 ov:pointer-events-none'
           )}
           aria-label="Close modal"
@@ -66,7 +66,7 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({ isOpen, on
         {/* Modal content */}
         <div className="ov:w-full ov:h-full ov:overflow-hidden ov:flex ov:rounded-lg">
           {/* Main content area with square aspect ratio */}
-          <div className="ov:relative ov:flex ov:items-center ov:justify-center ov:overflow-hidden ov:w-[90vh] ov:h-[90vh]">
+          <div className="ov:relative ov:flex ov:items-center ov:justify-center ov:overflow-hidden ov:lg:w-[60vh] ov:w-[70vh] ov:xl:w-[90vh] ov:h-[90vh]">
             <div className="ov:w-full ov:h-full">
               {children}
             </div>
