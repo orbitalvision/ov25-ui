@@ -35,8 +35,10 @@ export const InitialiseMenu: React.FC = () => {
   }
 
   return (
-    <div className="ov:w-full ov:h-full ov:overflow-auto ov:p-4">
-      <div className="ov:grid ov:grid-cols-4 ov:gap-2">
+    <div className="ov:w-full ov:h-full ov:flex ov:items-center ov:justify-center ov:p-4">
+      <div className="ov:w-full ov:max-w-[960px] ov:mx-auto">
+        <h2 className="ov:text-center ov:text-base ov:mb-4 ov:text-[var(--ov25-text-color)]">Select a model to get started</h2>
+        <div className="ov:grid ov:grid-cols-4 ov:gap-2">
         {compatibleModules.map((module, index) => {
           const variant: Variant = {
             id: `${module.productId}-${module.model.modelId}`,
@@ -59,6 +61,7 @@ export const InitialiseMenu: React.FC = () => {
             </div>
           );
         })}
+        </div>
       </div>
     </div>
   );
