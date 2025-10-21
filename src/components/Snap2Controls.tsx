@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { DimensionsIcon } from '../lib/svgs/DimensionsIcon.js';
 import { toggleDimensions, toggleFullscreen, toggleMiniDimensions } from '../utils/configurator-utils.js';
 import { useOV25UI } from '../contexts/ov25-ui-context.js';
@@ -7,10 +7,18 @@ import { Eye, EyeClosed, TableRowsSplit } from 'lucide-react';
 import SaveSnap2Menu from './SaveSnap2Menu.js';
 
 const Snap2Controls: React.FC = () => {
-  const { controlsHidden, toggleHideAll, shareDialogTrigger, isVariantsOpen, setIsVariantsOpen, setActiveOptionId, allOptions, isMobile, configuratorState } = useOV25UI();
+  const { controlsHidden, toggleHideAll, shareDialogTrigger, isVariantsOpen, setIsVariantsOpen, setActiveOptionId, allOptions, isMobile, configuratorState, isModalOpen } = useOV25UI();
   
   const [canSeeDimensions, setCanSeeDimensions] = useState(false);
   const [canSeeMiniDimensions, setCanSeeMiniDimensions] = useState(false);
+
+  // Reset dimensions state when modal closes
+  useEffect(() => {
+    if (!isModalOpen) {
+      setCanSeeDimensions(false);
+      setCanSeeMiniDimensions(false);
+    }
+  }, [isModalOpen]);
 
   const handleToggleDimensions = () => {
     toggleDimensions(canSeeDimensions, setCanSeeDimensions);
