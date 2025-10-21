@@ -32,14 +32,9 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({ isOpen, on
     }
   }, [isOpen, onClose]);
 
-  // Focus modal when it opens and add global keydown listener
+  // Add global keydown listener when modal is open
   useEffect(() => {
     if (isOpen) {
-      // Focus the modal container
-      if (modalRef.current) {
-        modalRef.current.focus();
-      }
-      
       // Add global keydown listener
       document.addEventListener('keydown', handleKeyDown);
       
@@ -53,7 +48,7 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({ isOpen, on
     <div
       ref={modalRef}
       className={cn(
-        'ov:fixed ov:inset-0 ov:z-[99999999999999] ov:bg-black/50 ov:flex ov:flex-row ov:items-start ov:justify-center',
+        'ov:fixed ov:inset-0 ov:z-[99999999999999] ov:bg-black/50 ov:flex ov:flex-row ov:items-center ov:justify-center',
         'ov:p-4',
         !isOpen && 'ov:hidden ov:pointer-events-none'
       )}
@@ -104,7 +99,7 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({ isOpen, on
                ${isVariantsOpen ? 'ov:pointer-events-auto' : 'ov:pointer-events-none'}`
             }
           >
-            <ProductVariantsWrapper key={`variants-${isModalOpen ? 'open' : 'closed'}`} />
+            <ProductVariantsWrapper />
           </div>
             <ModuleBottomPanel portalTarget={contentRef.current || undefined} />
 

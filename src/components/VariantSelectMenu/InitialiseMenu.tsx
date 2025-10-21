@@ -55,12 +55,12 @@ export const InitialiseMenu: React.FC = () => {
               className="ov:w-full ov:cursor-pointer"
               onClick={() => handleModuleSelect(variant)}
             >
-              <div className="ov:w-full ov:h-[100px] ov:flex ov:items-center ov:justify-center ov:rounded-xl ov:bg-white ov:cursor-pointer ov:p-2 ov:border ov:border-[#F0F0F0]">
+              <div className="ov:w-full ov:h-[140px] ov:flex ov:items-center ov:justify-center ov:rounded-xl ov:bg-white ov:cursor-pointer ov:p-2 ov:border ov:border-[#F0F0F0]">
                 {module.product.hasImage && module.product.imageUrl ? (
                   <img
-                    src={module.product.imageUrl}
+                    src={module.product.imageUrl.replace('thumbnail', 'small_image')}
                     alt={module.product.name}
-                    className="ov:w-full ov:h-full ov:object-none ov:rounded-lg"
+                    className="ov:w-full ov:h-full ov:object-cover ov:rounded-lg"
                   />
                 ) : (
                   <div className="ov:w-full ov:h-full ov:bg-gray-200 ov:rounded-lg ov:flex ov:items-center ov:justify-center">
