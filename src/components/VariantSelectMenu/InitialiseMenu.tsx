@@ -50,14 +50,24 @@ export const InitialiseMenu: React.FC = () => {
             isSelected: false,
           };
           return (
-            <div key={`${module.productId}-${module.model.modelId}`} className="ov:w-full">
-              <ModuleVariantCard
-                variant={variant}
-                onSelect={handleModuleSelect}
-                index={index}
-                isMobile={isMobile}
-                isLoading={isModuleSelectionLoading}
-              />
+            <div 
+              key={`${module.productId}-${module.model.modelId}`} 
+              className="ov:w-full ov:cursor-pointer"
+              onClick={() => handleModuleSelect(variant)}
+            >
+              <div className="ov:w-full ov:h-[100px] ov:flex ov:items-center ov:justify-center ov:rounded-xl ov:bg-white ov:cursor-pointer ov:p-2 ov:border ov:border-[#F0F0F0]">
+                {module.product.hasImage && module.product.imageUrl ? (
+                  <img
+                    src={module.product.imageUrl}
+                    alt={module.product.name}
+                    className="ov:w-full ov:h-full ov:object-none ov:rounded-lg"
+                  />
+                ) : (
+                  <div className="ov:w-full ov:h-full ov:bg-gray-200 ov:rounded-lg ov:flex ov:items-center ov:justify-center">
+                    <span className="ov:text-gray-400 ov:text-xs">No Image</span>
+                  </div>
+                )}
+              </div>
             </div>
           );
         })}

@@ -115,8 +115,6 @@ export function ProductVariantsWrapper() {
       const isLegOption = activeOption?.name?.toLowerCase().includes('leg');
       
       // Handle all non-size options the same way, but use LegsVariantCard when appropriate
-      console.log("WOAH");
-      console.log('activeOption', activeOption);
       return (
         <ProductVariants
           isOpen={isVariantsOpen}
