@@ -1,5 +1,5 @@
 import React from 'react';
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { cn } from '../lib/utils.js';
@@ -26,11 +26,11 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({ isOpen, on
     }
   };
 
-  const handleKeyDown = (e: KeyboardEvent) => {
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (e.key === 'Escape' && isOpen) {
       onClose();
     }
-  };
+  }, [isOpen, onClose]);
 
   // Focus modal when it opens and add global keydown listener
   useEffect(() => {
@@ -47,7 +47,7 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({ isOpen, on
         document.removeEventListener('keydown', handleKeyDown);
       };
     }
-  }, [isOpen]);
+  }, [isOpen, handleKeyDown]);
 
   return createPortal(
     <div
