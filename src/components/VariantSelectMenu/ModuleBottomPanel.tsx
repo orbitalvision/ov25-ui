@@ -244,7 +244,6 @@ export const ModuleBottomPanel: React.FC<{ portalTarget?: Element }> = ({ portal
                       >
                         <div 
                           className="ov:w-[100px] ov:h-[100px] ov:flex ov:items-center ov:justify-center ov:rounded-xl ov:shadow-lg ov:bg-white ov:cursor-pointer ov:p-2"
-                          onClick={() => handleModuleSelect(variant)}
                         >
                           {module.product.hasImage && module.product.imageUrl ? (
                             <img
