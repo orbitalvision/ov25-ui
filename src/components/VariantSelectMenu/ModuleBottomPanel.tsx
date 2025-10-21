@@ -137,7 +137,7 @@ export const ModuleBottomPanel: React.FC<{ portalTarget?: Element }> = ({ portal
         <div className="ov:flex ov:justify-between ov:items-center">
           <div className="ov:w-full">
             <div className="ov:flex ov:justify-center ov:mb-4">
-              <div className="ov:bg-white ov:shadow-md ov:backdrop-blur-sm ov:rounded-full ov:px-2 ov:pt-2 ov:pb-0">
+              <div className="ov:bg-white ov:shadow-md ov:backdrop-blur-sm ov:rounded-full ov:px-2 ov:pb-0">
                 <div className="ov:relative ov:flex ov:items-center ov:gap-1">
                   <button
                     ref={(el) => tabsRef.current[0] = el}
