@@ -3,7 +3,6 @@ import { createPortal } from 'react-dom';
 import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 import { selectModule, CompatibleModule, closeModuleSelectMenu } from '../../utils/configurator-utils.js';
 import { ChevronsRight, CornerDownRight, Layers, Sofa } from 'lucide-react';
-import { ModuleVariantCard } from './variant-cards/ModuleVariantCard.js';
 import { Carousel, CarouselContent, CarouselItem } from '../ui/carousel.js';
 import { Variant } from './ProductVariants.js';
 
@@ -16,7 +15,6 @@ export const ModuleBottomPanel: React.FC<{ portalTarget?: Element }> = ({ portal
     setSelectedModuleType,
     isModuleSelectionLoading,
     setIsModuleSelectionLoading,
-    isMobile,
   } = useOV25UI();
 
   // Mount/animation state
@@ -36,6 +34,32 @@ export const ModuleBottomPanel: React.FC<{ portalTarget?: Element }> = ({ portal
       const position = module.position.toLowerCase();
       return position.includes(selectedModuleType);
     }) : [];
+
+  // Get available tab types based on what modules exist
+  const getAvailableTabTypes = () => {
+    if (!compatibleModules || compatibleModules.length === 0) return ['all'];
+    
+    const availableTypes = ['all']; // Always show 'all'
+    
+    // Check which specific types have modules
+    const hasMiddle = compatibleModules.some(module => 
+      module.position.toLowerCase().includes('middle')
+    );
+    const hasCorner = compatibleModules.some(module => 
+      module.position.toLowerCase().includes('corner')
+    );
+    const hasEnd = compatibleModules.some(module => 
+      module.position.toLowerCase().includes('end')
+    );
+    
+    if (hasMiddle) availableTypes.push('middle');
+    if (hasCorner) availableTypes.push('corner');
+    if (hasEnd) availableTypes.push('end');
+    
+    return availableTypes;
+  };
+
+  const availableTabTypes = getAvailableTabTypes();
 
   const handleModuleSelect = (variant: Variant) => {
     if (isModuleSelectionLoading) {
@@ -80,11 +104,11 @@ export const ModuleBottomPanel: React.FC<{ portalTarget?: Element }> = ({ portal
 
   // Update active tab index when selectedModuleType changes
   useEffect(() => {
-    const newIndex = tabTypes.indexOf(selectedModuleType);
+    const newIndex = availableTabTypes.indexOf(selectedModuleType);
     if (newIndex !== -1) {
       setActiveTabIndex(newIndex);
     }
-  }, [selectedModuleType, tabTypes]);
+  }, [selectedModuleType, availableTabTypes]);
 
   const updateUnderlinePosition = (tabIndex: number) => {
     const activeTab = tabsRef.current[tabIndex];
@@ -139,54 +163,40 @@ export const ModuleBottomPanel: React.FC<{ portalTarget?: Element }> = ({ portal
             <div className="ov:flex ov:justify-center ov:mb-4">
               <div className="ov:bg-white ov:shadow-md ov:backdrop-blur-sm ov:rounded-full ov:px-2 ov:pb-0">
                 <div className="ov:relative ov:flex ov:items-center ov:gap-1">
-                  <button
-                    ref={(el) => tabsRef.current[0] = el}
-                    onClick={() => setSelectedModuleType('all')}
-                    className={`ov:flex ov:items-center ov:gap-1.5 ov:px-4 ov:py-2 ov:rounded-full ov:text-sm ov:font-medium ov:transition-colors ${
-                      selectedModuleType === 'all' 
-                        ? 'ov:text-gray-900' 
-                        : 'ov:text-gray-600 ov:hover:text-gray-900'
-                    }`}
-                  >
-                    <Layers className="ov:w-3.5 ov:h-3.5" />
-                    <span>All</span>
-                  </button>
-                  <button
-                    ref={(el) => tabsRef.current[1] = el}
-                    onClick={() => setSelectedModuleType('middle')}
-                    className={`ov:flex ov:items-center ov:gap-1.5 ov:px-4 ov:py-2 ov:rounded-full ov:text-sm ov:font-medium ov:transition-colors ${
-                      selectedModuleType === 'middle' 
-                        ? 'ov:text-gray-900' 
-                        : 'ov:text-gray-600 ov:hover:text-gray-900'
-                    }`}
-                  >
-                    <Sofa className="ov:w-3.5 ov:h-3.5" />
-                    <span>Middle</span>
-                  </button>
-                  <button
-                    ref={(el) => tabsRef.current[2] = el}
-                    onClick={() => setSelectedModuleType('corner')}
-                    className={`ov:flex ov:items-center ov:gap-1.5 ov:px-4 ov:py-2 ov:rounded-full ov:text-sm ov:font-medium ov:transition-colors ${
-                      selectedModuleType === 'corner' 
-                        ? 'ov:text-gray-900' 
-                        : 'ov:text-gray-600 ov:hover:text-gray-900'
-                    }`}
-                  >
-                    <CornerDownRight className="ov:w-3.5 ov:h-3.5" />
-                    <span>Corner</span>
-                  </button>
-                  <button
-                    ref={(el) => tabsRef.current[3] = el}
-                    onClick={() => setSelectedModuleType('end')}
-                    className={`ov:flex ov:items-center ov:gap-1.5 ov:px-4 ov:py-2 ov:rounded-full ov:text-sm ov:font-medium ov:transition-colors ${
-                      selectedModuleType === 'end' 
-                        ? 'ov:text-gray-900' 
-                        : 'ov:text-gray-600 ov:hover:text-gray-900'
-                    }`}
-                  >
-                    <ChevronsRight className="ov:w-3.5 ov:h-3.5" />
-                    <span>End</span>
-                  </button>
+                  {availableTabTypes.map((tabType, index) => {
+                    const getTabConfig = (type: string) => {
+                      switch (type) {
+                        case 'all':
+                          return { icon: Layers, label: 'All' };
+                        case 'middle':
+                          return { icon: Sofa, label: 'Middle' };
+                        case 'corner':
+                          return { icon: CornerDownRight, label: 'Corner' };
+                        case 'end':
+                          return { icon: ChevronsRight, label: 'End' };
+                        default:
+                          return { icon: Layers, label: 'All' };
+                      }
+                    };
+
+                    const { icon: Icon, label } = getTabConfig(tabType);
+                    
+                    return (
+                      <button
+                        key={tabType}
+                        ref={(el) => tabsRef.current[index] = el}
+                        onClick={() => setSelectedModuleType(tabType as 'all' | 'middle' | 'corner' | 'end')}
+                        className={`ov:flex ov:items-center ov:gap-1.5 ov:px-4 ov:py-2 ov:rounded-full ov:text-sm ov:font-medium ov:transition-colors ${
+                          selectedModuleType === tabType 
+                            ? 'ov:text-gray-900' 
+                            : 'ov:text-gray-600 ov:hover:text-gray-900'
+                        }`}
+                      >
+                        <Icon className="ov:w-3.5 ov:h-3.5" />
+                        <span>{label}</span>
+                      </button>
+                    );
+                  })}
                   
                   {/* Animated green underline */}
                   <div
