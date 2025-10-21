@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 import { CompatibleModule, selectModule } from '../../utils/configurator-utils.js';
 import { Variant } from './ProductVariants.js';
@@ -10,6 +10,8 @@ export const InitialiseMenu: React.FC = () => {
     isModuleSelectionLoading,
     setIsModuleSelectionLoading,
   } = useOV25UI();
+
+  const [hoveredModule, setHoveredModule] = useState<string | null>(null);
 
   const handleModuleSelect = (variant: Variant) => {
     if (isModuleSelectionLoading) {
@@ -52,10 +54,12 @@ export const InitialiseMenu: React.FC = () => {
             <div 
               key={`${module.productId}-${module.model.modelId}`} 
               className={cn(
-                "ov:w-full ov:flex ov:flex-col",
+                "ov:w-full ov:flex ov:flex-col ov:relative",
                 isModuleSelectionLoading ? "ov:cursor-not-allowed ov:opacity-50" : "ov:cursor-pointer"
               )}
               onClick={() => !isModuleSelectionLoading && handleModuleSelect(variant)}
+              onMouseEnter={() => setHoveredModule(`${module.productId}-${module.model.modelId}`)}
+              onMouseLeave={() => setHoveredModule(null)}
             >
               <div className="ov:w-full ov:h-[100px] ov:sm:h-[140px] ov:flex ov:items-center ov:justify-center ov:rounded-xl ov:bg-white ov:cursor-pointer ov:p-1 ov:sm:p-2 ov:border ov:border-[#F0F0F0]">
                 {module.product.hasImage && module.product.imageUrl ? (
@@ -70,6 +74,13 @@ export const InitialiseMenu: React.FC = () => {
                   </div>
                 )}
               </div>
+              
+              {/* Custom tooltip */}
+              {hoveredModule === `${module.productId}-${module.model.modelId}` && (
+                <div className="ov:absolute ov:bottom-full ov:left-1/2 ov:transform ov:-translate-x-1/2 ov:mb-2 ov:px-2 ov:py-1 ov:bg-gray-900 ov:text-white ov:text-xs ov:rounded ov:whitespace-nowrap ov:z-10">
+                  {module.product.name}
+                </div>
+              )}
             </div>
           );
         })}
