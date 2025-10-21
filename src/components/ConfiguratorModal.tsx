@@ -58,7 +58,7 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({ isOpen, on
       <div
         className={cn(
           'ov:relative ov:bg-white ov:rounded-lg ov:shadow-xl',
-          'ov:w-auto ov:h-[60vh] ov:lg:h-[70vh] ov:xl:h-[90vh] ov:max-w-[1980px] ov:max-h-none',
+          'ov:w-auto ov:h-full ov:max-w-[1980px] ov:max-h-none',
           'ov:flex'
         )}
       >
@@ -81,7 +81,7 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({ isOpen, on
         </button>
 
         {/* Modal content */}
-        <div ref={contentRef} className="ov:relative ov:w-[90vw] ov:h-[90vh] ov:overflow-hidden ov:flex ov:rounded-lg">
+        <div ref={contentRef} className="ov:relative ov:w-[90vw] ov:h-full ov:overflow-hidden ov:flex ov:rounded-lg">
           {/* Main content area */}
           <div className="ov:relative ov:flex ov:items-stretch ov:justify-stretch ov:flex-1 ov:h-full ov:w-full ov:overflow-visible">
             <div className="ov:w-full ov:h-full">
