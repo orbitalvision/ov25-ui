@@ -16,7 +16,8 @@ export const VariantsHeader = () => {
         activeOptionId,
         allOptions,
         showOptional,
-        isModalOpen
+        isModalOpen,
+        isSnap2Mode
       } = useOV25UI();
 
     const currentOption = allOptions.find(opt => opt.id === activeOptionId)
@@ -24,7 +25,10 @@ export const VariantsHeader = () => {
     return (
         <>
         {/* Desktop Controls: Full width button */}
-        <div id="ov25-variants-header" className="ov:hidden ov:md:block">
+        <div id="ov25-variants-header" className={cn(
+          "ov:hidden",
+          isSnap2Mode ? "ov:lg:block" : "ov:md:block"
+        )}>
           <button 
             onClick={() => setIsVariantsOpen(false)}
             className={cn(
@@ -47,7 +51,10 @@ export const VariantsHeader = () => {
         </div>
    
         {/* Mobile(ipad size) Controls: Title with separate chevron buttons */}
-        <div id="ov25-carousel-controls" className="ov25-mobile-variants-carousel-controls ov:relative ov:flex ov:cursor-pointer ov:md:hidden ov:items-center ov:justify-between ov:w-full ov:p-4 ov:py-[1.125rem] ov:pt-6">
+        <div id="ov25-carousel-controls" className={cn(
+          "ov25-mobile-variants-carousel-controls ov:relative ov:flex ov:cursor-pointer ov:items-center ov:justify-between ov:w-full ov:p-4 ov:py-[1.125rem] ov:pt-6",
+          isSnap2Mode ? "ov:lg:hidden" : "ov:md:hidden"
+        )}>
             <div className="ov:absolute ov:inset-0 ov:w-full ov:flex ov:justify-center ov:items-center ov:pb-5 ov:pt-10 ov:border-b ov:border-[var(--ov25-border-color)]">
                 <p data-optional={currentOption?.hasNonOption ? 'true' : 'false'} className="ov:text-[var(--ov25-secondary-text-color)]">
                 {currentOption && capitalizeWords(currentOption.name + ((currentOption.hasNonOption && showOptional) ? ' (Optional)' : '')) }
