@@ -7,11 +7,12 @@ import { useOV25UI } from '../contexts/ov25-ui-context.js';
 import { ProductVariantsWrapper } from './VariantSelectMenu/ProductVariantsWrapper.js';
 import { MobileCheckoutButton } from './VariantSelectMenu/MobileCheckoutButton.js';
 import { TwoStageDrawer } from './ui/two-stage-drawer.js';
+import { InitialiseMenu } from './VariantSelectMenu/InitialiseMenu.js';
 import { closeModuleSelectMenu, DRAWER_HEIGHT_RATIO, IFRAME_HEIGHT_RATIO } from '../utils/configurator-utils.js';
 import { createPortal } from 'react-dom';
 
 export const Snap2ConfigureUI: React.FC = () => {
-  const { isVariantsOpen, isModalOpen, setIsModalOpen, setIsVariantsOpen, isMobile, allOptions, setActiveOptionId, setShareDialogTrigger, shareDialogTrigger, isSnap2Mode, drawerSize, setDrawerSize, configuratorState, skipNextDrawerCloseRef, setCompatibleModules, setConfiguratorState, setPreloading, preloading, iframeResetKey, resetIframe } = useOV25UI();
+  const { isVariantsOpen, isModalOpen, setIsModalOpen, setIsVariantsOpen, isMobile, allOptions, activeOptionId, setActiveOptionId, setShareDialogTrigger, shareDialogTrigger, isSnap2Mode, drawerSize, setDrawerSize, configuratorState, skipNextDrawerCloseRef, setCompatibleModules, setConfiguratorState, setPreloading, preloading, iframeResetKey, resetIframe } = useOV25UI();
   const [shouldRenderIframe, setShouldRenderIframe] = useState(false);
   const [pendingOpen, setPendingOpen] = useState(false);
 
@@ -85,19 +86,19 @@ export const Snap2ConfigureUI: React.FC = () => {
 
   return (
     <>
-      {/* Render iframe on mobile when needed */}
+      {/* Render iframe on mobile when needed (hidden during initial module selection) */}
       {window.innerWidth < 1024 && shouldRenderIframe && createPortal(
         <>
           <div className={cn(
             "ov:fixed ov:inset-0 ov:w-full ov:h-full ov:z-[2147483645]",
-            !isVariantsOpen && "ov:opacity-0 ov:pointer-events-none"
+            (!isVariantsOpen || (activeOptionId === 'modules' && (!configuratorState?.snap2Objects || configuratorState.snap2Objects.length === 0))) && "ov:opacity-0 ov:pointer-events-none"
           )}>
             <ProductGallery key={`gallery-${iframeResetKey}`} isInModal={false} isPreloading={preloading} />
           </div>
           <div 
             className={cn(
               "ov:fixed ov:top-0 ov:left-0 ov:w-full ov:z-[2147483645] ov:pointer-events-none ov:transition-[height] ov:duration-500",
-              !isVariantsOpen && "ov:opacity-0 ov:pointer-events-none"
+              (!isVariantsOpen || (activeOptionId === 'modules' && (!configuratorState?.snap2Objects || configuratorState.snap2Objects.length === 0))) && "ov:opacity-0 ov:pointer-events-none"
             )}
             style={{ 
               height: drawerSize === 'large' 
@@ -111,8 +112,16 @@ export const Snap2ConfigureUI: React.FC = () => {
         document.body
       )}
       
-      {/* Always render drawer on mobile (just keep it closed until needed) */}
-      {window.innerWidth < 1024 && (
+      {/* Fullscreen initial module selection for mobile */}
+      {window.innerWidth < 1024 && isVariantsOpen && activeOptionId === 'modules' && (!configuratorState?.snap2Objects || configuratorState.snap2Objects.length === 0) && createPortal(
+        <div className="ov:fixed ov:inset-0 ov:z-[20] ov:bg-white">
+          <InitialiseMenu />
+        </div>,
+        document.body
+      )}
+
+      {/* Only render drawer on mobile when there are snap2Objects */}
+      {window.innerWidth < 1024 && (configuratorState?.snap2Objects?.length ?? 0) > 0 && (
         <TwoStageDrawer
           isOpen={isVariantsOpen}
           onOpenChange={handleMobileDrawerClose}

@@ -235,7 +235,7 @@ export const ModuleBottomPanel: React.FC<{ portalTarget?: Element }> = ({ portal
                   };
 
                   return (
-                    <CarouselItem key={module.productId} className="ov:basis-[170px] ov:flex-shrink-0">
+                    <CarouselItem key={module.productId} className="ov:basis-[150px] ov:flex-shrink-0">
                       <div 
                         className={`ov:p-2 ov:flex ov:flex-col ov:gap-2 ov:items-center ov:z-50 ov:w-[150px] ov:h-[150px] ${
                           isModuleSelectionLoading ? 'ov:cursor-not-allowed ov:opacity-50' : 'ov:cursor-pointer'
