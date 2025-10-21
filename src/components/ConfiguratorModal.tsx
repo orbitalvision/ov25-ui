@@ -1,5 +1,5 @@
 import React from 'react';
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { cn } from '../lib/utils.js';
@@ -18,6 +18,7 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({ isOpen, on
   const { shareDialogTrigger, isModalOpen, configuratorState, isVariantsOpen } = useOV25UI();
   const isShareDialogOpen = shareDialogTrigger !== 'none';
   const contentRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -25,21 +26,38 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({ isOpen, on
     }
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
+  const handleKeyDown = (e: KeyboardEvent) => {
+    if (e.key === 'Escape' && isOpen) {
       onClose();
     }
   };
 
+  // Focus modal when it opens and add global keydown listener
+  useEffect(() => {
+    if (isOpen) {
+      // Focus the modal container
+      if (modalRef.current) {
+        modalRef.current.focus();
+      }
+      
+      // Add global keydown listener
+      document.addEventListener('keydown', handleKeyDown);
+      
+      return () => {
+        document.removeEventListener('keydown', handleKeyDown);
+      };
+    }
+  }, [isOpen]);
+
   return createPortal(
     <div
+      ref={modalRef}
       className={cn(
         'ov:fixed ov:inset-0 ov:z-[99999999999999] ov:bg-black/50 ov:flex ov:flex-row ov:items-start ov:justify-center',
         'ov:p-4',
         !isOpen && 'ov:hidden ov:pointer-events-none'
       )}
       onClick={handleBackdropClick}
-      onKeyDown={handleKeyDown}
       tabIndex={-1}
     >
       <div
