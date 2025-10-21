@@ -97,7 +97,7 @@ const Snap2Controls: React.FC = () => {
         )}
 
         {/* Variants Button - only show on desktop */}
-        {!controlsHidden && allOptions.length > 0 && !isMobile && (
+        {!controlsHidden && allOptions.length > 0 && !(window.innerWidth < 1024) && (
           <button 
             id="ov25-snap2-variants-button" 
             onClick={handleVariantsClick} 
