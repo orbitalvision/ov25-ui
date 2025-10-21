@@ -954,7 +954,7 @@ export const OV25UIProvider: React.FC<{
             }
             break;
           case 'SELECT_MODULE_RECEIVED':
-            setIsModuleSelectionLoading(false);
+            // Loading state is now managed by InitialiseMenu component (when configuratorState.snap2Objects.length > 0). this is too early to set it to false, since 3D scene is not yet loaded.
             break;
         }
       } catch (error) {

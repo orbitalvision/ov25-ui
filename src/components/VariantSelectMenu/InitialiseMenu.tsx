@@ -1,8 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 import { CompatibleModule, selectModule } from '../../utils/configurator-utils.js';
-import { ModuleVariantCard } from './variant-cards/ModuleVariantCard.js';
 import { Variant } from './ProductVariants.js';
+import { cn } from '../../lib/utils.js';
 
 export const InitialiseMenu: React.FC = () => {
   const {
@@ -10,7 +10,15 @@ export const InitialiseMenu: React.FC = () => {
     isModuleSelectionLoading,
     setIsModuleSelectionLoading,
     isMobile,
+    configuratorState,
   } = useOV25UI();
+  
+  // Reset loading state when snap2Objects are created (InitialiseMenu will be hidden)
+  useEffect(() => {
+    if (configuratorState?.snap2Objects && configuratorState.snap2Objects.length > 0) {
+      setIsModuleSelectionLoading(false);
+    }
+  }, [configuratorState?.snap2Objects, setIsModuleSelectionLoading]);
 
   const handleModuleSelect = (variant: Variant) => {
     if (isModuleSelectionLoading) {
@@ -35,10 +43,10 @@ export const InitialiseMenu: React.FC = () => {
   }
 
   return (
-    <div className="ov:w-full ov:h-full ov:flex ov:flex-col ov:overflow-y-auto ov:p-4">
-      <div className="ov:w-full ov:max-w-[960px] ov:mx-auto ov:flex-1 ov:flex ov:flex-col">
+    <div className="ov:w-full ov:h-full ov:flex ov:flex-col ov:justify-center ov:overflow-y-auto ov:p-4">
+      <div className="ov:w-full ov:max-w-[960px] ov:mx-auto ov:flex ov:flex-col ov:justify-center ov:items-center">
         <h2 className="ov:text-center ov:text-base ov:mb-4 ov:text-[var(--ov25-text-color)] ov:flex-shrink-0">Select a model to get started</h2>
-        <div className="ov:grid ov:grid-cols-2 ov:gap-3 ov:sm:grid-cols-4 ov:flex-1 ov:overflow-y-auto">
+        <div className="ov:grid ov:grid-cols-2 ov:gap-2 ov:sm:grid-cols-4 ov:sm:gap-1">
         {compatibleModules.map((module, index) => {
           const variant: Variant = {
             id: `${module.productId}-${module.model.modelId}`,
@@ -52,10 +60,13 @@ export const InitialiseMenu: React.FC = () => {
           return (
             <div 
               key={`${module.productId}-${module.model.modelId}`} 
-              className="ov:w-full ov:cursor-pointer"
-              onClick={() => handleModuleSelect(variant)}
+              className={cn(
+                "ov:w-full ov:flex ov:flex-col",
+                isModuleSelectionLoading ? "ov:cursor-not-allowed ov:opacity-50" : "ov:cursor-pointer"
+              )}
+              onClick={() => !isModuleSelectionLoading && handleModuleSelect(variant)}
             >
-              <div className="ov:w-full ov:h-[100px] ov:sm:h-[140px] ov:flex ov:items-center ov:justify-center ov:rounded-xl ov:bg-white ov:cursor-pointer ov:p-2 ov:border ov:border-[#F0F0F0]">
+              <div className="ov:w-full ov:h-[100px] ov:sm:h-[140px] ov:flex ov:items-center ov:justify-center ov:rounded-xl ov:bg-white ov:cursor-pointer ov:p-1 ov:sm:p-2 ov:border ov:border-[#F0F0F0]">
                 {module.product.hasImage && module.product.imageUrl ? (
                   <img
                     src={module.product.imageUrl.replace('thumbnail', 'small_image')}
