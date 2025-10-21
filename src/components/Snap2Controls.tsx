@@ -107,8 +107,8 @@ const Snap2Controls: React.FC = () => {
           </button>
         )}
 
-        {/* Save Snap2 Menu */}
-        {!controlsHidden && <SaveSnap2Menu />}
+        {/* Save Snap2 Menu - always available */}
+        <SaveSnap2Menu />
 
         {/* Hide All Toggle Button */}
         <button 
