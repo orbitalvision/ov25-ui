@@ -889,6 +889,9 @@ export const OV25UIProvider: React.FC<{
             setAnimationState(data);
             break;
           case 'CONFIGURATOR_STATE':
+            if (isSnap2Mode) {
+              setIsModuleSelectionLoading(false);
+            }
             setConfiguratorState(data);
             break;
           case 'CURRENT_PRICE':

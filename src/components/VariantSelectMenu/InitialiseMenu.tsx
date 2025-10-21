@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 import { CompatibleModule, selectModule } from '../../utils/configurator-utils.js';
 import { Variant } from './ProductVariants.js';
@@ -9,16 +9,7 @@ export const InitialiseMenu: React.FC = () => {
     compatibleModules,
     isModuleSelectionLoading,
     setIsModuleSelectionLoading,
-    isMobile,
-    configuratorState,
   } = useOV25UI();
-  
-  // Reset loading state when snap2Objects are created (InitialiseMenu will be hidden)
-  useEffect(() => {
-    if (configuratorState?.snap2Objects && configuratorState.snap2Objects.length > 0) {
-      setIsModuleSelectionLoading(false);
-    }
-  }, [configuratorState?.snap2Objects, setIsModuleSelectionLoading]);
 
   const handleModuleSelect = (variant: Variant) => {
     if (isModuleSelectionLoading) {
