@@ -23,14 +23,14 @@ export const ModuleVariantCard = React.memo(
             onSelect(variant);
           }
         }}
-        className={`ov25-module-variant-card ov:relative ov:flex ov:flex-col ov:items-center ov:gap-2 ov:w-full ov:p-2 ov:text-left ov:md:border ov:border-[#F0F0F0] ov:text-[#282828] ${index % 2 === 0 ? 'ov:xl:border-r ov:border-[#F0F0F0]' : ''} ${
+        className={`ov25-module-variant-card ov:relative ov:flex ov:flex-col ov:items-center ov:gap-2 ov:w-full ov:h-full ov:p-2 ov:text-left ov:bg-white ov:md:border ov:border-[#F0F0F0] ov:text-[#282828] ov:rounded-xl ${index % 2 === 0 ? 'ov:xl:border-r ov:border-[#F0F0F0]' : ''} ${
           isLoading 
             ? 'ov:opacity-50 ov:cursor-not-allowed ov:pointer-events-none' 
             : 'ov:cursor-pointer ov:hover:bg-accent'
         }`}
         title={module.product.name}
       >
-        <div className="ov:flex ov:flex-1 ov:items-center ov:justify-between">
+        <div className="ov:flex ov:flex-1 ov:items-center ov:justify-center ov:min-h-0">
           <div className="ov:flex ov:flex-col ov:justify-center ov:items-center">
             {module.product.hasImage && module.product.imageUrl ? (
               <img
@@ -50,7 +50,7 @@ export const ModuleVariantCard = React.memo(
           </div>
         </div>
         
-        <div className="ov:flex ov:items-center ov:justify-between ov:w-full ov:-mt-2">
+        <div className="ov:flex ov:items-center ov:justify-between ov:w-full ov:mt-auto">
           <div className="ov:flex ov:items-center ov:gap-2 ov:w-full">
             <div className="ov:flex ov:items-center ov:flex-1">
               <div className="ov:w-[2px] ov:h-3 ov:bg-[#E5E5E5]"></div>
