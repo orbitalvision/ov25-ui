@@ -62,7 +62,7 @@ export const ProductVariants = ({
   basis = 'ov:basis-[43%]',
   isMobile,
 }: ProductVariantsProps) => {
-  const { activeOptionId, hidePricing } = useOV25UI();
+  const { activeOptionId, hidePricing, isSnap2Mode } = useOV25UI();
 
   return (
     <div className={cn(
@@ -72,7 +72,7 @@ export const ProductVariants = ({
       'ov:w-full'
     )}>
       <VariantsHeader />
-      {isMobile ? (
+      {(isMobile || (isSnap2Mode && window.innerWidth < 1024)) ? (
         <MobileVariants
           key={activeOptionId}
           variants={variants}

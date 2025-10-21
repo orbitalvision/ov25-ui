@@ -35,8 +35,8 @@ export function ProductVariantsWrapper() {
       setIsVariantsOpen(false);
     };
 
-    // Mobile-only: show modules list in the drawer when modules option is active
-    if (isMobile && activeOptionId === 'modules') {
+    // Mobile/tablet: show modules list in the drawer when modules option is active
+    if (window.innerWidth < 1024 && activeOptionId === 'modules') {
       const isLoading = (!compatibleModules || compatibleModules.length === 0) && 
         (!configuratorState?.snap2Objects || configuratorState.snap2Objects.length === 0);
 

@@ -333,7 +333,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
             </button>
         </div>
       )}
-      {isMobile && isVariantsOpen && (
+      {(isMobile || (isSnap2Mode && window.innerWidth < 1024)) && isVariantsOpen && (
         <div className={cn(
           "ov:absolute ov:w-full ov:pointer-events-none ov:h-full ov:inset-0 ov:gap-2 ov:p-4 ov:flex ov:justify-end ov:items-start ov:z-[101]",
           "ov:transition-opacity ov:duration-200",

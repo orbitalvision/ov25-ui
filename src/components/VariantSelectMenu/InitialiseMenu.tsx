@@ -35,10 +35,10 @@ export const InitialiseMenu: React.FC = () => {
   }
 
   return (
-    <div className="ov:w-full ov:h-full ov:flex ov:items-center ov:justify-center ov:p-4">
-      <div className="ov:w-full ov:max-w-[960px] ov:mx-auto">
-        <h2 className="ov:text-center ov:text-base ov:mb-4 ov:text-[var(--ov25-text-color)]">Select a model to get started</h2>
-        <div className="ov:grid ov:grid-cols-4 ov:gap-2">
+    <div className="ov:w-full ov:h-full ov:flex ov:flex-col ov:overflow-y-auto ov:p-4">
+      <div className="ov:w-full ov:max-w-[960px] ov:mx-auto ov:flex-1 ov:flex ov:flex-col">
+        <h2 className="ov:text-center ov:text-base ov:mb-4 ov:text-[var(--ov25-text-color)] ov:flex-shrink-0">Select a model to get started</h2>
+        <div className="ov:grid ov:grid-cols-2 ov:gap-3 ov:sm:grid-cols-4 ov:flex-1 ov:overflow-y-auto">
         {compatibleModules.map((module, index) => {
           const variant: Variant = {
             id: `${module.productId}-${module.model.modelId}`,
@@ -55,7 +55,7 @@ export const InitialiseMenu: React.FC = () => {
               className="ov:w-full ov:cursor-pointer"
               onClick={() => handleModuleSelect(variant)}
             >
-              <div className="ov:w-full ov:h-[140px] ov:flex ov:items-center ov:justify-center ov:rounded-xl ov:bg-white ov:cursor-pointer ov:p-2 ov:border ov:border-[#F0F0F0]">
+              <div className="ov:w-full ov:h-[100px] ov:sm:h-[140px] ov:flex ov:items-center ov:justify-center ov:rounded-xl ov:bg-white ov:cursor-pointer ov:p-2 ov:border ov:border-[#F0F0F0]">
                 {module.product.hasImage && module.product.imageUrl ? (
                   <img
                     src={module.product.imageUrl.replace('thumbnail', 'small_image')}

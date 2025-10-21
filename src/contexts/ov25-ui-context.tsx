@@ -821,9 +821,9 @@ export const OV25UIProvider: React.FC<{
 
   // Configure button handler for Snap2 mode
   const handleConfigureClick = useCallback(() => {
-    if (isMobile) {
+    if (window.innerWidth < 1024) {
       setPreloading(false);
-      // On mobile, open variants drawer.
+      // On mobile/tablet, open variants drawer.
       // Prefer first non-modules option; otherwise fall back to 'modules' so user can pick in the drawer.
       const firstNonModulesOption = allOptions.find(opt => opt.id !== 'modules');
       if (firstNonModulesOption) {
@@ -836,7 +836,7 @@ export const OV25UIProvider: React.FC<{
       setIsModalOpen(true);
       setIsModulePanelOpen(true);
     }
-  }, [isMobile, allOptions, setPreloading, setActiveOptionId, setIsVariantsOpen, setIsModalOpen, compatibleModules, setIsModulePanelOpen]);
+  }, [allOptions, setPreloading, setActiveOptionId, setIsVariantsOpen, setIsModalOpen, compatibleModules, setIsModulePanelOpen]);
 
   // Expose configure handler ref
   useEffect(() => {
@@ -941,13 +941,15 @@ export const OV25UIProvider: React.FC<{
           case 'COMPATIBLE_MODULES':
             setCompatibleModules(data.modules || []);
             if (data.modules.length > 0) {
-              setIsModulePanelOpen(true);
-              if (isMobile) {
+              if (window.innerWidth < 1024) {
+                // Mobile/tablet behavior - open drawer
                 setActiveOptionId('modules');
-                // Open drawer on mobile only when appropriate
                 if (!hasConfigureButton && !data.isInitialLoad) {
                   setIsVariantsOpen(true);
                 }
+              } else {
+                // Desktop behavior - open module panel
+                setIsModulePanelOpen(true);
               }
             }
             break;

@@ -23,7 +23,7 @@ export const ModuleVariantCard = React.memo(
             onSelect(variant);
           }
         }}
-        className={`ov25-module-variant-card ov:relative ov:flex ov:flex-col ov:items-center ov:gap-2 ov:w-full ov:h-full ov:p-2 ov:text-left ov:bg-white ov:md:border ov:border-[#F0F0F0] ov:text-[#282828] ov:rounded-xl ${index % 2 === 0 ? 'ov:xl:border-r ov:border-[#F0F0F0]' : ''} ${
+        className={`ov25-module-variant-card ov:relative ov:flex ov:flex-col ov:items-center ov:gap-2 ov:w-full ov:h-full ov:p-2 ov:text-left ov:bg-white ov:xl:border ov:border-[#F0F0F0] ov:text-[#282828] ${index % 2 === 0 ? 'ov:xl:border-r ov:border-[#F0F0F0]' : ''} ${
           isLoading 
             ? 'ov:opacity-50 ov:cursor-not-allowed ov:pointer-events-none' 
             : 'ov:cursor-pointer ov:hover:bg-accent'
