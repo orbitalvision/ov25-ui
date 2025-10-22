@@ -101,7 +101,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
         return Object.keys(optionFilters).some((key) => optionFilters[key]?.length > 0);
     }, [activeOption?.name, availableProductFilters]);
 
-    const selectedFilters = availableProductFilters && activeOption?.name ? Object.keys(availableProductFilters[activeOption.name])
+    const selectedFilters = availableProductFilters && activeOption?.name && availableProductFilters[activeOption.name] ? Object.keys(availableProductFilters[activeOption.name])
     .flatMap(filterName => 
         availableProductFilters[activeOption.name][filterName]
             .filter(filter => filter.checked)
