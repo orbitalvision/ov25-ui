@@ -5,6 +5,7 @@ import { selectModule, CompatibleModule, closeModuleSelectMenu } from '../../uti
 import { ChevronsRight, CornerDownRight, Layers, Sofa } from 'lucide-react';
 import { Carousel, CarouselContent, CarouselItem } from '../ui/carousel.js';
 import { Variant } from './ProductVariants.js';
+import { cn } from '../../lib/utils.js';
 
 export const ModuleBottomPanel: React.FC<{ portalTarget?: Element }> = ({ portalTarget }) => {
   const {
@@ -20,6 +21,10 @@ export const ModuleBottomPanel: React.FC<{ portalTarget?: Element }> = ({ portal
   // Mount/animation state
   const [isRendered, setIsRendered] = useState(false);
   const [isEntering, setIsEntering] = useState(false);
+  
+  // Hover state for tooltips
+  const [hoveredModule, setHoveredModule] = useState<string | null>(null);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
   
   // Tab underline animation state
   const tabTypes = ['all', 'middle', 'corner', 'end'];
@@ -223,7 +228,7 @@ export const ModuleBottomPanel: React.FC<{ portalTarget?: Element }> = ({ portal
         </div>
 
         {/* Module carousel */}
-        <div className="ov:flex-1 ov:overflow-hidden">
+        <div className="ov:flex-1 ov:overflow-visible">
           {filteredModules.length === 0 ? (
             <div className="ov:flex ov:flex-col ov:items-center ov:justify-center ov:py-8 ov:space-y-4">
               <p className="ov:text-sm ov:text-[var(--ov25-secondary-text-color)]">
@@ -247,10 +252,25 @@ export const ModuleBottomPanel: React.FC<{ portalTarget?: Element }> = ({ portal
                   return (
                     <CarouselItem key={module.productId} className="ov:basis-[150px] ov:flex-shrink-0">
                       <div 
-                        className={`ov:p-2 ov:flex ov:flex-col ov:gap-2 ov:items-center ov:z-50 ov:w-[150px] ov:h-[150px] ${
+                        className={cn(
+                          "ov:p-2 ov:flex ov:flex-col ov:gap-2 ov:items-center ov:z-50 ov:w-[150px] ov:h-[150px] ov:relative",
                           isModuleSelectionLoading ? 'ov:cursor-not-allowed ov:opacity-50' : 'ov:cursor-pointer'
-                        }`} 
+                        )}
                         onClick={() => handleModuleSelect(variant)}
+                        onMouseEnter={(e) => {
+                          const moduleId = `${module.productId}-${module.model.modelId}`;
+                          // Get module position for tooltip placement
+                          const rect = e.currentTarget.getBoundingClientRect();
+                          setTooltipPosition({
+                            x: rect.left + rect.width / 2,
+                            y: rect.top - 10
+                          });
+                          
+                          setHoveredModule(moduleId);
+                        }}
+                        onMouseLeave={() => {
+                          setHoveredModule(null);
+                        }}
                       >
                         <div 
                           className="ov:w-[100px] ov:h-[100px] ov:flex ov:items-center ov:justify-center ov:rounded-xl ov:shadow-lg ov:bg-white ov:cursor-pointer ov:p-2"
@@ -267,6 +287,23 @@ export const ModuleBottomPanel: React.FC<{ portalTarget?: Element }> = ({ portal
                             </div>
                           )}
                         </div>
+                        
+                        {/* Custom tooltip - render outside carousel */}
+                        {(() => {
+                          return hoveredModule === `${module.productId}-${module.model.modelId}`;
+                        })() && createPortal(
+                          <div 
+                            className="ov:fixed ov:px-3 ov:py-2 ov:bg-gray-900 ov:text-white ov:text-sm ov:rounded-lg ov:shadow-lg ov:z-[999999999999999] ov:pointer-events-none ov:whitespace-nowrap"
+                            style={{ 
+                              left: `${tooltipPosition.x}px`,
+                              top: `${tooltipPosition.y}px`,
+                              transform: 'translateX(-50%)' // Center horizontally
+                            }}
+                          >
+                            {module.product.name}
+                          </div>,
+                          document.body
+                        )}
                       </div>
                     </CarouselItem>
                   );
