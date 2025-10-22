@@ -2,11 +2,128 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>OV25 Configurator Test</title>
+    <title>OV25 UI - Configurator Test Suite</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      }
+      h1 {
+        color: #333;
+        margin-bottom: 10px;
+      }
+      .subtitle {
+        color: #666;
+        margin-bottom: 30px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-top: 30px;
+      }
+      .card {
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 20px;
+        transition: all 0.2s ease;
+      }
+      .card:hover {
+        border-color: #007bff;
+        box-shadow: 0 2px 8px rgba(0,123,255,0.1);
+      }
+      .card h3 {
+        margin: 0 0 10px 0;
+        color: #333;
+        font-size: 18px;
+      }
+      .card p {
+        margin: 0 0 15px 0;
+        color: #666;
+        font-size: 14px;
+        line-height: 1.4;
+      }
+      .card a {
+        display: inline-block;
+        background: #007bff;
+        color: white;
+        text-decoration: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-size: 14px;
+        transition: background-color 0.2s ease;
+      }
+      .card a:hover {
+        background: #0056b3;
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    <div class="container">
+      <h1>OV25 UI Configurator Test Suite</h1>
+      <p class="subtitle">Test different configurations of the OV25 configurator component</p>
+      
+      <div class="grid">
+        <div class="card">
+          <h3>Single Product - No Variants</h3>
+          <p>Windrush - Loveseat</p>
+          <a href="single-no-variants.html">Open Test</a>
+        </div>
+        
+        <div class="card">
+          <h3>Single Product - No Pricing</h3>
+          <p>Aughton - Petit</p>
+          <a href="single-no-pricing.html">Open Test</a>
+        </div>
+        
+        <div class="card">
+          <h3>Single Product - No Groups</h3>
+          <p>Aughton - Petit</p>
+          <a href="single-no-groups.html">Open Test</a>
+        </div>
+        
+        <div class="card">
+          <h3>Single Product - With Groups</h3>
+          <p>Pickering 3-Seater</p>
+          <a href="single-with-groups.html">Open Test</a>
+        </div>
+        
+        <div class="card">
+          <h3>Range - No Groups</h3>
+          <p>Ashley Manor - Ponti range</p>
+          <a href="range-no-groups.html">Open Test</a>
+        </div>
+        
+        <div class="card">
+          <h3>Range - With Groups</h3>
+          <p>Arlo&Jacob - Otti range</p>
+          <a href="range-with-groups.html">Open Test</a>
+        </div>
+        
+        <div class="card">
+          <h3>Snap2 Configuration</h3>
+          <p>Arlo&Jacob - Otti range</p>
+          <a href="snap2.html">Open Test</a>
+        </div>
+        
+        <div class="card">
+          <h3>Snap2 with UUID</h3>
+          <p>Snap2 configuration with specific configuration UUID.</p>
+          <a href="snap2-uuid.html">Open Test</a>
+        </div>
+      </div>
+    </div>
   </body>
-</html> 
+</html>
