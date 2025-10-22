@@ -11,12 +11,13 @@ let configuratorInitialized = false;
 const initializeConfigurator = () => {
   if (configuratorInitialized) return;
 
-  // Inject the configurator - Single product without groups
+  // Inject the configurator - Product with swatches
   injectConfigurator({
     apiKey: () => { return '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d' }, 
-    productLink: () => { return '576' }, // Aughton - Petit
+    productLink: () => { return '217' }, // Woodbros Pickering-3 Seater (has swatches)
     galleryId: { id: '.configurator-container', replace: true },
     variantsId: '#ov25-controls',
+    swatchesId: '#ov25-swatches',
     priceId: { id: '#price', replace: true },
     nameId: { id: '#name', replace: true },
     logoURL: 'https://ov25.orbital.vision/OV.png',
@@ -27,6 +28,7 @@ const initializeConfigurator = () => {
     buyNowFunction: () => {
       alert('Buy now function called');
     },
+    // This product has swatches for materials/colors
   });
 
   configuratorInitialized = true;
@@ -72,8 +74,9 @@ function App() {
   }, []);
 
   return (
-    <div className="app ">
-      <h1>Single Product - No Groups</h1>
+    <div className="app">
+      <h1>Product with Swatches</h1>
+      <p>Testing product configuration with color/material swatches</p>
       <div className="ov:flex ov:flex-col ov:md:flex-row">
         <div className="configurator-container ov:w-full ov:aspect-square ov:md:w-[700px] ov:md:h-[500px]">
           <img src={sofaImage} alt="Product Image" />
@@ -85,7 +88,7 @@ function App() {
           </div>
           <div id='ov25-controls'></div>
           <div id="ov25-swatches"></div>
-           </div>
+        </div>
       </div>
     </div>
   );

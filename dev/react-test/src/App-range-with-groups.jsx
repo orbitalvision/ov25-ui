@@ -21,7 +21,12 @@ const initializeConfigurator = () => {
     nameId: { id: '#name', replace: true },
     logoURL: 'https://ov25.orbital.vision/OV.png',
     hidePricing: false,
-    // This is a range with grouped variants
+    addToBasketFunction: () => {
+      alert('Checkout function called');
+    },
+    buyNowFunction: () => {
+      alert('Buy now function called');
+    },
   });
 
   configuratorInitialized = true;
