@@ -101,6 +101,16 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
         return Object.keys(optionFilters).some((key) => optionFilters[key]?.length > 0);
     }, [activeOption?.name, availableProductFilters]);
 
+    const selectedFilters = availableProductFilters && activeOption?.name ? Object.keys(availableProductFilters[activeOption.name])
+    .flatMap(filterName => 
+        availableProductFilters[activeOption.name][filterName]
+            .filter(filter => filter.checked)
+            .map(filter => ({
+                ...filter,
+                filterCategory: filterName
+            }))
+    ) : [];
+
     return (
         <div id="ov25-filter-controls-container" className="ov:flex ov:flex-col ov:gap-2 ov:px-4">
             <div id="ov25-filter-controls" className="ov:flex ov:flex-nowrap ov:items-center ov:gap-2 ov:py-2">
@@ -148,7 +158,8 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
                 </button>
                 )}
             </div>
-            {!isFilterOpen && !isMobile && <div id="ov25-filter-controls-pills" className="ov:flex ov:flex-wrap ov:gap-2 ov:pb-2">
+            {!isFilterOpen && !isMobile && selectedFilters.length > 0 && 
+            <div id="ov25-filter-controls-pills" className="ov:flex ov:flex-wrap ov:gap-2 ov:pb-2 ov:max-h-[200px] ov:overflow-y-auto ov:border-b ov:border-gray-200">
                 {
                     (() => {
                         if (!activeOption || !availableProductFilters || !availableProductFilters[activeOption.name]) {
@@ -161,16 +172,6 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
                                 </div>
                             );
                         }
-                        
-                        const selectedFilters = Object.keys(availableProductFilters[activeOption.name])
-                            .flatMap(filterName => 
-                                availableProductFilters[activeOption.name][filterName]
-                                    .filter(filter => filter.checked)
-                                    .map(filter => ({
-                                        ...filter,
-                                        filterCategory: filterName
-                                    }))
-                            );
 
                         if (selectedFilters.length === 0) {
                             return (
