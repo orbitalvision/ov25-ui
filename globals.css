@@ -217,10 +217,6 @@ html #ov25-configurator-variant-menu-container {
     display: none;
 }
 
-#ov25-variant-group-content div[data-selected="true"] .ov25-variant-image-container {
-  border: 2px solid var(--ov25-highlight-color);
-}
-
 .ov25-variant-image-container img {
   width: 100%;
   height: 100%;
@@ -342,6 +338,16 @@ html #ov25-configurator-variant-menu-container {
   height: 80%;
 }
 
+.ov25-variant-name {
+  font-size: 0.75rem;
+  line-height: 1.25rem;
+}
+
+.ov25-group-name {
+  font-size: 1.25rem;
+  line-height: 2rem;
+}
+
 .ov25-swatch-icon {
   fill: white;
   stroke-width: 1px;
@@ -385,4 +391,17 @@ html #ov25-configurator-variant-menu-container {
 
 [data-sonner-toast] {
   pointer-events: all;
+}
+
+/* Custom gradient and shadow classes for variant cards */
+.radial_gradient {
+    background-size: 100% 100%;
+    background-position: 0px 0px;
+    background-image: radial-gradient(75% 75% at 50% 50%, #00FFFF00 0%, #00FFFF00 50%, #FFFFFFFF 100%);
+}
+
+/* Enhanced inner shadow */
+.shadow-inner-intense {
+  box-shadow: inset 0 2px 8px 0 rgba(154, 154, 154, 0.5), 
+              inset 0 2px 4px 0 rgba(243, 244, 246, 0.15);
 }

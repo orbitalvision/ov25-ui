@@ -141,10 +141,10 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
                 {(variantsToRender as VariantGroup[]).map((variantGroup) => (
                   variantGroup.variants.length > 0 && (
                     <div key={variantGroup.groupName}>
-                      <div className="ov:flex ov:items-center ov:mx-4 ov:justify-between">
+                      <div className="ov:flex ov:items-center ov:mx-4 ov:justify-between ov:border-t ov:border-gray-200 ">
                         <h3 className="ov25-group-name ov:text-lg ov:py-2 ov:text-[var(--ov25-secondary-text-color)]">{variantGroup.groupName}</h3>
                       </div>
-                      <div id="ov25-variant-group-content" className={`ov:grid ${getGridColsClass(gridDivide)}`}>
+                      <div id="ov25-variant-group-content" className={`ov:grid ${getGridColsClass(gridDivide)} ov:pb-4`}>
                         <VariantsContent variantsToRender={variantGroup.variants} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
                       </div>
                     </div>

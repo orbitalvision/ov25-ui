@@ -156,7 +156,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
                                 return null;
                             }
                             return (
-                                <div className="ov25-filter-pill ov:flex ov:flex-row ov:gap-2 ov:px-2 ov:py-3 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:whitespace-nowrap ov:cursor-pointer ov:transition-all ov:text-sm">
+                                <div className="ov25-filter-pill ov:flex ov:flex-row ov:gap-2 ov:px-2 ov:py-2 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:whitespace-nowrap ov:cursor-pointer ov:transition-all ov:text-sm">
                                     All Collections
                                 </div>
                             );
@@ -174,14 +174,14 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
 
                         if (selectedFilters.length === 0) {
                             return (
-                                <div id="ov25-filter-pill-all" className="ov25-filter-pill ov:flex-row ov:hidden ov:gap-2 ov:px-2 ov:py-3 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:whitespace-nowrap ov:cursor-default ov:transition-all ov:text-sm">
+                                <div id="ov25-filter-pill-all" className="ov25-filter-pill ov:flex-row ov:hidden ov:gap-2 ov:px-2 ov:py-2 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:whitespace-nowrap ov:cursor-default ov:transition-all ov:text-sm">
                                     All Collections
                                 </div>
                             );
                         }
 
                         return selectedFilters.map(filter => (
-                            <div key={filter.value} className="ov25-filter-pill ov:flex ov:flex-row ov:gap-2 ov:px-2 ov:py-3 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:whitespace-nowrap ov:cursor-pointer ov:transition-all ov:text-sm">
+                            <div key={filter.value} className="ov25-filter-pill ov:flex ov:flex-row ov:gap-2 ov:px-2 ov:py-2 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:whitespace-nowrap ov:cursor-pointer ov:transition-all ov:text-sm">
                                 <span>
                                     {filter.value}
                                 </span>
