@@ -1,36 +1,30 @@
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
-import { injectConfigurator } from 'ov25-ui';
+import { injectMultipleConfigurators } from 'ov25-ui';
 import sofaImage from './images/sofa.png';
 import './index.css';
 
-// Function to initialize the first configurator
-const initializeConfigurator1 = () => {
-
-  // Inject the first configurator
-  injectConfigurator({
-    apiKey: () => { return '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d' }, 
-    productLink: () => { return 'snap2/126' }, // Otti range
-    configureButtonId: { id: '#ov25-fullscreen-button', replace: false },
-    logoURL: 'https://ov25.orbital.vision/OV.png',
-    hidePricing: true,
-  });
-};
-
-// Function to initialize the second configurator
-const initializeConfigurator2 = () => {
-
-  // Inject the second configurator
-  injectConfigurator({
-    apiKey: () => { return '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d' }, 
-    productLink: () => { return 'snap2/4' }, // Otto range
-    configureButtonId: { id: '#ov25-fullscreen-button-2', replace: false },
-    logoURL: 'https://ov25.orbital.vision/OV.png',
-    hidePricing: true,
-  });
-};
-
 function App() {
+  // Initialize multiple configurators
+  useEffect(() => {
+    injectMultipleConfigurators([
+      {
+        apiKey: '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d',
+        productLink: 'snap2/126', // Otti range
+        configureButtonId: { id: '#ov25-fullscreen-button', replace: false },
+        logoURL: 'https://ov25.orbital.vision/OV.png',
+        hidePricing: true,
+      },
+      {
+        apiKey: '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d',
+        productLink: 'snap2/4', // Otto range
+        configureButtonId: { id: '#ov25-fullscreen-button-2', replace: false },
+        logoURL: 'https://ov25.orbital.vision/OV.png',
+        hidePricing: true,
+      }
+    ]);
+  }, []);
+
   // Set up the message event listener
   const handleMessage = (event) => {
     const { type, payload } = event.data;
@@ -82,8 +76,8 @@ function App() {
               <div id="name-1">NAME: Product</div>
             </div>
             <div className='ov:flex ov:flex-col'>
-              <button id="ov25-fullscreen-button" onClick={initializeConfigurator1} className='ov:cursor-pointer ov:bg-blue-500 ov:text-white ov:p-2 ov:rounded-md ov:mb-2'>Configure Otti (100cm)</button>
-              <button id="ov25-fullscreen-button-2" onClick={initializeConfigurator2} className='ov:cursor-pointer ov:bg-blue-500 ov:text-white ov:p-2 ov:rounded-md ov:mt-2'>Configure Otto (115cm)</button>
+              <button id="ov25-fullscreen-button" className='ov:cursor-pointer ov:bg-blue-500 ov:text-white ov:p-2 ov:rounded-md ov:mb-2'>Configure Otti (100cm)</button>
+              <button id="ov25-fullscreen-button-2" className='ov:cursor-pointer ov:bg-blue-500 ov:text-white ov:p-2 ov:rounded-md ov:mt-2'>Configure Otto (115cm)</button>
             </div>
             <div id='ov25-controls-1'></div>
             <div id="ov25-swatches-1"></div>

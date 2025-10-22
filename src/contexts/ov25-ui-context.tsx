@@ -286,6 +286,7 @@ interface OV25UIContextType {
   handlePreviousOption: () => void;
   getSelectedValue: (option: Option | SizeOption) => string;
   toggleAR: () => void;
+  cleanupConfigurator: () => void;
 }
 
 // Create the context
@@ -436,6 +437,50 @@ export const OV25UIProvider: React.FC<{
 
   // Configure handler ref for external access
   const configureHandlerRef = useRef<(() => void) | null>(null);
+
+  // Cleanup function for switching between configurators
+  const cleanupConfigurator = useCallback(() => {
+    // Close any open modal/drawer
+    setIsModalOpen(false);
+    setIsVariantsOpen(false);
+    
+    // Reset snap2-specific state
+    setConfiguratorState(undefined);
+    setCompatibleModules(null);
+    setSnap2SaveResponse(null);
+    setShareDialogTrigger('none');
+    setControlsHidden(false);
+    setIsModulePanelOpen(false);
+    setIsModuleSelectionLoading(false);
+    
+    // Reset iframe
+    setIframeResetKey(prev => prev + 1);
+    
+    // Reset other relevant state
+    setActiveOptionId(null);
+    setSelectedSelections([]);
+    setError(null);
+    setArPreviewLink(null);
+    setPreloading(false);
+    setHasSwitchedAfterDefer(false);
+  }, [
+    setIsModalOpen,
+    setIsVariantsOpen,
+    setConfiguratorState,
+    setCompatibleModules,
+    setSnap2SaveResponse,
+    setShareDialogTrigger,
+    setControlsHidden,
+    setIsModulePanelOpen,
+    setIsModuleSelectionLoading,
+    setIframeResetKey,
+    setActiveOptionId,
+    setSelectedSelections,
+    setError,
+    setArPreviewLink,
+    setPreloading,
+    setHasSwitchedAfterDefer
+  ]);
 
   // When variants open, auto-close bottom modules panel
   useEffect(() => {
@@ -847,6 +892,11 @@ export const OV25UIProvider: React.FC<{
     }
   }, [handleConfigureClick]);
 
+  // Expose cleanup function via window object
+  useEffect(() => {
+    (window as any).ov25CleanupConfigurator = cleanupConfigurator;
+  }, [cleanupConfigurator]);
+
   // Handler for AR GLB data
   const handleARGLBData = useCallback(async (base64Data: string) => {
     try {
@@ -1110,6 +1160,7 @@ export const OV25UIProvider: React.FC<{
     handlePreviousOption,
     getSelectedValue,
     toggleAR,
+    cleanupConfigurator,
   };
 
   return (

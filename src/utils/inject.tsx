@@ -40,6 +40,53 @@ const createCSSVariablesStylesheet = (cssVariables: string): CSSStyleSheet => {
 // Apply to main document
 document.adoptedStyleSheets = [sharedStylesheet];
 
+// Function to wait for an element to appear in the DOM
+function waitForElement(selector: string, timeout = 5000) {
+  return new Promise<Element>((resolve, reject) => {
+    const interval = 100;
+    let elapsed = 0;
+
+    const checkExist = setInterval(() => {
+      const element = document.querySelector(selector);
+      if (element) {
+        clearInterval(checkExist);
+        resolve(element);
+      } else if (elapsed >= timeout) {
+        clearInterval(checkExist);
+        reject(new Error(`Element "${selector}" not found within ${timeout}ms`));
+      }
+      elapsed += interval;
+    }, interval);
+  });
+};
+
+// Helper function to cleanup shadow DOM containers
+const cleanupShadowDOMContainers = () => {
+  const containersToRemove = [
+    'ov25-mobile-drawer-container',
+    'ov25-configurator-view-controls-container', 
+    'ov25-popover-portal-container',
+    'ov25-toaster-container',
+    'ov25-swatchbook-portal-container',
+    'ov25-provider-root'
+  ];
+  
+  containersToRemove.forEach(id => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.remove();
+    }
+  });
+  
+  // Clean up any portaled elements that replaced existing elements
+  const replacedElements = document.querySelectorAll('[class*="ov25-configurator-"]');
+  replacedElements.forEach(element => {
+    if (element.shadowRoot) {
+      element.shadowRoot.innerHTML = '';
+    }
+  });
+};
+
 export type StringOrFunction = string | (() => string);
 
 export type ElementConfig = {
@@ -372,25 +419,6 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
       document.adoptedStyleSheets = [...document.adoptedStyleSheets, cssVariablesStylesheet];
     };
 
-    // Function to wait for an element to appear in the DOM
-    function waitForElement(selector: string, timeout = 5000) {
-      return new Promise<Element>((resolve, reject) => {
-        const interval = 100;
-        let elapsed = 0;
-
-        const checkExist = setInterval(() => {
-          const element = document.querySelector(selector);
-          if (element) {
-            clearInterval(checkExist);
-            resolve(element);
-          } else if (elapsed >= timeout) {
-            clearInterval(checkExist);
-            reject(new Error(`Element "${selector}" not found within ${timeout}ms`));
-          }
-          elapsed += interval;
-        }, interval);
-      });
-    };
 
     // Function to check if gallery or its parents have z-index set
     const checkForStackedGallery = (): boolean => {
@@ -568,5 +596,88 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     document.addEventListener('DOMContentLoaded', ensureLoaded, { once: true });
   } else {
     ensureLoaded();
+  }
+}
+
+// Module-level variables for multiple configurators
+let currentConfigs: InjectConfiguratorOptions[] = [];
+let activeConfiguratorIndex: number = 0;
+
+export function injectMultipleConfigurators(configs: InjectConfiguratorOptions[]) {
+  // Validate all configs are Snap2 mode
+  const invalidConfigs = configs.filter(config => {
+    const productLink = typeof config.productLink === 'function' ? config.productLink() : config.productLink;
+    return !productLink?.startsWith('snap2/');
+  });
+  
+  if (invalidConfigs.length > 0) {
+    throw new Error('injectMultipleConfigurators only supports Snap2 configurators (productLink must start with "snap2/")');
+  }
+  
+  // Validate all configs have configureButtonId
+  const configsWithoutButton = configs.filter(config => !config.configureButtonId);
+  if (configsWithoutButton.length > 0) {
+    throw new Error('All configs must have a configureButtonId defined');
+  }
+  
+  // Store configs
+  currentConfigs = configs;
+  activeConfiguratorIndex = 0;
+  
+  // Initialize the first configurator immediately
+  injectConfigurator(configs[0]);
+  
+  // Set up click listeners for ALL configurators (including the first one)
+  for (let i = 0; i < configs.length; i++) {
+    const config = configs[i];
+    const selector = typeof config.configureButtonId === 'string' 
+      ? config.configureButtonId 
+      : config.configureButtonId!.id;
+    
+    // Wait for element to exist, then attach listener
+    waitForElement(selector, 5000)
+      .then((element: Element) => {
+        const handleClick = async () => {
+          // Only do full cleanup and re-initialization if switching to a different configurator
+          if (activeConfiguratorIndex !== i) {
+            // Cleanup current configurator
+            if ((window as any).ov25CleanupConfigurator) {
+              (window as any).ov25CleanupConfigurator();
+            }
+            
+            // Wait for cleanup
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            // Unmount React root
+            const container = document.getElementById('ov25-provider-root');
+            if (container && (container as any)._reactRoot) {
+              (container as any)._reactRoot.unmount();
+              delete (container as any)._reactRoot;
+            }
+            
+            // Clean up shadow DOM containers
+            cleanupShadowDOMContainers();
+            
+            // Initialize new configurator
+            injectConfigurator(config);
+            
+            // Update active index
+            activeConfiguratorIndex = i;
+          }
+          
+          // Auto-open the configurator (whether it's the same one or a different one)
+          setTimeout(() => {
+            const handlerRef = (window as any).ov25ConfigureHandlerRef;
+            if (handlerRef?.current) {
+              handlerRef.current();
+            }
+          }, 200);
+        };
+        
+        element.addEventListener('click', handleClick);
+      })
+      .catch((err: Error) => {
+        console.warn(`[OV25-UI] Configure button element not found for selector "${selector}": ${err.message}`);
+      });
   }
 }
