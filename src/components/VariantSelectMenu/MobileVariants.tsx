@@ -125,13 +125,13 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
                   <CarouselItem key={group.groupName} className="ov:py-2 ov:max-w-full ov:basis-auto">
                     <button
                       onClick={() => setSelectedGroupIndex(index)}
-                      className={`ov25-group-control ov:w-auto ov:py-2 ov:px-4 ov:rounded-full ov:shadow-md ov:text-neutral-500 ov:border ${
+                      className={`ov25-group-control ov:w-auto ov:py-1 ov:px-4 ov:rounded-full ov:shadow-md ov:text-neutral-500 ov:border ${
                         selectedGroupIndex === index
                           ? 'ov:border-neutral-900 ov:text-neutral-900'
                           : ''
                       } ov:flex ov:items-center ov:justify-center ov:text-xs ov:gap-2 ov:whitespace-nowrap`}
                     >
-                      <span className="ov:truncate">{capitalizeWords(group.groupName)}</span>
+                      <span className="ov:truncate ov:py-1">{capitalizeWords(group.groupName)}</span>
                     </button>
                   </CarouselItem>
                 ) : null;
