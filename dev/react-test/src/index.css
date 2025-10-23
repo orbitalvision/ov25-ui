@@ -63,3 +63,75 @@ h1 {
 #ov25-price-product-page, #ov25-subtotal-product-page, #ov25-savings-amount-product-page, #ov25-savings-percentage-product-page {
   font-size: 1.5em;
 }
+
+/* Multiple Configurators Styles */
+.subtitle {
+  color: #666;
+  margin-bottom: 30px;
+}
+
+.configurators-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 30px;
+  margin-top: 30px;
+}
+
+.configurator-card {
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 20px;
+  background: #fafafa;
+}
+
+.configurator-card h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 18px;
+}
+
+.gallery-container {
+  width: 100%;
+  aspect-ratio: 1/1;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 15px;
+  background: #f9f9f9;
+}
+
+.product-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 10px;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #eee;
+}
+
+.product-name {
+  font-weight: 600;
+  color: #333;
+}
+
+.product-price {
+  font-size: 18px;
+  font-weight: bold;
+  color: #007bff;
+}
+
+.variants-container {
+  margin-top: 15px;
+  padding: 15px;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #eee;
+}
+
+.variants-container h4 {
+  margin: 0 0 10px 0;
+  color: #333;
+  font-size: 14px;
+  font-weight: 600;
+}
