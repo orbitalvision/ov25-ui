@@ -3,7 +3,6 @@ import { ProductVariants, Variant } from './ProductVariants.js';
 import { useOV25UI } from "../../contexts/ov25-ui-context.js";
 import { closeModuleSelectMenu, selectModule, CompatibleModule } from '../../utils/configurator-utils.js';
 import { SizeVariantCard } from "./variant-cards/SizeVariantCard.js";
-import { LegsVariantCard } from "./variant-cards/LegsVariantCard.js";
 import { ModuleVariantCard } from "./variant-cards/ModuleVariantCard.js";
 
 export type DrawerSizes = 'closed' | 'small' | 'large';
@@ -110,16 +109,12 @@ export function ProductVariantsWrapper() {
           isMobile={isMobile}
         />
       );
-    } else if (typeof activeOptionId === 'string') {
-      // Check if the option name includes "leg" (case insensitive)
-      const isLegOption = activeOption?.name?.toLowerCase().includes('leg');
-      
-      // Handle all non-size options the same way, but use LegsVariantCard when appropriate
+    } else {
       return (
         <ProductVariants
           isOpen={isVariantsOpen}
           basis={isMobile ? 'ov:basis-[33%]' : undefined}
-          gridDivide={isLegOption ? 2 : (isMobile ? 4 : 4)}
+          gridDivide={4}
           onClose={handleCloseVariants}
           title={`${activeOption?.name || ''}`}
           variants={activeOption?.groups?.map(group => ({
@@ -130,7 +125,7 @@ export function ProductVariantsWrapper() {
               optionId: activeOption?.id,
               name: selection?.name,
               price: selection?.price,
-              image: (isLegOption ? selection?.miniThumbnails?.large : selection?.miniThumbnails?.medium) || '/placeholder.svg?height=200&width=200',
+              image: (selection?.miniThumbnails?.medium) || '/placeholder.svg?height=200&width=200',
               blurHash: (selection as any).blurHash,
               isSelected: selectedSelections.some(
                 sel => sel.optionId === activeOption.id && 
@@ -140,12 +135,11 @@ export function ProductVariantsWrapper() {
               swatch: selection?.swatch
             })).sort((a, b) => a.name.localeCompare(b.name))
           })) || []}
-          VariantCard={isLegOption ? LegsVariantCard : undefined}
+          VariantCard={undefined}
           drawerSize={drawerSize}
           onSelect={handleSelectionSelect}
           isMobile={isMobile}
         />
       );
     }
-    return null;
   }
