@@ -189,7 +189,7 @@ export const ModuleBottomPanel: React.FC<{ portalTarget?: Element }> = ({ portal
                     return (
                       <button
                         key={tabType}
-                        ref={(el) => tabsRef.current[index] = el}
+                        ref={(el) => { tabsRef.current[index] = el; }}
                         onClick={() => setSelectedModuleType(tabType as 'all' | 'middle' | 'corner' | 'end')}
                         className={`ov:flex ov:items-center ov:gap-1.5 ov:px-4 ov:py-2 ov:rounded-full ov:text-sm ov:font-medium ov:transition-colors ${
                           selectedModuleType === tabType 

@@ -20,7 +20,7 @@ interface PopoverTriggerProps {
 interface PopoverContentProps {
   children: React.ReactNode;
   className?: string;
-  triggerRef?: React.RefObject<HTMLElement>;
+  triggerRef?: React.RefObject<HTMLElement | HTMLButtonElement | null>;
 }
 
 function Popover({ open, onOpenChange, children }: PopoverProps) {
@@ -28,15 +28,16 @@ function Popover({ open, onOpenChange, children }: PopoverProps) {
 }
 
 function PopoverTrigger({ asChild, children, onClick }: PopoverTriggerProps) {
-  const child = React.Children.only(children) as React.ReactElement;
+  const child = React.Children.only(children) as React.ReactElement<any>;
+  const childProps = child.props as { onClick?: (e: React.MouseEvent) => void };
   return React.cloneElement(child, {
     onClick: (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
-      child.props.onClick?.(e);
+      childProps.onClick?.(e);
       onClick?.();
     }
-  });
+  } as any);
 }
 
 function PopoverContent({ children, className, triggerRef }: PopoverContentProps) {
@@ -48,7 +49,7 @@ function PopoverContent({ children, className, triggerRef }: PopoverContentProps
     if (triggerRef?.current) {
       const rect = triggerRef.current.getBoundingClientRect();
       setPosition({
-        top: rect.top - 8, // Position just above the trigger
+        top: rect.top - 8, // Position just above the trigger 
         left: rect.left + rect.width / 2
       });
       // Small delay to ensure positioning is set before showing
