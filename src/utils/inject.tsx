@@ -14,10 +14,10 @@ import { Snap2ConfigureButton, Snap2ConfigureUI } from '../components/Snap2Confi
 import { createPortal } from 'react-dom';
 
 // Import styles directly
-import '../styles.css';
+import '../../globals.css';
 import { Toaster } from 'sonner';
 // Import CSS as string for adoptedStyleSheets
-import cssText from '../styles.css?inline';
+import cssText from '../../globals.css?inline';
 
 // Import sonner CSS as string
 import sonnerCssText from 'sonner/dist/styles.css?inline';
