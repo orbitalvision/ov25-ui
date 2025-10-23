@@ -1,13 +1,11 @@
-import { useState, type ReactNode, useEffect } from "react"
+import { useState, type ReactNode, useEffect, useRef } from "react"
 import { createPortal } from "react-dom"
-import { animated, useSpring } from "@react-spring/web"
+import { gsap } from "gsap"
 import * as React from 'react'
 import { CSSProperties } from "react"
 import { useOV25UI } from "../../contexts/ov25-ui-context.js"
-import { DRAWER_HEIGHT_RATIO, IFRAME_HEIGHT_RATIO } from "../../utils/configurator-utils.js"
+import { DRAWER_HEIGHT_RATIO } from "../../utils/configurator-utils.js"
 import { ChevronUpIcon, ChevronDownIcon } from "lucide-react"
-
-const AnimatedDiv = animated.div as any;
 
 export interface TwoStageDrawerProps {
   children: ReactNode
@@ -49,6 +47,16 @@ const TwoStageDrawerComponent = ({
   const [viewportHeightState, setViewportHeightState] = useState(window.visualViewport?.height !== undefined ? window.visualViewport?.height :  window.innerHeight)
   const [isViewportReady, setIsViewportReady] = useState(true)
   
+  // GSAP refs
+  const drawerRef = useRef<HTMLDivElement>(null)
+  
+  // Initialize drawer height
+  useEffect(() => {
+    if (drawerRef.current) {
+      gsap.set(drawerRef.current, { height: 0 })
+    }
+  }, [])
+  
 
   function getMinHeight(viewPortHeight: number) {
     return viewPortHeight - (isMobile ? viewPortHeight * DRAWER_HEIGHT_RATIO : window.innerWidth * (2/3))
@@ -61,11 +69,6 @@ const TwoStageDrawerComponent = ({
   const minHeight = typeof window !== 'undefined' ? getMinHeight(viewportHeightState) : 0
   const maxHeight = typeof window !== 'undefined' ? getMaxHeight(viewportHeightState) : 0
 
-  const [{ height }, api] = useSpring(() => ({
-    height: 0,
-    config: { tension: 200, friction: 30 },
-  }))
-
   // Effect to update drawer height on window resize
   useEffect(() => {
     const updateHeight = () => {
@@ -74,11 +77,15 @@ const TwoStageDrawerComponent = ({
       setIsViewportReady(true);
 
       // Update drawer height if it's open
-      if (drawerState !== 0) {
+      if (drawerState !== 0 && drawerRef.current) {
         const newMinHeight = getMinHeight(newHeight);
         const newMaxHeight = getMaxHeight(newHeight);
         const newHeightx = drawerState === 1 ? newMinHeight : newMaxHeight;
-        api.start({ height: newHeightx });
+        gsap.to(drawerRef.current, {
+          height: newHeightx,
+          duration: 0.5,
+          ease: "cubic-bezier(0.4, 0, 0.2, 1)"
+        });
       }
     };
 
@@ -95,7 +102,7 @@ const TwoStageDrawerComponent = ({
       window.visualViewport?.removeEventListener('scroll', updateHeight);
       window.removeEventListener('resize', updateHeight);
     };
-  }, [drawerState, api]);
+  }, [drawerState]);
 
   // Handle drawer state changes based on isOpen prop
   useEffect(() => {
@@ -191,7 +198,27 @@ const TwoStageDrawerComponent = ({
     if (newState === 0) {
       onOpenChange(false)
     }
-    api.start({ height: getHeightForState(newState) })
+    
+    // Animate with GSAP
+    if (drawerRef.current) {
+      const targetHeight = getHeightForState(newState)
+      
+      // Kill any existing animations
+      gsap.killTweensOf(drawerRef.current)
+      
+      // Animate to target height (matching iframe timing)
+      gsap.to(drawerRef.current, {
+        height: targetHeight,
+        duration: 0.5,
+        ease: "cubic-bezier(0.4, 0, 0.2, 1)",
+        onComplete: () => {
+          // Ensure final height is set
+          if (drawerRef.current) {
+            gsap.set(drawerRef.current, { height: targetHeight })
+          }
+        }
+      })
+    }
   }
 
   const toggleDrawerState = () => {
@@ -208,9 +235,10 @@ const TwoStageDrawerComponent = ({
   }
 
   const drawerContent = (
-    <AnimatedDiv
+    <div
+      ref={drawerRef}
       style={{
-        height,
+        height: 0,
         bottom: 0,
         touchAction: "none",
         WebkitOverflowScrolling: 'touch',
@@ -242,7 +270,7 @@ const TwoStageDrawerComponent = ({
 
         <div className="ov:h-full ov:flex ov:flex-col ov:pointer-events-none">{children}</div>
       </div>
-    </AnimatedDiv>
+    </div>
   );
   
   // Get Shadow DOM reference from context
