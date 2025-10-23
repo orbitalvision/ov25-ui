@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Multiple Standard Configurators</title>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+        margin: 0;
+        padding: 20px;
+        background-color: #f5f5f5;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        padding: 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      }
+      h1 {
+        color: #333;
+        margin-bottom: 10px;
+      }
+      .subtitle {
+        color: #666;
+        margin-bottom: 30px;
+      }
+      .configurators-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 30px;
+        margin-top: 30px;
+      }
+      .configurator-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 20px;
+        background: #fafafa;
+      }
+      .configurator-card h3 {
+        margin: 0 0 15px 0;
+        color: #333;
+        font-size: 18px;
+      }
+      .gallery-container {
+        width: 100%;
+        aspect-ratio: 1/1;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        margin-bottom: 15px;
+        background: #f9f9f9;
+      }
+      .product-info {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+        padding: 10px;
+        background: white;
+        border-radius: 4px;
+        border: 1px solid #eee;
+      }
+      .product-name {
+        font-weight: 600;
+        color: #333;
+      }
+      .product-price {
+        font-size: 18px;
+        font-weight: bold;
+        color: #007bff;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Multiple Standard Configurators</h1>
+      <p class="subtitle">Testing multiple standard configurators on the same page without variants</p>
+      
+      <div class="configurators-grid">
+        <!-- Configurator 1 -->
+        <div class="configurator-card">
+          <h3>Product 1 - Windrush Loveseat</h3>
+          <div id="gallery-1" class="gallery-container"></div>
+          <div class="product-info">
+            <div id="name-1" class="product-name">Windrush Loveseat</div>
+            <div id="price-1" class="product-price">£1,299</div>
+          </div>
+        </div>
+        
+        <!-- Configurator 2 -->
+        <div class="configurator-card">
+          <h3>Product 2 - Aughton Petit</h3>
+          <div id="gallery-2" class="gallery-container"></div>
+          <div class="product-info">
+            <div id="name-2" class="product-name">Aughton Petit</div>
+            <div id="price-2" class="product-price">£899</div>
+          </div>
+        </div>
+        
+        <!-- Configurator 3 -->
+        <div class="configurator-card">
+          <h3>Product 3 - Arlo&Jacob - Otti - Corner Unit</h3>
+          <div id="gallery-3" class="gallery-container"></div>
+          <div class="product-info">
+            <div id="name-3" class="product-name">Arlo&Jacob - Otti - Corner Unit</div>
+            <div id="price-3" class="product-price">£1,299</div>
+          </div>
+        </div>
+        
+        <!-- Configurator 4 -->
+        <div class="configurator-card">
+          <h3>Product 4 - Arlo&Jacob - Otti - Grand Filler Unit</h3>
+          <div id="gallery-4" class="gallery-container"></div>
+          <div class="product-info">
+            <div id="name-4" class="product-name">Arlo&Jacob - Otti - Grand Filler Unit</div>
+            <div id="price-4" class="product-price">£1,599</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module">
+      import { injectMultipleConfigurators } from 'ov25-ui';
+      
+      // Initialize multiple standard configurators
+      injectMultipleConfigurators([
+        {
+          apiKey: '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d',
+          productLink: '607', // Windrush Loveseat
+          galleryId: '#gallery-1',
+          priceId: { id: '#price-1', replace: true },
+          nameId: { id: '#name-1', replace: true },
+          logoURL: 'https://ov25.orbital.vision/OV.png',
+          addToBasketFunction: () => console.log('Add to basket - Product 1'),
+          buyNowFunction: () => console.log('Buy now - Product 1'),
+          addSwatchesToCartFunction: () => console.log('Add swatches to cart - Product 1'),
+        },
+        {
+          apiKey: '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d',
+          productLink: '576', // Aughton Petit
+          galleryId: '#gallery-2',
+          priceId: { id: '#price-2', replace: true },
+          nameId: { id: '#name-2', replace: true },
+          logoURL: 'https://ov25.orbital.vision/OV.png',
+          addToBasketFunction: () => console.log('Add to basket - Product 2'),
+          buyNowFunction: () => console.log('Buy now - Product 2'),
+          addSwatchesToCartFunction: () => console.log('Add swatches to cart - Product 2'),
+        },
+        {
+          apiKey: '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d',
+          productLink: '1284', // Arlo&Jacob - Otti - Corner Unit
+          galleryId: '#gallery-3',
+          priceId: { id: '#price-3', replace: true },
+          nameId: { id: '#name-3', replace: true },
+          logoURL: 'https://ov25.orbital.vision/OV.png',
+          addToBasketFunction: () => console.log('Add to basket - Product 3'),
+          buyNowFunction: () => console.log('Buy now - Product 3'),
+          addSwatchesToCartFunction: () => console.log('Add swatches to cart - Product 3'),
+        },
+        {
+          apiKey: '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d',
+          productLink: '1287', // Arlo&Jacob - Otti - Grand Filler Unit
+          galleryId: '#gallery-4',
+          priceId: { id: '#price-4', replace: true },
+          nameId: { id: '#name-4', replace: true },
+          logoURL: 'https://ov25.orbital.vision/OV.png',
+          addToBasketFunction: () => console.log('Add to basket - Product 4'),
+          buyNowFunction: () => console.log('Buy now - Product 4'),
+          addSwatchesToCartFunction: () => console.log('Add swatches to cart - Product 4'),
+        }
+      ]);
+    </script>
+  </body>
+</html>

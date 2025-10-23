@@ -71,6 +71,17 @@ const cleanupShadowDOMContainers = () => {
     'ov25-provider-root'
   ];
   
+  // Also remove any unique provider roots and shadow DOM containers
+  const uniqueProviderRoots = document.querySelectorAll('[id^="ov25-provider-root-"]');
+  uniqueProviderRoots.forEach(element => {
+    element.remove();
+  });
+  
+  const uniqueShadowContainers = document.querySelectorAll('[id^="ov25-configurator-view-controls-container-"]');
+  uniqueShadowContainers.forEach(element => {
+    element.remove();
+  });
+  
   containersToRemove.forEach(id => {
     const element = document.getElementById(id);
     if (element) {
@@ -118,6 +129,7 @@ export interface InjectConfiguratorOptions {
   logoURL?: string;
   mobileLogoURL?: string;
   cssString?: string;
+  uniqueId?: string; // For multiple configurators to prevent ID conflicts
 }
 
 export function injectConfigurator(opts: InjectConfiguratorOptions) {
@@ -143,6 +155,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     showOptional,
     hidePricing,
     hideAr,
+    uniqueId,
   } = opts;
 
   // Add generateThumbnail function to window object
@@ -249,7 +262,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     
     // Create configurator view controls Shadow DOM container
     const configuratorViewControlsContainer = document.createElement('div');
-    configuratorViewControlsContainer.id = 'ov25-configurator-view-controls-container';
+    configuratorViewControlsContainer.id = uniqueId ? `ov25-configurator-view-controls-container-${uniqueId}` : 'ov25-configurator-view-controls-container';
     configuratorViewControlsContainer.style.position = 'absolute';
     configuratorViewControlsContainer.style.top = '0';
     configuratorViewControlsContainer.style.left = '0';
@@ -513,7 +526,11 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     // Special handling for configurator view controls - wait for the specific container
     // Only render if not in configure button mode (ConfigureButton handles it in that case)
     if (!configureButtonId) {
-      waitForElement('#true-configurator-view-controls-container', 10000)
+      const controlsContainerId = uniqueId 
+        ? `#true-configurator-view-controls-container-${uniqueId}` 
+        : '#true-configurator-view-controls-container';
+      
+      waitForElement(controlsContainerId, 10000)
         .then(element => {
           // Create Shadow DOM on the configurator view controls container
           if (!element.shadowRoot) {
@@ -538,13 +555,17 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     }
 
     // If no portals were created we can bail early
-    if (portals.length === 0) return;
+    if (portals.length === 0) {
+      return;
+    }
 
-    // Create (or reuse) a container for the single React root
-    let container = document.getElementById('ov25-provider-root');
+    // Create (or reuse) a container for the React root
+    // For standard configurators with uniqueId, create separate containers
+    const containerId = uniqueId ? `ov25-provider-root-${uniqueId}` : 'ov25-provider-root';
+    let container = document.getElementById(containerId);
     if (!container) {
       container = document.createElement('div');
-      container.id = 'ov25-provider-root';
+      container.id = containerId;
       container.style.display = 'contents';  // prov. doesn't render anything anyway
       document.body.appendChild(container);
     }
@@ -579,6 +600,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
          hidePricing={hidePricing}
          isProductGalleryStacked={isProductGalleryStacked}
          hasConfigureButton={!!configureButtonId}
+         uniqueId={uniqueId}
          shadowDOMs={{
            mobileDrawer: mobileDrawerShadowRoot,
            configuratorViewControls: configuratorViewControlsShadowRoot,
@@ -604,80 +626,125 @@ let currentConfigs: InjectConfiguratorOptions[] = [];
 let activeConfiguratorIndex: number = 0;
 
 export function injectMultipleConfigurators(configs: InjectConfiguratorOptions[]) {
-  // Validate all configs are Snap2 mode
-  const invalidConfigs = configs.filter(config => {
+  // Detect configurator type based on productLink
+  const snap2Configs = configs.filter(config => {
+    const productLink = typeof config.productLink === 'function' ? config.productLink() : config.productLink;
+    return productLink?.startsWith('snap2/');
+  });
+  
+  const standardConfigs = configs.filter(config => {
     const productLink = typeof config.productLink === 'function' ? config.productLink() : config.productLink;
     return !productLink?.startsWith('snap2/');
   });
   
-  if (invalidConfigs.length > 0) {
-    throw new Error('injectMultipleConfigurators only supports Snap2 configurators (productLink must start with "snap2/")');
+  // Validate Snap2 configs have configureButtonId
+  const snap2ConfigsWithoutButton = snap2Configs.filter(config => !config.configureButtonId);
+  if (snap2ConfigsWithoutButton.length > 0) {
+    throw new Error('All Snap2 configs must have a configureButtonId defined');
   }
   
-  // Validate all configs have configureButtonId
-  const configsWithoutButton = configs.filter(config => !config.configureButtonId);
-  if (configsWithoutButton.length > 0) {
-    throw new Error('All configs must have a configureButtonId defined');
+  // Validate standard configs have galleryId
+  const standardConfigsWithoutGallery = standardConfigs.filter(config => !config.galleryId);
+  if (standardConfigsWithoutGallery.length > 0) {
+    throw new Error('All standard configs must have a galleryId defined');
+  }
+  
+  // Check for ID conflicts in standard configs
+  const galleryIds = standardConfigs.map(config => {
+    const galleryId = typeof config.galleryId === 'string' ? config.galleryId : config.galleryId?.id;
+    return galleryId;
+  }).filter(Boolean);
+  
+  const uniqueGalleryIds = new Set(galleryIds);
+  if (galleryIds.length !== uniqueGalleryIds.size) {
+    throw new Error(`Can't place multiple configurators in the same place. All galleryId values must be unique.`);
+  }
+  
+  const variantsIds = standardConfigs.map(config => {
+    const variantsId = typeof config.variantsId === 'string' ? config.variantsId : config.variantsId?.id;
+    return variantsId;
+  }).filter(Boolean);
+  
+  const uniqueVariantsIds = new Set(variantsIds);
+  if (variantsIds.length !== uniqueVariantsIds.size) {
+    throw new Error(`Can't place multiple configurator controls in the same place.All variantsId values must be unique for standard configurators`);
   }
   
   // Store configs
   currentConfigs = configs;
   activeConfiguratorIndex = 0;
   
-  // Initialize the first configurator immediately
-  injectConfigurator(configs[0]);
-  
-  // Set up click listeners for ALL configurators (including the first one)
-  for (let i = 0; i < configs.length; i++) {
-    const config = configs[i];
-    const selector = typeof config.configureButtonId === 'string' 
-      ? config.configureButtonId 
-      : config.configureButtonId!.id;
+  // Handle Snap2 configurators (exclusive, lazy initialization)
+  if (snap2Configs.length > 0) {
+    // Initialize the first Snap2 configurator immediately
+    injectConfigurator(snap2Configs[0]);
     
-    // Wait for element to exist, then attach listener
-    waitForElement(selector, 5000)
-      .then((element: Element) => {
-        const handleClick = async () => {
-          // Only do full cleanup and re-initialization if switching to a different configurator
-          if (activeConfiguratorIndex !== i) {
-            // Cleanup current configurator
-            if ((window as any).ov25CleanupConfigurator) {
-              (window as any).ov25CleanupConfigurator();
+    // Set up click listeners for ALL Snap2 configurators (including the first one)
+    for (let i = 0; i < snap2Configs.length; i++) {
+      const config = snap2Configs[i];
+      const selector = typeof config.configureButtonId === 'string' 
+        ? config.configureButtonId 
+        : config.configureButtonId!.id;
+      
+      // Wait for element to exist, then attach listener
+      waitForElement(selector, 5000)
+        .then((element: Element) => {
+          const handleClick = async () => {
+            // Only do full cleanup and re-initialization if switching to a different configurator
+            if (activeConfiguratorIndex !== i) {
+              // Cleanup current configurator
+              if ((window as any).ov25CleanupConfigurator) {
+                (window as any).ov25CleanupConfigurator();
+              }
+              
+              // Wait for cleanup
+              await new Promise(resolve => setTimeout(resolve, 100));
+              
+              // Unmount React root
+              const container = document.getElementById('ov25-provider-root');
+              if (container && (container as any)._reactRoot) {
+                (container as any)._reactRoot.unmount();
+                delete (container as any)._reactRoot;
+              }
+              
+              // Clean up shadow DOM containers
+              cleanupShadowDOMContainers();
+              
+              // Initialize new configurator
+              injectConfigurator(config);
+              
+              // Update active index
+              activeConfiguratorIndex = i;
             }
             
-            // Wait for cleanup
-            await new Promise(resolve => setTimeout(resolve, 100));
-            
-            // Unmount React root
-            const container = document.getElementById('ov25-provider-root');
-            if (container && (container as any)._reactRoot) {
-              (container as any)._reactRoot.unmount();
-              delete (container as any)._reactRoot;
-            }
-            
-            // Clean up shadow DOM containers
-            cleanupShadowDOMContainers();
-            
-            // Initialize new configurator
-            injectConfigurator(config);
-            
-            // Update active index
-            activeConfiguratorIndex = i;
-          }
+            // Auto-open the configurator (whether it's the same one or a different one)
+            setTimeout(() => {
+              const handlerRef = (window as any).ov25ConfigureHandlerRef;
+              if (handlerRef?.current) {
+                handlerRef.current();
+              }
+            }, 200);
+          };
           
-          // Auto-open the configurator (whether it's the same one or a different one)
-          setTimeout(() => {
-            const handlerRef = (window as any).ov25ConfigureHandlerRef;
-            if (handlerRef?.current) {
-              handlerRef.current();
-            }
-          }, 200);
-        };
-        
-        element.addEventListener('click', handleClick);
-      })
-      .catch((err: Error) => {
-        console.warn(`[OV25-UI] Configure button element not found for selector "${selector}": ${err.message}`);
-      });
+          element.addEventListener('click', handleClick);
+        })
+        .catch((err: Error) => {
+          console.warn(`[OV25-UI] Configure button element not found for selector "${selector}": ${err.message}`);
+        });
+    }
+  }
+  
+  // Handle standard configurators (simultaneous display)
+  if (standardConfigs.length > 0) {
+    // Initialize all standard configurators immediately
+    for (let i = 0; i < standardConfigs.length; i++) {
+      const config = standardConfigs[i];
+      // Add uniqueId to prevent element ID conflicts
+      const configWithUniqueId = {
+        ...config,
+        uniqueId: `config-${i}`
+      };
+      injectConfigurator(configWithUniqueId);
+    }
   }
 }

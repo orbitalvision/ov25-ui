@@ -185,6 +185,7 @@ interface OV25UIContextType {
   logoURL?: string;
   isProductGalleryStacked: boolean;
   mobileLogoURL?: string;
+  uniqueId?: string;
 
   // Computed values
   currentProduct?: Product;
@@ -292,6 +293,11 @@ interface OV25UIContextType {
 // Create the context
 const OV25UIContext = createContext<OV25UIContextType | undefined>(undefined);
 
+// Create a function to create unique contexts for multiple configurators
+export const createUniqueContext = (uniqueId: string) => {
+  return createContext<OV25UIContextType | undefined>(undefined);
+};
+
 // Context provider component
 export const OV25UIProvider: React.FC<{ 
   children: React.ReactNode, 
@@ -310,6 +316,7 @@ export const OV25UIProvider: React.FC<{
   isProductGalleryStacked: boolean,
   hasConfigureButton: boolean,
   mobileLogoURL?: string,
+  uniqueId?: string,
   shadowDOMs?: {
     mobileDrawer?: ShadowRoot;
     configuratorViewControls?: ShadowRoot;
@@ -333,6 +340,7 @@ export const OV25UIProvider: React.FC<{
   isProductGalleryStacked,
   hasConfigureButton,
   mobileLogoURL,
+  uniqueId,
   shadowDOMs
 }) => {
   // State definitions
@@ -563,11 +571,15 @@ export const OV25UIProvider: React.FC<{
   };
 
   const selectCamera = (cameraId: string) => {
-    sendMessageToIframe('SELECT_CAMERA', cameraId);
+    sendMessageToIframe('SELECT_CAMERA', cameraId, uniqueId);
   }
 
   const selectLightGroup = (subGroupId: string) => {
-    sendMessageToIframe('SELECT_LIGHT', subGroupId);
+    sendMessageToIframe('SELECT_LIGHT', subGroupId, uniqueId);
+  }
+
+  const handleToggleAR = () => {
+    toggleAR(uniqueId);
   }
 
   // Computed values
@@ -809,7 +821,7 @@ export const OV25UIProvider: React.FC<{
   const toggleHideAll = useCallback(() => {
     const newHiddenState = !controlsHidden;
     setControlsHidden(newHiddenState);
-    sendMessageToIframe('TOGGLE_HIDE_ALL', { hideAll: newHiddenState });
+    sendMessageToIframe('TOGGLE_HIDE_ALL', { hideAll: newHiddenState }, uniqueId);
   }, [controlsHidden, setControlsHidden]);
 
   const handleSelectionSelect = throttle((selection: Selection) => {
@@ -826,7 +838,7 @@ export const OV25UIProvider: React.FC<{
           const newSelections = prev.filter(sel => sel.optionId !== 'size');
           return [...newSelections, { optionId: 'size', selectionId: selection.id }];
         });
-        sendMessageToIframe('SELECT_PRODUCT', selection.id);
+        sendMessageToIframe('SELECT_PRODUCT', selection.id, uniqueId);
         setCurrentProductId(selection.id);
       }
       return;
@@ -843,7 +855,7 @@ export const OV25UIProvider: React.FC<{
         optionId: activeOptionId, 
         groupId: selection.groupId, 
         selectionId: selection.id
-      });
+      }, uniqueId);
     }
     if(!hasSwitchedAfterDefer && galleryIndex === 1 && deferThreeD) {
       setHasSwitchedAfterDefer(true);
@@ -922,6 +934,15 @@ export const OV25UIProvider: React.FC<{
         // Skip if no payload or type
         if (!type) {
           return;
+        }
+        
+        // For standard configurators with uniqueId, filter messages by iframe source
+        if (uniqueId) {
+          const iframeId = `ov25-configurator-iframe-${uniqueId}`;
+          const iframe = document.getElementById(iframeId) as HTMLIFrameElement;
+          if (!iframe || event.source !== iframe.contentWindow) {
+            return;
+          }
         }
         
         // AR_GLB_DATA sends raw base64 string, don't parse it
@@ -1079,6 +1100,7 @@ export const OV25UIProvider: React.FC<{
     images,
     logoURL,
     mobileLogoURL,
+    uniqueId,
     // Computed values
     currentProduct,
     sizeOption,
@@ -1159,7 +1181,7 @@ export const OV25UIProvider: React.FC<{
     handleNextOption,
     handlePreviousOption,
     getSelectedValue,
-    toggleAR,
+    toggleAR: handleToggleAR,
     cleanupConfigurator,
   };
 

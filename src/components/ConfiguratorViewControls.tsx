@@ -35,6 +35,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
     hasConfigureButton,
     toggleAR,
     hideAr,
+    uniqueId,
   } = useOV25UI();
 
   // Local state for dimensions
@@ -88,7 +89,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
     (currentProduct as any)?.dimensionZ);
 
   const handleToggleDimensions = () => {
-    toggleDimensions(canSeeDimensions, setCanSeeDimensions);
+    toggleDimensions(canSeeDimensions, setCanSeeDimensions, uniqueId);
   }
   
   const handleAnimationButtonText = () => {
@@ -183,7 +184,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
             )}
           </button>}
           {canAnimate && (
-            <button id="ov25-animation-toggle-button" onClick={toggleAnimation} className={cn(
+            <button id="ov25-animation-toggle-button" onClick={() => toggleAnimation(uniqueId)} className={cn(
               'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2  ov:border ov:items-center ov:justify-center',
               'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
               'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
@@ -328,7 +329,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
               'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
               'ov:bg-[var(--ov25-overlay-button-color)]',
           )}
-            onClick={toggleFullscreen}>
+            onClick={() => toggleFullscreen(uniqueId)}>
               <ExpandIcon strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1"/>
             </button>
         </div>

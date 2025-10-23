@@ -24,7 +24,8 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
         isProductGalleryStacked,
         arPreviewLink,
         setArPreviewLink,
-        isVariantsOpen
+        isVariantsOpen,
+        uniqueId
     } = useOV25UI();
 
     // Use the custom hook to handle iframe positioning
@@ -66,7 +67,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
         let frameId: number;
         
         const positionIframeContainer = () => {
-            const originalContainer = document.getElementById('ov25-configurator-iframe-container');
+            const originalContainer = document.getElementById(uniqueId ? `ov25-configurator-iframe-container-${uniqueId}` : 'ov25-configurator-iframe-container');
             const trueContainer = document.getElementById('true-ov25-configurator-iframe-container');
             
             if (originalContainer && trueContainer && !isDrawerOrDialogOpen) {
@@ -118,7 +119,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
                 "ov:rounded-[var(--ov25-configurator-iframe-border-radius)]",
                 "ov:bg-[var(--ov25-configurator-iframe-background-color)]",
             )}></div>
-            <div id="ov25-configurator-iframe-container"
+            <div id={uniqueId ? `ov25-configurator-iframe-container-${uniqueId}` : "ov25-configurator-iframe-container"}
                 data-fullscreen={isVariantsOpen}
                 ref={containerRef}
                 className={cn(

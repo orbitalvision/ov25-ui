@@ -53,10 +53,32 @@ const findElementByIdInShadowOrRegularDOM = (id: string): HTMLElement | null => 
 };
 
 /**
+ * Helper function to find iframe with unique ID pattern
+ */
+const findIframeWithUniqueId = (uniqueId?: string): HTMLElement | null => {
+  // If we have a uniqueId, try to find the specific iframe for this configurator
+  if (uniqueId) {
+    const iframeId = `ov25-configurator-iframe-${uniqueId}`;
+    const uniqueIframe = document.getElementById(iframeId);
+    if (uniqueIframe) {
+      return uniqueIframe;
+    }
+  }
+  
+  // Fallback to standard iframe ID
+  const standardIframe = document.getElementById('ov25-configurator-iframe');
+  if (standardIframe) {
+    return standardIframe;
+  }
+  
+  return null;
+};
+
+/**
  * Hook to position the iframe and its container at the top of the screen when drawer is open
  */
 export const useIframePositioning = () => {
-  const {isDrawerOrDialogOpen, isMobile, drawerSize, isProductGalleryStacked, isSnap2Mode } = useOV25UI();
+  const {isDrawerOrDialogOpen, isMobile, drawerSize, isProductGalleryStacked, isSnap2Mode, uniqueId } = useOV25UI();
   const originalStyles = useRef<{
     container: {
       position: string;
@@ -91,8 +113,9 @@ export const useIframePositioning = () => {
   // This useEffect handles drawer opening and closing - saving and restoring original styles
   useEffect(() => {
     // Get the iframe element and container
-    const iframe = findElementByIdInShadowOrRegularDOM('ov25-configurator-iframe');
-    const container = findElementByIdInShadowOrRegularDOM(isProductGalleryStacked ? 'true-ov25-configurator-iframe-container' : 'ov25-configurator-iframe-container');
+    const iframe = findIframeWithUniqueId(uniqueId);
+    const containerId = uniqueId ? `ov25-configurator-iframe-container-${uniqueId}` : 'ov25-configurator-iframe-container';
+    const container = findElementByIdInShadowOrRegularDOM(isProductGalleryStacked ? 'true-ov25-configurator-iframe-container' : containerId);
     const parent = container?.parentElement;
 
     if (!iframe || !container || !parent) return;
@@ -289,13 +312,14 @@ export const useIframePositioning = () => {
     return () => {
       window.removeEventListener('resize', updateIframeWidth);
     };
-  }, [isDrawerOrDialogOpen, isMobile, isSnap2Mode]);
+  }, [isDrawerOrDialogOpen, isMobile, isSnap2Mode, uniqueId]);
 
   // This useEffect handles drawer size changes
   useEffect(() => {
     if (isDrawerOrDialogOpen) {
-        const iframe = findElementByIdInShadowOrRegularDOM('ov25-configurator-iframe');
-        const container = findElementByIdInShadowOrRegularDOM('ov25-configurator-iframe-container');
+        const iframe = findIframeWithUniqueId(uniqueId);
+        const containerId = uniqueId ? `ov25-configurator-iframe-container-${uniqueId}` : 'ov25-configurator-iframe-container';
+        const container = findElementByIdInShadowOrRegularDOM(containerId);
         if(!container || !iframe) return;
 
         const originalIframeHeight = iframe.style.height;
@@ -325,7 +349,7 @@ export const useIframePositioning = () => {
             }
         };
     }
-  }, [drawerSize, isDrawerOrDialogOpen, isSnap2Mode, isMobile])
+  }, [drawerSize, isDrawerOrDialogOpen, isSnap2Mode, isMobile, uniqueId])
 };
 
 export default useIframePositioning;

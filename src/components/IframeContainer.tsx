@@ -17,7 +17,8 @@ export const IframeContainer = () => {
         galleryIndexToUse,
         images: passedImages,
         isProductGalleryStacked: isStacked,
-        isVariantsOpen
+        isVariantsOpen,
+        uniqueId
     } = useOV25UI();
 
     // Get the images from the current product
@@ -58,7 +59,7 @@ export const IframeContainer = () => {
         <iframe
             data-fullscreen={isVariantsOpen}
             ref={iframeRef}
-            id="ov25-configurator-iframe"
+            id={uniqueId ? `ov25-configurator-iframe-${uniqueId}` : "ov25-configurator-iframe"}
             src={iframeSrc}
             className={`ov:w-full ov:bg-transparent ov:h-full ${galleryIndex === galleryIndexToUse ? 'ov:block' : 'ov:ov25-controls-hidden'}`}
             allow="camera; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; xr-spatial-tracking; fullscreen"
@@ -78,7 +79,7 @@ export const IframeContainer = () => {
         })()}
 
         {/* Container for ConfiguratorViewControls portal */}
-        <div id="true-configurator-view-controls-container" className="ov:absolute ov:inset-0 ov:w-full ov:h-full ov:pointer-events-none"></div>
+        <div id={uniqueId ? `true-configurator-view-controls-container-${uniqueId}` : "true-configurator-view-controls-container"} className="ov:absolute ov:inset-0 ov:w-full ov:h-full ov:pointer-events-none"></div>
 
     </div>
     )

@@ -55,8 +55,9 @@ export type SelectModuleReceivedMessage = {
 /**
  * Get the iframe element by ID
  */
-const getConfiguratorIframe = (): HTMLIFrameElement | null => {
-  return document.getElementById('ov25-configurator-iframe') as HTMLIFrameElement;
+const getConfiguratorIframe = (uniqueId?: string): HTMLIFrameElement | null => {
+  const iframeId = uniqueId ? `ov25-configurator-iframe-${uniqueId}` : 'ov25-configurator-iframe';
+  return document.getElementById(iframeId) as HTMLIFrameElement;
 };
 
 /**
@@ -64,9 +65,10 @@ const getConfiguratorIframe = (): HTMLIFrameElement | null => {
  */
 export const sendMessageToIframe = (
   type: string,
-  payload: any
+  payload: any,
+  uniqueId?: string
 ) => {
-  const iframe = getConfiguratorIframe();
+  const iframe = getConfiguratorIframe(uniqueId);
   if (iframe?.contentWindow) {
     iframe.contentWindow.postMessage({
       type,
@@ -78,9 +80,10 @@ export const sendMessageToIframe = (
 /**
  * Handle selecting a product
  * @param productId - The ID of the product to select
+ * @param uniqueId - Optional unique ID for multiple configurators
  */
-export const selectProduct = (productId: number): void => {
-  sendMessageToIframe('SELECT_PRODUCT', productId);
+export const selectProduct = (productId: number, uniqueId?: string): void => {
+  sendMessageToIframe('SELECT_PRODUCT', productId, uniqueId);
 };
 
 /**
@@ -89,27 +92,27 @@ export const selectProduct = (productId: number): void => {
  * @param groupId - The ID of the group the option belongs to
  * @param selectionId - The ID of the specific selection
  */
-export const selectOption = (optionId: string, groupId: string, selectionId: string): void => {
+export const selectOption = (optionId: string, groupId: string, selectionId: string, uniqueId?: string): void => {
   sendMessageToIframe('SELECT_SELECTION', {
     optionId,
     groupId,
     selectionId
-  });
+  }, uniqueId);
 };
 
 /**
  * Update the quantity of the product
  * @param quantity - The new quantity value
  */
-export const updateQuantity = (quantity: number): void => {
-  sendMessageToIframe('UPDATE_QUANTITY', { quantity });
+export const updateQuantity = (quantity: number, uniqueId?: string): void => {
+  sendMessageToIframe('UPDATE_QUANTITY', { quantity }, uniqueId);
 };
 
 /**
  * Add the current configured product to the cart
  */
-export const addToCart = (): void => {
-  sendMessageToIframe('ADD_TO_CART', {});
+export const addToCart = (uniqueId?: string): void => {
+  sendMessageToIframe('ADD_TO_CART', {}, uniqueId);
 };
 
 /**
@@ -119,9 +122,10 @@ export const addToCart = (): void => {
  */
 export const toggleDimensions = (
   canSeeDimensions: boolean,
-  setCanSeeDimensions: React.Dispatch<React.SetStateAction<boolean>>
+  setCanSeeDimensions: React.Dispatch<React.SetStateAction<boolean>>,
+  uniqueId?: string
 ): void => {
-  sendMessageToIframe('VIEW_DIMENSIONS', { dimensions: !canSeeDimensions });
+  sendMessageToIframe('VIEW_DIMENSIONS', { dimensions: !canSeeDimensions }, uniqueId);
   setCanSeeDimensions(prev => !prev);
 };
 
@@ -130,62 +134,63 @@ export const toggleDimensions = (
  */
 export const toggleMiniDimensions = (
   canSeeMiniDimensions: boolean,
-  setCanSeeMiniDimensions: React.Dispatch<React.SetStateAction<boolean>>
+  setCanSeeMiniDimensions: React.Dispatch<React.SetStateAction<boolean>>,
+  uniqueId?: string
 ): void => {
-  sendMessageToIframe('VIEW_MINI_DIMENSIONS', { miniDimensions: !canSeeMiniDimensions });
+  sendMessageToIframe('VIEW_MINI_DIMENSIONS', { miniDimensions: !canSeeMiniDimensions }, uniqueId);
   setCanSeeMiniDimensions(prev => !prev);
 };
 
 /**
  * Request iframe to save snap2 configuration and return URL info
  */
-export const requestSnap2Save = (): void => {
-  sendMessageToIframe('REQUEST_SNAP2_SAVE', {});
+export const requestSnap2Save = (uniqueId?: string): void => {
+  sendMessageToIframe('REQUEST_SNAP2_SAVE', {}, uniqueId);
 };
 
 /**
  * Send SELECT_MODULE message to iframe
  */
-export const selectModule = (modelPath: string, modelId: number): void => {
+export const selectModule = (modelPath: string, modelId: number, uniqueId?: string): void => {
   sendMessageToIframe('SELECT_MODULE', {
     modelPath,
     modelId
-  });
+  }, uniqueId);
 };
 
 /**
  * This will deselect the model and attachment point
  */
-export const closeModuleSelectMenu = (): void => {
-  sendMessageToIframe('CLOSE_MODULE_SELECT_MENU', {});
+export const closeModuleSelectMenu = (uniqueId?: string): void => {
+  sendMessageToIframe('CLOSE_MODULE_SELECT_MENU', {}, uniqueId);
 };
 
 /**
  * Toggle animation in the 3D viewer
  */
-export const toggleAnimation = (): void => {
-  sendMessageToIframe('TOGGLE_ANIMATION', {});
+export const toggleAnimation = (uniqueId?: string): void => {
+  sendMessageToIframe('TOGGLE_ANIMATION', {}, uniqueId);
 };
 
 /**
  * Enter VR mode
  */
-export const toggleVR = (): void => {
-  sendMessageToIframe('ENTER_VR', {});
+export const toggleVR = (uniqueId?: string): void => {
+  sendMessageToIframe('ENTER_VR', {}, uniqueId);
 };
 
 /**
  * Enter AR mode
  */
-export const toggleAR = (): void => {
-  sendMessageToIframe('ENTER_AR', {});
+export const toggleAR = (uniqueId?: string): void => {
+  sendMessageToIframe('ENTER_AR', {}, uniqueId);
 };
 
 /**
  * Toggle fullscreen mode for the iframe's container
  */
-export const toggleFullscreen = (): void => {
-  const iframe = getConfiguratorIframe();
+export const toggleFullscreen = (uniqueId?: string): void => {
+  const iframe = getConfiguratorIframe(uniqueId);
   const container = iframe?.parentElement;
   if (container) {
     if (!document.fullscreenElement) {
