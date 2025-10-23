@@ -256,7 +256,6 @@ html #ov25-configurator-variant-menu-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-right: 0.5em;
 }
 
 #ov25-mobile-savings-amount {
@@ -288,7 +287,6 @@ html #ov25-configurator-variant-menu-container {
 #ov25-mobile-price-container:not(:has(#ov25-mobile-subtotal)) {
     display: flex;
     align-items: center;
-    margin-right: 1em;
 }
 
 #ov25-mobile-price-container:not(:has(#ov25-mobile-subtotal)) #ov25-mobile-price {
