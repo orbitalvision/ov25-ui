@@ -19,7 +19,7 @@ const initializeConfigurator = () => {
     priceId: { id: '#price', replace: true },
     nameId: { id: '#name', replace: true },
     logoURL: 'https://ov25.orbital.vision/OV.png',
-    hidePricing: false,
+    hidePricing: true,
     // Snap2 configuration mode
   });
 

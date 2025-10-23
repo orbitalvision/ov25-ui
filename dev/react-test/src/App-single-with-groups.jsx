@@ -21,6 +21,12 @@ const initializeConfigurator = () => {
     nameId: { id: '#name', replace: true },
     logoURL: 'https://ov25.orbital.vision/OV.png',
     hidePricing: false,
+    addToBasketFunction: () => {
+      alert('Add to basket function called');
+    },
+    buyNowFunction: () => {
+      alert('Buy now function called');
+    },
     // This product has grouped variants
   });
 
