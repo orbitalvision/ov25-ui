@@ -37,7 +37,7 @@ export const InitialiseMenu: React.FC = () => {
 
   return (
     <div className="ov:w-full ov:h-full ov:flex ov:flex-col ov:justify-center ov:overflow-y-auto ov:p-4">
-      <div className="ov:w-full ov:max-w-[960px] ov:mx-auto ov:flex ov:flex-col ov:justify-center ov:items-center">
+      <div className="ov:w-full ov:max-w-[960px] ov:mx-auto ov:flex ov:flex-col ov:justify-center ov:items-center ov:pt-4">
         <h2 className="ov:text-center ov:text-base ov:mb-4 ov:text-[var(--ov25-text-color)] ov:flex-shrink-0">Select a model to get started</h2>
         <div className="ov:grid ov:grid-cols-2 ov:gap-2 ov:sm:grid-cols-4 ov:sm:gap-1">
         {compatibleModules.map((module, index) => {

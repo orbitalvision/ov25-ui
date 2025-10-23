@@ -20,7 +20,7 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
 
     return (
     <div 
-        className={`ov25-default-variant-card ov:flex ov:flex-col ov:items-center ${variant.isSelected ? '' : ''} ov:transition-transform ov:pt-2`}
+        className={`ov25-default-variant-card ov:flex ov:flex-col ov:items-center ov:pt-1 ${isGrouped && isMobile ? '' : 'ov:my-4 ov:pb-1'} ${variant.isSelected ? '' : ''} ov:transition-transform`}
         key={variant.id + variant.groupId + variant.optionId}
         data-selected={variant.isSelected}
         title={variant.name}
@@ -29,7 +29,8 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
             <div 
                 className={cn(
                     'ov25-variant-image-container',
-                    'ov:w-16 ov:h-16 ov:my-4 ovshadow-lg ov:rounded-full ov:overflow-hidden ov:cursor-pointer ov:border-transparent ov:shadow-md',
+                    isGrouped && isMobile ? 'ov:w-13 ov:h-13' : 'ov:w-16 ov:h-16',
+                    'ov:rounded-full ov:overflow-hidden ov:cursor-pointer ov:border-transparent ov:shadow-md',
                 )}
                 {...(variant.isSelected && { selected: true })}
                 onClick={() => onSelect(variant)}
@@ -42,9 +43,9 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
                     <img 
                         src={variant.image || '/placeholder.svg'}
                         alt={variant.name}
-                        width={56}
-                        height={56}
-                        className="ov:w-16 ov:h-16 ov:object-cover"
+                        width={isGrouped && isMobile ? 56 : 64}
+                        height={isGrouped && isMobile ? 56 : 64}
+                        className={isGrouped && isMobile ? "ov:w-13 ov:h-13 ov:object-cover" : "ov:w-16 ov:h-16 ov:object-cover"}
                     />
                 ) : (
                     <div className="ov:w-full ov:h-full ov:bg-gray-200 ov:flex ov:items-center ov:justify-center">
@@ -55,15 +56,15 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
                     <SwatchIconOverlay isSelected={isSwatchSelectedFor(variant.swatch)} onClick={handleSwatchClick} />
                 )}
             </div>
-            <div className={`ov25-variant-card-gradient ov:w-16 ov:h-16 ov:rounded-full ov:absolute ov:top-4 ov:left-0 radial_gradient ov:mix-blend-multiply ov:pointer-events-none`}></div>
-            <div className={`ov25-variant-card-gradient ov:w-16 ov:h-16 ov:rounded-full ov:absolute ov:top-4 ov:left-0 ov:bg-black shadow-inner-intense ov:mix-blend-difference ov:pointer-events-none`}></div>
-            <div className={`ov25-variant-card-border ov:w-16 ov:h-16 ov:scale-[1.15] ov:pointer-events-none ov:mt-4 ov:bg-transparent ov:rounded-full ov:absolute ov:inset-0 ov:aspect-square ${variant.isSelected ? 'ov:border-2 ov:border-dashed ov:border-[var(--ov25-highlight-color)]' : 'hidden '}`}></div>
+            <div className={`ov25-variant-card-gradient ${isGrouped && isMobile ? 'ov:w-13 ov:h-13' : 'ov:w-16 ov:h-16'} ov:rounded-full ov:absolute ${isGrouped && isMobile ? 'ov:top-0' : 'ov:top-0'} ov:left-0 radial_gradient ov:mix-blend-multiply ov:pointer-events-none`}></div>
+            <div className={`ov25-variant-card-gradient ${isGrouped && isMobile ? 'ov:w-13 ov:h-13' : 'ov:w-16 ov:h-16'} ov:rounded-full ov:absolute ${isGrouped && isMobile ? 'ov:top-0' : 'ov:top-0'} ov:left-0 ov:bg-black shadow-inner-intense ov:mix-blend-difference ov:pointer-events-none`}></div>
+            <div className={`ov25-variant-card-border ${isGrouped && isMobile ? 'ov:w-13 ov:h-13' : 'ov:w-16 ov:h-16'} ov:scale-[1.15] ov:pointer-events-none ov:bg-transparent ov:rounded-full ov:absolute ov:inset-0 ov:aspect-square ${variant.isSelected ? 'ov:border-2 ov:border-dashed ov:border-[var(--ov25-highlight-color)]' : 'hidden '}`}></div>
         </div>
         <div 
             onClick={() => onSelect(variant)}
             className="ov:cursor-pointer ov:max-w-full"
         >
-            <span className="ov25-variant-name ov:text-xs ov:text-center ov:text-black ov:line-clamp-3">
+            <span className={`ov25-variant-name ov:text-xs ov:text-center ov:text-black ov:line-clamp-3 ${isGrouped && isMobile ? '' : 'ov:pt-2'}`}>
                 {variant.name}
             </span>
         </div>
