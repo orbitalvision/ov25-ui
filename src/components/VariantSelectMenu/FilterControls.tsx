@@ -9,14 +9,16 @@ interface FilterControlsProps {
     isFilterOpen: boolean;
     setIsFilterOpen: (isOpen: boolean) => void;
     isGrouped: boolean;
+    optionId?: string; // Optional optionId for inline variant content
 }
 
 export const FilterControls: React.FC<FilterControlsProps> = ({
     isFilterOpen,
     setIsFilterOpen,
     isGrouped,
+    optionId,
 }) => {
-    const { searchQueries, setSearchQuery, activeOptionId, availableProductFilters, activeOption, isMobile, setAvailableProductFilters, setIsVariantsOpen, setIsSwatchBookOpen, swatchRulesData, selectedSwatches } = useOV25UI();
+    const { searchQueries, setSearchQuery, activeOptionId, availableProductFilters, activeOption, isMobile, setAvailableProductFilters, setIsVariantsOpen, setIsSwatchBookOpen, swatchRulesData, selectedSwatches, allOptionsWithoutModules } = useOV25UI();
     const [localSearchQuery, setLocalSearchQuery] = React.useState('');
     const debouncedSearchQuery = useDebounce(localSearchQuery, 500);
     const previousOptionIdRef = React.useRef<string | null>(null);
@@ -25,28 +27,31 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
     const [displayCount, setDisplayCount] = React.useState(selectedSwatches.length);
     const previousSelectedSwatchesRef = React.useRef(selectedSwatches);
     
-    // Effect for updating local search query when activeOptionId changes
+    // Use provided optionId or fall back to activeOptionId
+    const currentOptionId = optionId || activeOptionId;
+    
+    // Effect for updating local search query when currentOptionId changes
     React.useEffect(() => {
-        if (activeOptionId && activeOptionId !== previousOptionIdRef.current) {
-            const newQuery = searchQueries[activeOptionId] || '';
+        if (currentOptionId && currentOptionId !== previousOptionIdRef.current) {
+            const newQuery = searchQueries[currentOptionId] || '';
             setLocalSearchQuery(newQuery);
-            previousOptionIdRef.current = activeOptionId;
+            previousOptionIdRef.current = currentOptionId;
             isUserInputRef.current = false;
         }
-    }, [activeOptionId, searchQueries]);
+    }, [currentOptionId, searchQueries]);
 
     // Effect for syncing local state to global state
     React.useEffect(() => {
-        if (activeOptionId) {
+        if (currentOptionId) {
             if (!isUserInputRef.current) {
-                // Immediate update when activeOptionId changes
-                setSearchQuery(activeOptionId, localSearchQuery);
+                // Immediate update when currentOptionId changes
+                setSearchQuery(currentOptionId, localSearchQuery);
             } else {
                 // Debounced update when user types
-                setSearchQuery(activeOptionId, debouncedSearchQuery);
+                setSearchQuery(currentOptionId, debouncedSearchQuery);
             }
         }
-    }, [activeOptionId, localSearchQuery, debouncedSearchQuery, setSearchQuery, isUserInputRef]);
+    }, [currentOptionId, localSearchQuery, debouncedSearchQuery, setSearchQuery, isUserInputRef]);
 
     // Effect for triggering animation when selectedSwatches changes
     React.useEffect(() => {
@@ -95,15 +100,22 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
     }, [activeOption, availableProductFilters, setAvailableProductFilters]);
 
     const shouldShowFilterButton = React.useMemo(() => {
-        if (!activeOption?.name) return false;
-        const optionFilters = availableProductFilters?.[activeOption.name];
+        // For inline variant content, we need to find the option by currentOptionId
+        const targetOption = currentOptionId === activeOptionId ? activeOption : 
+            allOptionsWithoutModules?.find(opt => opt.id === currentOptionId);
+        
+        if (!targetOption?.name) return false;
+        const optionFilters = availableProductFilters?.[targetOption.name];
         if (!optionFilters) return false;
         return Object.keys(optionFilters).some((key) => optionFilters[key]?.length > 0);
-    }, [activeOption?.name, availableProductFilters]);
+    }, [currentOptionId, activeOptionId, activeOption, allOptionsWithoutModules, availableProductFilters]);
 
-    const selectedFilters = availableProductFilters && activeOption?.name && availableProductFilters[activeOption.name] ? Object.keys(availableProductFilters[activeOption.name])
+    const targetOption = currentOptionId === activeOptionId ? activeOption : 
+        allOptionsWithoutModules?.find(opt => opt.id === currentOptionId);
+    
+    const selectedFilters = availableProductFilters && targetOption?.name && availableProductFilters[targetOption.name] ? Object.keys(availableProductFilters[targetOption.name])
     .flatMap(filterName => 
-        availableProductFilters[activeOption.name][filterName]
+        availableProductFilters[targetOption.name][filterName]
             .filter(filter => filter.checked)
             .map(filter => ({
                 ...filter,

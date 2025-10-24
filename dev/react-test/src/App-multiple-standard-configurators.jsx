@@ -108,7 +108,7 @@ function App() {
       <div className="configurators-grid">
         {/* Configurator 1 */}
         <div className="configurator-card">
-          <h3>Product 1 - Windrush Loveseat</h3>
+          <h3>Product 1</h3>
           <div id="gallery-1" className="gallery-container"></div>
           <div className="product-info">
             <div id="name-1" className="product-name">Windrush Loveseat</div>
@@ -118,7 +118,7 @@ function App() {
         
         {/* Configurator 2 */}
         <div className="configurator-card">
-          <h3>Product 2 - Aughton Petit</h3>
+          <h3>Product 2</h3>
           <div id="gallery-2" className="gallery-container"></div>
           <div className="product-info">
             <div id="name-2" className="product-name">Aughton Petit</div>

@@ -130,6 +130,7 @@ export interface InjectConfiguratorOptions {
   mobileLogoURL?: string;
   cssString?: string;
   uniqueId?: string; // For multiple configurators to prevent ID conflicts
+  useInlineVariantControls?: boolean;
 }
 
 export function injectConfigurator(opts: InjectConfiguratorOptions) {
@@ -156,6 +157,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     hidePricing,
     hideAr,
     uniqueId,
+    useInlineVariantControls,
   } = opts;
 
   // Add generateThumbnail function to window object
@@ -601,6 +603,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
          isProductGalleryStacked={isProductGalleryStacked}
          hasConfigureButton={!!configureButtonId}
          uniqueId={uniqueId}
+         useInlineVariantControls={useInlineVariantControls}
          shadowDOMs={{
            mobileDrawer: mobileDrawerShadowRoot,
            configuratorViewControls: configuratorViewControlsShadowRoot,

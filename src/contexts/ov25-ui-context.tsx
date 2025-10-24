@@ -90,7 +90,6 @@ export interface SizeOption {
   name: 'size';
   groups: [{
     id: 'size-group';
-    name: 'Size Options';
     selections: Array<{
       id: string;
       name: string;
@@ -215,6 +214,7 @@ interface OV25UIContextType {
   isModalOpen: boolean;
   controlsHidden: boolean;
   hasConfigureButton: boolean;
+  useInlineVariantControls: boolean;
   shareDialogTrigger: 'none' | 'save-button' | 'modal-close';
   skipNextDrawerCloseRef: React.MutableRefObject<boolean>;
   preloading: boolean;
@@ -281,13 +281,14 @@ interface OV25UIContextType {
   setSelectedModuleType: React.Dispatch<React.SetStateAction<'all' | 'middle' | 'corner' | 'end'>>;
   setIsModulePanelOpen: React.Dispatch<React.SetStateAction<boolean>>;
   // Actions
-  handleSelectionSelect: (selection: Selection) => void;
+  handleSelectionSelect: (selection: Selection, optionId?: string) => void;
   handleOptionClick: (optionId: string) => void;
   handleNextOption: () => void;
   handlePreviousOption: () => void;
   getSelectedValue: (option: Option | SizeOption) => string;
   toggleAR: () => void;
   cleanupConfigurator: () => void;
+  applySearchAndFilters: (option: Option | SizeOption, optionId: string) => Option | SizeOption;
 }
 
 // Create the context
@@ -317,6 +318,7 @@ export const OV25UIProvider: React.FC<{
   hasConfigureButton: boolean,
   mobileLogoURL?: string,
   uniqueId?: string,
+  useInlineVariantControls?: boolean,
   shadowDOMs?: {
     mobileDrawer?: ShadowRoot;
     configuratorViewControls?: ShadowRoot;
@@ -341,6 +343,7 @@ export const OV25UIProvider: React.FC<{
   hasConfigureButton,
   mobileLogoURL,
   uniqueId,
+  useInlineVariantControls = false,
   shadowDOMs
 }) => {
   // State definitions
@@ -596,7 +599,6 @@ export const OV25UIProvider: React.FC<{
     name: 'size',
     groups: [{
       id: 'size-group',
-      name: 'Size Options',
       selections: products?.map(p => ({
         id: p?.id,
         name: p?.name,
@@ -607,13 +609,17 @@ export const OV25UIProvider: React.FC<{
     }]
   };
 
-  // Active option based on activeOptionId
-  const baseActiveOption = configuratorState?.options?.find(opt => opt.id === activeOptionId);
-  const activeOption = useMemo(() => {
-    if (!baseActiveOption) return undefined;
+  // Helper function to apply search and filter logic to any option
+  const applySearchAndFilters = useCallback((option: Option | SizeOption, optionId: string) => {
+    if (!option) return option;
+
+    // For size options, just return as-is since they don't have complex filtering
+    if (option.id === 'size' || optionId === 'size') {
+      return option;
+    }
 
     const searchFilter = (text: string) => {
-      const currentSearchQuery = searchQueries[baseActiveOption.id];
+      const currentSearchQuery = searchQueries[optionId];
       if (!currentSearchQuery) return true;
       const similarity = stringSimilarity(text.toLowerCase(), currentSearchQuery.toLowerCase());
       const containsQuery = text.toLowerCase().includes(currentSearchQuery.toLowerCase());
@@ -622,7 +628,7 @@ export const OV25UIProvider: React.FC<{
 
     // Checks a selection against the filters and returns true if it matches any of the filters.
     const checkSelectionFilters = (selection: any) => {
-      const optionFilters = availableProductFilters?.[baseActiveOption.name];
+      const optionFilters = availableProductFilters?.[option.name];
       if (!optionFilters) return true;
       
       let hasAnyCheckedFilters = false;
@@ -652,7 +658,7 @@ export const OV25UIProvider: React.FC<{
 
     // Checks a selection against the search query and returns true if it matches the search query.
     const checkSelectionSearch = (selection: any) => {
-      const currentSearchQuery = searchQueries[baseActiveOption.id];
+      const currentSearchQuery = searchQueries[optionId];
       if (!currentSearchQuery) return true;
       
       // Check selection name
@@ -674,9 +680,9 @@ export const OV25UIProvider: React.FC<{
     };
 
     return {
-      ...baseActiveOption,
-      groups: baseActiveOption.groups.filter((group) => {
-        const currentSearchQuery = searchQueries[baseActiveOption.id];
+      ...option,
+      groups: (option.groups as Group[]).filter((group) => {
+        const currentSearchQuery = searchQueries[optionId];
         // First check if group name matches search
         if (currentSearchQuery && searchFilter(group.name)) {
           return true;
@@ -691,8 +697,8 @@ export const OV25UIProvider: React.FC<{
         }
 
         // If no search query, check category filters
-        if (availableProductFilters?.[baseActiveOption.name]?.['Collections']?.some(filter => filter.checked)) {
-          return availableProductFilters?.[baseActiveOption.name]['Collections']
+        if (availableProductFilters?.[option.name]?.['Collections']?.some(filter => filter.checked)) {
+          return availableProductFilters?.[option.name]['Collections']
             .filter(filter => filter.checked)
             .map(filter => filter.value)
             .includes(group.name);
@@ -701,7 +707,7 @@ export const OV25UIProvider: React.FC<{
         return !currentSearchQuery; // Only return true if there's no search query
       }).map(group => ({
         ...group,
-        selections: searchQueries[baseActiveOption.id] && !searchFilter(group.name) 
+        selections: searchQueries[optionId] && !searchFilter(group.name) 
           ? group.selections.filter(selection => {
               const matchesSearch = checkSelectionSearch(selection);
               const matchesFilters = checkSelectionFilters(selection);
@@ -710,8 +716,19 @@ export const OV25UIProvider: React.FC<{
             })
           : group.selections.filter(selection => checkSelectionFilters(selection))
       }))
-    };
-  }, [baseActiveOption, availableProductFilters, searchQueries]);
+    } as Option;
+  }, [availableProductFilters, searchQueries]);
+
+  // Active option based on activeOptionId
+  const baseActiveOption = configuratorState?.options?.find(opt => opt.id === activeOptionId);
+  const activeOption = useMemo(() => {
+    if (!baseActiveOption) return undefined;
+    // Only apply search and filters for regular options, not size options
+    if (activeOptionId === 'size') {
+      return baseActiveOption;
+    }
+    return applySearchAndFilters(baseActiveOption, activeOptionId || '') as Option;
+  }, [baseActiveOption, activeOptionId, applySearchAndFilters]);
 
   // Compute filters once when we have the necessary data
   if (!hasComputedFilters.current && configuratorState && configuratorState.options && configuratorState.options.length > 0) {
@@ -824,8 +841,15 @@ export const OV25UIProvider: React.FC<{
     sendMessageToIframe('TOGGLE_HIDE_ALL', { hideAll: newHiddenState }, uniqueId);
   }, [controlsHidden, setControlsHidden]);
 
-  const handleSelectionSelect = throttle((selection: Selection) => {
-    if (activeOptionId === 'size') {
+  /**
+   * Handles variant selection with optional optionId parameter.
+   * @param selection - The selected variant
+   * @param optionId - Optional option ID to use instead of activeOptionId (useful for inline variant controls)
+   */
+  const handleSelectionSelect = throttle((selection: Selection, optionId?: string) => {
+    // Use provided optionId if available, otherwise fall back to activeOptionId
+    const currentOptionId = optionId || activeOptionId;
+    if (currentOptionId === 'size') {
       if (currentProductId !== selection.id) {
         // Block if already selecting a product
         if (isSelectingProduct.current) {
@@ -844,15 +868,15 @@ export const OV25UIProvider: React.FC<{
       return;
     } else {
       setSelectedSelections(prev => {
-        const newSelections = prev.filter(sel => sel.optionId !== activeOptionId);
+        const newSelections = prev.filter(sel => sel.optionId !== currentOptionId);
         return [...newSelections, { 
-          optionId: activeOptionId || '', 
+          optionId: currentOptionId || '', 
           groupId: selection.groupId, 
           selectionId: selection.id 
         }];
       });
       sendMessageToIframe('SELECT_SELECTION', {
-        optionId: activeOptionId, 
+        optionId: currentOptionId, 
         groupId: selection.groupId, 
         selectionId: selection.id
       }, uniqueId);
@@ -1121,6 +1145,7 @@ export const OV25UIProvider: React.FC<{
     isModalOpen,
     controlsHidden,
     hasConfigureButton: hasConfigureButtonState,
+    useInlineVariantControls,
     shareDialogTrigger,
     skipNextDrawerCloseRef,
     preloading,
@@ -1184,6 +1209,7 @@ export const OV25UIProvider: React.FC<{
     getSelectedValue,
     toggleAR: handleToggleAR,
     cleanupConfigurator,
+    applySearchAndFilters,
   };
 
   return (

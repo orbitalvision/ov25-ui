@@ -2,30 +2,39 @@ import * as React from 'react'
 import { ProductFilters, useOV25UI } from '../../contexts/ov25-ui-context.js';
 
 
-export const FilterContent: React.FC = () => {
-    const { availableProductFilters, setAvailableProductFilters, activeOption } = useOV25UI();
+interface FilterContentProps {
+    optionId?: string; // Optional optionId for inline variant content
+}
+
+export const FilterContent: React.FC<FilterContentProps> = ({ optionId }) => {
+    const { availableProductFilters, setAvailableProductFilters, activeOption, allOptionsWithoutModules } = useOV25UI();
+
+    // Use provided optionId or fall back to activeOption
+    const targetOption = optionId ? 
+        allOptionsWithoutModules?.find(opt => opt.id === optionId) : 
+        activeOption;
 
     const handleFilterChange = React.useCallback((filterKey: string, optionValue: string, checked: boolean) => {
-        if (!activeOption?.name || !availableProductFilters?.[activeOption.name]?.[filterKey]) return;
+        if (!targetOption?.name || !availableProductFilters?.[targetOption.name]?.[filterKey]) return;
 
         setAvailableProductFilters(prev => ({
             ...prev,
-            [activeOption.name]: {
-                ...prev[activeOption.name],
-                [filterKey]: prev[activeOption.name][filterKey].map(opt => 
+            [targetOption.name]: {
+                ...prev[targetOption.name],
+                [filterKey]: prev[targetOption.name][filterKey].map(opt => 
                     opt.value === optionValue ? { ...opt, checked } : opt
                 )
             }
         }));
-    }, [activeOption, availableProductFilters, setAvailableProductFilters]);
+    }, [targetOption, availableProductFilters, setAvailableProductFilters]);
 
-    if (!availableProductFilters || !activeOption?.name) return (
+    if (!availableProductFilters || !targetOption?.name) return (
         <div id="ov25-filter-empty" className="ov:w-full ov:h-full ov:p-4 ov:pt-16 ov:flex ov:justify-center">
             <h3 className="ov:text-lg ov:text-[var(--ov25-secondary-text-color)]">No filters available</h3>
         </div>
     );
 
-    const activeFilters = availableProductFilters[activeOption.name];
+    const activeFilters = availableProductFilters[targetOption.name];
     const doAnyFiltersExist = activeFilters && Object.keys(activeFilters).length > 0 && Object.keys(activeFilters).some(key => activeFilters[key]?.length > 0)
     if (!doAnyFiltersExist) return (
         <div id="ov25-filter-empty" className="ov:w-full ov:h-full ov:p-4 ov:pt-16 ov:flex ov:justify-center">

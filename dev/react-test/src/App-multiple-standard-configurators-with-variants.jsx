@@ -95,7 +95,6 @@ function App() {
             <div id="price-1" className="product-price">£1,299</div>
           </div>
           <div className="variants-container">
-            <h4>Size Options</h4>
             <div id="variants-1"></div>
           </div>
         </div>
@@ -109,7 +108,6 @@ function App() {
             <div id="price-2" className="product-price">£1,599</div>
           </div>
           <div className="variants-container">
-            <h4>Size Options</h4>
             <div id="variants-2"></div>
           </div>
         </div>

@@ -5,11 +5,13 @@ interface VariantCardProps {
   onSelect: (variant: any) => void;
   index: number;
   isMobile?: boolean;
+  showImage?: boolean;
+  showDimensions?: boolean;
 }
 
 // Use React.memo to prevent unnecessary re-renders
 export const SizeVariantCard = React.memo(
-  ({ variant, onSelect, index, isMobile }: VariantCardProps) => {
+  ({ variant, onSelect, index, isMobile, showImage = false, showDimensions = true }: VariantCardProps) => {
     // Generate a stable image src that will be used for both rendering and as a key
     const imgSrc = variant.image || "/placeholder.svg";
     
@@ -24,24 +26,27 @@ export const SizeVariantCard = React.memo(
         data-selected={variant.isSelected}
         title={variant.name}
       >
-        <div className="ov:flex ov:flex-1 ov:items-center ov:justify-between">
+        <div className="ov:flex ov:flex-1 ov:flex-col ov:items-center ov:justify-between">
+          {showImage && <img src={imgSrc} alt={variant.name} className="ov:w-full ov:h-full ov:object-cover ov:rounded-lg" />}
           <div className="ov:flex ov:flex-col ov:justify-center ov:items-center">
             <h3 className="ov:font-[350] ov:text-base ov:text-center ov:leading-[2em] ov:text-[var(--ov25-secondary-text-color)]">{variant.name}</h3>
           </div>
         </div>
-        <div className="ov:flex ov:items-center ov:justify-between ov:w-full ov:-mt-4">
-          <div className="ov:flex ov:items-center ov:gap-2 ov:w-full">
-            <div className="ov:flex ov:items-center ov:flex-1">
-              <div className="ov:w-[2px] ov:h-3 ov:bg-[#E5E5E5]"></div>
-              <div className="ov:h-[2px] ov:flex-1 ov:bg-[#E5E5E5]"></div>
-            </div>
-            <span className="ov:text-[12px] ov:font-[350] ov:whitespace-nowrap ov:text-[var(--ov25-secondary-text-color)]">{variant?.data?.dimensionX}cm</span>
-            <div className="ov:flex ov:items-center ov:flex-1">
-              <div className="ov:h-[2px] ov:flex-1 ov:bg-[#E5E5E5]"></div>
-              <div className="ov:w-[2px] ov:h-3 ov:bg-[#E5E5E5]"></div>
+        {showDimensions && (
+          <div className="ov:flex ov:items-center ov:justify-between ov:w-full ov:-mt-4">
+            <div className="ov:flex ov:items-center ov:gap-2 ov:w-full">
+              <div className="ov:flex ov:items-center ov:flex-1">
+                <div className="ov:w-[2px] ov:h-3 ov:bg-[#E5E5E5]"></div>
+                <div className="ov:h-[2px] ov:flex-1 ov:bg-[#E5E5E5]"></div>
+              </div>
+              <span className="ov:text-[12px] ov:font-[350] ov:whitespace-nowrap ov:text-[var(--ov25-secondary-text-color)]">{variant?.data?.dimensionX}cm</span>
+              <div className="ov:flex ov:items-center ov:flex-1">
+                <div className="ov:h-[2px] ov:flex-1 ov:bg-[#E5E5E5]"></div>
+                <div className="ov:w-[2px] ov:h-3 ov:bg-[#E5E5E5]"></div>
+              </div>
             </div>
           </div>
-        </div>
+        )}
       </div>
     );
   },

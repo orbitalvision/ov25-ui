@@ -7,6 +7,7 @@ import { VariantContentDesktop } from './VariantContentDesktop.js';
 import { ProductVariantsWrapper } from './ProductVariantsWrapper.js';
 import { MobileCheckoutButton } from './MobileCheckoutButton.js';
 import { ModuleBottomPanel } from './ModuleBottomPanel.js';
+import { InlineVariantContent } from './InlineVariantContent.js';
 
 // Types
 export type DrawerSizes = 'closed' | 'small' | 'large';
@@ -28,6 +29,7 @@ export const VariantSelectMenu: React.FC = () => {
     hasConfigureButton,
     setShareDialogTrigger,
     isSnap2Mode,
+    useInlineVariantControls,
   } = useOV25UI();
 
 
@@ -47,12 +49,16 @@ export const VariantSelectMenu: React.FC = () => {
           return <Overlay />;
         })()}
         {!hasConfigureButton && (
-          <ProductOptionsGroup
-            allOptions={allOptionsWithoutModules}
-            handleOptionClick={handleOptionClick}
-            range={range}
-            getSelectedValue={getSelectedValue}
-          />
+          useInlineVariantControls && !isMobile ? (
+            <InlineVariantContent />
+          ) : (
+            <ProductOptionsGroup
+              allOptions={allOptionsWithoutModules}
+              handleOptionClick={handleOptionClick}
+              range={range}
+              getSelectedValue={getSelectedValue}
+            />
+          )
         )}
         {!isModalOpen && (
           isMobile ? (
@@ -74,7 +80,7 @@ export const VariantSelectMenu: React.FC = () => {
               );
             })()
           ) : (
-            <VariantContentDesktop />
+            !useInlineVariantControls && <VariantContentDesktop />
           )
         )}
         <ModuleBottomPanel />
