@@ -1015,6 +1015,7 @@ export const OV25UIProvider: React.FC<{
           case 'COMPATIBLE_MODULES':
             setCompatibleModules(data.modules || []);
             if (data.modules.length > 0) {
+              setIsModuleSelectionLoading(false);
               if (window.innerWidth < 1024) {
                 // Mobile/tablet behavior - open drawer
                 setActiveOptionId('modules');
