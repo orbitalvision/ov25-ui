@@ -14,7 +14,7 @@ const initializeConfigurator = () => {
   // Inject the configurator - Single product with inline variant controls
   injectConfigurator({
     apiKey: () => { return '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d' }, 
-    productLink: () => { return 'range/4' }, // Arlo&Jacob - Otto range
+    productLink: () => { return '1289' }, // Arlo&Jacob - Otto - Large 1 Arm Unit RHF
     galleryId: { id: '.configurator-container', replace: true },
     variantsId: '#ov25-controls',
     priceId: { id: '#price', replace: true },
