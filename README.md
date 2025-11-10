@@ -4,17 +4,33 @@ A modern React UI component library for e-commerce applications, featuring a con
 
 ## Installation
 
+### For React 19
+
 ```bash
 npm install ov25-ui
 ```
+
+### For React 18 (Shopify, WooCommerce, etc.)
+
+```bash
+npm install @ov25-ui/react18
+```
+
+**Note:** Both packages provide identical functionality. Choose the package that matches your React version to avoid dependency conflicts.
 
 ## Usage
 
 ### ES Modules (recommended)
 
+**For React 19:**
 ```javascript
-
 import { injectConfigurator } from 'ov25-ui';
+```
+
+**For React 18:**
+```javascript
+import { injectConfigurator } from '@ov25-ui/react18';
+```
 
 // Inject the configurator into your page
 injectConfigurator({
@@ -57,11 +73,31 @@ async function captureThumbnail() {
 
 The function returns a Promise that resolves with the uploaded screenshot URL from S3. Screenshots are automatically uploaded and the returned URL can be used immediately.
 
-## Updating the node pacakge
+## Publishing
 
-1. Go into package.json and increase the version number
-2. Run npm publish
+This package is published in two versions to support both React 18 and React 19:
 
+- **`ov25-ui`** - For React 19 consumers (default)
+- **`@ov25-ui/react18`** - For React 18 consumers (Shopify, WooCommerce, etc.)
+
+### Publishing both versions
+
+1. Update the version number in `package.json`
+2. Run `npm run publish` to build and publish both packages
+
+### Publishing individual versions (don't do this usually)
+
+- React 18: `npm run publish:react18`
+- React 19: `npm run publish:react19`
+
+### Building without publishing
+
+- React 18: `npm run build:react18`
+- React 19: `npm run build:react19`
+
+### Managing Dependencies
+
+When adding new dependencies to `package.json`, they will automatically be used for both React 18 and React 19 builds. The build scripts handle React version differences automatically.
 
 ## Testing locally
 

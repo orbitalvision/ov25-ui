@@ -25,14 +25,18 @@
     "preview": "vite preview",
     "dev": "npm run build && cd dev/react-test && npm run build && npm run dev",
     "build": "vite build && npm run generate-types && npm run inject-css-import && npm run convert-rem-to-em",
-    "build:lib": "vite build && npm run generate-types && npm run inject-css-import && npm run convert-rem-to-em",
     "generate-types": "tsc --emitDeclarationOnly --outDir dist",
     "inject-css-import": "node scripts/inject-css-import.js",
     "convert-rem-to-em": "node scripts/replace-rem-to-em.js",
     "copy:css": "mkdir -p dist && cp ./globals.css ./dist/index.css",
     "clean": "rimraf dist",
-    "prepare": "npm run clean && npm run build:lib",
-    "test": "echo \"No tests specified\" && exit 0"
+    "prepare": "npm run clean && npm run build",
+    "test": "echo \"No tests specified\" && exit 0",
+    "build:react18": "node scripts/build-react18.js",
+    "build:react19": "node scripts/build-react19.js",
+    "publish": "node scripts/publish-all.js",
+    "publish:react18": "npm run build:react18 && npm publish --ignore-scripts",
+    "publish:react19": "npm run build:react19 && npm publish --ignore-scripts"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.10",
@@ -54,18 +58,18 @@
     "tailwind-merge": "^3.2.0"
   },
   "peerDependencies": {
-    "react": "^18.3.1 || ^19",
-    "react-dom": "^18.3.1 || ^19"
+    "react": "^19",
+    "react-dom": "^19"
   },
   "devDependencies": {
     "@babel/core": "^7.24.0",
     "@babel/preset-env": "^7.24.0",
     "@babel/preset-react": "^7.24.0",
     "@tailwindcss/vite": "^4.1.4",
-    "@types/react": "^18.2.0",
-    "@types/react-dom": "^18.2.0",
-    "react": "19.2.0",
-    "react-dom": "19.2.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
     "rimraf": "^3.0.2",
     "tailwind": "^4.0.0",
     "tailwindcss": "^4.1.4",
