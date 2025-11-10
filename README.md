@@ -13,7 +13,7 @@ npm install ov25-ui
 ### For React 18 (Shopify, WooCommerce, etc.)
 
 ```bash
-npm install @ov25-ui/react18
+npm install ov25-ui-react18
 ```
 
 **Note:** Both packages provide identical functionality. Choose the package that matches your React version to avoid dependency conflicts.
@@ -29,7 +29,7 @@ import { injectConfigurator } from 'ov25-ui';
 
 **For React 18:**
 ```javascript
-import { injectConfigurator } from '@ov25-ui/react18';
+import { injectConfigurator } from 'ov25-ui-react18';
 ```
 
 // Inject the configurator into your page
@@ -78,7 +78,7 @@ The function returns a Promise that resolves with the uploaded screenshot URL fr
 This package is published in two versions to support both React 18 and React 19:
 
 - **`ov25-ui`** - For React 19 consumers (default)
-- **`@ov25-ui/react18`** - For React 18 consumers (Shopify, WooCommerce, etc.)
+- **`ov25-ui-react18`** - For React 18 consumers (Shopify, WooCommerce, etc.)
 
 ### Publishing both versions
 

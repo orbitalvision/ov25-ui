@@ -33,7 +33,7 @@ try {
   };
   
   // Modify for React 18
-  packageJson.name = "@ov25-ui/react18";
+  packageJson.name = "ov25-ui-react18";
   packageJson.peerDependencies = {
     "react": "^18.2.0",
     "react-dom": "^18.2.0"

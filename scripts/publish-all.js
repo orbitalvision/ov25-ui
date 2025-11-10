@@ -27,14 +27,17 @@ try {
   console.log('✓ React 19 version published\n');
 
   // Build and publish React 18 version
-  console.log('=== Building and publishing React 18 version (@ov25-ui/react18) ===');
+  console.log('=== Building and publishing React 18 version (ov25-ui-react18) ===');
   
   // Build React 18 version (this will modify package.json, build, then restore)
   execSync('node scripts/build-react18.js', { cwd: rootDir, stdio: 'inherit' });
   
   // Read package.json and modify for React 18 publishing
+  // Note: build-react18.js already modified it, so we need to read the current state
   const packageJsonForPublish = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
-  packageJsonForPublish.name = "@ov25-ui/react18";
+  
+  // Update for React 18 publishing
+  packageJsonForPublish.name = "ov25-ui-react18";
   packageJsonForPublish.version = version;
   packageJsonForPublish.peerDependencies = {
     "react": "^18.2.0",
@@ -47,7 +50,11 @@ try {
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   };
+  
   fs.writeFileSync(packageJsonPath, JSON.stringify(packageJsonForPublish, null, 2) + '\n');
+  
+  // Verify the package.json is correct before publishing
+  console.log(`Publishing package: ${packageJsonForPublish.name}@${packageJsonForPublish.version}`);
   
   execSync('npm publish --ignore-scripts', { 
     cwd: rootDir, 
