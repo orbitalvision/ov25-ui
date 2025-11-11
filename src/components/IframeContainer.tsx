@@ -36,10 +36,40 @@ export const IframeContainer = () => {
         (currentProduct as any)?.dimensionY &&
         (currentProduct as any)?.dimensionZ);
 
+    // Get background color from CSS variable and ensure it's hex
+    const hexBgColor = useMemo(() => {
+        const root = document.documentElement;
+        const cssValue = getComputedStyle(root).getPropertyValue('--ov25-background-color').trim();
+        
+        if (!cssValue) return null;
+        
+        // If already hex format, return it
+        if (cssValue.startsWith('#')) {
+            return cssValue;
+        }
+        
+        // Convert to hex using computed style
+        const tempDiv = document.createElement('div');
+        tempDiv.style.backgroundColor = cssValue;
+        document.body.appendChild(tempDiv);
+        const rgb = getComputedStyle(tempDiv).backgroundColor;
+        document.body.removeChild(tempDiv);
+        
+        const match = rgb.match(/\d+/g);
+        if (match && match.length >= 3) {
+            return `#${[match[0], match[1], match[2]].map(x => {
+                const h = parseInt(x).toString(16);
+                return h.length === 1 ? '0' + h : h;
+            }).join('')}`;
+        }
+        
+        return null;
+    }, []);
+
     // Use the utility function to get the iframe src
     const iframeSrc = useMemo(() =>
-        getIframeSrc(apiKey, productLink, configurationUuid),
-        [productLink, apiKey, configurationUuid]);
+        getIframeSrc(apiKey, productLink, configurationUuid, hexBgColor),
+        [productLink, apiKey, configurationUuid, hexBgColor]);
 
     const isStackedStyles = cn(
         "ov:relative ov:aspect-square ov:md:aspect-[3/2] ov:2xl:aspect-video ov:overflow-hidden ov:z-[3]",

@@ -225,6 +225,7 @@ export const getIframeSrc = (
   apiKey: string | null,
   productLink: string | null,
   configurationUuid?: string | null,
+  hexBgColor?: string | null,
 ): string => {
   const baseUrl = 'https://configurator.orbital.vision';
   
@@ -246,6 +247,12 @@ export const getIframeSrc = (
   // Add configuration_uuid if provided
   if (configurationUuid) {
     queryParams.set('configuration_uuid', configurationUuid);
+  }
+  
+  // Add hexBgColor if provided (remove # if present)
+  if (hexBgColor) {
+    const hexValue = hexBgColor.startsWith('#') ? hexBgColor.substring(1) : hexBgColor;
+    queryParams.set('hexBgColor', hexValue);
   }
   
   // Convert query parameters back to string
