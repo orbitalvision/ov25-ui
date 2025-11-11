@@ -39,7 +39,7 @@ export const IframeContainer = () => {
     // Get background color from CSS variable and ensure it's hex
     const hexBgColor = useMemo(() => {
         const root = document.documentElement;
-        const cssValue = getComputedStyle(root).getPropertyValue('--ov25-background-color').trim();
+        const cssValue = getComputedStyle(root).getPropertyValue('--ov25-configurator-iframe-background-color').trim();
         
         if (!cssValue) return null;
         
