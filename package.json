@@ -1,6 +1,6 @@
 {
   "name": "ov25-ui",
-  "version": "0.5.43",
+  "version": "0.5.53",
   "description": "A UI configurator for OV25 product visualization",
   "type": "module",
   "main": "dist/index.js",
@@ -16,9 +16,6 @@
   "files": [
     "dist"
   ],
-  "publishConfig": {
-    "access": "public"
-  },
   "scripts": {
     "start": "vite",
     "type-check": "tsc --noEmit",
@@ -31,12 +28,13 @@
     "copy:css": "mkdir -p dist && cp ./globals.css ./dist/index.css",
     "clean": "rimraf dist",
     "prepare": "npm run clean && npm run build",
+    "prepublishOnly": "echo 'ERROR: Do not run npm publish directly. Use npm run publish:all instead.' && exit 1",
     "test": "echo \"No tests specified\" && exit 0",
     "build:react18": "node scripts/build-react18.js",
     "build:react19": "node scripts/build-react19.js",
-    "publish": "node scripts/publish-all.js",
     "publish:react18": "npm run build:react18 && npm publish --ignore-scripts",
-    "publish:react19": "npm run build:react19 && npm publish --ignore-scripts"
+    "publish:react19": "npm run build:react19 && npm publish --ignore-scripts",
+    "publish:all": "node scripts/publish-all.js"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.10",

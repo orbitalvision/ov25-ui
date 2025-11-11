@@ -32,8 +32,7 @@ try {
   // Build React 18 version (this will modify package.json, build, then restore)
   execSync('node scripts/build-react18.js', { cwd: rootDir, stdio: 'inherit' });
   
-  // Read package.json and modify for React 18 publishing
-  // Note: build-react18.js already modified it, so we need to read the current state
+  // Read package.json (build-react18.js restored it to React 19, so we need to modify it again)
   const packageJsonForPublish = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'));
   
   // Update for React 18 publishing
@@ -51,6 +50,7 @@ try {
     "react-dom": "^18.2.0"
   };
   
+  // Write the modified package.json
   fs.writeFileSync(packageJsonPath, JSON.stringify(packageJsonForPublish, null, 2) + '\n');
   
   // Verify the package.json is correct before publishing
