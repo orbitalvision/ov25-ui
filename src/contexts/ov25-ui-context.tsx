@@ -54,12 +54,14 @@ export interface Selection {
     [key: string]: string[];
   }
   swatch?: Swatch;
+  isVisible?: boolean;
 }
 
 export interface Group {
   id: string;
   name: string;
   selections: Selection[];
+  isVisible?: boolean;
 }
 
 export interface Option {
@@ -67,6 +69,7 @@ export interface Option {
   name: string;
   groups: Group[];
   hasNonOption?: boolean;
+  isVisible?: boolean;
 }
 
 export interface ConfiguratorState {
@@ -681,7 +684,9 @@ export const OV25UIProvider: React.FC<{
 
     return {
       ...option,
-      groups: (option.groups as Group[]).filter((group) => {
+      groups: (option.groups as Group[])
+        .filter((group) => group.isVisible !== false)
+        .filter((group) => {
         const currentSearchQuery = searchQueries[optionId];
         // First check if group name matches search
         if (currentSearchQuery && searchFilter(group.name)) {
@@ -707,7 +712,7 @@ export const OV25UIProvider: React.FC<{
         return !currentSearchQuery; // Only return true if there's no search query
       }).map(group => ({
         ...group,
-        selections: searchQueries[optionId] && !searchFilter(group.name) 
+          selections: (searchQueries[optionId] && !searchFilter(group.name) 
           ? group.selections.filter(selection => {
               const matchesSearch = checkSelectionSearch(selection);
               const matchesFilters = checkSelectionFilters(selection);
@@ -715,6 +720,7 @@ export const OV25UIProvider: React.FC<{
               return matchesSearch && matchesFilters;
             })
           : group.selections.filter(selection => checkSelectionFilters(selection))
+          ).filter(selection => selection.isVisible !== false)
       }))
     } as Option;
   }, [availableProductFilters, searchQueries]);
@@ -800,6 +806,16 @@ export const OV25UIProvider: React.FC<{
     ...(isSnap2Mode && (!configuratorState?.snap2Objects || configuratorState.snap2Objects.length === 0) ? [] : [
       ...(products?.length > 1 && !isSnap2Mode ? [sizeOption] : []),
       ...(configuratorState?.options || [])
+        .filter(option => option.isVisible !== false)
+        .map(option => ({
+          ...option,
+          groups: option.groups
+            .filter(group => group.isVisible !== false)
+            .map(group => ({
+              ...group,
+              selections: group.selections.filter(selection => selection.isVisible !== false)
+            }))
+        }))
     ])
   ];
 
@@ -971,7 +987,6 @@ export const OV25UIProvider: React.FC<{
         
         // AR_GLB_DATA sends raw base64 string, don't parse it
         const data = (type === 'AR_GLB_DATA' || !payload) ? {} : JSON.parse(payload);
-
         switch (type) {
           case 'ALL_PRODUCTS':
             setProducts(data);
@@ -987,7 +1002,65 @@ export const OV25UIProvider: React.FC<{
             if (isSnap2Mode) {
               setIsModuleSelectionLoading(false);
             }
-            setConfiguratorState(data);
+            // Preserve existing visibility state when CONFIGURATOR_STATE is received
+            setConfiguratorState(prev => {
+              // Create a map of existing visibility states for quick lookup
+              const existingVisibility = new Map<string, { option?: boolean; groups: Map<string, { group?: boolean; selections: Map<string, boolean> }> }>();
+              
+              if (prev) {
+                prev.options.forEach(option => {
+                  const groupMap = new Map<string, { group?: boolean; selections: Map<string, boolean> }>();
+                  option.groups.forEach(group => {
+                    const selectionMap = new Map<string, boolean>();
+                    group.selections.forEach(selection => {
+                      if (selection.isVisible !== undefined) {
+                        selectionMap.set(selection.id, selection.isVisible);
+                      }
+                    });
+                    groupMap.set(group.id, {
+                      group: group.isVisible,
+                      selections: selectionMap
+                    });
+                  });
+                  existingVisibility.set(option.id, {
+                    option: option.isVisible,
+                    groups: groupMap
+                  });
+                });
+              }
+              
+              // Merge incoming data with existing visibility state
+              const initializedData = {
+                ...data,
+                options: (data.options || []).map((option: Option) => {
+                  const existing = existingVisibility.get(option.id);
+                  return {
+                    ...option,
+                    isVisible: option.isVisible !== undefined 
+                      ? option.isVisible 
+                      : (existing?.option !== undefined ? existing.option : true),
+                    groups: (option.groups || []).map((group: Group) => {
+                      const existingGroup = existing?.groups.get(group.id);
+                      return {
+                        ...group,
+                        isVisible: group.isVisible !== undefined
+                          ? group.isVisible
+                          : (existingGroup?.group !== undefined ? existingGroup.group : true),
+                        selections: (group.selections || []).map((selection: Selection) => ({
+                          ...selection,
+                          isVisible: selection.isVisible !== undefined
+                            ? selection.isVisible
+                            : (existingGroup?.selections.get(selection.id) !== undefined 
+                                ? existingGroup.selections.get(selection.id) 
+                                : true)
+                        }))
+                      };
+                    })
+                  };
+                })
+              };
+              return initializedData;
+            });
             break;
           case 'CURRENT_PRICE':
             setPrice(data.totalPrice);
@@ -1054,6 +1127,102 @@ export const OV25UIProvider: React.FC<{
             break;
           case 'SELECT_MODULE_RECEIVED':
             // Loading state is now managed by InitialiseMenu component (when configuratorState.snap2Objects.length > 0). this is too early to set it to false, since 3D scene is not yet loaded.
+            break;
+          case 'SHOW_OPTION':
+          case 'HIDE_OPTION':
+            setConfiguratorState(prev => {
+              if (!prev) return prev;
+              const isVisible = type === 'SHOW_OPTION';
+              const optionExists = prev.options.some(opt => opt.id === data.optionId);
+              if (!optionExists) {
+                console.warn(`Visibility message received for unknown option ID: ${data.optionId}`);
+                return prev;
+              }
+              return {
+                ...prev,
+                options: prev.options.map(option => 
+                  option.id === data.optionId 
+                    ? { ...option, isVisible }
+                    : option
+                )
+              };
+            });
+            break;
+          case 'SHOW_GROUP':
+          case 'HIDE_GROUP':
+            setConfiguratorState(prev => {
+              if (!prev) return prev;
+              const isVisible = type === 'SHOW_GROUP';
+              const option = prev.options.find(opt => opt.id === data.optionId);
+              if (!option) {
+                console.warn(`Visibility message received for unknown option ID: ${data.optionId}`);
+                return prev;
+              }
+              const groupExists = option.groups.some(grp => grp.id === data.groupId);
+              if (!groupExists) {
+                console.warn(`Visibility message received for unknown group ID: ${data.groupId} in option: ${data.optionId}`);
+                return prev;
+              }
+              return {
+                ...prev,
+                options: prev.options.map(option => 
+                  option.id === data.optionId
+                    ? {
+                        ...option,
+                        groups: option.groups.map(group =>
+                          group.id === data.groupId
+                            ? { ...group, isVisible }
+                            : group
+                        )
+                      }
+                    : option
+                )
+              };
+            });
+            break;
+          case 'SHOW_SELECTION':
+          case 'HIDE_SELECTION':
+            setConfiguratorState(prev => {
+              if (!prev) return prev;
+              const isVisible = type === 'SHOW_SELECTION';
+              const option = prev.options.find(opt => opt.id === data.optionId);
+              if (!option) {
+                console.warn(`Visibility message received for unknown option ID: ${data.optionId}`);
+                return prev;
+              }
+              const group = option.groups.find(grp => grp.id === data.groupId);
+              if (!group) {
+                console.warn(`Visibility message received for unknown group ID: ${data.groupId} in option: ${data.optionId}`);
+                return prev;
+              }
+              const selectionExists = group.selections.some(sel => sel.id === data.selectionId);
+              if (!selectionExists) {
+                console.warn(`Visibility message received for unknown selection ID: ${data.selectionId} in group: ${data.groupId}, option: ${data.optionId}`);
+                return prev;
+              }
+              return {
+                ...prev,
+                options: prev.options.map(option => 
+                  option.id === data.optionId
+                    ? {
+                        ...option,
+                        groups: option.groups.map(group =>
+                          group.id === data.groupId
+                            ? {
+                                ...group,
+                                selections: group.selections.map(selection =>
+                                  selection.id === data.selectionId
+                                    ? { ...selection, isVisible }
+                                    : selection
+                                )
+                              }
+                            : group
+                        )
+                      }
+                    : option
+                )
+              };
+            });
             break;
         }
       } catch (error) {
