@@ -31,7 +31,7 @@ const VariantsContentWithCarousel = React.memo(({ variantsToRender, VariantCard,
                 5: '20%'
               }[basis];
               return (
-                <CarouselItem key={`${variant.id}-${variant.isSelected ? 'selected' : 'unselected'}`} style={{flexBasis}} className="ov:cursor-pointer">
+                <CarouselItem key={variant.id + (variant.groupId || '') + (variant.optionId || '')} style={{flexBasis}} className="ov:cursor-pointer">
                   <VariantCard
                     variant={variant}
                     onSelect={onSelect}
@@ -46,7 +46,30 @@ const VariantsContentWithCarousel = React.memo(({ variantsToRender, VariantCard,
         </Carousel>
       </>
     )
+  }, (prevProps, nextProps) => {
+    // Only re-render if the variants array reference changes or length changes
+    if (prevProps.variantsToRender.length !== nextProps.variantsToRender.length) {
+      return false;
+    }
+    
+    // Check if variants are the same by comparing IDs and images
+    // This ensures we don't re-render if only isSelected changed
+    for (let i = 0; i < prevProps.variantsToRender.length; i++) {
+      const prev = prevProps.variantsToRender[i];
+      const next = nextProps.variantsToRender[i];
+      if (prev.id !== next.id || prev.image !== next.image || prev.name !== next.name) {
+        return false;
+      }
+    }
+    
+    // Don't re-render if only isSelected changed - DefaultVariantCard memo handles that
+    return (
+      prevProps.isMobile === nextProps.isMobile &&
+      prevProps.isGrouped === nextProps.isGrouped
+    );
   });
+
+VariantsContentWithCarousel.displayName = 'VariantsContentWithCarousel';
 
 const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onSelect, gridDivide, isFilterOpen, setIsFilterOpen, moduleTypeTabs }: {
   variants: VariantGroup[] | Variant[],
@@ -95,8 +118,8 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
   const currentOption = allOptions.find(opt => opt.id === activeOptionId);
 
   if (isGrouped && !shouldDestructureGroups) {
-    const group = (variants as VariantGroup[])[selectedGroupIndex]
-    const variantsToRender =  group ? group.variants : [] as Variant[];
+    // Render all groups but hide inactive ones with display: none
+    // This keeps components mounted, preventing image reloads when switching groups
     return (
       <div id="ov25-mobile-filter-container" className="ov:relative ov:w-full ov:h-full ov:flex ov:flex-col">
         {drawerSize !== 'small' && currentOption?.name.toLowerCase() !== 'modules' && (
@@ -112,9 +135,6 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
           </div>
         )}
         <div id="ov25-mobile-content-area" className="ov:relative ov:flex-1 ov:overflow-hidden ov:min-h-0">
-          {variantsToRender.length === 0 && (
-            <NoResults />
-          )}
           <Carousel opts={{ dragFree: true, loop: false }} className="ov:py-2">
             <CarouselContent className="ov:px-4 ov:-ml-2 ov:pr-4">
               <CarouselItem key={'placeholder'} className="ov:basis-[37%] ov:py-2">
@@ -139,28 +159,48 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
             </CarouselContent>
           </Carousel>
 
-          {drawerSize === 'small' ? (
-            <VariantsContentWithCarousel 
-              variantsToRender={variantsToRender}
-              VariantCard={VariantCard}
-              onSelect={onSelect}
-              isMobile={isMobile}
-              isGrouped={isGrouped && !shouldDestructureGroups}
-            />
-          ) : (
-            <>
-              <div id="ov25-mobile-variants-content" className="ov:h-full ov:overflow-y-auto">
-                <div style={{ display: 'grid' }} className={`ov:px-2 ov:pb-63 ${getGridColsClass(gridDivide)}`}>
-                  <VariantsContent variantsToRender={variantsToRender} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
+          {/* Render all groups, hiding inactive ones */}
+          <div className="ov:relative ov:h-full">
+            {(variants as VariantGroup[]).map((group, index) => {
+              const isActive = selectedGroupIndex === index;
+              if (group.variants.length === 0) return null;
+              
+              return (
+                <div
+                  key={group.groupName}
+                  className="ov:absolute ov:inset-0"
+                  style={{ display: isActive ? 'block' : 'none' }}
+                >
+                  {drawerSize === 'small' ? (
+                    <VariantsContentWithCarousel 
+                      variantsToRender={group.variants}
+                      VariantCard={VariantCard}
+                      onSelect={onSelect}
+                      isMobile={isMobile}
+                      isGrouped={isGrouped && !shouldDestructureGroups}
+                    />
+                  ) : (
+                    <>
+                      <div id="ov25-mobile-variants-content" className="ov:h-full ov:overflow-y-auto">
+                        <div style={{ display: 'grid' }} className={`ov:px-2 ov:pb-63 ${getGridColsClass(gridDivide)}`}>
+                          <VariantsContent variantsToRender={group.variants} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
+                        </div>
+                      </div>
+                      {shouldShowFilters && (
+                        <div data-open={isFilterOpen} id="ov25-filter-content-wrapper-mobile" className={`ov:absolute ov:inset-0 ov:flex ov:flex-wrap ov:p-2 ov:px-4 ov:overflow-y-auto ov:bg-[var(--ov25-background-color)] ov:transition-transform ov:duration-500 ov:ease-in-out ${isFilterOpen ? 'ov:translate-y-0' : 'ov:translate-y-full'}`}>
+                          <FilterContent />
+                        </div>
+                      )}
+                    </>
+                  )}
                 </div>
-              </div>
-              {shouldShowFilters && (
-                <div data-open={isFilterOpen} id="ov25-filter-content-wrapper-mobile" className={`ov:absolute ov:inset-0 ov:flex ov:flex-wrap ov:p-2 ov:px-4 ov:overflow-y-auto ov:bg-[var(--ov25-background-color)] ov:transition-transform ov:duration-500 ov:ease-in-out ${isFilterOpen ? 'ov:translate-y-0' : 'ov:translate-y-full'}`}>
-                  <FilterContent />
-                </div>
-              )}
-            </>
-          )}
+              );
+            })}
+            {/* Show NoResults if no groups have variants */}
+            {(variants as VariantGroup[]).every(group => group.variants.length === 0) && (
+              <NoResults />
+            )}
+          </div>
         </div>
       </div>
     );
