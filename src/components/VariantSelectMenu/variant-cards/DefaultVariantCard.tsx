@@ -12,6 +12,55 @@ interface VariantCardProps {
     isMobile?: boolean;
     isGrouped?: boolean;
   }
+
+// Memoized image component that only re-renders when image URL or size changes
+const VariantImage = React.memo(({ 
+  image, 
+  name, 
+  isGrouped, 
+  isMobile 
+}: { 
+  image: string | null | undefined; 
+  name: string; 
+  isGrouped: boolean; 
+  isMobile?: boolean;
+}) => {
+  if (name.toLowerCase() === "none") {
+    return (
+      <div className="ov:w-full ov:h-full ov:flex ov:items-center ov:justify-center" data-none="true">
+        <BanIcon className="ov:w-10 ov:h-10 ov:text-[var(--ov25-secondary-text-color)]" />
+      </div>
+    );
+  }
+  
+  if (image) {
+    return (
+      <img 
+        src={image || '/placeholder.svg'}
+        alt={name}
+        width={isGrouped && isMobile ? 56 : 64}
+        height={isGrouped && isMobile ? 56 : 64}
+        className={isGrouped && isMobile ? "ov:w-13 ov:h-13 ov:object-cover" : "ov:w-16 ov:h-16 ov:object-cover"}
+      />
+    );
+  }
+  
+  return (
+    <div className="ov:w-full ov:h-full ov:bg-gray-200 ov:flex ov:items-center ov:justify-center">
+      <span className="ov:text-xs ov:text-[var(--ov25-secondary-text-color)]">No img</span>
+    </div>
+  );
+}, (prevProps, nextProps) => {
+  // Only re-render if image URL, name, or size props change
+  return (
+    prevProps.image === nextProps.image &&
+    prevProps.name === nextProps.name &&
+    prevProps.isGrouped === nextProps.isGrouped &&
+    prevProps.isMobile === nextProps.isMobile
+  );
+});
+
+VariantImage.displayName = 'VariantImage';
   
 export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobile, isGrouped = false }: VariantCardProps) => {
     const { shouldShowSwatch, isSwatchSelectedFor, getSwatchClickHandler } = useSwatchActions();
@@ -35,23 +84,12 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
                 {...(variant.isSelected && { selected: true })}
                 onClick={() => onSelect(variant)}
             >
-                {variant.name.toLowerCase() === "none" ? (
-                    <div className="ov:w-full ov:h-full ov:flex ov:items-center ov:justify-center" data-none="true">
-                        <BanIcon className="ov:w-10 ov:h-10 ov:text-[var(--ov25-secondary-text-color)]" />
-                    </div>
-                ) : variant.image ? (
-                    <img 
-                        src={variant.image || '/placeholder.svg'}
-                        alt={variant.name}
-                        width={isGrouped && isMobile ? 56 : 64}
-                        height={isGrouped && isMobile ? 56 : 64}
-                        className={isGrouped && isMobile ? "ov:w-13 ov:h-13 ov:object-cover" : "ov:w-16 ov:h-16 ov:object-cover"}
-                    />
-                ) : (
-                    <div className="ov:w-full ov:h-full ov:bg-gray-200 ov:flex ov:items-center ov:justify-center">
-                        <span className="ov:text-xs ov:text-[var(--ov25-secondary-text-color)]">No img</span>
-                    </div>
-                )}
+                <VariantImage 
+                    image={variant.image}
+                    name={variant.name}
+                    isGrouped={isGrouped}
+                    isMobile={isMobile}
+                />
                 {swatchVisible && variant.swatch && (
                     <SwatchIconOverlay isSelected={isSwatchSelectedFor(variant.swatch)} onClick={handleSwatchClick} />
                 )}

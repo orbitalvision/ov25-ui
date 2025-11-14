@@ -14,7 +14,7 @@ export const VariantsContent = ({ variantsToRender, VariantCard = DefaultVariant
       <>
         {variantsToRender.map((variant, index) => {
           const cardProps: any = {
-            key: `${variant.id}-${variant.isSelected ? 'selected' : 'unselected'}`,
+            key: variant.id + (variant.groupId || '') + (variant.optionId || ''),
             variant,
             onSelect,
             index,
