@@ -1,4 +1,4 @@
-import React  from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { ProductVariants, Variant } from './ProductVariants.js';
 import { useOV25UI } from "../../contexts/ov25-ui-context.js";
 import { closeModuleSelectMenu, selectModule, CompatibleModule } from '../../utils/configurator-utils.js';
@@ -24,6 +24,10 @@ export function ProductVariantsWrapper() {
         isModuleSelectionLoading,
         setIsModuleSelectionLoading,
         configuratorState,
+        allOptionsWithoutModules,
+        applySearchAndFilters,
+        searchQueries,
+        availableProductFilters,
       } = useOV25UI();
 
     const handleCloseVariants = () => {
@@ -33,6 +37,22 @@ export function ProductVariantsWrapper() {
       }
       setIsVariantsOpen(false);
     };
+
+    // Wrapper to convert Variant to Selection format for handleSelectionSelect
+    // Memoized to ensure stable reference
+    const handleVariantSelect = useCallback((variant: Variant) => {
+      // Convert Variant to Selection-like object
+      const selection = {
+        id: variant.id,
+        name: variant.name,
+        price: variant.price,
+        blurHash: variant.blurHash || '',
+        groupId: variant.groupId,
+        thumbnail: variant.image,
+        miniThumbnails: variant.image ? { medium: variant.image } : undefined,
+      };
+      handleSelectionSelect(selection as any, variant.optionId);
+    }, [handleSelectionSelect]);
 
     // Mobile/tablet: show modules list in the drawer when modules option is active
     if (window.innerWidth < 1024 && activeOptionId === 'modules') {
@@ -85,61 +105,111 @@ export function ProductVariantsWrapper() {
       );
     }
 
-    if (activeOptionId === 'size') {
-      return (
-        <ProductVariants
-          isOpen={isVariantsOpen}
-          gridDivide={2}
-          onClose={handleCloseVariants}
-          title="Size"
-          variants={sizeOption.groups[0].selections.map(selection => ({
-            id: selection?.id,
-            name: selection?.name,
-            price: selection?.price,
-            image: selection?.thumbnail || '/placeholder.svg?height=200&width=200',
-            blurHash: (selection as any)?.blurHash,
-            data: products?.find(p => p?.id === selection?.id),
-            isSelected: selection.id === currentProductId || selectedSelections.some(
-              sel => sel.optionId === 'size' && sel.selectionId === selection.id
-            )
-          }))}
-          VariantCard={SizeVariantCard}
-          drawerSize={drawerSize}
-          onSelect={handleSelectionSelect}
-          isMobile={isMobile}
-        />
-      );
-    } else {
-      return (
-        <ProductVariants
-          isOpen={isVariantsOpen}
-          basis={isMobile ? 'ov:basis-[33%]' : undefined}
-          gridDivide={4}
-          onClose={handleCloseVariants}
-          title={`${activeOption?.name || ''}`}
-          variants={activeOption?.groups?.map(group => ({
-            groupName: group?.name,
-            variants: group?.selections?.map(selection => ({
-              id: selection?.id,
-              groupId: group?.id,
-              optionId: activeOption?.id,
-              name: selection?.name,
-              price: selection?.price,
-              image: (selection?.miniThumbnails?.medium) || '/placeholder.svg?height=200&width=200',
-              blurHash: (selection as any).blurHash,
-              isSelected: selectedSelections.some(
-                sel => sel.optionId === activeOption.id && 
-                      sel.groupId === group.id && 
-                      sel.selectionId === selection.id
-              ),
-              swatch: selection?.swatch
-            })).sort((a, b) => a.name.localeCompare(b.name))
-          })) || []}
-          VariantCard={undefined}
-          drawerSize={drawerSize}
-          onSelect={handleSelectionSelect}
-          isMobile={isMobile}
-        />
-      );
-    }
+    // Apply filters and search to all options (memoized to recalculate when filters/search change)
+    const filteredOptions = useMemo(() => {
+      return allOptionsWithoutModules.map(option => {
+        if (option.id === 'size') return option; // Size doesn't need filtering
+        return applySearchAndFilters(option, option.id);
+      });
+    }, [allOptionsWithoutModules, applySearchAndFilters, searchQueries, availableProductFilters]);
+
+    // Memoize size variants to recalculate when selectedSelections changes
+    const sizeVariants = useMemo(() => {
+      if (!sizeOption?.groups?.[0]?.selections) return [];
+      return sizeOption.groups[0].selections.map(selection => ({
+        id: selection?.id,
+        name: selection?.name,
+        price: selection?.price,
+        image: selection?.thumbnail || '/placeholder.svg?height=200&width=200',
+        blurHash: (selection as any)?.blurHash,
+        data: products?.find(p => p?.id === selection?.id),
+        isSelected: selection.id === currentProductId || selectedSelections.some(
+          sel => sel.optionId === 'size' && sel.selectionId === selection.id
+        )
+      }));
+    }, [sizeOption, currentProductId, selectedSelections, products]);
+
+    // Memoize variants for all other options to recalculate when selectedSelections changes
+    const allOptionsVariants = useMemo(() => {
+      return filteredOptions
+        .map((filteredOption, index) => {
+          const option = allOptionsWithoutModules[index];
+          if (option.id === 'size') return null; // Size is handled separately
+          
+          return {
+            optionId: option.id,
+            optionName: option.name,
+            variants: filteredOption.groups
+              ?.filter(group => 'name' in group && group.name) // Only include groups with names
+              ?.map(group => ({
+                groupName: 'name' in group ? group.name : 'Default Group',
+                variants: group?.selections?.map(selection => ({
+                  id: selection?.id,
+                  groupId: group?.id,
+                  optionId: option.id,
+                  name: selection?.name,
+                  price: selection?.price,
+                  image: (selection as any)?.miniThumbnails?.medium || '/placeholder.svg?height=200&width=200',
+                  blurHash: (selection as any).blurHash,
+                  isSelected: selectedSelections.some(
+                    sel => sel.optionId === option.id && 
+                          sel.groupId === group.id && 
+                          sel.selectionId === selection.id
+                  ),
+                  swatch: (selection as any)?.swatch
+                })).sort((a, b) => a.name.localeCompare(b.name))
+              })) || []
+          };
+        })
+        .filter((item): item is { optionId: string; optionName: string; variants: any[] } => item !== null);
+    }, [filteredOptions, allOptionsWithoutModules, selectedSelections]);
+
+    // Render all options, hiding inactive ones with display: none
+    // This keeps components mounted, preventing image reloads when switching options
+    // Wrap in a container with height constraints so only the visible one affects layout
+    return (
+      <div className="ov:md:flex ov:md:flex-col ov:max-h-full ov:h-full ov:relative">
+        {/* Size option */}
+        {sizeVariants.length > 0 && (
+          <div 
+            className="ov:absolute ov:inset-0"
+            style={{ display: activeOptionId === 'size' ? 'block' : 'none' }}
+          >
+            <ProductVariants
+              isOpen={isVariantsOpen}
+              gridDivide={2}
+              onClose={handleCloseVariants}
+              title="Size"
+              variants={sizeVariants}
+              VariantCard={SizeVariantCard}
+              drawerSize={drawerSize}
+              onSelect={handleVariantSelect}
+              isMobile={isMobile}
+            />
+          </div>
+        )}
+        
+        {/* All other options - using memoized variants */}
+        {allOptionsVariants.map(({ optionId, optionName, variants }) => (
+          <div 
+            key={optionId}
+            className="ov:absolute ov:inset-0"
+            style={{ display: activeOptionId === optionId ? 'block' : 'none' }}
+          >
+            <ProductVariants
+              isOpen={isVariantsOpen}
+              basis={isMobile ? 'ov:basis-[33%]' : undefined}
+              gridDivide={4}
+              onClose={handleCloseVariants}
+              title={optionName}
+              variants={variants}
+              VariantCard={undefined}
+              drawerSize={drawerSize}
+              onSelect={handleVariantSelect}
+              isMobile={isMobile}
+            />
+          </div>
+        ))}
+      </div>
+    )
   }
