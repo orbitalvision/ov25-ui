@@ -52,17 +52,22 @@ const VariantsContentWithCarousel = React.memo(({ variantsToRender, VariantCard,
       return false;
     }
     
-    // Check if variants are the same by comparing IDs and images
-    // This ensures we don't re-render if only isSelected changed
+    // Check if variants are the same by comparing IDs, images, and names
+    // Also check isSelected - we need to re-render when selection state changes
     for (let i = 0; i < prevProps.variantsToRender.length; i++) {
       const prev = prevProps.variantsToRender[i];
       const next = nextProps.variantsToRender[i];
-      if (prev.id !== next.id || prev.image !== next.image || prev.name !== next.name) {
-        return false;
+      if (
+        prev.id !== next.id || 
+        prev.image !== next.image || 
+        prev.name !== next.name ||
+        prev.isSelected !== next.isSelected
+      ) {
+        return false; // Re-render needed
       }
     }
     
-    // Don't re-render if only isSelected changed - DefaultVariantCard memo handles that
+    // Only skip re-render if everything is the same
     return (
       prevProps.isMobile === nextProps.isMobile &&
       prevProps.isGrouped === nextProps.isGrouped
@@ -284,4 +289,14 @@ export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSe
         moduleTypeTabs={moduleTypeTabs}
       />
     );
+}, (prevProps, nextProps) => {
+  // Individual cards are already memoized, so we only need to check if the array reference changed
+  // and if other props changed. The deep comparison is unnecessary since cards handle their own memoization.
+  return (
+    prevProps.variants === nextProps.variants &&
+    prevProps.isMobile === nextProps.isMobile &&
+    prevProps.gridDivide === nextProps.gridDivide &&
+    prevProps.VariantCard === nextProps.VariantCard &&
+    prevProps.onSelect === nextProps.onSelect
+  );
 });

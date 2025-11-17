@@ -118,6 +118,7 @@ export function ProductVariantsWrapper() {
       if (!sizeOption?.groups?.[0]?.selections) return [];
       return sizeOption.groups[0].selections.map(selection => ({
         id: selection?.id,
+        optionId: 'size', // Required for handleVariantSelect to work
         name: selection?.name,
         price: selection?.price,
         image: selection?.thumbnail || '/placeholder.svg?height=200&width=200',

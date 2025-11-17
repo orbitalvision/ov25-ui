@@ -74,7 +74,6 @@ export const ProductVariants = ({
       <VariantsHeader />
       {(isMobile || (isSnap2Mode && window.innerWidth < 1024)) ? (
         <MobileVariants
-          key={activeOptionId}
           variants={variants}
           VariantCard={VariantCard}
           isMobile={isMobile}
