@@ -237,28 +237,21 @@ export const getIframeSrc = (
     productLink = '';
   }
   
-  // Remove leading slash if present
   const cleanedLink = productLink.startsWith('/') ? productLink.substring(1) : productLink;
   
-  // Get current URL query parameters
-  const currentUrl = new URL(window.location.href);
-  const queryParams = new URLSearchParams(currentUrl.search);
+  // Create fresh query params (don't read from window.location to avoid including browser URL params)
+  const queryParams = new URLSearchParams();
   
-  // Add configuration_uuid if provided
   if (configurationUuid) {
     queryParams.set('configuration_uuid', configurationUuid);
   }
   
-  // Add hexBgColor if provided (remove # if present)
   if (hexBgColor) {
     const hexValue = hexBgColor.startsWith('#') ? hexBgColor.substring(1) : hexBgColor;
     queryParams.set('hexBgColor', hexValue);
   }
   
-  // Convert query parameters back to string
   const queryString = queryParams.toString();
-  
-  // Append query parameters to the product link if they exist
   const linkWithParams = queryString ? `${cleanedLink}?${queryString}` : cleanedLink;
 
   return `${baseUrl}/${apiKey}/${linkWithParams}`;

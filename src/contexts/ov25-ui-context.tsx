@@ -1103,7 +1103,10 @@ export const OV25UIProvider: React.FC<{
           case 'SNAP2_SAVE_RESPONSE':
             if (data.success) {
               const currentUrl = window.location.origin + window.location.pathname;
-              const shareableUrl = `${currentUrl}?configuration_uuid=${data.uuid}`;
+              const urlParams = new URLSearchParams();
+              urlParams.set('configuration_uuid', data.uuid);
+              urlParams.set('product_link', productLink || '');
+              const shareableUrl = `${currentUrl}?${urlParams.toString()}`;
               setSnap2SaveResponse({ success: true, shareUrl: shareableUrl });
             } else {
               setSnap2SaveResponse({ success: false, error: data.error || 'Failed to save configuration' });

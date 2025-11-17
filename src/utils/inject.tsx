@@ -98,6 +98,21 @@ const cleanupShadowDOMContainers = () => {
   });
 };
 
+// Get configuration_uuid from query parameters
+const getConfigurationUuidFromQueryParams = (): string | null => {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get('configuration_uuid');
+};
+
+// Get product_link from query parameters
+const getProductLinkFromQueryParams = (): string | null => {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get('product_link');
+};
+
+// Track if we've consumed the query param configuration_uuid (only use on first load)
+let hasConsumedQueryConfigUuid = false;
+
 export type StringOrFunction = string | (() => string);
 
 export type ElementConfig = {
@@ -203,12 +218,6 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
   // Resolve string or function
   const resolveStringOrFunction = (value: StringOrFunction): string => {
     return typeof value === 'function' ? value() : value;
-  };
-
-  // Get configuration_uuid from query parameters with precedence over injected value
-  const getConfigurationUuidFromQueryParams = (): string | null => {
-    const urlParams = new URLSearchParams(window.location.search);
-    return urlParams.get('configuration_uuid');
   };
 
   // Get selector string from ElementSelector
@@ -434,7 +443,6 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
       document.adoptedStyleSheets = [...document.adoptedStyleSheets, cssVariablesStylesheet];
     };
 
-
     // Function to check if gallery or its parents have z-index set
     const checkForStackedGallery = (): boolean => {
       const gallerySelector = getSelector(galleryId);
@@ -581,9 +589,22 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     const resolvedApiKey = resolveStringOrFunction(apiKey);
     const resolvedProductLink = resolveStringOrFunction(productLink);
     
-    // Check query parameters first, then fall back to injected configurationUuid
-    const queryConfigUuid = getConfigurationUuidFromQueryParams();
-    const resolvedConfigurationUuid = queryConfigUuid || (configurationUuid ? resolveStringOrFunction(configurationUuid) : undefined);
+    // Use query param configuration_uuid only on first load, not on switches
+    let resolvedConfigurationUuid: string | undefined;
+    if (!hasConsumedQueryConfigUuid) {
+      const queryConfigUuid = getConfigurationUuidFromQueryParams();
+      const queryProductLink = getProductLinkFromQueryParams();
+      
+      if (queryConfigUuid && (!queryProductLink || queryProductLink === resolvedProductLink)) {
+        resolvedConfigurationUuid = queryConfigUuid;
+        hasConsumedQueryConfigUuid = true;
+      } else if (configurationUuid) {
+        resolvedConfigurationUuid = resolveStringOrFunction(configurationUuid);
+      }
+    } else {
+      // Query param already consumed - only use injected configurationUuid
+      resolvedConfigurationUuid = configurationUuid ? resolveStringOrFunction(configurationUuid) : undefined;
+    }
     
     root.render(
        <OV25UIProvider 
@@ -616,19 +637,57 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
      );
   };
 
+  // Check if we should auto-open (before ensureLoaded consumes the query param)
+  let shouldAutoOpen = configureButtonId && !hasConsumedQueryConfigUuid;
+  let queryConfigUuid: string | null = null;
+  
+  if (shouldAutoOpen) {
+    queryConfigUuid = getConfigurationUuidFromQueryParams();
+    const queryProductLink = getProductLinkFromQueryParams();
+    const resolvedProductLinkForAutoOpen = resolveStringOrFunction(productLink);
+    
+    // Only auto-open if query param matches this configurator
+    if (!queryConfigUuid || (queryProductLink && queryProductLink !== resolvedProductLinkForAutoOpen)) {
+      shouldAutoOpen = false;
+    }
+  }
+  
   // Run now if DOM ready, otherwise wait
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', ensureLoaded, { once: true });
   } else {
     ensureLoaded();
   }
+  
+  // Auto-open Snap2 configurator if configuration_uuid is in query parameters
+  if (shouldAutoOpen && queryConfigUuid) {
+    const attemptAutoOpen = (attempts = 0) => {
+      const handlerRef = (window as any).ov25ConfigureHandlerRef;
+      if (handlerRef?.current) {
+        setTimeout(() => {
+          handlerRef.current();
+        }, 200);
+      } else if (attempts < 20) {
+        setTimeout(() => attemptAutoOpen(attempts + 1), 100);
+      }
+    };
+    attemptAutoOpen();
+  }
 }
 
 // Module-level variables for multiple configurators
 let currentConfigs: InjectConfiguratorOptions[] = [];
 let activeConfiguratorIndex: number = 0;
+let hasInitializedMultipleConfigurators = false;
+const clickHandlers = new Map<string, (event: Event) => void>();
+let isReinitializing = false;
 
 export function injectMultipleConfigurators(configs: InjectConfiguratorOptions[]) {
+  if (hasInitializedMultipleConfigurators) {
+    console.warn('[OV25-UI] injectMultipleConfigurators has already been called. Skipping duplicate initialization.');
+    return;
+  }
+  hasInitializedMultipleConfigurators = true;
   // Detect configurator type based on productLink
   const snap2Configs = configs.filter(config => {
     const productLink = typeof config.productLink === 'function' ? config.productLink() : config.productLink;
@@ -679,8 +738,49 @@ export function injectMultipleConfigurators(configs: InjectConfiguratorOptions[]
   
   // Handle Snap2 configurators (exclusive, lazy initialization)
   if (snap2Configs.length > 0) {
-    // Initialize the first Snap2 configurator immediately
-    injectConfigurator(snap2Configs[0]);
+    // Determine which configurator to initialize based on query parameters
+    const queryConfigUuid = getConfigurationUuidFromQueryParams();
+    const queryProductLink = getProductLinkFromQueryParams();
+    
+    // Find the matching configurator if product_link is specified
+    let configuratorToInitialize = snap2Configs[0];
+    let configuratorIndexToInitialize = 0;
+    
+    if (queryProductLink) {
+      const matchingIndex = snap2Configs.findIndex(config => {
+        const productLink = typeof config.productLink === 'function' 
+          ? config.productLink() 
+          : config.productLink;
+        return productLink === queryProductLink;
+      });
+      
+      if (matchingIndex !== -1) {
+        configuratorToInitialize = snap2Configs[matchingIndex];
+        configuratorIndexToInitialize = matchingIndex;
+      }
+    }
+    
+    // Initialize the selected Snap2 configurator
+    injectConfigurator(configuratorToInitialize);
+    activeConfiguratorIndex = configuratorIndexToInitialize;
+    
+    // Auto-open configurator if configuration_uuid is in query parameters
+    if (queryConfigUuid) {
+      // Wait for the handler to be set up, then auto-open
+      const attemptAutoOpen = (attempts = 0) => {
+        const handlerRef = (window as any).ov25ConfigureHandlerRef;
+        if (handlerRef?.current) {
+          // Handler is ready, open the configurator
+          setTimeout(() => {
+            handlerRef.current();
+          }, 200);
+        } else if (attempts < 20) {
+          // Handler not ready yet, try again after a short delay
+          setTimeout(() => attemptAutoOpen(attempts + 1), 100);
+        }
+      };
+      attemptAutoOpen();
+    }
     
     // Set up click listeners for ALL Snap2 configurators (including the first one)
     for (let i = 0; i < snap2Configs.length; i++) {
@@ -689,46 +789,51 @@ export function injectMultipleConfigurators(configs: InjectConfiguratorOptions[]
         ? config.configureButtonId 
         : config.configureButtonId!.id;
       
-      // Wait for element to exist, then attach listener
       waitForElement(selector, 5000)
         .then((element: Element) => {
-          const handleClick = async () => {
-            // Only do full cleanup and re-initialization if switching to a different configurator
-            if (activeConfiguratorIndex !== i) {
-              // Cleanup current configurator
-              if ((window as any).ov25CleanupConfigurator) {
-                (window as any).ov25CleanupConfigurator();
-              }
-              
-              // Wait for cleanup
-              await new Promise(resolve => setTimeout(resolve, 100));
-              
-              // Unmount React root
+          const existingHandler = clickHandlers.get(selector);
+          if (existingHandler) {
+            element.removeEventListener('click', existingHandler);
+          }
+          
+          const handleClick = async (event: Event) => {
+            if (isReinitializing) {
+              return;
+            }
+            
+            isReinitializing = true;
+            
+            try {
+              // Unmount React root to clean up state (don't call cleanup function to avoid modal flicker)
               const container = document.getElementById('ov25-provider-root');
               if (container && (container as any)._reactRoot) {
                 (container as any)._reactRoot.unmount();
                 delete (container as any)._reactRoot;
               }
               
-              // Clean up shadow DOM containers
               cleanupShadowDOMContainers();
-              
-              // Initialize new configurator
               injectConfigurator(config);
-              
-              // Update active index
               activeConfiguratorIndex = i;
+              
+              // Open configurator after React renders
+              requestAnimationFrame(() => {
+                setTimeout(() => {
+                  const handlerRef = (window as any).ov25ConfigureHandlerRef;
+                  if (handlerRef?.current) {
+                    handlerRef.current();
+                  }
+                  setTimeout(() => {
+                    isReinitializing = false;
+                  }, 500);
+                }, 100);
+              });
+            } catch (error) {
+              console.error('[OV25-UI] Error during reinitialization:', error);
+              isReinitializing = false;
             }
-            
-            // Auto-open the configurator (whether it's the same one or a different one)
-            setTimeout(() => {
-              const handlerRef = (window as any).ov25ConfigureHandlerRef;
-              if (handlerRef?.current) {
-                handlerRef.current();
-              }
-            }, 200);
           };
           
+          clickHandlers.set(selector, handleClick);
           element.addEventListener('click', handleClick);
         })
         .catch((err: Error) => {
