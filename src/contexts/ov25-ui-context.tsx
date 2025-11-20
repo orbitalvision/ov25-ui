@@ -1055,7 +1055,7 @@ export const OV25UIProvider: React.FC<{
                                 : true)
                         }))
                       };
-                    })
+                    }).filter(group => group.selections.length > 0)
                   };
                 })
               };
