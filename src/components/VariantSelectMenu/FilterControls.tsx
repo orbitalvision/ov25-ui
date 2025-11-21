@@ -18,7 +18,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
     isGrouped,
     optionId,
 }) => {
-    const { searchQueries, setSearchQuery, activeOptionId, availableProductFilters, activeOption, isMobile, setAvailableProductFilters, setIsVariantsOpen, setIsSwatchBookOpen, swatchRulesData, selectedSwatches, allOptionsWithoutModules } = useOV25UI();
+    const { searchQueries, setSearchQuery, activeOptionId, availableProductFilters, activeOption, isMobile, setAvailableProductFilters, setIsVariantsOpen, setIsSwatchBookOpen, swatchRulesData, selectedSwatches, allOptionsWithoutModules, hasSelectionsWithSwatches } = useOV25UI();
     const [localSearchQuery, setLocalSearchQuery] = React.useState('');
     const debouncedSearchQuery = useDebounce(localSearchQuery, 500);
     const previousOptionIdRef = React.useRef<string | null>(null);
@@ -145,7 +145,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
                     <input value={localSearchQuery} onChange={handleSearchInputChange} type="text" placeholder="Search" className="ov:w-full ov:pl-2 ov:ml-2 ov:text-[var(--ov25-secondary-text-color)] ov:bg-transparent ov:outline-none" />
                     {localSearchQuery && (<X size={24} className="ov:min-w-[24px] ov:pr-2 ov:cursor-pointer" onClick={() => setLocalSearchQuery('')} />)}
                 </div>
-                {swatchRulesData.enabled && (
+                {swatchRulesData.enabled && hasSelectionsWithSwatches && (
                 <button 
                     id="ov25-filter-controls-swatches"
                     className="ov:flex ov:items-center ov:p-2 ov:rounded-full ov:border ov:border-transparent ov:whitespace-nowrap ov:cursor-pointer ov:bg-black/30"

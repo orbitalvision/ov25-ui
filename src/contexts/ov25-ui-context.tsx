@@ -205,6 +205,7 @@ interface OV25UIContextType {
   selectedSwatches: Swatch[];
   swatchRulesData: SwatchRulesData;
   isSwatchBookOpen: boolean;
+  hasSelectionsWithSwatches: boolean;
   availableCameras: Array<{
     id: string;
     displayName: string;
@@ -831,6 +832,16 @@ export const OV25UIProvider: React.FC<{
     });
   });
 
+  // Check if any selection in the current product has a swatch
+  const hasSelectionsWithSwatches = useMemo(() => {
+    if (!configuratorState?.options) return false;
+    return configuratorState.options.some(option =>
+      option.groups.some(group =>
+        group.selections.some(selection => selection.swatch !== undefined)
+      )
+    );
+  }, [configuratorState]);
+
   // Helper function to get the selected value for an option
   const getSelectedValue = (option: Option | SizeOption) => {
     if (option.id === 'size') {
@@ -1312,6 +1323,7 @@ export const OV25UIProvider: React.FC<{
     selectedSwatches,
     swatchRulesData,
     isSwatchBookOpen,
+    hasSelectionsWithSwatches,
     availableCameras,
     availableLights,
     isSnap2Mode,

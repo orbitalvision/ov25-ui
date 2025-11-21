@@ -2,13 +2,13 @@ import React from 'react';
 import { useOV25UI } from '../contexts/ov25-ui-context.js';
 
 export const SwatchesContainer: React.FC = () => {
-  const { selectedSwatches, swatchRulesData, setIsSwatchBookOpen } = useOV25UI();
+  const { selectedSwatches, swatchRulesData, setIsSwatchBookOpen, hasSelectionsWithSwatches } = useOV25UI();
 
   const toggleSwatchBook = () => {
     setIsSwatchBookOpen(true);
   };
 
-  if (!swatchRulesData.enabled) {
+  if (!swatchRulesData.enabled || !hasSelectionsWithSwatches) {
     return null;
   }
 
