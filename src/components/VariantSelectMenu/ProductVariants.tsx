@@ -13,6 +13,7 @@ export interface Variant {
   groupId?: string
   optionId?: string
   name: string
+  sku?: string
   price: number
   image: string
   blurHash: string

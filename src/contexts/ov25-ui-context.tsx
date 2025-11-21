@@ -45,6 +45,7 @@ export interface Product {
 export interface Selection {
   id: string;
   name: string;
+  sku?: string;
   thumbnail?: string;
   miniThumbnails?: {small: string, medium: string, large: string}
   price: number;
@@ -114,6 +115,7 @@ export interface Swatch {
   option: string;
   manufacturerId: string;
   description: string;
+  sku: string;
   thumbnail: {
     blurHash: string;
     thumbnail: string;

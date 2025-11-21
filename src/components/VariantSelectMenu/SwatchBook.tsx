@@ -56,7 +56,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
             <DialogTitle>Swatch Book</DialogTitle>
           </div>         
           {/* Featured/zoomed swatch section */}
-          {zoomedSwatch && (
+          {zoomedSwatch && zoomedSwatch.thumbnail && zoomedSwatch.thumbnail.miniThumbnails && (
             <div id="ov25-swatchbook-featured" className="ov:flex-shrink-0">
               <div className="ov:flex ov:flex-col ov:items-center ov:gap-4">
                 <div className="ov:relative ov:w-[200px] ov:h-[200px] ov:md:w-[250px] ov:md:h-[250px] group">
@@ -70,6 +70,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
                   <div className="ov:flex ov:items-center ov:justify-center ov:gap-2 ov:mb-2">
                     <h3 className="ov:text-base ov:md:text-lg ov:font-medium ov:text-black">{zoomedSwatch.name}</h3>
                     <p className="ov:text-gray-600 ov:text-xs ov:italic">- {zoomedSwatch.option}</p>
+                    <p className="ov:text-gray-600 ov:text-xs ov:italic">- {zoomedSwatch.sku}</p>
                   </div>
                   <p className="ov:text-black ov:text-sm ov:font-normal ov:leading-6 ov:line-clamp-5 ov:md:line-clamp-3 ov:md:min-h-18">{zoomedSwatch.description}</p>
                 </div>
@@ -93,7 +94,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
               {selectedSwatches.map((swatch) => (
                 <div key={`${swatch.manufacturerId}-${swatch.name}-${swatch.option}`} className='ov25-swatch-item ov:flex ov:flex-col ov:gap-2 ov:items-center ov:text-center ov:w-full ov:min-h-[100px] ov:md:w-auto ov:md:h-auto'>
                   <div className='ov25-swatch-image-container ov:relative ov:w-[100px] ov:h-[100px] ov:md:w-[120px] ov:md:h-[120px] group'>
-                    <img src={swatch.thumbnail.miniThumbnails.medium} alt={swatch.name} className='ov25-swatch-image ov:w-full ov:h-full ov:object-cover ov:rounded-lg'/>
+                    <img src={swatch.thumbnail && swatch.thumbnail.miniThumbnails ? swatch.thumbnail.miniThumbnails.medium : '/placeholder.svg?height=200&width=200'} alt={swatch.name} className='ov25-swatch-image ov:w-full ov:h-full ov:object-cover ov:rounded-lg'/>
                     <button
                       onClick={() => toggleSwatch(swatch)}
                       className='ov25-swatch-remove-button ov:flex ov:items-center ov:justify-center ov:absolute ov:top-1 ov:right-1 ov:w-6 ov:h-6 ov:bg-white ov:rounded-full ov:cursor-pointer ov:shadow-md ov:transition-colors ov:z-[10] ov:opacity-40 ov:hover:opacity-80 ov:hover:bg-gray-100'
