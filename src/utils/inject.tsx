@@ -64,31 +64,31 @@ function waitForElement(selector: string, timeout = 5000) {
 const cleanupShadowDOMContainers = () => {
   const containersToRemove = [
     'ov25-mobile-drawer-container',
-    'ov25-configurator-view-controls-container', 
+    'ov25-configurator-view-controls-container',
     'ov25-popover-portal-container',
     'ov25-toaster-container',
     'ov25-swatchbook-portal-container',
     'ov25-provider-root'
   ];
-  
+
   // Also remove any unique provider roots and shadow DOM containers
   const uniqueProviderRoots = document.querySelectorAll('[id^="ov25-provider-root-"]');
   uniqueProviderRoots.forEach(element => {
     element.remove();
   });
-  
+
   const uniqueShadowContainers = document.querySelectorAll('[id^="ov25-configurator-view-controls-container-"]');
   uniqueShadowContainers.forEach(element => {
     element.remove();
   });
-  
+
   containersToRemove.forEach(id => {
     const element = document.getElementById(id);
     if (element) {
       element.remove();
     }
   });
-  
+
   // Clean up any portaled elements that replaced existing elements
   const replacedElements = document.querySelectorAll('[class*="ov25-configurator-"]');
   replacedElements.forEach(element => {
@@ -261,7 +261,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     mobileDrawerContainer.style.pointerEvents = 'none';
     mobileDrawerContainer.style.zIndex = '99999999999991';
     document.body.appendChild(mobileDrawerContainer);
-    
+
     // Create Shadow DOM root for mobile drawer
     const mobileDrawerShadowRoot = mobileDrawerContainer.attachShadow({ mode: 'open' });
     const mobileDrawerStylesheets = [sharedStylesheet];
@@ -270,7 +270,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
       mobileDrawerStylesheets.push(cssVariablesStylesheet);
     }
     mobileDrawerShadowRoot.adoptedStyleSheets = mobileDrawerStylesheets;
-    
+
     // Create configurator view controls Shadow DOM container
     const configuratorViewControlsContainer = document.createElement('div');
     configuratorViewControlsContainer.id = uniqueId ? `ov25-configurator-view-controls-container-${uniqueId}` : 'ov25-configurator-view-controls-container';
@@ -282,7 +282,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     configuratorViewControlsContainer.style.pointerEvents = 'none';
     configuratorViewControlsContainer.style.zIndex = '101';
     document.body.appendChild(configuratorViewControlsContainer);
-    
+
     // Create Shadow DOM root for configurator view controls
     const configuratorViewControlsShadowRoot = configuratorViewControlsContainer.attachShadow({ mode: 'open' });
     const configuratorViewControlsStylesheets = [sharedStylesheet];
@@ -291,7 +291,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
       configuratorViewControlsStylesheets.push(cssVariablesStylesheet);
     }
     configuratorViewControlsShadowRoot.adoptedStyleSheets = configuratorViewControlsStylesheets;
-    
+
     // Create popover portal Shadow DOM container
     const popoverPortalContainer = document.createElement('div');
     popoverPortalContainer.id = 'ov25-popover-portal-container';
@@ -303,7 +303,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     popoverPortalContainer.style.pointerEvents = 'none';
     popoverPortalContainer.style.zIndex = '99999999999992';
     document.body.appendChild(popoverPortalContainer);
-    
+
     // Create Shadow DOM root for popover portal
     const popoverPortalShadowRoot = popoverPortalContainer.attachShadow({ mode: 'open' });
     const popoverPortalStylesheets = [sharedStylesheet];
@@ -324,7 +324,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     toasterContainer.style.pointerEvents = 'none';
     toasterContainer.style.zIndex = '999999999999999';
     document.body.appendChild(toasterContainer);
-    
+
     // Create Shadow DOM root for toaster portal
     const toasterPortalShadowRoot = toasterContainer.attachShadow({ mode: 'open' });
     const toasterPortalStylesheets = [sharedStylesheet, sonnerStylesheet];
@@ -333,7 +333,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
       toasterPortalStylesheets.push(cssVariablesStylesheet);
     }
     toasterPortalShadowRoot.adoptedStyleSheets = toasterPortalStylesheets;
-    
+
     // Create swatchbook portal Shadow DOM container
     const swatchbookPortalContainer = document.createElement('div');
     swatchbookPortalContainer.id = 'ov25-swatchbook-portal-container';
@@ -345,7 +345,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     swatchbookPortalContainer.style.pointerEvents = 'none';
     swatchbookPortalContainer.style.zIndex = '99999999999993';
     document.body.appendChild(swatchbookPortalContainer);
-    
+
     // Create Shadow DOM root for swatchbook portal
     const swatchbookPortalShadowRoot = swatchbookPortalContainer.attachShadow({ mode: 'open' });
     const swatchbookPortalStylesheets = [sharedStylesheet];
@@ -354,7 +354,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
       swatchbookPortalStylesheets.push(cssVariablesStylesheet);
     }
     swatchbookPortalShadowRoot.adoptedStyleSheets = swatchbookPortalStylesheets;
-    
+
     // Make sure the portal targets are in the DOM *now*
     const portals: ReactNode[] = [];
 
@@ -391,14 +391,14 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
           const emptyDiv = document.createElement('div');
           // Preserve original classes and add our class
           emptyDiv.className = `${target.className} ov25-configurator-${componentName}`.trim();
-          
+
           // Create Shadow DOM root
           if (!emptyDiv.shadowRoot) {
             const shadowRoot = emptyDiv.attachShadow({ mode: 'open' });
             // Inject CSS into the new Shadow DOM
             injectCSSIntoShadowDOM(shadowRoot);
           }
-          
+
           // Replace the target with the empty div
           target.parentNode.replaceChild(emptyDiv, target);
           // Create portal into the Shadow DOM root
@@ -429,7 +429,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     const processElement = (elementSelector: ElementSelector | undefined, component: ReactNode, componentName: string) => {
       const selector = getSelector(elementSelector);
       const useShadowDOM = shouldCreateShadowDOM(componentName);
-      
+
       if (shouldReplace(elementSelector)) {
         portalReplaceElement(selector, component, componentName, useShadowDOM);
       } else {
@@ -447,25 +447,25 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     const checkForStackedGallery = (): boolean => {
       const gallerySelector = getSelector(galleryId);
       if (!gallerySelector) return false;
-      
+
       const galleryElement = document.querySelector(gallerySelector);
       if (!galleryElement) return false;
-      
+
       // Traverse up the DOM tree checking for z-index
       let currentElement: Element | null = galleryElement;
-      
+
       while (currentElement && currentElement !== document.documentElement) {
         const computedStyle = window.getComputedStyle(currentElement);
         const zIndex = computedStyle.zIndex;
-        
+
         // Check if z-index is explicitly set (not 'auto')
         if (zIndex !== 'auto' && zIndex !== '') {
           return true;
         }
-        
+
         currentElement = currentElement.parentElement;
       }
-      
+
       return false;
     };
 
@@ -474,15 +474,15 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     // Process each component
     // Only show gallery if no configure button (Snap2 mode)
     if (!configureButtonId) {
-      processElement(galleryId, <ProductGallery  />, 'gallery');
+      processElement(galleryId, <ProductGallery />, 'gallery');
     }
     processElement(variantsId, <VariantSelectMenu />, 'variants');
-    
+
     // Always show price, name, and swatches
     processElement(priceId, <Price />, 'price');
     processElement(nameId, <Name />, 'name');
     processElement(swatchesId, <SwatchesContainer />, 'swatches');
-    
+
     // Show configure button if provided
     if (configureButtonId) {
       if (shouldReplace(configureButtonId)) {
@@ -510,13 +510,10 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
         portals.push(<Snap2ConfigureUI key="snap2-configure-ui" />);
       }
     }
-    
-    // Add toaster to portals
-    portals.push(createPortal(<Toaster position="top-center" richColors style={{ zIndex: 999999999999999 }} />, toasterPortalShadowRoot));
-    
+
     // Add swatchbook to portals
     portals.push(createPortal(<SwatchBook isMobile={false} />, swatchbookPortalShadowRoot));
-    
+
     // Special handling for carousel - only use polling if carouselId is true
     if (carouselId === true) {
       // Start polling for true-carousel element
@@ -536,10 +533,10 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     // Special handling for configurator view controls - wait for the specific container
     // Only render if not in configure button mode (ConfigureButton handles it in that case)
     if (!configureButtonId) {
-      const controlsContainerId = uniqueId 
-        ? `#true-configurator-view-controls-container-${uniqueId}` 
+      const controlsContainerId = uniqueId
+        ? `#true-configurator-view-controls-container-${uniqueId}`
         : '#true-configurator-view-controls-container';
-      
+
       waitForElement(controlsContainerId, 10000)
         .then(element => {
           // Create Shadow DOM on the configurator view controls container
@@ -558,6 +555,36 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
         .catch(err => {
           console.warn(`[OV25-UI] ${err.message}`);
         });
+    }
+
+    // Special handling for toaster - wait for the container inside the fullscreen element
+    // Only render if not in configure button mode (ConfigureButton handles it in that case)
+    if (!configureButtonId) {
+      const toasterContainerId = uniqueId
+        ? `#true-toaster-container-${uniqueId}`
+        : '#true-toaster-container';
+
+      waitForElement(toasterContainerId, 10000)
+        .then(element => {
+          // Create Shadow DOM on the toaster container
+          if (!element.shadowRoot) {
+            const shadowRoot = element.attachShadow({ mode: 'open' });
+            const toasterStylesheets = [sharedStylesheet, sonnerStylesheet];
+            if (cssString) {
+              const cssVariablesStylesheet = createCSSVariablesStylesheet(cssString);
+              toasterStylesheets.push(cssVariablesStylesheet);
+            }
+            shadowRoot.adoptedStyleSheets = toasterStylesheets;
+          }
+          // Portal Toaster into the Shadow DOM
+          portals.push(createPortal(<Toaster position="top-center" richColors style={{ zIndex: 999 }} />, element.shadowRoot!));
+        })
+        .catch(err => {
+          console.warn(`[OV25-UI] ${err.message}`);
+        });
+    } else {
+      // For Snap2 mode (configure button), use body-level toaster container
+      portals.push(createPortal(<Toaster position="top-center" richColors style={{ zIndex: 999999999999999 }} />, toasterPortalShadowRoot));
     }
 
     if (cssString) {
@@ -588,13 +615,13 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     // Resolve apiKey and productLink when rendering
     const resolvedApiKey = resolveStringOrFunction(apiKey);
     const resolvedProductLink = resolveStringOrFunction(productLink);
-    
+
     // Use query param configuration_uuid only on first load, not on switches
     let resolvedConfigurationUuid: string | undefined;
     if (!hasConsumedQueryConfigUuid) {
       const queryConfigUuid = getConfigurationUuidFromQueryParams();
       const queryProductLink = getProductLinkFromQueryParams();
-      
+
       if (queryConfigUuid && (!queryProductLink || queryProductLink === resolvedProductLink)) {
         resolvedConfigurationUuid = queryConfigUuid;
         hasConsumedQueryConfigUuid = true;
@@ -605,60 +632,60 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
       // Query param already consumed - only use injected configurationUuid
       resolvedConfigurationUuid = configurationUuid ? resolveStringOrFunction(configurationUuid) : undefined;
     }
-    
+
     root.render(
-       <OV25UIProvider 
-         apiKey={resolvedApiKey} 
-         productLink={resolvedProductLink} 
-         configurationUuid={resolvedConfigurationUuid || ''}
-         buyNowFunction={buyNowFunction}
-         addSwatchesToCartFunction={addSwatchesToCartFunction}
-         addToBasketFunction={addToBasketFunction} 
-         images={images} 
-         logoURL={logoURL}
-         mobileLogoURL={mobileLogoURL}
-         deferThreeD={deferThreeD}
-         showOptional={showOptional}
-         hideAr={hideAr}
-         hidePricing={hidePricing}
-         isProductGalleryStacked={isProductGalleryStacked}
-         hasConfigureButton={!!configureButtonId}
-         uniqueId={uniqueId}
-         useInlineVariantControls={useInlineVariantControls}
-         shadowDOMs={{
-           mobileDrawer: mobileDrawerShadowRoot,
-           configuratorViewControls: configuratorViewControlsShadowRoot,
-           popoverPortal: popoverPortalShadowRoot,
-           swatchbookPortal: swatchbookPortalShadowRoot
-         }}
-       >
-         {portals}
-       </OV25UIProvider>
-     );
+      <OV25UIProvider
+        apiKey={resolvedApiKey}
+        productLink={resolvedProductLink}
+        configurationUuid={resolvedConfigurationUuid || ''}
+        buyNowFunction={buyNowFunction}
+        addSwatchesToCartFunction={addSwatchesToCartFunction}
+        addToBasketFunction={addToBasketFunction}
+        images={images}
+        logoURL={logoURL}
+        mobileLogoURL={mobileLogoURL}
+        deferThreeD={deferThreeD}
+        showOptional={showOptional}
+        hideAr={hideAr}
+        hidePricing={hidePricing}
+        isProductGalleryStacked={isProductGalleryStacked}
+        hasConfigureButton={!!configureButtonId}
+        uniqueId={uniqueId}
+        useInlineVariantControls={useInlineVariantControls}
+        shadowDOMs={{
+          mobileDrawer: mobileDrawerShadowRoot,
+          configuratorViewControls: configuratorViewControlsShadowRoot,
+          popoverPortal: popoverPortalShadowRoot,
+          swatchbookPortal: swatchbookPortalShadowRoot
+        }}
+      >
+        {portals}
+      </OV25UIProvider>
+    );
   };
 
   // Check if we should auto-open (before ensureLoaded consumes the query param)
   let shouldAutoOpen = configureButtonId && !hasConsumedQueryConfigUuid;
   let queryConfigUuid: string | null = null;
-  
+
   if (shouldAutoOpen) {
     queryConfigUuid = getConfigurationUuidFromQueryParams();
     const queryProductLink = getProductLinkFromQueryParams();
     const resolvedProductLinkForAutoOpen = resolveStringOrFunction(productLink);
-    
+
     // Only auto-open if query param matches this configurator
     if (!queryConfigUuid || (queryProductLink && queryProductLink !== resolvedProductLinkForAutoOpen)) {
       shouldAutoOpen = false;
     }
   }
-  
+
   // Run now if DOM ready, otherwise wait
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', ensureLoaded, { once: true });
   } else {
     ensureLoaded();
   }
-  
+
   // Auto-open Snap2 configurator if configuration_uuid is in query parameters
   if (shouldAutoOpen && queryConfigUuid) {
     const attemptAutoOpen = (attempts = 0) => {
@@ -693,77 +720,77 @@ export function injectMultipleConfigurators(configs: InjectConfiguratorOptions[]
     const productLink = typeof config.productLink === 'function' ? config.productLink() : config.productLink;
     return productLink?.startsWith('snap2/');
   });
-  
+
   const standardConfigs = configs.filter(config => {
     const productLink = typeof config.productLink === 'function' ? config.productLink() : config.productLink;
     return !productLink?.startsWith('snap2/');
   });
-  
+
   // Validate Snap2 configs have configureButtonId
   const snap2ConfigsWithoutButton = snap2Configs.filter(config => !config.configureButtonId);
   if (snap2ConfigsWithoutButton.length > 0) {
     throw new Error('All Snap2 configs must have a configureButtonId defined');
   }
-  
+
   // Validate standard configs have galleryId
   const standardConfigsWithoutGallery = standardConfigs.filter(config => !config.galleryId);
   if (standardConfigsWithoutGallery.length > 0) {
     throw new Error('All standard configs must have a galleryId defined');
   }
-  
+
   // Check for ID conflicts in standard configs
   const galleryIds = standardConfigs.map(config => {
     const galleryId = typeof config.galleryId === 'string' ? config.galleryId : config.galleryId?.id;
     return galleryId;
   }).filter(Boolean);
-  
+
   const uniqueGalleryIds = new Set(galleryIds);
   if (galleryIds.length !== uniqueGalleryIds.size) {
     throw new Error(`Can't place multiple configurators in the same place. All galleryId values must be unique.`);
   }
-  
+
   const variantsIds = standardConfigs.map(config => {
     const variantsId = typeof config.variantsId === 'string' ? config.variantsId : config.variantsId?.id;
     return variantsId;
   }).filter(Boolean);
-  
+
   const uniqueVariantsIds = new Set(variantsIds);
   if (variantsIds.length !== uniqueVariantsIds.size) {
     throw new Error(`Can't place multiple configurator controls in the same place.All variantsId values must be unique for standard configurators`);
   }
-  
+
   // Store configs
   currentConfigs = configs;
   activeConfiguratorIndex = 0;
-  
+
   // Handle Snap2 configurators (exclusive, lazy initialization)
   if (snap2Configs.length > 0) {
     // Determine which configurator to initialize based on query parameters
     const queryConfigUuid = getConfigurationUuidFromQueryParams();
     const queryProductLink = getProductLinkFromQueryParams();
-    
+
     // Find the matching configurator if product_link is specified
     let configuratorToInitialize = snap2Configs[0];
     let configuratorIndexToInitialize = 0;
-    
+
     if (queryProductLink) {
       const matchingIndex = snap2Configs.findIndex(config => {
-        const productLink = typeof config.productLink === 'function' 
-          ? config.productLink() 
+        const productLink = typeof config.productLink === 'function'
+          ? config.productLink()
           : config.productLink;
         return productLink === queryProductLink;
       });
-      
+
       if (matchingIndex !== -1) {
         configuratorToInitialize = snap2Configs[matchingIndex];
         configuratorIndexToInitialize = matchingIndex;
       }
     }
-    
+
     // Initialize the selected Snap2 configurator
     injectConfigurator(configuratorToInitialize);
     activeConfiguratorIndex = configuratorIndexToInitialize;
-    
+
     // Auto-open configurator if configuration_uuid is in query parameters
     if (queryConfigUuid) {
       // Wait for the handler to be set up, then auto-open
@@ -781,28 +808,28 @@ export function injectMultipleConfigurators(configs: InjectConfiguratorOptions[]
       };
       attemptAutoOpen();
     }
-    
+
     // Set up click listeners for ALL Snap2 configurators (including the first one)
     for (let i = 0; i < snap2Configs.length; i++) {
       const config = snap2Configs[i];
-      const selector = typeof config.configureButtonId === 'string' 
-        ? config.configureButtonId 
+      const selector = typeof config.configureButtonId === 'string'
+        ? config.configureButtonId
         : config.configureButtonId!.id;
-      
+
       waitForElement(selector, 5000)
         .then((element: Element) => {
           const existingHandler = clickHandlers.get(selector);
           if (existingHandler) {
             element.removeEventListener('click', existingHandler);
           }
-          
+
           const handleClick = async (event: Event) => {
             if (isReinitializing) {
               return;
             }
-            
+
             isReinitializing = true;
-            
+
             try {
               // Unmount React root to clean up state (don't call cleanup function to avoid modal flicker)
               const container = document.getElementById('ov25-provider-root');
@@ -810,11 +837,11 @@ export function injectMultipleConfigurators(configs: InjectConfiguratorOptions[]
                 (container as any)._reactRoot.unmount();
                 delete (container as any)._reactRoot;
               }
-              
+
               cleanupShadowDOMContainers();
               injectConfigurator(config);
               activeConfiguratorIndex = i;
-              
+
               // Open configurator after React renders
               requestAnimationFrame(() => {
                 setTimeout(() => {
@@ -832,7 +859,7 @@ export function injectMultipleConfigurators(configs: InjectConfiguratorOptions[]
               isReinitializing = false;
             }
           };
-          
+
           clickHandlers.set(selector, handleClick);
           element.addEventListener('click', handleClick);
         })
@@ -841,7 +868,7 @@ export function injectMultipleConfigurators(configs: InjectConfiguratorOptions[]
         });
     }
   }
-  
+
   // Handle standard configurators (simultaneous display)
   if (standardConfigs.length > 0) {
     // Initialize all standard configurators immediately

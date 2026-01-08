@@ -3,7 +3,7 @@ import { X as CloseIcon, Camera, Upload, Lightbulb } from 'lucide-react'
 import { ExpandIcon, Rotate3D } from "lucide-react"
 import { DimensionsIcon } from '../lib/svgs/DimensionsIcon.js'
 import { ArIcon } from '../lib/svgs/ArIcon.js'
-import { toggleDimensions, toggleAnimation,  toggleFullscreen, getAnimationButtonText } from '../utils/configurator-utils.js'
+import { toggleDimensions, toggleAnimation, toggleFullscreen, getAnimationButtonText } from '../utils/configurator-utils.js'
 import { useOV25UI } from '../contexts/ov25-ui-context.js'
 import { cn } from '../lib/utils.js'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover.js'
@@ -16,9 +16,9 @@ interface ConfiguratorViewControlsProps {
 
 const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => {
 
-  const { 
-    isVariantsOpen, 
-    setIsVariantsOpen, 
+  const {
+    isVariantsOpen,
+    setIsVariantsOpen,
     isMobile,
     canAnimate,
     animationState,
@@ -91,7 +91,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
   const handleToggleDimensions = () => {
     toggleDimensions(canSeeDimensions, setCanSeeDimensions, uniqueId);
   }
-  
+
   const handleAnimationButtonText = () => {
     return getAnimationButtonText(canAnimate, animationState);
   }
@@ -100,7 +100,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      toast.success('Share link copied to clipboard!');
+      toast.success('Share link copied to clipboard!', { duration: 3000 });
     } catch (error) {
       // Fallback for older browsers
       const textArea = document.createElement('textarea');
@@ -123,29 +123,29 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
     const shareText = `I just designed this ${productName} — take a look!`;
     // Check if Web Share API is available (mobile devices)
     if (navigator.share && isMobile) {
-        try {
-          await navigator.share({
-            title: shareTitle,
-            text: shareText,
-            url: currentUrl,
-          });
-        } catch (error) {
-          // User cancelled or share failed — fallback
-          await copyToClipboard(currentUrl);
-        }
-      } else {
-        // Web Share API not available or desktop — fallback
+      try {
+        await navigator.share({
+          title: shareTitle,
+          text: shareText,
+          url: currentUrl,
+        });
+      } catch (error) {
+        // User cancelled or share failed — fallback
         await copyToClipboard(currentUrl);
       }
-
+    } else {
+      // Web Share API not available or desktop — fallback
+      await copyToClipboard(currentUrl);
     }
+
+  }
 
 
   return (
     <>
       {/* Snap2 Controls - shown only in snap2 mode */}
       {isSnap2Mode && <Snap2Controls />}
-    
+
       {/* <div className={cn(
         "ov:absolute ov:w-full ov:pointer-events-none ov:h-full ov:inset-0 ov:gap-2 ov:p-4 ov:flex ov:justify-end ov:items-end ov:z-[101]",
         "ov:text-[var(--ov25-configurator-view-controls-text-color)]"
@@ -165,7 +165,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
         )}
     </div> */}
 
-    <div className={cn(
+      <div className={cn(
         "ov:pointer-events-none ov:absolute ov:w-full ov:h-full ov:inset-0 ov:gap-2 ov:p-4 ov:flex ov:justify-end ov:items-end ov:z-[101]",
         "ov:text-[var(--ov25-configurator-view-controls-text-color)]",
         "ov:transition-all ov:duration-200",
@@ -178,7 +178,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
             'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
             'ov:bg-[var(--ov25-overlay-button-color)]',
           )}>
-            <Upload strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1"/>
+            <Upload strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" />
             {!isMobile && (
               <p className="ov25-controls-text ov:text-sm ov:text-[var(--ov25-text-color)]">Share</p>
             )}
@@ -190,10 +190,10 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
               'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
               'ov:bg-[var(--ov25-overlay-button-color)]',
             )}>
-                <Rotate3D strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1"/>
-                {!isMobile && (
+              <Rotate3D strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" />
+              {!isMobile && (
                 <p className="ov25-controls-text ov:text-sm ov:font-light">{handleAnimationButtonText()}</p>
-                )}
+              )}
             </button>
           )}
 
@@ -203,8 +203,8 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
               'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
               'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
               'ov:bg-[var(--ov25-overlay-button-color)]',
-              )}>
-              <DimensionsIcon className="ov:w-[19px] ov:h-[19px] p-1" color="var(--ov25-text-color)"/>
+            )}>
+              <DimensionsIcon className="ov:w-[19px] ov:h-[19px] p-1" color="var(--ov25-text-color)" />
               {!isMobile && (
                 <p className="ov25-controls-text ov:text-sm ov:text-[var(--ov25-text-color)]">Dimensions</p>
               )}
@@ -215,9 +215,9 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
             <div data-popover>
               <Popover open={isCameraPopoverOpen} onOpenChange={setIsCameraPopoverOpen}>
                 <PopoverTrigger onClick={() => setIsCameraPopoverOpen(!isCameraPopoverOpen)}>
-                  <button 
+                  <button
                     ref={cameraButtonRef}
-                    id="ov25-camera-toggle-button" 
+                    id="ov25-camera-toggle-button"
                     className={cn(
                       'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:border ov:items-center ov:justify-center',
                       'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
@@ -225,7 +225,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
                       'ov:bg-[var(--ov25-overlay-button-color)]',
                     )}
                   >
-                    <Camera strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1"/>
+                    <Camera strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" />
                     {!isMobile && (
                       <p className="ov25-controls-text ov:text-sm ov:text-[var(--ov25-text-color)]">Camera</p>
                     )}
@@ -262,9 +262,9 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
             <div data-popover>
               <Popover open={isLightPopoverOpen} onOpenChange={setIsLightPopoverOpen}>
                 <PopoverTrigger onClick={() => setIsLightPopoverOpen(!isLightPopoverOpen)}>
-                  <button 
+                  <button
                     ref={lightButtonRef}
-                    id="ov25-light-toggle-button" 
+                    id="ov25-light-toggle-button"
                     className={cn(
                       'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:border ov:items-center ov:justify-center',
                       'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
@@ -272,7 +272,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
                       'ov:bg-[var(--ov25-overlay-button-color)]',
                     )}
                   >
-                    <Lightbulb strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1"/>
+                    <Lightbulb strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" />
                     {!isMobile && (
                       <p className="ov25-controls-text ov:text-sm ov:text-[var(--ov25-text-color)]">Lights</p>
                     )}
@@ -312,7 +312,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
               'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
               'ov:bg-[var(--ov25-overlay-button-color)]',
             )}>
-              <ArIcon className="ov:w-[19px] ov:h-[19px] p-1" color="var(--ov25-text-color)"/>
+              <ArIcon className="ov:w-[19px] ov:h-[19px] p-1" color="var(--ov25-text-color)" />
               {!isMobile && (
                 <p className="ov25-controls-text ov:text-sm ov:text-[var(--ov25-text-color)]">View in your room</p>
               )}
@@ -323,15 +323,15 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
       </div>
       {!isVariantsOpen && !isMobile && !controlsHidden && !hasConfigureButton && (!isSnap2Mode || !hasConfigureButton) && (
         <div className="ov:absolute ov:ov25-controls-hidden ov:size-full ov:md:flex ov:pointer-events-none ov:inset-0 ov:p-4 ov:justify-end ov:items-start ov:z-[101]">
-            <button id="ov25-desktop-fullscreen-button" className={cn(
-              'ov:cursor-pointer ov:aspect-square ov:p-2 ov:pointer-events-auto ov:flex ov:gap-2.5 ov:ml-auto ov:border ov:items-center ov:justify-center',
-              'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
-              'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
-              'ov:bg-[var(--ov25-overlay-button-color)]',
+          <button id="ov25-desktop-fullscreen-button" className={cn(
+            'ov:cursor-pointer ov:aspect-square ov:p-2 ov:pointer-events-auto ov:flex ov:gap-2.5 ov:ml-auto ov:border ov:items-center ov:justify-center',
+            'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
+            'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
+            'ov:bg-[var(--ov25-overlay-button-color)]',
           )}
             onClick={() => toggleFullscreen(uniqueId)}>
-              <ExpandIcon strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1"/>
-            </button>
+            <ExpandIcon strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" />
+          </button>
         </div>
       )}
       {(isMobile || (isSnap2Mode && window.innerWidth < 1024)) && isVariantsOpen && (
@@ -340,7 +340,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
           "ov:transition-opacity ov:duration-200",
           shareDialogTrigger !== 'none' && "ov:opacity-0"
         )}>
-          <button 
+          <button
             id="ov25-mobile-close-button"
             onClick={() => {
               if (isSnap2Mode && hasConfigureButton && shareDialogTrigger === 'none' && (configuratorState?.snap2Objects?.length ?? 0) > 0) {
@@ -356,7 +356,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
               'ov:bg-[var(--ov25-overlay-button-color)]',
             )}
           >
-            <CloseIcon strokeWidth={1} className="ov:w-[19px] ov:h-[19px]"/>
+            <CloseIcon strokeWidth={1} className="ov:w-[19px] ov:h-[19px]" />
           </button>
         </div>
       )}

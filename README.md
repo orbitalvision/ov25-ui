@@ -103,7 +103,13 @@ When adding new dependencies to `package.json`, they will automatically be used 
 
 - There is a minimal react project in dev/react-test which build a simple webpage. 
 - It then calls injectConfigurator with some options. (dev/react-test/src/App.jsx)
-- The react-test project will need an initial `npm install`
+- The react-test project will need an initial `npm install` (dont install at root, you must `cd dev/react-test` first. it has a separate `package.json`)
 - To run, go to root directory of ov25-ui. run `npm run dev`. This will build the project and then spin up the react project
 - Go to http://localhost:3000
+
+## Running tests locally
+
+- `npm run test:unit` for unit tests
+- `npm run test:e2e` for full end-to-end tests (page navigation network requests, all browser features, SLOW)
+- `npm run test:browser` for simpler frontend tests (component testing but with real browser APIs)
 

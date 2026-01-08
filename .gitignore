@@ -5,3 +5,6 @@ dist
 .env.dev
 .DS_Store
 .npmrc
+playwright-report
+test/browser/__screenshots__/
+test-results/
