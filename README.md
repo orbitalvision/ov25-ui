@@ -83,7 +83,7 @@ This package is published in two versions to support both React 18 and React 19:
 ### Publishing both versions
 
 1. Update the version number in `package.json`
-2. Run `npm run publish` to build and publish both packages
+2. Run `npm run publish:all` to build and publish both packages
 
 ### Publishing individual versions (don't do this usually)
 

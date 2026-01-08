@@ -61,7 +61,7 @@ export const InitialiseMenu: React.FC = () => {
               onMouseEnter={() => setHoveredModule(`${module.productId}-${module.model.modelId}`)}
               onMouseLeave={() => setHoveredModule(null)}
             >
-              <div className="ov:w-full ov:h-[100px] ov:sm:h-[140px] ov:flex ov:items-center ov:justify-center ov:rounded-xl ov:bg-white ov:cursor-pointer ov:p-1 ov:sm:p-2 ov:border ov:border-[#F0F0F0]">
+              <div className=" ov:w-[170px] ov:md:w-[235px] ov:h-[100px] ov:sm:h-[140px] ov:flex ov:items-center ov:justify-center ov:rounded-xl ov:bg-white ov:cursor-pointer ov:p-1 ov:sm:p-2 ov:border ov:border-[#F0F0F0]">
                 {module.product.hasImage && module.product.imageUrl ? (
                   <img
                     src={module.product.imageUrl.replace('thumbnail', 'small_image')}

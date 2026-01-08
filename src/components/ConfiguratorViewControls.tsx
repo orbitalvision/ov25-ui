@@ -211,7 +211,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
             </button>
           )}
 
-          {availableCameras.length > 1 && (
+          {availableCameras.length > 1 && !isSnap2Mode && (
             <div data-popover>
               <Popover open={isCameraPopoverOpen} onOpenChange={setIsCameraPopoverOpen}>
                 <PopoverTrigger onClick={() => setIsCameraPopoverOpen(!isCameraPopoverOpen)}>
