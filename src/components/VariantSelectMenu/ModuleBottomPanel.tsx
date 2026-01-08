@@ -279,7 +279,7 @@ export const ModuleBottomPanel: React.FC<{ portalTarget?: Element }> = ({ portal
                             <img
                               src={module.product.imageUrl}
                               alt={module.product.name}
-                              className="ov:w-full ov:h-full ov:object-none ov:rounded-lg"
+                              className="ov:w-full ov:h-full ov:object-contain ov:rounded-lg"
                             />
                           ) : (
                             <div className="ov:w-full ov:h-full ov:bg-gray-200 ov:rounded-lg ov:flex ov:items-center ov:justify-center">
