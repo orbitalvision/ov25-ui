@@ -262,6 +262,15 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     mobileDrawerContainer.style.zIndex = '99999999999991';
     document.body.appendChild(mobileDrawerContainer);
 
+    // add an empty <span> inside the mobile drawer container to stop shopify themes with empty div rules from hiding the div
+    // even though its got an iframe in its shadow root, the shopify themes still recognise it as empty div and apply a rule like this:
+    // div:empty { display: none; }
+    const mobileDrawerEmptySpan = document.createElement('span');
+    mobileDrawerEmptySpan.style.width = '100%';
+    mobileDrawerEmptySpan.style.height = '100%';
+    mobileDrawerEmptySpan.style.pointerEvents = 'none';
+    mobileDrawerContainer.appendChild(mobileDrawerEmptySpan);
+
     // Create Shadow DOM root for mobile drawer
     const mobileDrawerShadowRoot = mobileDrawerContainer.attachShadow({ mode: 'open' });
     const mobileDrawerStylesheets = [sharedStylesheet];
@@ -282,6 +291,15 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     configuratorViewControlsContainer.style.pointerEvents = 'none';
     configuratorViewControlsContainer.style.zIndex = '101';
     document.body.appendChild(configuratorViewControlsContainer);
+
+    // add an empty <span> inside the configurator view controls container to stop shopify themes with empty div rules from hiding the div
+    // even though its got an iframe in its shadow root, the shopify themes still recognise it as empty div and apply a rule like this:
+    // div:empty { display: none; }
+    const configuratorViewControlsEmptySpan = document.createElement('span');
+    configuratorViewControlsEmptySpan.style.width = '100%';
+    configuratorViewControlsEmptySpan.style.height = '100%';
+    configuratorViewControlsEmptySpan.style.pointerEvents = 'none';
+    configuratorViewControlsContainer.appendChild(configuratorViewControlsEmptySpan);
 
     // Create Shadow DOM root for configurator view controls
     const configuratorViewControlsShadowRoot = configuratorViewControlsContainer.attachShadow({ mode: 'open' });
@@ -304,6 +322,15 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     popoverPortalContainer.style.zIndex = '99999999999992';
     document.body.appendChild(popoverPortalContainer);
 
+    // add an empty <span> inside the popover portal container to stop shopify themes with empty div rules from hiding the div
+    // even though its got an iframe in its shadow root, the shopify themes still recognise it as empty div and apply a rule like this:
+    // div:empty { display: none; }
+    const popoverPortalEmptySpan = document.createElement('span');
+    popoverPortalEmptySpan.style.width = '100%';
+    popoverPortalEmptySpan.style.height = '100%';
+    popoverPortalEmptySpan.style.pointerEvents = 'none';
+    popoverPortalContainer.appendChild(popoverPortalEmptySpan);
+
     // Create Shadow DOM root for popover portal
     const popoverPortalShadowRoot = popoverPortalContainer.attachShadow({ mode: 'open' });
     const popoverPortalStylesheets = [sharedStylesheet];
@@ -325,6 +352,15 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     toasterContainer.style.zIndex = '999999999999999';
     document.body.appendChild(toasterContainer);
 
+    // add an empty <span> inside the toaster portal container to stop shopify themes with empty div rules from hiding the div
+    // even though its got an iframe in its shadow root, the shopify themes still recognise it as empty div and apply a rule like this:
+    // div:empty { display: none; }
+    const toasterPortalEmptySpan = document.createElement('span');
+    toasterPortalEmptySpan.style.width = '100%';
+    toasterPortalEmptySpan.style.height = '100%';
+    toasterPortalEmptySpan.style.pointerEvents = 'none';
+    toasterContainer.appendChild(toasterPortalEmptySpan);
+
     // Create Shadow DOM root for toaster portal
     const toasterPortalShadowRoot = toasterContainer.attachShadow({ mode: 'open' });
     const toasterPortalStylesheets = [sharedStylesheet, sonnerStylesheet];
@@ -345,6 +381,15 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     swatchbookPortalContainer.style.pointerEvents = 'none';
     swatchbookPortalContainer.style.zIndex = '99999999999993';
     document.body.appendChild(swatchbookPortalContainer);
+
+    // add an empty <span> inside the swatchbook portal container to stop shopify themes with empty div rules from hiding the div
+    // even though its got an iframe in its shadow root, the shopify themes still recognise it as empty div and apply a rule like this:
+    // div:empty { display: none; }
+    const swatchbookPortalEmptySpan = document.createElement('span');
+    swatchbookPortalEmptySpan.style.width = '100%';
+    swatchbookPortalEmptySpan.style.height = '100%';
+    swatchbookPortalEmptySpan.style.pointerEvents = 'none';
+    swatchbookPortalContainer.appendChild(swatchbookPortalEmptySpan);
 
     // Create Shadow DOM root for swatchbook portal
     const swatchbookPortalShadowRoot = swatchbookPortalContainer.attachShadow({ mode: 'open' });
