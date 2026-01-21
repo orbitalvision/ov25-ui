@@ -250,6 +250,7 @@ const TwoStageDrawerComponent = ({
         pointerEvents: drawerState === 0 ? 'none' : 'auto',
         ...style
       }}
+      data-clarity-mask="true"
       className={'ov:bg-[var(--ov25-configurator-iframe-background-color)]'}
     >
       <div id="ov25-drawer-content" className="ov:w-full ov:h-full ov:bg-[var(--ov25-background-color)] ov:relative ov:rounded-t-xl ov:[box-shadow:0_-4px_6px_-1px_rgba(0,0,0,0.05),0_-2px_4px_-2px_rgba(0,0,0,0.03)]">

@@ -136,7 +136,7 @@ export function VariantContentDesktop() {
 
     // Always render the container for transform effects, but conditionally render the content
     const menuContent = (
-        <div className="ov:inset-0 ov:size-full ov:fixed ov:pointer-events-none ov:z-[9999999999999] ">
+        <div data-clarity-mask="true" className="ov:inset-0 ov:size-full ov:fixed ov:pointer-events-none ov:z-[9999999999999] ">
             <div className="ov:w-full ov:h-full ov:relative ov:pointer-events-none">
             <div 
               ref={menuContainerRef}
