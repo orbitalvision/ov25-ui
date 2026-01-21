@@ -51,7 +51,7 @@ test.describe('Windrush - Loveseat. Single product without variants', () => {
         await expect(shareButton).toBeVisible();
         await shareButton.click();
         // link should be copied to clipboard
-        await expect(page.evaluate(() => navigator.clipboard.readText())).resolves.toContain('http://localhost:3008/single-no-variants.html?productId=607&selections=Fabrics%3DAqua%26Legs%3DDark+Oak');
+        await expect(page.evaluate(() => navigator.clipboard.readText())).resolves.toContain('http://localhost:3008/single-no-variants.html?configuration=eyJwIjo2MDcsInMiOls0LDE5XX0');
         // toast should appear
         const toast = page.locator('li[data-sonner-toast]');
         await expect(toast).toBeVisible();
@@ -111,7 +111,7 @@ test.describe('Windrush - Loveseat. Single product without variants', () => {
         await expect(shareButton).toBeVisible();
         await shareButton.click();
         // link should be copied to clipboard
-        await expect(page.evaluate(() => navigator.clipboard.readText())).resolves.toContain('http://localhost:3008/single-no-variants.html?productId=607&selections=Fabrics%3DAqua%26Legs%3DDark+Oak');
+        await expect(page.evaluate(() => navigator.clipboard.readText())).resolves.toContain('http://localhost:3008/single-no-variants.html?configuration=eyJwIjo2MDcsInMiOls0LDE5XX0');
         // toast should appear - use .last() to get the most recent toast
         const toast2 = page.locator('li[data-sonner-toast]').last();
         await expect(toast2).toBeVisible();
