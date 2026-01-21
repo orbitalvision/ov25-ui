@@ -84,10 +84,12 @@ export const IframeContainer = () => {
 
     return (
         <div id="true-ov25-configurator-iframe-container"
+            data-clarity-mask="true"
             className={cn(isStacked ? isStackedStyles : isInlineStyles)}>
             <iframe id="ov25-dummy-iframe" allow="camera; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; xr-spatial-tracking; fullscreen" style={{ display: 'none !important', height: '0 !important', width: '0 !important' }}></iframe> {/* Used as bait to stop Trustpilot from hijacking our iframe. it looks for first iframe in the DOM */}
             <iframe
                 data-fullscreen={isVariantsOpen}
+                data-clarity-mask="true"
                 ref={iframeRef}
                 id={uniqueId ? `ov25-configurator-iframe-${uniqueId}` : "ov25-configurator-iframe"}
                 src={iframeSrc}

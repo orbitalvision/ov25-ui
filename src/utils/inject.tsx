@@ -253,6 +253,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     // Create mobile drawer Shadow DOM container
     const mobileDrawerContainer = document.createElement('div');
     mobileDrawerContainer.id = 'ov25-mobile-drawer-container';
+    mobileDrawerContainer.setAttribute('data-clarity-mask', 'true');
     mobileDrawerContainer.style.position = 'fixed';
     mobileDrawerContainer.style.top = '0';
     mobileDrawerContainer.style.left = '0';
@@ -283,6 +284,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     // Create configurator view controls Shadow DOM container
     const configuratorViewControlsContainer = document.createElement('div');
     configuratorViewControlsContainer.id = uniqueId ? `ov25-configurator-view-controls-container-${uniqueId}` : 'ov25-configurator-view-controls-container';
+    configuratorViewControlsContainer.setAttribute('data-clarity-mask', 'true');
     configuratorViewControlsContainer.style.position = 'absolute';
     configuratorViewControlsContainer.style.top = '0';
     configuratorViewControlsContainer.style.left = '0';
@@ -313,6 +315,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     // Create popover portal Shadow DOM container
     const popoverPortalContainer = document.createElement('div');
     popoverPortalContainer.id = 'ov25-popover-portal-container';
+    popoverPortalContainer.setAttribute('data-clarity-mask', 'true');
     popoverPortalContainer.style.position = 'fixed';
     popoverPortalContainer.style.top = '0';
     popoverPortalContainer.style.left = '0';
@@ -343,6 +346,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     // Create toaster portal container
     const toasterContainer = document.createElement('div');
     toasterContainer.id = 'ov25-toaster-container';
+    toasterContainer.setAttribute('data-clarity-mask', 'true');
     toasterContainer.style.position = 'fixed';
     toasterContainer.style.top = '0';
     toasterContainer.style.left = '0';
@@ -373,6 +377,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     // Create swatchbook portal Shadow DOM container
     const swatchbookPortalContainer = document.createElement('div');
     swatchbookPortalContainer.id = 'ov25-swatchbook-portal-container';
+    swatchbookPortalContainer.setAttribute('data-clarity-mask', 'true');
     swatchbookPortalContainer.style.position = 'fixed';
     swatchbookPortalContainer.style.top = '0';
     swatchbookPortalContainer.style.left = '0';
@@ -434,6 +439,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
         if (target && target.parentNode) {
           // Create an empty div to replace the target
           const emptyDiv = document.createElement('div');
+          emptyDiv.setAttribute('data-clarity-mask', 'true');
           // Preserve original classes and add our class
           emptyDiv.className = `${target.className} ov25-configurator-${componentName}`.trim();
 
@@ -456,6 +462,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
         if (target && target.parentNode) {
           // Create an empty div to replace the target
           const emptyDiv = document.createElement('div');
+          emptyDiv.setAttribute('data-clarity-mask', 'true');
           // Preserve original classes and add our class
           emptyDiv.className = `${target.className} ov25-configurator-${componentName}`.trim();
           // Copy dimensions from original element
@@ -648,6 +655,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     if (!container) {
       container = document.createElement('div');
       container.id = containerId;
+      container.setAttribute('data-clarity-mask', 'true');
       container.style.display = 'contents';  // prov. doesn't render anything anyway
       document.body.appendChild(container);
     }
