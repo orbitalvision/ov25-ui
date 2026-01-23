@@ -59,6 +59,7 @@ const DialogContent = React.forwardRef<
       {createPortal(
         <DialogPrimitive.Content
           ref={ref}
+          id={id}
           className={cn(
             "ov:fixed ov:left-[50%] ov:top-[50%] ov:z-2147483646 ov:grid ov:w-full ov:max-w-lg ov:translate-x-[-50%] ov:translate-y-[-50%] ov:gap-4 ov:border ov:bg-background ov:p-6 ov:shadow-lg ov:duration-200 data-[state=open]:ov:animate-in data-[state=closed]:ov:animate-out data-[state=closed]:ov:fade-out-0 data-[state=open]:ov:fade-in-0 data-[state=closed]:ov:zoom-out-95 data-[state=open]:ov:zoom-in-95 data-[state=closed]:ov:slide-out-to-left-1/2 data-[state=closed]:ov:slide-out-to-top-[48%] data-[state=open]:ov:slide-in-from-left-1/2 data-[state=open]:ov:slide-in-from-top-[48%] ov:rounded-lg",
             className
