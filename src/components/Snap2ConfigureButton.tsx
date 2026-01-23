@@ -72,14 +72,14 @@ export const Snap2ConfigureUI: React.FC = () => {
     const shouldShowSaveDialog = isSnap2Mode && (configuratorState?.snap2Objects?.length ?? 0) > 0;
 
     if (!shouldShowSaveDialog) {
+      // Only clear state if we're not showing the save dialog
       setIsModalOpen(false);
+      setIsVariantsOpen(false);
+      setCompatibleModules(null);
+      setConfiguratorState(undefined);
       resetIframe();
-    }
-    setIsVariantsOpen(false);
-    setCompatibleModules(null);
-    setConfiguratorState(undefined);
-
-    if (shouldShowSaveDialog) {
+    } else {
+      // If showing save dialog, keep state intact and trigger the save dialog
       setShareDialogTrigger('modal-close');
     }
   };

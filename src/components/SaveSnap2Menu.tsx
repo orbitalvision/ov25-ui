@@ -88,22 +88,73 @@ export const SaveSnap2Menu: React.FC = () => {
 
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(shareUrl);
-      toast.success('Link copied to clipboard!');
+      // Try modern clipboard API first
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText(shareUrl);
+        toast.success('Link copied to clipboard!');
+        return;
+      }
+      throw new Error('Clipboard API not available');
     } catch (error) {
-      toast.error('Failed to copy link');
+      // Fallback for mobile/tablet devices or browsers without clipboard API
+      try {
+        // Use the visible textarea element for better mobile compatibility
+        const textarea = document.querySelector('textarea[readonly]') as HTMLTextAreaElement;
+        if (textarea && textarea.value === shareUrl) {
+          textarea.focus();
+          textarea.select();
+          // For mobile devices, we need to set selection range explicitly
+          if (textarea.setSelectionRange) {
+            textarea.setSelectionRange(0, shareUrl.length);
+          }
+          const successful = document.execCommand('copy');
+          textarea.blur();
+          
+          if (successful) {
+            toast.success('Link copied to clipboard!');
+            return;
+          }
+        }
+        
+        // Fallback: create temporary textarea if visible one doesn't work
+        const textArea = document.createElement('textarea');
+        textArea.value = shareUrl;
+        textArea.style.position = 'fixed';
+        textArea.style.opacity = '0';
+        textArea.style.left = '-9999px';
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        const successful = document.execCommand('copy');
+        document.body.removeChild(textArea);
+        
+        if (successful) {
+          toast.success('Link copied to clipboard!');
+        } else {
+          throw new Error('execCommand failed');
+        }
+      } catch (fallbackError) {
+        console.error('Clipboard copy failed:', fallbackError);
+        toast.error('Failed to copy link. Please select and copy manually.');
+      }
     }
   };
 
   const handleShareDialogClose = (open: boolean) => {
     setShowShareDialog(open);
     if (!open) {
+      const wasModalClose = shareDialogTrigger === 'modal-close';
+      const hasShareUrl = !!shareUrl; // Link has been generated and shown
+      
       setShareDialogTrigger('none');
       setIsSaving(false);
       setShareUrl('');
       setShowConfirmation(false);
       
-      if (shareDialogTrigger === 'modal-close') {
+      // If the link is shown (user clicked "Yes" and save completed), 
+      // clicking X should close both dialogs
+      // Otherwise (on confirmation screen), clicking X just closes save dialog
+      if (hasShareUrl && wasModalClose) {
         setIsModalOpen(false);
         skipNextDrawerCloseRef.current = true;
         setIsVariantsOpen(false);
@@ -111,6 +162,28 @@ export const SaveSnap2Menu: React.FC = () => {
         setConfiguratorState(undefined);
         resetIframe();
       }
+      // If on confirmation screen, X just closes save dialog and keeps snap2 open
+    }
+  };
+
+  const handleNoSave = () => {
+    // User clicked "No" - they don't want to save, so close both dialogs
+    const wasModalClose = shareDialogTrigger === 'modal-close';
+    
+    setShowShareDialog(false);
+    setShareDialogTrigger('none');
+    setIsSaving(false);
+    setShareUrl('');
+    setShowConfirmation(false);
+    
+    // Close the snap2 dialog and reset everything
+    if (wasModalClose) {
+      setIsModalOpen(false);
+      skipNextDrawerCloseRef.current = true;
+      setIsVariantsOpen(false);
+      setCompatibleModules(null);
+      setConfiguratorState(undefined);
+      resetIframe();
     }
   };
 
@@ -154,7 +227,7 @@ export const SaveSnap2Menu: React.FC = () => {
                       Yes
                     </button>
                     <button 
-                      onClick={() => handleShareDialogClose(false)}
+                      onClick={handleNoSave}
                       className="ov:flex-1 ov:px-4 ov:py-2 ov:border ov:border-[var(--ov25-border-color)] ov:bg-[var(--ov25-background-color)] ov:text-[var(--ov25-text-color)] ov:rounded-md ov:cursor-pointer ov:hover:opacity-90"
                     >
                       No

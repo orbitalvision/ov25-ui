@@ -353,7 +353,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     toasterContainer.style.width = '100%';
     toasterContainer.style.height = '100%';
     toasterContainer.style.pointerEvents = 'none';
-    toasterContainer.style.zIndex = '2147483646'; // max - 1
+    toasterContainer.style.zIndex = '2147483647'; // max
     document.body.appendChild(toasterContainer);
 
     // add an empty <span> inside the toaster portal container to stop shopify themes with empty div rules from hiding the div
