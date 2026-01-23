@@ -260,7 +260,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     mobileDrawerContainer.style.width = '100%';
     mobileDrawerContainer.style.height = '100%';
     mobileDrawerContainer.style.pointerEvents = 'none';
-    mobileDrawerContainer.style.zIndex = '99999999999991';
+    mobileDrawerContainer.style.zIndex = '2147483646'; // max - 1
     document.body.appendChild(mobileDrawerContainer);
 
     // add an empty <span> inside the mobile drawer container to stop shopify themes with empty div rules from hiding the div
@@ -322,7 +322,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     popoverPortalContainer.style.width = '100%';
     popoverPortalContainer.style.height = '100%';
     popoverPortalContainer.style.pointerEvents = 'none';
-    popoverPortalContainer.style.zIndex = '99999999999992';
+    popoverPortalContainer.style.zIndex = '2147483646'; // max -1
     document.body.appendChild(popoverPortalContainer);
 
     // add an empty <span> inside the popover portal container to stop shopify themes with empty div rules from hiding the div
@@ -353,7 +353,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     toasterContainer.style.width = '100%';
     toasterContainer.style.height = '100%';
     toasterContainer.style.pointerEvents = 'none';
-    toasterContainer.style.zIndex = '999999999999999';
+    toasterContainer.style.zIndex = '2147483646'; // max - 1
     document.body.appendChild(toasterContainer);
 
     // add an empty <span> inside the toaster portal container to stop shopify themes with empty div rules from hiding the div
@@ -384,7 +384,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     swatchbookPortalContainer.style.width = '100%';
     swatchbookPortalContainer.style.height = '100%';
     swatchbookPortalContainer.style.pointerEvents = 'none';
-    swatchbookPortalContainer.style.zIndex = '99999999999993';
+    swatchbookPortalContainer.style.zIndex = '2147483646'; // max - 1
     document.body.appendChild(swatchbookPortalContainer);
 
     // add an empty <span> inside the swatchbook portal container to stop shopify themes with empty div rules from hiding the div
@@ -609,35 +609,9 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
         });
     }
 
-    // Special handling for toaster - wait for the container inside the fullscreen element
-    // Only render if not in configure button mode (ConfigureButton handles it in that case)
-    if (!configureButtonId) {
-      const toasterContainerId = uniqueId
-        ? `#true-toaster-container-${uniqueId}`
-        : '#true-toaster-container';
-
-      waitForElement(toasterContainerId, 10000)
-        .then(element => {
-          // Create Shadow DOM on the toaster container
-          if (!element.shadowRoot) {
-            const shadowRoot = element.attachShadow({ mode: 'open' });
-            const toasterStylesheets = [sharedStylesheet, sonnerStylesheet];
-            if (cssString) {
-              const cssVariablesStylesheet = createCSSVariablesStylesheet(cssString);
-              toasterStylesheets.push(cssVariablesStylesheet);
-            }
-            shadowRoot.adoptedStyleSheets = toasterStylesheets;
-          }
-          // Portal Toaster into the Shadow DOM
-          portals.push(createPortal(<Toaster position="top-center" richColors style={{ zIndex: 999 }} />, element.shadowRoot!));
-        })
-        .catch(err => {
-          console.warn(`[OV25-UI] ${err.message}`);
-        });
-    } else {
-      // For Snap2 mode (configure button), use body-level toaster container
-      portals.push(createPortal(<Toaster position="top-center" richColors style={{ zIndex: 999999999999999 }} />, toasterPortalShadowRoot));
-    }
+    // Special handling for toaster - use body-level container for all modes to ensure visibility in fullscreen
+    // Use body-level toaster container at max z-index to ensure it appears above fullscreen iframe
+    portals.push(createPortal(<Toaster position="top-center" richColors style={{ zIndex: 2147483647 }} />, toasterPortalShadowRoot));
 
     if (cssString) {
       setupCSSVariables(cssString);

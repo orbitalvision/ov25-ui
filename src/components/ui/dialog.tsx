@@ -18,10 +18,11 @@ const DialogOverlay = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Overlay>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Overlay>
 >(({ className, ...props }, ref) => (
+  // z-index 2147483646 is max-2
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "ov:fixed ov:inset-0 ov:z-[2147483646] ov:bg-black/80  data-[state=open]:ov:animate-in data-[state=closed]:ov:animate-out data-[state=closed]:ov:fade-out-0 data-[state=open]:ov:fade-in-0",
+      "ov:fixed ov:inset-0 ov:z-2147483646 ov:bg-black/80  data-[state=open]:ov:animate-in data-[state=closed]:ov:animate-out data-[state=closed]:ov:fade-out-0 data-[state=open]:ov:fade-in-0",
       className
     )}
     {...props}
@@ -32,14 +33,20 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref) => {
+>(({ className, children, id, ...props }, ref) => {
   const { shadowDOMs } = useOV25UI();
   
   // Snap2 dialogs need special handling for fullscreen compatibility
   const isSnap2Dialog = className?.includes('snap2');
-  // Always use document.body for snap2 dialogs to ensure top-most stacking above modals
-  const portalTarget = isSnap2Dialog 
+  // SwatchBook dialogs should use the swatchbook portal
+  const isSwatchBookDialog = id === 'ov25-swatchbook';
+  // AR preview dialog should always use document.body to ensure visibility in fullscreen
+  const isArPreviewDialog = id === 'ov25-ar-preview-qr-code-dialog';
+  // Always use document.body for snap2 dialogs and AR preview dialogs to ensure top-most stacking above modals
+  const portalTarget = isSnap2Dialog || isArPreviewDialog
     ? document.body
+    : isSwatchBookDialog
+    ? (shadowDOMs?.swatchbookPortal || document.body)
     : (shadowDOMs?.configuratorViewControls || shadowDOMs?.swatchbookPortal || document.body);
   
   if (!portalTarget) {
@@ -53,7 +60,7 @@ const DialogContent = React.forwardRef<
         <DialogPrimitive.Content
           ref={ref}
           className={cn(
-            "ov:fixed ov:left-[50%] ov:top-[50%] ov:z-[2147483647] ov:grid ov:w-full ov:max-w-lg ov:translate-x-[-50%] ov:translate-y-[-50%] ov:gap-4 ov:border ov:bg-background ov:p-6 ov:shadow-lg ov:duration-200 data-[state=open]:ov:animate-in data-[state=closed]:ov:animate-out data-[state=closed]:ov:fade-out-0 data-[state=open]:ov:fade-in-0 data-[state=closed]:ov:zoom-out-95 data-[state=open]:ov:zoom-in-95 data-[state=closed]:ov:slide-out-to-left-1/2 data-[state=closed]:ov:slide-out-to-top-[48%] data-[state=open]:ov:slide-in-from-left-1/2 data-[state=open]:ov:slide-in-from-top-[48%] ov:rounded-lg",
+            "ov:fixed ov:left-[50%] ov:top-[50%] ov:z-2147483646 ov:grid ov:w-full ov:max-w-lg ov:translate-x-[-50%] ov:translate-y-[-50%] ov:gap-4 ov:border ov:bg-background ov:p-6 ov:shadow-lg ov:duration-200 data-[state=open]:ov:animate-in data-[state=closed]:ov:animate-out data-[state=closed]:ov:fade-out-0 data-[state=open]:ov:fade-in-0 data-[state=closed]:ov:zoom-out-95 data-[state=open]:ov:zoom-in-95 data-[state=closed]:ov:slide-out-to-left-1/2 data-[state=closed]:ov:slide-out-to-top-[48%] data-[state=open]:ov:slide-in-from-left-1/2 data-[state=open]:ov:slide-in-from-top-[48%] ov:rounded-lg",
             className
           )}
           {...props}

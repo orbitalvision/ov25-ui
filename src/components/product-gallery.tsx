@@ -40,7 +40,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
             const originalZIndex = container?.style.zIndex;
             const originalPosition = container?.style.position;
             if (container) {
-                container.style.zIndex = '9999999999999';
+                container.style.zIndex = '2147483644'; // max -1
             }
             
             return () => {

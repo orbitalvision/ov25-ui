@@ -54,57 +54,6 @@ export function ProductVariantsWrapper() {
       handleSelectionSelect(selection as any, variant.optionId);
     }, [handleSelectionSelect]);
 
-    // Mobile/tablet: show modules list in the drawer when modules option is active
-    if (window.innerWidth < 1024 && activeOptionId === 'modules') {
-      const isLoading = (!compatibleModules || compatibleModules.length === 0) && 
-        (!configuratorState?.snap2Objects || configuratorState.snap2Objects.length === 0);
-
-      const handleModuleSelect = (variant: Variant) => {
-        if (isModuleSelectionLoading) return;
-        const module = variant.data as CompatibleModule;
-        const modelPath = module?.model?.modelPath;
-        const modelId = module?.model?.modelId;
-        if (!modelPath || !modelId) return;
-        setIsModuleSelectionLoading(true);
-        selectModule(modelPath, modelId);
-      };
-
-      if (isLoading) {
-        return (
-          <div className="ov:flex ov:flex-col ov:items-center ov:justify-center ov:py-8 ov:space-y-4">
-            <p className="ov:text-sm ov:text-[var(--ov25-secondary-text-color)]">Loading...</p>
-          </div>
-        );
-      }
-
-      return (
-        <ProductVariants
-          isOpen={isVariantsOpen}
-          gridDivide={2}
-          onClose={handleCloseVariants}
-          title="Modules"
-          variants={(compatibleModules || []).map(module => ({
-            id: `${module.productId}-${module.model.modelId}`,
-            name: module.product.name,
-            price: 0,
-            image: module.product.hasImage ? module.product.imageUrl : '/placeholder.svg?height=200&width=200',
-            blurHash: '',
-            data: module,
-            isSelected: false
-          } as Variant))}
-          VariantCard={(props) => (
-            <ModuleVariantCard 
-              {...props} 
-              isLoading={isModuleSelectionLoading}
-            />
-          )}
-          drawerSize={drawerSize}
-          onSelect={handleModuleSelect}
-          isMobile={isMobile}
-        />
-      );
-    }
-
     // Apply filters and search to all options (memoized to recalculate when filters/search change)
     const filteredOptions = useMemo(() => {
       return allOptionsWithoutModules.map(option => {
@@ -164,6 +113,57 @@ export function ProductVariantsWrapper() {
         })
         .filter((item): item is { optionId: string; optionName: string; variants: any[] } => item !== null);
     }, [filteredOptions, allOptionsWithoutModules, selectedSelections]);
+
+    // Mobile/tablet: show modules list in the drawer when modules option is active
+    if (window.innerWidth < 1024 && activeOptionId === 'modules') {
+      const isLoading = (!compatibleModules || compatibleModules.length === 0) && 
+        (!configuratorState?.snap2Objects || configuratorState.snap2Objects.length === 0);
+
+      const handleModuleSelect = (variant: Variant) => {
+        if (isModuleSelectionLoading) return;
+        const module = variant.data as CompatibleModule;
+        const modelPath = module?.model?.modelPath;
+        const modelId = module?.model?.modelId;
+        if (!modelPath || !modelId) return;
+        setIsModuleSelectionLoading(true);
+        selectModule(modelPath, modelId);
+      };
+
+      if (isLoading) {
+        return (
+          <div className="ov:flex ov:flex-col ov:items-center ov:justify-center ov:py-8 ov:space-y-4">
+            <p className="ov:text-sm ov:text-[var(--ov25-secondary-text-color)]">Loading...</p>
+          </div>
+        );
+      }
+
+      return (
+        <ProductVariants
+          isOpen={isVariantsOpen}
+          gridDivide={2}
+          onClose={handleCloseVariants}
+          title="Modules"
+          variants={(compatibleModules || []).map(module => ({
+            id: `${module.productId}-${module.model.modelId}`,
+            name: module.product.name,
+            price: 0,
+            image: module.product.hasImage ? module.product.imageUrl : '/placeholder.svg?height=200&width=200',
+            blurHash: '',
+            data: module,
+            isSelected: false
+          } as Variant))}
+          VariantCard={(props) => (
+            <ModuleVariantCard 
+              {...props} 
+              isLoading={isModuleSelectionLoading}
+            />
+          )}
+          drawerSize={drawerSize}
+          onSelect={handleModuleSelect}
+          isMobile={isMobile}
+        />
+      );
+    }
 
     // Render all options, hiding inactive ones with display: none
     // This keeps components mounted, preventing image reloads when switching options

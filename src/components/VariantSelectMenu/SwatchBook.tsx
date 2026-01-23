@@ -11,7 +11,7 @@ interface SwatchBookProps {
 export const SwatchBook: React.FC<SwatchBookProps> = ({
   isMobile,
 }) => {
-  const { addSwatchesToCart, toggleSwatch, selectedSwatches, swatchRulesData, isSwatchBookOpen, setIsSwatchBookOpen } = useOV25UI();
+  const { addSwatchesToCart, toggleSwatch, selectedSwatches, swatchRulesData, isSwatchBookOpen, setIsSwatchBookOpen, setIsVariantsOpen, allOptions, setActiveOptionId } = useOV25UI();
 
   const calculateEmptySquares = () => {
     const maxSwatches = swatchRulesData.canExeedFreeLimit ? swatchRulesData.maxSwatches : swatchRulesData.freeSwatchLimit;
@@ -48,10 +48,17 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
     }
   };
 
+  const handleOpen3DConfigurator = () => {
+    setIsSwatchBookOpen(false);
+    setActiveOptionId(allOptions[0].id);
+    setZoomedSwatch(null);
+    setIsVariantsOpen(true);
+  };
+
   return (
     <Dialog open={isSwatchBookOpen} onOpenChange={handleDialogOpenChange}>
-      <DialogContent id="ov25-swatchbook" className="ov:flex ov:flex-col ov:p-2 ov:md:p-6 ov:bg-white ov:border-none ov:max-w-[95vw] ov:md:max-w-[700px] ov:h-[95vh] ov:md:h-[800px] ov:mx-auto ov:my-2 ov:md:m-0" aria-describedby={undefined}>
-        <> 
+      <DialogContent id="ov25-swatchbook" className="ov:flex ov:flex-col ov:p-2 ov:md:p-6 ov:bg-white ov:border-none ov:max-w-[95vw] ov:md:max-w-[700px] ov:h-[90vh] ov:max-h-[90vh] ov:md:h-[800px] ov:mx-auto ov:my-2 ov:md:m-0 ov:overflow-hidden" aria-describedby={undefined}>
+        <div className="ov:flex ov:flex-col ov:min-h-0 ov:h-full">
           <div id="ov25-swatchbook-title" className="ov:flex-shrink-0 ov:text-black ov:text-[1.5em] ov:font-normal">
             <DialogTitle>Swatch Book</DialogTitle>
           </div>         
@@ -80,20 +87,20 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
           
           <div 
             id="ov25-swatchbook-content" 
-            className="ov:flex-1 ov:overflow-y-auto ov:overflow-x-hidden ov:min-h-[120px] ov:md:min-h-[240px] ov:focus:outline-none"
+            className="ov:flex-1 ov:overflow-y-hidden ov:overflow-x-hidden ov:min-h-0 ov:focus:outline-none"
             tabIndex={0}
             onWheel={(e) => e.currentTarget.scrollTop += e.deltaY}
           >
             {selectedSwatches.length === 0 && (
               <div id="ov25-swatchbook-empty" className="ov:flex ov:flex-col ov:items-center ov:justify-center ov:py-8 ov:px-4">
                 <p className='ov25-swatchbook-empty-title ov:text-black ov:text-lg ov:font-medium ov:mb-2'>No swatches selected</p>
-                <p className='ov25-swatchbook-empty-description ov:text-gray-600 ov:text-sm ov:text-center'>Use the 3D Configurator to view fabrics and select swatch samples</p>
+                <p className='ov25-swatchbook-empty-description ov:text-gray-600 text-sm text-center'>Use the <span onClick={handleOpen3DConfigurator} className="ov:underline ov:cursor-pointer">3D Configurator</span> to view fabrics and select swatch samples</p>
               </div>  
             )}
-            <div id="ov25-swatchbook-swatches-list" className="ov:grid ov:grid-cols-2 ov:sm:grid-cols-3 ov:md:grid-cols-4 ov:gap-2 ov:md:gap-2 ov:w-full ov:px-4 ov:py-2">
+            <div id="ov25-swatchbook-swatches-list" className="ov:overflow-y-auto ov:grid ov:grid-cols-2 ov:sm:grid-cols-3 ov:md:grid-cols-4 ov:gap-2 ov:md:gap-2 ov:w-full ov:px-4 ov:py-2">
               {selectedSwatches.map((swatch) => (
-                <div key={`${swatch.manufacturerId}-${swatch.name}-${swatch.option}`} className='ov25-swatch-item ov:flex ov:flex-col ov:gap-2 ov:items-center ov:text-center ov:w-full ov:min-h-[100px] ov:md:w-auto ov:md:h-auto'>
-                  <div className='ov25-swatch-image-container ov:relative ov:w-[100px] ov:h-[100px] ov:md:w-[120px] ov:md:h-[120px] group'>
+                <div key={`${swatch.manufacturerId}-${swatch.name}-${swatch.option}`} className='ov25-swatch-item ov:flex ov:flex-col ov:gap-2 ov:items-center ov:text-center ov:w-full ov:min-h-[85px] ov:md:w-auto ov:md:h-auto'>
+                  <div className='ov25-swatch-image-container ov:relative ov:w-[85px] ov:h-[85px] ov:md:w-[105px] ov:md:h-[105px] group'>
                     <img src={swatch.thumbnail && swatch.thumbnail.miniThumbnails ? swatch.thumbnail.miniThumbnails.medium : '/placeholder.svg?height=200&width=200'} alt={swatch.name} className='ov25-swatch-image ov:w-full ov:h-full ov:object-cover ov:rounded-lg'/>
                     <button
                       onClick={() => toggleSwatch(swatch)}
@@ -115,14 +122,14 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
                 </div>
               ))}
               {emptySquares.map((emptySquare) => (
-                <div key={emptySquare.id} className='ov25-swatch-item ov:flex ov:flex-col ov:gap-2 ov:items-center ov:text-center ov:w-full ov:min-h-[100px] ov:md:w-auto ov:md:h-auto'>
-                  <div className='ov25-swatch-image-container ov:relative ov:w-[100px] ov:h-[100px] ov:md:w-[120px] ov:md:h-[120px] ov:border-2 ov:border-dashed ov:border-gray-300 ov:rounded-lg ov:flex ov:items-center ov:justify-center ov:bg-gray-50'>
+                <div key={emptySquare.id} className='ov25-swatch-item ov:flex ov:flex-col ov:gap-2 ov:items-center ov:text-center ov:w-full ov:min-h-[85px] ov:md:w-auto ov:md:h-auto'>
+                  <div className='ov25-swatch-image-container ov:relative ov:w-[80px] ov:h-[80px] ov:md:w-[105px] ov:md:h-[105px] ov:border-2 ov:border-dashed ov:border-gray-300 ov:rounded-lg ov:flex ov:items-center ov:justify-center ov:bg-gray-50'>
                   </div>
                 </div>
               ))}
             </div>
           </div>
-          <div id="ov25-swatchbook-controls" className="ov:flex ov:justify-between ov:items-center ov:flex-shrink-0 ov:mt-auto">
+          <div id="ov25-swatchbook-controls" className="ov:flex ov:justify-between ov:items-center ov:flex-shrink-0">
             <div>
               <span>Total cost: </span>
               <span>£{(swatchRulesData.pricePerSwatch * Math.max(selectedSwatches.length - swatchRulesData.freeSwatchLimit, 0)).toFixed(2)}</span>
@@ -139,7 +146,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
               </button>
             </div>
           </div>
-        </>
+        </div>
       </DialogContent>
     </Dialog>
   );

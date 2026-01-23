@@ -44,11 +44,12 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({ isOpen, on
     }
   }, [isOpen, handleKeyDown]);
 
+  // render at z-index 2147483646 (max -1)
   return createPortal(
     <div
       ref={modalRef}
       className={cn(
-        'ov:fixed ov:inset-0 ov:z-[99999999999999] ov:bg-black/50 ov:flex ov:flex-row ov:items-start ov:justify-center',
+        'ov:fixed ov:inset-0 ov:z-2147483646 ov:bg-black/50 ov:flex ov:flex-row ov:items-start ov:justify-center',
         'ov:p-4',
         !isOpen && 'ov:hidden ov:pointer-events-none'
       )}

@@ -293,7 +293,7 @@ export const ModuleBottomPanel: React.FC<{ portalTarget?: Element }> = ({ portal
                           return hoveredModule === `${module.productId}-${module.model.modelId}`;
                         })() && createPortal(
                           <div 
-                            className="ov:fixed ov:px-3 ov:py-2 ov:bg-gray-900 ov:text-white ov:text-sm ov:rounded-lg ov:shadow-lg ov:z-[999999999999999] ov:pointer-events-none ov:whitespace-nowrap"
+                            className="ov:fixed ov:px-3 ov:py-2 ov:bg-gray-900 ov:text-white ov:text-sm ov:rounded-lg ov:shadow-lg ov:z-2147483646 ov:pointer-events-none ov:whitespace-nowrap"
                             style={{ 
                               left: `${tooltipPosition.x}px`,
                               top: `${tooltipPosition.y}px`,

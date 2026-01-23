@@ -242,7 +242,7 @@ const TwoStageDrawerComponent = ({
         bottom: 0,
         touchAction: "none",
         WebkitOverflowScrolling: 'touch',
-        zIndex: 2147483647,
+        zIndex: 2147483646, // max -1
         position: 'fixed',
         left: 0,
         right: 0,

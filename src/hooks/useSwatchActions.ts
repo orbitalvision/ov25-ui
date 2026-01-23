@@ -33,7 +33,6 @@ export function useSwatchActions() {
         action: {
           label: 'Open Swatchbook',
           onClick: () => {
-            setIsVariantsOpen(false);
             setIsSwatchBookOpen(true);
           }
         },
@@ -44,7 +43,6 @@ export function useSwatchActions() {
         action: {
           label: 'Open Swatchbook',
           onClick: () => {
-            setIsVariantsOpen(false);
             setIsSwatchBookOpen(true);
           }
         },

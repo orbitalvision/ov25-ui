@@ -135,8 +135,9 @@ export function VariantContentDesktop() {
     }, [isVariantsOpen, setIsVariantsOpen]);
 
     // Always render the container for transform effects, but conditionally render the content
+    // z-index 2147483644 is max - 3
     const menuContent = (
-        <div data-clarity-mask="true" className="ov:inset-0 ov:size-full ov:fixed ov:pointer-events-none ov:z-[9999999999999] ">
+        <div data-clarity-mask="true" className="ov:inset-0 ov:size-full ov:fixed ov:pointer-events-none ov:z-2147483644">
             <div className="ov:w-full ov:h-full ov:relative ov:pointer-events-none">
             <div 
               ref={menuContainerRef}
@@ -165,7 +166,7 @@ export function VariantContentDesktop() {
       shadowContainer.style.width = '100%';
       shadowContainer.style.height = '100%';
       shadowContainer.style.pointerEvents = 'none';
-      shadowContainer.style.zIndex = '9999999999999';
+      shadowContainer.style.zIndex = '2147483644'; // max - 3
       document.body.appendChild(shadowContainer);
       
       // Create Shadow DOM root

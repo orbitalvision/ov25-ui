@@ -297,7 +297,7 @@ html #ov25-configurator-variant-menu-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 99999999999992;
+    z-index: 2147483646; /* max - 1 */
     cursor: pointer;
     position: absolute;
     width: 6rem;

@@ -82,7 +82,6 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
     };
 
     const handleSwatchButtonClick = () => {
-        setIsVariantsOpen(false);
         setIsSwatchBookOpen(true);
     };
 

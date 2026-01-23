@@ -86,18 +86,18 @@ export const Snap2ConfigureUI: React.FC = () => {
 
   return (
     <>
-      {/* Render iframe on mobile when needed (hidden during initial module selection) */}
+      {/* Render iframe on mobile when needed (hidden during initial module selection). z-index 2147483644 is max - 3 */}
       {window.innerWidth < 1024 && shouldRenderIframe && createPortal(
         <>
           <div className={cn(
-            "ov:fixed ov:inset-0 ov:w-full ov:h-full ov:z-[2147483645]",
+            "ov:fixed ov:inset-0 ov:w-full ov:h-full ov:z-2147483644",
             (!isVariantsOpen || (activeOptionId === 'modules' && (!configuratorState?.snap2Objects || configuratorState.snap2Objects.length === 0))) && "ov:opacity-0 ov:pointer-events-none"
           )}>
             <ProductGallery key={`gallery-${iframeResetKey}`} isInModal={false} isPreloading={preloading} />
           </div>
           <div 
             className={cn(
-              "ov:fixed ov:top-0 ov:left-0 ov:w-full ov:z-[2147483645] ov:pointer-events-none ov:transition-[height] ov:duration-500",
+              "ov:fixed ov:top-0 ov:left-0 ov:w-full ov:z-2147483644 ov:pointer-events-none ov:transition-[height] ov:duration-500",
               (!isVariantsOpen || (activeOptionId === 'modules' && (!configuratorState?.snap2Objects || configuratorState.snap2Objects.length === 0))) && "ov:opacity-0 ov:pointer-events-none"
             )}
             style={{ 
