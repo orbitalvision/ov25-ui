@@ -155,6 +155,30 @@ try {
   fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2) + '\n');
   
   console.log('✓ Both versions published successfully!');
+  
+  // Clean up and reinstall dependencies to ensure dev/react-test works correctly
+  console.log('\n=== Cleaning up dependencies ===');
+  const nodeModulesPath = path.join(rootDir, 'node_modules');
+  const packageLockPath = path.join(rootDir, 'package-lock.json');
+  
+  // Delete node_modules if it exists
+  if (fs.existsSync(nodeModulesPath)) {
+    console.log('Deleting node_modules...');
+    fs.rmSync(nodeModulesPath, { recursive: true, force: true });
+    console.log('✓ node_modules deleted');
+  }
+  
+  // Delete package-lock.json if it exists
+  if (fs.existsSync(packageLockPath)) {
+    console.log('Deleting package-lock.json...');
+    fs.unlinkSync(packageLockPath);
+    console.log('✓ package-lock.json deleted');
+  }
+  
+  // Reinstall dependencies
+  console.log('Reinstalling dependencies...');
+  execSync('npm install', { cwd: rootDir, stdio: 'inherit' });
+  console.log('✓ Dependencies reinstalled successfully\n');
 } catch (error) {
   // Make sure test server is killed if it was started
   if (testServer && testServer.pid) {
