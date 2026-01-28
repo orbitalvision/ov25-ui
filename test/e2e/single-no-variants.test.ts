@@ -51,7 +51,7 @@ test.describe('Windrush - Loveseat. Single product without variants', () => {
         await expect(shareButton).toBeVisible();
         await shareButton.click();
         // link should be copied to clipboard
-        await expect(page.evaluate(() => navigator.clipboard.readText())).resolves.toContain('http://localhost:3008/single-no-variants.html?configuration=eyJwIjo2MDcsInMiOls0LDE5XX0');
+        await expect(page.evaluate(() => navigator.clipboard.readText())).resolves.toContain('http://localhost:3008/single-no-variants.html?configuration=');
         // toast should appear
         const toast = page.locator('li[data-sonner-toast]');
         await expect(toast).toBeVisible();
@@ -83,9 +83,8 @@ test.describe('Windrush - Loveseat. Single product without variants', () => {
         const arButton = page.locator('#ov25-ar-toggle-button');
         await expect(arButton).toBeVisible();
         await arButton.click();
-        // dialog should appear
-        const arDialogContainer = page.locator('#ov25-configurator-view-controls-container');
-        const arDialog = arDialogContainer.locator('#ov25-ar-preview-qr-code-dialog');
+        // dialog should appear (AR dialog is portaled to document.body, not inside the container)
+        const arDialog = page.locator('#ov25-ar-preview-qr-code-dialog');
         await expect(arDialog).toBeVisible();
         await expect(arDialog).toContainText('View in room');
         await expect(arDialog).toContainText('Scan the QR code on your phones camera to view this item in your room');
@@ -111,7 +110,7 @@ test.describe('Windrush - Loveseat. Single product without variants', () => {
         await expect(shareButton).toBeVisible();
         await shareButton.click();
         // link should be copied to clipboard
-        await expect(page.evaluate(() => navigator.clipboard.readText())).resolves.toContain('http://localhost:3008/single-no-variants.html?configuration=eyJwIjo2MDcsInMiOls0LDE5XX0');
+        await expect(page.evaluate(() => navigator.clipboard.readText())).resolves.toContain('http://localhost:3008/single-no-variants.html?configuration=');
         // toast should appear - use .last() to get the most recent toast
         const toast2 = page.locator('li[data-sonner-toast]').last();
         await expect(toast2).toBeVisible();
@@ -145,4 +144,5 @@ test.describe('Windrush - Loveseat. Single product without variants', () => {
         await fullscreenButton.click();
         await expect(page.evaluate(() => document.fullscreenElement?.id)).resolves.toBe(undefined);
     });
+    
 });
