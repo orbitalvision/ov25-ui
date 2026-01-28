@@ -161,11 +161,18 @@ try {
   const nodeModulesPath = path.join(rootDir, 'node_modules');
   const packageLockPath = path.join(rootDir, 'package-lock.json');
   
-  // Delete node_modules if it exists
+  // Delete node_modules if it exists (using shell command for better reliability with symlinks)
   if (fs.existsSync(nodeModulesPath)) {
     console.log('Deleting node_modules...');
-    fs.rmSync(nodeModulesPath, { recursive: true, force: true });
-    console.log('✓ node_modules deleted');
+    try {
+      // Use shell command for more reliable deletion on macOS/Unix systems
+      execSync(`rm -rf "${nodeModulesPath}"`, { cwd: rootDir, stdio: 'inherit' });
+      console.log('✓ node_modules deleted');
+    } catch (error) {
+      // Fallback to fs.rmSync if shell command fails
+      fs.rmSync(nodeModulesPath, { recursive: true, force: true });
+      console.log('✓ node_modules deleted (fallback method)');
+    }
   }
   
   // Delete package-lock.json if it exists
