@@ -13,8 +13,8 @@ const initializeConfigurator = () => {
 
   // Inject the configurator - Product with swatches
   injectConfigurator({
-    apiKey: () => { return '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d' }, 
-    productLink: () => { return '217' }, // Woodbros Pickering-3 Seater (has swatches)
+    apiKey: () => { return '51-dd7de4d1dabdd994b22c406595cfe15589623ec85622b9f721ca4d1dbdb58721' }, 
+    productLink: () => { return '1682' }, // Woodbros Pickering-3 Seater (has swatches)
     galleryId: { id: '.configurator-container', replace: true },
     variantsId: '#ov25-controls',
     swatchesId: '#ov25-swatches',
