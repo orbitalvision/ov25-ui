@@ -159,6 +159,14 @@ export function VariantContentDesktop() {
     let shadowContainer = document.getElementById('ov25-variants-shadow-container');
     if (!shadowContainer) {
       shadowContainer = document.createElement('div');
+      // add an empty <span> inside the shadow container to stop shopify themes with empty div rules from hiding the div
+      // even though its got an iframe in its shadow root, the shopify themes still recognise it as empty div and apply a rule like this:
+      // div:empty { display: none; }
+      const shadowContainerEmptySpan = document.createElement('span');
+      shadowContainerEmptySpan.style.width = '100%';
+      shadowContainerEmptySpan.style.height = '100%';
+      shadowContainerEmptySpan.style.pointerEvents = 'none';
+      shadowContainer.appendChild(shadowContainerEmptySpan);
       shadowContainer.id = 'ov25-variants-shadow-container';
       shadowContainer.style.position = 'fixed';
       shadowContainer.style.top = '0';

@@ -28,7 +28,7 @@ const VariantImage = React.memo(({
   if (name.toLowerCase() === "none") {
     return (
       <div className="ov:w-full ov:h-full ov:flex ov:items-center ov:justify-center" data-none="true">
-        <BanIcon className="ov:w-10 ov:h-10 ov:text-[var(--ov25-secondary-text-color)]" />
+        <BanIcon className="ov:w-10 ov:h-10 ov:text-(--ov25-secondary-text-color)" />
       </div>
     );
   }
@@ -47,7 +47,7 @@ const VariantImage = React.memo(({
   
   return (
     <div className="ov:w-full ov:h-full ov:bg-gray-200 ov:flex ov:items-center ov:justify-center">
-      <span className="ov:text-xs ov:text-[var(--ov25-secondary-text-color)]">No img</span>
+      <span className="ov:text-xs ov:text-(--ov25-secondary-text-color)">No img</span>
     </div>
   );
 }, (prevProps, nextProps) => {
@@ -66,12 +66,14 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
     const { shouldShowSwatch, isSwatchSelectedFor, getSwatchClickHandler } = useSwatchActions();
     const swatchVisible = shouldShowSwatch(!!variant.isSelected, variant.swatch);
     const handleSwatchClick = getSwatchClickHandler(!!variant.isSelected, variant.swatch);
+    const isSwatchSelected = isSwatchSelectedFor(variant.swatch);
 
     return (
     <div 
         className={`ov25-default-variant-card ov:flex ov:flex-col ov:items-center ov:pt-1 ${isGrouped && isMobile ? '' : 'ov:my-4 ov:pb-1'} ${variant.isSelected ? '' : ''} ov:transition-transform`}
         key={variant.id + variant.groupId + variant.optionId}
         data-selected={variant.isSelected}
+        data-swatch-selected={isSwatchSelected}
         title={variant.name}
     >
         <div className="ov:relative">
