@@ -185,7 +185,9 @@ try {
   // Reinstall dependencies
   console.log('Reinstalling dependencies...');
   execSync('npm install', { cwd: rootDir, stdio: 'inherit' });
-  console.log('✓ Dependencies reinstalled successfully\n');
+
+  console.log('✓ Both versions published successfully, and Dependencies reinstalled successfully 🎉');
+  
 } catch (error) {
   // Make sure test server is killed if it was started
   if (testServer && testServer.pid) {
