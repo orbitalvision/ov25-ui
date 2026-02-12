@@ -7,7 +7,7 @@ import { Eye, EyeClosed, TableRowsSplit } from 'lucide-react';
 import SaveSnap2Menu from './SaveSnap2Menu.js';
 
 const Snap2Controls: React.FC = () => {
-  const { controlsHidden, toggleHideAll, shareDialogTrigger, isVariantsOpen, setIsVariantsOpen, setActiveOptionId, allOptions, isMobile, configuratorState, isModalOpen } = useOV25UI();
+  const { controlsHidden, toggleHideAll, shareDialogTrigger, isVariantsOpen, setIsVariantsOpen, setActiveOptionId, allOptions, isMobile, configuratorState, isModalOpen, cssString } = useOV25UI();
   
   const [canSeeDimensions, setCanSeeDimensions] = useState(false);
   const [canSeeMiniDimensions, setCanSeeMiniDimensions] = useState(false);
@@ -21,11 +21,11 @@ const Snap2Controls: React.FC = () => {
   }, [isModalOpen]);
 
   const handleToggleDimensions = () => {
-    toggleDimensions(canSeeDimensions, setCanSeeDimensions);
+    toggleDimensions(canSeeDimensions, setCanSeeDimensions, undefined, cssString);
   };
 
   const handleToggleMiniDimensionsClick = () => {
-    toggleMiniDimensions(canSeeMiniDimensions, setCanSeeMiniDimensions);
+    toggleMiniDimensions(canSeeMiniDimensions, setCanSeeMiniDimensions, undefined, cssString);
   };
   
   const handleVariantsClick = () => {

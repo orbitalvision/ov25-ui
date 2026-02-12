@@ -36,6 +36,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
     toggleAR,
     hideAr,
     uniqueId,
+    cssString,
   } = useOV25UI();
 
   // Local state for dimensions
@@ -89,7 +90,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
     (currentProduct as any)?.dimensionZ);
 
   const handleToggleDimensions = () => {
-    toggleDimensions(canSeeDimensions, setCanSeeDimensions, uniqueId);
+    toggleDimensions(canSeeDimensions, setCanSeeDimensions, uniqueId, cssString);
   }
 
   const handleAnimationButtonText = () => {

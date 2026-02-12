@@ -686,6 +686,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
           popoverPortal: popoverPortalShadowRoot,
           swatchbookPortal: swatchbookPortalShadowRoot
         }}
+        cssString={cssString}
       >
         {portals}
       </OV25UIProvider>

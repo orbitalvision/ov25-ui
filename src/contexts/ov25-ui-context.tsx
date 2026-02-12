@@ -145,6 +145,7 @@ interface OV25UIContextType {
     popoverPortal?: ShadowRoot;
     swatchbookPortal?: ShadowRoot;
   };
+  cssString?: string;
   // State
   products: Product[];
   currentProductId?: string;
@@ -295,6 +296,14 @@ interface OV25UIContextType {
   toggleAR: () => void;
   cleanupConfigurator: () => void;
   applySearchAndFilters: (option: Option | SizeOption, optionId: string) => Option | SizeOption;
+  /** Open the variant configurator (closes swatch book, opens variants drawer). Optionally pass an option name (case insensitive) to open on that option. */
+  openConfigurator: (optionName?: string) => void;
+  /** Close the variant configurator drawer. For use by custom buttons. */
+  closeConfigurator: () => void;
+  /** Open the swatch book. Exposed for custom buttons. */
+  openSwatchBook: () => void;
+  /** Close the swatch book. Exposed for custom buttons. */
+  closeSwatchBook: () => void;
 }
 
 // Create the context
@@ -330,7 +339,8 @@ export const OV25UIProvider: React.FC<{
     configuratorViewControls?: ShadowRoot;
     popoverPortal?: ShadowRoot;
     swatchbookPortal?: ShadowRoot;
-  }
+  },
+  cssString?: string,
 }> = ({ 
   children,
   productLink,
@@ -350,7 +360,8 @@ export const OV25UIProvider: React.FC<{
   mobileLogoURL,
   uniqueId,
   useInlineVariantControls = false,
-  shadowDOMs
+  shadowDOMs,
+  cssString,
 }) => {
   // State definitions
   const [products, setProducts] = useState<Product[]>([]);
@@ -948,6 +959,41 @@ export const OV25UIProvider: React.FC<{
     }
   }, [allOptions, setPreloading, setActiveOptionId, setIsVariantsOpen, setIsModalOpen, compatibleModules, setIsModulePanelOpen]);
 
+  /** Open variant configurator: close swatch book, open variants drawer. Optional optionName uses fuzzy match; fallback to first option. */
+  const openConfigurator = useCallback((optionName?: string) => {
+    setIsSwatchBookOpen(false);
+    if (allOptions.length > 0) {
+      const name = optionName?.trim();
+      let targetId: string | undefined;
+      if (name) {
+        const withSimilarity = allOptions.map((opt) => ({
+          id: opt.id,
+          similarity: stringSimilarity(opt.name.toLowerCase(), name.toLowerCase()),
+        }));
+        const best = withSimilarity.reduce((a, b) => (a.similarity >= b.similarity ? a : b));
+        targetId = best.similarity > 0.4 ? best.id : undefined;
+      }
+      setActiveOptionId(targetId ?? allOptions[0].id);
+    }
+    setIsVariantsOpen(true);
+  }, [allOptions, setIsSwatchBookOpen, setActiveOptionId, setIsVariantsOpen]);
+
+  /** Close variant configurator drawer. Exposed for custom buttons. */
+  const closeConfigurator = useCallback(() => {
+    setIsSwatchBookOpen(false);
+    setIsVariantsOpen(false);
+  }, [setIsVariantsOpen]);
+
+  /** Open the swatch book. Exposed for custom buttons. */
+  const openSwatchBook = useCallback(() => {
+    setIsSwatchBookOpen(true);
+  },[setIsSwatchBookOpen])
+
+  /** Close the swatch book. Exposed for custom buttons. */
+  const closeSwatchBook = useCallback(() => {
+    setIsSwatchBookOpen(false);
+  },[setIsSwatchBookOpen])
+
   // Expose configure handler ref
   useEffect(() => {
     configureHandlerRef.current = handleConfigureClick;
@@ -956,6 +1002,20 @@ export const OV25UIProvider: React.FC<{
       (window as any).ov25ConfigureHandlerRef.current = handleConfigureClick;
     }
   }, [handleConfigureClick]);
+
+  // Expose open/close configurator on window for developers (e.g. custom buttons)
+  useEffect(() => {
+    (window as any).ov25OpenConfigurator = openConfigurator;
+    (window as any).ov25CloseConfigurator = closeConfigurator;
+    (window as any).ov25OpenSwatchBook = openSwatchBook;
+    (window as any).ov25CloseSwatchBook = closeSwatchBook;
+    return () => {
+      delete (window as any).ov25OpenConfigurator;
+      delete (window as any).ov25CloseConfigurator;
+      delete (window as any).ov25OpenSwatchBook;
+      delete (window as any).ov25CloseSwatchBook;
+    };
+  }, [openConfigurator, closeConfigurator, openSwatchBook, closeSwatchBook]);
 
   // Expose cleanup function via window object
   useEffect(() => {
@@ -1269,6 +1329,7 @@ export const OV25UIProvider: React.FC<{
   const contextValue: OV25UIContextType = {
     // Shadow DOM references
     shadowDOMs,
+    cssString,
     // State
     products,
     currentProductId,
@@ -1396,6 +1457,10 @@ export const OV25UIProvider: React.FC<{
     toggleAR: handleToggleAR,
     cleanupConfigurator,
     applySearchAndFilters,
+    openConfigurator,
+    closeConfigurator,
+    openSwatchBook,
+    closeSwatchBook,
   };
 
   return (

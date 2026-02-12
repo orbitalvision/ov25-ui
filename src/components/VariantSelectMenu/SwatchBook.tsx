@@ -11,7 +11,7 @@ interface SwatchBookProps {
 export const SwatchBook: React.FC<SwatchBookProps> = ({
   isMobile,
 }) => {
-  const { addSwatchesToCart, toggleSwatch, selectedSwatches, swatchRulesData, isSwatchBookOpen, setIsSwatchBookOpen, isVariantsOpen, setIsVariantsOpen, allOptions, setActiveOptionId } = useOV25UI();
+  const { addSwatchesToCart, toggleSwatch, selectedSwatches, swatchRulesData, isSwatchBookOpen, setIsSwatchBookOpen, isVariantsOpen, openConfigurator } = useOV25UI();
 
   const calculateEmptySquares = () => {
     const selectedCount = selectedSwatches.length;
@@ -53,11 +53,10 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
   };
 
   const handleOpen3DConfigurator = () => {
-    setIsSwatchBookOpen(false);
-    setActiveOptionId(allOptions[0].id);
+    openConfigurator();
     setZoomedSwatch(null);
-    setIsVariantsOpen(true);
   };
+
   return (
     <Dialog open={isSwatchBookOpen} onOpenChange={handleDialogOpenChange}>
       <DialogContent id="ov25-swatchbook" className="ov:flex ov:flex-col ov:p-2 ov:md:p-6 ov:bg-white ov:border-none ov:max-w-[95vw] ov:md:max-w-[700px] ov:h-[90vh] ov:max-h-[90vh] ov:md:h-[800px] ov:mx-auto ov:my-2 ov:md:m-0 ov:overflow-hidden" aria-describedby={undefined}>

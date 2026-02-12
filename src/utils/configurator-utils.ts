@@ -123,9 +123,10 @@ export const addToCart = (uniqueId?: string): void => {
 export const toggleDimensions = (
   canSeeDimensions: boolean,
   setCanSeeDimensions: React.Dispatch<React.SetStateAction<boolean>>,
-  uniqueId?: string
+  uniqueId?: string,
+  cssString?: string
 ): void => {
-  sendMessageToIframe('VIEW_DIMENSIONS', { dimensions: !canSeeDimensions }, uniqueId);
+  sendMessageToIframe('VIEW_DIMENSIONS', { dimensions: !canSeeDimensions, styles: cssString }, uniqueId);
   setCanSeeDimensions(prev => !prev);
 };
 
@@ -135,9 +136,10 @@ export const toggleDimensions = (
 export const toggleMiniDimensions = (
   canSeeMiniDimensions: boolean,
   setCanSeeMiniDimensions: React.Dispatch<React.SetStateAction<boolean>>,
-  uniqueId?: string
+  uniqueId?: string,
+  cssString?: string
 ): void => {
-  sendMessageToIframe('VIEW_MINI_DIMENSIONS', { miniDimensions: !canSeeMiniDimensions }, uniqueId);
+  sendMessageToIframe('VIEW_MINI_DIMENSIONS', { miniDimensions: !canSeeMiniDimensions, styles: cssString }, uniqueId);
   setCanSeeMiniDimensions(prev => !prev);
 };
 

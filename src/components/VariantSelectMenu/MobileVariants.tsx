@@ -8,6 +8,7 @@ import { VariantsContent } from './VariantsContent.js';
 import { FilterControls } from './FilterControls.js';
 import { FilterContent } from './FilterContent.js';
 import { NoResults } from './NoResults.js';
+import { cn } from '../../lib/utils.js';
 
 
 const VariantsContentWithCarousel = React.memo(({ variantsToRender, VariantCard, onSelect, isMobile, isGrouped = false }: { variantsToRender: Variant[], VariantCard: React.ComponentType<VariantCardProps>, onSelect: (variant: Variant) => void, isMobile: boolean, isGrouped: boolean }) => {
@@ -19,19 +20,19 @@ const VariantsContentWithCarousel = React.memo(({ variantsToRender, VariantCard,
       <>
         <Carousel opts={{ dragFree: true, loop: false }}>
           <CarouselContent>
-            <CarouselItem key={`spacer`} style={{flexBasis: `9%`}} className="ov:cursor-pointer">
+            <CarouselItem key={`spacer`} className="ov:cursor-pointer ov:basis-[9%]">
             </CarouselItem>
             {variantsToRender.map((variant, index) => {
               const basis =  activeOptionName.toLowerCase() === 'size' ? 2  : (activeOptionName.toLowerCase() === 'modules' ? 2 : 5)
-              const flexBasis = {
-                1: '100%',
-                2: '50%',
-                3: '33.333%',
-                4: '25%',
-                5: '20%'
+              const basisClass = {
+                1: 'ov:basis-full',
+                2: 'ov:basis-[45%]',
+                3: 'ov:basis-1/3',
+                4: 'ov:basis-1/4',
+                5: 'ov:basis-[20%]'
               }[basis];
               return (
-                <CarouselItem key={variant.id + (variant.groupId || '') + (variant.optionId || '')} style={{flexBasis}} className="ov:cursor-pointer">
+                <CarouselItem key={variant.id + (variant.groupId || '') + (variant.optionId || '')} className={cn('ov:cursor-pointer', basisClass)}>
                   <VariantCard
                     variant={variant}
                     onSelect={onSelect}
