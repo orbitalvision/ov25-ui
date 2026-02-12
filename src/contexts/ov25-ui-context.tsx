@@ -974,8 +974,8 @@ export const OV25UIProvider: React.FC<{
         targetId = best.similarity > 0.4 ? best.id : undefined;
       }
       setActiveOptionId(targetId ?? allOptions[0].id);
+      setIsVariantsOpen(true);
     }
-    setIsVariantsOpen(true);
   }, [allOptions, setIsSwatchBookOpen, setActiveOptionId, setIsVariantsOpen]);
 
   /** Close variant configurator drawer. Exposed for custom buttons. */
