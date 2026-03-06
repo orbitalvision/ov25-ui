@@ -85,18 +85,21 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
         setIsSwatchBookOpen(true);
     };
 
+    const targetOption = currentOptionId === activeOptionId ? activeOption :
+        allOptionsWithoutModules?.find(opt => opt.id === currentOptionId);
+
     const handleFilterChange = React.useCallback((filterKey: string, optionValue: string, checked: boolean) => {
-        if (!activeOption?.name || !availableProductFilters?.[activeOption.name]?.[filterKey]) return;
+        if (!targetOption?.name || !availableProductFilters?.[targetOption.name]?.[filterKey]) return;
         setAvailableProductFilters(prev => ({
             ...prev,
-            [activeOption.name]: {
-                ...prev[activeOption.name],
-                [filterKey]: prev[activeOption.name][filterKey].map(opt => 
+            [targetOption.name]: {
+                ...prev[targetOption.name],
+                [filterKey]: prev[targetOption.name][filterKey].map(opt =>
                     opt.value === optionValue ? { ...opt, checked } : opt
                 )
             }
         }));
-    }, [activeOption, availableProductFilters, setAvailableProductFilters]);
+    }, [targetOption, availableProductFilters, setAvailableProductFilters]);
 
     const shouldShowFilterButton = React.useMemo(() => {
         // For inline variant content, we need to find the option by currentOptionId
@@ -109,9 +112,6 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
         return Object.keys(optionFilters).some((key) => optionFilters[key]?.length > 0);
     }, [currentOptionId, activeOptionId, activeOption, allOptionsWithoutModules, availableProductFilters]);
 
-    const targetOption = currentOptionId === activeOptionId ? activeOption : 
-        allOptionsWithoutModules?.find(opt => opt.id === currentOptionId);
-    
     const selectedFilters = availableProductFilters && targetOption?.name && availableProductFilters[targetOption.name] ? Object.keys(availableProductFilters[targetOption.name])
     .flatMap(filterName => 
         availableProductFilters[targetOption.name][filterName]
@@ -170,10 +170,10 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
                 )}
             </div>
             {!isFilterOpen && !isMobile && selectedFilters.length > 0 && 
-            <div id="ov25-filter-controls-pills" className="ov:flex ov:flex-wrap ov:gap-2 ov:pb-2 ov:max-h-[200px] ov:overflow-y-auto ov:border-b ov:border-gray-200">
+            <div id="ov25-filter-controls-pills" className="ov:flex ov:flex-wrap ov:gap-2 ov:pb-2 ov:max-h-[200px] ov:overflow-y-auto ov:border-gray-200">
                 {
                     (() => {
-                        if (!activeOption || !availableProductFilters || !availableProductFilters[activeOption.name]) {
+                        if (!targetOption || !availableProductFilters || !availableProductFilters[targetOption.name]) {
                             if (!isGrouped) {
                                 return null;
                             }

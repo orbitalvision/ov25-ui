@@ -151,7 +151,7 @@ export const InlineVariantContent: React.FC = () => {
 
             {/* Expanded Content */}
             {isExpanded && (
-              <div className="ov:border-t ov:min-w-[460px] ov:h-[440px] ov:border-[var(--ov25-border-color)] ov:bg-[var(--ov25-background-color)]">
+              <div className="ov:border-t ov:min-w-[460px] ov:border-[var(--ov25-border-color)] ov:bg-[var(--ov25-background-color)]">
                 {/* Filter Controls - Only for non-size options */}
                 {option.id !== 'size' && (
                   <div className="ov:p-1 ov:border-b ov:border-[var(--ov25-border-color)]">
@@ -165,16 +165,16 @@ export const InlineVariantContent: React.FC = () => {
                 )}
                 
                 {/* Variants Content */}
-                <div className="ov:relative ov:w-full ov:h-full ov:flex ov:flex-col">
-                  <div className="ov:relative ov:flex-1 ov:overflow-hidden ov:flex ov:flex-col">
+                <div className="ov:relative ov:w-full ov:flex ov:flex-col">
+                  <div className="ov:relative ov:flex ov:flex-col">
                     {allVariants.length === 0 && (
-                      <div className="ov:flex ov:items-center ov:justify-center ov:h-full">
+                      <div className="ov:flex ov:items-center ov:justify-center ov:min-h-[120px] ov:p-4">
                         <NoResults />
                       </div>
                     )}
                     {allVariants.length > 0 && (
-                      <div className="ov:flex-1 ov:overflow-hidden">
-                        <div className={`ov:grid ov:h-full ov:content-start ov:p-4 ${option.id === 'size' ? 'ov:grid-cols-2!' : 'ov:grid-cols-5!'}`}>
+                      <div className="ov:p-4">
+                        <div className={`ov:grid ov:content-start ov:gap-2 ${option.id === 'size' ? 'ov:grid-cols-2!' : 'ov:grid-cols-5!'}`}>
                           <VariantsContent 
                             variantsToRender={currentPageVariants} 
                             VariantCard={option.id === 'size' ? SizeVariantCard : DefaultVariantCard} 
