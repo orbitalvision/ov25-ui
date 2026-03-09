@@ -213,8 +213,11 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     });
   };
 
-  // Storage for configure handler that will be set by the context
   (window as any).ov25ConfigureHandlerRef = { current: null };
+  (window as any).ov25OpenConfiguratorRef = { current: null };
+  (window as any).ov25CloseConfiguratorRef = { current: null };
+  (window as any).ov25OpenSwatchBookRef = { current: null };
+  (window as any).ov25CloseSwatchBookRef = { current: null };
 
   // Resolve string or function
   const resolveStringOrFunction = (value: StringOrFunction): string => {
@@ -660,6 +663,11 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
       // Query param already consumed - only use injected configurationUuid
       resolvedConfigurationUuid = configurationUuid ? resolveStringOrFunction(configurationUuid) : undefined;
     }
+
+    (window as any).ov25OpenConfigurator = (optionName?: string) => (window as any).ov25OpenConfiguratorRef?.current?.(optionName);
+    (window as any).ov25CloseConfigurator = () => (window as any).ov25CloseConfiguratorRef?.current?.();
+    (window as any).ov25OpenSwatchBook = () => (window as any).ov25OpenSwatchBookRef?.current?.();
+    (window as any).ov25CloseSwatchBook = () => (window as any).ov25CloseSwatchBookRef?.current?.();
 
     root.render(
       <OV25UIProvider

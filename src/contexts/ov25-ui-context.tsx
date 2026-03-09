@@ -20,6 +20,33 @@ function throttle<T extends (...args: any[]) => void>(
   };
 }
 
+function useLocalStorage<T>(key: string, initialValue: T): [T, React.Dispatch<React.SetStateAction<T>>] {
+  const [storedValue, setStoredValue] = useState<T>(() => {
+    try {
+      const item = window.localStorage.getItem(key);
+      return item ? JSON.parse(item) : initialValue;
+    } catch (error) {
+      console.error(`Error reading localStorage key "${key}":`, error);
+      return initialValue;
+    }
+  });
+
+  const setValue = useCallback((value: T | ((val: T) => T)) => {
+    setStoredValue(prevValue => {
+      try {
+        const valueToStore = value instanceof Function ? value(prevValue) : value;
+        window.localStorage.setItem(key, JSON.stringify(valueToStore));
+        return valueToStore;
+      } catch (error) {
+        console.error(`Error setting localStorage key "${key}":`, error);
+        return prevValue;
+      }
+    });
+  }, [key]);
+
+  return [storedValue, setValue];
+}
+
 // Define types
 export type DrawerSizes = 'closed' | 'small' | 'large';
 export type AnimationState = 'unavailable' | 'open' | 'close' | 'loop' | 'stop';
@@ -407,36 +434,7 @@ export const OV25UIProvider: React.FC<{
     id: string;
     displayName: string;
   }>>([]);
-  const hasDefered = useRef(false);
   const isSelectingProduct = useRef(false);
-  const hasComputedFilters = useRef(false);
-
-  const useLocalStorage = <T,>(key: string, initialValue: T): [T, React.Dispatch<React.SetStateAction<T>>] => {
-    const [storedValue, setStoredValue] = useState<T>(() => {
-      try {
-        const item = window.localStorage.getItem(key);
-        return item ? JSON.parse(item) : initialValue;
-      } catch (error) {
-        console.error(`Error reading localStorage key "${key}":`, error);
-        return initialValue;
-      }
-    });
-
-    const setValue = useCallback((value: T | ((val: T) => T)) => {
-      setStoredValue(prevValue => {
-        try {
-          const valueToStore = value instanceof Function ? value(prevValue) : value;
-          window.localStorage.setItem(key, JSON.stringify(valueToStore));
-          return valueToStore;
-        } catch (error) {
-          console.error(`Error setting localStorage key "${key}":`, error);
-          return prevValue;
-        }
-      });
-    }, [key]);
-
-    return [storedValue, setValue];
-  };
 
   const [selectedSwatches, setSelectedSwatches] = useLocalStorage<Swatch[]>('ov25-selected-swatches', []);
   const [isSwatchBookOpen, setIsSwatchBookOpen] = useState<boolean>(false);
@@ -524,22 +522,6 @@ export const OV25UIProvider: React.FC<{
     }
   }, [isModulePanelOpen, isMobile]);
 
-  // Effect: Initialize selectedSelections from configuratorState
-  useEffect(() => {
-    if (configuratorState?.selectedSelections) {
-      setSelectedSelections(configuratorState.selectedSelections);
-    }
-    if (configuratorState?.configuratorSettings?.swatchSettings) {
-      setSwatchRulesData(configuratorState.configuratorSettings.swatchSettings);
-    }
-    if (configuratorState?.snap2Objects && configuratorState.snap2Objects.length > 0) {
-      const firstNonModulesOption = allOptions.find(opt => opt.id !== 'modules');
-      if (firstNonModulesOption) {
-        setActiveOptionId(firstNonModulesOption.id);
-      }
-    }
-  }, [configuratorState]);
-
   // Effect: Clear pending product ID when current product ID updates
   useEffect(() => {
     if (currentProductId && pendingProductId === currentProductId) {
@@ -609,22 +591,6 @@ export const OV25UIProvider: React.FC<{
   const isSnap2Mode = useMemo(() => {
     return productLink?.startsWith('snap2/') || false;
   }, [productLink]);
-
-  // Create a virtual size option from products
-  const sizeOption: SizeOption = {
-    id: 'size',
-    name: 'size',
-    groups: [{
-      id: 'size-group',
-      selections: products?.map(p => ({
-        id: p?.id,
-        name: p?.name,
-        price: p?.price,
-        discount: p?.discount,
-        thumbnail: p?.metadata?.images?.length > 0 ? p?.metadata?.images[p?.metadata?.images?.length - 1] : null
-      })) || []
-    }]
-  };
 
   // Helper function to apply search and filter logic to any option
   const applySearchAndFilters = useCallback((option: Option | SizeOption, optionId: string) => {
@@ -750,21 +716,66 @@ export const OV25UIProvider: React.FC<{
     return applySearchAndFilters(baseActiveOption, activeOptionId || '') as Option;
   }, [baseActiveOption, activeOptionId, applySearchAndFilters]);
 
-  // Compute filters once when we have the necessary data
-  if (!hasComputedFilters.current && configuratorState && configuratorState.options && configuratorState.options.length > 0) {
+  const sizeOption: SizeOption = useMemo(() => ({
+    id: 'size',
+    name: 'size',
+    groups: [{
+      id: 'size-group',
+      selections: products?.map(p => ({
+        id: p?.id,
+        name: p?.name,
+        price: p?.price,
+        discount: p?.discount,
+        thumbnail: p?.metadata?.images?.length > 0 ? p?.metadata?.images[p?.metadata?.images?.length - 1] : null
+      })) || []
+    }]
+  }), [products]);
+
+  const allOptions = useMemo(() => {
+    const modulesOption = {
+      id: 'modules',
+      name: 'Modules',
+      groups: [{ id: 'modules-group', name: 'Compatible Modules', selections: [] }]
+    };
+    const options = [
+      ...(isSnap2Mode ? [modulesOption] : []),
+      ...(isSnap2Mode && (!configuratorState?.snap2Objects || configuratorState.snap2Objects.length === 0) ? [] : [
+        ...(products?.length > 1 && !isSnap2Mode ? [sizeOption] : []),
+        ...(configuratorState?.options || [])
+          .filter(option => option.isVisible !== false)
+          .map(option => ({
+            ...option,
+            groups: option.groups
+              .filter(group => group.isVisible !== false)
+              .map(group => ({
+                ...group,
+                selections: group.selections.filter(selection => selection.isVisible !== false)
+              }))
+          }))
+      ])
+    ];
+    options.forEach((option: Option | SizeOption) => {
+      (option as Option).hasNonOption = option.groups.some(group =>
+        group.selections.some(selection => selection.name.toLowerCase() === 'none')
+      );
+    });
+    return options;
+  }, [isSnap2Mode, products, configuratorState, sizeOption]);
+
+  const allOptionsWithoutModules = allOptions.filter(option => option.id !== 'modules');
+
+  useEffect(() => {
+    if (!configuratorState?.options?.length) return;
     const availableFilters = configuratorState.configuratorSettings?.availableProductFilters || {};
     const allFilterSets: ProductFilters = {};
 
-    // Process each option, adding filters for each selection and group.
     configuratorState.options.forEach(option => {
       if (option.name && availableFilters[option.name]) {
-        // Initialize filter sets for this option
         const filterSets: { [key: string]: Set<string> } = {};
         availableFilters[option.name].forEach((filter: string) => {
           filterSets[filter] = new Set<string>();
         });
 
-        // Loop through all filters for this option, adding filter values to the set
         option.groups.forEach(group => {
           group.selections.forEach(selection => {
             Object.keys(selection.filter || {}).forEach((key: string) => {
@@ -776,72 +787,39 @@ export const OV25UIProvider: React.FC<{
           });
         });
 
-        // Convert sets to arrays for this option
         allFilterSets[option.name] = {};
         Object.keys(filterSets).forEach(key => {
           if (!allFilterSets[option.name]) {
             allFilterSets[option.name] = {};
           }
-          allFilterSets[option.name][key] = Array.from(filterSets[key]).map(value => ({ 
-            value, 
-            checked: false 
-          }));
+          allFilterSets[option.name][key] = Array.from(filterSets[key]).map(value => ({ value, checked: false }));
         });
       }
-      // Add groups as the first filter for this option. If the only group is 'Default Groups' its not really a group so we should not show the filter.
       if (option.groups && option.groups.length > 0 && (option.groups.length > 1 || option.groups[0].name !== 'Default Group')) {
         if (!allFilterSets[option.name]) {
           allFilterSets[option.name] = {};
         }
-        allFilterSets[option.name]['Collections'] = option.groups.map(group => ({
-          value: group.name,
-          checked: false
-        }));
+        allFilterSets[option.name]['Collections'] = option.groups.map(group => ({ value: group.name, checked: false }));
       }
     });
     setAvailableProductFilters(allFilterSets);
     setShowFilters(Object.keys(allFilterSets).length > 0 && Object.keys(allFilterSets).some(key => Object.keys(allFilterSets[key]).some(key2 => Object.keys(allFilterSets[key][key2]).length > 0)));
-    hasComputedFilters.current = true;
-  }
+  }, [configuratorState?.options, configuratorState?.configuratorSettings?.availableProductFilters]);
 
-  // Combine size option with configurator options, only including size option if multiple products exist and not in snap2 mode
-  const allOptions = [
-    // Add modules option first in snap2 mode
-    ...(isSnap2Mode ? [{
-      id: 'modules',
-      name: 'Modules',
-      groups: [{
-        id: 'modules-group',
-        name: 'Compatible Modules',
-        selections: []
-      }]
-    }] : []),
-    // Only show other options if we have snap2Objects or we're not in snap2 mode
-    ...(isSnap2Mode && (!configuratorState?.snap2Objects || configuratorState.snap2Objects.length === 0) ? [] : [
-      ...(products?.length > 1 && !isSnap2Mode ? [sizeOption] : []),
-      ...(configuratorState?.options || [])
-        .filter(option => option.isVisible !== false)
-        .map(option => ({
-          ...option,
-          groups: option.groups
-            .filter(group => group.isVisible !== false)
-            .map(group => ({
-              ...group,
-              selections: group.selections.filter(selection => selection.isVisible !== false)
-            }))
-        }))
-    ])
-  ];
-
-  const allOptionsWithoutModules = allOptions.filter(option => option.id !== 'modules');
-
-  allOptions.forEach(option => {
-    option.hasNonOption = option.groups.some(group => {
-      return group.selections.some(selection => {
-        return selection.name.toLowerCase() === 'none';
-      });
-    });
-  });
+  useEffect(() => {
+    if (configuratorState?.selectedSelections) {
+      setSelectedSelections(configuratorState.selectedSelections);
+    }
+    if (configuratorState?.configuratorSettings?.swatchSettings) {
+      setSwatchRulesData(configuratorState.configuratorSettings.swatchSettings);
+    }
+    if (configuratorState?.snap2Objects && configuratorState.snap2Objects.length > 0) {
+      const firstNonModulesOption = allOptions.find(opt => opt.id !== 'modules');
+      if (firstNonModulesOption) {
+        setActiveOptionId(firstNonModulesOption.id);
+      }
+    }
+  }, [configuratorState, allOptions]);
 
   // Check if any selection in the current product has a swatch
   const hasSelectionsWithSwatches = useMemo(() => {
@@ -881,51 +859,11 @@ export const OV25UIProvider: React.FC<{
     sendMessageToIframe('TOGGLE_HIDE_ALL', { hideAll: newHiddenState }, uniqueId);
   }, [controlsHidden, setControlsHidden]);
 
-  /**
-   * Handles variant selection with optional optionId parameter.
-   * @param selection - The selected variant
-   * @param optionId - Optional option ID to use instead of activeOptionId (useful for inline variant controls)
-   */
-  const handleSelectionSelect = throttle((selection: Selection, optionId?: string) => {
-    // Use provided optionId if available, otherwise fall back to activeOptionId
-    const currentOptionId = optionId || activeOptionId;
-    if (currentOptionId === 'size') {
-      if (currentProductId !== selection.id) {
-        // Block if already selecting a product
-        if (isSelectingProduct.current) {
-          return;
-        }
-        
-        isSelectingProduct.current = true;
-        setPendingProductId(selection.id);
-        setSelectedSelections(prev => {
-          const newSelections = prev.filter(sel => sel.optionId !== 'size');
-          return [...newSelections, { optionId: 'size', selectionId: selection.id }];
-        });
-        sendMessageToIframe('SELECT_PRODUCT', selection.id, uniqueId);
-        setCurrentProductId(selection.id);
-      }
-      return;
-    } else {
-      setSelectedSelections(prev => {
-        const newSelections = prev.filter(sel => sel.optionId !== currentOptionId);
-        return [...newSelections, { 
-          optionId: currentOptionId || '', 
-          groupId: selection.groupId, 
-          selectionId: selection.id 
-        }];
-      });
-      sendMessageToIframe('SELECT_SELECTION', {
-        optionId: currentOptionId, 
-        groupId: selection.groupId, 
-        selectionId: selection.id
-      }, uniqueId);
-    }
-    if(!hasSwitchedAfterDefer && galleryIndex === 1 && deferThreeD) {
-      setHasSwitchedAfterDefer(true);
-      setGalleryIndex(galleryIndexToUse);
-    }
-  }, 500)
+  const handleSelectionSelectRef = useRef<(selection: Selection, optionId?: string) => void>(() => {});
+  const handleSelectionSelect = useMemo(
+    () => throttle((selection: Selection, optionId?: string) => handleSelectionSelectRef.current(selection, optionId), 500),
+    []
+  );
 
   // Navigation functions
   const handleNextOption = () => {
@@ -994,28 +932,31 @@ export const OV25UIProvider: React.FC<{
     setIsSwatchBookOpen(false);
   },[setIsSwatchBookOpen])
 
-  // Expose configure handler ref
-  useEffect(() => {
-    configureHandlerRef.current = handleConfigureClick;
-    // Also sync to window object for external access
-    if ((window as any).ov25ConfigureHandlerRef) {
-      (window as any).ov25ConfigureHandlerRef.current = handleConfigureClick;
-    }
-  }, [handleConfigureClick]);
+  configureHandlerRef.current = handleConfigureClick;
+  const configureHandlerWindowRef = (window as any).ov25ConfigureHandlerRef;
+  if (configureHandlerWindowRef) {
+    configureHandlerWindowRef.current = handleConfigureClick;
+  }
 
-  // Expose open/close configurator on window for developers (e.g. custom buttons)
-  useEffect(() => {
-    (window as any).ov25OpenConfigurator = openConfigurator;
-    (window as any).ov25CloseConfigurator = closeConfigurator;
-    (window as any).ov25OpenSwatchBook = openSwatchBook;
-    (window as any).ov25CloseSwatchBook = closeSwatchBook;
-    return () => {
-      delete (window as any).ov25OpenConfigurator;
-      delete (window as any).ov25CloseConfigurator;
-      delete (window as any).ov25OpenSwatchBook;
-      delete (window as any).ov25CloseSwatchBook;
-    };
-  }, [openConfigurator, closeConfigurator, openSwatchBook, closeSwatchBook]);
+  const openRef = (window as any).ov25OpenConfiguratorRef;
+  const closeRef = (window as any).ov25CloseConfiguratorRef;
+  const openSwatchRef = (window as any).ov25OpenSwatchBookRef;
+  const closeSwatchRef = (window as any).ov25CloseSwatchBookRef;
+  if (openRef) openRef.current = openConfigurator;
+  if (closeRef) closeRef.current = closeConfigurator;
+  if (openSwatchRef) openSwatchRef.current = openSwatchBook;
+  if (closeSwatchRef) closeSwatchRef.current = closeSwatchBook;
+
+  useEffect(() => () => {
+    const r1 = (window as any).ov25OpenConfiguratorRef;
+    const r2 = (window as any).ov25CloseConfiguratorRef;
+    const r3 = (window as any).ov25OpenSwatchBookRef;
+    const r4 = (window as any).ov25CloseSwatchBookRef;
+    if (r1) r1.current = null;
+    if (r2) r2.current = null;
+    if (r3) r3.current = null;
+    if (r4) r4.current = null;
+  }, []);
 
   // Expose cleanup function via window object
   useEffect(() => {
@@ -1317,12 +1258,46 @@ export const OV25UIProvider: React.FC<{
   const [galleryIndex, setGalleryIndex] = useState(0);
 
   const [galleryIndexToUse, setGalleryIndexToUse] = useState(galleryIndex);
-  useEffect(() => {
-      if(deferThreeD && allImages.length > 0 && !hasDefered.current) {
-        setGalleryIndexToUse(1);
-        hasDefered.current = true;
+
+  const handleSelectionSelectImpl = useCallback((selection: Selection, optionId?: string) => {
+    const currentOptionId = optionId || activeOptionId;
+    if (currentOptionId === 'size') {
+      if (currentProductId !== selection.id) {
+        if (isSelectingProduct.current) return;
+        isSelectingProduct.current = true;
+        setPendingProductId(selection.id);
+        setSelectedSelections(prev => {
+          const newSelections = prev.filter(sel => sel.optionId !== 'size');
+          return [...newSelections, { optionId: 'size', selectionId: selection.id }];
+        });
+        sendMessageToIframe('SELECT_PRODUCT', selection.id, uniqueId);
+        setCurrentProductId(selection.id);
       }
-    }, [allImages]);
+      return;
+    }
+    setSelectedSelections(prev => {
+      const newSelections = prev.filter(sel => sel.optionId !== currentOptionId);
+      return [...newSelections, { optionId: currentOptionId || '', groupId: selection.groupId, selectionId: selection.id }];
+    });
+    sendMessageToIframe('SELECT_SELECTION', {
+      optionId: currentOptionId,
+      groupId: selection.groupId,
+      selectionId: selection.id
+    }, uniqueId);
+    if (!hasSwitchedAfterDefer && galleryIndex === 1 && deferThreeD) {
+      setHasSwitchedAfterDefer(true);
+      setGalleryIndex(galleryIndexToUse);
+    }
+  }, [activeOptionId, currentProductId, galleryIndex, galleryIndexToUse, deferThreeD, hasSwitchedAfterDefer, uniqueId]);
+  handleSelectionSelectRef.current = handleSelectionSelectImpl;
+
+  const didDeferGallery = useRef(false);
+  useEffect(() => {
+    if (deferThreeD && allImages.length > 0 && !didDeferGallery.current) {
+      didDeferGallery.current = true;
+      setGalleryIndexToUse(1);
+    }
+  }, [deferThreeD, allImages.length]);
 
 
 
