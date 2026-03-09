@@ -253,6 +253,19 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     shadowRoot.adoptedStyleSheets = stylesheets;
   };
 
+  // Elements like button, input, form don't support attachShadow - wrap in div
+  const getOrCreateShadowHost = (target: Element): Element => {
+    const SHADOW_HOST_TAGS = new Set(['article', 'aside', 'blockquote', 'body', 'div', 'footer', 'header', 'main', 'nav', 'p', 'section', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
+    const tag = target.tagName.toLowerCase();
+    if (SHADOW_HOST_TAGS.has(tag) || tag.includes('-')) {
+      return target;
+    }
+    const wrapper = document.createElement('div');
+    wrapper.className = target.className;
+    target.parentNode?.replaceChild(wrapper, target);
+    return wrapper;
+  };
+
   const ensureLoaded = () => {
     // Create mobile drawer Shadow DOM container
     const mobileDrawerContainer = document.createElement('div');
@@ -416,13 +429,12 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
       if (createShadow && selector) {
         const target = document.querySelector(selector);
         if (target) {
-          // Create Shadow DOM root if it doesn't exist
-          if (!target.shadowRoot) {
-            const shadowRoot = target.attachShadow({ mode: 'open' });
-            // Inject CSS into the new Shadow DOM
+          const host = getOrCreateShadowHost(target);
+          if (!host.shadowRoot) {
+            const shadowRoot = host.attachShadow({ mode: 'open' });
             injectCSSIntoShadowDOM(shadowRoot);
           }
-          portals.push(createPortal(el, target.shadowRoot!));
+          portals.push(createPortal(el, host.shadowRoot!));
         } else {
           console.warn(`[OV25-UI] Element not found for selector "${selector}"`);
         }
