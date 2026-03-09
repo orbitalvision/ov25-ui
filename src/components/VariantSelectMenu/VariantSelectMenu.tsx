@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '../../lib/utils.js';
 import { TwoStageDrawer } from ".././ui/two-stage-drawer.js";
 import { useOV25UI } from "../../contexts/ov25-ui-context.js";
 import { ProductOptionsGroup } from "./ProductOptions.js";
@@ -30,6 +31,8 @@ export const VariantSelectMenu: React.FC = () => {
     setShareDialogTrigger,
     isSnap2Mode,
     useInlineVariantControls,
+    useSimpleVariantsSelector,
+    openConfiguratorOrSnap2,
   } = useOV25UI();
 
 
@@ -48,7 +51,15 @@ export const VariantSelectMenu: React.FC = () => {
           const Overlay = MobilePriceOverlay as any;
           return <Overlay />;
         })()}
-        {!hasConfigureButton && (
+        {useSimpleVariantsSelector ? (
+          <button
+            id="ov25-configure-button"
+            className={cn('ov25-configure-button ov:p-3 ov:py-2 ov:my-2 ov:cursor-pointer ov:bg-white ov:text-black ov:border ov:rounded-md ov:border-[var(--ov25-border-color)]')}
+            onClick={openConfiguratorOrSnap2}
+          >
+            Configure
+          </button>
+        ) : !hasConfigureButton && (
           useInlineVariantControls && !isMobile ? (
             <InlineVariantContent />
           ) : (

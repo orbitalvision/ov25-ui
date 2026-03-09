@@ -146,6 +146,7 @@ export interface InjectConfiguratorOptions {
   cssString?: string;
   uniqueId?: string; // For multiple configurators to prevent ID conflicts
   useInlineVariantControls?: boolean;
+  useSimpleVariantsSelector?: boolean;
 }
 
 export function injectConfigurator(opts: InjectConfiguratorOptions) {
@@ -173,6 +174,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     hideAr,
     uniqueId,
     useInlineVariantControls,
+    useSimpleVariantsSelector,
   } = opts;
 
   // Add generateThumbnail function to window object
@@ -545,16 +547,24 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     const configureTarget = configureSelector ? document.querySelector(configureSelector) : null;
 
     // Process each component
-    // Only show gallery if no configure button (Snap2 mode)
-    if (!configureButtonId) {
+    // Show gallery unless Snap2 mode with configure button (useSimpleVariantsSelector uses standard flow)
+    if (!configureButtonId || useSimpleVariantsSelector) {
       processElement(galleryId, <ProductGallery />, 'gallery');
     }
 
-    // Portal for configurator UI: variants OR configure button (single button, not three)
-    if (variantsTarget) {
-      processElement(variantsId, <VariantSelectMenu />, 'variants');
-    } else if (configureTarget && configureButtonId) {
-      processElement(configureButtonId, <Snap2ConfigureButton />, 'configure-button');
+    // Portal for configurator UI
+    if (useSimpleVariantsSelector) {
+      if (configureTarget && configureButtonId) {
+        processElement(configureButtonId, <VariantSelectMenu />, 'configure-button');
+      } else if (variantsTarget) {
+        processElement(variantsId, <VariantSelectMenu />, 'variants');
+      }
+    } else {
+      if (variantsTarget) {
+        processElement(variantsId, <VariantSelectMenu />, 'variants');
+      } else if (configureTarget && configureButtonId) {
+        processElement(configureButtonId, <Snap2ConfigureButton />, 'configure-button');
+      }
     }
 
     // Always show price, name, and swatches
@@ -562,8 +572,8 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     processElement(nameId, <Name />, 'name');
     processElement(swatchesId, <SwatchesContainer />, 'swatches');
 
-    // Configure button handling when both variants and configure button exist
-    if (configureButtonId && variantsTarget && configureTarget) {
+    // Configure button handling when both variants and configure button exist (Snap2 only, not useSimpleVariantsSelector)
+    if (configureButtonId && variantsTarget && configureTarget && !useSimpleVariantsSelector) {
       if (shouldReplace(configureButtonId)) {
         processElement(configureButtonId, <Snap2ConfigureButton />, 'configure-button');
       } else {
@@ -583,6 +593,13 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
               console.warn(`[OV25-UI] Configure button element not found: ${err.message}`);
             });
         }
+        portals.push(<Snap2ConfigureUI key="snap2-configure-ui" />);
+      }
+    }
+
+    if (useSimpleVariantsSelector) {
+      const resolvedProductLink = resolveStringOrFunction(productLink);
+      if (resolvedProductLink?.startsWith('snap2/')) {
         portals.push(<Snap2ConfigureUI key="snap2-configure-ui" />);
       }
     }
@@ -607,8 +624,8 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     }
 
     // Special handling for configurator view controls - wait for the specific container
-    // Only render if not in configure button mode (ConfigureButton handles it in that case)
-    if (!configureButtonId) {
+    // Skip when Snap2 mode (Snap2ConfigureButton handles it); useSimpleVariantsSelector uses standard flow
+    if (!configureButtonId || useSimpleVariantsSelector) {
       const controlsContainerId = uniqueId
         ? `#true-configurator-view-controls-container-${uniqueId}`
         : '#true-configurator-view-controls-container';
@@ -705,9 +722,10 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
         hideAr={hideAr}
         hidePricing={hidePricing}
         isProductGalleryStacked={isProductGalleryStacked}
-        hasConfigureButton={!!configureButtonId}
+        hasConfigureButton={!!configureButtonId && !useSimpleVariantsSelector}
         uniqueId={uniqueId}
         useInlineVariantControls={useInlineVariantControls}
+        useSimpleVariantsSelector={!!useSimpleVariantsSelector}
         shadowDOMs={{
           mobileDrawer: mobileDrawerShadowRoot,
           configuratorViewControls: configuratorViewControlsShadowRoot,

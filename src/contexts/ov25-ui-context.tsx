@@ -249,6 +249,7 @@ interface OV25UIContextType {
   controlsHidden: boolean;
   hasConfigureButton: boolean;
   useInlineVariantControls: boolean;
+  useSimpleVariantsSelector: boolean;
   shareDialogTrigger: 'none' | 'save-button' | 'modal-close';
   skipNextDrawerCloseRef: React.MutableRefObject<boolean>;
   preloading: boolean;
@@ -325,6 +326,8 @@ interface OV25UIContextType {
   applySearchAndFilters: (option: Option | SizeOption, optionId: string) => Option | SizeOption;
   /** Open the variant configurator (closes swatch book, opens variants drawer). Optionally pass an option name (case insensitive) to open on that option. */
   openConfigurator: (optionName?: string) => void;
+  /** Open configurator or Snap2 modal based on product type. For useSimpleVariantsSelector single button. */
+  openConfiguratorOrSnap2: () => void;
   /** Close the variant configurator drawer. For use by custom buttons. */
   closeConfigurator: () => void;
   /** Open the swatch book. Exposed for custom buttons. */
@@ -361,6 +364,7 @@ export const OV25UIProvider: React.FC<{
   mobileLogoURL?: string,
   uniqueId?: string,
   useInlineVariantControls?: boolean,
+  useSimpleVariantsSelector?: boolean,
   shadowDOMs?: {
     mobileDrawer?: ShadowRoot;
     configuratorViewControls?: ShadowRoot;
@@ -387,6 +391,7 @@ export const OV25UIProvider: React.FC<{
   mobileLogoURL,
   uniqueId,
   useInlineVariantControls = false,
+  useSimpleVariantsSelector = false,
   shadowDOMs,
   cssString,
 }) => {
@@ -932,6 +937,14 @@ export const OV25UIProvider: React.FC<{
     setIsSwatchBookOpen(false);
   },[setIsSwatchBookOpen])
 
+  const openConfiguratorOrSnap2 = useCallback(() => {
+    if (isSnap2Mode) {
+      handleConfigureClick();
+    } else {
+      openConfigurator();
+    }
+  }, [isSnap2Mode, handleConfigureClick, openConfigurator]);
+
   configureHandlerRef.current = handleConfigureClick;
   const configureHandlerWindowRef = (window as any).ov25ConfigureHandlerRef;
   if (configureHandlerWindowRef) {
@@ -1368,6 +1381,7 @@ export const OV25UIProvider: React.FC<{
     controlsHidden,
     hasConfigureButton: hasConfigureButtonState,
     useInlineVariantControls,
+    useSimpleVariantsSelector,
     shareDialogTrigger,
     skipNextDrawerCloseRef,
     preloading,
@@ -1433,6 +1447,7 @@ export const OV25UIProvider: React.FC<{
     cleanupConfigurator,
     applySearchAndFilters,
     openConfigurator,
+    openConfiguratorOrSnap2,
     closeConfigurator,
     openSwatchBook,
     closeSwatchBook,
