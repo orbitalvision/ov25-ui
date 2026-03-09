@@ -527,25 +527,34 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
 
     const isProductGalleryStacked = checkForStackedGallery();
 
+    const variantsSelector = getSelector(variantsId);
+    const configureSelector = configureButtonId ? getSelector(configureButtonId) : undefined;
+    const variantsTarget = variantsSelector ? document.querySelector(variantsSelector) : null;
+    const configureTarget = configureSelector ? document.querySelector(configureSelector) : null;
+
     // Process each component
     // Only show gallery if no configure button (Snap2 mode)
     if (!configureButtonId) {
       processElement(galleryId, <ProductGallery />, 'gallery');
     }
-    processElement(variantsId, <VariantSelectMenu />, 'variants');
+
+    // Portal for configurator UI: variants OR configure button (single button, not three)
+    if (variantsTarget) {
+      processElement(variantsId, <VariantSelectMenu />, 'variants');
+    } else if (configureTarget && configureButtonId) {
+      processElement(configureButtonId, <Snap2ConfigureButton />, 'configure-button');
+    }
 
     // Always show price, name, and swatches
     processElement(priceId, <Price />, 'price');
     processElement(nameId, <Name />, 'name');
     processElement(swatchesId, <SwatchesContainer />, 'swatches');
 
-    // Show configure button if provided
-    if (configureButtonId) {
+    // Configure button handling when both variants and configure button exist
+    if (configureButtonId && variantsTarget && configureTarget) {
       if (shouldReplace(configureButtonId)) {
-        // Replace mode: portal the component
         processElement(configureButtonId, <Snap2ConfigureButton />, 'configure-button');
       } else {
-        // Listener mode: attach click handler to existing button and render UI separately
         const selector = getSelector(configureButtonId);
         if (selector) {
           waitForElement(selector, 5000)
@@ -562,7 +571,6 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
               console.warn(`[OV25-UI] Configure button element not found: ${err.message}`);
             });
         }
-        // Add Snap2ConfigureUI to portals to render modal/drawer
         portals.push(<Snap2ConfigureUI key="snap2-configure-ui" />);
       }
     }
