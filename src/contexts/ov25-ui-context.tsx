@@ -942,7 +942,7 @@ export const OV25UIProvider: React.FC<{
   const closeRef = (window as any).ov25CloseConfiguratorRef;
   const openSwatchRef = (window as any).ov25OpenSwatchBookRef;
   const closeSwatchRef = (window as any).ov25CloseSwatchBookRef;
-  if (openRef) openRef.current = openConfigurator;
+  if (openRef) openRef.current = isSnap2Mode ? handleConfigureClick : openConfigurator;
   if (closeRef) closeRef.current = closeConfigurator;
   if (openSwatchRef) openSwatchRef.current = openSwatchBook;
   if (closeSwatchRef) closeSwatchRef.current = closeSwatchBook;
