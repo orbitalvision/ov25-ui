@@ -239,6 +239,7 @@ interface OV25UIContextType {
   sizeOption: SizeOption;
   activeOption?: Option;
   availableProductFilters?: ProductFilters;
+  optionHasVisibleFilters: (option: { id: string; name: string }) => boolean;
   showFilters?: boolean;
   allOptions: (Option | SizeOption)[];
   allOptionsWithoutModules: (Option | SizeOption)[];
@@ -877,6 +878,20 @@ export const OV25UIProvider: React.FC<{
 
   const allOptionsWithoutModules = allOptions.filter(option => option.id !== 'modules');
 
+  const optionHasVisibleFilters = useCallback(
+    (option: { id: string; name: string }) => {
+      const optionFilters = availableProductFilters?.[option.name];
+      if (!optionFilters || Object.keys(optionFilters).length === 0) return false;
+      const fullOption = allOptionsWithoutModules?.find((o) => o.id === option.id);
+      const groupCount = fullOption?.groups?.length ?? 0;
+      return Object.keys(optionFilters).some((key) => {
+        if (key === 'Collections') return groupCount > 1 && (optionFilters[key]?.length ?? 0) > 0;
+        return (optionFilters[key]?.length ?? 0) > 0;
+      });
+    },
+    [availableProductFilters, allOptionsWithoutModules]
+  );
+
   useEffect(() => {
     if (!configuratorState?.options?.length) return;
     const availableFilters = configuratorState.configuratorSettings?.availableProductFilters || {};
@@ -1502,6 +1517,7 @@ export const OV25UIProvider: React.FC<{
     sizeOption,
     activeOption: activeOption,
     availableProductFilters,
+    optionHasVisibleFilters,
     showFilters,
     allOptions,
     allOptionsWithoutModules,

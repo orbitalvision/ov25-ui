@@ -187,7 +187,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
                     />
                   ) : (
                     <>
-                      <div id="ov25-mobile-variants-content" className="ov:h-full ov:overflow-y-auto">
+                      <div id="ov25-mobile-variants-content" className={`ov:h-full ${isFilterOpen ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}>
                         <div style={{ display: 'grid' }} className={`ov:px-2 ov:pb-63 ${getGridColsClass(gridDivide)}`}>
                           <VariantsContent variantsToRender={group.variants} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
                         </div>
@@ -250,7 +250,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
             {variantsToRender.length === 0 && (
             <NoResults />
             )}
-            <div id="ov25-mobile-variants-content" className="ov:h-full ov:overflow-y-auto">
+            <div id="ov25-mobile-variants-content" className={`ov:h-full ${isFilterOpen ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}>
               <div style={{ display: 'grid' }} className={`ov:px-0 ov:pb-63 ov:gap-2 ${getGridColsClass(gridDivide)}`}>
                 <VariantsContent variantsToRender={variantsToRender} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
               </div>

@@ -32,6 +32,7 @@ function App() {
       title="Single Product - No Variants"
       description="Windrush - Loveseat"
       injectConfig={config}
+      renderSwatches={false}
     />
   );
 }

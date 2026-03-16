@@ -1,8 +1,11 @@
-import { useState, useMemo } from "react"
+import { useState, useMemo, useRef, useEffect } from "react"
 import * as React from 'react'
+import { createPortal } from 'react-dom'
 import { getIframeSrc } from '../utils/configurator-utils.js'
 import { useOV25UI } from "../contexts/ov25-ui-context.js"
 import { cn, getProductGalleryImages, resolveImageUrl } from "../lib/utils.js"
+import { getSharedStylesheet, createCSSVariablesStylesheet } from '../utils/shadow-styles.js'
+import ConfiguratorViewControls from './ConfiguratorViewControls.js'
 
 
 export const IframeContainer = () => {
@@ -21,7 +24,23 @@ export const IframeContainer = () => {
         uniqueId,
         isMobile,
         deferThreeD,
+        cssString,
     } = useOV25UI();
+
+    const controlsContainerRef = useRef<HTMLDivElement>(null);
+    const [controlsShadowRoot, setControlsShadowRoot] = useState<ShadowRoot | null>(null);
+
+    useEffect(() => {
+        const el = controlsContainerRef.current;
+        if (!el || el.shadowRoot) return;
+        const shadowRoot = el.attachShadow({ mode: 'open' });
+        const stylesheets: CSSStyleSheet[] = [getSharedStylesheet()];
+        if (cssString) {
+            stylesheets.push(createCSSVariablesStylesheet(cssString));
+        }
+        shadowRoot.adoptedStyleSheets = stylesheets;
+        setControlsShadowRoot(shadowRoot);
+    }, [cssString]);
 
     const hasCutout = !!(currentProduct?.metadata as any)?.cutoutImage
     const cutoutFirst = hasCutout && (isMobile || !deferThreeD)
@@ -113,8 +132,13 @@ export const IframeContainer = () => {
                 ) : null;
             })()}
 
-            {/* Container for ConfiguratorViewControls portal */}
-            <div id={uniqueId ? `true-configurator-view-controls-container-${uniqueId}` : "true-configurator-view-controls-container"} className="ov:absolute ov:inset-0 ov:w-full ov:h-full ov:pointer-events-none"></div>
+            {/* Container for ConfiguratorViewControls - we attach shadow here and portal controls into it */}
+            <div
+                ref={controlsContainerRef}
+                id={uniqueId ? `true-configurator-view-controls-container-${uniqueId}` : "true-configurator-view-controls-container"}
+                className="ov:absolute ov:inset-0 ov:w-full ov:h-full ov:pointer-events-none"
+            />
+            {controlsShadowRoot && createPortal(<ConfiguratorViewControls />, controlsShadowRoot)}
 
             {/* Container for Toaster portal - must be inside fullscreen element */}
             <div id={uniqueId ? `true-toaster-container-${uniqueId}` : "true-toaster-container"} className="ov:absolute ov:inset-0 ov:w-full ov:h-full ov:pointer-events-none ov:z-999"></div>

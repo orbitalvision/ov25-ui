@@ -98,7 +98,6 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
     return getAnimationButtonText(canAnimate, animationState);
   }
 
-
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -114,9 +113,6 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
       toast.success('Share link copied to clipboard!');
     }
   };
-
-
-
 
   const handleShare = async () => {
     const currentUrl = window.location.href;
@@ -141,7 +137,6 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
     }
 
   }
-
 
   return (
     <>

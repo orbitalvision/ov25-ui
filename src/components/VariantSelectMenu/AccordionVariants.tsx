@@ -178,27 +178,29 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
                     optionId={optionId}
                   />
                 </div>
-                <div className={`ov:relative ov:min-h-0 ov:flex-1 ov:overflow-y-auto ov:pt-4 ov:pb-4 ${mode === 'drawer' && isMobile ? 'ov:pb-20' : ''}`}>
-                  {variants.map((group) =>
-                    group.variants.length > 0 ? (
-                      <div key={group.groupName} className="ov:mb-4 last:ov:mb-0">
-                        {variants.length > 1 && (
-                          <h4 className="ov:text-sm ov:mb-3 ov:px-4 ov:text-[var(--ov25-secondary-text-color)] ov:font-medium">
-                            {capitalizeWords(group.groupName)}
-                          </h4>
-                        )}
-                        <div className={`ov:grid ${getGridColsClass(4)}`}>
-                          <VariantsContent
-                            variantsToRender={group.variants}
-                            VariantCard={DefaultVariantCard}
-                            isMobile={isMobile}
-                            onSelect={handleVariantSelect}
-                            compactSpacing
-                          />
+                <div className="ov:relative ov:min-h-0 ov:flex-1 ov:flex ov:flex-col ov:pt-4 ov:pb-4">
+                  <div className={`ov:min-h-0 ov:flex-1 ${mode === 'drawer' && isMobile ? 'ov:pb-20' : ''} ${isFilterOpen[optionId] ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}>
+                    {variants.map((group) =>
+                      group.variants.length > 0 ? (
+                        <div key={group.groupName} className="ov:mb-4 last:ov:mb-0">
+                          {variants.length > 1 && (
+                            <h4 className="ov:text-sm ov:mb-3 ov:px-4 ov:text-[var(--ov25-secondary-text-color)] ov:font-medium">
+                              {capitalizeWords(group.groupName)}
+                            </h4>
+                          )}
+                          <div className={`ov:grid ${getGridColsClass(4)}`}>
+                            <VariantsContent
+                              variantsToRender={group.variants}
+                              VariantCard={DefaultVariantCard}
+                              isMobile={isMobile}
+                              onSelect={handleVariantSelect}
+                              compactSpacing
+                            />
+                          </div>
                         </div>
-                      </div>
-                    ) : null
-                  )}
+                      ) : null
+                    )}
+                  </div>
                   {isFilterOpen[optionId] && (
                     <div className="ov:absolute ov:inset-0 ov:z-20 ov:flex ov:justify-end ov:flex-wrap ov:overflow-y-auto ov:p-2 ov:px-4 ov:bg-[var(--ov25-background-color)]">
                       <FilterContent optionId={optionId} />

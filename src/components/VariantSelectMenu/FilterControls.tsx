@@ -20,7 +20,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
     optionId,
     optionIds,
 }) => {
-    const { searchQueries, setSearchQuery, activeOptionId, availableProductFilters, activeOption, isMobile, setAvailableProductFilters, setIsVariantsOpen, openSwatchBook, swatchRulesData, selectedSwatches, allOptionsWithoutModules, hasSelectionsWithSwatches, swatchBookFlash, setSwatchBookFlash } = useOV25UI();
+    const { searchQueries, setSearchQuery, activeOptionId, availableProductFilters, optionHasVisibleFilters, activeOption, isMobile, setAvailableProductFilters, setIsVariantsOpen, openSwatchBook, swatchRulesData, selectedSwatches, allOptionsWithoutModules, hasSelectionsWithSwatches, swatchBookFlash, setSwatchBookFlash } = useOV25UI();
     const [localSearchQuery, setLocalSearchQuery] = React.useState('');
     const debouncedSearchQuery = useDebounce(localSearchQuery, 1);
     const previousOptionIdRef = React.useRef<string | null>(null);
@@ -116,19 +116,15 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
             const optionFilters = availableProductFilters?.[opt.name];
             if (!optionFilters || Object.keys(optionFilters).length === 0) continue;
             hasFilterCategories = true;
-            const fullOption = allOptionsWithoutModules?.find(o => o.id === opt.id);
-            const groupCount = fullOption?.groups?.length ?? 0;
-            const hasVisible = Object.keys(optionFilters).some(key => {
-                if (key === 'Collections') return groupCount > 1 && (optionFilters[key]?.length ?? 0) > 0;
-                return (optionFilters[key]?.length ?? 0) > 0;
-            });
-            if (hasVisible) hasVisibleFilterContent = true;
+            if (optionHasVisibleFilters(opt)) {
+                hasVisibleFilterContent = true;
+            }
         }
         return {
             shouldShowFilterButton: hasFilterCategories,
             isFilterDisabled: hasFilterCategories && !hasVisibleFilterContent,
         };
-    }, [targetOptions, availableProductFilters, allOptionsWithoutModules]);
+    }, [targetOptions, availableProductFilters, optionHasVisibleFilters]);
 
     const selectedFilters = React.useMemo(() => {
         return targetOptions.flatMap(opt =>
@@ -152,8 +148,8 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
                             "ov:flex ov:items-center ov:justify-center ov:p-1.5 ov:rounded-full",
                             isFilterDisabled
                                 ? "ov:opacity-50 ov:cursor-not-allowed"
-                                : "ov:cursor-pointer ov:hover:bg-neutral-50",
-                            isFilterOpen && !isFilterDisabled && "ov:bg-neutral-50"
+                                : "ov:cursor-pointer ov:hover:bg-neutral-200",
+                            isFilterOpen && !isFilterDisabled && "ov:bg-neutral-200"
                         )}
                         onClick={() => !isFilterDisabled && setIsFilterOpen(!isFilterOpen)} 
                         disabled={isFilterDisabled}

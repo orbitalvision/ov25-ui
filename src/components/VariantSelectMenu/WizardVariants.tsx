@@ -342,7 +342,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
                 </div>
               )}
               {filteredOption && allVariants.length > 0 && (
-                <div className="ov-wizard-variants-scroll ov:overflow-y-auto ov:h-full ov:p-4">
+                <div className={`ov-wizard-variants-scroll ov:h-full ov:p-4 ${isFilterOpenForOption ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}>
                   <div className={`ov:grid ov:content-start ov:gap-2 ${currentOption!.id === 'size' ? 'ov:grid-cols-2!' : 'ov:grid-cols-4!'}`}>
                     <VariantsContent
                       variantsToRender={visibleVariants}

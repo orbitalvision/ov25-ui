@@ -197,27 +197,29 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
             optionId={currentView}
           />
         </div>
-        <div className={`ov:relative ov:min-h-0 ov:flex-1 ov:overflow-y-auto ov:pt-0 ${scrollContentClass}`}>
-          {opt.variants.map((group) =>
-            group.variants.length > 0 ? (
-              <div key={group.groupName} className="ov:mb-0 last:ov:mb-0">
-                {opt.variants.length > 1 && (
-                  <h4 className="ov:sticky ov:top-0 ov:z-[9] ov:bg-[var(--ov25-background-color)] ov:px-4 ov:text-sm ov:pt-4 ov:pb-3 ov:text-[var(--ov25-secondary-text-color)] ov:font-medium">
-                    {capitalizeWords(group.groupName)}
-                  </h4>
-                )}
-                <div className={`ov:grid ${getGridColsClass(4)}`}>
-                  <VariantsContent
-                    variantsToRender={group.variants}
-                    VariantCard={DefaultVariantCard}
-                    isMobile={isMobile}
-                    onSelect={handleVariantSelect}
-                    compactSpacing
-                  />
+        <div className="ov:relative ov:min-h-0 ov:flex-1 ov:flex ov:flex-col ov:pt-0">
+          <div className={`ov:min-h-0 ov:flex-1 ov:pt-0 ${scrollContentClass} ${isFilterOpen[currentView] ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}>
+            {opt.variants.map((group) =>
+              group.variants.length > 0 ? (
+                <div key={group.groupName} className="ov:mb-0 last:ov:mb-0">
+                  {opt.variants.length > 1 && (
+                    <h4 className="ov:sticky ov:top-0 ov:z-[9] ov:bg-[var(--ov25-background-color)] ov:px-4 ov:text-sm ov:pt-4 ov:pb-3 ov:text-[var(--ov25-secondary-text-color)] ov:font-medium">
+                      {capitalizeWords(group.groupName)}
+                    </h4>
+                  )}
+                  <div className={`ov:grid ${getGridColsClass(4)}`}>
+                    <VariantsContent
+                      variantsToRender={group.variants}
+                      VariantCard={DefaultVariantCard}
+                      isMobile={isMobile}
+                      onSelect={handleVariantSelect}
+                      compactSpacing
+                    />
+                  </div>
                 </div>
-              </div>
-            ) : null
-          )}
+              ) : null
+            )}
+          </div>
           {isFilterOpen[currentView] && (
             <div className="ov:absolute ov:inset-0 ov:z-20 ov:flex ov:justify-end ov:flex-wrap ov:overflow-y-auto ov:p-2 ov:px-4 ov:bg-[var(--ov25-background-color)]">
               <FilterContent optionId={currentView} />

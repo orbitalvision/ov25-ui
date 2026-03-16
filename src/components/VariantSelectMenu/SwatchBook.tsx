@@ -119,7 +119,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
                     <VariantsCloseButton
                       onClick={() => toggleSwatch(swatch)}
                       ariaLabel="Remove swatch"
-                      className="ov:top-1! ov:right-1! ov:p-1! ov:w-6 ov:h-6 ov:z-10 ov:bg-white ov:rounded-full ov:opacity-0 ov:group-hover:opacity-100 ov:pointer-events-none ov:group-hover:pointer-events-auto ov:transition-opacity"
+                      className="ov:top-1! ov:right-1! ov:p-1! ov:w-6 ov:h-6 ov:z-10 ov:bg-white ov:rounded-full ov:md:opacity-0 ov:md:group-hover:opacity-100 ov:pointer-events-auto ov:md:pointer-events-none ov:md:group-hover:pointer-events-auto ov:transition-opacity"
                     />
                     <button
                       onClick={() => setZoomedSwatch(swatch)}

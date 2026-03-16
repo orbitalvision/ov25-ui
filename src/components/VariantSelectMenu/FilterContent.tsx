@@ -1,6 +1,6 @@
 import * as React from 'react'
-import { ProductFilters, useOV25UI } from '../../contexts/ov25-ui-context.js';
-
+import { useOV25UI } from '../../contexts/ov25-ui-context.js';
+import { VariantDisplayStyleOverlay } from '../../types/config-enums.js';
 
 interface FilterContentProps {
     optionId?: string;
@@ -8,7 +8,7 @@ interface FilterContentProps {
 }
 
 export const FilterContent: React.FC<FilterContentProps> = ({ optionId, optionIds }) => {
-    const { availableProductFilters, setAvailableProductFilters, activeOption, allOptionsWithoutModules } = useOV25UI();
+    const { availableProductFilters, setAvailableProductFilters, activeOption, allOptionsWithoutModules, isMobile, variantDisplayStyleOverlay } = useOV25UI();
 
     const targetOptions = React.useMemo(() => {
         const ids = optionIds ?? (optionId ? [optionId] : []);
@@ -46,7 +46,7 @@ export const FilterContent: React.FC<FilterContentProps> = ({ optionId, optionId
 
                 return (
                     <div key={targetOption.id} className="ov:mb-6">
-                        <h4 className="ov:text-sm ov:font-medium ov:text-[var(--ov25-secondary-text-color)] ov:mb-2 ov:capitalize">{targetOption.name}</h4>
+                        {isMobile || variantDisplayStyleOverlay === VariantDisplayStyleOverlay.List ? <h4 className="ov:text-sm ov:font-medium ov:text-[var(--ov25-secondary-text-color)] ov:mb-2 ov:capitalize">{targetOption.name}</h4> : null}
                         {Object.entries(activeFilters)
                             .filter(([filterKey]) => {
                                 if (filterKey !== 'Collections') return true;

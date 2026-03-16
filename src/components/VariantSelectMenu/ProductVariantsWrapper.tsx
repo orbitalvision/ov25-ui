@@ -73,7 +73,6 @@ export function ProductVariantsWrapper({ isInline = false }: ProductVariantsWrap
         setIsFilterOpen(prev => ({ ...prev, [optionId]: !prev[optionId] }));
     }, []);
 
-
     const handleCloseVariants = () => {
       if (activeOptionId === 'modules') {
         closeModuleSelectMenu();
@@ -82,7 +81,6 @@ export function ProductVariantsWrapper({ isInline = false }: ProductVariantsWrap
     };
 
     // Wrapper to convert Variant to Selection format for handleSelectionSelect
-    // Memoized to ensure stable reference
     const handleVariantSelect = useCallback((variant: Variant) => {
       // Convert Variant to Selection-like object
       const selection = {
@@ -193,7 +191,7 @@ export function ProductVariantsWrapper({ isInline = false }: ProductVariantsWrap
       const parent = el?.parentElement;
       if (!el || !parent) return;
       const checkOverflow = () => {
-        setUseTabsDropdown(el.scrollWidth > parent.clientWidth);
+        setUseTabsDropdown(el.scrollWidth >= parent.clientWidth);
       };
       checkOverflow();
       const ro = new ResizeObserver(checkOverflow);
@@ -293,6 +291,7 @@ export function ProductVariantsWrapper({ isInline = false }: ProductVariantsWrap
     const needsBottomMarginForButton = isMobile && !isInline;
     const isMobileList = isMobile && !isInline && effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.List;
 
+    // When the active option changes, scroll to the active option (list mode only, used for when you have a custom button to open the configurator on an option)
     useEffect(() => {
       if (effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.List && activeOptionId && listScrollRef.current) {
         const el = listScrollRef.current.querySelector(`[data-ov25-option-id="${activeOptionId}"]`);
@@ -356,32 +355,35 @@ export function ProductVariantsWrapper({ isInline = false }: ProductVariantsWrap
     const hasOptionVariants = (opt: { optionId: string; optionName: string; variants: any[] }) =>
       opt.variants.some((g: { variants: any[] }) => g.variants.length > 0);
 
+    const listOptionsToShow = useMemo(() => {
+      const withVariants = allOptionsVariants.filter(hasOptionVariants);
+      if (effectiveVariantDisplayStyleOverlay !== VariantDisplayStyleOverlay.List) return withVariants;
+      const listOptionIdsWithSelectedFilters = availableProductFilters
+        ? listFilterOptionIds.filter((optionId) => {
+            const opt = allOptionsVariants.find((o) => o.optionId === optionId);
+            if (!opt) return false;
+            const optionFilters = availableProductFilters[opt.optionName];
+            if (!optionFilters) return false;
+            return Object.keys(optionFilters).some((key) =>
+              (optionFilters[key]?.some((f: { checked: boolean }) => f.checked) ?? false)
+            );
+          })
+        : [];
+      if (listOptionIdsWithSelectedFilters.length === 0) return withVariants;
+      return withVariants.filter((opt) => listOptionIdsWithSelectedFilters.includes(opt.optionId));
+    }, [allOptionsVariants, effectiveVariantDisplayStyleOverlay, listFilterOptionIds, availableProductFilters]);
+
     const listFilterBlock = effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.List && listFilterOptionIds.length > 0 && (
       <div className="ov:shrink-0 ov:bg-[var(--ov25-background-color)] ov:pb-2">
         {renderFilterBlock(listFilterKey, listFilterOptionIds)}
-        {isFilterOpen[listFilterKey] && (
-          <div className="ov:max-h-[min(fit-content,50vh)] ov:overflow-y-auto ov:px-4">
-            <FilterContent optionIds={listFilterOptionIds} />
-          </div>
-        )}
       </div>
     );
 
-    const listContent = (
-      <>
-        {showSize && (
-          <div data-ov25-option-id="size">
-            {renderSizeSection(true, isMobileList)}
-          </div>
-        )}
-        {allOptionsVariants
-          .filter(hasOptionVariants)
-          .map((opt) => (
-            <div key={opt.optionId} data-ov25-option-id={opt.optionId}>
-              {renderOptionSection(opt, true, isMobileList, effectiveVariantDisplayStyleOverlay !== VariantDisplayStyleOverlay.List)}
-            </div>
-          ))}
-      </>
+    const filterSheetOverlayClass = 'ov:absolute ov:inset-0 ov:z-20 ov:flex ov:justify-end ov:flex-wrap ov:overflow-y-auto ov:p-2 ov:px-4 ov:bg-[var(--ov25-background-color)]';
+    const renderFilterSheet = (props: { optionId?: string; optionIds?: string[] }) => (
+      <div className={filterSheetOverlayClass}>
+        <FilterContent optionId={props.optionId} optionIds={props.optionIds} />
+      </div>
     );
 
     const tabsContent = (
@@ -449,9 +451,21 @@ export function ProductVariantsWrapper({ isInline = false }: ProductVariantsWrap
             </div>
           )}
         </div>
-        <div className={`ov:flex-1 ov:min-h-0 ov:overflow-y-auto ov:pt-0 ${needsBottomMarginForButton ? 'ov:pb-20' : 'ov:pb-2'}`}>
-          {activeTab === 'size' && showSize && renderSizeSection(false)}
-          {activeTab !== 'size' && allOptionsVariants.map((opt) => (opt.optionId === activeTab ? renderOptionSection(opt, false) : null))}
+        {activeTab !== 'size' && (
+          <div className="ov:shrink-0 ov:bg-[var(--ov25-background-color)]">
+            {renderFilterBlock(activeTab)}
+          </div>
+        )}
+        <div className="ov:relative ov:flex-1 ov:min-h-0 ov:flex ov:flex-col">
+          <div className={`ov:flex-1 ov:min-h-0 ov:pt-0 ${needsBottomMarginForButton ? 'ov:pb-20' : 'ov:pb-2'} ${activeTab !== 'size' && isFilterOpen[activeTab] ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}>
+            {activeTab === 'size' && showSize && renderSizeSection(false)}
+            {activeTab !== 'size' && allOptionsVariants.map((opt) => (opt.optionId === activeTab ? renderOptionSection(opt, false, false, false) : null))}
+          </div>
+          {activeTab !== 'size' && isFilterOpen[activeTab] && (
+            <div className="ov:absolute ov:inset-0 ov:z-20 ov:flex ov:justify-end ov:flex-wrap ov:overflow-y-auto ov:p-2 ov:px-4 ov:bg-[var(--ov25-background-color)]">
+              <FilterContent optionId={activeTab} />
+            </div>
+          )}
         </div>
       </div>
     );
@@ -459,6 +473,7 @@ export function ProductVariantsWrapper({ isInline = false }: ProductVariantsWrap
     const useTree = effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.Tree;
     const useAccordion = effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.Accordion && !isMobile;
 
+    // tabs, tree, accordion, list
     const displayContent =
       effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.Tabs
         ? tabsContent
@@ -467,13 +482,23 @@ export function ProductVariantsWrapper({ isInline = false }: ProductVariantsWrap
           : useAccordion
             ? <AccordionVariants mode={isInline ? 'inline' : 'drawer'} />
             : (
-                <div style={{ paddingBottom: listScrollHeight }}>
-                  {listContent}
+                <div>
+                  {showSize && (
+                    <div data-ov25-option-id="size">
+                      {renderSizeSection(true, isMobileList)}
+                    </div>
+                  )}
+                  {listOptionsToShow.map((opt) => (
+                    <div key={opt.optionId} data-ov25-option-id={opt.optionId}>
+                      {renderOptionSection(opt, true, isMobileList, effectiveVariantDisplayStyleOverlay !== VariantDisplayStyleOverlay.List)}
+                    </div>
+                  ))}
                 </div>
               );
 
     const isAccordionOrTree = useAccordion || useTree;
-    const contentScrollClass = isAccordionOrTree ? 'ov:overflow-hidden' : 'ov:overflow-y-auto';
+    const isListModeFilterOpen = effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.List && !!isFilterOpen[listFilterKey];
+    const contentScrollClass = isAccordionOrTree ? 'ov:overflow-hidden' : isListModeFilterOpen ? 'ov:overflow-hidden' : 'ov:overflow-y-auto';
     const contentPaddingClass = isAccordionOrTree
       ? (needsBottomMarginForButton ? 'ov:pb-16' : '')
       : (needsBottomMarginForButton ? 'ov:pt-0 ov:pb-20' : 'ov:pt-0 ov:pb-2');
@@ -487,12 +512,15 @@ export function ProductVariantsWrapper({ isInline = false }: ProductVariantsWrap
             className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:h-full ov:overflow-hidden ov:bg-[var(--ov25-background-color)]"
           >
             {isListMode && listFilterBlock}
-            <div
-              ref={listScrollRef}
-              data-ov25-list-variants-content
-              className={`ov:flex-1 ov:min-h-0 ${contentScrollClass} ${contentPaddingClass}`}
-            >
-              {displayContent}
+            <div className="ov:relative ov:flex-1 ov:min-h-0 ov:flex ov:flex-col">
+              <div
+                ref={listScrollRef}
+                data-ov25-list-variants-content
+                className={`ov:min-h-0 ov:flex-1 ${contentScrollClass} ${contentPaddingClass}`}
+              >
+                {displayContent}
+              </div>
+              {isListMode && isFilterOpen[listFilterKey] && renderFilterSheet({ optionIds: listFilterOptionIds })}
             </div>
             {!hidePricing && (
               <div className="ov:shrink-0 ov:px-4 ov:pb-2 ov:pt-2">
@@ -507,8 +535,11 @@ export function ProductVariantsWrapper({ isInline = false }: ProductVariantsWrap
         <div className="ov:flex ov:flex-col ov:max-h-full ov:h-full ov:bg-[var(--ov25-background-color)]">
           <VariantsHeader />
           {isListMode && listFilterBlock}
-          <div ref={listScrollRef} className={`ov:flex-1 ov:min-h-0 ${contentScrollClass} ${contentPaddingClass}`}>
-            {displayContent}
+          <div className="ov:relative ov:flex-1 ov:min-h-0 ov:flex ov:flex-col">
+            <div ref={listScrollRef} className={`ov:min-h-0 ov:flex-1 ${contentScrollClass} ${contentPaddingClass}`}>
+              {displayContent}
+            </div>
+            {isListMode && isFilterOpen[listFilterKey] && renderFilterSheet({ optionIds: listFilterOptionIds })}
           </div>
           {!isMobile && !hidePricing && (
             <div className="ov:shrink-0 ov:px-4 ov:pb-2 ov:pt-2">

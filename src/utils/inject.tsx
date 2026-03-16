@@ -8,7 +8,6 @@ import Name from '../components/Name.js';
 import VariantSelectMenu from '../components/VariantSelectMenu/VariantSelectMenu.js';
 import { SwatchesContainer } from '../components/SwatchesContainer.js';
 import { ProductCarousel } from '../components/product-carousel.js';
-import ConfiguratorViewControls from '../components/ConfiguratorViewControls.js';
 import { SwatchBook } from '../components/VariantSelectMenu/SwatchBook.js';
 import { Snap2ConfigureButton, Snap2ConfigureUI } from '../components/Snap2ConfigureButton.js';
 import { ConfigureButton } from '../components/ConfigureButton.js';
@@ -17,8 +16,7 @@ import { createPortal } from 'react-dom';
 // Import styles directly
 import '../../globals.css';
 import { Toaster } from 'sonner';
-// Import CSS as string for adoptedStyleSheets
-import cssText from '../../globals.css?inline';
+import { getSharedStylesheet, createCSSVariablesStylesheet } from './shadow-styles.js';
 
 // Import sonner CSS as string
 import sonnerCssText from 'sonner/dist/styles.css?inline';
@@ -26,17 +24,7 @@ import sonnerCssText from 'sonner/dist/styles.css?inline';
 const sonnerStylesheet = new CSSStyleSheet();
 sonnerStylesheet.replaceSync(sonnerCssText);
 
-
-// Create shared stylesheet
-const sharedStylesheet = new CSSStyleSheet();
-sharedStylesheet.replaceSync(cssText);
-
-// Function to create CSS variables stylesheet from CSS string
-const createCSSVariablesStylesheet = (cssVariables: string): CSSStyleSheet => {
-  const cssVariablesStylesheet = new CSSStyleSheet();
-  cssVariablesStylesheet.replaceSync(cssVariables);
-  return cssVariablesStylesheet;
-};
+const sharedStylesheet = getSharedStylesheet();
 
 // Apply to main document
 document.adoptedStyleSheets = [sharedStylesheet];
@@ -345,7 +333,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     }
     mobileDrawerShadowRoot.adoptedStyleSheets = mobileDrawerStylesheets;
 
-    // Create configurator view controls Shadow DOM container
+    // Create Shadow DOM container used as default dialog portal target (DialogContent portals here when not Snap2/SwatchBook/AR)
     const configuratorViewControlsContainer = document.createElement('div');
     configuratorViewControlsContainer.id = uniqueId ? `ov25-configurator-view-controls-container-${uniqueId}` : 'ov25-configurator-view-controls-container';
     configuratorViewControlsContainer.setAttribute('data-clarity-mask', 'true');
@@ -677,33 +665,6 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
         .then(element => {
           const useShadowDOM = shouldCreateShadowDOM('carousel');
           pushPortal('#true-carousel', <ProductCarousel />, useShadowDOM);
-        })
-        .catch(err => {
-          console.warn(`[OV25-UI] ${err.message}`);
-        });
-    }
-
-    // Special handling for configurator view controls - wait for the specific container
-    // Show when gallery is rendered (container lives inside ProductGallery/IframeContainer)
-    if (getSelector(effectiveGallerySelector)) {
-      const controlsContainerId = uniqueId
-        ? `#true-configurator-view-controls-container-${uniqueId}`
-        : '#true-configurator-view-controls-container';
-
-      waitForElement(controlsContainerId, 10000)
-        .then(element => {
-          // Create Shadow DOM on the configurator view controls container
-          if (!element.shadowRoot) {
-            const shadowRoot = element.attachShadow({ mode: 'open' });
-            const configuratorViewControlsStylesheets = [sharedStylesheet];
-            if (cssString) {
-              const cssVariablesStylesheet = createCSSVariablesStylesheet(cssString);
-              configuratorViewControlsStylesheets.push(cssVariablesStylesheet);
-            }
-            shadowRoot.adoptedStyleSheets = configuratorViewControlsStylesheets;
-          }
-          // Portal ConfiguratorViewControls into the Shadow DOM
-          portals.push(createPortal(<ConfiguratorViewControls />, element.shadowRoot!));
         })
         .catch(err => {
           console.warn(`[OV25-UI] ${err.message}`);
