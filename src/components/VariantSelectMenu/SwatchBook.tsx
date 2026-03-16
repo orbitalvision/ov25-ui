@@ -3,6 +3,7 @@ import { Plus, ZoomIn } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle } from "../ui/dialog.js";
 import { Button } from "../ui/button.js";
 import { VariantsCloseButton } from "./VariantsCloseButton.js";
+import { SwatchImage } from "../SwatchImage.js";
 import { Swatch, useOV25UI } from "../../contexts/ov25-ui-context.js";
 import { cn } from '../../lib/utils.js';
 
@@ -76,10 +77,10 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
             <div id="ov25-swatchbook-featured" className="ov:shrink-0">
               <div className="ov:flex ov:flex-col ov:items-center ov:gap-4">
                 <div className="ov25-selected-swatch-image-container ov:relative ov:w-[200px] ov:h-[200px] ov:md:w-[250px] ov:md:h-[250px] group">
-                  <img
+                  <SwatchImage
                     src={zoomedSwatch.thumbnail.miniThumbnails.large}
                     alt={zoomedSwatch.name}
-                    className='ov25-swatch-image ov:w-full ov:h-full ov:object-cover ov:rounded-lg ov:aspect-square'
+                    className='ov25-swatch-image ov:w-full ov:h-full ov:aspect-square'
                   />
                 </div>
                 <div className="ov:text-center">
@@ -110,11 +111,15 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
               {selectedSwatches.map((swatch) => (
                 <div key={`${swatch.manufacturerId}-${swatch.name}-${swatch.option}`} className='ov25-swatch-item ov:flex ov:flex-col ov:gap-2 ov:items-center ov:text-center ov:w-[calc(50%-4px)] ov:sm:w-[calc(33.333%-5.33px)] ov:md:w-[calc(25%-6px)] ov:min-h-[85px]'>
                   <div className='ov25-swatch-image-container ov:group ov:relative ov:w-[85px] ov:h-[85px] ov:md:w-[105px] ov:md:h-[105px]'>
-                    <img src={swatch.thumbnail && swatch.thumbnail.miniThumbnails ? swatch.thumbnail.miniThumbnails.medium : '/placeholder.svg?height=200&width=200'} alt={swatch.name} className='ov25-swatch-image ov:w-full ov:h-full ov:object-cover ov:rounded-lg'/>
+                    <SwatchImage
+                      src={swatch.thumbnail && swatch.thumbnail.miniThumbnails ? swatch.thumbnail.miniThumbnails.medium : '/placeholder.svg?height=200&width=200'}
+                      alt={swatch.name}
+                      className='ov25-swatch-image ov:w-full ov:h-full'
+                    />
                     <VariantsCloseButton
                       onClick={() => toggleSwatch(swatch)}
                       ariaLabel="Remove swatch"
-                      className="ov:top-1! ov:right-1! ov:p-1! ov:w-6 ov:h-6 ov:z-10 ov:opacity-0 ov:group-hover:opacity-100 ov:pointer-events-none ov:group-hover:pointer-events-auto ov:transition-opacity"
+                      className="ov:top-1! ov:right-1! ov:p-1! ov:w-6 ov:h-6 ov:z-10 ov:bg-white ov:rounded-full ov:opacity-0 ov:group-hover:opacity-100 ov:pointer-events-none ov:group-hover:pointer-events-auto ov:transition-opacity"
                     />
                     <button
                       onClick={() => setZoomedSwatch(swatch)}
