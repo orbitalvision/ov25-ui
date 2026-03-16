@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "checkJs": true,
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2020", "DOM"]
+  },
+  "include": ["src/**/*", "tests/**/*", "templates/**/*", "*.d.ts"]
+}

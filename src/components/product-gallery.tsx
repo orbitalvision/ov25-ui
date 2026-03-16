@@ -22,6 +22,8 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
         galleryIndexToUse,
         images: passedImages,
         isProductGalleryStacked,
+        carouselSibling,
+        showCarousel,
         arPreviewLink,
         setArPreviewLink,
         isVariantsOpen,
@@ -120,6 +122,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
             )}></div>
             <div id={uniqueId ? `ov25-configurator-iframe-container-${uniqueId}` : "ov25-configurator-iframe-container"}
                 data-fullscreen={isVariantsOpen}
+                data-stacked={isProductGalleryStacked}
                 data-clarity-mask="true"
                 ref={containerRef}
                 className={cn(
@@ -131,7 +134,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
                 {!isProductGalleryStacked && <IframeContainer />}
 
             </div>
-            <div id='true-carousel' ></div>
+            {showCarousel && !carouselSibling && <div id='true-carousel' className="ov:mt-[var(--ov25-gallery-gap)]"></div>}
         </div>
         {isProductGalleryStacked && createPortal(
            <IframeContainer  />,

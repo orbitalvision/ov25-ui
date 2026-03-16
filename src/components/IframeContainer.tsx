@@ -2,7 +2,7 @@ import { useState, useMemo } from "react"
 import * as React from 'react'
 import { getIframeSrc } from '../utils/configurator-utils.js'
 import { useOV25UI } from "../contexts/ov25-ui-context.js"
-import { cn } from "../lib/utils.js"
+import { cn, getProductGalleryImages, resolveImageUrl } from "../lib/utils.js"
 
 
 export const IframeContainer = () => {
@@ -18,14 +18,15 @@ export const IframeContainer = () => {
         images: passedImages,
         isProductGalleryStacked: isStacked,
         isVariantsOpen,
-        uniqueId
+        uniqueId,
+        isMobile,
+        deferThreeD,
     } = useOV25UI();
 
-    // Get the images from the current product
-    const productImages = currentProduct?.metadata?.images?.slice(0, -1) || [];
-
+    const hasCutout = !!(currentProduct?.metadata as any)?.cutoutImage
+    const cutoutFirst = hasCutout && (isMobile || !deferThreeD)
+    const productImages = getProductGalleryImages(currentProduct?.metadata, { cutoutFirst })
     const images = [...(passedImages || []), ...productImages]
-
 
     // Any component-specific state remains local
     const [canSeeDimensions, setCanSeeDimensions] = useState(false);
@@ -100,12 +101,14 @@ export const IframeContainer = () => {
             {/* Display selected image when galleryIndex is not the 3D spin */}
             {(() => {
                 const imageIndex = galleryIndex < galleryIndexToUse ? galleryIndex : galleryIndex - 1;
-                return galleryIndex !== galleryIndexToUse && images[imageIndex] ? (
+                const img = images[imageIndex];
+                const src = img ? resolveImageUrl(img as any, 'main') : null;
+                return galleryIndex !== galleryIndexToUse && src ? (
                     <img
                         id={`ov-25-configurator-product-image-${galleryIndex}`}
-                        src={images[imageIndex]}
+                        src={src}
                         alt={`Product image ${galleryIndex}`}
-                        className="ov:object-contain ov:min-h-full ov:min-w-full ov:z-[5] ov:absolute ov:inset-0 ov:bg-[var(--ov25-configurator-iframe-background-color)]"
+                        className="ov:object-cover ov:min-h-full ov:min-w-full ov:z-[5] ov:absolute ov:inset-0 ov:bg-[var(--ov25-configurator-iframe-background-color)]"
                     />
                 ) : null;
             })()}

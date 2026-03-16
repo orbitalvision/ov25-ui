@@ -5,185 +5,272 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>OV25 UI - Configurator Test Suite</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
     <style>
-      body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-        margin: 0;
-        padding: 20px;
-        background-color: #f5f5f5;
-      }
-      .container {
-        max-width: 800px;
-        margin: 0 auto;
-        background: white;
-        padding: 30px;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      }
-      h1 {
-        color: #333;
-        margin-bottom: 10px;
-      }
-      .subtitle {
-        color: #666;
-        margin-bottom: 30px;
-      }
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 20px;
-        margin-top: 30px;
-      }
-      .card {
-        border: 1px solid #e0e0e0;
-        border-radius: 6px;
-        padding: 20px;
-        transition: all 0.2s ease;
-      }
-      .card:hover {
-        border-color: #007bff;
-        box-shadow: 0 2px 8px rgba(0,123,255,0.1);
-      }
-      .card h3 {
-        margin: 0 0 10px 0;
-        color: #333;
-        font-size: 18px;
-      }
-      .card p {
-        margin: 0 0 15px 0;
-        color: #666;
-        font-size: 14px;
-        line-height: 1.4;
-      }
-      .card a {
-        display: inline-block;
-        background: #007bff;
-        color: white;
-        text-decoration: none;
-        padding: 8px 16px;
-        border-radius: 4px;
-        font-size: 14px;
-        transition: background-color 0.2s ease;
-      }
-      .card a:hover {
-        background: #0056b3;
-      }
+      body { font-family: 'IBM Plex Sans', sans-serif; margin: 0; padding: 16px; background: #f5f5f5; color: #1a1a1a; font-size: 14px; }
+      .container { max-width: 720px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+      .header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+      h1 { margin: 0; font-size: 20px; font-weight: 600; }
+      .subtitle { color: #525252; font-size: 13px; margin: 4px 0 0 0; }
+      .reset-btn { padding: 6px 12px; font-size: 12px; font-weight: 500; color: #6c757d; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; cursor: pointer; font-family: inherit; }
+      .reset-btn:hover { background: #e9ecef; color: #495057; }
+      .checklist-header { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 10px; font-weight: 600; color: #6c757d; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e8e8e8; margin-bottom: 4px; }
+      .checklist-header .col-m, .checklist-header .col-d { width: 14px; flex-shrink: 0; }
+      .checklist-section { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: #007bff; margin: 16px 0 8px 0; padding-bottom: 4px; border-bottom: 1px solid #e8e8e8; }
+      .checklist-section:first-of-type { margin-top: 0; }
+      .checklist { list-style: none; padding: 0; margin: 0; }
+      .checklist-item { display: flex; flex-direction: column; align-items: stretch; padding: 6px 0; border-radius: 4px; transition: background 0.15s; }
+      .checklist-item:hover { background: #f8f9fa; }
+      .check-cell { width: 14px; height: 14px; flex-shrink: 0; border: 1px solid #adb5bd; border-radius: 2px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; line-height: 1; transition: background 0.15s, border-color 0.15s; }
+      .check-cell:hover { border-color: #6c757d; }
+      .check-cell[data-state="pass"] { background: #22c55e; border-color: #22c55e; color: white; }
+      .check-cell[data-state="pass"]::after { content: "✓"; }
+      .check-cell[data-state="fail"] { background: #dc2626; border-color: #dc2626; color: white; }
+      .check-cell[data-state="fail"]::after { content: "✕"; }
+      .checklist-item a { color: #1a1a1a; text-decoration: none; font-size: 13px; flex: 1; min-width: 0; cursor: pointer; }
+      .checklist-item a:hover { color: #007bff; }
+      .checklist-item.reviewed-both a { color: #6c757d; text-decoration: line-through; }
+      .checklist-item .item-row { display: flex; align-items: center; gap: 8px; width: 100%; }
+      .checklist-item .comment-block { display: none; margin-top: 4px; margin-left: 38px; }
+      .checklist-item .comment-block.visible { display: flex; align-items: flex-start; gap: 6px; }
+      .checklist-item .comment-block textarea { flex: 1; min-width: 0; font-family: inherit; font-size: 12px; padding: 6px 8px; border: 1px solid #dee2e6; border-radius: 4px; resize: vertical; min-height: 36px; }
+      .checklist-item .comment-block textarea:focus { outline: none; border-color: #007bff; }
+      .checklist-item .comment-block .comment-close { flex-shrink: 0; width: 24px; height: 24px; padding: 0; border: none; background: #f8f9fa; color: #6c757d; border-radius: 4px; cursor: pointer; font-size: 14px; line-height: 1; display: flex; align-items: center; justify-content: center; }
+      .checklist-item .comment-block .comment-close:hover { background: #e9ecef; color: #495057; }
     </style>
   </head>
   <body>
     <div class="container">
-      <h1>OV25 UI Configurator Test Suite</h1>
-      <p class="subtitle">Test different configurations of the OV25 configurator component</p>
-      
-      <div class="grid">
-        <div class="card">
-          <h3>Single Product - No Variants</h3>
-          <p>Windrush - Loveseat</p>
-          <a href="single-no-variants.html">Open Test</a>
+      <div class="header">
+        <div>
+          <h1>OV25 UI Test Suite</h1>
+          <p class="subtitle">Click = pass ✓</p>
+          <p class="subtitle">Shift+click = fail ✕</p>
+          <p class="subtitle">Ctrl+click test name = add comment</p>
         </div>
-        
-        <div class="card">
-          <h3>Single Product - No Pricing</h3>
-          <p>Aughton - Petit</p>
-          <a href="single-no-pricing.html">Open Test</a>
-        </div>
-        
-        <div class="card">
-          <h3>Single Product - No Groups</h3>
-          <p>Aughton - Petit</p>
-          <a href="single-no-groups.html">Open Test</a>
-        </div>
-        
-        <div class="card">
-          <h3>Single Product - With Discounts</h3>
-          <p>Aughton - Petit (with discount pricing)</p>
-          <a href="single-with-discounts.html">Open Test</a>
-        </div>
-        
-        <div class="card">
-          <h3>Single Product - With Groups</h3>
-          <p>Pickering 3-Seater</p>
-          <a href="single-with-groups.html">Open Test</a>
-        </div>
-        
-        <div class="card">
-          <h3>Single Product - Inline Variants</h3>
-          <p>Arlo&Jacob - Otto - Large 1 Arm Unit RHF with inline variant controls</p>
-          <a href="single-inline-variants.html">Open Test</a>
-        </div>
-        
-        <div class="card">
-          <h3>Range - Inline Variants with Groups</h3>
-          <p>Arlo&Jacob - Otti range with inline variant controls and grouped variants</p>
-          <a href="range-inline-variants-groups.html">Open Test</a>
-        </div>
-        
-        <div class="card">
-          <h3>Range - No Groups</h3>
-          <p>Ashley Manor - Ponti range</p>
-          <a href="range-no-groups.html">Open Test</a>
-        </div>
-        
-        <div class="card">
-          <h3>Range - With Groups</h3>
-          <p>Arlo&Jacob - Otti range</p>
-          <a href="range-with-groups.html">Open Test</a>
-        </div>
-        
-        <div class="card">
-          <h3>Snap2 Configuration</h3>
-          <p>Arlo&Jacob - Otti range</p>
-          <a href="snap2.html">Open Test</a>
-        </div>
-        
-        <div class="card">
-          <h3>Snap2 with UUID</h3>
-          <p>Snap2 configuration with specific configuration UUID.</p>
-          <a href="snap2-uuid.html">Open Test</a>
-        </div>
-        
-        <div class="card">
-          <h3>Product with Swatches</h3>
-          <p>TODO</p>
-          <a href="product-with-swatches.html">Open Test</a>
-        </div>
-        
-        <div class="card">
-          <h3>Multiple Snap2 Configurators</h3>
-          <p>Arlo&Jacob - Otti range and Otto range (Snap2 mode)</p>
-          <a href="multiple-configurators.html">Open Test</a>
-        </div>
-        
-        <div class="card">
-          <h3>Multiple Standard Configurators</h3>
-          <p>Multiple standard products without variants</p>
-          <a href="multiple-standard-configurators.html">Open Test</a>
-        </div>
-        
-        <div class="card">
-          <h3>Multiple Standard Configurators with Variants</h3>
-          <p>Multiple standard products with variants</p>
-          <a href="multiple-standard-configurators-with-variants.html">Open Test</a>
-        </div>
-        
-        <div class="card">
-          <h3>Multiple Standard Configurators with Inline Variants</h3>
-          <p>Multiple standard products with inline variant controls</p>
-          <a href="multiple-standard-configurators-inline-variants.html">Open Test</a>
-        </div>
-        
-        <div class="card">
-          <h3>Single Product - Custom open/close buttons</h3>
-          <p>Single product with custom open/close buttons</p>
-          <a href="single-custom-button.html">Open Test</a>
-        </div>
-
-        <div class="card">
-          <h3>Single Product - Custom CSS</h3>
-          <p>Single product with custom CSS</p>
-          <a href="single-custom-css.html">Open Test</a>
-        </div>
+        <button type="button" class="reset-btn" id="reset-btn">Reset all</button>
       </div>
+
+      <div class="checklist-header"><span class="col-m">M</span><span class="col-d">D</span><span>Test</span></div>
+
+      <div class="checklist-section">Single Product</div>
+      <ul class="checklist">
+        <li class="checklist-item" data-id="single-no-variants"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/single-no-variants.html" >No variants</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+        <li class="checklist-item" data-id="single-no-pricing"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/single-no-pricing.html" >No pricing</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+        <li class="checklist-item" data-id="single-no-groups"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/single-no-groups.html" >No groups</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+        <li class="checklist-item" data-id="single-with-discounts"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/single-with-discounts.html" >With discounts</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+        <li class="checklist-item" data-id="single-with-groups"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/single-with-groups.html" >With groups</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+        <li class="checklist-item" data-id="single-inline-variants"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/single-inline-variants.html" >Inline variants</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+        <li class="checklist-item" data-id="single-custom-button"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/single-custom-button.html" >Custom open/close buttons</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+        <li class="checklist-item" data-id="single-custom-css"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/single-custom-css.html" >Custom CSS</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+      </ul>
+
+      <div class="checklist-section">Product Gallery</div>
+      <ul class="checklist">
+        <li class="checklist-item" data-id="single-product-gallery"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/single-product-gallery.html" >Full gallery (sheet + tabs)</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+        <li class="checklist-item" data-id="configure-button-only"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/configure-button-only.html" >Configure button only</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+      </ul>
+
+      <div class="checklist-section">Gallery — Sheet + Variants</div>
+      <ul class="checklist">
+        <li class="checklist-item" data-id="gallery-sheet-tabs"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/gallery-sheet-tabs.html" >Tabs</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+        <li class="checklist-item" data-id="gallery-sheet-accordion"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/gallery-sheet-accordion.html" >Accordion</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+        <li class="checklist-item" data-id="gallery-sheet-tree"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/gallery-sheet-tree.html" >Tree</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+        <li class="checklist-item" data-id="gallery-sheet-list"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/gallery-sheet-list.html" >List</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+        <li class="checklist-item" data-id="gallery-sheet-wizard"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/gallery-sheet-wizard.html" >Wizard</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+      </ul>
+
+      <div class="checklist-section">Gallery — Inline + Variants</div>
+      <ul class="checklist">
+        <li class="checklist-item" data-id="gallery-inline-tabs"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/gallery-inline-tabs.html" >Tabs</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+        <li class="checklist-item" data-id="gallery-inline-accordion"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/gallery-inline-accordion.html" >Accordion</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+        <li class="checklist-item" data-id="gallery-inline-tree"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/gallery-inline-tree.html" >Tree</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+        <li class="checklist-item" data-id="gallery-inline-list"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/gallery-inline-list.html" >List</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+        <li class="checklist-item" data-id="gallery-inline-wizard"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/gallery-inline-wizard.html" >Wizard</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+      </ul>
+
+      <div class="checklist-section">Gallery — Carousel</div>
+      <ul class="checklist">
+        <li class="checklist-item" data-id="gallery-carousel-horizontal"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/gallery-carousel-horizontal.html" >Horizontal</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+        <li class="checklist-item" data-id="gallery-carousel-stacked"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/gallery-carousel-stacked.html" >Stacked</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+        <li class="checklist-item" data-id="gallery-no-carousel"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/gallery-no-carousel.html" >None</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+      </ul>
+
+      <div class="checklist-section">Swatches</div>
+      <ul class="checklist">
+        <li class="checklist-item" data-id="product-with-swatches"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/product-with-swatches.html" >Product with swatches</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+      </ul>
+
+      <div class="checklist-section">Range</div>
+      <ul class="checklist">
+        <li class="checklist-item" data-id="range-no-groups"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/range-no-groups.html" >No groups</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+        <li class="checklist-item" data-id="range-with-groups"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/range-with-groups.html" >With groups</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+        <li class="checklist-item" data-id="range-inline-variants-groups"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/range-inline-variants-groups.html" >Inline + groups</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+      </ul>
+
+      <div class="checklist-section">Snap2</div>
+      <ul class="checklist">
+        <li class="checklist-item" data-id="snap2"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/snap2.html" >Basic</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+        <li class="checklist-item" data-id="snap2-uuid"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/snap2-uuid.html" >With UUID</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+      </ul>
+
+      <div class="checklist-section">Other</div>
+      <ul class="checklist">
+        <li class="checklist-item" data-id="multiple-configurators"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/multiple-configurators.html" >Multiple Snap2</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+        <li class="checklist-item" data-id="multiple-standard-configurators"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/multiple-standard-configurators.html" >Multiple standard</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+        <li class="checklist-item" data-id="multiple-standard-configurators-with-variants"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/multiple-standard-configurators-with-variants.html" >Multiple standard + variants</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+        <li class="checklist-item" data-id="multiple-standard-configurators-inline-variants"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/multiple-standard-configurators-inline-variants.html" >Multiple standard + inline</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+      </ul>
     </div>
+    </div>
+    <script>
+      (function() {
+        const STORAGE_KEY = 'ov25-test-checklist';
+        function toState(v) {
+          if (v === 'pass' || v === 'fail') return v;
+          if (v === true) return 'pass';
+          if (v === false) return 'fail';
+          return '';
+        }
+        function load() {
+          try {
+            const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+            document.querySelectorAll('.checklist-item').forEach(el => {
+              const id = el.dataset.id;
+              const data = saved[id] || {};
+              const cbMobile = el.querySelector('.cb-mobile');
+              const cbDesktop = el.querySelector('.cb-desktop');
+              const link = el.querySelector('.item-row a');
+              const commentBlock = el.querySelector('.comment-block');
+              const textarea = commentBlock.querySelector('textarea');
+              const closeBtn = commentBlock.querySelector('.comment-close');
+
+              cbMobile.dataset.state = toState(data.mobile);
+              cbDesktop.dataset.state = toState(data.desktop);
+              updateReviewedClass(el, cbMobile, cbDesktop);
+
+              if (data.comment) {
+                textarea.value = data.comment;
+                commentBlock.classList.add('visible');
+              }
+
+              link.addEventListener('click', (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                  e.preventDefault();
+                  commentBlock.classList.add('visible');
+                  textarea.focus();
+                } else {
+                  e.preventDefault();
+                  window.location.href = link.href;
+                }
+              });
+
+              function saveComment() {
+                const all = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+                all[id] = all[id] || {};
+                const val = textarea.value.trim();
+                all[id].comment = val || undefined;
+                if (!val) delete all[id].comment;
+                if (Object.keys(all[id]).length === 0) delete all[id];
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+              }
+
+              function hideComment() {
+                commentBlock.classList.remove('visible');
+                textarea.value = '';
+                saveComment();
+              }
+
+              textarea.addEventListener('blur', () => {
+                if (!textarea.value.trim()) {
+                  hideComment();
+                } else {
+                  saveComment();
+                }
+              });
+
+              closeBtn.addEventListener('click', hideComment);
+
+              function handleClick(cell, key) {
+                return function(e) {
+                  const state = cell.dataset.state;
+                  const next = e.shiftKey ? 'fail' : 'pass';
+                  cell.dataset.state = (state === next ? '' : next);
+                  const all = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+                  all[id] = all[id] || {};
+                  const val = cell.dataset.state || undefined;
+                  all[id][key] = val;
+                  if (!val) delete all[id][key];
+                  if (Object.keys(all[id]).length === 0) delete all[id];
+                  localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
+                  updateReviewedClass(el, cbMobile, cbDesktop);
+                };
+              }
+              cbMobile.addEventListener('click', handleClick(cbMobile, 'mobile'));
+              cbDesktop.addEventListener('click', handleClick(cbDesktop, 'desktop'));
+              [cbMobile, cbDesktop].forEach(c => {
+                c.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); c.click(); } });
+              });
+            });
+          } catch (_) {}
+        }
+        function updateReviewedClass(el, cbMobile, cbDesktop) {
+          const both = (cbMobile.dataset.state === 'pass' || cbMobile.dataset.state === 'fail') &&
+            (cbDesktop.dataset.state === 'pass' || cbDesktop.dataset.state === 'fail');
+          el.classList.toggle('reviewed-both', both);
+        }
+        function reset() {
+          localStorage.removeItem(STORAGE_KEY);
+          document.querySelectorAll('.check-cell').forEach(c => { c.dataset.state = ''; });
+          document.querySelectorAll('.checklist-item').forEach(el => {
+            el.classList.remove('reviewed-both');
+            const block = el.querySelector('.comment-block');
+            const ta = block.querySelector('textarea');
+            block.classList.remove('visible');
+            ta.value = '';
+          });
+        }
+        document.getElementById('reset-btn').addEventListener('click', reset);
+        load();
+
+        (function viewportSwitcher() {
+          const params = new URLSearchParams(window.location.search);
+          if (params.get('viewport') === 'mobile') {
+            document.getElementById('viewport-switcher').style.display = 'none';
+            return;
+          }
+          const VP_KEY = 'ov25-viewport-mode';
+          const switcher = document.getElementById('viewport-switcher');
+          const wrap = document.getElementById('mobile-preview-wrap');
+          const content = document.getElementById('page-content');
+          const btnM = document.getElementById('vp-mobile');
+          const btnD = document.getElementById('vp-desktop');
+          const iframe = document.getElementById('mobile-preview-iframe');
+          function getMode() { try { const s = localStorage.getItem(VP_KEY); return s === 'mobile' ? 'mobile' : 'desktop'; } catch (_) { return 'desktop'; } }
+          function setMode(mode) {
+            try { localStorage.setItem(VP_KEY, mode); } catch (_) {}
+            const isMobile = mode === 'mobile';
+            wrap.classList.toggle('visible', isMobile);
+            content.classList.toggle('hidden', isMobile);
+            btnM.setAttribute('aria-pressed', isMobile);
+            btnD.setAttribute('aria-pressed', !isMobile);
+            btnM.classList.toggle('active', isMobile);
+            btnD.classList.toggle('active', !isMobile);
+            if (isMobile) {
+              const embed = window.location.pathname + (window.location.search || '');
+              iframe.src = window.location.origin + '/mobile-preview.html?embed=' + encodeURIComponent(embed);
+            } else {
+              iframe.src = 'about:blank';
+            }
+          }
+          btnM.addEventListener('click', () => setMode('mobile'));
+          btnD.addEventListener('click', () => setMode('desktop'));
+          setMode(getMode());
+          switcher.style.display = 'flex';
+        })();
+      })();
+    </script>
   </body>
 </html>

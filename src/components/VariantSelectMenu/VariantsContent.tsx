@@ -2,13 +2,14 @@ import { Variant, VariantCardProps } from "./ProductVariants.js";
 import { DefaultVariantCard } from "./variant-cards/DefaultVariantCard.js"
 import * as React from 'react'
 
-export const VariantsContent = ({ variantsToRender, VariantCard = DefaultVariantCard, isMobile, onSelect, showImage, showDimensions }
+export const VariantsContent = ({ variantsToRender, VariantCard = DefaultVariantCard, isMobile, onSelect, showImage, showDimensions, compactSpacing }
     : { variantsToRender: Variant[], 
         VariantCard: React.ComponentType<VariantCardProps>,
         isMobile: boolean,
         onSelect: (variant: Variant) => void,
         showImage?: boolean,
-        showDimensions?: boolean
+        showDimensions?: boolean,
+        compactSpacing?: boolean
     }) => {
     return (
       <>
@@ -23,6 +24,7 @@ export const VariantsContent = ({ variantsToRender, VariantCard = DefaultVariant
           
           if (showImage !== undefined) cardProps.showImage = showImage;
           if (showDimensions !== undefined) cardProps.showDimensions = showDimensions;
+          if (compactSpacing !== undefined) cardProps.compactSpacing = compactSpacing;
           
           return <VariantCard {...cardProps} />;
         })}

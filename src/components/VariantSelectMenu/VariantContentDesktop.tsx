@@ -4,6 +4,8 @@ import { createPortal } from 'react-dom';
 
 import { useOV25UI } from "../../contexts/ov25-ui-context.js";
 import { ProductVariantsWrapper } from './ProductVariantsWrapper.js';
+import { WizardVariants } from './WizardVariants.js';
+import { VariantsHeader } from './VariantsHeader.js';
 
 export function VariantContentDesktop() {
     const {
@@ -11,6 +13,8 @@ export function VariantContentDesktop() {
         setIsVariantsOpen,
         setIsDrawerOrDialogOpen,
         isDrawerOrDialogOpen,
+        isSwatchBookOpen,
+        variantDisplayStyleOverlay,
       } = useOV25UI();
     
     const menuContainerRef = useRef<HTMLDivElement>(null);
@@ -117,10 +121,10 @@ export function VariantContentDesktop() {
       }
     }, [isDrawerOrDialogOpen]);
 
-    // Add escape key listener when the menu is open
+    // Add escape key listener when the menu is open (skip when swatch book is open - it handles its own Escape)
     useEffect(() => {
       const handleEscapeKey = (event: KeyboardEvent) => {
-        if (event.key === 'Escape' && isVariantsOpen) {
+        if (event.key === 'Escape' && isVariantsOpen && !isSwatchBookOpen) {
           setIsVariantsOpen(false);
         }
       };
@@ -132,7 +136,7 @@ export function VariantContentDesktop() {
       return () => {
         window.removeEventListener('keydown', handleEscapeKey);
       };
-    }, [isVariantsOpen, setIsVariantsOpen]);
+    }, [isVariantsOpen, isSwatchBookOpen, setIsVariantsOpen]);
 
     // Always render the container for transform effects, but conditionally render the content
     // z-index 2147483644 is max - 3
@@ -147,7 +151,16 @@ export function VariantContentDesktop() {
                 transform: 'translateX(100%)'
               }}
             >
-                <ProductVariantsWrapper/>
+                {variantDisplayStyleOverlay === 'wizard' ? (
+                  <div className="ov:flex ov:flex-col ov:h-full ov:bg-[var(--ov25-background-color)]">
+                    <VariantsHeader />
+                    <div className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:overflow-hidden">
+                      <WizardVariants mode="drawer" />
+                    </div>
+                  </div>
+                ) : (
+                  <ProductVariantsWrapper />
+                )}
             </div>
         </div>
       </div>

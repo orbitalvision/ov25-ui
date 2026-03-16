@@ -1,15 +1,16 @@
 import * as React from 'react'
-import { ListFilter, Search, X } from "lucide-react";
+import { Funnel, Search, X } from "lucide-react";
 import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 import { useDebounce } from '../../hooks/useDebounce.js';
-import { SwatchIcon } from '../ui/SwatchIcon.js';
+import { SwatchIconSvg } from '../../lib/svgs/SwatchIconSvg.js';
 import { cn } from '../../lib/utils.js';
 
 interface FilterControlsProps {
     isFilterOpen: boolean;
     setIsFilterOpen: (isOpen: boolean) => void;
     isGrouped: boolean;
-    optionId?: string; // Optional optionId for inline variant content
+    optionId?: string;
+    optionIds?: string[];
 }
 
 export const FilterControls: React.FC<FilterControlsProps> = ({
@@ -17,20 +18,21 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
     setIsFilterOpen,
     isGrouped,
     optionId,
+    optionIds,
 }) => {
-    const { searchQueries, setSearchQuery, activeOptionId, availableProductFilters, activeOption, isMobile, setAvailableProductFilters, setIsVariantsOpen, setIsSwatchBookOpen, swatchRulesData, selectedSwatches, allOptionsWithoutModules, hasSelectionsWithSwatches } = useOV25UI();
+    const { searchQueries, setSearchQuery, activeOptionId, availableProductFilters, activeOption, isMobile, setAvailableProductFilters, setIsVariantsOpen, openSwatchBook, swatchRulesData, selectedSwatches, allOptionsWithoutModules, hasSelectionsWithSwatches, swatchBookFlash, setSwatchBookFlash } = useOV25UI();
     const [localSearchQuery, setLocalSearchQuery] = React.useState('');
-    const debouncedSearchQuery = useDebounce(localSearchQuery, 500);
+    const debouncedSearchQuery = useDebounce(localSearchQuery, 1);
     const previousOptionIdRef = React.useRef<string | null>(null);
     const isUserInputRef = React.useRef(false);
     const [isAnimating, setIsAnimating] = React.useState(false);
     const [displayCount, setDisplayCount] = React.useState(selectedSwatches.length);
     const previousSelectedSwatchesRef = React.useRef(selectedSwatches);
-    
-    // Use provided optionId or fall back to activeOptionId
-    const currentOptionId = optionId || activeOptionId;
-    
-    // Effect for updating local search query when currentOptionId changes
+
+    const resolvedOptionIds = optionIds ?? (optionId ? [optionId] : activeOptionId ? [activeOptionId] : []);
+    const currentOptionId = resolvedOptionIds[0];
+    const resolvedOptionIdsKey = resolvedOptionIds.join(',');
+
     React.useEffect(() => {
         if (currentOptionId && currentOptionId !== previousOptionIdRef.current) {
             const newQuery = searchQueries[currentOptionId] || '';
@@ -40,127 +42,159 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
         }
     }, [currentOptionId, searchQueries]);
 
-    // Effect for syncing local state to global state
     React.useEffect(() => {
-        if (currentOptionId) {
-            if (!isUserInputRef.current) {
-                // Immediate update when currentOptionId changes
-                setSearchQuery(currentOptionId, localSearchQuery);
-            } else {
-                // Debounced update when user types
-                setSearchQuery(currentOptionId, debouncedSearchQuery);
-            }
-        }
-    }, [currentOptionId, localSearchQuery, debouncedSearchQuery, setSearchQuery, isUserInputRef]);
+        if (resolvedOptionIds.length === 0) return;
+        const query = !isUserInputRef.current ? localSearchQuery : debouncedSearchQuery;
+        resolvedOptionIds.forEach(id => setSearchQuery(id, query));
+    }, [resolvedOptionIdsKey, localSearchQuery, debouncedSearchQuery, setSearchQuery]);
 
     // Effect for triggering animation when selectedSwatches changes
     React.useEffect(() => {
         if (selectedSwatches.length !== previousSelectedSwatchesRef.current.length) {
             setIsAnimating(true);
-            
+            const prevLen = previousSelectedSwatchesRef.current.length;
+            setSwatchBookFlash(selectedSwatches.length > prevLen ? 'cta' : 'destructive');
+
             // First fade out the old number
             const fadeOutTimer = setTimeout(() => {
                 setDisplayCount(selectedSwatches.length);
-            }, 250); // Half the animation duration
-            
-            // Then complete the animation
+            }, 250);
+
             const completeTimer = setTimeout(() => {
                 setIsAnimating(false);
-            }, 500); // Full animation duration
-            
+            }, 500);
+
             previousSelectedSwatchesRef.current = selectedSwatches;
             return () => {
                 clearTimeout(fadeOutTimer);
                 clearTimeout(completeTimer);
             };
         }
-    }, [selectedSwatches]);
+    }, [selectedSwatches, setSwatchBookFlash]);
+
+    // Clear flash after animation
+    React.useEffect(() => {
+        if (!swatchBookFlash) return;
+        const t = setTimeout(() => setSwatchBookFlash(null), 500);
+        return () => clearTimeout(t);
+    }, [swatchBookFlash, setSwatchBookFlash]);
 
     const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setLocalSearchQuery(e.target.value);
         isUserInputRef.current = true;
     };
 
-    const handleSwatchButtonClick = () => {
-        setIsSwatchBookOpen(true);
+    const handleSwatchButtonClick = (e: React.MouseEvent) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openSwatchBook();
     };
 
-    const targetOption = currentOptionId === activeOptionId ? activeOption :
-        allOptionsWithoutModules?.find(opt => opt.id === currentOptionId);
+    const targetOptions = React.useMemo(() =>
+        resolvedOptionIds.map(id => allOptionsWithoutModules?.find(opt => opt.id === id)).filter(Boolean) as { id: string; name: string }[],
+        [resolvedOptionIds, allOptionsWithoutModules]
+    );
+    const targetOption = targetOptions[0];
 
-    const handleFilterChange = React.useCallback((filterKey: string, optionValue: string, checked: boolean) => {
-        if (!targetOption?.name || !availableProductFilters?.[targetOption.name]?.[filterKey]) return;
+    const handleFilterChange = React.useCallback((filterKey: string, optionValue: string, checked: boolean, optionName: string) => {
+        if (!optionName || !availableProductFilters?.[optionName]?.[filterKey]) return;
         setAvailableProductFilters(prev => ({
             ...prev,
-            [targetOption.name]: {
-                ...prev[targetOption.name],
-                [filterKey]: prev[targetOption.name][filterKey].map(opt =>
+            [optionName]: {
+                ...prev[optionName],
+                [filterKey]: prev[optionName][filterKey].map(opt =>
                     opt.value === optionValue ? { ...opt, checked } : opt
                 )
             }
         }));
-    }, [targetOption, availableProductFilters, setAvailableProductFilters]);
+    }, [availableProductFilters, setAvailableProductFilters]);
 
-    const shouldShowFilterButton = React.useMemo(() => {
-        // For inline variant content, we need to find the option by currentOptionId
-        const targetOption = currentOptionId === activeOptionId ? activeOption : 
-            allOptionsWithoutModules?.find(opt => opt.id === currentOptionId);
-        
-        if (!targetOption?.name) return false;
-        const optionFilters = availableProductFilters?.[targetOption.name];
-        if (!optionFilters) return false;
-        return Object.keys(optionFilters).some((key) => optionFilters[key]?.length > 0);
-    }, [currentOptionId, activeOptionId, activeOption, allOptionsWithoutModules, availableProductFilters]);
+    const { shouldShowFilterButton, isFilterDisabled } = React.useMemo(() => {
+        let hasFilterCategories = false;
+        let hasVisibleFilterContent = false;
+        for (const opt of targetOptions) {
+            const optionFilters = availableProductFilters?.[opt.name];
+            if (!optionFilters || Object.keys(optionFilters).length === 0) continue;
+            hasFilterCategories = true;
+            const fullOption = allOptionsWithoutModules?.find(o => o.id === opt.id);
+            const groupCount = fullOption?.groups?.length ?? 0;
+            const hasVisible = Object.keys(optionFilters).some(key => {
+                if (key === 'Collections') return groupCount > 1 && (optionFilters[key]?.length ?? 0) > 0;
+                return (optionFilters[key]?.length ?? 0) > 0;
+            });
+            if (hasVisible) hasVisibleFilterContent = true;
+        }
+        return {
+            shouldShowFilterButton: hasFilterCategories,
+            isFilterDisabled: hasFilterCategories && !hasVisibleFilterContent,
+        };
+    }, [targetOptions, availableProductFilters, allOptionsWithoutModules]);
 
-    const selectedFilters = availableProductFilters && targetOption?.name && availableProductFilters[targetOption.name] ? Object.keys(availableProductFilters[targetOption.name])
-    .flatMap(filterName => 
-        availableProductFilters[targetOption.name][filterName]
-            .filter(filter => filter.checked)
-            .map(filter => ({
-                ...filter,
-                filterCategory: filterName
-            }))
-    ) : [];
+    const selectedFilters = React.useMemo(() => {
+        return targetOptions.flatMap(opt =>
+            availableProductFilters?.[opt.name]
+                ? Object.keys(availableProductFilters[opt.name]).flatMap(filterName =>
+                    availableProductFilters[opt.name][filterName]
+                        .filter(filter => filter.checked)
+                        .map(filter => ({ ...filter, filterCategory: filterName, optionName: opt.name }))
+                )
+                : []
+        ) as { value: string; filterCategory: string; optionName: string }[];
+    }, [targetOptions, availableProductFilters]);
 
     return (
-        <div id="ov25-filter-controls-container" className="ov:flex ov:flex-col ov:gap-2 ov:px-4">
-            <div id="ov25-filter-controls" className="ov:flex ov:flex-nowrap ov:items-center ov:gap-2 ov:py-2">
+        <div id="ov25-filter-controls-container" className="ov:flex ov:flex-col ov:gap-1.5 ov:px-4">
+            <div id="ov25-filter-controls" className="ov:flex ov:flex-nowrap ov:items-center ov:gap-2 ov:py-1.5">
                 {shouldShowFilterButton && (
                     <button 
                         id="ov25-filter-controls-button"
                         className={cn(
-                            "ov:flex ov:items-center ov:p-2 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:whitespace-nowrap ov:hover:bg-[var(--ov25-hover-color)]",
-                            isFilterOpen ? "ov:bg-gray-50" : ""
+                            "ov:flex ov:items-center ov:justify-center ov:p-1.5 ov:rounded-full",
+                            isFilterDisabled
+                                ? "ov:opacity-50 ov:cursor-not-allowed"
+                                : "ov:cursor-pointer ov:hover:bg-neutral-50",
+                            isFilterOpen && !isFilterDisabled && "ov:bg-neutral-50"
                         )}
-                        onClick={() => setIsFilterOpen(!isFilterOpen)} 
+                        onClick={() => !isFilterDisabled && setIsFilterOpen(!isFilterOpen)} 
+                        disabled={isFilterDisabled}
                         data-open={isFilterOpen}
+                        aria-label="Filters"
                     >
-                        <ListFilter size={24} />
-                        <span className="ov:px-4 ov:color-[var(--ov25-secondary-text-color)]">Filters</span>
+                        <Funnel size={18} className="ov:text-[var(--ov25-secondary-text-color)]/60" />
                     </button>
                 )}
-                <div id="ov25-filter-controls-search" className="ov:flex ov:flex-1 ov:items-center ov:p-2 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:hover:bg-[var(--ov25-hover-color)]">
-                    <Search size={24} className="ov:min-w-[24px]"/>
-                    <input value={localSearchQuery} onChange={handleSearchInputChange} type="text" placeholder="Search" className="ov:w-full ov:pl-2 ov:ml-2 ov:text-[var(--ov25-secondary-text-color)] ov:bg-transparent ov:outline-none" />
-                    {localSearchQuery && (<X size={24} className="ov:min-w-[24px] ov:pr-2 ov:cursor-pointer" onClick={() => setLocalSearchQuery('')} />)}
+                <div id="ov25-filter-controls-search" className="ov:flex ov:flex-1 ov:items-center ov:py-1.5 ov:px-2 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:hover:bg-[var(--ov25-hover-color)]">
+                    <Search size={18} className="ov:shrink-0 ov:text-[var(--ov25-secondary-text-color)]/60"/>
+                    <input value={localSearchQuery} onChange={handleSearchInputChange} type="text" placeholder="Search" className="ov:w-full ov:pl-2 ov:text-sm ov:text-[var(--ov25-secondary-text-color)] ov:bg-transparent ov:outline-none ov:placeholder:text-[var(--ov25-secondary-text-color)]/70" />
+                    {localSearchQuery && (<X size={18} className="ov:shrink-0 ov:pl-1 ov:cursor-pointer ov:text-[var(--ov25-secondary-text-color)]" onClick={() => setLocalSearchQuery('')} />)}
                 </div>
                 {swatchRulesData.enabled && hasSelectionsWithSwatches && (
                 <button 
                     id="ov25-filter-controls-swatches"
-                    className="ov:flex ov:items-center ov:p-2 ov:rounded-full ov:border ov:border-transparent ov:whitespace-nowrap ov:cursor-pointer ov:bg-black/30"
-                    onClick={() => handleSwatchButtonClick()}
+                    type="button"
+                    data-ov25-swatch-book-button
+                    data-ov25-swatch-flash={swatchBookFlash ?? undefined}
+                    className="ov:flex ov:items-center ov:justify-center ov:rounded-full ov:border ov:border-transparent ov:cursor-pointer"
+                    onClick={handleSwatchButtonClick}
+                    aria-label="Open swatch book"
                 >
                     <div className="ov:relative">
-                        <SwatchIcon 
+                        <SwatchIconSvg
                             fill="white"
-                            stroke="#6E6E6E"
-                            strokeWidth="0"
-                            size={24}
+                            stroke="var(--ov25-border-color)"
+                            size={32}
+                            pathClassName={cn(
+                                swatchBookFlash === 'destructive' && "ov25-swatch-flash-destructive",
+                                swatchBookFlash === 'cta' && "ov25-swatch-flash-cta"
+                            )}
                         />
-                        {selectedSwatches.length > 0 && (
-                            <div className={cn(
-                                "ov:absolute ov:top-1/2 ov:left-1/2 ov:transform ov:-translate-x-1/2 ov:-translate-y-1/2 ov:text-black ov:font-base ov:text-sm ov:transition-opacity ov:duration-250",
-                                isAnimating && "ov:opacity-20"
+                            {selectedSwatches.length > 0 && (
+                            <div 
+                                data-ov25-swatch-book-count
+                                className={cn(
+                                "ov:absolute ov:top-1/2 ov:left-1/2 ov:transform ov:-translate-x-1/2 ov:-translate-y-1/2 ov:text-[var(--ov25-text-color)] ov:font-medium ov:text-xs",
+                                isAnimating && swatchBookFlash === 'destructive' && "ov25-swatch-count-flash-destructive",
+                                isAnimating && swatchBookFlash === 'cta' && "ov25-swatch-count-flash-cta"
                             )}>
                                 {displayCount}
                             </div>
@@ -170,7 +204,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
                 )}
             </div>
             {!isFilterOpen && !isMobile && selectedFilters.length > 0 && 
-            <div id="ov25-filter-controls-pills" className="ov:flex ov:flex-wrap ov:gap-2 ov:pb-2 ov:max-h-[200px] ov:overflow-y-auto ov:border-gray-200">
+            <div id="ov25-filter-controls-pills" className="ov:flex ov:flex-wrap ov:gap-1.5 ov:pb-1.5 ov:max-h-[100px] ov:overflow-y-auto ov:border-gray-200">
                 {
                     (() => {
                         if (!targetOption || !availableProductFilters || !availableProductFilters[targetOption.name]) {
@@ -178,7 +212,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
                                 return null;
                             }
                             return (
-                                <div className="ov25-filter-pill ov:flex ov:flex-row ov:gap-2 ov:px-2 ov:py-2 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:whitespace-nowrap ov:cursor-pointer ov:transition-all ov:text-sm">
+                                <div className="ov25-filter-pill ov:flex ov:flex-row ov:gap-1.5 ov:px-2 ov:py-1 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:whitespace-nowrap ov:cursor-pointer ov:transition-all ov:text-xs">
                                     All Collections
                                 </div>
                             );
@@ -186,21 +220,21 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
 
                         if (selectedFilters.length === 0) {
                             return (
-                                <div id="ov25-filter-pill-all" className="ov25-filter-pill ov:flex-row ov:hidden ov:gap-2 ov:px-2 ov:py-2 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:whitespace-nowrap ov:cursor-default ov:transition-all ov:text-sm">
+                                <div id="ov25-filter-pill-all" className="ov25-filter-pill ov:flex-row ov:hidden ov:gap-1.5 ov:px-2 ov:py-1 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:whitespace-nowrap ov:cursor-default ov:transition-all ov:text-xs">
                                     All Collections
                                 </div>
                             );
                         }
 
-                        return selectedFilters.map(filter => (
-                            <div key={filter.value} className="ov25-filter-pill ov:flex ov:flex-row ov:gap-2 ov:px-2 ov:py-2 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:whitespace-nowrap ov:cursor-pointer ov:transition-all ov:text-sm">
+                        return selectedFilters.map((filter, i) => (
+                            <div key={`${filter.optionName}-${filter.filterCategory}-${filter.value}-${i}`} className="ov25-filter-pill ov:flex ov:flex-row ov:gap-1.5 ov:px-2 ov:py-1 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:whitespace-nowrap ov:cursor-pointer ov:transition-all ov:text-xs">
                                 <span>
                                     {filter.value}
                                 </span>
                                 <X 
-                                    className="ov25-filter-pill-close ov:p-1 ov:mt-[1px]" 
-                                    size={20} 
-                                    onClick={() => handleFilterChange(filter.filterCategory, filter.value, false)} 
+                                    className="ov25-filter-pill-close ov:p-0.5" 
+                                    size={14} 
+                                    onClick={() => handleFilterChange(filter.filterCategory, filter.value, false, filter.optionName)} 
                                 />
                             </div>
                         ));

@@ -54,10 +54,9 @@ const Snap2Controls: React.FC = () => {
       (shareDialogTrigger !== 'none') && "ov:opacity-0 ov:pointer-events-none"
     )}>
       <div className={cn(
-        'ov:flex ov:gap-2 ov:pointer-events-auto ov:items-center ov:px-2 ov:py-1 ov:border',
+        'ov:flex ov:gap-2 ov:pointer-events-auto ov:items-center ov:px-2 ov:py-1',
         'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
-        'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
-        'ov:bg-[var(--ov25-overlay-button-color)]',
+        'ov:shadow-sm ov:bg-[var(--ov25-overlay-button-color)]',
         'ov:transition-all ov:duration-200'
       )}>
         {/* Dimensions Button with integrated mini toggle */}
@@ -66,7 +65,7 @@ const Snap2Controls: React.FC = () => {
             <button 
               id="ov25-snap2-dimensions-button" 
               onClick={handleToggleDimensions} 
-              className="ov:cursor-pointer ov:w-8 ov:h-8 ov:flex ov:items-center ov:justify-center ov:transition-all ov:duration-200 ov:hover:opacity-80 ov:border ov:border-[var(--ov25-configurator-view-controls-border-color)] ov:rounded-full"
+              className="ov:cursor-pointer ov:w-8 ov:h-8 ov:flex ov:items-center ov:justify-center ov:transition-all ov:duration-200 ov:hover:opacity-80 ov:shadow-sm ov:rounded-full ov:bg-[var(--ov25-overlay-button-color)]"
             >
               <DimensionsIcon className="ov:w-[16px] ov:h-[16px]" color="var(--ov25-text-color)"/>
             </button>
@@ -77,8 +76,7 @@ const Snap2Controls: React.FC = () => {
                 id="ov25-snap2-mini-dimensions-switch" 
                 onClick={handleToggleMiniDimensionsClick} 
                 className={cn(
-                  'ov:cursor-pointer ov:relative ov:w-8 ov:h-4 ov:rounded-full ov:border ov:transition-all ov:duration-200',
-                  'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
+                  'ov:cursor-pointer ov:relative ov:w-8 ov:h-4 ov:rounded-full ov:shadow-sm ov:transition-all ov:duration-200',
                   canSeeMiniDimensions 
                     ? 'ov:bg-[var(--ov25-text-color)]' 
                     : 'ov:bg-[var(--ov25-overlay-button-color)]',
@@ -97,15 +95,15 @@ const Snap2Controls: React.FC = () => {
         )}
 
         {/* Variants Button - only show on desktop */}
-        {!controlsHidden && allOptions.length > 0 && !(window.innerWidth < 1024) && (
+        {!controlsHidden && allOptions.length > 0 && !isMobile && (
           <button 
             id="ov25-snap2-variants-button" 
             onClick={handleVariantsClick} 
             className={cn(
-              "ov:cursor-pointer ov:w-8 ov:h-8 ov:flex ov:items-center ov:justify-center ov:transition-all ov:duration-200 ov:hover:opacity-80 ov:border ov:rounded-full",
+              "ov:cursor-pointer ov:w-8 ov:h-8 ov:flex ov:items-center ov:justify-center ov:transition-all ov:duration-200 ov:hover:opacity-80 ov:shadow-sm ov:rounded-full",
               isVariantsOpen 
-                ? "ov:border-[var(--ov25-text-color)] ov:bg-gray-200" 
-                : "ov:border-[var(--ov25-configurator-view-controls-border-color)]"
+                ? "ov:bg-gray-200" 
+                : "ov:bg-[var(--ov25-overlay-button-color)]"
             )}
           >
             <TableRowsSplit 
@@ -122,7 +120,7 @@ const Snap2Controls: React.FC = () => {
         <button 
           id="ov25-snap2-hide-all-button" 
           onClick={toggleHideAll} 
-          className="ov:cursor-pointer ov:w-8 ov:h-8 ov:flex ov:items-center ov:justify-center ov:transition-all ov:duration-200 ov:hover:opacity-80 ov:border ov:border-[var(--ov25-configurator-view-controls-border-color)] ov:rounded-full"
+          className="ov:cursor-pointer ov:w-8 ov:h-8 ov:flex ov:items-center ov:justify-center ov:transition-all ov:duration-200 ov:hover:opacity-80 ov:shadow-sm ov:rounded-full ov:bg-[var(--ov25-overlay-button-color)]"
         >
           {controlsHidden ? (
             <EyeClosed className="ov:w-[16px] ov:h-[16px]" color="var(--ov25-text-color)"/>

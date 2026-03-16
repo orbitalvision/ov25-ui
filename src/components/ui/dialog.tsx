@@ -32,8 +32,8 @@ DialogOverlay.displayName = DialogPrimitive.Overlay.displayName
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, id, ...props }, ref) => {
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { closeClassName?: string }
+>(({ className, children, id, closeClassName, ...props }, ref) => {
   const { shadowDOMs } = useOV25UI();
   
   // Snap2 dialogs need special handling for fullscreen compatibility
@@ -67,7 +67,7 @@ const DialogContent = React.forwardRef<
           {...props}
         >
           {children}
-          <DialogPrimitive.Close className="ov:absolute ov:right-4 ov:top-4 ov:rounded-sm ov:opacity-70 ov:ring-offset-background ov:transition-opacity hover:ov:opacity-100 focus:ov:outline-none focus:ov:ring-2 focus:ov:ring-ring focus:ov:ring-offset-2 disabled:ov:pointer-events-none data-[state=open]:ov:bg-accent data-[state=open]:ov:text-muted-foreground">
+          <DialogPrimitive.Close className={cn("ov:absolute ov:right-4 ov:top-4 ov:rounded-sm ov:opacity-70 ov:cursor-pointer ov:ring-offset-background ov:transition-opacity hover:ov:opacity-100 focus:ov:outline-none focus:ov:ring-2 focus:ov:ring-ring focus:ov:ring-offset-2 disabled:ov:pointer-events-none data-[state=open]:ov:bg-accent data-[state=open]:ov:text-muted-foreground", closeClassName)}>
             <X className="ov:h-6 ov:w-6" />
             <span className="ov:sr-only">Close</span>
           </DialogPrimitive.Close>

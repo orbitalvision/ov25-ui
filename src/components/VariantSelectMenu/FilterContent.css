@@ -1,6 +1,6 @@
 #ov25-filter-content {
   width: 100%;
-  height: 100%;
+  max-height: fit-content;
   padding-right: 1em;
   padding-bottom: 10em;
   overflow-y: auto;
@@ -44,7 +44,7 @@
 
 #ov25-filter-empty {
   width: 100%;
-  height: 100%;
+  max-height: fit-content;
   padding: 1rem;
   padding-top: 4rem;
   display: flex;

@@ -1,7 +1,16 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { sendMessageToIframe, toggleAR, CompatibleModule, detectUserAgent } from '../utils/configurator-utils.js';
+import { SaveSnap2Dialog } from '../components/SaveSnap2Dialog.js';
+import {
+  CarouselDisplayMode,
+  CarouselLayout,
+  VariantDisplayStyle,
+  VariantDisplayStyleOverlay,
+} from '../types/config-enums.js';
 import { stringSimilarity } from 'string-similarity-js';
 import { launchARWithGLBBlob } from '../utils/launchARWithGLBBlob.js';
+import { getProductGalleryImages, resolveImageUrl } from '../lib/utils.js';
+import type { OnChangePayload, OnChangePricePayload, OnChangeSkuPayload } from '../types/inject-config.js';
 
 function throttle<T extends (...args: any[]) => void>(
   fn: T,
@@ -210,12 +219,18 @@ interface OV25UIContextType {
   productLink: string | null;
   apiKey: string;
   configurationUuid: string | null;
-  buyNowFunction: () => void;
-  addToBasketFunction: () => void;
-  addSwatchesToCart: () => void;
+  buyNowFunction: (payload?: OnChangePayload) => void;
+  addToBasketFunction: (payload?: OnChangePayload) => void;
+  buySwatches: () => void;
   images?: string[];
   logoURL?: string;
   isProductGalleryStacked: boolean;
+  carouselLayout: CarouselLayout;
+  carouselLayoutMobile: CarouselLayout;
+  carouselMaxImagesDesktop?: number;
+  carouselMaxImagesMobile?: number;
+  carouselSibling: boolean;
+  showCarousel: boolean;
   mobileLogoURL?: string;
   uniqueId?: string;
 
@@ -233,6 +248,8 @@ interface OV25UIContextType {
   selectedSwatches: Swatch[];
   swatchRulesData: SwatchRulesData;
   isSwatchBookOpen: boolean;
+  swatchBookFlash: 'destructive' | 'cta' | null;
+  setSwatchBookFlash: React.Dispatch<React.SetStateAction<'destructive' | 'cta' | null>>;
   hasSelectionsWithSwatches: boolean;
   availableCameras: Array<{
     id: string;
@@ -249,9 +266,20 @@ interface OV25UIContextType {
   controlsHidden: boolean;
   hasConfigureButton: boolean;
   useInlineVariantControls: boolean;
+  configuratorDisplayMode: 'inline' | 'sheet' | 'drawer' | 'variants-only-sheet';
+  configuratorDisplayModeMobile: 'inline' | 'drawer' | 'variants-only-sheet';
   useSimpleVariantsSelector: boolean;
+  /** Drawer trigger: single Configure button or per-option buttons (ProductOptionsGroup). */
+  configuratorTriggerStyle: 'single-button' | 'split-buttons';
+  variantDisplayStyleMobile: VariantDisplayStyle;
+  variantDisplayStyleInline: VariantDisplayStyleOverlay;
+  variantDisplayStyleInlineMobile: VariantDisplayStyleOverlay;
+  variantDisplayStyleOverlay: VariantDisplayStyleOverlay;
+  variantDisplayStyleOverlayMobile: VariantDisplayStyleOverlay;
   shareDialogTrigger: 'none' | 'save-button' | 'modal-close';
   skipNextDrawerCloseRef: React.MutableRefObject<boolean>;
+  skipNextShareClickRef: React.MutableRefObject<boolean>;
+  expandToOptionIdOnOpen: string | null;
   preloading: boolean;
   setPreloading: (preloading: boolean) => void;
   resetIframe: () => void;
@@ -350,21 +378,42 @@ export const OV25UIProvider: React.FC<{
   productLink: string | null, 
   apiKey: string, 
   configurationUuid: string,
-  buyNowFunction: () => void,
-  addToBasketFunction: () => void,
-  addSwatchesToCartFunction: (swatches: Swatch[], swatchRulesData: SwatchRulesData) => void,
+  buyNowFunction: (payload?: OnChangePayload) => void,
+  addToBasketFunction: (payload?: OnChangePayload) => void,
+  buySwatchesFunction: (swatches: Swatch[], swatchRulesData: SwatchRulesData) => void,
+  onChange?: (payload: OnChangePayload) => void,
   images?: string[],
   deferThreeD?: boolean,
   showOptional?: boolean,
   hidePricing?: boolean,
   hideAr?: boolean,
+  forceMobile?: boolean,
   logoURL?: string,
   isProductGalleryStacked: boolean,
+  carouselDisplayMode?: CarouselDisplayMode,
+  carouselDisplayModeMobile?: CarouselDisplayMode,
+  carouselMaxImagesDesktop?: number,
+  carouselMaxImagesMobile?: number,
+  /** @deprecated Use carouselDisplayMode */
+  carouselLayout?: CarouselDisplayMode,
+  carouselSibling?: boolean,
+  showCarousel?: boolean,
   hasConfigureButton: boolean,
   mobileLogoURL?: string,
   uniqueId?: string,
   useInlineVariantControls?: boolean,
+  useInlineVariantControlsMobile?: boolean,
+  configuratorDisplayMode?: 'inline' | 'sheet' | 'drawer' | 'variants-only-sheet',
+  configuratorDisplayModeMobile?: 'inline' | 'drawer' | 'variants-only-sheet',
   useSimpleVariantsSelector?: boolean,
+  configuratorTriggerStyle?: 'single-button' | 'split-buttons',
+  configuratorTriggerStyleMobile?: 'single-button' | 'split-buttons',
+  variantDisplayStyle?: VariantDisplayStyle,
+  variantDisplayStyleMobile?: VariantDisplayStyle,
+  variantDisplayStyleInline?: VariantDisplayStyleOverlay,
+  variantDisplayStyleInlineMobile?: VariantDisplayStyleOverlay,
+  variantDisplayStyleOverlay?: VariantDisplayStyleOverlay,
+  variantDisplayStyleOverlayMobile?: VariantDisplayStyleOverlay,
   shadowDOMs?: {
     mobileDrawer?: ShadowRoot;
     configuratorViewControls?: ShadowRoot;
@@ -379,22 +428,52 @@ export const OV25UIProvider: React.FC<{
   configurationUuid,
   buyNowFunction,
   addToBasketFunction,
-  addSwatchesToCartFunction,
+  buySwatchesFunction,
+  onChange,
   images,
   deferThreeD = false,
   showOptional = false,
   hidePricing = false,
   hideAr = false,
+  forceMobile = false,
   logoURL,
   isProductGalleryStacked,
+  carouselDisplayMode: carouselDisplayModeProp,
+  carouselDisplayModeMobile: carouselDisplayModeMobileProp,
+  carouselMaxImagesDesktop,
+  carouselMaxImagesMobile,
+  carouselLayout: carouselLayoutProp,
+  carouselSibling = false,
+  showCarousel = true,
   hasConfigureButton,
   mobileLogoURL,
   uniqueId,
   useInlineVariantControls = false,
-  useSimpleVariantsSelector = false,
+  useInlineVariantControlsMobile: useInlineVariantControlsMobileProp,
+  configuratorDisplayMode = 'sheet',
+  configuratorDisplayModeMobile: configuratorDisplayModeMobileProp,
+  useSimpleVariantsSelector = true,
+  configuratorTriggerStyle = 'single-button',
+  configuratorTriggerStyleMobile: configuratorTriggerStyleMobileProp,
+  variantDisplayStyle,
+  variantDisplayStyleMobile: variantDisplayStyleMobileProp,
+  variantDisplayStyleInline: variantDisplayStyleInlineProp,
+  variantDisplayStyleInlineMobile: variantDisplayStyleInlineMobileProp,
+  variantDisplayStyleOverlay: variantDisplayStyleOverlayProp,
+  variantDisplayStyleOverlayMobile: variantDisplayStyleOverlayMobileProp,
   shadowDOMs,
   cssString,
 }) => {
+  const carouselLayout = carouselDisplayModeProp ?? carouselLayoutProp ?? CarouselDisplayMode.Stacked;
+  const carouselLayoutMobile = carouselDisplayModeMobileProp ?? carouselDisplayModeProp ?? carouselLayoutProp ?? CarouselDisplayMode.Stacked;
+  const variantDisplayStyleMobile = variantDisplayStyleMobileProp ?? variantDisplayStyle ?? VariantDisplayStyle.Tree;
+  const listLikeStyles: VariantDisplayStyle[] = [VariantDisplayStyle.Wizard, VariantDisplayStyle.List, VariantDisplayStyle.Tabs, VariantDisplayStyle.Accordion, VariantDisplayStyle.Tree];
+  const isListLike = variantDisplayStyle != null && listLikeStyles.includes(variantDisplayStyle);
+  const isListLikeMobile = variantDisplayStyleMobile != null && listLikeStyles.includes(variantDisplayStyleMobile);
+  const variantDisplayStyleInline: VariantDisplayStyleOverlay = isListLike ? (variantDisplayStyle as VariantDisplayStyleOverlay) : (variantDisplayStyleInlineProp ?? VariantDisplayStyleOverlay.Wizard);
+  const variantDisplayStyleOverlay: VariantDisplayStyleOverlay = isListLike ? (variantDisplayStyle as VariantDisplayStyleOverlay) : (variantDisplayStyleOverlayProp ?? VariantDisplayStyleOverlay.Tree);
+  const variantDisplayStyleInlineMobile: VariantDisplayStyleOverlay = variantDisplayStyleInlineMobileProp ?? (isListLikeMobile ? (variantDisplayStyleMobile as VariantDisplayStyleOverlay) : variantDisplayStyleInline);
+  const variantDisplayStyleOverlayMobile: VariantDisplayStyleOverlay = variantDisplayStyleOverlayMobileProp ?? (isListLikeMobile ? (variantDisplayStyleMobile as VariantDisplayStyleOverlay) : variantDisplayStyleOverlay);
   // State definitions
   const [products, setProducts] = useState<Product[]>([]);
   const [currentProductId, setCurrentProductId] = useState<string>();
@@ -405,6 +484,7 @@ export const OV25UIProvider: React.FC<{
     selectionId: string;
   }>>([]);
   const [activeOptionId, setActiveOptionId] = useState<string | null>(null);
+  const [expandToOptionIdOnOpen, setExpandToOptionIdOnOpen] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(0);
   const [subtotal, setSubtotal] = useState(0);
@@ -425,7 +505,7 @@ export const OV25UIProvider: React.FC<{
   const [canAnimate, setCanAnimate] = useState<boolean>(false);
   const [animationState, setAnimationState] = useState<AnimationState>('unavailable');
   const iframeRef = useRef<HTMLIFrameElement>(null!);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(forceMobile || window.innerWidth < 768);
   const [hasSwitchedAfterDefer, setHasSwitchedAfterDefer] = useState(false)
   const [pendingProductId, setPendingProductId] = useState<string | null>(null);
   const [availableProductFilters, setAvailableProductFilters] = useState<ProductFilters>({});
@@ -443,6 +523,7 @@ export const OV25UIProvider: React.FC<{
 
   const [selectedSwatches, setSelectedSwatches] = useLocalStorage<Swatch[]>('ov25-selected-swatches', []);
   const [isSwatchBookOpen, setIsSwatchBookOpen] = useState<boolean>(false);
+  const [swatchBookFlash, setSwatchBookFlash] = useState<'destructive' | 'cta' | null>(null);
   const [swatchRulesData, setSwatchRulesData] = useState<SwatchRulesData>({
     freeSwatchLimit: 0,
     canExeedFreeLimit: false,
@@ -457,6 +538,7 @@ export const OV25UIProvider: React.FC<{
   const [hasConfigureButtonState, setHasConfigureButton] = useState(hasConfigureButton);
   const [shareDialogTrigger, setShareDialogTrigger] = useState<'none' | 'save-button' | 'modal-close'>('none');
   const skipNextDrawerCloseRef = useRef(false);
+  const skipNextShareClickRef = useRef(false);
   const [preloading, setPreloading] = useState(window.innerWidth < 768);
   const [iframeResetKey, setIframeResetKey] = useState(0);
   
@@ -468,6 +550,21 @@ export const OV25UIProvider: React.FC<{
 
   // Configure handler ref for external access
   const configureHandlerRef = useRef<(() => void) | null>(null);
+
+  const latestPriceRef = useRef<OnChangePricePayload | null>(null);
+  const latestSkuRef = useRef<OnChangeSkuPayload | null>(null);
+  const configuratorStateRef = useRef<ConfiguratorState | undefined>(configuratorState);
+  configuratorStateRef.current = configuratorState;
+  const onChangeRef = useRef(onChange);
+  onChangeRef.current = onChange;
+
+  const addToBasketWithPayload = useCallback(() => {
+    addToBasketFunction({ skus: latestSkuRef.current ?? null, price: latestPriceRef.current ?? null });
+  }, [addToBasketFunction]);
+
+  const buyNowWithPayload = useCallback(() => {
+    buyNowFunction({ skus: latestSkuRef.current ?? null, price: latestPriceRef.current ?? null });
+  }, [buyNowFunction]);
 
   // Cleanup function for switching between configurators
   const cleanupConfigurator = useCallback(() => {
@@ -521,11 +618,19 @@ export const OV25UIProvider: React.FC<{
   }, [isVariantsOpen]);
 
   useEffect(() => {
+    if (!isVariantsOpen) setExpandToOptionIdOnOpen(null);
+  }, [isVariantsOpen]);
+
+  useEffect(() => {
     // auto-close variants when module panel opens on desktop
     if (isModulePanelOpen && !isMobile) {
       setIsVariantsOpen(false);
     }
   }, [isModulePanelOpen, isMobile]);
+
+  useEffect(() => {
+    if (isModalOpen) skipNextShareClickRef.current = false;
+  }, [isModalOpen]);
 
   // Effect: Clear pending product ID when current product ID updates
   useEffect(() => {
@@ -535,21 +640,19 @@ export const OV25UIProvider: React.FC<{
     }
   }, [currentProductId, pendingProductId]);
 
-  // Effect for detecting mobile devices
+  // Effect for detecting mobile devices (skip when forceMobile)
   useEffect(() => {
+    if (forceMobile) {
+      setIsMobile(true);
+      return;
+    }
     const checkIfMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
-    
-    // Check initially
     checkIfMobile();
-    
-    // Add event listener for window resize
     window.addEventListener('resize', checkIfMobile);
-    
-    // Cleanup
     return () => window.removeEventListener('resize', checkIfMobile);
-  }, []);
+  }, [forceMobile]);
 
   const setSearchQuery = useCallback((optionId: string, query: string) => {
     setSearchQueries(prev => ({
@@ -572,8 +675,8 @@ export const OV25UIProvider: React.FC<{
     return selectedSwatches.some(s => s.manufacturerId === swatch.manufacturerId && s.name === swatch.name && s.option === swatch.option);
   }, [selectedSwatches]);
 
-  const addSwatchesToCart = () => {
-    addSwatchesToCartFunction(selectedSwatches, swatchRulesData);
+  const buySwatches = () => {
+    buySwatchesFunction(selectedSwatches, swatchRulesData);
     setSelectedSwatches([]);
   };
 
@@ -731,7 +834,12 @@ export const OV25UIProvider: React.FC<{
         name: p?.name,
         price: p?.price,
         discount: p?.discount,
-        thumbnail: p?.metadata?.images?.length > 0 ? p?.metadata?.images[p?.metadata?.images?.length - 1] : null
+        thumbnail: (() => {
+          const imgs = p?.metadata?.images
+          if (!imgs?.length) return undefined
+          const last = imgs[imgs.length - 1]
+          return resolveImageUrl(last as any, 'carousel') || undefined
+        })()
       })) || []
     }]
   }), [products]);
@@ -800,7 +908,7 @@ export const OV25UIProvider: React.FC<{
           allFilterSets[option.name][key] = Array.from(filterSets[key]).map(value => ({ value, checked: false }));
         });
       }
-      if (option.groups && option.groups.length > 0 && (option.groups.length > 1 || option.groups[0].name !== 'Default Group')) {
+      if (option.groups && option.groups.length > 1) {
         if (!allFilterSets[option.name]) {
           allFilterSets[option.name] = {};
         }
@@ -854,6 +962,7 @@ export const OV25UIProvider: React.FC<{
 
   // Action handlers
   const handleOptionClick = (optionId: string) => {
+    setExpandToOptionIdOnOpen(optionId);
     setActiveOptionId(optionId);
     setIsVariantsOpen(true);
   };
@@ -885,8 +994,9 @@ export const OV25UIProvider: React.FC<{
 
   // Configure button handler for Snap2 mode
   const handleConfigureClick = useCallback(() => {
-    if (window.innerWidth < 1024) {
+    if (isMobile) {
       setPreloading(false);
+      setExpandToOptionIdOnOpen(null);
       // On mobile/tablet, open variants drawer.
       // Prefer first non-modules option; otherwise fall back to 'modules' so user can pick in the drawer.
       const firstNonModulesOption = allOptions.find(opt => opt.id !== 'modules');
@@ -900,7 +1010,7 @@ export const OV25UIProvider: React.FC<{
       setIsModalOpen(true);
       setIsModulePanelOpen(true);
     }
-  }, [allOptions, setPreloading, setActiveOptionId, setIsVariantsOpen, setIsModalOpen, compatibleModules, setIsModulePanelOpen]);
+  }, [allOptions, isMobile, setPreloading, setActiveOptionId, setIsVariantsOpen, setIsModalOpen, compatibleModules, setIsModulePanelOpen]);
 
   /** Open variant configurator: close swatch book, open variants drawer. Optional optionName uses fuzzy match; fallback to first option. */
   const openConfigurator = useCallback((optionName?: string) => {
@@ -916,9 +1026,13 @@ export const OV25UIProvider: React.FC<{
         const best = withSimilarity.reduce((a, b) => (a.similarity >= b.similarity ? a : b));
         targetId = best.similarity > 0.4 ? best.id : undefined;
       }
-      setActiveOptionId(targetId ?? allOptions[0].id);
-      setIsVariantsOpen(true);
+      const resolved = targetId ?? allOptions[0].id;
+      setExpandToOptionIdOnOpen(name ? resolved : null);
+      setActiveOptionId(resolved);
+    } else {
+      setExpandToOptionIdOnOpen(null);
     }
+    setIsVariantsOpen(true);
   }, [allOptions, setIsSwatchBookOpen, setActiveOptionId, setIsVariantsOpen]);
 
   /** Close variant configurator drawer. Exposed for custom buttons. */
@@ -1016,6 +1130,10 @@ export const OV25UIProvider: React.FC<{
         const data = (type === 'AR_GLB_DATA' || !payload) ? {} : JSON.parse(payload);
         switch (type) {
           case 'ALL_PRODUCTS':
+            console.log('[ov25-ui] ALL_PRODUCTS received:', data);
+            data?.forEach?.((p: any, i: number) => {
+              console.log(`[ov25-ui] Product ${i} (id=${p?.id}) metadata:`, p?.metadata);
+            });
             setProducts(data);
             break;
           case 'CURRENT_PRODUCT_ID':
@@ -1089,16 +1207,24 @@ export const OV25UIProvider: React.FC<{
               return initializedData;
             });
             break;
-          case 'CURRENT_PRICE':
-            setPrice(data.totalPrice);
-            setSubtotal(data.subtotal)
-            setFormattedSubtotal(data.formattedSubtotal)
-            setFormattedPrice(data.formattedPrice)
-            setDiscount(data.discount)
+          case 'CURRENT_PRICE': {
+            const pricePayload = data as OnChangePricePayload;
+            latestPriceRef.current = pricePayload;
+            setPrice(pricePayload.totalPrice);
+            setSubtotal(pricePayload.subtotal);
+            setFormattedSubtotal(pricePayload.formattedSubtotal);
+            setFormattedPrice(pricePayload.formattedPrice);
+            setDiscount(pricePayload.discount);
+            onChangeRef.current?.({ skus: latestSkuRef.current ?? null, price: pricePayload });
             break;
-          case 'CURRENT_SKU':
+          }
+          case 'CURRENT_SKU': {
+            const skuPayload = data as OnChangeSkuPayload;
+            latestSkuRef.current = skuPayload;
             setCurrentSku(data);
+            onChangeRef.current?.({ skus: skuPayload, price: latestPriceRef.current ?? null });
             break;
+          }
           case 'RANGE':
             setRange(data);
             break;
@@ -1143,15 +1269,19 @@ export const OV25UIProvider: React.FC<{
             setCompatibleModules(data.modules || []);
             if (data.modules.length > 0) {
               setIsModuleSelectionLoading(false);
-              if (window.innerWidth < 1024) {
-                // Mobile/tablet behavior - open drawer
+              if (isMobile) {
+                setExpandToOptionIdOnOpen(null);
                 setActiveOptionId('modules');
                 if (!hasConfigureButton && !data.isInitialLoad) {
                   setIsVariantsOpen(true);
                 }
               } else {
-                // Desktop behavior - open module panel
                 setIsModulePanelOpen(true);
+              }
+            } else if (isMobile && configuratorStateRef.current?.snap2Objects?.length) {
+              const firstVariant = configuratorStateRef.current.options?.[0];
+              if (firstVariant) {
+                setActiveOptionId(firstVariant.id);
               }
             }
             break;
@@ -1264,8 +1394,9 @@ export const OV25UIProvider: React.FC<{
     return () => window.removeEventListener('message', handleMessage);
   }, [handleARGLBData]);
 
-  const productImages = currentProduct?.metadata?.images?.slice(0, -1) || [];
-
+  const hasCutout = !!(currentProduct?.metadata as any)?.cutoutImage
+  const cutoutFirst = hasCutout && (isMobile || !deferThreeD)
+  const productImages = getProductGalleryImages(currentProduct?.metadata, { cutoutFirst })
   const allImages = [...(images || []), ...productImages]
   
   const [galleryIndex, setGalleryIndex] = useState(0);
@@ -1343,6 +1474,12 @@ export const OV25UIProvider: React.FC<{
     iframeRef,
     isMobile,
     isProductGalleryStacked,
+  carouselLayout,
+  carouselLayoutMobile,
+  carouselMaxImagesDesktop,
+  carouselMaxImagesMobile,
+  carouselSibling,
+  showCarousel,
     hasSwitchedAfterDefer,
     deferThreeD,
     showOptional,
@@ -1353,9 +1490,9 @@ export const OV25UIProvider: React.FC<{
     productLink,
     apiKey,
     configurationUuid,
-    buyNowFunction,
-    addToBasketFunction,
-    addSwatchesToCart,
+    buyNowFunction: buyNowWithPayload,
+    addToBasketFunction: addToBasketWithPayload,
+    buySwatches,
     images,
     logoURL,
     mobileLogoURL,
@@ -1372,6 +1509,8 @@ export const OV25UIProvider: React.FC<{
     selectedSwatches,
     swatchRulesData,
     isSwatchBookOpen,
+    swatchBookFlash,
+    setSwatchBookFlash,
     hasSelectionsWithSwatches,
     availableCameras,
     availableLights,
@@ -1380,10 +1519,20 @@ export const OV25UIProvider: React.FC<{
     isModalOpen,
     controlsHidden,
     hasConfigureButton: hasConfigureButtonState,
-    useInlineVariantControls,
+    useInlineVariantControls: isMobile ? (useInlineVariantControlsMobileProp ?? useInlineVariantControls) : useInlineVariantControls,
+    configuratorDisplayMode,
+    configuratorDisplayModeMobile: configuratorDisplayModeMobileProp ?? (configuratorDisplayMode === 'inline' ? 'inline' : 'drawer'),
     useSimpleVariantsSelector,
+    configuratorTriggerStyle: isMobile ? (configuratorTriggerStyleMobileProp ?? configuratorTriggerStyle) : configuratorTriggerStyle,
+    variantDisplayStyleMobile,
+    variantDisplayStyleInline,
+    variantDisplayStyleInlineMobile,
+    variantDisplayStyleOverlay,
+    variantDisplayStyleOverlayMobile,
     shareDialogTrigger,
     skipNextDrawerCloseRef,
+    skipNextShareClickRef,
+    expandToOptionIdOnOpen,
     preloading,
     setPreloading,
     resetIframe: () => setIframeResetKey(prev => prev + 1),
@@ -1456,6 +1605,7 @@ export const OV25UIProvider: React.FC<{
   return (
     <OV25UIContext.Provider value={contextValue}>
       {children}
+      {isSnap2Mode && <SaveSnap2Dialog />}
     </OV25UIContext.Provider>
   );
 };

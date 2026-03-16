@@ -1,13 +1,19 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
 :root {
   height: 100%;
   line-height: 1.5;
   font-weight: 400;
+  font-family: 'IBM Plex Sans', sans-serif;
+  color: #1a1a1a;
 }
 
 html, body {
   height: 100%;
   margin: 0;
   padding: 0;
+  font-family: 'IBM Plex Sans', sans-serif;
+  color: #1a1a1a;
 }
 
 #root {
@@ -19,10 +25,46 @@ html, body {
   padding: 1em;
   height: 100%;
   max-width: 1400px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  color: #1a1a1a;
+}
+
+.app p {
+  color: #525252;
 }
 
 h1 {
   margin-bottom: 20px;
+  color: #1a1a1a;
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+
+/* Viewport phone frame (mobile preview) */
+.viewport-phone-frame::before {
+  content: '';
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 125px;
+  height: 28px;
+  background: #1c1c1e;
+  border-radius: 0 0 18px 18px;
+  z-index: 10;
+  pointer-events: none;
+}
+.viewport-phone-frame::after {
+  content: '';
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 134px;
+  height: 5px;
+  background: #1c1c1e;
+  border-radius: 3px;
+  z-index: 10;
+  pointer-events: none;
 }
 
 /* Configurator styles */
@@ -66,8 +108,9 @@ h1 {
 
 /* Multiple Configurators Styles */
 .subtitle {
-  color: #666;
+  color: #525252;
   margin-bottom: 30px;
+  font-family: 'IBM Plex Sans', sans-serif;
 }
 
 .configurators-grid {
@@ -101,8 +144,9 @@ h1 {
 
 .configurator-card h3 {
   margin: 0 0 15px 0;
-  color: #333;
+  color: #1a1a1a;
   font-size: 18px;
+  font-family: 'IBM Plex Sans', sans-serif;
 }
 
 .gallery-container {
@@ -138,10 +182,11 @@ h1 {
 .product-name {
   font-size: 16px;
   font-weight: 600;
-  color: #333;
+  color: #1a1a1a;
   margin-bottom: 8px;
   word-wrap: break-word;
   overflow-wrap: break-word;
+  font-family: 'IBM Plex Sans', sans-serif;
 }
 
 .product-price {
@@ -161,7 +206,8 @@ h1 {
 
 .variants-container h4 {
   margin: 0 0 10px 0;
-  color: #333;
+  color: #1a1a1a;
   font-size: 14px;
   font-weight: 600;
+  font-family: 'IBM Plex Sans', sans-serif;
 }

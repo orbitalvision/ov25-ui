@@ -5,7 +5,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils/cn.js"
 
 const buttonVariants = cva(
-  "ov:inline-flex ov:items-center ov:rounded-md ov:justify-center ov:gap-2 ov:whitespace-nowrap ov:text-sm ov:font-medium ov:transition-colors ov:focus-visible:outline-none ov:disabled:pointer-events-none ov:disabled:opacity-50 ov:[&_svg]:pointer-events-none ov:[&_svg]:size-4 ov:[&_svg]:shrink-0",
+  "ov:inline-flex ov:items-center ov:rounded-md ov:justify-center ov:gap-2 ov:whitespace-nowrap ov:text-sm ov:font-medium ov:transition-colors ov:focus-visible:outline-none ov:disabled:pointer-events-none ov:disabled:opacity-50 ov:[&_svg]:pointer-events-none ov:[&_svg]:size-4 ov:[&_svg]:shrink-0 ov:cursor-pointer ov:uppercase",
   {
     variants: {
       variant: {
@@ -20,7 +20,9 @@ const buttonVariants = cva(
         secondary:
           "ov:bg-secondary ov:text-secondary-foreground ov:shadow-sm ov:hover:bg-secondary/80",
         success:
-          "ov:bg-green-500 ov:text-white ov:shadow-sm ov:hover:bg-green-600",
+          "ov:bg-[var(--ov25-cta-color)] ov:text-white ov:shadow-sm ov:hover:bg-[var(--ov25-cta-color-hover)]",
+        configure:
+          "ov:rounded-full ov:bg-[var(--ov25-cta-color)] ov:text-white ov:font-medium ov:py-3 ov:px-6 ov:hover:bg-[var(--ov25-cta-color)] ov:disabled:opacity-30 ov:disabled:hover:bg-[var(--ov25-cta-color-light)]",
         ghost: "ov:hover:bg-accent ov:hover:text-accent-foreground",
         link: "ov:text-primary ov:underline-offset-4 ov:hover:underline",
         shimmerOutline: "ov:hover:animate-shimmer ov:border ov:border-input ov:bg-background ov:bg-[linear-gradient(110deg,#ffffff,45%,#f7f7f7,55%,#ffffff)] ov:bg-[length:200%_100%] ov:shadow-sm ov:hover:bg-accent ov:hover:text-accent-foreground ",

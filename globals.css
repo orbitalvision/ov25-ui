@@ -1,4 +1,18 @@
 @import "tailwindcss" prefix(ov);
+@import url("https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap");
+
+@theme inline {
+  --radius: var(--ov25-rounded);
+  --radius-xs: var(--ov25-rounded-xs);
+  --radius-sm: var(--ov25-rounded-sm);
+  --radius-md: var(--ov25-rounded-md);
+  --radius-lg: var(--ov25-rounded-lg);
+  --radius-xl: var(--ov25-rounded-xl);
+  --radius-2xl: var(--ov25-rounded-2xl);
+  --radius-3xl: var(--ov25-rounded-3xl);
+  --radius-4xl: var(--ov25-rounded-4xl);
+  --radius-full: var(--ov25-rounded-full);
+}
 
 /* Override Shopify's div:empty rule for ov25-ui components */
 #ov25-configurator-iframe-container div:empty,
@@ -10,34 +24,61 @@
   display: block !important;
 }
 
-/* Set default font sizes for OV25-UI only. In Shadow DOM, scope with :host; in light DOM, scope to OV25 ids. */
-:host, :host * {
-  font-size: initial;
+#ov25-aside-menu {
+  display: flex;
+  flex-direction: column;
 }
-
-[id^="ov25-"], [id^="ov25-"] * {
-  font-size: initial;
+#ov25-aside-menu:not([data-ov25-inline-list]) {
+  min-height: 0 !important;
+  height: fit-content !important;
+}
+#ov25-aside-menu[data-ov25-inline-list] {
+  min-height: var(--ov25-inline-list-aside-min-height);
+}
+#ov25-aside-menu #ov25-controls {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 :root {
     /* Custom CSS Variables */
     --ov25-background-color: #ffffff;
-    --ov25-secondary-background-color: #E5E5E5;
+    --ov25-secondary-background-color: #f6f6f6;
     --ov25-highlight-color: #00fbff;
 
     --ov25-text-color: black;
     --ov25-secondary-text-color: #000000;
 
-    --ov25-primary-color: black;
+    --ov25-primary-color: rgb(65, 65, 65);
     --ov25-border-color: #E5E5E5;
     --ov25-border-color-secondary: #282828;
     
     --ov25-hover-color: oklch(98.5% .002 247.839);
     --ov25-color-handle: #000000;
 
+    --ov25-cta-color: #22c55e;
+    --ov25-cta-color-hover: #16a34a;
+    --ov25-cta-color-light: #4ade80;
+
+    --ov25-destructive: #ef4444;
 
     --ov25-button-border-radius: 0px;
     --ov25-button-border-width: 1px;
+
+    /* Border radius – ov:rounded-* utilities use these; override to customize */
+    --ov25-rounded: 0.25rem;
+    --ov25-rounded-xs: 0.125rem;
+    --ov25-rounded-sm: 0.25rem;
+    --ov25-rounded-md: 0.375rem;
+    --ov25-rounded-lg: 0.5rem;
+    --ov25-rounded-xl: 0.75rem;
+    --ov25-rounded-2xl: 1rem;
+    --ov25-rounded-3xl: 1.5rem;
+    --ov25-rounded-4xl: 2rem;
+    --ov25-rounded-full: 9999px;
     
     /* Typography variables */
     --ov25-text-xs-size: 0.75em; /* 12px */
@@ -57,7 +98,8 @@
 
     /* iframe styling */
     --ov25-configurator-iframe-background-color: var(--ov25-secondary-background-color);
-    --ov25-configurator-iframe-border-radius: 0px;
+    --ov25-configurator-iframe-border-radius: 1rem;
+    --ov25-gallery-gap: 0.5rem;
 
     /* view controls that are overlayed onto the iframe, such as the dimensions button */
     --ov25-configurator-view-controls-text-color: var(--ov25-text-color);
@@ -79,6 +121,81 @@
     /* Drawer Styles */
     --ov25-configurator-variant-drawer-handle-color: var(--ov25-color-handle);
 
+    /* Wizard variants: inline mode uses fixed height; drawer mode fills */
+    --ov25-wizard-variants-content-height: 600px;
+    --ov25-wizard-variants-filter-height: 40px;
+    --ov25-wizard-variants-available-height: 100%;
+
+    /* Inline list: aside taller so scrollable area gets 600px + room for checkout button */
+    --ov25-inline-list-aside-min-height: 1000px;
+    --ov25-inline-list-aside-min-height-mobile: 100px;
+    --ov25-inline-list-aside-max-height-mobile: 600px;
+
+    --ov25-variant-thumb-border-radius: var(--ov25-rounded-full);
+
+    --ov25-360-font-family: 'Lato', sans-serif;
+}
+
+@media (max-width: 640px) {
+  :root {
+    --ov25-inline-list-aside-min-height: var(--ov25-inline-list-aside-min-height-mobile);
+  }
+  #ov25-configurator-variant-menu-container {
+    max-height: var(--ov25-inline-list-aside-max-height-mobile);
+  }
+}
+
+[data-ov25-wizard-variants-mode="inline"] [data-ov25-wizard-variants-content] {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+}
+
+[data-ov25-wizard-variants-mode="inline"] [data-ov25-wizard-variants-step-content] {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+}
+
+[data-ov25-wizard-variants-mode="drawer"] [data-ov25-wizard-variants-step-content] {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+}
+
+[data-ov25-wizard-variants-mode="drawer"] [data-ov25-wizard-variants-content] {
+  flex: 1;
+  min-height: 0;
+  height: auto;
+}
+
+[data-ov25-list-variants-mode="inline"] [data-ov25-list-variants-content] {
+  height: var(--ov25-wizard-variants-content-height);
+}
+
+/* Selection thumbnail: fabric icons, review images, etc. Edit globally to change appearance.
+   Uses same overlay structure as variant cards (radial_gradient, shadow-inner-intense). */
+.ov25-selection-thumbnail {
+  overflow: hidden;
+  border-radius: var(--ov25-variant-thumb-border-radius);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+}
+
+.ov25-variant-thumb-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  border-radius: var(--ov25-variant-thumb-border-radius);
+}
+
+.ov25-variant-thumb-wrapper {
+  border-radius: var(--ov25-variant-thumb-border-radius);
+}
+.ov25-selection-thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 
 #ov25-dummy-iframe {
@@ -88,10 +205,15 @@
 }
 
 /* Aspect ratio media queries for configurator iframe */
-#ov25-configurator-iframe-container {
+#ov25-configurator-iframe-container,
+[id^="ov25-configurator-iframe-container-"] {
     aspect-ratio: 1/1; /* Default square aspect ratio for mobile */
     padding: 0px !important;
     margin: 0px !important;
+    overflow: hidden;
+}
+#ov25-configurator-iframe-container[data-stacked="true"],
+[id^="ov25-configurator-iframe-container-"][data-stacked="true"] {
     overflow: visible !important;
 }
 
@@ -115,6 +237,14 @@
 
 html #ov25-configurator-variant-menu-container {
   font-size: 100%;
+}
+
+.ov25-configurator-carousel-sibling {
+  width: 100%;
+}
+
+.ov25-360-label {
+  font-family: var(--ov25-360-font-family);
 }
 
 #ov25-product-carousel svg {
@@ -346,15 +476,51 @@ html #ov25-configurator-variant-menu-container {
   line-height: 2rem;
 }
 
+.ov25-gradient {
+    background: linear-gradient(90deg, #26E8FE 0%, #808AFF 50%, #A41EFE 100%), #121214;
+}
+
 .ov25-swatch-icon {
   fill: white;
   stroke-width: 1px;
   stroke: black;
 }
 
-/* Swatch icon shadow styles */
-#ov25-variant-swatch-icon-container svg {
-  filter: drop-shadow(0 0 8px rgba(0, 0, 0, 1));
+
+
+/* Swatch icon SVG flash animations - shared duration for icon + count */
+:root {
+  --ov25-swatch-flash-duration: 0.5s;
+}
+@keyframes ov25-swatch-flash-destructive {
+  0%, 100% { stroke: var(--ov25-border-color); }
+  50% { stroke: var(--ov25-destructive); }
+}
+@keyframes ov25-swatch-flash-cta {
+  0%, 100% { stroke: var(--ov25-border-color); }
+  50% { stroke: var(--ov25-cta-color); }
+}
+.ov25-swatch-flash-destructive {
+  animation: ov25-swatch-flash-destructive var(--ov25-swatch-flash-duration) ease-out;
+}
+.ov25-swatch-flash-cta {
+  animation: ov25-swatch-flash-cta var(--ov25-swatch-flash-duration) ease-out;
+}
+
+/* Swatch count text flash - same duration as SVG */
+@keyframes ov25-swatch-count-flash-destructive {
+  0%, 100% { color: var(--ov25-text-color); }
+  50% { color: var(--ov25-destructive); }
+}
+@keyframes ov25-swatch-count-flash-cta {
+  0%, 100% { color: var(--ov25-text-color); }
+  50% { color: var(--ov25-cta-color); }
+}
+.ov25-swatch-count-flash-destructive {
+  animation: ov25-swatch-count-flash-destructive var(--ov25-swatch-flash-duration) ease-out;
+}
+.ov25-swatch-count-flash-cta {
+  animation: ov25-swatch-count-flash-cta var(--ov25-swatch-flash-duration) ease-out;
 }
 
 /* Plus icon animation for swatch changes */
@@ -387,8 +553,28 @@ html #ov25-configurator-variant-menu-container {
   width: 8px;
 }
 
+.ov25-thumbnail-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.ov25-thumbnail-scroll::-webkit-scrollbar {
+  display: none;
+}
+
 [data-sonner-toast] {
   pointer-events: all;
+}
+
+/* Snap2 variants slide panel */
+[data-ov25-variants-panel] {
+  transform: translateX(100%);
+  pointer-events: none;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-ov25-variants-panel][data-open="true"] {
+  transform: translateX(0);
+  pointer-events: auto;
 }
 
 /* Custom gradient and shadow classes for variant cards */

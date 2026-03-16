@@ -1,275 +1,39 @@
-import React, { useState } from 'react';
-import { Share, Loader2 } from 'lucide-react';
+import React from 'react';
+import { Share } from 'lucide-react';
 import { toast } from 'sonner';
 import { useOV25UI } from '../contexts/ov25-ui-context.js';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from './ui/dialog.js';
 import { cn } from '../utils/cn.js';
 import { requestSnap2Save } from '../utils/configurator-utils.js';
 
-// Component for saving snap2 configuration (generating a shareable link). Opens automatically when main dialog is closed.
 export const SaveSnap2Menu: React.FC = () => {
-  const { 
-    snap2SaveResponse,
-    setSnap2SaveResponse,
-    shareDialogTrigger,
-    setShareDialogTrigger,
-    setIsModalOpen,
-    setIsVariantsOpen,
-    skipNextDrawerCloseRef,
-    setCompatibleModules,
-    setConfiguratorState,
-    resetIframe,
-  } = useOV25UI();
-  
-  const [isSaving, setIsSaving] = useState(false);
-  const [showShareDialog, setShowShareDialog] = useState(false);
-  const [shareUrl, setShareUrl] = useState('');
-  const [showConfirmation, setShowConfirmation] = useState(false);
-
-  // Handle save response from context
-  React.useEffect(() => {
-    if (snap2SaveResponse) {
-      if (snap2SaveResponse.success && snap2SaveResponse.shareUrl) {
-        setShareUrl(snap2SaveResponse.shareUrl);
-        setIsSaving(false);
-      } else if (!snap2SaveResponse.success && snap2SaveResponse.error) {
-        toast.error(snap2SaveResponse.error);
-        setShowShareDialog(false);
-        setIsSaving(false);
-      }
-      // Clear the response after handling
-      setSnap2SaveResponse(null);
-    }
-  }, [snap2SaveResponse, setSnap2SaveResponse]);
-
-  // Handle auto-open share dialog from context
-  React.useEffect(() => {
-    if (shareDialogTrigger !== 'none' && !showShareDialog && !isSaving && !showConfirmation) {
-      if (shareDialogTrigger === 'modal-close') {
-        setShowConfirmation(true);
-      } else {
-        setIsSaving(true);
-      }
-      setShowShareDialog(true);
-    }
-  }, [shareDialogTrigger, showShareDialog, isSaving, showConfirmation]);
+  const { setShareDialogTrigger, skipNextShareClickRef } = useOV25UI();
 
   const handleSave = async () => {
+    if (skipNextShareClickRef.current) {
+      skipNextShareClickRef.current = false;
+      return;
+    }
     setShareDialogTrigger('save-button');
-    setShowShareDialog(true);
-    setIsSaving(true);
-    
     try {
       requestSnap2Save();
     } catch (error) {
       console.error('Save error:', error);
       toast.error('Failed to save configuration');
-      setShowShareDialog(false);
-      setIsSaving(false);
       setShareDialogTrigger('none');
-    }
-  };
-
-  const handleConfirmSave = async () => {
-    setIsSaving(true);
-    setShowConfirmation(false);
-    
-    try {
-      // Request iframe to save configuration and return URL info
-      requestSnap2Save();
-    } catch (error) {
-      console.error('Save error:', error);
-      toast.error('Failed to save configuration');
-      setShowShareDialog(false);
-      setIsSaving(false);
-      setShareDialogTrigger('none');
-    }
-  };
-
-  const copyToClipboard = async () => {
-    try {
-      // Try modern clipboard API first
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        await navigator.clipboard.writeText(shareUrl);
-        toast.success('Link copied to clipboard!');
-        return;
-      }
-      throw new Error('Clipboard API not available');
-    } catch (error) {
-      // Fallback for mobile/tablet devices or browsers without clipboard API
-      try {
-        // Use the visible textarea element for better mobile compatibility
-        const textarea = document.querySelector('textarea[readonly]') as HTMLTextAreaElement;
-        if (textarea && textarea.value === shareUrl) {
-          textarea.focus();
-          textarea.select();
-          // For mobile devices, we need to set selection range explicitly
-          if (textarea.setSelectionRange) {
-            textarea.setSelectionRange(0, shareUrl.length);
-          }
-          const successful = document.execCommand('copy');
-          textarea.blur();
-          
-          if (successful) {
-            toast.success('Link copied to clipboard!');
-            return;
-          }
-        }
-        
-        // Fallback: create temporary textarea if visible one doesn't work
-        const textArea = document.createElement('textarea');
-        textArea.value = shareUrl;
-        textArea.style.position = 'fixed';
-        textArea.style.opacity = '0';
-        textArea.style.left = '-9999px';
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-        const successful = document.execCommand('copy');
-        document.body.removeChild(textArea);
-        
-        if (successful) {
-          toast.success('Link copied to clipboard!');
-        } else {
-          throw new Error('execCommand failed');
-        }
-      } catch (fallbackError) {
-        console.error('Clipboard copy failed:', fallbackError);
-        toast.error('Failed to copy link. Please select and copy manually.');
-      }
-    }
-  };
-
-  const handleShareDialogClose = (open: boolean) => {
-    setShowShareDialog(open);
-    if (!open) {
-      const wasModalClose = shareDialogTrigger === 'modal-close';
-      const hasShareUrl = !!shareUrl; // Link has been generated and shown
-      
-      setShareDialogTrigger('none');
-      setIsSaving(false);
-      setShareUrl('');
-      setShowConfirmation(false);
-      
-      // If the link is shown (user clicked "Yes" and save completed), 
-      // clicking X should close both dialogs
-      // Otherwise (on confirmation screen), clicking X just closes save dialog
-      if (hasShareUrl && wasModalClose) {
-        setIsModalOpen(false);
-        skipNextDrawerCloseRef.current = true;
-        setIsVariantsOpen(false);
-        setCompatibleModules(null);
-        setConfiguratorState(undefined);
-        resetIframe();
-      }
-      // If on confirmation screen, X just closes save dialog and keeps snap2 open
-    }
-  };
-
-  const handleNoSave = () => {
-    // User clicked "No" - they don't want to save, so close both dialogs
-    const wasModalClose = shareDialogTrigger === 'modal-close';
-    
-    setShowShareDialog(false);
-    setShareDialogTrigger('none');
-    setIsSaving(false);
-    setShareUrl('');
-    setShowConfirmation(false);
-    
-    // Close the snap2 dialog and reset everything
-    if (wasModalClose) {
-      setIsModalOpen(false);
-      skipNextDrawerCloseRef.current = true;
-      setIsVariantsOpen(false);
-      setCompatibleModules(null);
-      setConfiguratorState(undefined);
-      resetIframe();
     }
   };
 
   return (
-    <>
-      {/* Save Button */}
-      <button 
-        onClick={handleSave}
-        className={cn(
-          'ov:cursor-pointer ov:w-8 ov:h-8 ov:flex ov:items-center ov:justify-center',
-          'ov:border ov:border-[var(--ov25-configurator-view-controls-border-color)] ov:rounded-full',
-          'ov:bg-[var(--ov25-overlay-button-color)]',
-          'ov:transition-all ov:duration-200 ov:hover:opacity-80'
-        )}
-      >
-        <Share className="ov:w-[16px] ov:h-[16px]" color="var(--ov25-text-color)"/>
-      </button>
-
-      {/* Share Dialog */}
-      {(showShareDialog || shareDialogTrigger !== 'none') && (
-        <Dialog open={showShareDialog} onOpenChange={handleShareDialogClose}>
-          <DialogContent aria-describedby={undefined} className="snap2-dialog ov:bg-[var(--ov25-background-color)] ov:border-[var(--ov25-border-color)]">
-            <DialogHeader>
-              <DialogTitle className="ov:text-[var(--ov25-text-color)]">
-                {shareDialogTrigger === 'modal-close' ? 'Save Your Configuration' : 'Share Configuration'}
-              </DialogTitle>
-            </DialogHeader>
-            <div className="ov:space-y-4">
-              {showConfirmation ? (
-                <>
-                  <p className="ov:text-sm ov:text-[var(--ov25-secondary-text-color)]">
-                    {shareDialogTrigger === 'modal-close' 
-                      ? 'Do you want to save your progress? Without saving, your configuration will be lost.'
-                      : 'Do you want to save your configuration?'}
-                  </p>
-                  <div className="ov:flex ov:space-x-2">
-                    <button 
-                      onClick={handleConfirmSave}
-                      className="ov:flex-1 ov:px-4 ov:py-2 ov:bg-[var(--ov25-primary-color)] ov:text-white ov:rounded-md ov:cursor-pointer ov:hover:opacity-90"
-                    >
-                      Yes
-                    </button>
-                    <button 
-                      onClick={handleNoSave}
-                      className="ov:flex-1 ov:px-4 ov:py-2 ov:border ov:border-[var(--ov25-border-color)] ov:bg-[var(--ov25-background-color)] ov:text-[var(--ov25-text-color)] ov:rounded-md ov:cursor-pointer ov:hover:opacity-90"
-                    >
-                      No
-                    </button>
-                  </div>
-                </>
-              ) : isSaving ? (
-                <div className="ov:flex ov:flex-col ov:items-center ov:justify-center ov:py-8 ov:space-y-4">
-                  <Loader2 className="ov:w-8 ov:h-8 ov:animate-spin ov:text-[var(--ov25-text-color)]" />
-                  <p className="ov:text-sm ov:text-[var(--ov25-secondary-text-color)]">
-                    Saving configuration...
-                  </p>
-                </div>
-              ) : (
-                <>
-                  <p className="ov:text-sm ov:text-[var(--ov25-secondary-text-color)]">
-                    {shareDialogTrigger === 'modal-close' 
-                      ? 'Save this link to return to your configuration later. Without it, your progress will be lost:'
-                      : 'Copy this link to share with others or save your custom configuration for later:'}
-                  </p>
-                  <div className="ov:space-y-2">
-                    <textarea
-                      value={shareUrl}
-                      rows={2}
-                      readOnly
-                      className="ov:min-h-[80px] ov:w-full ov:resize-none ov:bg-[var(--ov25-background-color)] ov:border-[var(--ov25-border-color)] ov:text-[var(--ov25-text-color)]"
-                      placeholder="Shareable link will appear here..."
-                    />
-                    <button 
-                      onClick={copyToClipboard} 
-                      className="ov:w-full ov:px-4 ov:py-2 ov:border ov:border-[var(--ov25-border-color)] ov:bg-[var(--ov25-background-color)] ov:text-[var(--ov25-text-color)] ov:rounded-md ov:cursor-pointer"
-                    >
-                      Copy Link
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          </DialogContent>
-        </Dialog>
+    <button
+      onClick={handleSave}
+      className={cn(
+        'ov:cursor-pointer ov:w-8 ov:h-8 ov:flex ov:items-center ov:justify-center',
+        'ov:shadow-sm ov:rounded-full ov:bg-[var(--ov25-overlay-button-color)]',
+        'ov:transition-all ov:duration-200 ov:hover:opacity-80'
       )}
-    </>
+    >
+      <Share className="ov:w-[16px] ov:h-[16px]" color="var(--ov25-text-color)" />
+    </button>
   );
 };
 

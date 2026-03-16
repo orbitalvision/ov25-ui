@@ -10,48 +10,22 @@ const initializeConfigurator = () => {
   if (configuratorInitialized) return;
 
   // Inject the configurator
-  injectConfigurator({
-    apiKey: () => { return '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d' }, 
-    productLink: () => { return '607' }, 
-    // productLink: () => { return 'range/77' },
-    // productLink: () => { return 'snap2/4' }, 
-    // configureButtonId: { id: '#ov25-fullscreen-button', replace: false },
-    // configurationUuid: () => { return '68245136-580c-4481-864c-1da82f3a50db' },
-    // 217 = Woodbros Pickering-3 Seater (Grouped)
-    // range/2 Aughton (Non Grouped)
-    // 501 Westbridge/glenwood/grand split option (no filters)
-    // onSelectionChange: (selections) => {
-    // },
-    // onProductChange: (product) => {
-    // },
-    // images: [
-    //   'https://demo.orbital.vision/_next/image?url=https%3A%2F%2Flondon-website-general-purpose.s3.eu-west-2.amazonaws.com%2Fassets%2Forganizations%2F15%2Fproducts%2FTamarisk%2F45%2FWindrush-Large-Sofa-Front.png&w=1920&q=75',
-    //   'https://demo.orbital.vision/_next/image?url=https%3A%2F%2Flondon-website-general-purpose.s3.eu-west-2.amazonaws.com%2Fassets%2Forganizations%2F15%2Fproducts%2FTamarisk%2F45%2FWindrush-Large-Sofa-Angled.png&w=1920&q=75',
-    //   'https://demo.orbital.vision/_next/image?url=https%3A%2F%2Flondon-website-general-purpose.s3.eu-west-2.amazonaws.com%2Fassets%2Forganizations%2F15%2Fproducts%2FTamarisk%2F45%2FWindrush-Large-Sofa-Side.png&w=1920&q=75',
-    //   'https://demo.orbital.vision/_next/image?url=https%3A%2F%2Flondon-website-general-purpose.s3.eu-west-2.amazonaws.com%2Fassets%2Forganizations%2F15%2Fproducts%2FTamarisk%2F45%2FWindrush-Large-Sofa-Back.png&w=1920&q=75',
-    // ],
-    galleryId: { id: '.configurator-container', replace: true },
-    variantsId: '#ov25-controls',
-    priceId: { id: '#price', replace: true },
-    nameId: { id: '#name', replace: true },
-    // deferThreeD: false,
-    // variantsId: '#ov25-controls',
-    // swatchesId: '#ov25-swatches',
-    // carouselId: true,
-    // showOptional: true,
-    logoURL: 'https://ov25.orbital.vision/OV.png',
-    // addToBasketFunction: () => {
-    //   alert('Checkout function called');
-    // },
-    // buyNowFunction: () => {
-    //   alert('Buy now function called');
-    // },
-    // addSwatchesToCartFunction: (swatches, swatchRulesData) => {
-    //   console.log('Add swatches to cart function called with:', { swatches, swatchRulesData });
-    //   alert(`Add swatches to cart function called with ${swatches.length} swatches`);
-    // },
-    hidePricing: true,
-  });
+  injectConfigurator(/** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
+    apiKey: () => '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d',
+    productLink: () => '607',
+    selectors: {
+      gallery: { selector: '.configurator-container', replace: true },
+      variants: '#ov25-controls',
+      price: { selector: '#price', replace: true },
+      name: { selector: '#name', replace: true },
+    },
+    callbacks: {
+      addToBasket: () => {},
+      buyNow: () => {},
+      buySwatches: () => {},
+    },
+    flags: { hidePricing: true },
+  }));
 
   configuratorInitialized = true;
 };
@@ -108,7 +82,7 @@ function App() {
             <div id="price">PRICE: £123</div>
             <div id="name">NAME: Product Name</div>
           </div>
-          <button id="ov25-fullscreen-button" className='ov:cursor-pointer ov:bg-blue-500 ov:text-white ov:p-2 ov:rounded-md'>Configure Your Sofa</button>
+          <button id="ov25-fullscreen-button" className='ov:cursor-pointer ov:bg-transparent ov:text-white ov:p-2 ov:rounded-md'>Configure Your Sofa</button>
           <div id='ov25-controls'></div>
           <div id="ov25-swatches"></div>
            </div>

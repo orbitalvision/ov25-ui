@@ -36,6 +36,7 @@ export interface VariantCardProps {
   index: number
   isMobile: boolean;
   isGrouped?: boolean;
+  compactSpacing?: boolean;
 }
 
 interface ProductVariantsProps {
@@ -73,7 +74,7 @@ export const ProductVariants = ({
       'ov:w-full'
     )}>
       <VariantsHeader />
-      {(isMobile || (isSnap2Mode && window.innerWidth < 1024)) ? (
+      {isMobile ? (
         <MobileVariants
           variants={variants}
           VariantCard={VariantCard}
@@ -90,7 +91,11 @@ export const ProductVariants = ({
           gridDivide={gridDivide}
         />
       )}
-      {!isMobile && !hidePricing ? <CheckoutButton /> : null}
+      {!isMobile && !hidePricing ? (
+        <div className="ov:shrink-0 ov:px-4 ov:pb-2 ov:pt-2">
+          <CheckoutButton />
+        </div>
+      ) : null}
     </div>
   )
 }

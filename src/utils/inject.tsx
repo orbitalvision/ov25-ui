@@ -11,6 +11,7 @@ import { ProductCarousel } from '../components/product-carousel.js';
 import ConfiguratorViewControls from '../components/ConfiguratorViewControls.js';
 import { SwatchBook } from '../components/VariantSelectMenu/SwatchBook.js';
 import { Snap2ConfigureButton, Snap2ConfigureUI } from '../components/Snap2ConfigureButton.js';
+import { ConfigureButton } from '../components/ConfigureButton.js';
 import { createPortal } from 'react-dom';
 
 // Import styles directly
@@ -113,57 +114,90 @@ const getProductLinkFromQueryParams = (): string | null => {
 // Track if we've consumed the query param configuration_uuid (only use on first load)
 let hasConsumedQueryConfigUuid = false;
 
-export type StringOrFunction = string | (() => string);
+import {
+  ConfiguratorDisplayMode,
+  CarouselDisplayMode,
+  VariantDisplayMode,
+  VariantDisplayStyleOverlay,
+} from '../types/config-enums.js';
+import {
+  type InjectConfiguratorInput,
+  type InjectConfiguratorOptions,
+  type LegacyInjectConfiguratorOptions,
+  type ElementSelector,
+  type StringOrFunction,
+  normalizeInjectConfig,
+} from '../types/inject-config.js';
 
-export type ElementConfig = {
-  id: string;
-  replace?: boolean;
+export type { StringOrFunction, ElementConfig, ElementSelector } from '../types/inject-config.js';
+export {
+  ConfiguratorDisplayMode,
+  CarouselDisplayMode,
+  VariantDisplayMode,
+  VariantDisplayStyleOverlay,
+  CarouselLayout,
+  VariantDisplayStyle,
+} from '../types/config-enums.js';
+export type {
+  InjectConfiguratorOptions,
+  LegacyInjectConfiguratorOptions,
+  InjectConfiguratorInput,
+  CarouselConfig,
+  ConfiguratorConfig,
+  VariantsConfig,
+  SelectorsConfig,
+  CallbacksConfig,
+  BrandingConfig,
+  FlagsConfig,
+  OnChangePayload,
+  OnChangePricePayload,
+  OnChangeSkuPayload,
+  OptionSkuMap,
+} from '../types/inject-config.js';
+
+type InjectInternalOptions = {
+  skipConfigureButton?: boolean;
+  multipleSnap2ReplaceButtons?: Array<{ selector: string; configIndex: number }>;
+  switchToSnap2Config?: (index: number) => void;
 };
 
-export type ElementSelector = string | ElementConfig;
-
-export interface InjectConfiguratorOptions {
-  apiKey: StringOrFunction;
-  productLink: StringOrFunction;
-  configurationUuid?: StringOrFunction;
-  galleryId?: ElementSelector;
-  images?: string[];
-  deferThreeD?: boolean;
-  showOptional?: boolean;
-  hidePricing?: boolean;
-  hideAr?: boolean;
-  priceId?: ElementSelector;
-  nameId?: ElementSelector;
-  variantsId?: ElementSelector;
-  swatchesId?: ElementSelector;
-  carouselId?: ElementSelector | true;
-  configureButtonId?: ElementSelector;
-  addToBasketFunction: () => void;
-  buyNowFunction: () => void;
-  addSwatchesToCartFunction: (swatches: Swatch[], swatchRulesData: SwatchRulesData) => void;
-  logoURL?: string;
-  mobileLogoURL?: string;
-  cssString?: string;
-  uniqueId?: string; // For multiple configurators to prevent ID conflicts
-  useInlineVariantControls?: boolean;
-  useSimpleVariantsSelector?: boolean;
+export function injectConfigurator(opts: InjectConfiguratorInput | InjectConfiguratorInput[], _internal?: InjectInternalOptions) {
+  const configs = Array.isArray(opts) ? opts : [opts];
+  if (configs.length > 1) {
+    runMultipleConfiguratorLogic(configs);
+    return;
+  }
+  injectSingleConfigurator(configs[0], _internal);
 }
 
-export function injectConfigurator(opts: InjectConfiguratorOptions) {
+function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions?: InjectInternalOptions) {
+  const skipConfigureButton = internalOptions?.skipConfigureButton ?? false;
+  const n = normalizeInjectConfig(opts);
   const {
     apiKey,
     productLink,
     configurationUuid,
-    galleryId,
-    priceId,
-    nameId,
-    variantsId,
-    swatchesId,
-    carouselId,
-    configureButtonId,
+    gallerySelector,
+    priceSelector,
+    nameSelector,
+    variantsSelector,
+    swatchesSelector,
+    configureButtonSelector,
+    carouselDisplayMode,
+    carouselDisplayModeMobile,
+    carouselMaxImagesDesktop,
+    carouselMaxImagesMobile,
+    configuratorDisplayMode,
+    configuratorDisplayModeMobile,
+    configuratorTriggerStyle,
+    configuratorTriggerStyleMobile,
+    variantDisplayMode,
+    variantDisplayModeMobile,
+    useSimpleVariantsSelector,
     addToBasketFunction,
     buyNowFunction,
-    addSwatchesToCartFunction,
+    buySwatchesFunction,
+    onChangeFunction,
     images,
     logoURL,
     mobileLogoURL,
@@ -172,10 +206,21 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     showOptional,
     hidePricing,
     hideAr,
+    forceMobile,
+    autoOpen = false,
     uniqueId,
-    useInlineVariantControls,
-    useSimpleVariantsSelector,
-  } = opts;
+  } = n;
+
+  const showCarousel = carouselDisplayMode !== CarouselDisplayMode.None;
+  const useInlineVariantControls = configuratorDisplayMode === ConfiguratorDisplayMode.Inline
+    || (opts as any).useInlineVariantControls === true;
+  const useInlineVariantControlsMobile = configuratorDisplayModeMobile === ConfiguratorDisplayMode.Inline;
+  const variantDisplayStyle = variantDisplayMode;
+  const variantDisplayStyleMobile = variantDisplayModeMobile;
+
+  // Snap2 ignores gallery selector - gallery is always inside the modal
+  const resolvedProductLinkForGallery = typeof productLink === 'function' ? productLink() : productLink;
+  const effectiveGallerySelector = resolvedProductLinkForGallery?.startsWith('snap2/') ? undefined : gallerySelector;
 
   // Add generateThumbnail function to window object
   (window as any).ov25GenerateThumbnail = () => {
@@ -229,7 +274,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
   // Get selector string from ElementSelector
   const getSelector = (elementSelector: ElementSelector | undefined): string | undefined => {
     if (!elementSelector) return undefined;
-    return typeof elementSelector === 'string' ? elementSelector : 'id' in elementSelector ? elementSelector.id : undefined;
+    return typeof elementSelector === 'string' ? elementSelector : ('selector' in elementSelector ? elementSelector.selector : 'id' in elementSelector ? elementSelector.id : undefined);
   };
 
   // Check if replacement is needed
@@ -478,14 +523,11 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
       } else if (selector) {
         const target = document.querySelector(selector);
         if (target && target.parentNode) {
-          // Create an empty div to replace the target
           const emptyDiv = document.createElement('div');
           emptyDiv.setAttribute('data-clarity-mask', 'true');
-          // Preserve original classes and add our class
           emptyDiv.className = `${target.className} ov25-configurator-${componentName}`.trim();
-          // Copy dimensions from original element
+          if (target.id) emptyDiv.id = target.id;
 
-          // Replace the target with the empty div
           target.parentNode.replaceChild(emptyDiv, target);
           // Create portal into the empty div
           portals.push(createPortal(el, emptyDiv));
@@ -515,10 +557,10 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
 
     // Function to check if gallery or its parents have z-index set
     const checkForStackedGallery = (): boolean => {
-      const gallerySelector = getSelector(galleryId);
-      if (!gallerySelector) return false;
+      const selector = getSelector(effectiveGallerySelector);
+      if (!selector) return false;
 
-      const galleryElement = document.querySelector(gallerySelector);
+      const galleryElement = document.querySelector(selector);
       if (!galleryElement) return false;
 
       // Traverse up the DOM tree checking for z-index
@@ -540,44 +582,67 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     };
 
     const isProductGalleryStacked = checkForStackedGallery();
+    const carouselSibling = showCarousel && shouldReplace(effectiveGallerySelector);
 
-    const variantsSelector = getSelector(variantsId);
-    const configureSelector = configureButtonId ? getSelector(configureButtonId) : undefined;
-    const variantsTarget = variantsSelector ? document.querySelector(variantsSelector) : null;
+    const variantsSelectorStr = getSelector(variantsSelector);
+    const configureSelector = configureButtonSelector ? getSelector(configureButtonSelector) : undefined;
+    const variantsTarget = variantsSelectorStr ? document.querySelector(variantsSelectorStr) : null;
     const configureTarget = configureSelector ? document.querySelector(configureSelector) : null;
 
     // Process each component
-    // Show gallery unless Snap2 mode with configure button (useSimpleVariantsSelector uses standard flow)
-    if (!configureButtonId || useSimpleVariantsSelector) {
-      processElement(galleryId, <ProductGallery />, 'gallery');
+    // Show gallery whenever a gallery selector is provided (user explicitly wants gallery in that slot)
+    if (getSelector(effectiveGallerySelector)) {
+      processElement(effectiveGallerySelector, <ProductGallery />, 'gallery');
+      if (carouselSibling) {
+        const gallerySelectorStr = getSelector(effectiveGallerySelector);
+        const replacementDiv = gallerySelectorStr ? document.querySelector(gallerySelectorStr) : null;
+        if (replacementDiv?.parentNode) {
+          const carouselWrapper = document.createElement('div');
+          carouselWrapper.id = 'true-carousel';
+          carouselWrapper.className = 'ov25-configurator-carousel-sibling';
+          carouselWrapper.style.marginTop = 'var(--ov25-gallery-gap)';
+          replacementDiv.parentNode.insertBefore(carouselWrapper, replacementDiv.nextSibling);
+          pushPortal('#true-carousel', <ProductCarousel />, shouldCreateShadowDOM('carousel'));
+        }
+      }
     }
 
-    // Portal for configurator UI
-    if (useSimpleVariantsSelector) {
-      if (configureTarget && configureButtonId) {
-        processElement(configureButtonId, <VariantSelectMenu />, 'configure-button');
-      } else if (variantsTarget) {
-        processElement(variantsId, <VariantSelectMenu />, 'variants');
+    // Portal for configurator UI (skip when multiple Snap2 - handlers added by runMultipleConfiguratorLogic)
+    if (!skipConfigureButton) {
+      if (useSimpleVariantsSelector) {
+        if (configureTarget && configureButtonSelector) {
+          processElement(configureButtonSelector, <VariantSelectMenu />, 'configure-button');
+        } else if (variantsTarget) {
+          processElement(variantsSelector, <VariantSelectMenu />, 'variants');
+        }
+      } else {
+        if (variantsTarget) {
+          processElement(variantsSelector, <VariantSelectMenu />, 'variants');
+        } else if (configureTarget && configureButtonSelector) {
+          processElement(configureButtonSelector, <Snap2ConfigureButton />, 'configure-button');
+        }
       }
-    } else {
-      if (variantsTarget) {
-        processElement(variantsId, <VariantSelectMenu />, 'variants');
-      } else if (configureTarget && configureButtonId) {
-        processElement(configureButtonId, <Snap2ConfigureButton />, 'configure-button');
+    }
+
+    // Multiple Snap2 replace mode: replace target elements with our ConfigureButton
+    const { multipleSnap2ReplaceButtons, switchToSnap2Config } = internalOptions ?? {};
+    if (multipleSnap2ReplaceButtons?.length && switchToSnap2Config) {
+      for (const { selector, configIndex } of multipleSnap2ReplaceButtons) {
+        portalReplaceElement(selector, <ConfigureButton onClick={() => switchToSnap2Config(configIndex)} />, 'configure-button', false);
       }
     }
 
     // Always show price, name, and swatches
-    processElement(priceId, <Price />, 'price');
-    processElement(nameId, <Name />, 'name');
-    processElement(swatchesId, <SwatchesContainer />, 'swatches');
+    processElement(priceSelector, <Price />, 'price');
+    processElement(nameSelector, <Name />, 'name');
+    processElement(swatchesSelector, <SwatchesContainer />, 'swatches');
 
     // Configure button handling when both variants and configure button exist (Snap2 only, not useSimpleVariantsSelector)
-    if (configureButtonId && variantsTarget && configureTarget && !useSimpleVariantsSelector) {
-      if (shouldReplace(configureButtonId)) {
-        processElement(configureButtonId, <Snap2ConfigureButton />, 'configure-button');
+    if (configureButtonSelector && variantsTarget && configureTarget && !useSimpleVariantsSelector) {
+      if (shouldReplace(configureButtonSelector)) {
+        processElement(configureButtonSelector, <Snap2ConfigureButton />, 'configure-button');
       } else {
-        const selector = getSelector(configureButtonId);
+        const selector = getSelector(configureButtonSelector);
         if (selector) {
           waitForElement(selector, 5000)
             .then(element => {
@@ -607,9 +672,7 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     // Add swatchbook to portals
     portals.push(createPortal(<SwatchBook isMobile={false} />, swatchbookPortalShadowRoot));
 
-    // Special handling for carousel - only use polling if carouselId is true
-    if (carouselId === true) {
-      // Start polling for true-carousel element
+    if (showCarousel && !carouselSibling) {
       waitForElement('#true-carousel', 10000)
         .then(element => {
           const useShadowDOM = shouldCreateShadowDOM('carousel');
@@ -618,14 +681,11 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
         .catch(err => {
           console.warn(`[OV25-UI] ${err.message}`);
         });
-    } else if (carouselId) {
-      // Process normally if it's a standard ElementSelector
-      processElement(carouselId as ElementSelector, <ProductCarousel />, 'carousel');
     }
 
     // Special handling for configurator view controls - wait for the specific container
-    // Skip when Snap2 mode (Snap2ConfigureButton handles it); useSimpleVariantsSelector uses standard flow
-    if (!configureButtonId || useSimpleVariantsSelector) {
+    // Show when gallery is rendered (container lives inside ProductGallery/IframeContainer)
+    if (getSelector(effectiveGallerySelector)) {
       const controlsContainerId = uniqueId
         ? `#true-configurator-view-controls-container-${uniqueId}`
         : '#true-configurator-view-controls-container';
@@ -712,8 +772,9 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
         productLink={resolvedProductLink}
         configurationUuid={resolvedConfigurationUuid || ''}
         buyNowFunction={buyNowFunction}
-        addSwatchesToCartFunction={addSwatchesToCartFunction}
+        buySwatchesFunction={buySwatchesFunction}
         addToBasketFunction={addToBasketFunction}
+        onChange={onChangeFunction}
         images={images}
         logoURL={logoURL}
         mobileLogoURL={mobileLogoURL}
@@ -721,11 +782,25 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
         showOptional={showOptional}
         hideAr={hideAr}
         hidePricing={hidePricing}
+        forceMobile={forceMobile}
         isProductGalleryStacked={isProductGalleryStacked}
-        hasConfigureButton={!!configureButtonId && !useSimpleVariantsSelector}
+        carouselDisplayMode={carouselDisplayMode}
+        carouselDisplayModeMobile={carouselDisplayModeMobile}
+        carouselMaxImagesDesktop={carouselMaxImagesDesktop}
+        carouselMaxImagesMobile={carouselMaxImagesMobile}
+        carouselSibling={carouselSibling}
+        showCarousel={showCarousel}
+        hasConfigureButton={!!configureButtonSelector && !useSimpleVariantsSelector}
         uniqueId={uniqueId}
         useInlineVariantControls={useInlineVariantControls}
+        useInlineVariantControlsMobile={useInlineVariantControlsMobile}
+        configuratorDisplayMode={configuratorDisplayMode}
+        configuratorDisplayModeMobile={configuratorDisplayModeMobile}
         useSimpleVariantsSelector={!!useSimpleVariantsSelector}
+        configuratorTriggerStyle={configuratorTriggerStyle}
+        configuratorTriggerStyleMobile={configuratorTriggerStyleMobile}
+        variantDisplayStyle={variantDisplayStyle}
+        variantDisplayStyleMobile={variantDisplayStyleMobile}
         shadowDOMs={{
           mobileDrawer: mobileDrawerShadowRoot,
           configuratorViewControls: configuratorViewControlsShadowRoot,
@@ -740,17 +815,21 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
   };
 
   // Check if we should auto-open (before ensureLoaded consumes the query param)
-  let shouldAutoOpen = configureButtonId && !hasConsumedQueryConfigUuid;
+  const usesSheetOrDrawer = configuratorDisplayMode !== ConfiguratorDisplayMode.Inline || configuratorDisplayModeMobile !== ConfiguratorDisplayMode.Inline;
+  const canAutoOpenFromConfig = autoOpen && usesSheetOrDrawer && (configureButtonSelector || variantsSelector);
+
+  let shouldAutoOpen = false;
   let queryConfigUuid: string | null = null;
 
-  if (shouldAutoOpen) {
+  if (canAutoOpenFromConfig) {
+    shouldAutoOpen = true;
+  } else if (configureButtonSelector && !hasConsumedQueryConfigUuid) {
     queryConfigUuid = getConfigurationUuidFromQueryParams();
     const queryProductLink = getProductLinkFromQueryParams();
     const resolvedProductLinkForAutoOpen = resolveStringOrFunction(productLink);
 
-    // Only auto-open if query param matches this configurator
-    if (!queryConfigUuid || (queryProductLink && queryProductLink !== resolvedProductLinkForAutoOpen)) {
-      shouldAutoOpen = false;
+    if (queryConfigUuid && (!queryProductLink || queryProductLink === resolvedProductLinkForAutoOpen)) {
+      shouldAutoOpen = true;
     }
   }
 
@@ -761,8 +840,8 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
     ensureLoaded();
   }
 
-  // Auto-open Snap2 configurator if configuration_uuid is in query parameters
-  if (shouldAutoOpen && queryConfigUuid) {
+  // Auto-open configurator when autoOpen is true (non-inline) or configuration_uuid in query params
+  if (shouldAutoOpen && (queryConfigUuid || canAutoOpenFromConfig)) {
     const attemptAutoOpen = (attempts = 0) => {
       const handlerRef = (window as any).ov25ConfigureHandlerRef;
       if (handlerRef?.current) {
@@ -778,15 +857,15 @@ export function injectConfigurator(opts: InjectConfiguratorOptions) {
 }
 
 // Module-level variables for multiple configurators
-let currentConfigs: InjectConfiguratorOptions[] = [];
+let currentConfigs: InjectConfiguratorInput[] = [];
 let activeConfiguratorIndex: number = 0;
 let hasInitializedMultipleConfigurators = false;
 const clickHandlers = new Map<string, (event: Event) => void>();
 let isReinitializing = false;
 
-export function injectMultipleConfigurators(configs: InjectConfiguratorOptions[]) {
+function runMultipleConfiguratorLogic(configs: InjectConfiguratorInput[]) {
   if (hasInitializedMultipleConfigurators) {
-    console.warn('[OV25-UI] injectMultipleConfigurators has already been called. Skipping duplicate initialization.');
+    console.warn('[OV25-UI] injectConfigurator with multiple configs has already been called. Skipping duplicate initialization.');
     return;
   }
   hasInitializedMultipleConfigurators = true;
@@ -801,37 +880,45 @@ export function injectMultipleConfigurators(configs: InjectConfiguratorOptions[]
     return !productLink?.startsWith('snap2/');
   });
 
-  // Validate Snap2 configs have configureButtonId
-  const snap2ConfigsWithoutButton = snap2Configs.filter(config => !config.configureButtonId);
+  const getGallerySelector = (c: InjectConfiguratorInput) =>
+    ('selectors' in c && c.selectors?.gallery) ?? (c as any).gallerySelector ?? (c as any).galleryId;
+  const getConfigureButtonSelector = (c: InjectConfiguratorInput) =>
+    ('selectors' in c && c.selectors?.configureButton) ?? (c as any).configureButtonSelector ?? (c as any).configureButtonId;
+  const getSelectorFromConfig = (sel: ReturnType<typeof getConfigureButtonSelector>): string | undefined =>
+    typeof sel === 'string' ? sel : (sel && ('selector' in sel ? sel.selector : 'id' in sel ? sel.id : undefined));
+  const shouldReplaceConfig = (sel: ReturnType<typeof getConfigureButtonSelector>): boolean =>
+    sel != null && typeof sel === 'object' && sel.replace === true;
+  const getVariantsSelector = (c: InjectConfiguratorInput) =>
+    ('selectors' in c && c.selectors?.variants) ?? (c as any).variantsSelector ?? (c as any).variantsId;
+
+  const snap2ConfigsWithoutButton = snap2Configs.filter(config => !getConfigureButtonSelector(config));
   if (snap2ConfigsWithoutButton.length > 0) {
-    throw new Error('All Snap2 configs must have a configureButtonId defined');
+    throw new Error('All Snap2 configs must have a configureButtonSelector defined');
   }
 
-  // Validate standard configs have galleryId
-  const standardConfigsWithoutGallery = standardConfigs.filter(config => !config.galleryId);
+  const standardConfigsWithoutGallery = standardConfigs.filter(config => !getGallerySelector(config));
   if (standardConfigsWithoutGallery.length > 0) {
-    throw new Error('All standard configs must have a galleryId defined');
+    throw new Error('All standard configs must have a gallerySelector defined');
   }
 
-  // Check for ID conflicts in standard configs
-  const galleryIds = standardConfigs.map(config => {
-    const galleryId = typeof config.galleryId === 'string' ? config.galleryId : config.galleryId?.id;
-    return galleryId;
+  const gallerySelectors = standardConfigs.map(config => {
+    const sel = getGallerySelector(config);
+    return typeof sel === 'string' ? sel : (sel && ('selector' in sel ? sel.selector : 'id' in sel ? sel.id : undefined));
   }).filter(Boolean);
 
-  const uniqueGalleryIds = new Set(galleryIds);
-  if (galleryIds.length !== uniqueGalleryIds.size) {
-    throw new Error(`Can't place multiple configurators in the same place. All galleryId values must be unique.`);
+  const uniqueGalleryIds = new Set(gallerySelectors);
+  if (gallerySelectors.length !== uniqueGalleryIds.size) {
+    throw new Error(`Can't place multiple configurators in the same place. All gallerySelector values must be unique.`);
   }
 
-  const variantsIds = standardConfigs.map(config => {
-    const variantsId = typeof config.variantsId === 'string' ? config.variantsId : config.variantsId?.id;
-    return variantsId;
+  const variantsSelectors = standardConfigs.map(config => {
+    const sel = getVariantsSelector(config);
+    return typeof sel === 'string' ? sel : (sel && ('selector' in sel ? sel.selector : 'id' in sel ? sel.id : undefined));
   }).filter(Boolean);
 
-  const uniqueVariantsIds = new Set(variantsIds);
-  if (variantsIds.length !== uniqueVariantsIds.size) {
-    throw new Error(`Can't place multiple configurator controls in the same place.All variantsId values must be unique for standard configurators`);
+  const uniqueVariantsIds = new Set(variantsSelectors);
+  if (variantsSelectors.length !== uniqueVariantsIds.size) {
+    throw new Error(`Can't place multiple configurator controls in the same place.All variantsSelector values must be unique for standard configurators`);
   }
 
   // Store configs
@@ -862,12 +949,55 @@ export function injectMultipleConfigurators(configs: InjectConfiguratorOptions[]
       }
     }
 
-    // Initialize the selected Snap2 configurator
-    injectConfigurator(configuratorToInitialize);
+    const multipleSnap2ReplaceButtons = snap2Configs
+      .map((c, i) => {
+        const btnSel = getConfigureButtonSelector(c);
+        const selector = getSelectorFromConfig(btnSel);
+        if (!selector || !shouldReplaceConfig(btnSel)) return null;
+        return { selector, configIndex: i };
+      })
+      .filter((x): x is { selector: string; configIndex: number } => x != null);
+
+    const switchToSnap2Config = (configIndex: number) => {
+      if (isReinitializing) return;
+      isReinitializing = true;
+      try {
+        const container = document.getElementById('ov25-provider-root');
+        if (container && (container as any)._reactRoot) {
+          (container as any)._reactRoot.unmount();
+          delete (container as any)._reactRoot;
+        }
+        cleanupShadowDOMContainers();
+        injectSingleConfigurator(snap2Configs[configIndex], {
+          skipConfigureButton: true,
+          multipleSnap2ReplaceButtons,
+          switchToSnap2Config,
+        });
+        activeConfiguratorIndex = configIndex;
+        requestAnimationFrame(() => {
+          setTimeout(() => {
+            (window as any).ov25ConfigureHandlerRef?.current?.();
+            setTimeout(() => { isReinitializing = false; }, 500);
+          }, 100);
+        });
+      } catch (error) {
+        console.error('[OV25-UI] Error during reinitialization:', error);
+        isReinitializing = false;
+      }
+    };
+
+    injectSingleConfigurator(configuratorToInitialize, {
+      skipConfigureButton: snap2Configs.length > 1,
+      multipleSnap2ReplaceButtons: multipleSnap2ReplaceButtons.length > 0 ? multipleSnap2ReplaceButtons : undefined,
+      switchToSnap2Config: multipleSnap2ReplaceButtons.length > 0 ? switchToSnap2Config : undefined,
+    });
     activeConfiguratorIndex = configuratorIndexToInitialize;
 
-    // Auto-open configurator if configuration_uuid is in query parameters
-    if (queryConfigUuid) {
+    const initNorm = normalizeInjectConfig(configuratorToInitialize);
+    const usesSheetOrDrawer = initNorm.configuratorDisplayMode !== 'inline' || initNorm.configuratorDisplayModeMobile !== 'inline';
+    const shouldAutoOpenMulti = queryConfigUuid || (initNorm.autoOpen && usesSheetOrDrawer);
+
+    if (shouldAutoOpenMulti) {
       // Wait for the handler to be set up, then auto-open
       const attemptAutoOpen = (attempts = 0) => {
         const handlerRef = (window as any).ov25ConfigureHandlerRef;
@@ -884,12 +1014,13 @@ export function injectMultipleConfigurators(configs: InjectConfiguratorOptions[]
       attemptAutoOpen();
     }
 
-    // Set up click listeners for ALL Snap2 configurators (including the first one)
+    // Set up click listeners for Snap2 configurators with replace: false (replace: true use our ConfigureButton)
     for (let i = 0; i < snap2Configs.length; i++) {
       const config = snap2Configs[i];
-      const selector = typeof config.configureButtonId === 'string'
-        ? config.configureButtonId
-        : config.configureButtonId!.id;
+      const btnSel = getConfigureButtonSelector(config);
+      if (shouldReplaceConfig(btnSel)) continue;
+      const selector = getSelectorFromConfig(btnSel);
+      if (!selector) continue;
 
       waitForElement(selector, 5000)
         .then((element: Element) => {
@@ -914,7 +1045,7 @@ export function injectMultipleConfigurators(configs: InjectConfiguratorOptions[]
               }
 
               cleanupShadowDOMContainers();
-              injectConfigurator(config);
+              injectSingleConfigurator(config, { skipConfigureButton: true });
               activeConfiguratorIndex = i;
 
               // Open configurator after React renders
@@ -950,11 +1081,7 @@ export function injectMultipleConfigurators(configs: InjectConfiguratorOptions[]
     for (let i = 0; i < standardConfigs.length; i++) {
       const config = standardConfigs[i];
       // Add uniqueId to prevent element ID conflicts
-      const configWithUniqueId = {
-        ...config,
-        uniqueId: `config-${i}`
-      };
-      injectConfigurator(configWithUniqueId);
+      injectSingleConfigurator({ ...config, uniqueId: `config-${i}` });
     }
   }
 }

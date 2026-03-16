@@ -18,7 +18,7 @@ export const NoResults = ({ message }: NoResultsProps) => {
 
   return (
     <div id="ov25-no-results" className="ov:w-full ov:h-full ov:p-4 ov:pt-16 ov:flex ov:justify-center">
-      <h3 className="ov:text-lg ov:text-[var(--ov25-secondary-text-color)]">{displayMessage}</h3>
+      <h3 className="ov:text-sm ov:text-[var(--ov25-secondary-text-color)]/60">{displayMessage}</h3>
     </div>
   );
 };

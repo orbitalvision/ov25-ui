@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { X as CloseIcon, Camera, Upload, Lightbulb } from 'lucide-react'
+import { Camera, Upload, Lightbulb } from 'lucide-react'
 import { ExpandIcon, Rotate3D } from "lucide-react"
 import { DimensionsIcon } from '../lib/svgs/DimensionsIcon.js'
 import { ArIcon } from '../lib/svgs/ArIcon.js'
@@ -9,6 +9,7 @@ import { cn } from '../lib/utils.js'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover.js'
 import { toast } from 'sonner'
 import Snap2Controls from './Snap2Controls.js'
+import { VariantsCloseButton } from './VariantSelectMenu/VariantsCloseButton.js'
 
 interface ConfiguratorViewControlsProps {
   // All props now come from context, so no props needed
@@ -153,14 +154,13 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
       )}>
         {canAnimate && (
           <button onClick={toggleAnimation} className={cn(
-            'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2  ov:border ov:items-center ov:justify-center',
+            'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:items-center ov:justify-center',
             'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
-            'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
-            'ov:bg-[var(--ov25-overlay-button-color)]',
+            'ov:shadow-sm ov:bg-[var(--ov25-overlay-button-color)]',
           )}>
               <Rotate3D strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1"/>
               {!isMobile && (
-              <p className="ov25-controls-text ov:text-sm ov:font-light">{handleAnimationButtonText()}</p>
+              <p className="ov25-controls-text ov25-360-label ov:text-sm ov:font-light">{handleAnimationButtonText()}</p>
               )}
           </button>
         )}
@@ -174,10 +174,9 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
       )}>
         <div className="ov:flex ov:flex-row ov:gap-2 ov:items-end">
           {!controlsHidden && !isSnap2Mode && <button id="ov25-share-button" onClick={handleShare} className={cn(
-            'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:border ov:items-center ov:justify-center',
+            'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:items-center ov:justify-center',
             'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
-            'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
-            'ov:bg-[var(--ov25-overlay-button-color)]',
+            'ov:shadow-sm ov:bg-[var(--ov25-overlay-button-color)]',
           )}>
             <Upload strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" />
             {!isMobile && (
@@ -186,24 +185,22 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
           </button>}
           {canAnimate && (
             <button id="ov25-animation-toggle-button" onClick={() => toggleAnimation(uniqueId)} className={cn(
-              'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2  ov:border ov:items-center ov:justify-center',
+              'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:items-center ov:justify-center',
               'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
-              'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
-              'ov:bg-[var(--ov25-overlay-button-color)]',
+              'ov:shadow-sm ov:bg-[var(--ov25-overlay-button-color)]',
             )}>
               <Rotate3D strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" />
               {!isMobile && (
-                <p className="ov25-controls-text ov:text-sm ov:font-light">{handleAnimationButtonText()}</p>
+                <p className="ov25-controls-text ov25-360-label ov:text-sm ov:font-light">{handleAnimationButtonText()}</p>
               )}
             </button>
           )}
 
           {showDimensionsToggle && (
             <button id="ov25-desktop-dimensions-toggle-button" onClick={handleToggleDimensions} className={cn(
-              'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2  ov:border ov:items-center ov:justify-center',
+              'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:items-center ov:justify-center',
               'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
-              'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
-              'ov:bg-[var(--ov25-overlay-button-color)]',
+              'ov:shadow-sm ov:bg-[var(--ov25-overlay-button-color)]',
             )}>
               <DimensionsIcon className="ov:w-[19px] ov:h-[19px] p-1" color="var(--ov25-text-color)" />
               {!isMobile && (
@@ -220,10 +217,9 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
                     ref={cameraButtonRef}
                     id="ov25-camera-toggle-button"
                     className={cn(
-                      'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:border ov:items-center ov:justify-center',
+                      'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:items-center ov:justify-center',
                       'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
-                      'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
-                      'ov:bg-[var(--ov25-overlay-button-color)]',
+                      'ov:shadow-sm ov:bg-[var(--ov25-overlay-button-color)]',
                     )}
                   >
                     <Camera strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" />
@@ -267,10 +263,9 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
                     ref={lightButtonRef}
                     id="ov25-light-toggle-button"
                     className={cn(
-                      'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:border ov:items-center ov:justify-center',
+                      'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:items-center ov:justify-center',
                       'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
-                      'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
-                      'ov:bg-[var(--ov25-overlay-button-color)]',
+                      'ov:shadow-sm ov:bg-[var(--ov25-overlay-button-color)]',
                     )}
                   >
                     <Lightbulb strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" />
@@ -308,10 +303,9 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
 
           {!hideAr && !isSnap2Mode && (
             <button id="ov25-ar-toggle-button" onClick={toggleAR} className={cn(
-              'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:border ov:items-center ov:justify-center',
+              'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:items-center ov:justify-center',
               'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
-              'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
-              'ov:bg-[var(--ov25-overlay-button-color)]',
+              'ov:shadow-sm ov:bg-[var(--ov25-overlay-button-color)]',
             )}>
               <ArIcon className="ov:w-[19px] ov:h-[19px] p-1" color="var(--ov25-text-color)" />
               {!isMobile && (
@@ -322,42 +316,24 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
 
         </div>
       </div>
-      {!isVariantsOpen && !isMobile && !controlsHidden && !hasConfigureButton && (!isSnap2Mode || !hasConfigureButton) && (
-        <div className="ov:absolute ov:ov25-controls-hidden ov:size-full ov:md:flex ov:pointer-events-none ov:inset-0 ov:p-4 ov:justify-end ov:items-start ov:z-[101]">
-          <button id="ov25-desktop-fullscreen-button" className={cn(
-            'ov:cursor-pointer ov:aspect-square ov:p-2 ov:pointer-events-auto ov:flex ov:gap-2.5 ov:ml-auto ov:border ov:items-center ov:justify-center',
-            'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
-            'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
-            'ov:bg-[var(--ov25-overlay-button-color)]',
-          )}
-            onClick={() => toggleFullscreen(uniqueId)}>
-            <ExpandIcon strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" />
-          </button>
-        </div>
-      )}
-      {(isMobile || (isSnap2Mode && window.innerWidth < 1024)) && isVariantsOpen && (
+      {isVariantsOpen && isMobile && (
         <div className={cn(
-          "ov:absolute ov:w-full ov:pointer-events-none ov:h-full ov:inset-0 ov:gap-2 ov:p-4 ov:flex ov:justify-end ov:items-start ov:z-[101]",
+          "ov:absolute ov:w-full ov:pointer-events-none ov:h-full ov:inset-0 ov:z-[101]",
           "ov:transition-opacity ov:duration-200",
           shareDialogTrigger !== 'none' && "ov:opacity-0"
         )}>
-          <button
-            id="ov25-mobile-close-button"
-            onClick={() => {
-              if (isSnap2Mode && hasConfigureButton && shareDialogTrigger === 'none' && (configuratorState?.snap2Objects?.length ?? 0) > 0) {
-                setShareDialogTrigger('modal-close');
-              } else {
-                setIsVariantsOpen(false);
-              }
-            }}
-            className={cn(
-              'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:border ov:items-center ov:justify-center',
-              'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
-              'ov:border-[var(--ov25-configurator-view-controls-border-color)]',
-              'ov:bg-[var(--ov25-overlay-button-color)]',
-            )}
-          >
-            <CloseIcon strokeWidth={1} className="ov:w-[19px] ov:h-[19px]" />
+          <VariantsCloseButton />
+        </div>
+      )}
+      {!isVariantsOpen && !isMobile && !controlsHidden && !isSnap2Mode && !hasConfigureButton && (
+        <div className="ov:absolute ov:ov25-controls-hidden ov:size-full ov:md:flex ov:pointer-events-none ov:inset-0 ov:p-4 ov:justify-end ov:items-start ov:z-[101]">
+          <button id="ov25-desktop-fullscreen-button" className={cn(
+            'ov:cursor-pointer ov:aspect-square ov:p-2 ov:pointer-events-auto ov:flex ov:gap-2.5 ov:ml-auto ov:items-center ov:justify-center',
+            'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
+            'ov:shadow-sm ov:bg-[var(--ov25-overlay-button-color)]',
+          )}
+            onClick={() => toggleFullscreen(uniqueId)}>
+            <ExpandIcon strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" />
           </button>
         </div>
       )}

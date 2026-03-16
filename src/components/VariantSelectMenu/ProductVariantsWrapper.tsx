@@ -1,20 +1,39 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState, useEffect, useRef } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { ProductVariants, Variant } from './ProductVariants.js';
+import { AccordionVariants } from './AccordionVariants.js';
+import { TreeVariants } from './TreeVariants.js';
 import { useOV25UI } from "../../contexts/ov25-ui-context.js";
 import { closeModuleSelectMenu, selectModule, CompatibleModule } from '../../utils/configurator-utils.js';
 import { SizeVariantCard } from "./variant-cards/SizeVariantCard.js";
 import { ModuleVariantCard } from "./variant-cards/ModuleVariantCard.js";
+import { VariantsHeader } from './VariantsHeader.js';
+import { VariantsContent } from './VariantsContent.js';
+import { DefaultVariantCard } from './variant-cards/DefaultVariantCard.js';
+import { CheckoutButton } from './CheckoutButton.js';
+import { getGridColsClass } from './DesktopVariants.js';
+import { VariantDisplayStyleOverlay } from '../../types/config-enums.js';
+import { FilterControls } from './FilterControls.js';
+import { FilterContent } from './FilterContent.js';
 
 export type DrawerSizes = 'closed' | 'small' | 'large';
 
-export function ProductVariantsWrapper() {
+const capitalizeWords = (str: string) =>
+  str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+
+export interface ProductVariantsWrapperProps {
+  isInline?: boolean;
+}
+
+export function ProductVariantsWrapper({ isInline = false }: ProductVariantsWrapperProps = {}) {
     const {
         isVariantsOpen,
         setIsVariantsOpen,
         isMobile,
         drawerSize,
         activeOptionId,
-        activeOption,
+        setActiveOptionId,
+        handleOptionClick,
         sizeOption,
         handleSelectionSelect,
         currentProductId,
@@ -28,10 +47,34 @@ export function ProductVariantsWrapper() {
         applySearchAndFilters,
         searchQueries,
         availableProductFilters,
+        variantDisplayStyleOverlay,
+        variantDisplayStyleOverlayMobile,
+        variantDisplayStyleMobile,
+        hidePricing,
       } = useOV25UI();
 
+    const hasSnap2Objects = (configuratorState?.snap2Objects?.length ?? 0) > 0;
+    const hasNoModulesToShow = !compatibleModules || compatibleModules.length === 0;
+
+    useEffect(() => {
+      if (isMobile && !isInline && activeOptionId === 'modules' && hasSnap2Objects && hasNoModulesToShow && allOptionsWithoutModules.length > 0) {
+        setActiveOptionId(allOptionsWithoutModules[0].id);
+      }
+    }, [isMobile, isInline, activeOptionId, hasSnap2Objects, hasNoModulesToShow, allOptionsWithoutModules, setActiveOptionId]);
+
+    const [activeTab, setActiveTab] = useState<string>('size');
+    const [useTabsDropdown, setUseTabsDropdown] = useState(false);
+    const [listScrollHeight, setListScrollHeight] = useState(0);
+    const [isFilterOpen, setIsFilterOpen] = useState<Record<string, boolean>>({});
+    const tabsMeasureRef = useRef<HTMLDivElement>(null);
+    const listScrollRef = useRef<HTMLDivElement>(null);
+
+    const toggleFilter = useCallback((optionId: string) => {
+        setIsFilterOpen(prev => ({ ...prev, [optionId]: !prev[optionId] }));
+    }, []);
+
+
     const handleCloseVariants = () => {
-      // If we're closing the modules option, send message to iframe
       if (activeOptionId === 'modules') {
         closeModuleSelectMenu();
       }
@@ -114,20 +157,162 @@ export function ProductVariantsWrapper() {
         .filter((item): item is { optionId: string; optionName: string; variants: any[] } => item !== null);
     }, [filteredOptions, allOptionsWithoutModules, selectedSelections]);
 
-    // Mobile/tablet: show modules list in the drawer when modules option is active
-    if (window.innerWidth < 1024 && activeOptionId === 'modules') {
-      const isLoading = (!compatibleModules || compatibleModules.length === 0) && 
-        (!configuratorState?.snap2Objects || configuratorState.snap2Objects.length === 0);
+    const showSize = allOptionsWithoutModules.some((o) => o.id === 'size') && sizeVariants.length > 0;
 
-      const handleModuleSelect = (variant: Variant) => {
-        if (isModuleSelectionLoading) return;
-        const module = variant.data as CompatibleModule;
-        const modelPath = module?.model?.modelPath;
-        const modelId = module?.model?.modelId;
-        if (!modelPath || !modelId) return;
-        setIsModuleSelectionLoading(true);
-        selectModule(modelPath, modelId);
+    const listLikeOverlays: VariantDisplayStyleOverlay[] = [
+      VariantDisplayStyleOverlay.List,
+      VariantDisplayStyleOverlay.Tabs,
+      VariantDisplayStyleOverlay.Accordion,
+      VariantDisplayStyleOverlay.Tree,
+    ];
+    const drawerMobileStyle: VariantDisplayStyleOverlay = ['list', 'tabs', 'tree'].includes(variantDisplayStyleMobile)
+      ? (variantDisplayStyleMobile as VariantDisplayStyleOverlay)
+      : VariantDisplayStyleOverlay.List;
+    const effectiveVariantDisplayStyleOverlay = isMobile && !isInline
+      ? drawerMobileStyle
+      : isMobile
+        ? variantDisplayStyleOverlayMobile
+        : variantDisplayStyleOverlay;
+    const isListLike = listLikeOverlays.includes(effectiveVariantDisplayStyleOverlay);
+
+    const tabIds = useMemo(() => {
+      const ids = showSize ? ['size', ...allOptionsVariants.map((o) => o.optionId)] : allOptionsVariants.map((o) => o.optionId);
+      return ids;
+    }, [showSize, allOptionsVariants]);
+
+    useEffect(() => {
+      if (activeOptionId && tabIds.includes(activeOptionId)) {
+        setActiveTab(activeOptionId);
+      } else if (!tabIds.includes(activeTab)) {
+        setActiveTab(tabIds[0] ?? 'size');
+      }
+    }, [tabIds, activeTab, activeOptionId]);
+
+    useEffect(() => {
+      const el = tabsMeasureRef.current;
+      const parent = el?.parentElement;
+      if (!el || !parent) return;
+      const checkOverflow = () => {
+        setUseTabsDropdown(el.scrollWidth > parent.clientWidth);
       };
+      checkOverflow();
+      const ro = new ResizeObserver(checkOverflow);
+      ro.observe(parent);
+      return () => ro.disconnect();
+    }, [tabIds]);
+
+    useEffect(() => {
+      const el = listScrollRef.current;
+      if (!el) return;
+      const updateHeight = () => {
+        if (effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.List) {
+          setListScrollHeight(el.clientHeight);
+        }
+      };
+      const ro = new ResizeObserver(updateHeight);
+      ro.observe(el);
+      updateHeight();
+      return () => ro.disconnect();
+    }, [effectiveVariantDisplayStyleOverlay]);
+
+    const getTabLabel = (id: string) =>
+      id === 'size' ? 'Size' : allOptionsVariants.find((o) => o.optionId === id)?.optionName ?? id;
+
+    const renderSizeSection = (showHeader = true, isMobileListSticky = false) => (
+      <div className=" ov:pb-6">
+        {showHeader && (
+          <h3 className={`ov:sticky ov:top-0  ov:px-4 ov:z-10 ov:bg-[var(--ov25-background-color)] ov:text-lg ov:pb-4 ov:text-[var(--ov25-secondary-text-color)] ${isMobileListSticky ? 'ov:pt-2' : 'ov:pt-0'}`}>
+            {capitalizeWords('Size')}
+          </h3>
+        )}
+        <div className="ov:bg-[var(--ov25-background-color)] ov:pt-4">
+          <div className={`ov:grid ${getGridColsClass(2)}`}>
+            <VariantsContent
+              variantsToRender={sizeVariants}
+              VariantCard={SizeVariantCard}
+              isMobile={isMobile}
+              onSelect={handleVariantSelect}
+            />
+          </div>
+        </div>
+      </div>
+    );
+
+    const renderFilterBlock = (optionId: string, optionIds?: string[]) => (
+      <div className="ov:shrink-0 ov:py-2">
+        <FilterControls
+          isFilterOpen={!!isFilterOpen[optionId]}
+          setIsFilterOpen={() => toggleFilter(optionId)}
+          isGrouped={false}
+          optionId={optionIds ? undefined : optionId}
+          optionIds={optionIds}
+        />
+      </div>
+    );
+
+    const renderOptionSection = ({ optionId, optionName, variants }: { optionId: string; optionName: string; variants: any[] }, showHeader = true, isMobileListSticky = false, showFilter = true) => (
+      <div key={optionId} className=" ov:pb-6">
+        {showHeader && (
+          <h3 className={`ov:sticky ov:top-0  ov:px-4 ov:z-10 ov:bg-[var(--ov25-background-color)] ov:text-lg ov:pb-4 ov:text-[var(--ov25-secondary-text-color)] ${isMobileListSticky ? 'ov:pt-2' : 'ov:pt-0'}`}>
+            {capitalizeWords(optionName)}
+          </h3>
+        )}
+        {showFilter && renderFilterBlock(optionId)}
+        <div className="ov:relative">
+          {variants.map((group) =>
+            group.variants.length > 0 ? (
+              <div key={group.groupName} className="ov:mb-4">
+                {variants.length > 1 && (
+                  <h4 className={`ov:sticky ov:z-[9] ov:bg-[var(--ov25-background-color)] ov:px-4 ov:text-sm ov:pt-6 ov:pb-3 ov:text-[var(--ov25-secondary-text-color)] ov:font-medium ${showHeader ? 'ov:top-10' : 'ov:top-0'}`}>
+                    {capitalizeWords(group.groupName)}
+                  </h4>
+                )}
+                <div className="ov:bg-[var(--ov25-background-color)] ov:pt-4">
+                  <div className={`ov:grid ${getGridColsClass(4)}`}>
+                    <VariantsContent
+                      variantsToRender={group.variants}
+                      VariantCard={DefaultVariantCard}
+                      isMobile={isMobile}
+                      onSelect={handleVariantSelect}
+                      compactSpacing
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : null
+          )}
+          {showFilter && isFilterOpen[optionId] && (
+            <div className="ov:absolute ov:inset-0 ov:z-20 ov:flex ov:justify-end ov:flex-wrap ov:overflow-y-auto ov:p-2 ov:px-4 ov:bg-[var(--ov25-background-color)]">
+              <FilterContent optionId={optionId} />
+            </div>
+          )}
+        </div>
+      </div>
+    );
+
+    const needsBottomMarginForButton = isMobile && !isInline;
+    const isMobileList = isMobile && !isInline && effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.List;
+
+    useEffect(() => {
+      if (effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.List && activeOptionId && listScrollRef.current) {
+        const el = listScrollRef.current.querySelector(`[data-ov25-option-id="${activeOptionId}"]`);
+        el?.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      }
+    }, [activeOptionId, effectiveVariantDisplayStyleOverlay]);
+
+    const handleModuleSelect = useCallback((variant: Variant) => {
+      if (isModuleSelectionLoading) return;
+      const module = variant.data as CompatibleModule;
+      const modelPath = module?.model?.modelPath;
+      const modelId = module?.model?.modelId;
+      if (!modelPath || !modelId) return;
+      setIsModuleSelectionLoading(true);
+      selectModule(modelPath, modelId);
+    }, [isModuleSelectionLoading, setIsModuleSelectionLoading]);
+
+    if (isMobile && activeOptionId === 'modules') {
+      const isLoading = (!compatibleModules || compatibleModules.length === 0) &&
+        (!configuratorState?.snap2Objects || configuratorState.snap2Objects.length === 0);
 
       if (isLoading) {
         return (
@@ -153,8 +338,8 @@ export function ProductVariantsWrapper() {
             isSelected: false
           } as Variant))}
           VariantCard={(props) => (
-            <ModuleVariantCard 
-              {...props} 
+            <ModuleVariantCard
+              {...props}
               isLoading={isModuleSelectionLoading}
             />
           )}
@@ -165,14 +350,179 @@ export function ProductVariantsWrapper() {
       );
     }
 
-    // Render all options, hiding inactive ones with display: none
-    // This keeps components mounted, preventing image reloads when switching options
-    // Wrap in a container with height constraints so only the visible one affects layout
+    const listFilterOptionIds = tabIds.filter(id => id !== 'size');
+    const listFilterKey = listFilterOptionIds.join(',');
+
+    const hasOptionVariants = (opt: { optionId: string; optionName: string; variants: any[] }) =>
+      opt.variants.some((g: { variants: any[] }) => g.variants.length > 0);
+
+    const listFilterBlock = effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.List && listFilterOptionIds.length > 0 && (
+      <div className="ov:shrink-0 ov:bg-[var(--ov25-background-color)] ov:pb-2">
+        {renderFilterBlock(listFilterKey, listFilterOptionIds)}
+        {isFilterOpen[listFilterKey] && (
+          <div className="ov:max-h-[min(fit-content,50vh)] ov:overflow-y-auto ov:px-4">
+            <FilterContent optionIds={listFilterOptionIds} />
+          </div>
+        )}
+      </div>
+    );
+
+    const listContent = (
+      <>
+        {showSize && (
+          <div data-ov25-option-id="size">
+            {renderSizeSection(true, isMobileList)}
+          </div>
+        )}
+        {allOptionsVariants
+          .filter(hasOptionVariants)
+          .map((opt) => (
+            <div key={opt.optionId} data-ov25-option-id={opt.optionId}>
+              {renderOptionSection(opt, true, isMobileList, effectiveVariantDisplayStyleOverlay !== VariantDisplayStyleOverlay.List)}
+            </div>
+          ))}
+      </>
+    );
+
+    const tabsContent = (
+      <div className="ov:flex ov:flex-col ov:h-full" data-ov25-tabs-container>
+        <div className={`ov:relative ov:shrink-0 ov:flex ov:items-stretch ov:gap-0 ov:px-4 ov:pt-4 ov:pb-0 ov:bg-[var(--ov25-background-color)] ${isMobile && isInline ? 'ov:sticky ov:top-0 ov:z-10' : ''}`}>
+          <div className="ov:absolute ov:left-4 ov:right-4 ov:top-4 ov:overflow-hidden ov:opacity-0 ov:pointer-events-none ov:invisible" aria-hidden>
+            <div ref={tabsMeasureRef} className="ov:flex ov:gap-2 ov:whitespace-nowrap">
+              {tabIds.map((id) => (
+                <span key={id} className="ov:px-4 ov:py-2.5 ov:text-sm">
+                  {capitalizeWords(getTabLabel(id))}
+                </span>
+              ))}
+            </div>
+          </div>
+          {useTabsDropdown ? (
+            <div className="ov:relative ov:w-full ov:pb-3" data-ov25-tabs data-ov25-tabs-dropdown>
+              <div className="ov25-gradient ov:rounded-full ov:p-[3px]">
+                <div className="ov:relative ov:rounded-full ov:bg-[var(--ov25-background-color)] ov:flex ov:items-center">
+                  <select
+                    value={activeTab}
+                    onChange={(e) => {
+                      const id = e.target.value;
+                      setActiveTab(id);
+                      handleOptionClick(id);
+                    }}
+                    data-ov25-tab-select
+                    className="ov:w-full ov:appearance-none ov:bg-transparent ov:rounded-full ov:px-4 ov:py-2.5 ov:text-sm ov:pr-10 ov:cursor-pointer ov:focus:outline-none ov:focus:ring-0 ov:text-[var(--ov25-text-color)]"
+                  >
+                    {tabIds.map((id) => (
+                      <option key={id} value={id}>
+                        {capitalizeWords(getTabLabel(id))}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown size={16} className="ov:absolute ov:right-3 ov:top-1/2 ov:-translate-y-1/2 ov:pointer-events-none ov:text-[var(--ov25-secondary-text-color)] ov:shrink-0" />
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="ov:flex ov:gap-2 ov:overflow-x-auto ov:flex-1 ov:min-w-0 ov:pb-3 ov:justify-center" data-ov25-tabs>
+              {tabIds.map((id) => {
+                const label = getTabLabel(id);
+                const isActive = activeTab === id;
+                return (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => {
+                      setActiveTab(id);
+                      handleOptionClick(id);
+                    }}
+                    data-ov25-tab
+                    data-ov25-tab-id={id}
+                    data-ov25-tab-active={isActive ? 'true' : undefined}
+                    className={`ov:shrink-0 ov:px-4 ov:py-2.5 ov:text-sm ov:rounded-t-md ov:font-medium ov:transition-colors ov:border ov:border-b-0 ov:border-transparent ${
+                      isActive
+                        ? 'ov:bg-[var(--ov25-text-color)] ov:text-[var(--ov25-background-color)] ov:-[var(--ov25-text-color)] ov:border-[var(--ov25-border-color)] ov:shadow-[0_-1px_0_0_var(--ov25-background-color)]'
+                        : 'ov:bg-[var(--ov25-secondary-background-color)] ov:text-[var(--ov25-secondary-text-color)] hover:ov:text-[var(--ov25-text-color)] hover:ov:bg-[var(--ov25-hover-color)] ov:cursor-pointer'
+                    }`}
+                  >
+                    {capitalizeWords(label)}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+        <div className={`ov:flex-1 ov:min-h-0 ov:overflow-y-auto ov:pt-0 ${needsBottomMarginForButton ? 'ov:pb-20' : 'ov:pb-2'}`}>
+          {activeTab === 'size' && showSize && renderSizeSection(false)}
+          {activeTab !== 'size' && allOptionsVariants.map((opt) => (opt.optionId === activeTab ? renderOptionSection(opt, false) : null))}
+        </div>
+      </div>
+    );
+
+    const useTree = effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.Tree;
+    const useAccordion = effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.Accordion && !isMobile;
+
+    const displayContent =
+      effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.Tabs
+        ? tabsContent
+        : useTree
+          ? <TreeVariants mode={isInline ? 'inline' : 'drawer'} />
+          : useAccordion
+            ? <AccordionVariants mode={isInline ? 'inline' : 'drawer'} />
+            : (
+                <div style={{ paddingBottom: listScrollHeight }}>
+                  {listContent}
+                </div>
+              );
+
+    const isAccordionOrTree = useAccordion || useTree;
+    const contentScrollClass = isAccordionOrTree ? 'ov:overflow-hidden' : 'ov:overflow-y-auto';
+    const contentPaddingClass = isAccordionOrTree
+      ? (needsBottomMarginForButton ? 'ov:pb-16' : '')
+      : (needsBottomMarginForButton ? 'ov:pt-0 ov:pb-20' : 'ov:pt-0 ov:pb-2');
+
+    if (isListLike) {
+      const isListMode = effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.List;
+      if (isInline) {
+        return (
+          <div
+            data-ov25-list-variants-mode="inline"
+            className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:h-full ov:overflow-hidden ov:bg-[var(--ov25-background-color)]"
+          >
+            {isListMode && listFilterBlock}
+            <div
+              ref={listScrollRef}
+              data-ov25-list-variants-content
+              className={`ov:flex-1 ov:min-h-0 ${contentScrollClass} ${contentPaddingClass}`}
+            >
+              {displayContent}
+            </div>
+            {!hidePricing && (
+              <div className="ov:shrink-0 ov:px-4 ov:pb-2 ov:pt-2">
+                <CheckoutButton />
+              </div>
+            )}
+          </div>
+        );
+      }
+
+      return (
+        <div className="ov:flex ov:flex-col ov:max-h-full ov:h-full ov:bg-[var(--ov25-background-color)]">
+          <VariantsHeader />
+          {isListMode && listFilterBlock}
+          <div ref={listScrollRef} className={`ov:flex-1 ov:min-h-0 ${contentScrollClass} ${contentPaddingClass}`}>
+            {displayContent}
+          </div>
+          {!isMobile && !hidePricing && (
+            <div className="ov:shrink-0 ov:px-4 ov:pb-2 ov:pt-2">
+              <CheckoutButton />
+            </div>
+          )}
+        </div>
+      );
+    }
+
     return (
       <div className="ov:md:flex ov:md:flex-col ov:max-h-full ov:h-full ov:relative">
-        {/* Size option */}
-        {sizeVariants.length > 0 && (
-          <div 
+        {showSize && (
+          <div
             className="ov:absolute ov:inset-0"
             style={{ display: activeOptionId === 'size' ? 'block' : 'none' }}
           >
@@ -189,10 +539,8 @@ export function ProductVariantsWrapper() {
             />
           </div>
         )}
-        
-        {/* All other options - using memoized variants */}
         {allOptionsVariants.map(({ optionId, optionName, variants }) => (
-          <div 
+          <div
             key={optionId}
             className="ov:absolute ov:inset-0"
             style={{ display: activeOptionId === optionId ? 'block' : 'none' }}
@@ -212,5 +560,5 @@ export function ProductVariantsWrapper() {
           </div>
         ))}
       </div>
-    )
+    );
   }

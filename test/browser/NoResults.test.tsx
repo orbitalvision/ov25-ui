@@ -11,8 +11,9 @@ const mockProviderProps = {
   configurationUuid: 'test-uuid',
   buyNowFunction: () => {},
   addToBasketFunction: () => {},
-  addSwatchesToCartFunction: () => {},
+  buySwatchesFunction: () => {},
   isProductGalleryStacked: false,
+  carouselLayout: 'carousel' as const,
   hasConfigureButton: false,
 }
 

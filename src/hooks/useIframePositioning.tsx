@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useOV25UI } from '../contexts/ov25-ui-context.js';
-import { DRAWER_HEIGHT_RATIO, IFRAME_HEIGHT_RATIO } from '../utils/configurator-utils.js';
+import { IFRAME_HEIGHT_RATIO } from '../utils/configurator-utils.js';
 
 /**
  * Helper function to find an element in Shadow DOM or regular DOM
@@ -16,8 +16,6 @@ const findElementByIdInShadowOrRegularDOM = (id: string): HTMLElement | null => 
   // Special case for variant menu container - look in the variants shadow container
   if (id === 'ov25-configurator-variant-menu-container') {
     const variantsShadowContainer = document.getElementById('ov25-variants-shadow-container');
-
-    
     if (variantsShadowContainer?.shadowRoot) {
       const elementInShadow = variantsShadowContainer.shadowRoot.getElementById(id);
       if (elementInShadow) {
@@ -25,7 +23,16 @@ const findElementByIdInShadowOrRegularDOM = (id: string): HTMLElement | null => 
       }
     }
   }
-  
+
+  // Snap2 mobile: iframe container lives inside mobile drawer shadow root
+  const mobileDrawerContainer = document.getElementById('ov25-mobile-drawer-container');
+  if (mobileDrawerContainer?.shadowRoot) {
+    const elementInShadow = mobileDrawerContainer.shadowRoot.getElementById(id);
+    if (elementInShadow) {
+      return elementInShadow;
+    }
+  }
+
   // If not found, search in all shadow roots
   const shadowHosts = document.querySelectorAll('div[class^="ov25-configurator-"]');
   
@@ -56,21 +63,16 @@ const findElementByIdInShadowOrRegularDOM = (id: string): HTMLElement | null => 
  * Helper function to find iframe with unique ID pattern
  */
 const findIframeWithUniqueId = (uniqueId?: string): HTMLElement | null => {
-  // If we have a uniqueId, try to find the specific iframe for this configurator
-  if (uniqueId) {
-    const iframeId = `ov25-configurator-iframe-${uniqueId}`;
-    const uniqueIframe = document.getElementById(iframeId);
-    if (uniqueIframe) {
-      return uniqueIframe;
-    }
+  const iframeId = uniqueId ? `ov25-configurator-iframe-${uniqueId}` : 'ov25-configurator-iframe';
+  const fromDoc = document.getElementById(iframeId);
+  if (fromDoc) return fromDoc;
+
+  const mobileDrawerContainer = document.getElementById('ov25-mobile-drawer-container');
+  if (mobileDrawerContainer?.shadowRoot) {
+    const fromShadow = mobileDrawerContainer.shadowRoot.getElementById(iframeId);
+    if (fromShadow) return fromShadow;
   }
-  
-  // Fallback to standard iframe ID
-  const standardIframe = document.getElementById('ov25-configurator-iframe');
-  if (standardIframe) {
-    return standardIframe;
-  }
-  
+
   return null;
 };
 
@@ -78,7 +80,7 @@ const findIframeWithUniqueId = (uniqueId?: string): HTMLElement | null => {
  * Hook to position the iframe and its container at the top of the screen when drawer is open
  */
 export const useIframePositioning = () => {
-  const {isDrawerOrDialogOpen, isMobile, drawerSize, isProductGalleryStacked, isSnap2Mode, uniqueId } = useOV25UI();
+  const { isDrawerOrDialogOpen, isMobile, drawerSize, isProductGalleryStacked, isSnap2Mode, uniqueId } = useOV25UI();
   const originalStyles = useRef<{
     container: {
       position: string;
@@ -112,7 +114,6 @@ export const useIframePositioning = () => {
 
   // This useEffect handles drawer opening and closing - saving and restoring original styles
   useEffect(() => {
-    // Get the iframe element and container
     const iframe = findIframeWithUniqueId(uniqueId);
     const containerId = uniqueId ? `ov25-configurator-iframe-container-${uniqueId}` : 'ov25-configurator-iframe-container';
     const container = findElementByIdInShadowOrRegularDOM(isProductGalleryStacked ? 'true-ov25-configurator-iframe-container' : containerId);
@@ -210,11 +211,11 @@ export const useIframePositioning = () => {
 
       // Opening animation code
       if (isMobile) {
-        // Sets height for iframe and container, taking into account the viewport height for apple mobile devices.
         const updateMobileHeight = () => {
           const viewportHeight = window.visualViewport?.height !== undefined ? window.visualViewport?.height : window.innerHeight;
-          container.style.height = `${viewportHeight * DRAWER_HEIGHT_RATIO}px`;
-          iframe.style.height = `${viewportHeight * DRAWER_HEIGHT_RATIO}px`;
+          const iframeHeight = viewportHeight * IFRAME_HEIGHT_RATIO;
+          container.style.height = `${iframeHeight}px`;
+          iframe.style.height = `${iframeHeight}px`;
         };
 
         updateMobileHeight(); // Initial height update
@@ -314,33 +315,26 @@ export const useIframePositioning = () => {
     };
   }, [isDrawerOrDialogOpen, isMobile, isSnap2Mode, uniqueId]);
 
-  // This useEffect handles drawer size changes
+  // This useEffect handles drawer size changes (mobile drawer is always "large" when open)
   useEffect(() => {
-    if (isDrawerOrDialogOpen) {
+    if (!(isDrawerOrDialogOpen && isMobile)) return;
         const iframe = findIframeWithUniqueId(uniqueId);
         const containerId = uniqueId ? `ov25-configurator-iframe-container-${uniqueId}` : 'ov25-configurator-iframe-container';
-        const container = findElementByIdInShadowOrRegularDOM(containerId);
+        const container = findElementByIdInShadowOrRegularDOM(isProductGalleryStacked ? 'true-ov25-configurator-iframe-container' : containerId);
         if(!container || !iframe) return;
 
         const originalIframeHeight = iframe.style.height;
         const originalContainerHeight = container.style.height;
 
-        // Add transition immediately and keep it
         iframe.style.transition = 'height 500ms cubic-bezier(0.4, 0, 0.2, 1)';
         container.style.transition = 'height 500ms cubic-bezier(0.4, 0, 0.2, 1)';
 
-        if (drawerSize === 'large') {
-            const newHeight = `${window.innerHeight * IFRAME_HEIGHT_RATIO}px`;
-            iframe.style.height = newHeight;
-            container.style.height = newHeight;
-        } else if (drawerSize === 'small') {
-            const newHeight = `${window.innerHeight * DRAWER_HEIGHT_RATIO}px`;
-            iframe.style.height = newHeight;
-            container.style.height = newHeight;
-        }
+        const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+        const newHeight = `${viewportHeight * IFRAME_HEIGHT_RATIO}px`;
+        iframe.style.height = newHeight;
+        container.style.height = newHeight;
 
         return () => {
-            // Only remove transitions and restore heights when drawer closes
             if (!isDrawerOrDialogOpen) {
                 iframe.style.transition = 'none';
                 container.style.transition = 'none';
@@ -348,8 +342,7 @@ export const useIframePositioning = () => {
                 container.style.height = originalContainerHeight;
             }
         };
-    }
-  }, [drawerSize, isDrawerOrDialogOpen, isSnap2Mode, isMobile, uniqueId])
+  }, [drawerSize, isDrawerOrDialogOpen, isSnap2Mode, isMobile, isProductGalleryStacked, uniqueId])
 };
 
 export default useIframePositioning;

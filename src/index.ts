@@ -2,17 +2,42 @@
 import '../globals.css';
 
 // Export the injectConfigurator function from inject.ts
-import { injectConfigurator, injectMultipleConfigurators } from './utils/inject.js';
-import type { InjectConfiguratorOptions } from './utils/inject.js';
+import { injectConfigurator } from './utils/inject.js';
+import type { InjectConfiguratorOptions, InjectConfiguratorInput } from './utils/inject.js';
 
-// Export both as named exports and as default export
-export { injectConfigurator, injectMultipleConfigurators };
-export type { InjectConfiguratorOptions };
+export {
+  injectConfigurator,
+  ConfiguratorDisplayMode,
+  CarouselDisplayMode,
+  VariantDisplayMode,
+  VariantDisplayStyleOverlay,
+  CarouselLayout,
+  VariantDisplayStyle,
+} from './utils/inject.js';
+export type {
+  InjectConfiguratorOptions,
+  LegacyInjectConfiguratorOptions,
+  InjectConfiguratorInput,
+  CarouselConfig,
+  ConfiguratorConfig,
+  VariantsConfig,
+  SelectorsConfig,
+  CallbacksConfig,
+  BrandingConfig,
+  FlagsConfig,
+  ElementSelector,
+  ElementConfig,
+  StringOrFunction,
+  OnChangePayload,
+  OnChangePricePayload,
+  OnChangeSkuPayload,
+  OptionSkuMap,
+} from './utils/inject.js';
+export type { Swatch, SwatchRulesData } from './contexts/ov25-ui-context.js';
 
 // Default export object containing all exports
 const OV25UI = {
   injectConfigurator,
-  injectMultipleConfigurators,
 };
 
 export default OV25UI; 

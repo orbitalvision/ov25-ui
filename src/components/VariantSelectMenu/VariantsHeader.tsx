@@ -1,53 +1,34 @@
 import * as React from 'react'
 import { cn } from '../../lib/utils.js';
-import { ChevronLeft,  ChevronUp,  Triangle } from 'lucide-react';
+import { ChevronUp, X } from 'lucide-react';
 import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 import { capitalizeWords } from './DesktopVariants.js';
+import { OVOrBrandLogo } from '../OVOrBrandLogo.js';
+import { VariantsCloseButton } from './VariantsCloseButton.js';
 
 
 
 export const VariantsHeader = () => {
-    const {
-        setIsVariantsOpen,
-        logoURL,
-        range,
-        handleNextOption,
-        handlePreviousOption,
-        activeOptionId,
-        allOptions,
-        showOptional,
-        isModalOpen,
-        isSnap2Mode
-      } = useOV25UI();
+  const { logoURL, handleNextOption, handlePreviousOption, activeOptionId, allOptions, showOptional, isSnap2Mode, isMobile } = useOV25UI();
 
-    const currentOption = allOptions.find(opt => opt.id === activeOptionId)
+  if (isMobile) return <div id="ov25-variants-header-mobile" className='w-full h-1'></div>;
 
-    return (
+  const currentOption = allOptions.find(opt => opt.id === activeOptionId);
+
+  return (
         <>
-        {/* Desktop Controls: Full width button */}
+        {/* Desktop Controls: Title with close button top right */}
         <div id="ov25-variants-header" className={cn(
-          "ov:hidden",
+          "ov:hidden ov:relative",
           isSnap2Mode ? "ov:lg:block" : "ov:md:block"
         )}>
-          <button 
-            onClick={() => setIsVariantsOpen(false)}
-            className={cn(
-              'ov:flex ov:items-center ov:cursor-pointer ov:justify-between ov:w-full ov:border-none ov:p-4 ov:py-[1.125rem]',
-              'ov:bg-[var(--ov25-background-color)]',
-              isModalOpen && 'ov:cursor-default'
-            )}
-          >
-            <div className="ov:flex ov:items-center ov:gap-2 ov:justify-center ov:w-full ov:relative">
-              <div className="ov:absolute ov:cursor-pointer ov:w-full ov:inset-0 ov:h-full ov:flex ov:items-center ov:text-[var(--ov25-text-color)]">
-                <ChevronLeft className="ov:h-4"/>
-              </div>
-              {logoURL ? (
-                <img src={logoURL} alt="Logo" className="ov:h-full ov:w-auto ov:object-contain"/>
-              ) : (
-                <h3 className="ov:text-base ov:font-[400] ov:z-10">{range?.name}</h3>
-              )}
-            </div>
-          </button>
+          <div className={cn(
+            'ov:flex ov:items-center ov:justify-center ov:w-full ov:border-none ov:p-4   ov:py-[1.125rem] ov:relative ',
+            'ov:bg-[var(--ov25-background-color)]'
+          )}>
+            <OVOrBrandLogo imageUrl={logoURL} className="ov:h-10" />
+            <VariantsCloseButton />
+          </div>
         </div>
    
         {/* Mobile(ipad size) Controls: Title with separate chevron buttons */}
