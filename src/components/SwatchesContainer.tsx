@@ -14,7 +14,7 @@ export const SwatchesContainer: React.FC = () => {
   }
 
   return (
-    <div id="ov25-selected-swatches-container" className="ov:flex ov:flex-row ov:items-center ov:max-w-[300px] ov:mt-2 ov:gap-2 ov:border ov:border-[var(--ov25-border-color)] ov:rounded-md ov:p-2 ov:cursor-pointer" onClick={toggleSwatchBook}>
+    <div id="ov25-selected-swatches-container" className="ov:flex ov:flex-row ov:items-center ov:max-w-[300px] ov:mt-2 ov:gap-2  ov:rounded-full  ov:p-2  ov:cursor-pointer" onClick={toggleSwatchBook}>
       {(selectedSwatches.length > 0 && selectedSwatches[0].thumbnail && selectedSwatches[0].thumbnail.miniThumbnails) ? (
         <SwatchImage
           src={selectedSwatches[0].thumbnail.miniThumbnails.small}
