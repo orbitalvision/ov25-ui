@@ -85,6 +85,15 @@ This package is published in two versions to support both React 18 and React 19:
 1. Update the version number in `package.json`
 2. Run `npm run publish:all` to build and publish both packages
 
+### Canary releases
+
+For pre-release testing without affecting the `latest` tag:
+
+1. Bump to a prerelease version: `npm version prerelease --preid=canary` (e.g. `0.5.73` → `0.5.74-canary.0`)
+2. Run `npm run publish:canary` to build and publish both packages under the `canary` tag
+
+Consumers install with `npm install ov25-ui@canary` or `npm install ov25-ui-react18@canary`. Regular `npm install ov25-ui` continues to resolve to `latest`.
+
 ### Publishing individual versions (don't do this usually)
 
 - React 18: `npm run publish:react18`

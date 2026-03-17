@@ -20,7 +20,6 @@ export const Snap2ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({ isOpe
   const { shareDialogTrigger, isModalOpen, configuratorState, isVariantsOpen, isProductGalleryStacked, uniqueId, isMobile, variantDisplayStyleOverlay, variantDisplayStyleOverlayMobile } = useOV25UI();
   const effectiveOverlayStyle = isMobile ? variantDisplayStyleOverlayMobile : variantDisplayStyleOverlay;
   const isShareDialogOpen = shareDialogTrigger !== 'none';
-  const contentRef = useRef<HTMLDivElement>(null);
   const modalRef = useRef<HTMLDivElement>(null);
   const [portalTargetEl, setPortalTargetEl] = useState<HTMLDivElement | null>(null);
 
@@ -71,10 +70,7 @@ export const Snap2ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({ isOpe
       >
         {/* Modal content — clip-path used instead of overflow:hidden to avoid Chrome compositing bugs */}
         <div
-          ref={(el) => {
-            contentRef.current = el;
-            setPortalTargetEl(el);
-          }}
+          ref={setPortalTargetEl}
           className="ov:relative ov:w-[90vw] ov:h-full ov:flex ov:rounded-3xl"
           style={{ clipPath: 'inset(0 round 1.5rem)' }}
         >

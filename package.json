@@ -1,6 +1,6 @@
 {
   "name": "ov25-ui",
-  "version": "0.5.73",
+  "version": "0.5.74-canary.0",
   "description": "A UI configurator for OV25 product visualization",
   "type": "module",
   "main": "dist/index.js",
@@ -35,7 +35,8 @@
     "test:browser:ci": "CI=true vitest run --config vitest.browser.config.ts",
     "build:react18": "node scripts/build-react18.js",
     "build:react19": "node scripts/build-react19.js",
-    "publish:all": "node scripts/publish-all.js"
+    "publish:all": "node scripts/publish-all.js",
+    "publish:canary": "node scripts/publish-canary.js"
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.10",
