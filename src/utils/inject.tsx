@@ -2,7 +2,7 @@
 import React, { ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import { OV25UIProvider } from '../contexts/ov25-ui-context.js';
-import { ProductGallery } from '../components/product-gallery.js';
+import { ProductGallery, DeferredGalleryContainer } from '../components/product-gallery.js';
 import Price from '../components/Price.js';
 import Name from '../components/Name.js';
 import VariantSelectMenu from '../components/VariantSelectMenu/VariantSelectMenu.js';
@@ -453,6 +453,19 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     }
     swatchbookPortalShadowRoot.adoptedStyleSheets = swatchbookPortalStylesheets;
 
+    // When no gallery selector but deferThreeD, render gallery in hidden container so iframe exists for when sheet opens
+    const hasGallerySelector = !!getSelector(effectiveGallerySelector);
+    if (deferThreeD && !hasGallerySelector) {
+      let deferredGalleryEl = document.getElementById('ov25-deferred-gallery-container');
+      if (!deferredGalleryEl) {
+        deferredGalleryEl = document.createElement('div');
+        deferredGalleryEl.id = 'ov25-deferred-gallery-container';
+        deferredGalleryEl.setAttribute('data-clarity-mask', 'true');
+        deferredGalleryEl.style.pointerEvents = 'none';
+        document.body.appendChild(deferredGalleryEl);
+      }
+    }
+
     // Make sure the portal targets are in the DOM *now*
     const portals: ReactNode[] = [];
 
@@ -589,6 +602,9 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
           pushPortal('#true-carousel', <ProductCarousel />, shouldCreateShadowDOM('carousel'));
         }
       }
+    // When no gallery selector but deferThreeD, render gallery in hidden container so configurator appears when sheet opens
+    } else if (deferThreeD && !hasGallerySelector) {
+      pushPortal('#ov25-deferred-gallery-container', <DeferredGalleryContainer />, false);
     }
 
     // Portal for configurator UI (skip when multiple Snap2 - handlers added by runMultipleConfiguratorLogic)

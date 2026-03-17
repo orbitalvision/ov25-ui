@@ -146,3 +146,28 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
     )
 }
 
+/**
+ * Renders ProductGallery inside a hidden container when no gallery selector is provided
+ * but deferThreeD is true. When the sheet/drawer opens, the wrapper becomes visible so
+ * useIframePositioning can show the configurator on the left. The iframe stays in the DOM
+ * so it can load; it is just positioned off-screen until the user opens the configurator.
+ */
+export function DeferredGalleryContainer() {
+    const { isDrawerOrDialogOpen } = useOV25UI();
+    return (
+        <div
+            className="ov25-configurator-gallery ov:font-[family-name:var(--ov25-font-family)]"
+            style={{
+                position: 'fixed',
+                inset: 0,
+                width: '100%',
+                height: '100%',
+                visibility: isDrawerOrDialogOpen ? 'visible' : 'hidden',
+                pointerEvents: 'none',
+                zIndex: 2147483643,
+            }}
+        >
+            <ProductGallery />
+        </div>
+    );
+}

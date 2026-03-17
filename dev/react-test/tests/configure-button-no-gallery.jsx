@@ -11,6 +11,7 @@ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
     name: { selector: '#name', replace: true },
     configureButton: { selector: '[data-ov25-configure-button]', replace: true },
   },
+  deferThreeD: true,
   carousel: { desktop: 'stacked', mobile: 'carousel' },
   configurator: {
     displayMode: { desktop: 'sheet', mobile: 'drawer' },
@@ -25,14 +26,14 @@ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
     buyNow: () => alert('Buy now'),
     buySwatches: () => alert('Add swatches to cart'),
   },
-  flags: { hidePricing: false },
+  flags: { hidePricing: false, deferThreeD: true },
 });
 
 function App() {
   return (
     <TestPageLayout
-      title="Configure Button Only"
-      description="Standard product with a single Configure button. Variants drawer opens on click (useSimpleVariantsSelector)."
+      title="Configure Button Only (no gallery / defer3D)"
+      description="Same as configure-button-only but with defer3D=true: 3D view is deferred until user interaction."
       injectConfig={config}
       renderControls={false}
       renderSwatches={false}
