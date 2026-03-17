@@ -109,7 +109,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
             )}
             <div id="ov25-swatchbook-swatches-list" className={cn(`ov:overflow-y-auto ov:flex ov:flex-wrap ov:gap-2 ov:md:gap-2 ov:w-full ov:px-4 ov:py-2`, maxSwatches <= 4 ? 'ov:justify-center' : 'ov:justify-start')}>
               {selectedSwatches.map((swatch) => (
-                <div key={`${swatch.manufacturerId}-${swatch.name}-${swatch.option}`} className='ov25-swatch-item ov:flex ov:flex-col ov:gap-2 ov:items-center ov:text-center ov:w-[calc(50%-4px)] ov:sm:w-[calc(33.333%-5.33px)] ov:md:w-[calc(25%-6px)] ov:min-h-[85px]'>
+                <div key={`${swatch.manufacturerId}-${swatch.name}-${swatch.option}`} className='ov25-swatch-item ov:flex ov:flex-col ov:gap-2 ov:items-center ov:text-center ov:sm:w-[calc(33.333%-5.33px)] ov:md:w-[calc(25%-6px)] ov:min-h-[85px]'>
                   <div className='ov25-swatch-image-container ov:group ov:relative ov:w-[85px] ov:h-[85px] ov:md:w-[105px] ov:md:h-[105px]'>
                     <SwatchImage
                       src={swatch.thumbnail && swatch.thumbnail.miniThumbnails ? swatch.thumbnail.miniThumbnails.medium : '/placeholder.svg?height=200&width=200'}
@@ -135,7 +135,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
               ))}
               {emptySquares.map((emptySquare, i) => (
                 i === 0 ? (
-                  <div key={emptySquare.id} className='ov25-swatch-item ov:flex ov:flex-col ov:gap-2 ov:items-center ov:text-center ov:w-[calc(50%-4px)] ov:sm:w-[calc(33.333%-5.33px)] ov:md:w-[calc(25%-6px)] ov:min-h-[85px]'>
+                  <div key={emptySquare.id} className='ov25-swatch-item ov:flex ov:flex-col ov:gap-2 ov:items-center ov:text-center ov:sm:w-[calc(33.333%-5.33px)] ov:md:w-[calc(25%-6px)] ov:min-h-[85px]'>
                     <div className='ov25-swatch-image-container ov:relative ov:w-[80px] ov:h-[80px] ov:md:w-[105px] ov:md:h-[105px] ov:border-2 ov:border-dashed ov:border-gray-300 ov:rounded-lg ov:flex ov:items-center ov:justify-center ov:bg-gray-50'>
                       <div onClick={handleOpen3DConfigurator} className='ov25-empty-swatch-square ov:w-[90%] ov:h-[90%] ov:flex ov:flex-col ov:items-center ov:justify-center ov:gap-2 ov:cursor-pointer'>
                         <Plus className='ov:w-full ov:h-full ov:text-gray-300 ov:stroke-[0.5px]'/>
