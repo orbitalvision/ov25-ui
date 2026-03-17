@@ -188,14 +188,16 @@ export function ProductVariantsWrapper({ isInline = false }: ProductVariantsWrap
 
     useEffect(() => {
       const el = tabsMeasureRef.current;
-      const parent = el?.parentElement;
-      if (!el || !parent) return;
+      const section = el?.parentElement?.parentElement;
+      if (!el || !section) return;
       const checkOverflow = () => {
-        setUseTabsDropdown(el.scrollWidth >= parent.clientWidth);
+        const { paddingLeft, paddingRight } = getComputedStyle(section);
+        const contentWidth = section.clientWidth - (parseFloat(paddingLeft) || 0) - (parseFloat(paddingRight) || 0);
+        setUseTabsDropdown(el.scrollWidth > contentWidth - 2);
       };
       checkOverflow();
       const ro = new ResizeObserver(checkOverflow);
-      ro.observe(parent);
+      ro.observe(section);
       return () => ro.disconnect();
     }, [tabIds]);
 
@@ -390,9 +392,13 @@ export function ProductVariantsWrapper({ isInline = false }: ProductVariantsWrap
       <div className="ov:flex ov:flex-col ov:h-full" data-ov25-tabs-container>
         <div className={`ov:relative ov:shrink-0 ov:flex ov:items-stretch ov:gap-0 ov:px-4 ov:pt-4 ov:pb-0 ov:bg-[var(--ov25-background-color)] ${isMobile && isInline ? 'ov:sticky ov:top-0 ov:z-10' : ''}`}>
           <div className="ov:absolute ov:left-4 ov:right-4 ov:top-4 ov:overflow-hidden ov:opacity-0 ov:pointer-events-none ov:invisible" aria-hidden>
-            <div ref={tabsMeasureRef} className="ov:flex ov:gap-2 ov:whitespace-nowrap">
+            <div ref={tabsMeasureRef} className="ov:inline-flex ov:gap-2 ov:whitespace-nowrap">
               {tabIds.map((id) => (
-                <span key={id} className="ov:px-4 ov:py-2.5 ov:text-sm">
+                <span
+                  key={id}
+                  className="ov:shrink-0 ov:px-4 ov:py-2.5 ov:text-sm ov:rounded-t-md ov:font-medium ov:border ov:border-b-0 ov:border-transparent ov:box-border"
+                  style={{ boxSizing: 'border-box' }}
+                >
                   {capitalizeWords(getTabLabel(id))}
                 </span>
               ))}
