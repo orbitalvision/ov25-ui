@@ -153,7 +153,7 @@ export const SaveSnap2Dialog: React.FC = () => {
         </DialogHeader>
         <div className="ov:space-y-4 mt-4">
           {showConfirmation ? (
-            <>
+            <>  
               <p className="ov:text-base ov:font-light ov:text-[var(--ov25-secondary-text-color)] ov:leading-relaxed">
                 {shareDialogTrigger === 'modal-close'
                   ? 'Do you want to save your progress? Without saving, your configuration will be lost.'
@@ -163,7 +163,7 @@ export const SaveSnap2Dialog: React.FC = () => {
               <div className="ov:flex ov:gap-2 pt-8">
                 <button
                   onClick={handleConfirmSave}
-                  className="ov:flex-1 ov:flex ov:items-center ov:justify-center ov:py-2 ov:px-6 ov:text-sm ov:rounded-full ov:bg-[var(--ov25-cta-color)] ov:text-white ov:font-medium ov:cursor-pointer ov:hover:bg-[var(--ov25-cta-color-hover)] ov:transition-colors ov:border-0 ov:text-center ov:uppercase"
+                  className="ov:flex-1 ov:flex ov:items-center ov:justify-center ov:py-2 ov:px-6 ov:text-sm ov:rounded-[var(--ov25-cta-border-radius)] ov:bg-[var(--ov25-cta-color)] ov:text-[var(--ov25-cta-text-color)] ov:font-medium ov:cursor-pointer ov:hover:bg-[var(--ov25-cta-color-hover)] ov:transition-colors ov:border-0 ov:text-center ov:uppercase"
                 >
                   Yes
                 </button>
@@ -173,7 +173,7 @@ export const SaveSnap2Dialog: React.FC = () => {
                     e.preventDefault();
                     handleNoSave();
                   }}
-                  className="ov:flex-1 ov:flex ov:items-center ov:justify-center ov:py-2 ov:px-6 ov:text-sm ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:bg-transparent ov:text-[var(--ov25-text-color)] ov:cursor-pointer ov:hover:opacity-90 ov:transition-colors ov:text-center ov:uppercase"
+                  className="ov:flex-1 ov:flex ov:items-center ov:justify-center ov:py-2 ov:px-6 ov:text-sm ov:rounded-[var(--ov25-cta-border-radius)] ov:border ov:border-[var(--ov25-border-color)] ov:bg-transparent ov:text-[var(--ov25-text-color)] ov:cursor-pointer ov:hover:opacity-90 ov:transition-colors ov:text-center ov:uppercase"
                 >
                   No
                 </button>
@@ -201,7 +201,7 @@ export const SaveSnap2Dialog: React.FC = () => {
                 />
                 <button
                   onClick={copyToClipboard}
-                  className="ov:w-full ov:flex ov:items-center ov:justify-center ov:py-2 ov:px-6 ov:text-sm ov:rounded-full ov:bg-[var(--ov25-cta-color)] ov:text-white ov:font-medium ov:cursor-pointer ov:hover:bg-[var(--ov25-cta-color-hover)] ov:transition-colors ov:border-0 ov:text-center ov:uppercase"
+                  className="ov:w-full ov:flex ov:items-center ov:justify-center ov:py-2 ov:px-6 ov:text-sm ov:rounded-[var(--ov25-cta-border-radius)] ov:bg-[var(--ov25-cta-color)] ov:text-[var(--ov25-cta-text-color)] ov:font-medium ov:cursor-pointer ov:hover:bg-[var(--ov25-cta-color-hover)] ov:transition-colors ov:border-0 ov:text-center ov:uppercase"
                 >
                   Copy Link
                 </button>

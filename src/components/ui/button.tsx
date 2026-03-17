@@ -20,9 +20,9 @@ const buttonVariants = cva(
         secondary:
           "ov:bg-secondary ov:text-secondary-foreground ov:shadow-sm ov:hover:bg-secondary/80",
         success:
-          "ov:bg-[var(--ov25-cta-color)] ov:text-white ov:shadow-sm ov:hover:bg-[var(--ov25-cta-color-hover)]",
+          "ov:bg-[var(--ov25-cta-color)] ov:text-[var(--ov25-cta-text-color)] ov:shadow-sm ov:hover:bg-[var(--ov25-cta-color-hover)]",
         configure:
-          "ov:rounded-full ov:bg-[var(--ov25-cta-color)] ov:text-white ov:font-medium ov:py-3 ov:px-6 ov:hover:bg-[var(--ov25-cta-color)] ov:disabled:opacity-30 ov:disabled:hover:bg-[var(--ov25-cta-color-light)]",
+          "ov:rounded-[var(--ov25-cta-border-radius)] ov:bg-[var(--ov25-cta-color)] ov:text-[var(--ov25-cta-text-color)] ov:font-medium ov:py-3 ov:px-6 ov:hover:bg-[var(--ov25-cta-color)] ov:disabled:opacity-30 ov:disabled:hover:bg-[var(--ov25-cta-color-light)]",
         ghost: "ov:hover:bg-accent ov:hover:text-accent-foreground",
         link: "ov:text-primary ov:underline-offset-4 ov:hover:underline",
         shimmerOutline: "ov:hover:animate-shimmer ov:border ov:border-input ov:bg-background ov:bg-[linear-gradient(110deg,#ffffff,45%,#f7f7f7,55%,#ffffff)] ov:bg-[length:200%_100%] ov:shadow-sm ov:hover:bg-accent ov:hover:text-accent-foreground ",

@@ -3,7 +3,7 @@ import { ShoppingCart } from 'lucide-react';
 import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 import { cn } from '../../lib/utils.js';
 
-const baseButtonClasses = 'ov:flex ov:items-center ov:justify-center ov:gap-2 ov:py-2 ov:px-6 ov:text-sm ov:rounded-full ov:bg-[var(--ov25-cta-color)] ov:text-white ov:font-medium ov:cursor-pointer ov:hover:bg-[var(--ov25-cta-color-hover)] ov:transition-colors ov:border-0 ov:text-center ov:uppercase';
+const baseButtonClasses = 'ov:flex ov:items-center ov:justify-center ov:gap-2 ov:py-2 ov:px-6 ov:text-sm ov:rounded-[var(--ov25-cta-border-radius)] ov:bg-[var(--ov25-cta-color)] ov:text-[var(--ov25-cta-text-color)] ov:font-medium ov:cursor-pointer ov:hover:bg-[var(--ov25-cta-color-hover)] ov:transition-colors ov:border-0 ov:text-center ov:uppercase';
 
 export const CheckoutButton = () => {
   const {
@@ -64,7 +64,7 @@ export const CheckoutButton = () => {
 
   return (
     <div className={wrapperClass}>
-    <div className="ov:relative ov:flex ov:w-full ov:rounded-full ov:overflow-hidden ov:bg-[var(--ov25-cta-color)] ov:text-white ov:uppercase ov:text-sm">
+    <div className="ov:relative ov:flex ov:w-full ov:rounded-[var(--ov25-cta-border-radius)] ov:overflow-hidden ov:bg-[var(--ov25-cta-color)] ov:text-[var(--ov25-cta-text-color)] ov:uppercase ov:text-sm">
       <div className="ov:flex ov:items-center ov:justify-center ov:gap-2 ov:py-2 ov:px-6 ov:pr-14 ov:min-w-0 ov:flex-1 ov:invisible" aria-hidden>
         {labelContent}
       </div>

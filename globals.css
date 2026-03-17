@@ -62,11 +62,17 @@
     --ov25-cta-color: #22c55e;
     --ov25-cta-color-hover: #16a34a;
     --ov25-cta-color-light: #4ade80;
+    --ov25-cta-border-radius: 9999px;
+    --ov25-cta-text-color: #ffffff;
 
     --ov25-destructive: #ef4444;
 
     --ov25-button-border-radius: 0px;
     --ov25-button-border-width: 1px;
+    --ov25-button-border-color: var(--ov25-border-color);
+    --ov25-button-text-color: #ffffff;
+    --ov25-button-hover-background-color: var(--ov25-hover-color);
+    --ov25-button-hover-text-color: var(--ov25-text-color);
 
     /* Border radius – ov:rounded-* utilities use these; override to customize */
     --ov25-rounded: 0.25rem;

@@ -1,6 +1,6 @@
 {
   "name": "ov25-ui",
-  "version": "0.5.74-canary.3",
+  "version": "0.5.74-canary.4",
   "description": "A UI configurator for OV25 product visualization",
   "type": "module",
   "main": "dist/index.js",
