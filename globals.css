@@ -123,7 +123,6 @@
 
     /* Wizard variants: inline mode uses fixed height; drawer mode fills */
     --ov25-wizard-variants-content-height: 600px;
-    --ov25-wizard-variants-filter-height: 40px;
     --ov25-wizard-variants-available-height: 100%;
 
     /* Inline list: aside taller so scrollable area gets 600px + room for checkout button */

@@ -242,7 +242,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
   );
 
   const filterBlock = !isReviewStep && currentOption && currentOption.id !== 'size' && (
-    <div className="ov:shrink-0 ov:h-[var(--ov25-wizard-variants-filter-height)] ov:flex ov:items-center">
+    <div className="ov:shrink-0 ov:flex ov:items-center">
       <div className="ov:w-full ov:p-1">
         <FilterControls
           isFilterOpen={isFilterOpenForOption}

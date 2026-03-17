@@ -199,7 +199,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
                 </button>
                 )}
             </div>
-            {!isFilterOpen && !isMobile && selectedFilters.length > 0 && 
+            {!isFilterOpen && selectedFilters.length > 0 && 
             <div id="ov25-filter-controls-pills" className="ov:flex ov:flex-wrap ov:gap-1.5 ov:pb-1.5 ov:max-h-[100px] ov:overflow-y-auto ov:border-gray-200">
                 {
                     (() => {
