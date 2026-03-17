@@ -930,7 +930,23 @@ export const OV25UIProvider: React.FC<{
         allFilterSets[option.name]['Collections'] = option.groups.map(group => ({ value: group.name, checked: false }));
       }
     });
-    setAvailableProductFilters(allFilterSets);
+
+    setAvailableProductFilters(prev => {
+      const merged: ProductFilters = {};
+      Object.keys(allFilterSets).forEach(optionName => {
+        merged[optionName] = {};
+        Object.keys(allFilterSets[optionName]).forEach(filterKey => {
+          const prevOptions = prev?.[optionName]?.[filterKey];
+          merged[optionName][filterKey] = allFilterSets[optionName][filterKey].map(
+            item => ({
+              ...item,
+              checked: prevOptions?.find(p => p.value === item.value)?.checked ?? item.checked
+            })
+          );
+        });
+      });
+      return merged;
+    });
     setShowFilters(Object.keys(allFilterSets).length > 0 && Object.keys(allFilterSets).some(key => Object.keys(allFilterSets[key]).some(key2 => Object.keys(allFilterSets[key][key2]).length > 0)));
   }, [configuratorState?.options, configuratorState?.configuratorSettings?.availableProductFilters]);
 

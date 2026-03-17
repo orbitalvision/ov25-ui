@@ -8,7 +8,6 @@ import { VariantContentDesktop } from './VariantContentDesktop.js';
 import { VariantsOnlySheet } from './VariantsOnlySheet.js';
 import { ProductVariantsWrapper } from './ProductVariantsWrapper.js';
 import { MobileCheckoutButton } from './MobileCheckoutButton.js';
-import { ModuleBottomPanel } from './ModuleBottomPanel.js';
 import { WizardVariants } from './WizardVariants.js';
 import { VariantsHeader } from './VariantsHeader.js';
 import { ConfigureButton } from '../ConfigureButton.js';
@@ -16,9 +15,10 @@ import { ConfigureButton } from '../ConfigureButton.js';
 // Types
 export type DrawerSizes = 'closed' | 'small' | 'large';
 
-// Simplified props - most data now comes from context
+/* Renders either the trigger area (configure button or options) or inline wizard/list/options when there's no configure button. */
+/* also renders the mobile drawer or desktop sheet/fullscreen content when the modal is closed. */
 export const VariantSelectMenu: React.FC = () => {
-  // Get all required data from context
+  
   const {
     isVariantsOpen,
     setIsVariantsOpen,
@@ -66,6 +66,7 @@ export const VariantSelectMenu: React.FC = () => {
   const isInlineWizard = useInlineVariantControls && effectiveVariantDisplayStyleInline === 'wizard';
   const isInlineTall = isInlineListLike || isInlineWizard;
   const useTriggerArea = useSimpleVariantsSelector && (!useInlineVariantControls || (!isInlineWizard && !isInlineListLike));
+
   useEffect(() => {
     const aside = containerRef.current?.getRootNode() instanceof ShadowRoot
       ? (containerRef.current.getRootNode() as ShadowRoot).host.closest('#ov25-aside-menu')
@@ -80,6 +81,67 @@ export const VariantSelectMenu: React.FC = () => {
     return () => aside?.removeAttribute('data-ov25-inline-list');
   }, [isInlineTall]);
 
+  const inlineTallWrapperClass = 'ov:flex-1 ov:min-h-0 ov:h-full ov:flex ov:flex-col ov:overflow-hidden';
+  const productOptionsGroupProps = { allOptions: allOptionsWithoutModules, handleOptionClick, range, getSelectedValue };
+
+  /** Trigger area (configure button or options) when useTriggerArea; otherwise inline wizard/list/options when there's no configure button. */
+  const renderTriggerOrInlineVariants = () => {
+    if (useTriggerArea) {
+      return configuratorTriggerStyle === 'single-button'
+        ? <ConfigureButton onClick={openConfiguratorOrSnap2} />
+        : <ProductOptionsGroup {...productOptionsGroupProps} />;
+    }
+    if (!hasConfigureButton) {
+      if (isInlineWizard) return <div className={inlineTallWrapperClass}><WizardVariants mode="inline" /></div>;
+      if (isInlineListLike) return <div className={inlineTallWrapperClass}><ProductVariantsWrapper isInline /></div>;
+      return <ProductOptionsGroup {...productOptionsGroupProps} />;
+    }
+    return null;
+  };
+
+  const renderMobile = () => {
+    if (useInlineVariantControls) {
+      if (!hasConfigureButton) return null;
+      if (isInlineWizard) return <div className={inlineTallWrapperClass}><WizardVariants mode="inline" /></div>;
+      if (isInlineListLike) return <div className={inlineTallWrapperClass}><ProductVariantsWrapper isInline /></div>;
+      return <ProductOptionsGroup {...productOptionsGroupProps} />;
+    }
+    if (configuratorDisplayModeMobile === 'variants-only-sheet') return <VariantsOnlySheet />;
+    if (isSnap2Mode) return null;
+    return (
+      <MobileDrawer
+        isOpen={isVariantsOpen}
+        onOpenChange={handleMobileDrawerClose}
+        onStateChange={(value: any) => setDrawerSize(value === 0 ? 'closed' : value === 1 ? 'small' : 'large')}
+        className="ov:z-[10]"
+      >
+        <div className='ov:w-full ov:h-full ov:flex ov:flex-col ov:absolute ov:top-0 ov:left-0 ov:pointer-events-auto'>
+          {variantDisplayStyleMobile === 'wizard' ? (
+            <div className="ov:flex ov:flex-col ov:h-full ov:bg-[var(--ov25-background-color)]">
+              <VariantsHeader />
+              <div className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:overflow-hidden">
+                <WizardVariants mode="drawer" />
+              </div>
+            </div>
+          ) : (
+            <ProductVariantsWrapper />
+          )}
+          {variantDisplayStyleMobile !== 'wizard' && (
+            <div className={`${drawerSize === 'large' || drawerSize === 'small' ? 'ov:fixed ov:bottom-0 ov:left-0 ov:w-full ov:z-[20]' : ''}`}>
+              <MobileCheckoutButton />
+            </div>
+          )}
+        </div>
+      </MobileDrawer>
+    );
+  };
+
+  const renderDesktop = () => {
+    if (configuratorDisplayMode === 'variants-only-sheet') return <VariantsOnlySheet />;
+    if (!useInlineVariantControls) return <VariantContentDesktop />;
+    return null;
+  };
+
   return (
     <>
       <div ref={containerRef} id="ov25-configurator-variant-menu-container" className="ov:relative ov:h-full ov:flex ov:flex-col ov:font-[family-name:var(--ov25-font-family)]">
@@ -87,91 +149,8 @@ export const VariantSelectMenu: React.FC = () => {
           const Overlay = MobilePriceOverlay as any;
           return <Overlay />;
         })()}
-        {useTriggerArea ? (
-          configuratorTriggerStyle === 'single-button' ? (
-            <ConfigureButton onClick={openConfiguratorOrSnap2} />
-          ) : (
-            <ProductOptionsGroup
-              allOptions={allOptionsWithoutModules}
-              handleOptionClick={handleOptionClick}
-              range={range}
-              getSelectedValue={getSelectedValue}
-            />
-          )
-        ) : !hasConfigureButton && (
-          isInlineWizard ? (
-            <div className="ov:flex-1 ov:min-h-0 ov:h-full ov:flex ov:flex-col ov:overflow-hidden">
-              <WizardVariants mode="inline" />
-            </div>
-          ) : isInlineListLike ? (
-            <div className="ov:flex-1 ov:min-h-0 ov:h-full ov:flex ov:flex-col ov:overflow-hidden">
-              <ProductVariantsWrapper isInline />
-            </div>
-          ) : (
-            <ProductOptionsGroup
-              allOptions={allOptionsWithoutModules}
-              handleOptionClick={handleOptionClick}
-              range={range}
-              getSelectedValue={getSelectedValue}
-            />
-          )
-        )}
-        {!isModalOpen && (
-          isMobile ? (
-            useInlineVariantControls ? (
-              hasConfigureButton ? (
-                isInlineWizard ? (
-                  <div className="ov:flex-1 ov:min-h-0 ov:h-full ov:flex ov:flex-col ov:overflow-hidden">
-                    <WizardVariants mode="inline" />
-                  </div>
-                ) : isInlineListLike ? (
-                  <div className="ov:flex-1 ov:min-h-0 ov:h-full ov:flex ov:flex-col ov:overflow-hidden">
-                    <ProductVariantsWrapper isInline />
-                  </div>
-                ) : (
-                  <ProductOptionsGroup
-                    allOptions={allOptionsWithoutModules}
-                    handleOptionClick={handleOptionClick}
-                    range={range}
-                    getSelectedValue={getSelectedValue}
-                  />
-                )
-              ) : null
-            ) : configuratorDisplayModeMobile === 'variants-only-sheet' ? (
-              <VariantsOnlySheet />
-            ) : !isSnap2Mode ? (
-              <MobileDrawer
-                isOpen={isVariantsOpen}
-                onOpenChange={handleMobileDrawerClose}
-                onStateChange={(value: any) => setDrawerSize(value === 0 ? 'closed' : value === 1 ? 'small' : 'large')}
-                className="ov:z-[10]"
-              >
-                <div className='ov:w-full ov:h-full ov:flex ov:flex-col ov:absolute ov:top-0 ov:left-0 ov:pointer-events-auto'>
-                  {variantDisplayStyleMobile === 'wizard' ? (
-                    <div className="ov:flex ov:flex-col ov:h-full ov:bg-[var(--ov25-background-color)]">
-                      <VariantsHeader />
-                      <div className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:overflow-hidden">
-                        <WizardVariants mode="drawer" />
-                      </div>
-                    </div>
-                  ) : (
-                    <ProductVariantsWrapper />
-                  )}
-                  {variantDisplayStyleMobile !== 'wizard' && (
-                    <div className={`${drawerSize === 'large' || drawerSize === 'small' ? 'ov:fixed ov:bottom-0 ov:left-0 ov:w-full ov:z-[20]' : '' }`}>
-                      <MobileCheckoutButton />
-                    </div>
-                  )}
-                </div>
-              </MobileDrawer>
-            ) : null
-          ) : configuratorDisplayMode === 'variants-only-sheet' ? (
-            <VariantsOnlySheet />
-          ) : !useInlineVariantControls ? (
-            <VariantContentDesktop />
-          ) : null
-        )}
-
+        {renderTriggerOrInlineVariants()}
+        {!isModalOpen && !isMobile ? renderDesktop() : renderMobile()}
       </div>
     </>
   );

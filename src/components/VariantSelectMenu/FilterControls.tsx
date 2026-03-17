@@ -200,7 +200,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
                 )}
             </div>
             {!isFilterOpen && selectedFilters.length > 0 && 
-            <div id="ov25-filter-controls-pills" className="ov:flex ov:flex-wrap ov:gap-1.5 ov:pb-1.5 ov:max-h-[100px] ov:overflow-y-auto ov:border-gray-200">
+            <div id="ov25-filter-controls-pills" className="ov:flex ov:flex-wrap ov:gap-1.5 ov:md:pb-1.5 ov:max-h-[100px] ov:overflow-y-auto ov:border-gray-200">
                 {
                     (() => {
                         if (!targetOption || !availableProductFilters || !availableProductFilters[targetOption.name]) {

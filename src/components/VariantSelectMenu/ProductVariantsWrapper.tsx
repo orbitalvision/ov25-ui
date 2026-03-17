@@ -253,7 +253,7 @@ export function ProductVariantsWrapper({ isInline = false }: ProductVariantsWrap
     const renderOptionSection = ({ optionId, optionName, variants }: { optionId: string; optionName: string; variants: any[] }, showHeader = true, isMobileListSticky = false, showFilter = true) => (
       <div key={optionId} className=" ov:pb-6">
         {showHeader && (
-          <h3 className={`ov:sticky ov:top-0  ov:px-4 ov:z-10 ov:bg-[var(--ov25-background-color)] ov:text-lg ov:pb-4 ov:text-[var(--ov25-secondary-text-color)] ${isMobileListSticky ? 'ov:pt-2' : 'ov:pt-0'}`}>
+          <h3 className={`ov:sticky ov:top-0  ov:px-4 ov:z-10 ov:bg-[var(--ov25-background-color)] ov:text-lg ov:pb-2 ov:md:pb-4 ov:text-[var(--ov25-secondary-text-color)] ${isMobileListSticky ? 'ov:pt-2' : 'ov:pt-0'}`}>
             {capitalizeWords(optionName)}
           </h3>
         )}
