@@ -14,7 +14,7 @@ export default defineConfig({
     },
     sourcemap: true,
     rollupOptions: {
-      external: ['react', 'react-dom'],
+      external: (id) => /^react(-dom)?(\/|$)/.test(id),
       output: {
         assetFileNames: (assetInfo) => {
           if (assetInfo.name === 'style.css') return 'index.css';
