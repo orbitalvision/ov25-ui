@@ -139,7 +139,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
     }, [targetOptions, availableProductFilters]);
 
     return (
-        <div id="ov25-filter-controls-container" className="ov:flex ov:flex-col ov:gap-1.5 ov:px-4">
+        <div id="ov25-filter-controls-wrapper" className="ov:flex ov:flex-col ov:gap-1.5 ov:px-4 ov:py-2">
             <div id="ov25-filter-controls" className="ov:flex ov:flex-nowrap ov:items-center ov:gap-2 ov:py-1.5">
                 {shouldShowFilterButton && (
                     <button 

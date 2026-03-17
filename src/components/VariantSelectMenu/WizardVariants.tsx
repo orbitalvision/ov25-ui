@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 import { VariantsContent } from './VariantsContent.js';
+import { GroupedVariantsList } from './GroupedVariantsList.js';
+import { getGridColsClass } from './DesktopVariants.js';
 import { NoResults } from './NoResults.js';
 import { DefaultVariantCard } from './variant-cards/DefaultVariantCard.js';
 import { SizeVariantCard } from './variant-cards/SizeVariantCard.js';
@@ -10,6 +12,7 @@ import { FilterControls } from './FilterControls.js';
 import { FilterContent } from './FilterContent.js';
 import { Button } from '../ui/button.js';
 import { CheckoutButton } from './CheckoutButton.js';
+import { cn } from '../../utils/cn.js';
 
 const BATCH_SIZE = 12;
 const SIZE_BATCH_SIZE = 4;
@@ -140,34 +143,60 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
   const filteredOption = !isReviewStep && currentOption
     ? (currentOption.id === 'size' ? currentOption : applySearchAndFilters(currentOption, currentOption.id))
     : null;
-  const allVariants = filteredOption?.groups?.flatMap((group: any) =>
-    group.selections?.map((selection: any) => ({
-      id: selection.id,
-      groupId: group.id,
-      optionId: currentOption!.id,
-      name: selection.name,
-      price: selection.price,
-      image: currentOption!.id === 'size'
-        ? (selection.thumbnail || '/placeholder.svg?height=200&width=200')
-        : (selection.miniThumbnails?.medium || '/placeholder.svg?height=200&width=200'),
-      blurHash: selection.blurHash,
-      data: currentOption!.id === 'size' ? products?.find(p => p?.id === selection?.id) : selection.data,
-      isSelected: currentOption!.id === 'size'
-        ? selection.id === currentProductId || selectedSelections.some(
-            sel => sel.optionId === currentOption!.id && sel.selectionId === selection.id
-          )
-        : selectedSelections.some(
+
+  const isSizeStep = currentOption?.id === 'size';
+  const allVariantsByGroup = !filteredOption || isSizeStep ? [] : (filteredOption as { groups?: { id: string; name?: string; selections?: any[] }[] }).groups
+    ?.filter((group: any) => group.selections?.length)
+    ?.map((group: any) => {
+      const variants = (group.selections || [])
+        .map((selection: any) => ({
+          id: selection.id,
+          groupId: group.id,
+          optionId: currentOption!.id,
+          name: selection.name,
+          price: selection.price,
+          image: selection.miniThumbnails?.medium || '/placeholder.svg?height=200&width=200',
+          blurHash: selection.blurHash,
+          data: selection.data,
+          isSelected: selectedSelections.some(
             sel => sel.optionId === currentOption!.id &&
               sel.groupId === group.id &&
               sel.selectionId === selection.id
           ),
-      swatch: selection.swatch
-    })) || []
-  ).sort((a: any, b: any) => a.name.localeCompare(b.name)) ?? [];
+          swatch: selection.swatch
+        }))
+        .sort((a: any, b: any) => a.name.localeCompare(b.name)) ?? [];
+      return {
+        groupId: group.id,
+        groupName: 'name' in group && group.name ? group.name : 'Default Group',
+        variants
+      };
+    }) ?? [];
+
+  const allVariants = isSizeStep
+    ? (filteredOption?.groups?.[0]?.selections?.map((selection: any) => ({
+        id: selection.id,
+        groupId: filteredOption.groups![0].id,
+        optionId: 'size',
+        name: selection.name,
+        price: selection.price,
+        image: selection.thumbnail || '/placeholder.svg?height=200&width=200',
+        blurHash: selection.blurHash,
+        data: products?.find(p => p?.id === selection?.id),
+        isSelected: selection.id === currentProductId || selectedSelections.some(
+          sel => sel.optionId === 'size' && sel.selectionId === selection.id
+        ),
+        swatch: selection.swatch
+      })) ?? []).sort((a: any, b: any) => a.name.localeCompare(b.name))
+    : allVariantsByGroup.flatMap(g => g.variants);
 
   const count = currentOption ? (visibleCount[currentOption.id] ?? getBatchSize(currentOption.id)) : 0;
   const visibleVariants = allVariants.slice(0, count);
   const hasMore = count < allVariants.length;
+
+  const groupedVisible = isSizeStep ? [] : allVariantsByGroup
+    .map(g => ({ groupName: g.groupName, variants: visibleVariants.filter((v: any) => v.groupId === g.groupId) }))
+    .filter(g => g.variants.length > 0);
   const isFilterOpenForOption = currentOption ? (isFilterOpen[currentOption.id] || false) : false;
 
   const useDropdown = totalSteps > DROPDOWN_STEP_THRESHOLD;
@@ -181,11 +210,11 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
   const prevStepLabel = !isFirstStep ? getStepLabel(currentStep - 1) : null;
   const nextStepLabel = !isLastStep ? getStepLabel(currentStep + 1) : null;
   const stepContentClasses = mode === 'inline'
-    ? 'ov:flex ov:flex-col  ov:bg-[var(--ov25-background-color)]'
-    : 'ov:flex ov:flex-col ov:bg-[var(--ov25-background-color)]';
+    ? 'ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:overflow-hidden'
+    : 'ov:flex ov:flex-col';
 
   const stepIndicatorBlock = (
-    <div className="ov:flex ov:flex-col ov:gap-2 ov:px-4 ov:py-3">
+    <div className=" ov25-option-header ov:flex ov:flex-col ov:gap-2 ov:px-4 ov:py-3">
       {useDropdown ? (
         <div className="ov:relative">
           <select
@@ -217,7 +246,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
               </button>
             )}
           </div>
-          <div className="ov:flex ov:flex-col ov:items-center ov:justify-center ">
+          <div className="ov25-wizard-current-step ov:flex ov:flex-col ov:items-center ov:justify-center ">
             <p className=" ov:text-[var(--ov25-secondary-text-color)] ov:font-light ov:text-sm">
               Step {currentStep + 1} of {totalSteps}
             </p>
@@ -225,7 +254,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
               {currentStepLabel}
             </p>
           </div>
-          <div className="ov:flex ov:justify-end">
+          <div className="ov25-wizard-next-step ov:flex ov:justify-end">
             {nextStepLabel && (
               <button
                 onClick={goNext}
@@ -242,37 +271,31 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
   );
 
   const filterBlock = !isReviewStep && currentOption && currentOption.id !== 'size' && (
-    <div className="ov:shrink-0 ov:flex ov:items-center">
-      <div className="ov:w-full ov:p-1">
         <FilterControls
           isFilterOpen={isFilterOpenForOption}
           setIsFilterOpen={() => toggleFilter(currentOption!.id)}
           isGrouped={false}
           optionId={currentOption!.id}
         />
-      </div>
-    </div>
   );
 
   const buttonsBlock = totalSteps > 1 && (
-    <div className="ov:shrink-0 ov:flex ov:items-center ov:justify-between ov:gap-3 ov:px-4 ov:py-3">
+    <div className={cn(`ov25-wizard-button-block ov:shrink-0 ov:flex ov:items-center ov:justify-between ov:gap-3 ov:px-4`, isReviewStep ? 'ov:py-1' : 'ov:py-3')}>
       <button
         onClick={goBack}
         disabled={isFirstStep}
-        className="ov:flex ov:items-center ov:gap-1 ov:px-3 ov:py-2 ov:text-sm ov:text-[var(--ov25-secondary-text-color)] ov:disabled:opacity-30 ov:disabled:cursor-not-allowed ov:hover:bg-[var(--ov25-hover-color)] ov:rounded ov:transition-colors"
+        className="ov25-wizard-button-back ov:flex ov:items-center ov:gap-1 ov:px-3 ov:text-sm ov:text-[var(--ov25-secondary-text-color)] ov:disabled:opacity-30 ov:disabled:cursor-not-allowed ov:hover:bg-[var(--ov25-hover-color)] ov:rounded ov:transition-colors"
       >
         <ChevronLeft size={18} />
         Back
       </button>
       {isReviewStep && hasCheckoutActions ? (
-        <div className="ov:flex-1 ov:min-w-0">
-          <CheckoutButton />
-        </div>
+        <CheckoutButton />
       ) : !isReviewStep ? (
         <Button
           onClick={goNext}
           variant="configure"
-          className="ov:flex-1 ov:flex ov:items-center ov:justify-center  ov:gap-1 ov:uppercase ov:disabled:cursor-not-allowed"
+          className="ov25-wizard-button-next ov:flex-1 ov:flex ov:items-center ov:justify-center  ov:gap-1 ov:uppercase ov:disabled:cursor-not-allowed"
         >
           Next
           <ChevronRight size={18} />
@@ -309,7 +332,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
                   imageUrl = (selection as any)?.miniThumbnails?.medium || selection?.thumbnail || '';
                 }
                 return (
-                  <div key={option.id} className="ov:flex ov:items-center ov:gap-3">
+                  <div key={option.id} className="ov25-wizard-button-option ov:flex ov:items-center ov:gap-3">
                     <button
                       type="button"
                       onClick={() => {
@@ -318,12 +341,12 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
                       }}
                       className="ov:flex ov:items-center ov:gap-3 ov:w-full ov:text-left ov:cursor-pointer ov:hover:bg-[var(--ov25-hover-color)] ov:rounded-md ov:p-2 ov:-m-2 ov:transition-colors"
                     >
-                      <div className="ov:shrink-0">
+                      <div className="ov25-wizard-button-option-image ov:shrink-0">
                         <VariantThumb imageUrl={imageUrl} size="lg" />
                       </div>
                       <div className="ov:flex ov:flex-1 ov:min-w-0 ov:justify-between ov:gap-4">
-                        <dt className="ov:text-[var(--ov25-secondary-text-color)] ov:capitalize ov:shrink-0">{option.name}</dt>
-                        <dd className="ov:text-[var(--ov25-secondary-text-color)] ov:font-normal ov:text-right ov:truncate">{value || '—'}</dd>
+                        <dt className="ov25-wizard-button-option-name ov:text-[var(--ov25-secondary-text-color)] ov:capitalize ov:shrink-0">{option.name}</dt>
+                        <dd className="ov25-wizard-button-option-value ov:text-[var(--ov25-secondary-text-color)] ov:font-normal ov:text-right ov:truncate">{value || '—'}</dd>
                       </div>
                     </button>
                   </div>
@@ -335,24 +358,35 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
         ) : (
         <div data-ov25-wizard-variants-step-content className={stepContentClasses}>
           <div data-ov25-wizard-variants-content className="ov:relative ov:w-full ov:flex ov:flex-col ov:flex-1 ov:min-h-0">
-            <div className="ov:relative ov:w-full ov:h-full ov:flex ov:flex-col">
+            <div className="ov:relative ov:w-full ov:h-full ov:flex ov:flex-col ov:overflow-hidden">
               {filteredOption && allVariants.length === 0 && (
                 <div className="ov:flex ov:items-center ov:justify-center ov:h-full ov:p-4">
                   <NoResults />
                 </div>
               )}
               {filteredOption && allVariants.length > 0 && (
-                <div className={`ov-wizard-variants-scroll ov:h-full ov:p-4 ${isFilterOpenForOption ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}>
-                  <div className={`ov:grid ov:content-start ov:gap-2 ${currentOption!.id === 'size' ? 'ov:grid-cols-2!' : 'ov:grid-cols-4!'}`}>
-                    <VariantsContent
-                      variantsToRender={visibleVariants}
-                      VariantCard={currentOption!.id === 'size' ? SizeVariantCard : DefaultVariantCard}
+                <div className={`ov-wizard-variants-scroll ov:h-full ${isFilterOpenForOption ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}>
+                  {isSizeStep ? (
+                    <div className={`ov:grid ov:content-start ov:gap-2 ${getGridColsClass(2)}`}>
+                      <VariantsContent
+                        variantsToRender={visibleVariants}
+                        VariantCard={SizeVariantCard}
+                        isMobile={false}
+                        onSelect={(selection) => handleSelectionSelect(selection, currentOption!.id)}
+                        showImage
+                        showDimensions={false}
+                      />
+                    </div>
+                  ) : (
+                    <GroupedVariantsList
+                      groups={groupedVisible}
+                      gridColsClass={getGridColsClass(4)}
+                      VariantCard={DefaultVariantCard}
                       isMobile={false}
                       onSelect={(selection) => handleSelectionSelect(selection, currentOption!.id)}
-                      showImage={currentOption!.id === 'size' ? true : undefined}
-                      showDimensions={currentOption!.id === 'size' ? false : undefined}
+                      showGroupHeaders={allVariantsByGroup.length > 1}
                     />
-                  </div>
+                  )}
                   {hasMore && (
                     <div
                       ref={(el) => { sentinelRefs.current[currentOption!.id] = el; }}
@@ -365,12 +399,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
             </div>
 
             {isFilterOpenForOption && currentOption && (
-              <div
-                data-open={isFilterOpenForOption}
-                className="ov:flex ov:justify-end ov:flex-wrap ov:overflow-y-auto ov:absolute ov:z-8 ov:inset-0 ov:h-full ov:p-2 ov:px-4 ov:bg-[var(--ov25-background-color)] ov:transition-transform ov:duration-500 ov:ease-in-out ov:translate-y-0"
-              >
-                <FilterContent optionId={currentOption.id} />
-              </div>
+              <FilterContent optionId={currentOption.id} wrapperVariant="inline" />
             )}
           </div>
         </div>
@@ -382,12 +411,13 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
     <div
       ref={rootRef}
       data-ov25-wizard-variants-mode={mode}
+      id="ov25-variants-content-wrapper"
       className="ov:w-full ov:flex-1 ov:min-h-0 ov:flex ov:flex-col ov:bg-[var(--ov25-background-color)] ov:overflow-hidden"
       style={mode === 'drawer' && availableHeight != null ? { '--ov25-wizard-variants-available-height': `${availableHeight}px` } as React.CSSProperties : undefined}
     >
       {stepIndicatorBlock}
       {mode !== 'inline' && filterBlock}
-      <div className="ov:flex-1 ov:min-h-0 ov:flex ov:flex-col">
+      <div className="ov25-variant-group-content ov:flex-1 ov:min-h-0 ov:flex ov:flex-col bg-[var(--ov25-background-color)]">
         {stepContentOnly}
         {mode !== 'inline' && buttonsBlock}
       </div>
@@ -406,7 +436,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
         </div>
         <div
           data-ov25-list-variants-content
-          className="ov:flex-1 ov:min-h-0 ov:overflow-y-auto ov:pt-0 ov:pb-2"
+          className="ov:flex-1 ov:min-h-0 ov:flex ov:flex-col ov:overflow-hidden ov:pt-0 ov:pb-2"
         >
           {stepContentOnly}
         </div>

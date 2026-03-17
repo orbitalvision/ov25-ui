@@ -2,6 +2,7 @@ import React, { useMemo, useCallback, useState, useEffect } from 'react';
 import { ChevronLeft } from 'lucide-react';
 import { TreeTrigger } from './TreeTrigger.js';
 import { VariantsContent } from './VariantsContent.js';
+import { GroupedVariantsList } from './GroupedVariantsList.js';
 import { SizeVariantCard } from './variant-cards/SizeVariantCard.js';
 import { DefaultVariantCard } from './variant-cards/DefaultVariantCard.js';
 import { useOV25UI } from '../../contexts/ov25-ui-context.js';
@@ -144,7 +145,7 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
     <button
       type="button"
       onClick={handleBack}
-      className="ov:shrink-0 ov:w-full ov:flex ov:items-center ov:gap-2 ov:px-4 ov:py-3 ov:text-left ov:bg-[var(--ov25-background-color)] ov:text-[var(--ov25-secondary-text-color)] hover:ov:bg-[var(--ov25-hover-bg-color,transparent)] ov:border-b ov:border-[var(--ov25-border-color)] ov:cursor-pointer"
+      className="ov25-option-header ov:shrink-0 ov:w-full ov:flex ov:items-center ov:gap-2 ov:px-4 ov:py-3 ov:text-left ov:bg-[var(--ov25-background-color)] ov:text-[var(--ov25-secondary-text-color)] hover:ov:bg-[var(--ov25-hover-bg-color,transparent)] ov:border-b ov:border-[var(--ov25-border-color)] ov:cursor-pointer"
     >
       <ChevronLeft className="ov:size-5" />
       <span className="ov:text-lg ov:font-medium">{title}</span>
@@ -168,7 +169,7 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
   );
 
   const sizeChildView = (
-    <div className="ov:flex ov:flex-col ov:min-h-0 ov:h-full ov:overflow-hidden">
+    <div className="ov:flex ov:flex-col ov:min-h-0 ov:flex-1 ov:overflow-hidden">
       {backHeader(capitalizeWords('Size'))}
       <div className={`ov:min-h-0 ov:flex-1 ov:overflow-y-auto ov:px-4 ov:pt-4 ov:pb-4 ${scrollContentClass}`}>
         <div className={`ov:grid ${getGridColsClass(2)}`}>
@@ -187,43 +188,28 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
     const opt = allOptionsVariants.find(o => o.optionId === currentView);
     if (!opt) return null;
     return (
-      <div className="ov:flex ov:flex-col ov:min-h-0 ov:h-full ov:overflow-hidden">
+      <div className="ov:flex ov:flex-col ov:min-h-0 ov:flex-1 ov:overflow-hidden">
         {backHeader(capitalizeWords(opt.optionName))}
-        <div className="ov:shrink-0 ov:py-2">
           <FilterControls
             isFilterOpen={!!isFilterOpen[currentView]}
             setIsFilterOpen={() => toggleFilter(currentView)}
             isGrouped={false}
             optionId={currentView}
           />
-        </div>
-        <div className="ov:relative ov:min-h-0 ov:flex-1 ov:flex ov:flex-col ov:pt-0">
+        <div className="ov:relative ov:min-h-0 ov:flex-1 ov:flex ov:flex-col ov:pt-0 ov:overflow-hidden">
           <div className={`ov:min-h-0 ov:flex-1 ov:pt-0 ${scrollContentClass} ${isFilterOpen[currentView] ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}>
-            {opt.variants.map((group) =>
-              group.variants.length > 0 ? (
-                <div key={group.groupName} className="ov:mb-0 last:ov:mb-0">
-                  {opt.variants.length > 1 && (
-                    <h4 className="ov:sticky ov:top-0 ov:z-[9] ov:bg-[var(--ov25-background-color)] ov:px-4 ov:text-sm ov:pt-4 ov:pb-3 ov:text-[var(--ov25-secondary-text-color)] ov:font-medium">
-                      {capitalizeWords(group.groupName)}
-                    </h4>
-                  )}
-                  <div className={`ov:grid ${getGridColsClass(4)}`}>
-                    <VariantsContent
-                      variantsToRender={group.variants}
-                      VariantCard={DefaultVariantCard}
-                      isMobile={isMobile}
-                      onSelect={handleVariantSelect}
-                      compactSpacing
-                    />
-                  </div>
-                </div>
-              ) : null
-            )}
+            <GroupedVariantsList
+              groups={opt.variants}
+              gridColsClass={getGridColsClass(4)}
+              VariantCard={DefaultVariantCard}
+              isMobile={isMobile}
+              onSelect={handleVariantSelect}
+              showGroupHeaders={opt.variants.length > 1}
+              compactSpacing
+            />
           </div>
           {isFilterOpen[currentView] && (
-            <div className="ov:absolute ov:inset-0 ov:z-20 ov:flex ov:justify-end ov:flex-wrap ov:overflow-y-auto ov:p-2 ov:px-4 ov:bg-[var(--ov25-background-color)]">
-              <FilterContent optionId={currentView} />
-            </div>
+            <FilterContent optionId={currentView} wrapperVariant="sheet" />
           )}
         </div>
       </div>
@@ -235,7 +221,7 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
   return (
     <div
       data-ov25-tree-variants-mode={mode}
-      className={`ov:flex ov:flex-col ov:min-h-0 ov:h-full ov:overflow-hidden ov:pb-0 ov:gap-1 ${showPaddingX ? 'ov:px-4' : ''}`}
+      className={`ov:flex ov:flex-col ov:min-h-0 ov:flex-1 ov:overflow-hidden ov:pb-0 ov:gap-1`}
     >
       {currentView === null && rootView}
       {currentView === 'size' && sizeChildView}

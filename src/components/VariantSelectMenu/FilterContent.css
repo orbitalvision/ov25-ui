@@ -56,7 +56,7 @@
   color: var(--ov25-secondary-text-color);
 } 
 
-#ov25-filter-controls-container {
+#ov25-filter-controls-wrapper {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;

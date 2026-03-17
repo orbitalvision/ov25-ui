@@ -151,7 +151,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
             </div>
           </div>
           <div id="ov25-swatchbook-controls" className="ov:flex ov:justify-between ov:items-center ov:shrink-0">
-            <div>
+            <div className="ov25-swatchbook-total-cost">
               <span>Total cost: </span>
               <span>£{(swatchRulesData.pricePerSwatch * Math.max(selectedSwatches.length - swatchRulesData.freeSwatchLimit, 0)).toFixed(2)}</span>
             </div>

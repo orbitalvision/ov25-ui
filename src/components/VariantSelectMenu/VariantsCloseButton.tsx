@@ -42,7 +42,7 @@ export const VariantsCloseButton = ({ onClick: onClickProp, ariaLabel = 'Close',
   return (
     <button
       onClick={handleClose}
-      className={cn(closeButtonBaseClass, className)}
+      className={cn('ov25-close-button',closeButtonBaseClass, className)}
       aria-label={ariaLabel}
     >
       <X size={24} className="ov:text-[var(--ov25-destructive)] ov:transition-transform" strokeWidth={2.5} />

@@ -18,9 +18,11 @@ export const CheckoutButton = () => {
 
   if (!hasAddToBasket && !hasBuyNow) return null;
 
+  const wrapperClass = 'ov25-checkout-button-wrapper ov:shrink-0 ov:px-4 ov:pb-2 ov:pt-2';
 
   if (hasAddToBasket && !hasBuyNow) {
     return (
+      <div className={wrapperClass}>
       <button
         id="ov25-add-to-basket-button"
         type="button"
@@ -33,11 +35,13 @@ export const CheckoutButton = () => {
         <span>Add to basket</span>
         <span>{formattedPrice}</span>
       </button>
+      </div>
     );
   }
 
   if (hasBuyNow && !hasAddToBasket) {
     return (
+      <div className={wrapperClass}>
       <button
         id="ov25-checkout-button"
         type="button"
@@ -47,6 +51,7 @@ export const CheckoutButton = () => {
         <span>Buy now</span>
         <span>{formattedPrice}</span>
       </button>
+      </div>
     );
   }
 
@@ -58,6 +63,7 @@ export const CheckoutButton = () => {
   );
 
   return (
+    <div className={wrapperClass}>
     <div className="ov:relative ov:flex ov:w-full ov:rounded-full ov:overflow-hidden ov:bg-[var(--ov25-cta-color)] ov:text-white ov:uppercase ov:text-sm">
       <div className="ov:flex ov:items-center ov:justify-center ov:gap-2 ov:py-2 ov:px-6 ov:pr-14 ov:min-w-0 ov:flex-1 ov:invisible" aria-hidden>
         {labelContent}
@@ -66,7 +72,7 @@ export const CheckoutButton = () => {
         <ShoppingCart size={20} />
       </div>
       <div
-        className="ov:absolute ov:inset-0 ov:flex ov:items-center ov:justify-center ov:gap-2 ov:pointer-events-none"
+        className="ov25-checkout-combo-button-text ov:absolute ov:z-1 ov:inset-0 ov:flex ov:items-center ov:justify-center ov:gap-2 ov:pointer-events-none"
         aria-hidden
       >
         {labelContent}
@@ -91,6 +97,7 @@ export const CheckoutButton = () => {
       >
         <ShoppingCart size={20} />
       </button>
+    </div>
     </div>
   );
 };

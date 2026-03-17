@@ -92,9 +92,7 @@ export const ProductVariants = ({
         />
       )}
       {!isMobile && !hidePricing ? (
-        <div className="ov:shrink-0 ov:px-4 ov:pb-2 ov:pt-2">
           <CheckoutButton />
-        </div>
       ) : null}
     </div>
   )

@@ -18,11 +18,11 @@ export const VariantsHeader = () => {
   return (
         <>
         {/* Desktop Controls: Title with close button top right */}
-        <div id="ov25-variants-header" className={cn(
+        <div id="ov25-variants-header-wrapper" className={cn(
           "ov:hidden ov:relative",
           isSnap2Mode ? "ov:lg:block" : "ov:md:block"
         )}>
-          <div className={cn(
+          <div id="ov25-variants-header" className={cn(
             'ov:flex ov:items-center ov:justify-center ov:w-full ov:border-none ov:p-4   ov:py-[1.125rem] ov:relative ',
             'ov:bg-[var(--ov25-background-color)]'
           )}>

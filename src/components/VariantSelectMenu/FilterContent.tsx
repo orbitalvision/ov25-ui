@@ -2,12 +2,20 @@ import * as React from 'react'
 import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 import { VariantDisplayStyleOverlay } from '../../types/config-enums.js';
 
+const wrapperBaseClass = 'ov25-filter-content-wrapper ov:flex ov:justify-end ov:z-10 ov:flex-wrap ov:overflow-y-auto ov:absolute ov:inset-0 ov:p-2 ov:px-4 ov:bg-[var(--ov25-background-color)]';
+
+export type FilterContentWrapperVariant = 'desktop' | 'mobile' | 'sheet' | 'accordion' | 'inline';
+
 interface FilterContentProps {
     optionId?: string;
     optionIds?: string[];
+    /** Wrapper layout/transition: desktop (slide from left), mobile (slide from bottom), sheet (overlay, no transition), accordion (no overlay), inline (e.g. wizard, always visible) */
+    wrapperVariant?: FilterContentWrapperVariant;
+    /** For desktop/mobile: whether the filter sheet is open (drives transition) */
+    isOpen?: boolean;
 }
 
-export const FilterContent: React.FC<FilterContentProps> = ({ optionId, optionIds }) => {
+export const FilterContent: React.FC<FilterContentProps> = ({ optionId, optionIds, wrapperVariant = 'sheet', isOpen = true }) => {
     const { availableProductFilters, setAvailableProductFilters, activeOption, allOptionsWithoutModules, isMobile, variantDisplayStyleOverlay } = useOV25UI();
 
     const targetOptions = React.useMemo(() => {
@@ -31,13 +39,11 @@ export const FilterContent: React.FC<FilterContentProps> = ({ optionId, optionId
         }));
     }, [availableProductFilters, setAvailableProductFilters]);
 
-    if (!availableProductFilters || optionsToRender.length === 0) return (
+    const innerContent = !availableProductFilters || optionsToRender.length === 0 ? (
         <div id="ov25-filter-empty" className="ov:w-full ov:max-h-fit ov:p-4 ov:pt-16 ov:flex ov:justify-center">
             <h3 className="ov:text-sm ov:text-[var(--ov25-secondary-text-color)]">No filters available</h3>
         </div>
-    );
-
-    return (
+    ) : (
         <div id="ov25-filter-content" className="ov:w-full ov:max-h-fit ov:pr-4 ov:pb-40 ov:overflow-y-auto">
             {optionsToRender.map((targetOption) => {
                 const activeFilters = availableProductFilters[targetOption.name];
@@ -46,7 +52,7 @@ export const FilterContent: React.FC<FilterContentProps> = ({ optionId, optionId
 
                 return (
                     <div key={targetOption.id} className="ov:mb-6">
-                        {isMobile || variantDisplayStyleOverlay === VariantDisplayStyleOverlay.List ? <h4 className="ov:text-sm ov:font-medium ov:text-[var(--ov25-secondary-text-color)] ov:mb-2 ov:capitalize">{targetOption.name}</h4> : null}
+                        {isMobile || variantDisplayStyleOverlay === VariantDisplayStyleOverlay.List ? <h4 className="ov25-filter-option-header ov:text-sm ov:font-medium ov:text-[var(--ov25-secondary-text-color)] ov:mb-2 ov:capitalize">{targetOption.name}</h4> : null}
                         {Object.entries(activeFilters)
                             .filter(([filterKey]) => {
                                 if (filterKey !== 'Collections') return true;
@@ -61,13 +67,13 @@ export const FilterContent: React.FC<FilterContentProps> = ({ optionId, optionId
                             .map(([filterKey, options]) => (
                                 options.length > 0 && (
                                     <div key={filterKey} className="ov:mb-3">
-                                        <h3 className="ov:text-xs ov:font-medium ov:text-[var(--ov25-secondary-text-color)] ov:mb-1.5 ov:uppercase">{filterKey}</h3>
+                                        <h3 className="ov25-filter-group-header ov:text-xs ov:font-medium ov:text-[var(--ov25-secondary-text-color)] ov:mb-1.5 ov:uppercase">{filterKey}</h3>
                                         <div className="ov:flex ov:flex-wrap ov:gap-1.5 ov:w-full">
                                             {options.map((option) => (
                                                 <button
                                                     key={option.value}
                                                     onClick={() => handleFilterChange(filterKey, option.value, !option.checked, targetOption.name)}
-                                                    className={`ov:px-3 ov:py-1.5 ov:rounded-full ov:text-xs ov:border ov:text-[var(--ov25-secondary-text-color)] ov:transition-all ov:cursor-pointer ov:hover:bg-gray-50 ${option.checked ? 'ov:border-[var(--ov25-highlight-color)] ov:bg-[color-mix(in_srgb,var(--ov25-highlight-color)_20%,transparent)]' : 'ov:border-[var(--ov25-border-color)]'}`}
+                                                    className={`ov25-filter-pill ov:px-3 ov:py-1.5 ov:rounded-full ov:text-xs ov:border ov:text-[var(--ov25-secondary-text-color)] ov:transition-all ov:cursor-pointer ov:hover:bg-gray-50 ${option.checked ? 'ov:border-[var(--ov25-highlight-color)] ov:bg-[color-mix(in_srgb,var(--ov25-highlight-color)_20%,transparent)]' : 'ov:border-[var(--ov25-border-color)]'}`}
                                                     data-checked={option.checked}
                                                 >
                                                     {option.value}
@@ -81,5 +87,35 @@ export const FilterContent: React.FC<FilterContentProps> = ({ optionId, optionId
                 );
             })}
         </div>
-    )
+    );
+
+    const wrapperClass = React.useMemo(() => {
+        const transition = 'ov:transition-transform ov:duration-500 ov:ease-in-out';
+        switch (wrapperVariant) {
+            case 'desktop':
+                return `${wrapperBaseClass} ov25-filter-sheet-overlay ov:z-8 ov:h-full ${transition} ${isOpen ? 'ov:translate-y-0' : 'ov:-translate-y-full'}`;
+            case 'mobile':
+                return `${wrapperBaseClass} ${transition} ${isOpen ? 'ov:translate-y-0' : 'ov:translate-y-full'}`;
+            case 'sheet':
+                return `${wrapperBaseClass} ov25-filter-sheet-overlay ov:z-20`;
+            case 'accordion':
+                return `${wrapperBaseClass} ov:z-20`;
+            case 'inline':
+            default:
+                return `${wrapperBaseClass} ov:z-8 ov:h-full ov:translate-y-0`;
+        }
+    }, [wrapperVariant, isOpen]);
+
+    const wrapperId = wrapperVariant === 'desktop' ? 'ov25-filter-content-wrapper-desktop' : wrapperVariant === 'mobile' ? 'ov25-filter-content-wrapper-mobile' : undefined;
+    const wrapperDataOpen = (wrapperVariant === 'desktop' || wrapperVariant === 'mobile') ? isOpen : undefined;
+
+    return (
+        <div
+            id={wrapperId}
+            data-open={wrapperDataOpen}
+            className={wrapperClass}
+        >
+            {innerContent}
+        </div>
+    );
 }

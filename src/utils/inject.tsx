@@ -1,7 +1,7 @@
 // inject.ts
 import React, { ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { OV25UIProvider, Swatch, SwatchRulesData } from '../contexts/ov25-ui-context.js';
+import { OV25UIProvider } from '../contexts/ov25-ui-context.js';
 import { ProductGallery } from '../components/product-gallery.js';
 import Price from '../components/Price.js';
 import Name from '../components/Name.js';
@@ -105,13 +105,9 @@ let hasConsumedQueryConfigUuid = false;
 import {
   ConfiguratorDisplayMode,
   CarouselDisplayMode,
-  VariantDisplayMode,
-  VariantDisplayStyleOverlay,
 } from '../types/config-enums.js';
 import {
   type InjectConfiguratorInput,
-  type InjectConfiguratorOptions,
-  type LegacyInjectConfiguratorOptions,
   type ElementSelector,
   type StringOrFunction,
   normalizeInjectConfig,
