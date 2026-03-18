@@ -29,8 +29,14 @@ try {
   console.log('✓ Component tests passed\n');
 
   // Run E2E tests (requires build and running server)
-  console.log('=== Building test app for E2E tests ===');
+  console.log('=== Building ov25-ui and ov25-setup for E2E tests ===');
   execSync('npm run build', { cwd: rootDir, stdio: 'inherit' });
+  const setupDir = path.join(rootDir, 'setup');
+  if (fs.existsSync(path.join(setupDir, 'package.json'))) {
+    execSync('npm install', { cwd: setupDir, stdio: 'inherit' });
+    execSync('npm run build', { cwd: setupDir, stdio: 'inherit' });
+  }
+  console.log('=== Building test app for E2E tests ===');
   execSync('cd dev/react-test && npm install && npm run build', { cwd: rootDir, stdio: 'inherit' });
   
   console.log('=== Starting test server for E2E tests ===');
@@ -156,37 +162,16 @@ try {
   
   console.log('✓ Both ov25-ui versions published successfully!');
 
-  // Build and publish ov25-setup (React 19) and ov25-setup-react18
-  const setupDir = path.join(rootDir, 'setup');
+  // Build and publish ov25-setup
   const setupPackageJsonPath = path.join(setupDir, 'package.json');
 
   if (fs.existsSync(setupPackageJsonPath)) {
-    console.log('\n=== Building and publishing ov25-setup (React 19) ===');
+    console.log('\n=== Building and publishing ov25-setup ===');
     execSync('npm install', { cwd: setupDir, stdio: 'inherit' });
     execSync('npm run build', { cwd: setupDir, stdio: 'inherit' });
     execSync(`node scripts/strip-layers.js "${path.join(setupDir, 'dist', 'index.css')}"`, { cwd: rootDir, stdio: 'inherit' });
     execSync('npm publish --ignore-scripts', { cwd: setupDir, stdio: 'inherit' });
-    console.log('✓ ov25-setup (React 19) published\n');
-
-    console.log('=== Building and publishing ov25-setup-react18 ===');
-    execSync('node scripts/build-react18.js', { cwd: setupDir, stdio: 'inherit' });
-    execSync(`node scripts/strip-layers.js "${path.join(setupDir, 'dist', 'index.css')}"`, { cwd: rootDir, stdio: 'inherit' });
-
-    const setupPkg = JSON.parse(fs.readFileSync(setupPackageJsonPath, 'utf8'));
-    const setupVersion = setupPkg.version;
-    setupPkg.name = 'ov25-setup-react18';
-    setupPkg.peerDependencies = { react: '^18.2.0', 'react-dom': '^18.2.0' };
-    fs.writeFileSync(setupPackageJsonPath, JSON.stringify(setupPkg, null, 2) + '\n');
-
-    execSync('npm publish --ignore-scripts', { cwd: setupDir, stdio: 'inherit' });
-    console.log('✓ ov25-setup-react18 published\n');
-
-    // Restore ov25-setup package.json
-    setupPkg.name = 'ov25-setup';
-    setupPkg.version = setupVersion;
-    setupPkg.peerDependencies = { react: '^19.0.0', 'react-dom': '^19.0.0' };
-    fs.writeFileSync(setupPackageJsonPath, JSON.stringify(setupPkg, null, 2) + '\n');
-    console.log('✓ ov25-setup package.json restored');
+    console.log('✓ ov25-setup published\n');
   }
 
   console.log('\n✓ All packages published successfully!');

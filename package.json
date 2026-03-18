@@ -1,6 +1,6 @@
 {
   "name": "ov25-ui",
-  "version": "0.5.74",
+  "version": "0.5.77",
   "description": "A UI configurator for OV25 product visualization",
   "type": "module",
   "main": "dist/index.js",
@@ -37,6 +37,7 @@
     "build:react18": "node scripts/build-react18.js",
     "build:react19": "node scripts/build-react19.js",
     "publish:all": "node scripts/publish-all.js",
+    "publish:setup": "node scripts/publish-setup.js",
     "publish:canary": "node scripts/publish-canary.js"
   },
   "dependencies": {
