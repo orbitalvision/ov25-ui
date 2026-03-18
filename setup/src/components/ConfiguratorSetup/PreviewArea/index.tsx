@@ -4,7 +4,12 @@ import { cn } from '../../../lib/utils';
 import type { SerializableInjectConfig } from '../preview-config-serializable';
 
 const OV25_CONFIG_MESSAGE = 'OV25_CONFIG';
-const DEFAULT_PREVIEW_BASE = 'https://app.ov25.ai/configurator-preview';
+function getPreviewBase() {
+  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+    return `http://localhost:${window.location.port}/configurator-preview`;
+  }
+  return 'https://configurator.ov25.ai';
+}
 
 type DeviceMode = 'desktop' | 'mobile';
 
@@ -31,7 +36,7 @@ export function PreviewArea({ serializableConfig, previewBaseUrl }: PreviewAreaP
 
   configRef.current = serializableConfig;
 
-  const src = previewBaseUrl || DEFAULT_PREVIEW_BASE;
+  const src = previewBaseUrl || getPreviewBase();
 
   const sendConfig = useCallback(() => {
     postConfig(iframeRef.current, configRef.current);

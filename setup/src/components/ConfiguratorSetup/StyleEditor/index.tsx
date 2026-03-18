@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo } from 'react';
 import { ChevronDown, ChevronRight, RotateCcw } from 'lucide-react';
 import { ScrollArea } from '../../ui/scroll-area';
-import { Textarea } from '../../ui/textarea';
+import { CSSEditor } from '../../ui/css-editor';
 import { STYLE_GROUPS } from '../../../lib/config/configurator-style-variables';
 import type { TypeSettings } from '../types';
 import { SectionHeader, SectionDivider } from '../shared-ui';
@@ -89,11 +89,10 @@ export function StylePanel({ currentSettings, updateSettings, updateNested }: St
         <SectionDivider />
         <div className="space-y-2">
           <SectionHeader description="Raw CSS that overrides everything above">Custom CSS</SectionHeader>
-          <Textarea
+          <CSSEditor
             placeholder=".ov25-variant-control { ... }"
             value={currentSettings.branding.cssString}
-            onChange={(e) => updateNested('branding', 'cssString', e.target.value)}
-            className="min-h-[100px] font-mono text-[11px]"
+            onChange={(val) => updateNested('branding', 'cssString', val)}
           />
         </div>
         <div className="h-4" />
