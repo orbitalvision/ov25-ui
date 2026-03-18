@@ -5,7 +5,9 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const cssPath = path.resolve(__dirname, '../dist/index.css');
+const cssPath = process.argv[2]
+  ? path.resolve(process.argv[2])
+  : path.resolve(__dirname, '../dist/index.css');
 
 function stripLayers(css) {
   let result = '';

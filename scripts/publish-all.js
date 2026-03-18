@@ -164,11 +164,13 @@ try {
     console.log('\n=== Building and publishing ov25-setup (React 19) ===');
     execSync('npm install', { cwd: setupDir, stdio: 'inherit' });
     execSync('npm run build', { cwd: setupDir, stdio: 'inherit' });
+    execSync(`node scripts/strip-layers.js "${path.join(setupDir, 'dist', 'index.css')}"`, { cwd: rootDir, stdio: 'inherit' });
     execSync('npm publish --ignore-scripts', { cwd: setupDir, stdio: 'inherit' });
     console.log('✓ ov25-setup (React 19) published\n');
 
     console.log('=== Building and publishing ov25-setup-react18 ===');
     execSync('node scripts/build-react18.js', { cwd: setupDir, stdio: 'inherit' });
+    execSync(`node scripts/strip-layers.js "${path.join(setupDir, 'dist', 'index.css')}"`, { cwd: rootDir, stdio: 'inherit' });
 
     const setupPkg = JSON.parse(fs.readFileSync(setupPackageJsonPath, 'utf8'));
     const setupVersion = setupPkg.version;
