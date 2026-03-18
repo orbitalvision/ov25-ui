@@ -32,35 +32,35 @@ const LAYOUT_OPTIONS: { value: PreviewLayoutType; label: string; description: st
   { value: 'snap2', label: 'Snap2', description: 'Modal-based configurator' },
 ];
 
-const CAROUSEL_OPTIONS: { value: FormCarouselDisplayMode; label: string }[] = [
-  { value: 'none', label: 'None' },
-  { value: 'carousel', label: 'Carousel' },
-  { value: 'stacked', label: 'Stacked' },
+const CAROUSEL_OPTIONS = [
+  { value: 'none' as FormCarouselDisplayMode, label: 'None', desc: 'No product images' },
+  { value: 'carousel' as FormCarouselDisplayMode, label: 'Carousel', desc: 'Horizontal scroll' },
+  { value: 'stacked' as FormCarouselDisplayMode, label: 'Stacked', desc: 'Vertical grid' },
 ];
 
-const DISPLAY_DESKTOP_OPTIONS: { value: FormConfiguratorDisplayMode; label: string }[] = [
-  { value: 'inline', label: 'Inline' },
-  { value: 'sheet', label: 'Sheet' },
-  { value: 'variants-only-sheet', label: 'Variants only sheet' },
+const DISPLAY_DESKTOP_OPTIONS = [
+  { value: 'inline' as FormConfiguratorDisplayMode, label: 'Inline', desc: 'Embedded beside the gallery' },
+  { value: 'sheet' as FormConfiguratorDisplayMode, label: 'Sheet', desc: 'Slides up from the bottom' },
+  { value: 'variants-only-sheet' as FormConfiguratorDisplayMode, label: 'Variants sheet', desc: 'Sheet with variants only' },
 ];
 
-const DISPLAY_MOBILE_OPTIONS: { value: FormConfiguratorDisplayModeMobile; label: string }[] = [
-  { value: 'inline', label: 'Inline' },
-  { value: 'drawer', label: 'Drawer' },
-  { value: 'variants-only-sheet', label: 'Variants only sheet' },
+const DISPLAY_MOBILE_OPTIONS = [
+  { value: 'inline' as FormConfiguratorDisplayModeMobile, label: 'Inline', desc: 'Embedded below gallery' },
+  { value: 'drawer' as FormConfiguratorDisplayModeMobile, label: 'Drawer', desc: 'Slides up from bottom' },
+  { value: 'variants-only-sheet' as FormConfiguratorDisplayModeMobile, label: 'Variants sheet', desc: 'Sheet with variants only' },
 ];
 
 const TRIGGER_OPTIONS = [
-  { value: 'single-button', label: 'Single' },
-  { value: 'split-buttons', label: 'Split' },
+  { value: 'single-button', label: 'Single', desc: 'One configure button' },
+  { value: 'split-buttons', label: 'Split', desc: 'Separate add & configure' },
 ];
 
-const VARIANT_OPTIONS: { value: FormVariantDisplayMode; label: string }[] = [
-  { value: 'tree', label: 'Tree' },
-  { value: 'list', label: 'List' },
-  { value: 'tabs', label: 'Tabs' },
-  { value: 'accordion', label: 'Accordion' },
-  { value: 'wizard', label: 'Wizard' },
+const VARIANT_OPTIONS = [
+  { value: 'tree' as FormVariantDisplayMode, label: 'Tree', desc: 'Nested groups' },
+  { value: 'list' as FormVariantDisplayMode, label: 'List', desc: 'Flat list' },
+  { value: 'tabs' as FormVariantDisplayMode, label: 'Tabs', desc: 'Tabbed groups' },
+  { value: 'accordion' as FormVariantDisplayMode, label: 'Accordion', desc: 'Collapsible groups' },
+  { value: 'wizard' as FormVariantDisplayMode, label: 'Wizard', desc: 'Step by step' },
 ];
 
 const ELEMENT_TOGGLES: { key: keyof TypeSettings['selectors']; label: string }[] = [
@@ -76,7 +76,7 @@ const FLAG_TOGGLES: { key: keyof TypeSettings['flags']; label: string }[] = [
   { key: 'hidePricing', label: 'Hide pricing' },
   { key: 'hideAr', label: 'Hide AR button' },
   { key: 'deferThreeD', label: 'Defer 3D loading' },
-  { key: 'showOptional', label: 'Show optional options' },
+  { key: 'showOptional', label: 'Show optional variants' },
   { key: 'forceMobile', label: 'Force mobile layout' },
   { key: 'autoOpen', label: 'Auto-open configurator' },
 ];
@@ -140,54 +140,44 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
       <TabsContent value="settings" className="flex-1 min-h-0 mt-0">
         <ScrollArea className="h-full">
           <div className="space-y-6 py-2 pr-4">
+
+            {/* --- Configurator --- */}
             <SectionDivider />
             <div className="space-y-3">
-              <SectionHeader>Product type</SectionHeader>
-              <div className="flex gap-1.5">
-                {LAYOUT_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setLayout(opt.value)}
-                    className={`flex-1 rounded-md px-2.5 py-2 text-center text-xs font-medium transition-all ${
-                      formState.layout === opt.value
-                        ? 'bg-foreground text-background shadow-sm'
-                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                    }`}
-                  >
-                    <span className="text-xs font-medium">{opt.label}</span>
-                  </button>
-                ))}
-              </div>
-              <p className="text-[11px] text-muted-foreground">
-                {LAYOUT_OPTIONS.find((o) => o.value === formState.layout)?.description}
-                {' '}&middot; <span className="font-mono">{PREVIEW_PRODUCT_LINKS[formState.layout]}</span>
-              </p>
-              {isSnap2 && (
-                <SwitchRow
-                  label="Starting configuration"
-                  checked={!!currentSettings.snap2UseStartingConfig}
-                  onCheckedChange={(v) => updateSettings('snap2UseStartingConfig', v)}
-                />
-              )}
-            </div>
-            <SectionDivider />
-            <div className="space-y-2.5">
-              <SectionHeader>Elements</SectionHeader>
-              {ELEMENT_TOGGLES.map(({ key, label }) => (
-                <SwitchRow
-                  key={key}
-                  label={label}
-                  checked={currentSettings.selectors[key].enabled}
-                  onCheckedChange={(v) => handleSelectorToggle(key, v)}
-                />
-              ))}
-            </div>
-            <SectionDivider />
-            <div className="space-y-3">
-              <SectionHeader>Carousel</SectionHeader>
+              <SectionHeader description="How the variant selector appears and behaves on your product page">Configurator</SectionHeader>
               <DesktopMobileRow
                 label="Display mode"
+                desktopValue={currentSettings.configurator.displayModeDesktop}
+                mobileValue={currentSettings.configurator.displayModeMobile}
+                onDesktopChange={(v) => updateNested('configurator', 'displayModeDesktop', v)}
+                onMobileChange={(v) => updateNested('configurator', 'displayModeMobile', v)}
+                options={DISPLAY_DESKTOP_OPTIONS}
+                mobileOptions={DISPLAY_MOBILE_OPTIONS}
+              />
+              <DesktopMobileRow
+                label="Trigger style"
+                desktopValue={currentSettings.configurator.triggerStyleDesktop}
+                mobileValue={currentSettings.configurator.triggerStyleMobile}
+                onDesktopChange={(v) => updateNested('configurator', 'triggerStyleDesktop', v)}
+                onMobileChange={(v) => updateNested('configurator', 'triggerStyleMobile', v)}
+                options={TRIGGER_OPTIONS}
+              />
+              <DesktopMobileRow
+                label="Variant layout"
+                desktopValue={currentSettings.configurator.variantDisplayDesktop}
+                mobileValue={currentSettings.configurator.variantDisplayMobile}
+                onDesktopChange={(v) => updateNested('configurator', 'variantDisplayDesktop', v)}
+                onMobileChange={(v) => updateNested('configurator', 'variantDisplayMobile', v)}
+                options={VARIANT_OPTIONS}
+              />
+            </div>
+
+            {/* --- Image Gallery --- */}
+            <SectionDivider />
+            <div className="space-y-3">
+              <SectionHeader description="Product images shown alongside the 3D viewer">Image Gallery</SectionHeader>
+              <DesktopMobileRow
+                label="Layout"
                 desktopValue={currentSettings.carousel.desktop}
                 mobileValue={currentSettings.carousel.mobile}
                 onDesktopChange={(v) => updateNested('carousel', 'desktop', v)}
@@ -217,50 +207,41 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
                 </div>
               </div>
             </div>
+
+            {/* --- Product Type --- */}
             <SectionDivider />
             <div className="space-y-3">
-              <SectionHeader>Configurator</SectionHeader>
-              <DesktopMobileRow
-                label="Display mode"
-                desktopValue={currentSettings.configurator.displayModeDesktop}
-                mobileValue={currentSettings.configurator.displayModeMobile}
-                onDesktopChange={(v) => updateNested('configurator', 'displayModeDesktop', v)}
-                onMobileChange={(v) => updateNested('configurator', 'displayModeMobile', v)}
-                options={DISPLAY_DESKTOP_OPTIONS}
-                mobileOptions={DISPLAY_MOBILE_OPTIONS}
-              />
-              <DesktopMobileRow
-                label="Trigger style"
-                desktopValue={currentSettings.configurator.triggerStyleDesktop}
-                mobileValue={currentSettings.configurator.triggerStyleMobile}
-                onDesktopChange={(v) => updateNested('configurator', 'triggerStyleDesktop', v)}
-                onMobileChange={(v) => updateNested('configurator', 'triggerStyleMobile', v)}
-                options={TRIGGER_OPTIONS}
-              />
-              <DesktopMobileRow
-                label="Variant layout"
-                desktopValue={currentSettings.configurator.variantDisplayDesktop}
-                mobileValue={currentSettings.configurator.variantDisplayMobile}
-                onDesktopChange={(v) => updateNested('configurator', 'variantDisplayDesktop', v)}
-                onMobileChange={(v) => updateNested('configurator', 'variantDisplayMobile', v)}
-                options={VARIANT_OPTIONS}
-              />
-            </div>
-            <SectionDivider />
-            <div className="space-y-2.5">
-              <SectionHeader>Options</SectionHeader>
-              {FLAG_TOGGLES.map(({ key, label }) => (
+              <SectionHeader description="The type of configurator experience for this product">Product Type</SectionHeader>
+              <div className="flex gap-1.5">
+                {LAYOUT_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setLayout(opt.value)}
+                    className={`flex-1 rounded-md px-2.5 py-2 text-center transition-all border ${
+                      formState.layout === opt.value
+                        ? 'border-foreground bg-foreground text-background shadow-sm'
+                        : 'border-border bg-white text-muted-foreground hover:border-foreground/30'
+                    }`}
+                  >
+                    <div className="text-xs font-medium">{opt.label}</div>
+                    <div className={`text-[9px] mt-0.5 ${formState.layout === opt.value ? 'text-background/70' : 'text-muted-foreground/60'}`}>{opt.description}</div>
+                  </button>
+                ))}
+              </div>
+              {isSnap2 && (
                 <SwitchRow
-                  key={key}
-                  label={label}
-                  checked={currentSettings.flags[key]}
-                  onCheckedChange={(v) => updateNested('flags', key, v)}
+                  label="Starting configuration"
+                  checked={!!currentSettings.snap2UseStartingConfig}
+                  onCheckedChange={(v) => updateSettings('snap2UseStartingConfig', v)}
                 />
-              ))}
+              )}
             </div>
+
+            {/* --- Branding --- */}
             <SectionDivider />
             <div className="space-y-3">
-              <SectionHeader>Branding</SectionHeader>
+              <SectionHeader description="Your brand logo displayed in the configurator header">Branding</SectionHeader>
               <div>
                 <Label className="text-[10px] text-muted-foreground">Logo URL</Label>
                 <Input
@@ -279,6 +260,34 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
                   className="h-7 text-xs mt-0.5"
                 />
               </div>
+            </div>
+
+            {/* --- Elements --- */}
+            <SectionDivider />
+            <div className="space-y-2.5">
+              <SectionHeader description="Toggle which UI elements the configurator injects into your page">Elements</SectionHeader>
+              {ELEMENT_TOGGLES.map(({ key, label }) => (
+                <SwitchRow
+                  key={key}
+                  label={label}
+                  checked={currentSettings.selectors[key].enabled}
+                  onCheckedChange={(v) => handleSelectorToggle(key, v)}
+                />
+              ))}
+            </div>
+
+            {/* --- Behaviour --- */}
+            <SectionDivider />
+            <div className="space-y-2.5">
+              <SectionHeader description="Fine-tune loading behaviour, visibility, and layout overrides">Behaviour</SectionHeader>
+              {FLAG_TOGGLES.map(({ key, label }) => (
+                <SwitchRow
+                  key={key}
+                  label={label}
+                  checked={currentSettings.flags[key]}
+                  onCheckedChange={(v) => updateNested('flags', key, v)}
+                />
+              ))}
             </div>
             <div className="h-4" />
           </div>

@@ -43,7 +43,7 @@ export default function ConfiguratorSetup(props: ConfiguratorSetupProps) {
           <PreviewArea serializableConfig={serializableConfig} previewBaseUrl={props.previewBaseUrl} />
         </main>
       )}
-      <aside className={props.hidePreview ? 'w-full' : 'w-[370px] shrink-0 border-l bg-background/50 px-4 pt-4 pb-4 overflow-hidden'}>
+      <aside className={props.hidePreview ? 'w-full' : 'w-[370px] shrink-0 border-l bg-white px-4 pt-4 pb-4 overflow-hidden'}>
         <ConfigPanel
           formState={formState}
           currentSettings={currentSettings}
