@@ -40,7 +40,7 @@ const CAROUSEL_OPTIONS = [
 
 const DISPLAY_DESKTOP_OPTIONS = [
   { value: 'inline' as FormConfiguratorDisplayMode, label: 'Inline', desc: 'Embedded beside the gallery' },
-  { value: 'sheet' as FormConfiguratorDisplayMode, label: 'Sheet', desc: 'Slides up from the bottom' },
+  { value: 'sheet' as FormConfiguratorDisplayMode, label: 'Sheet', desc: 'Slides in from the sides.' },
   { value: 'variants-only-sheet' as FormConfiguratorDisplayMode, label: 'Variants sheet', desc: 'Sheet with variants only' },
 ];
 

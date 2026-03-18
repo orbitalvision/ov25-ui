@@ -478,7 +478,7 @@ html #ov25-configurator-variant-menu-container {
 }
 
 .ov25-gradient {
-    background: linear-gradient(90deg, #26E8FE 0%, #808AFF 50%, #A41EFE 100%), #121214;
+    background: var(--ov25-highlight-color, linear-gradient(90deg, #26E8FE 0%, #808AFF 50%, #A41EFE 100%)), #121214;
 }
 
 .ov25-swatch-icon {

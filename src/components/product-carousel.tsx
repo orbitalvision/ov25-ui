@@ -112,7 +112,7 @@ export function ProductCarousel() {
           key={index}
           onClick={() => setGalleryIndex(galleryIndexToUse)}
           className={cn(
-            "ov:cursor-pointer ov:relative ov:pl-1 ov:aspect-square ov:w-full ov:flex ov:justify-center ov:items-center ov:overflow-hidden ov:rounded-2xl ov:bg-white ov:ring-2",
+            "ov:cursor-pointer ov:relative ov:pl-1 ov:aspect-square ov:w-full ov:flex ov:justify-center ov:items-center ov:overflow-hidden ov:rounded-[var(--ov25-configurator-iframe-border-radius)] ov:bg-white ov:ring-2",
             isSelected ? "ov:ring-[var(--ov25-primary-color)]" : "ov:ring-[var(--ov25-configurator-view-controls-border-color)]"
           )}
         >
@@ -129,7 +129,7 @@ export function ProductCarousel() {
         key={index}
         onClick={() => setGalleryIndex(isCutout ? galleryIndexToUse : (cutoutIndex === 0 ? index + 1 : index))}
         className={cn(
-          "ov:relative ov:aspect-square ov:w-full ov:overflow-hidden ov:rounded-2xl ov:bg-muted ov:cursor-pointer",
+          "ov25-gallery-image-button ov:relative ov:aspect-square ov:w-full ov:overflow-hidden ov:rounded-[var(--ov25-configurator-iframe-border-radius)] ov:bg-muted ov:cursor-pointer",
           isSelected && "ov:ring-2 ov:ring-[var(--ov25-primary-color)]"
         )}
       >
@@ -160,7 +160,7 @@ export function ProductCarousel() {
       <button
         key={index}
         onClick={() => setFullscreenImage(fullscreenSrc)}
-        className="ov:relative ov:aspect-[3/2] ov:w-full ov:overflow-hidden ov:rounded-2xl ov:bg-muted ov:cursor-pointer"
+        className="ov25-gallery-image-button ov:relative ov:aspect-[3/2] ov:w-full ov:overflow-hidden ov:rounded-[var(--ov25-configurator-iframe-border-radius)] ov:bg-muted ov:cursor-pointer"
       >
         <img
           src={src}
