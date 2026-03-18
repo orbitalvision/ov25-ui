@@ -38,8 +38,8 @@
 }
 
 #ov25-filter-content .filter-option[data-checked="true"] {
-  border-color: var(--ov25-highlight-color);
-  background-color: color-mix(in srgb, var(--ov25-highlight-color) 20%, transparent);
+  border-color: var(--ov25-highlight-color, #26E8FE);
+  background-color: color-mix(in srgb, var(--ov25-highlight-color, #26E8FE) 20%, transparent);
 }
 
 #ov25-filter-empty {

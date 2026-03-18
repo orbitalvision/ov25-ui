@@ -12,6 +12,11 @@ const packageJsonPath = path.join(rootDir, 'package.json');
 let testServer = null;
 
 try {
+  console.log('=== Fetching and pulling latest ===');
+  execSync('git fetch', { cwd: rootDir, stdio: 'inherit' });
+  execSync('git pull', { cwd: rootDir, stdio: 'inherit' });
+  console.log('✓ Up to date\n');
+
   console.log('Running tests before publishing...\n');
 
   // Run unit tests

@@ -30,12 +30,20 @@ function ControlRow({ label, isModified, onReset, children }: ControlRowProps) {
   );
 }
 
+const VARIANT_OUTLINE_GRADIENT = 'linear-gradient(90deg, #26E8FE 0%, #808AFF 50%, #A41EFE 100%)';
+
 export function StyleColorControl({ variable, value, defaultValue, onChange }: { variable: StyleVariable; value: string | undefined; defaultValue: string; onChange: (value: string) => void }) {
-  const current = value || defaultValue;
+  const current = value ?? defaultValue;
   const isModified = !!value && value !== defaultValue;
+  const isVariantOutline = variable.variable === '--ov25-highlight-color';
   return (
     <ControlRow label={variable.label} isModified={isModified} onReset={() => onChange('')}>
-      <ColorInput value={current} onChange={onChange} className="!w-7 !h-7 !rounded-md !shadow-sm" />
+      <ColorInput
+        value={current}
+        onChange={onChange}
+        className="!w-7 !h-7 !rounded-md !shadow-sm"
+        emptyDisplayBackground={isVariantOutline ? VARIANT_OUTLINE_GRADIENT : undefined}
+      />
     </ControlRow>
   );
 }

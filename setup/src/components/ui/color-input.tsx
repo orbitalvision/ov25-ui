@@ -9,24 +9,27 @@ interface ColorInputProps {
   onChange: (value: string) => void;
   className?: string;
   debounceMs?: number;
+  /** When value is empty, show this as the trigger background (e.g. gradient) */
+  emptyDisplayBackground?: string;
 }
 
-export function ColorInput({ value, onChange, className, debounceMs = 200 }: ColorInputProps) {
+export function ColorInput({ value, onChange, className, debounceMs = 200, emptyDisplayBackground }: ColorInputProps) {
   const [localColor, setLocalColor] = useState(value);
   const [open, setOpen] = useState(false);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    setLocalColor(value);
-  }, [value]);
+    setLocalColor(value || (emptyDisplayBackground ? '#26E8FE' : ''));
+  }, [value, emptyDisplayBackground]);
 
   useEffect(() => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
-    if (localColor !== value) {
+    const isPlaceholder = !value && emptyDisplayBackground && localColor === '#26E8FE';
+    if (localColor !== value && !isPlaceholder) {
       timeoutRef.current = setTimeout(() => onChange(localColor), debounceMs);
     }
     return () => { if (timeoutRef.current) clearTimeout(timeoutRef.current); };
-  }, [localColor, value, onChange, debounceMs]);
+  }, [localColor, value, onChange, debounceMs, emptyDisplayBackground]);
 
   const handleHexChange = (hex: string) => {
     if (/^#[0-9A-Fa-f]{0,6}$/.test(hex) || hex === '') {
@@ -42,6 +45,10 @@ export function ColorInput({ value, onChange, className, debounceMs = 200 }: Col
     return r > 240 && g > 240 && b > 240;
   };
 
+  const isEmpty = !localColor || localColor === '';
+  const triggerBackground = isEmpty && emptyDisplayBackground ? emptyDisplayBackground : localColor;
+  const useBackgroundStyle = !!emptyDisplayBackground && isEmpty;
+
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
@@ -49,10 +56,10 @@ export function ColorInput({ value, onChange, className, debounceMs = 200 }: Col
           type="button"
           className={cn(
             'w-20 h-20 rounded-lg shadow-lg transition-colors hover:opacity-80 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring',
-            isLightColor(localColor) ? 'border border-border/50' : 'border-none',
+            !useBackgroundStyle && isLightColor(localColor) ? 'border border-border/50' : 'border-none',
             className,
           )}
-          style={{ backgroundColor: localColor }}
+          style={useBackgroundStyle ? { background: triggerBackground } : { backgroundColor: triggerBackground }}
           aria-label="Select color"
         />
       </PopoverTrigger>
