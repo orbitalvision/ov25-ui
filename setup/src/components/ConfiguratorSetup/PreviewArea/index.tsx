@@ -4,11 +4,13 @@ import { cn } from '../../../lib/utils';
 import type { SerializableInjectConfig } from '../preview-config-serializable';
 
 const OV25_CONFIG_MESSAGE = 'OV25_CONFIG';
-function getPreviewBase() {
-  if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+const PREVIEW_BASE_URL = 'https://configurator.ov25.ai';
+
+function getPreviewBase(useLocalhost?: boolean) {
+  if (useLocalhost && typeof window !== 'undefined' && window.location.hostname === 'localhost') {
     return `http://localhost:${window.location.port}/configurator-preview`;
   }
-  return 'https://configurator.ov25.ai';
+  return PREVIEW_BASE_URL;
 }
 
 type DeviceMode = 'desktop' | 'mobile';
@@ -21,6 +23,7 @@ const DEVICE_SIZES: Record<DeviceMode, { width: string; label: string }> = {
 interface PreviewAreaProps {
   serializableConfig: SerializableInjectConfig;
   previewBaseUrl?: string;
+  useLocalPreview?: boolean;
 }
 
 function postConfig(iframe: HTMLIFrameElement | null, config: SerializableInjectConfig) {
@@ -28,7 +31,7 @@ function postConfig(iframe: HTMLIFrameElement | null, config: SerializableInject
   iframe.contentWindow.postMessage({ type: OV25_CONFIG_MESSAGE, config }, '*');
 }
 
-export function PreviewArea({ serializableConfig, previewBaseUrl }: PreviewAreaProps) {
+export function PreviewArea({ serializableConfig, previewBaseUrl, useLocalPreview }: PreviewAreaProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const configRef = useRef(serializableConfig);
   const [device, setDevice] = useState<DeviceMode>('desktop');
@@ -36,7 +39,7 @@ export function PreviewArea({ serializableConfig, previewBaseUrl }: PreviewAreaP
 
   configRef.current = serializableConfig;
 
-  const src = previewBaseUrl || getPreviewBase();
+  const src = previewBaseUrl || getPreviewBase(useLocalPreview);
 
   const sendConfig = useCallback(() => {
     postConfig(iframeRef.current, configRef.current);

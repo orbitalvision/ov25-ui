@@ -7,6 +7,8 @@ export interface ConfiguratorSetupProps {
   apiKey?: string;
   productLink?: string;
   previewBaseUrl?: string;
+  /** Only set to true during local OV25 development to use localhost preview */
+  useLocalPreview?: boolean;
   initialConfig?: ConfiguratorSetupPayload;
   onSave?: (payload: ConfiguratorSetupPayload) => void;
   hidePreview?: boolean;
@@ -40,10 +42,10 @@ export default function ConfiguratorSetup(props: ConfiguratorSetupProps) {
     <div className="h-screen flex">
       {!props.hidePreview && (
         <main className="flex-1 min-h-0 p-4">
-          <PreviewArea serializableConfig={serializableConfig} previewBaseUrl={props.previewBaseUrl} />
+          <PreviewArea serializableConfig={serializableConfig} previewBaseUrl={props.previewBaseUrl} useLocalPreview={props.useLocalPreview} />
         </main>
       )}
-      <aside className={props.hidePreview ? 'w-full' : 'w-[370px] shrink-0 border-l bg-white px-4 pt-4 pb-4 overflow-hidden'}>
+      <aside className={props.hidePreview ? 'w-full h-full flex flex-col' : 'w-[370px] shrink-0 border-l bg-white px-4 pt-4 pb-4 h-full flex flex-col overflow-hidden'}>
         <ConfigPanel
           formState={formState}
           currentSettings={currentSettings}
