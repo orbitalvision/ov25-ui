@@ -113,7 +113,7 @@ export const IframeContainer = () => {
                 ref={iframeRef}
                 id={uniqueId ? `ov25-configurator-iframe-${uniqueId}` : "ov25-configurator-iframe"}
                 src={iframeSrc}
-                className={`ov:w-full ov:bg-transparent ov:h-full ${galleryIndex === galleryIndexToUse ? 'ov:block' : 'ov:ov25-controls-hidden'}`}
+                className={`ov:w-full ov:bg-transparent ov:h-full ov:rounded-[var(--ov25-configurator-iframe-border-radius)] ${galleryIndex === galleryIndexToUse ? 'ov:block' : 'ov:ov25-controls-hidden'}`}
                 allow="camera; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; xr-spatial-tracking; fullscreen"
 
             />
