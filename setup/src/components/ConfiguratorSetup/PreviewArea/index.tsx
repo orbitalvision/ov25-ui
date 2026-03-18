@@ -4,7 +4,7 @@ import { cn } from '../../../lib/utils';
 import type { SerializableInjectConfig } from '../preview-config-serializable';
 
 const OV25_CONFIG_MESSAGE = 'OV25_CONFIG';
-const PREVIEW_BASE_URL = 'https://configurator.ov25.ai';
+const PREVIEW_BASE_URL = 'https://app.ov25.ai/configurator-preview';
 
 function getPreviewBase(useLocalhost?: boolean) {
   if (useLocalhost && typeof window !== 'undefined' && window.location.hostname === 'localhost') {
