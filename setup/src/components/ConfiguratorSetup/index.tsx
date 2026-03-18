@@ -13,6 +13,7 @@ export interface ConfiguratorSetupProps {
   onSave?: (payload: ConfiguratorSetupPayload) => void;
   hidePreview?: boolean;
   hideSaveButton?: boolean;
+  className?: string;
 }
 
 export type { ConfiguratorSetupPayload };
@@ -39,7 +40,7 @@ export default function ConfiguratorSetup(props: ConfiguratorSetupProps) {
   } = useConfiguratorSetup(overrides);
 
   return (
-    <div className="h-screen flex">
+    <div className={props.className || 'h-screen flex'}>
       {!props.hidePreview && (
         <main className="flex-1 min-h-0 p-4">
           <PreviewArea serializableConfig={serializableConfig} previewBaseUrl={props.previewBaseUrl} useLocalPreview={props.useLocalPreview} />
