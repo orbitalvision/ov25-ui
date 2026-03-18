@@ -27,8 +27,13 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
         arPreviewLink,
         setArPreviewLink,
         isVariantsOpen,
-        uniqueId
+        uniqueId,
+        configuratorDisplayMode,
+        configuratorDisplayModeMobile,
+        isMobile,
     } = useOV25UI();
+
+    const isModalMode = isMobile ? configuratorDisplayModeMobile === 'modal' : configuratorDisplayMode === 'modal';
 
     // Use the custom hook to handle iframe positioning
     useIframePositioning();
@@ -39,20 +44,23 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
         
         if (isDrawerOrDialogOpen) {
             const container = document.querySelector('.ov25-configurator-gallery') as HTMLElement;
-            const originalZIndex = container?.style.zIndex;
-            const originalPosition = container?.style.position;
-            if (container) {
-                container.style.zIndex = '2147483644'; // max -1
+            if (!container) return;
+            const originalZIndex = container.style.zIndex;
+            const originalPointerEvents = container.style.pointerEvents;
+
+            if (isModalMode) {
+                container.style.zIndex = '2147483647';
+                container.style.pointerEvents = 'auto';
+            } else {
+                container.style.zIndex = '2147483644';
             }
             
             return () => {
-                if (container) {
-                    container.style.zIndex = originalZIndex || '';
-                    container.style.position = originalPosition || '';
-                }
+                container.style.zIndex = originalZIndex || '';
+                container.style.pointerEvents = originalPointerEvents || '';
             };
         }
-    }, [isProductGalleryStacked, isDrawerOrDialogOpen]);
+    }, [isProductGalleryStacked, isDrawerOrDialogOpen, isModalMode]);
 
 
     const containerRef = useRef<HTMLDivElement>(null);
@@ -147,24 +155,23 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
 }
 
 /**
- * Renders ProductGallery inside a hidden container when no gallery selector is provided
- * but deferThreeD is true. When the sheet/drawer opens, the wrapper becomes visible so
- * useIframePositioning can show the configurator on the left. The iframe stays in the DOM
- * so it can load; it is just positioned off-screen until the user opens the configurator.
+ * Renders ProductGallery in a stable off-screen wrapper so the iframe loads once and stays alive.
+ * useIframePositioning handles repositioning the iframe into the visible area (sheet, modal, etc.)
+ * when the configurator opens.
  */
 export function DeferredGalleryContainer() {
-    const { isDrawerOrDialogOpen } = useOV25UI();
     return (
         <div
             className="ov25-configurator-gallery ov:font-[family-name:var(--ov25-font-family)]"
             style={{
                 position: 'fixed',
-                inset: 0,
+                top: 0,
+                left: 0,
                 width: '100%',
                 height: '100%',
-                visibility: isDrawerOrDialogOpen ? 'visible' : 'hidden',
                 pointerEvents: 'none',
-                zIndex: 2147483643,
+                zIndex: -1,
+                visibility: 'hidden',
             }}
         >
             <ProductGallery />

@@ -5,6 +5,7 @@ import { VariantDisplayStyleOverlay } from '../../types/config-enums.js';
 import { ProductOptionsGroup } from "./ProductOptions.js";
 import { MobilePriceOverlay } from "../mobile-price-overlay.js";
 import { VariantContentDesktop } from './VariantContentDesktop.js';
+import { ModalConfiguratorDesktop } from './ModalConfiguratorDesktop.js';
 import { VariantsOnlySheet } from './VariantsOnlySheet.js';
 import { ProductVariantsWrapper } from './ProductVariantsWrapper.js';
 import { MobileCheckoutButton } from './MobileCheckoutButton.js';
@@ -107,6 +108,7 @@ export const VariantSelectMenu: React.FC = () => {
       return <ProductOptionsGroup {...productOptionsGroupProps} />;
     }
     if (configuratorDisplayModeMobile === 'variants-only-sheet') return <VariantsOnlySheet />;
+    if (configuratorDisplayModeMobile === 'modal') return <ModalConfiguratorDesktop />;
     if (isSnap2Mode) return null;
     return (
       <MobileDrawer
@@ -138,6 +140,7 @@ export const VariantSelectMenu: React.FC = () => {
 
   const renderDesktop = () => {
     if (configuratorDisplayMode === 'variants-only-sheet') return <VariantsOnlySheet />;
+    if (configuratorDisplayMode === 'modal') return <ModalConfiguratorDesktop />;
     if (!useInlineVariantControls) return <VariantContentDesktop />;
     return null;
   };

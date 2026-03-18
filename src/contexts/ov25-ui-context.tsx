@@ -267,8 +267,8 @@ interface OV25UIContextType {
   controlsHidden: boolean;
   hasConfigureButton: boolean;
   useInlineVariantControls: boolean;
-  configuratorDisplayMode: 'inline' | 'sheet' | 'drawer' | 'variants-only-sheet';
-  configuratorDisplayModeMobile: 'inline' | 'drawer' | 'variants-only-sheet';
+  configuratorDisplayMode: 'inline' | 'sheet' | 'drawer' | 'variants-only-sheet' | 'modal';
+  configuratorDisplayModeMobile: 'inline' | 'drawer' | 'modal' | 'variants-only-sheet';
   useSimpleVariantsSelector: boolean;
   /** Drawer trigger: single Configure button or per-option buttons (ProductOptionsGroup). */
   configuratorTriggerStyle: 'single-button' | 'split-buttons';
@@ -404,8 +404,8 @@ export const OV25UIProvider: React.FC<{
   uniqueId?: string,
   useInlineVariantControls?: boolean,
   useInlineVariantControlsMobile?: boolean,
-  configuratorDisplayMode?: 'inline' | 'sheet' | 'drawer' | 'variants-only-sheet',
-  configuratorDisplayModeMobile?: 'inline' | 'drawer' | 'variants-only-sheet',
+  configuratorDisplayMode?: 'inline' | 'sheet' | 'drawer' | 'modal' | 'variants-only-sheet',
+  configuratorDisplayModeMobile?: 'inline' | 'drawer' | 'modal' | 'variants-only-sheet',
   useSimpleVariantsSelector?: boolean,
   configuratorTriggerStyle?: 'single-button' | 'split-buttons',
   configuratorTriggerStyleMobile?: 'single-button' | 'split-buttons',
@@ -1553,7 +1553,7 @@ export const OV25UIProvider: React.FC<{
     hasConfigureButton: hasConfigureButtonState,
     useInlineVariantControls: isMobile ? (useInlineVariantControlsMobileProp ?? useInlineVariantControls) : useInlineVariantControls,
     configuratorDisplayMode,
-    configuratorDisplayModeMobile: configuratorDisplayModeMobileProp ?? (configuratorDisplayMode === 'inline' ? 'inline' : 'drawer'),
+    configuratorDisplayModeMobile: configuratorDisplayModeMobileProp ?? (configuratorDisplayMode === 'inline' ? 'inline' : configuratorDisplayMode === 'modal' ? 'modal' : 'drawer'),
     useSimpleVariantsSelector,
     configuratorTriggerStyle: isMobile ? (configuratorTriggerStyleMobileProp ?? configuratorTriggerStyle) : configuratorTriggerStyle,
     variantDisplayStyleMobile,

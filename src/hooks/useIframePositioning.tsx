@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { useOV25UI } from '../contexts/ov25-ui-context.js';
 import { IFRAME_HEIGHT_RATIO } from '../utils/configurator-utils.js';
+import { MODAL_GALLERY_SLOT_ID } from '../components/ConfiguratorModal.js';
 
 /**
  * Helper function to find an element in Shadow DOM or regular DOM
@@ -80,7 +81,8 @@ const findIframeWithUniqueId = (uniqueId?: string): HTMLElement | null => {
  * Hook to position the iframe and its container at the top of the screen when drawer is open
  */
 export const useIframePositioning = () => {
-  const { isDrawerOrDialogOpen, isMobile, drawerSize, isProductGalleryStacked, isSnap2Mode, uniqueId } = useOV25UI();
+  const { isDrawerOrDialogOpen, isMobile, drawerSize, isProductGalleryStacked, isSnap2Mode, uniqueId, configuratorDisplayMode, configuratorDisplayModeMobile } = useOV25UI();
+  const isModalMode = isMobile ? configuratorDisplayModeMobile === 'modal' : configuratorDisplayMode === 'modal';
   const originalStyles = useRef<{
     container: {
       position: string;
@@ -92,6 +94,8 @@ export const useIframePositioning = () => {
       height: string;
       width: string;
       overflow: string;
+      pointerEvents: string;
+      visibility: string;
       transform: string;
       transition: string;
     };
@@ -102,6 +106,8 @@ export const useIframePositioning = () => {
       width: string;
       height: string;
       zIndex: string;
+      pointerEvents: string;
+      visibility: string;
       transform: string;
       transition: string;
     };
@@ -142,7 +148,11 @@ export const useIframePositioning = () => {
       if (!originalStyles.current) return;
       const styles = originalStyles.current;
 
-      if (isMobile) {
+      if (isModalMode) {
+        Object.assign(container.style, styles.container);
+        Object.assign(iframe.style, styles.iframe);
+        Object.assign(parent.style, styles.parent);
+      } else if (isMobile) {
         iframe.style.transition = 'transform 400ms cubic-bezier(0.4, 0, 0.2, 1)';
         container.style.transition = 'transform 400ms cubic-bezier(0.4, 0, 0.2, 1)';
         container.style.transform = 'translateY(-100%)';
@@ -181,6 +191,8 @@ export const useIframePositioning = () => {
             height: container.style.height,
             width: container.style.width,
             overflow: container.style.overflow,
+            pointerEvents: container.style.pointerEvents,
+            visibility: container.style.visibility,
             transform: 'translateX(0) translateY(0)',
             transition: 'none',
           },
@@ -191,6 +203,8 @@ export const useIframePositioning = () => {
             width: iframe.style.width,
             height: iframe.style.height,
             zIndex: iframe.style.zIndex,
+            pointerEvents: iframe.style.pointerEvents,
+            visibility: iframe.style.visibility,
             transform: 'translateX(0) translateY(0)',
             transition: 'none',
           },
@@ -210,7 +224,56 @@ export const useIframePositioning = () => {
       parent.style.overflow = 'hidden';
 
       // Opening animation code
-      if (isMobile) {
+      if (isModalMode) {
+        // Desktop modal: position iframe container to match the modal's gallery slot
+        const frameIdRef = { current: 0 };
+        const updateModalSlotPosition = () => {
+          const slot = document.getElementById(MODAL_GALLERY_SLOT_ID);
+          if (!slot) return;
+          const rect = slot.getBoundingClientRect();
+          container.style.position = 'fixed';
+          container.style.top = `${rect.top}px`;
+          container.style.left = `${rect.left}px`;
+          container.style.width = `${rect.width}px`;
+          container.style.height = `${rect.height}px`;
+          container.style.right = 'auto';
+          container.style.zIndex = '2147483647';
+          container.style.borderRadius = isMobile
+            ? '1.5rem 1.5rem 0 0'
+            : isSnap2Mode ? '1.5rem' : '1.5rem 0 0 1.5rem';
+          container.style.overflow = 'hidden';
+          container.style.pointerEvents = 'auto';
+          container.style.visibility = 'visible';
+          container.style.transition = 'none';
+          container.style.transform = 'none';
+          iframe.style.position = 'absolute';
+          iframe.style.top = '0';
+          iframe.style.left = '0';
+          iframe.style.width = '100%';
+          iframe.style.height = '100%';
+          iframe.style.zIndex = '1';
+          iframe.style.pointerEvents = 'auto';
+          iframe.style.visibility = 'visible';
+          iframe.style.transition = 'none';
+          iframe.style.transform = 'none';
+        };
+
+        updateModalSlotPosition();
+        const tick = () => {
+          updateModalSlotPosition();
+          frameIdRef.current = requestAnimationFrame(tick);
+        };
+        frameIdRef.current = requestAnimationFrame(tick);
+
+        const resizeObserver = new ResizeObserver(updateModalSlotPosition);
+        const slotEl = document.getElementById(MODAL_GALLERY_SLOT_ID);
+        if (slotEl) resizeObserver.observe(slotEl);
+
+        return () => {
+          cancelAnimationFrame(frameIdRef.current);
+          resizeObserver.disconnect();
+        };
+      } else if (isMobile) {
         const updateMobileHeight = () => {
           const viewportHeight = window.visualViewport?.height !== undefined ? window.visualViewport?.height : window.innerHeight;
           const iframeHeight = viewportHeight * IFRAME_HEIGHT_RATIO;
@@ -218,14 +281,12 @@ export const useIframePositioning = () => {
           iframe.style.height = `${iframeHeight}px`;
         };
 
-        updateMobileHeight(); // Initial height update
+        updateMobileHeight();
 
-        // Full width iframe on mobile
         container.style.width = '100%';
         container.style.right = '0';
         iframe.style.width = '100%';
 
-        // Set fixed positioning for mobile
         container.style.position = 'fixed';
         container.style.top = '0';
         container.style.left = '0';
@@ -240,23 +301,18 @@ export const useIframePositioning = () => {
         iframe.style.left = '0';
         iframe.style.zIndex = '100';
 
-        // Add viewport event listeners for mobile
         window.visualViewport?.addEventListener('resize', updateMobileHeight);
         window.visualViewport?.addEventListener('scroll', updateMobileHeight);
         window.addEventListener('resize', updateMobileHeight);
 
-        // Start animation (offscreen)
         container.style.transform = 'translateY(-100%)';
         iframe.style.transform = 'translateY(-100%)';
 
         setTimeout(() => {
-          // Start animation after short delay(sliding onscreen)
           iframe.style.transition = 'transform 400ms cubic-bezier(0.4, 0, 0.2, 1)';
           container.style.transition = 'transform 400ms cubic-bezier(0.4, 0, 0.2, 1)';
           container.style.transform = 'translateY(0%)';
           iframe.style.transform = 'translateY(0%)';
-          
-          // Update height again after animation to ensure correct size
           updateMobileHeight();
         }, 50);
 
@@ -267,7 +323,7 @@ export const useIframePositioning = () => {
           window.removeEventListener('resize', updateIframeWidth);
         };
       } else {
-        // Desktop opening animation code remains the same
+        // Desktop sheet opening animation
         setTimeout(() => {
           updateIframeWidth();
         }, 100);
@@ -313,7 +369,7 @@ export const useIframePositioning = () => {
     return () => {
       window.removeEventListener('resize', updateIframeWidth);
     };
-  }, [isDrawerOrDialogOpen, isMobile, isSnap2Mode, uniqueId]);
+  }, [isDrawerOrDialogOpen, isMobile, isSnap2Mode, uniqueId, isModalMode]);
 
   // This useEffect handles drawer size changes (mobile drawer is always "large" when open)
   useEffect(() => {

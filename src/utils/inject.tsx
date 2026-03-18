@@ -453,9 +453,11 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     }
     swatchbookPortalShadowRoot.adoptedStyleSheets = swatchbookPortalStylesheets;
 
-    // When no gallery selector but deferThreeD, render gallery in hidden container so iframe exists for when sheet opens
+    // When no gallery selector but deferThreeD, or modal mode with no gallery: render gallery in hidden container so iframe is preloaded
     const hasGallerySelector = !!getSelector(effectiveGallerySelector);
-    if (deferThreeD && !hasGallerySelector) {
+    const isAnyModalMode = configuratorDisplayMode === ConfiguratorDisplayMode.Modal || configuratorDisplayModeMobile === ConfiguratorDisplayMode.Modal;
+    const useDeferredGallery = !hasGallerySelector && (deferThreeD || isAnyModalMode);
+    if (useDeferredGallery) {
       let deferredGalleryEl = document.getElementById('ov25-deferred-gallery-container');
       if (!deferredGalleryEl) {
         deferredGalleryEl = document.createElement('div');
@@ -587,7 +589,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     const configureTarget = configureSelector ? document.querySelector(configureSelector) : null;
 
     // Process each component
-    // Show gallery whenever a gallery selector is provided (user explicitly wants gallery in that slot)
+    // Show gallery in page slot when selector is provided (including modal mode — iframe shows on page, then repositions into modal)
     if (getSelector(effectiveGallerySelector)) {
       processElement(effectiveGallerySelector, <ProductGallery />, 'gallery');
       if (carouselSibling) {
@@ -602,8 +604,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
           pushPortal('#true-carousel', <ProductCarousel />, shouldCreateShadowDOM('carousel'));
         }
       }
-    // When no gallery selector but deferThreeD, render gallery in hidden container so configurator appears when sheet opens
-    } else if (deferThreeD && !hasGallerySelector) {
+    } else if (useDeferredGallery) {
       pushPortal('#ov25-deferred-gallery-container', <DeferredGalleryContainer />, false);
     }
 

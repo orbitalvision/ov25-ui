@@ -1,8 +1,9 @@
-/** How the configurator UI is presented. Desktop: inline | sheet. Mobile: inline | drawer. */
+/** How the configurator UI is presented. Desktop: inline | sheet | modal. Mobile: inline | drawer. */
 export const ConfiguratorDisplayMode = {
   Inline: 'inline',
   Sheet: 'sheet',
   Drawer: 'drawer',
+  Modal: 'modal',
   VariantsOnlySheet: 'variants-only-sheet',
 } as const;
 export type ConfiguratorDisplayMode = (typeof ConfiguratorDisplayMode)[keyof typeof ConfiguratorDisplayMode];

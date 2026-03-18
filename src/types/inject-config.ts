@@ -26,8 +26,8 @@ export type CarouselConfig = ResponsiveValue<CarouselDisplayMode> & {
   maxImages?: number | ResponsiveValue<number>;
 };
 
-/** Configurator layout: desktop 'inline' | 'sheet', mobile 'inline' | 'drawer'. */
-export type ConfiguratorDisplayMode = 'inline' | 'sheet' | 'drawer';
+/** Configurator layout: desktop 'inline' | 'sheet' | 'modal', mobile 'inline' | 'drawer'. */
+export type ConfiguratorDisplayMode = 'inline' | 'sheet' | 'drawer' | 'modal';
 
 export type ConfiguratorConfig = {
   displayMode: ResponsiveValue<ConfiguratorDisplayMode>;
@@ -166,8 +166,8 @@ export interface LegacyInjectConfiguratorOptions {
   carouselDisplayMode?: CarouselDisplayMode;
   carouselDisplayModeMobile?: CarouselDisplayMode;
 
-  configuratorDisplayMode?: 'inline' | 'sheet';
-  configuratorDisplayModeMobile?: 'inline' | 'drawer';
+  configuratorDisplayMode?: 'inline' | 'sheet' | 'modal';
+  configuratorDisplayModeMobile?: 'inline' | 'drawer' | 'modal';
   configuratorTriggerStyle?: 'single-button' | 'split-buttons';
   configuratorTriggerStyleMobile?: 'single-button' | 'split-buttons';
 
@@ -224,8 +224,8 @@ export interface NormalizedInjectConfig {
   carouselMaxImagesDesktop?: number;
   carouselMaxImagesMobile?: number;
 
-  configuratorDisplayMode: 'inline' | 'sheet';
-  configuratorDisplayModeMobile: 'inline' | 'drawer';
+  configuratorDisplayMode: 'inline' | 'sheet' | 'modal';
+  configuratorDisplayModeMobile: 'inline' | 'drawer' | 'modal';
   configuratorTriggerStyle: 'single-button' | 'split-buttons';
   configuratorTriggerStyleMobile: 'single-button' | 'split-buttons';
 
@@ -279,7 +279,7 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
   const carouselMaxImagesMobile = typeof maxImagesRaw === 'number' ? maxImagesRaw : (typeof maxImagesRaw === 'object' && maxImagesRaw ? maxImagesRaw.mobile ?? maxImagesRaw.desktop : undefined);
 
   const configDesktop = configurator?.displayMode?.desktop ?? c.configuratorDisplayMode ?? 'sheet';
-  const configMobile = configurator?.displayMode?.mobile ?? c.configuratorDisplayModeMobile ?? (configDesktop === 'sheet' ? 'drawer' : 'inline');
+  const configMobile = configurator?.displayMode?.mobile ?? c.configuratorDisplayModeMobile ?? (configDesktop === 'sheet' ? 'drawer' : configDesktop === 'modal' ? 'modal' : 'inline');
   const triggerDesktop = configurator?.triggerStyle?.desktop ?? c.configuratorTriggerStyle ?? 'single-button';
   const triggerMobile = configurator?.triggerStyle?.mobile ?? c.configuratorTriggerStyleMobile ?? triggerDesktop;
 

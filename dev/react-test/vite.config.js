@@ -5,6 +5,7 @@ import path from 'path';
 const testPages = [
   'configure-button-only',
   'configure-button-no-gallery',
+  'configure-button-modal',
   'single-product-gallery',
   'single-no-variants',
   'single-no-pricing',

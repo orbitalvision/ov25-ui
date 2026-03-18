@@ -51,6 +51,7 @@ export function ProductVariantsWrapper({ isInline = false }: ProductVariantsWrap
         variantDisplayStyleOverlayMobile,
         variantDisplayStyleMobile,
         hidePricing,
+        configuratorDisplayModeMobile,
       } = useOV25UI();
 
     const hasSnap2Objects = (configuratorState?.snap2Objects?.length ?? 0) > 0;
@@ -547,7 +548,7 @@ export function ProductVariantsWrapper({ isInline = false }: ProductVariantsWrap
             </div>
             {isListMode && isFilterOpen[listFilterKey] && renderFilterSheet({ optionIds: listFilterOptionIds })}
           </div>
-          {!isMobile && !hidePricing && (
+          {(!isMobile || configuratorDisplayModeMobile === 'modal') && !hidePricing && (
             <CheckoutButton />
           )}
         </div>
