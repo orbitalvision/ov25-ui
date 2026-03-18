@@ -38,6 +38,7 @@ const testPages = [
   'gallery-carousel-horizontal',
   'gallery-carousel-stacked',
   'gallery-no-carousel',
+  'configurator-setup',
 ];
 
 const testInputs = Object.fromEntries(
@@ -49,6 +50,7 @@ export default defineConfig({
   resolve: {
     alias: {
       'ov25-ui': path.resolve(__dirname, '../../dist'),
+      'ov25-setup': path.resolve(__dirname, '../../setup'),
     },
   },
   build: {
