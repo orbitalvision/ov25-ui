@@ -3,8 +3,8 @@ import type { LayoutType } from '../../lib/config/preview-config';
 export type PreviewLayoutType = LayoutType;
 
 export type FormCarouselDisplayMode = 'none' | 'carousel' | 'stacked';
-export type FormConfiguratorDisplayMode = 'inline' | 'sheet' | 'variants-only-sheet';
-export type FormConfiguratorDisplayModeMobile = 'inline' | 'drawer' | 'variants-only-sheet';
+export type FormConfiguratorDisplayMode = 'inline' | 'sheet' | 'modal' | 'variants-only-sheet';
+export type FormConfiguratorDisplayModeMobile = 'inline' | 'drawer' | 'modal' | 'variants-only-sheet';
 export type FormVariantDisplayMode = 'wizard' | 'list' | 'tabs' | 'accordion' | 'tree';
 
 export interface SelectorFormState {

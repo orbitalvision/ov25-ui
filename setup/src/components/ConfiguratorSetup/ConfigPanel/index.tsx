@@ -41,12 +41,14 @@ const CAROUSEL_OPTIONS = [
 const DISPLAY_DESKTOP_OPTIONS = [
   { value: 'inline' as FormConfiguratorDisplayMode, label: 'Inline', desc: 'Embedded beside the gallery' },
   { value: 'sheet' as FormConfiguratorDisplayMode, label: 'Sheet', desc: 'Slides in from the sides.' },
+  { value: 'modal' as FormConfiguratorDisplayMode, label: 'Modal', desc: 'Centered overlay dialog' },
   { value: 'variants-only-sheet' as FormConfiguratorDisplayMode, label: 'Variants sheet', desc: 'Sheet with variants only' },
 ];
 
 const DISPLAY_MOBILE_OPTIONS = [
   { value: 'inline' as FormConfiguratorDisplayModeMobile, label: 'Inline', desc: 'Embedded below gallery' },
   { value: 'drawer' as FormConfiguratorDisplayModeMobile, label: 'Drawer', desc: 'Slides up from bottom' },
+  { value: 'modal' as FormConfiguratorDisplayModeMobile, label: 'Modal', desc: 'Centered overlay dialog' },
   { value: 'variants-only-sheet' as FormConfiguratorDisplayModeMobile, label: 'Variants sheet', desc: 'Sheet with variants only' },
 ];
 
