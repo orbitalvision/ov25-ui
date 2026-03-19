@@ -120,7 +120,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
     return (<>
 
         <div className={cn(
-            "ov:relative ov:font-[family-name:var(--ov25-font-family)] ov:h-full",
+            "ov:relative ov:font-[family-name:var(--ov25-font-family)] ov:h-auto ov:max-h-[90vh]",
             isPreloading && "ov:hidden"
         )} id="ov-25-configurator-gallery-container">
             <div id="ov25-configurator-background-color" className={cn(
