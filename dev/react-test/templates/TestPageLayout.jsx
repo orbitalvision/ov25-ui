@@ -97,7 +97,7 @@ export function TestPageLayout({
         {topContent}
         <div className="ov:flex ov:flex-col ov:md:flex-row">
           <div className="ov:w-full ov:md:w-[55%]">
-            <div className="configurator-container ov:w-full ov:aspect-square ov:md:aspect-[3/2] ov:md:max-h-[500px]">
+            <div className="configurator-container ov:w-full ov:aspect-square ov:md:aspect-[3/2]">
               <img src={sofaImage} alt="Product" />
             </div>
           </div>
