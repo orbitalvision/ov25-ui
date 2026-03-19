@@ -4,6 +4,7 @@ import { cn } from '../../../lib/utils';
 import type { SerializableInjectConfig } from '../preview-config-serializable';
 
 const OV25_CONFIG_MESSAGE = 'OV25_CONFIG';
+const OV25_PREVIEW_READY = 'OV25_PREVIEW_READY';
 const PREVIEW_BASE_URL = 'https://app.ov25.ai/configurator-preview';
 
 function getPreviewBase(useLocalhost?: boolean) {
@@ -43,6 +44,17 @@ export function PreviewArea({ serializableConfig, previewBaseUrl, useLocalPrevie
 
   const sendConfig = useCallback(() => {
     postConfig(iframeRef.current, configRef.current);
+  }, []);
+
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data?.type !== OV25_PREVIEW_READY) return;
+      if (iframeRef.current?.contentWindow && event.source === iframeRef.current.contentWindow) {
+        postConfig(iframeRef.current, configRef.current);
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
   }, []);
 
   useEffect(() => {
