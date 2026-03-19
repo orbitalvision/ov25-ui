@@ -179,6 +179,7 @@ interface OV25UIContextType {
     mobileDrawer?: ShadowRoot;
     configuratorViewControls?: ShadowRoot;
     popoverPortal?: ShadowRoot;
+    modalPortal?: ShadowRoot;
     swatchbookPortal?: ShadowRoot;
   };
   cssString?: string;
@@ -419,6 +420,7 @@ export const OV25UIProvider: React.FC<{
     mobileDrawer?: ShadowRoot;
     configuratorViewControls?: ShadowRoot;
     popoverPortal?: ShadowRoot;
+    modalPortal?: ShadowRoot;
     swatchbookPortal?: ShadowRoot;
   },
   cssString?: string,

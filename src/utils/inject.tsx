@@ -55,6 +55,7 @@ const cleanupShadowDOMContainers = () => {
     'ov25-mobile-drawer-container',
     'ov25-configurator-view-controls-container',
     'ov25-popover-portal-container',
+    'ov25-modal-portal-container',
     'ov25-toaster-container',
     'ov25-swatchbook-portal-container',
     'ov25-provider-root'
@@ -453,6 +454,33 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     }
     swatchbookPortalShadowRoot.adoptedStyleSheets = swatchbookPortalStylesheets;
 
+    // Create modal portal Shadow DOM container (ConfiguratorModal)
+    const modalPortalContainer = document.createElement('div');
+    modalPortalContainer.id = 'ov25-modal-portal-container';
+    modalPortalContainer.setAttribute('data-clarity-mask', 'true');
+    modalPortalContainer.style.position = 'fixed';
+    modalPortalContainer.style.top = '0';
+    modalPortalContainer.style.left = '0';
+    modalPortalContainer.style.width = '100%';
+    modalPortalContainer.style.height = '100%';
+    modalPortalContainer.style.pointerEvents = 'none';
+    modalPortalContainer.style.zIndex = '2147483646'; // max - 1
+    document.body.appendChild(modalPortalContainer);
+
+    const modalPortalEmptySpan = document.createElement('span');
+    modalPortalEmptySpan.style.width = '100%';
+    modalPortalEmptySpan.style.height = '100%';
+    modalPortalEmptySpan.style.pointerEvents = 'none';
+    modalPortalContainer.appendChild(modalPortalEmptySpan);
+
+    const modalPortalShadowRoot = modalPortalContainer.attachShadow({ mode: 'open' });
+    const modalPortalStylesheets = [sharedStylesheet];
+    if (cssString) {
+      const cssVariablesStylesheet = createCSSVariablesStylesheet(cssString);
+      modalPortalStylesheets.push(cssVariablesStylesheet);
+    }
+    modalPortalShadowRoot.adoptedStyleSheets = modalPortalStylesheets;
+
     // When no gallery selector but deferThreeD, or modal mode with no gallery: render gallery in hidden container so iframe is preloaded
     const hasGallerySelector = !!getSelector(effectiveGallerySelector);
     const isAnyModalMode = configuratorDisplayMode === ConfiguratorDisplayMode.Modal || configuratorDisplayModeMobile === ConfiguratorDisplayMode.Modal;
@@ -780,6 +808,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
           mobileDrawer: mobileDrawerShadowRoot,
           configuratorViewControls: configuratorViewControlsShadowRoot,
           popoverPortal: popoverPortalShadowRoot,
+          modalPortal: modalPortalShadowRoot,
           swatchbookPortal: swatchbookPortalShadowRoot
         }}
         cssString={cssString}

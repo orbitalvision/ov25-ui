@@ -37,10 +37,12 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({
     isSnap2Mode,
     variantDisplayStyleOverlay,
     variantDisplayStyleOverlayMobile,
+    shadowDOMs,
   } = useOV25UI();
   const effectiveOverlayStyle = isMobile ? variantDisplayStyleOverlayMobile : variantDisplayStyleOverlay;
   const isShareDialogOpen = shareDialogTrigger !== 'none';
   const modalRef = useRef<HTMLDivElement>(null);
+  const portalTarget = shadowDOMs?.modalPortal ?? document.body;
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {
@@ -65,7 +67,7 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({
   }, [isOpen, handleKeyDown]);
 
   const leftArea = useGallerySlot ? (
-    <div id={MODAL_GALLERY_SLOT_ID} className="ov:w-full ov:h-full ov:min-h-0" />
+    <div id={MODAL_GALLERY_SLOT_ID} className="ov:w-full ov:h-full ov:min-h-0" ><span></span></div>
   ) : (
     <div className="ov:w-full ov:h-full">{children}</div>
   );
@@ -149,6 +151,6 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({
         </div>
       </div>
     </div>,
-    document.body
+    portalTarget
   );
 };

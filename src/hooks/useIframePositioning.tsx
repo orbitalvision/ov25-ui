@@ -34,6 +34,15 @@ const findElementByIdInShadowOrRegularDOM = (id: string): HTMLElement | null => 
     }
   }
 
+  // Modal gallery slot lives inside modal portal shadow root
+  const modalPortalContainer = document.getElementById('ov25-modal-portal-container');
+  if (modalPortalContainer?.shadowRoot) {
+    const elementInShadow = modalPortalContainer.shadowRoot.getElementById(id);
+    if (elementInShadow) {
+      return elementInShadow;
+    }
+  }
+
   // If not found, search in all shadow roots
   const shadowHosts = document.querySelectorAll('div[class^="ov25-configurator-"]');
   
@@ -228,7 +237,7 @@ export const useIframePositioning = () => {
         // Desktop modal: position iframe container to match the modal's gallery slot
         const frameIdRef = { current: 0 };
         const updateModalSlotPosition = () => {
-          const slot = document.getElementById(MODAL_GALLERY_SLOT_ID);
+          const slot = findElementByIdInShadowOrRegularDOM(MODAL_GALLERY_SLOT_ID);
           if (!slot) return;
           const rect = slot.getBoundingClientRect();
           container.style.position = 'fixed';
@@ -266,7 +275,7 @@ export const useIframePositioning = () => {
         frameIdRef.current = requestAnimationFrame(tick);
 
         const resizeObserver = new ResizeObserver(updateModalSlotPosition);
-        const slotEl = document.getElementById(MODAL_GALLERY_SLOT_ID);
+        const slotEl = findElementByIdInShadowOrRegularDOM(MODAL_GALLERY_SLOT_ID);
         if (slotEl) resizeObserver.observe(slotEl);
 
         return () => {
