@@ -124,7 +124,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
             isPreloading && "ov:hidden"
         )} id="ov-25-configurator-gallery-container">
             <div id="ov25-configurator-background-color" className={cn(
-                "ov:h-full ov:w-full ov:z-[2] ov:absolute ov:inset-0 ov:block!",
+                "ov:h-full ov:max-h-[90vh] ov:w-full ov:z-[2] ov:absolute ov:inset-0 ov:block!",
                 "ov:rounded-[var(--ov25-configurator-iframe-border-radius)]",
                 "ov:bg-[var(--ov25-configurator-iframe-background-color)]",
             )}></div>
@@ -142,7 +142,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
                 {!isProductGalleryStacked && <IframeContainer />}
 
             </div>
-            {showCarousel && !carouselSibling && <div id='true-carousel' className="ov:mt-[var(--ov25-gallery-gap)]"></div>}
+            {showCarousel && !carouselSibling && <div id='true-carousel' className="ov:mt-[var(--ov25-gallery-gap)]"><span></span></div>}
         </div>
         {isProductGalleryStacked && createPortal(
            <IframeContainer  />,

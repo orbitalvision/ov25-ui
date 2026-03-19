@@ -600,6 +600,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
           carouselWrapper.id = 'true-carousel';
           carouselWrapper.className = 'ov25-configurator-carousel-sibling';
           carouselWrapper.style.marginTop = 'var(--ov25-gallery-gap)';
+          carouselWrapper.appendChild(document.createElement('span'));
           replacementDiv.parentNode.insertBefore(carouselWrapper, replacementDiv.nextSibling);
           pushPortal('#true-carousel', <ProductCarousel />, shouldCreateShadowDOM('carousel'));
         }
