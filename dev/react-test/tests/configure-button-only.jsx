@@ -20,6 +20,7 @@ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
       useSimpleVariantsSelector: true,
     },
   },
+  deferThreeD: true,
   callbacks: {
     addToBasket: () => alert('Add to basket'),
     buyNow: () => alert('Buy now'),
