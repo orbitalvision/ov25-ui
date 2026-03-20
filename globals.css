@@ -626,3 +626,7 @@ html #ov25-configurator-variant-menu-container {
   .ov25-gallery-image-button img {
     object-fit: contain;
   }
+
+  #true-carousel {
+    margin-top: var(--ov25-gallery-gap);
+  }
