@@ -3,7 +3,6 @@ import { EditorView, keymap, placeholder as cmPlaceholder } from '@codemirror/vi
 import { EditorState } from '@codemirror/state';
 import { css } from '@codemirror/lang-css';
 import { defaultKeymap } from '@codemirror/commands';
-import { oneDark } from '@codemirror/theme-one-dark';
 import { syntaxHighlighting, defaultHighlightStyle } from '@codemirror/language';
 
 interface CSSEditorProps {
@@ -32,18 +31,32 @@ export function CSSEditor({ value, onChange, placeholder, className }: CSSEditor
         keymap.of(defaultKeymap),
         css(),
         syntaxHighlighting(defaultHighlightStyle),
-        oneDark,
         EditorView.updateListener.of((update) => {
           if (update.docChanged) {
             onChangeRef.current(update.state.doc.toString());
           }
         }),
         EditorView.theme({
-          '&': { fontSize: '11px', borderRadius: '6px', border: '1px solid hsl(var(--border))' },
-          '.cm-content': { fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace', minHeight: '100px', padding: '8px 0' },
+          '&': {
+            fontSize: '11px',
+            borderRadius: '6px',
+            border: '1px solid var(--color-border)',
+            backgroundColor: 'var(--color-background)',
+            color: 'var(--color-foreground)',
+          },
+          '.cm-content': {
+            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
+            minHeight: '100px',
+            padding: '8px 0',
+            caretColor: 'var(--color-foreground)',
+          },
           '.cm-gutters': { display: 'none' },
-          '.cm-scroller': { borderRadius: '6px' },
-          '&.cm-focused': { outline: '2px solid hsl(var(--ring))', outlineOffset: '-1px' },
+          '.cm-scroller': {
+            borderRadius: '6px',
+            backgroundColor: 'var(--color-background)',
+          },
+          '.cm-placeholder': { color: 'var(--color-muted-foreground)' },
+          '&.cm-focused': { outline: '2px solid var(--color-ring)', outlineOffset: '-1px' },
         }),
         EditorView.lineWrapping,
         ...(placeholder ? [cmPlaceholder(placeholder)] : []),
