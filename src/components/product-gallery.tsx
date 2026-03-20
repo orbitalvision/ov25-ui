@@ -34,14 +34,16 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
     } = useOV25UI();
 
     const isModalMode = isMobile ? configuratorDisplayModeMobile === 'modal' : configuratorDisplayMode === 'modal';
+    const modalStackBoost = isDrawerOrDialogOpen && isModalMode;
 
     // Use the custom hook to handle iframe positioning
     useIframePositioning();
 
-    // Handle z-index for non-stacked gallery when drawer opens
+    // Lift gallery host above modal backdrop (ConfiguratorModal uses z-2147483646). Stacked layout skips
+    // .ov25-configurator-gallery on the outer host — true-iframe is portaled to body; modal path there sets z in useIframePositioning.
     useEffect(() => {
         if (isProductGalleryStacked) return;
-        
+
         if (isDrawerOrDialogOpen) {
             const container = document.querySelector('.ov25-configurator-gallery') as HTMLElement;
             if (!container) return;
@@ -54,7 +56,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
             } else {
                 container.style.zIndex = '2147483644';
             }
-            
+
             return () => {
                 container.style.zIndex = originalZIndex || '';
                 container.style.pointerEvents = originalPointerEvents || '';
@@ -120,11 +122,13 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
     return (<>
 
         <div className={cn(
-            "ov:relative ov:flex ov:flex-col ov:gap-[var(--ov25-gallery-gap)] ov:font-[family-name:var(--ov25-font-family)] ov:h-auto ov:max-h-[90vh] ov:isolate",
+            "ov:relative ov:flex ov:flex-col ov:gap-[var(--ov25-gallery-gap)] ov:font-[family-name:var(--ov25-font-family)] ov:h-auto ov:max-h-full",
+            modalStackBoost ? "ov:z-[2147483647]" : "ov:z-[2] ov:isolate",
             isPreloading && "ov:hidden"
         )} id="ov-25-configurator-gallery-container">
             <div id="ov25-configurator-background-color" className={cn(
-                "ov:h-full ov:max-h-[90vh] ov:w-full ov:z-[2] ov:absolute ov:inset-0 ov:block!",
+                "ov:h-full ov:max-h-[90vh] ov:w-full ov:z-[2] ov:absolute ov:inset-0",
+                modalStackBoost ? "ov:hidden!" : "ov:block!",
                 "ov:rounded-[var(--ov25-configurator-iframe-border-radius)]",
                 "ov:bg-[var(--ov25-configurator-iframe-background-color)]",
             )}></div>
@@ -142,7 +146,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
                 {!isProductGalleryStacked && <IframeContainer />}
 
             </div>
-            {showCarousel && !carouselSibling && (
+            {showCarousel && !carouselSibling && !modalStackBoost && (
               <div id="true-carousel" className="ov:shrink-0">
                 <span />
               </div>
@@ -164,6 +168,11 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
  * when the configurator opens.
  */
 export function DeferredGalleryContainer() {
+    const { isDrawerOrDialogOpen, configuratorDisplayMode, configuratorDisplayModeMobile, isMobile } = useOV25UI();
+    const isModalMode = isMobile ? configuratorDisplayModeMobile === 'modal' : configuratorDisplayMode === 'modal';
+    // Preload stays behind the page (z-index -1). When sheet/drawer opens, lift above the page.
+    // Modal backdrop is z-2147483646 — deferred host must be higher so the iframe sits above the dimmer.
+    const openZ = isDrawerOrDialogOpen ? (isModalMode ? 2147483647 : 2147483644) : -1;
     return (
         <div
             className="ov25-configurator-gallery ov:font-[family-name:var(--ov25-font-family)]"
@@ -174,7 +183,7 @@ export function DeferredGalleryContainer() {
                 width: '100%',
                 height: '100%',
                 pointerEvents: 'none',
-                zIndex: -1,
+                zIndex: openZ,
                 visibility: 'hidden',
             }}
         >

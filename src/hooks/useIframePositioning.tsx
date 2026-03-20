@@ -304,6 +304,8 @@ export const useIframePositioning = () => {
         container.style.borderRadius = '0';
         container.style.zIndex = '100';
         container.style.overflow = 'hidden';
+        container.style.visibility = 'visible';
+        iframe.style.visibility = 'visible';
 
         iframe.style.position = 'fixed';
         iframe.style.top = '0';
@@ -350,6 +352,8 @@ export const useIframePositioning = () => {
         container.style.borderRadius = '0';
         container.style.zIndex = '100';
         container.style.overflow = 'hidden';
+        container.style.visibility = 'visible';
+        iframe.style.visibility = 'visible';
 
         iframe.style.position = 'fixed';
         iframe.style.top = '0';

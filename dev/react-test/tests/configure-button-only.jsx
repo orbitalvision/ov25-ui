@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { TestPageLayout } from '../templates/TestPageLayout.jsx';
 import '../src/index.css';
 
-const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
+const baseConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
   apiKey: () => '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d',
   productLink: () => '217',
   selectors: {
@@ -20,7 +20,6 @@ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
       useSimpleVariantsSelector: true,
     },
   },
-  deferThreeD: true,
   callbacks: {
     addToBasket: () => alert('Add to basket'),
     buyNow: () => alert('Buy now'),
@@ -30,13 +29,62 @@ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
 });
 
 function App() {
+  const qs = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
+  // Default off = in-page gallery (old configure-button-only). ?defer3d=1 = no gallery slot + deferred preload (old no-gallery test).
+  const deferThreeD = qs.get('defer3d') === '1';
+
+  const config = {
+    ...baseConfig,
+    ...(deferThreeD
+      ? {
+          deferThreeD: true,
+          flags: { ...baseConfig.flags, deferThreeD: true },
+        }
+      : {
+          selectors: {
+            ...baseConfig.selectors,
+            gallery: { selector: '.configurator-container', replace: true },
+          },
+        }),
+  };
+
+  const linkClass = (active) =>
+    active ? 'ov:bg-black ov:text-white' : 'ov:bg-gray-200 ov:text-gray-800 ov:hover:bg-gray-300';
+
+  const deferOptions = [
+    { label: 'On', param: '1', active: deferThreeD },
+    { label: 'Off', param: '0', active: !deferThreeD },
+  ];
+
   return (
     <TestPageLayout
-      title="Configure Button Only"
-      description="Standard product with a single Configure button. Variants drawer opens on click (useSimpleVariantsSelector)."
+      title="Configure button only"
+      description={
+        deferThreeD
+          ? 'defer3D on: no gallery slot — 3D preloads in a hidden container until you open the sheet. Use defer3D off for an in-page gallery.'
+          : 'defer3D off: gallery replaces .configurator-container. Toggle defer3D at the top to test deferred preload (no gallery selector).'
+      }
       injectConfig={config}
       renderControls={false}
       renderSwatches={false}
+      topContent={
+        <div className="ov:flex ov:flex-wrap ov:gap-2 ov:mb-3 ov:text-sm ov:items-center">
+          <span className="ov:text-gray-600">defer3D:</span>
+          {deferOptions.map((opt) => {
+            const params = new URLSearchParams(window.location.search);
+            params.set('defer3d', opt.param);
+            return (
+              <a
+                key={opt.label}
+                href={`?${params}`}
+                className={`ov:px-2 ov:py-1 ov:rounded ov:no-underline ${linkClass(opt.active)}`}
+              >
+                {opt.label}
+              </a>
+            );
+          })}
+        </div>
+      }
       asideSlot={
         <button
           type="button"
