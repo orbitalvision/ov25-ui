@@ -130,6 +130,7 @@
     --ov25-wizard-variants-content-height: 600px;
     --ov25-wizard-variants-available-height: 100%;
 
+    --ov25-inline-list-aside-max-height: 45rem;
     /* Inline list: aside taller so scrollable area gets 600px + room for checkout button */
     --ov25-inline-list-aside-min-height: 1000px;
     --ov25-inline-list-aside-min-height-mobile: 100px;
@@ -600,3 +601,7 @@ html #ov25-configurator-variant-menu-container {
   box-shadow: inset 0 2px 8px 0 rgba(154, 154, 154, 0.5), 
               inset 0 2px 4px 0 rgba(243, 244, 246, 0.15);
 }
+
+#ov25-configurator-variant-menu-container:has([data-ov25-list-variants-mode="inline"]) {
+    max-height: var(--ov25-inline-list-aside-max-height);
+  }
