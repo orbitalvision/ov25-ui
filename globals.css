@@ -605,3 +605,24 @@ html #ov25-configurator-variant-menu-container {
 #ov25-configurator-variant-menu-container:has([data-ov25-list-variants-mode="inline"]) {
     max-height: var(--ov25-inline-list-aside-max-height);
   }
+
+  .ov25-gallery-image-button{
+    background-color: var(--ov25-configurator-iframe-background-color);
+    object-fit: contain ;
+  }
+  #true-ov25-configurator-iframe-container img {
+    object-fit: contain;
+  }
+  .ov25-thumbnail-scroll {
+    padding-left: 0px;
+    padding-right: 0px;
+  }
+  .ov\:ring-2 {
+    --tw-ring-inset: inset; 
+  }
+  .ov25-gallery-image-button div{
+    display: none;
+  }
+  .ov25-gallery-image-button img {
+    object-fit: contain;
+  }
