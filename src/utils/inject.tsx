@@ -7,7 +7,6 @@ import Price from '../components/Price.js';
 import Name from '../components/Name.js';
 import VariantSelectMenu from '../components/VariantSelectMenu/VariantSelectMenu.js';
 import { SwatchesContainer } from '../components/SwatchesContainer.js';
-import { ProductCarousel } from '../components/product-carousel.js';
 import { SwatchBook } from '../components/VariantSelectMenu/SwatchBook.js';
 import { Snap2ConfigureButton, Snap2ConfigureUI } from '../components/Snap2ConfigureButton.js';
 import { ConfigureButton } from '../components/ConfigureButton.js';
@@ -32,6 +31,12 @@ document.adoptedStyleSheets = [sharedStylesheet];
 // Function to wait for an element to appear in the DOM
 function waitForElement(selector: string, timeout = 5000) {
   return new Promise<Element>((resolve, reject) => {
+    const immediate = document.querySelector(selector);
+    if (immediate) {
+      resolve(immediate);
+      return;
+    }
+
     const interval = 100;
     let elapsed = 0;
 
@@ -609,7 +614,6 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     };
 
     const isProductGalleryStacked = checkForStackedGallery();
-    const carouselSibling = showCarousel && shouldReplace(effectiveGallerySelector);
 
     const variantsSelectorStr = getSelector(variantsSelector);
     const configureSelector = configureButtonSelector ? getSelector(configureButtonSelector) : undefined;
@@ -617,20 +621,25 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     const configureTarget = configureSelector ? document.querySelector(configureSelector) : null;
 
     // Process each component
-    // Show gallery in page slot when selector is provided (including modal mode — iframe shows on page, then repositions into modal)
+    // Show gallery in page slot when selector is provided (including modal mode — iframe shows on page, then repositions into modal).
+    // Non-replace: mount inside a dedicated flex column so iframe + thumbnails stay one layout unit (avoids grid splitting vs siblings).
     if (getSelector(effectiveGallerySelector)) {
-      processElement(effectiveGallerySelector, <ProductGallery />, 'gallery');
-      if (carouselSibling) {
-        const gallerySelectorStr = getSelector(effectiveGallerySelector);
-        const replacementDiv = gallerySelectorStr ? document.querySelector(gallerySelectorStr) : null;
-        if (replacementDiv?.parentNode) {
-          const carouselWrapper = document.createElement('div');
-          carouselWrapper.id = 'true-carousel';
-          carouselWrapper.className = 'ov25-configurator-carousel-sibling';
-          carouselWrapper.style.marginTop = 'var(--ov25-gallery-gap)';
-          carouselWrapper.appendChild(document.createElement('span'));
-          replacementDiv.parentNode.insertBefore(carouselWrapper, replacementDiv.nextSibling);
-          pushPortal('#true-carousel', <ProductCarousel />, shouldCreateShadowDOM('carousel'));
+      const gallerySel = getSelector(effectiveGallerySelector)!;
+      if (shouldReplace(effectiveGallerySelector)) {
+        processElement(effectiveGallerySelector, <ProductGallery />, 'gallery');
+      } else {
+        const target = document.querySelector(gallerySel);
+        if (target) {
+          const column = document.createElement('div');
+          column.className = 'ov25-configurator-inject-column';
+          column.setAttribute('data-clarity-mask', 'true');
+          column.style.display = 'flex';
+          column.style.flexDirection = 'column';
+          column.style.width = '100%';
+          target.appendChild(column);
+          portals.push(createPortal(<ProductGallery />, column));
+        } else {
+          console.warn(`[OV25-UI] Element not found for selector "${gallerySel}"`);
         }
       }
     } else if (useDeferredGallery) {
@@ -701,17 +710,6 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
 
     // Add swatchbook to portals
     portals.push(createPortal(<SwatchBook isMobile={false} />, swatchbookPortalShadowRoot));
-
-    if (showCarousel && !carouselSibling) {
-      waitForElement('#true-carousel', 10000)
-        .then(element => {
-          const useShadowDOM = shouldCreateShadowDOM('carousel');
-          pushPortal('#true-carousel', <ProductCarousel />, useShadowDOM);
-        })
-        .catch(err => {
-          console.warn(`[OV25-UI] ${err.message}`);
-        });
-    }
 
     // Special handling for toaster - use body-level container for all modes to ensure visibility in fullscreen
     // Use body-level toaster container at max z-index to ensure it appears above fullscreen iframe
@@ -791,7 +789,6 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
         carouselDisplayModeMobile={carouselDisplayModeMobile}
         carouselMaxImagesDesktop={carouselMaxImagesDesktop}
         carouselMaxImagesMobile={carouselMaxImagesMobile}
-        carouselSibling={carouselSibling}
         showCarousel={showCarousel}
         hasConfigureButton={!!configureButtonSelector && !useSimpleVariantsSelector}
         uniqueId={uniqueId}

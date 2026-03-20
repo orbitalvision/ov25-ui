@@ -1,10 +1,12 @@
-import {  useEffect, useRef } from "react"
+import { useEffect, useLayoutEffect, useRef, useState } from "react"
 import * as React from 'react'
 import { useOV25UI } from "../contexts/ov25-ui-context.js"
 import { useIframePositioning } from "../hooks/useIframePositioning.js"
 import { cn } from "../lib/utils.js"
 import { createPortal } from "react-dom"
+import { getSharedStylesheet, createCSSVariablesStylesheet } from "../utils/shadow-styles.js"
 import { IframeContainer } from "./IframeContainer.js"
+import { ProductCarousel } from "./product-carousel.js"
 import { ArPreviewQRCodeDialog } from "./ar-preview-qr-code-dialog.js"
 
 
@@ -22,7 +24,6 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
         galleryIndexToUse,
         images: passedImages,
         isProductGalleryStacked,
-        carouselSibling,
         showCarousel,
         arPreviewLink,
         setArPreviewLink,
@@ -31,10 +32,34 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
         configuratorDisplayMode,
         configuratorDisplayModeMobile,
         isMobile,
+        cssString,
     } = useOV25UI();
 
     const isModalMode = isMobile ? configuratorDisplayModeMobile === 'modal' : configuratorDisplayMode === 'modal';
     const modalStackBoost = isDrawerOrDialogOpen && isModalMode;
+
+    const carouselHostRef = useRef<HTMLDivElement>(null);
+    const [carouselShadowRoot, setCarouselShadowRoot] = useState<ShadowRoot | null>(null);
+
+    useLayoutEffect(() => {
+        if (!showCarousel || modalStackBoost) {
+            setCarouselShadowRoot(null);
+            return;
+        }
+        const host = carouselHostRef.current;
+        if (!host) return;
+
+        let shadow = host.shadowRoot;
+        if (!shadow) {
+            shadow = host.attachShadow({ mode: 'open' });
+        }
+        const stylesheets: CSSStyleSheet[] = [getSharedStylesheet()];
+        if (cssString) {
+            stylesheets.push(createCSSVariablesStylesheet(cssString));
+        }
+        shadow.adoptedStyleSheets = stylesheets;
+        setCarouselShadowRoot(shadow);
+    }, [showCarousel, modalStackBoost, cssString]);
 
     // Use the custom hook to handle iframe positioning
     useIframePositioning();
@@ -122,35 +147,47 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
     return (<>
 
         <div className={cn(
-            "ov:relative ov:flex ov:flex-col ov:gap-[var(--ov25-gallery-gap)] ov:font-[family-name:var(--ov25-font-family)] ov:h-auto ov:max-h-full",
+            "ov:relative ov:flex ov:flex-col ov:font-[family-name:var(--ov25-font-family)] ov:h-auto ov:max-h-full",
             modalStackBoost ? "ov:z-[2147483647]" : "ov:z-[2] ov:isolate",
             isPreloading && "ov:hidden"
         )} id="ov-25-configurator-gallery-container">
-            <div id="ov25-configurator-background-color" className={cn(
-                "ov:h-full ov:max-h-[90vh] ov:w-full ov:z-[2] ov:absolute ov:inset-0",
-                modalStackBoost ? "ov:hidden!" : "ov:block!",
-                "ov:rounded-[var(--ov25-configurator-iframe-border-radius)]",
-                "ov:bg-[var(--ov25-configurator-iframe-background-color)]",
-            )}></div>
-            <div id={uniqueId ? `ov25-configurator-iframe-container-${uniqueId}` : "ov25-configurator-iframe-container"}
-                data-fullscreen={isVariantsOpen}
-                data-stacked={isProductGalleryStacked}
-                data-clarity-mask="true"
-                ref={containerRef}
-                className={cn(
-                    "ov:h-full ov:w-full ov:relative ov:overflow-hidden ov:z-[3]",
+            {/* Scope background to iframe slot only; absolute inset-0 on the outer column was covering the carousel */}
+            <div className="ov:relative ov:w-full">
+                <div id="ov25-configurator-background-color" className={cn(
+                    "ov:pointer-events-none ov:absolute ov:inset-0 ov:z-[2] ov:w-full",
+                    modalStackBoost ? "ov:hidden!" : "ov:block!",
                     "ov:rounded-[var(--ov25-configurator-iframe-border-radius)]",
                     "ov:bg-[var(--ov25-configurator-iframe-background-color)]",
-                )}>
+                )}></div>
+                <div id={uniqueId ? `ov25-configurator-iframe-container-${uniqueId}` : "ov25-configurator-iframe-container"}
+                    data-fullscreen={isVariantsOpen}
+                    data-stacked={isProductGalleryStacked}
+                    data-clarity-mask="true"
+                    ref={containerRef}
+                    className={cn(
+                        "ov:h-full ov:w-full ov:relative ov:overflow-hidden ov:z-[3]",
+                        "ov:rounded-[var(--ov25-configurator-iframe-border-radius)]",
+                        "ov:bg-[var(--ov25-configurator-iframe-background-color)]",
+                    )}>
 
-                {!isProductGalleryStacked && <IframeContainer />}
+                    {!isProductGalleryStacked && <IframeContainer />}
 
+                </div>
             </div>
-            {showCarousel && !carouselSibling && !modalStackBoost && (
-              <div id="true-carousel" className="ov:shrink-0">
+            {showCarousel && !modalStackBoost && (
+              <div
+                ref={carouselHostRef}
+                id="true-carousel"
+                className={cn(
+                  "ov:shrink-0",
+                  isDrawerOrDialogOpen && "ov:hidden"
+                )}
+              >
                 <span />
               </div>
             )}
+            {carouselShadowRoot &&
+              createPortal(<ProductCarousel />, carouselShadowRoot)}
         </div>
         {isProductGalleryStacked && createPortal(
            <IframeContainer  />,

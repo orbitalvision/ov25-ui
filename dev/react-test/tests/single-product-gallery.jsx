@@ -1,11 +1,19 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { TestPageLayout } from '../templates/TestPageLayout.jsx';
+import sofaImage from '../src/images/sofa.png';
 import '../src/index.css';
+
+/** Explicit URLs so the carousel has data even if product 58 API metadata has no gallery images. */
+const DEMO_GALLERY_IMAGES = [
+  sofaImage,
+  ...Array.from({ length: 4 }, (_, i) => `https://picsum.photos/600/600?random=${i + 50}`),
+];
 
 const baseConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
   apiKey: () => '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d',
   productLink: () => '58',
+  images: DEMO_GALLERY_IMAGES,
   selectors: {
     gallery: { selector: '.configurator-container', replace: true },
     variants: '#ov25-controls',
@@ -13,7 +21,7 @@ const baseConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
     price: { selector: '#price', replace: true },
     name: { selector: '#name', replace: true },
   },
-  carousel: { desktop: 'stacked', mobile: 'carousel' },
+  carousel: { desktop: 'carousel', mobile: 'carousel' },
   configurator: {
     displayMode: { desktop: 'sheet', mobile: 'drawer' },
     triggerStyle: { desktop: 'single-button', mobile: 'single-button' },

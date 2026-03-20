@@ -25,7 +25,13 @@ export const IframeContainer = () => {
         isMobile,
         deferThreeD,
         cssString,
+        isDrawerOrDialogOpen,
+        configuratorDisplayMode,
+        configuratorDisplayModeMobile,
     } = useOV25UI();
+
+    const isModalMode =
+        isMobile ? configuratorDisplayModeMobile === 'modal' : configuratorDisplayMode === 'modal';
 
     const controlsContainerRef = useRef<HTMLDivElement>(null);
     const [controlsShadowRoot, setControlsShadowRoot] = useState<ShadowRoot | null>(null);
@@ -124,7 +130,13 @@ export const IframeContainer = () => {
                 const imageIndex = galleryIndex < galleryIndexToUse ? galleryIndex : galleryIndex - 1;
                 const img = images[imageIndex];
                 const src = img ? resolveImageUrl(img as any, 'main') : null;
-                return galleryIndex !== galleryIndexToUse && src ? (
+                // Sheet/drawer: poster sits in a bad stacking context vs variant UI (esp. deferThreeD); hide until closed.
+                // Modal: keep poster — gallery is repositioned into the modal slot with correct stacking.
+                const showPoster =
+                    galleryIndex !== galleryIndexToUse &&
+                    !!src &&
+                    (!isDrawerOrDialogOpen || isModalMode);
+                return showPoster ? (
                     <img
                         id={`ov-25-configurator-product-image-${galleryIndex}`}
                         src={src}

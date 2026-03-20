@@ -230,7 +230,6 @@ interface OV25UIContextType {
   carouselLayoutMobile: CarouselLayout;
   carouselMaxImagesDesktop?: number;
   carouselMaxImagesMobile?: number;
-  carouselSibling: boolean;
   showCarousel: boolean;
   mobileLogoURL?: string;
   uniqueId?: string;
@@ -398,7 +397,6 @@ export const OV25UIProvider: React.FC<{
   carouselMaxImagesMobile?: number,
   /** @deprecated Use carouselDisplayMode */
   carouselLayout?: CarouselDisplayMode,
-  carouselSibling?: boolean,
   showCarousel?: boolean,
   hasConfigureButton: boolean,
   mobileLogoURL?: string,
@@ -446,7 +444,6 @@ export const OV25UIProvider: React.FC<{
   carouselMaxImagesDesktop,
   carouselMaxImagesMobile,
   carouselLayout: carouselLayoutProp,
-  carouselSibling = false,
   showCarousel = true,
   hasConfigureButton,
   mobileLogoURL,
@@ -1511,7 +1508,6 @@ export const OV25UIProvider: React.FC<{
   carouselLayoutMobile,
   carouselMaxImagesDesktop,
   carouselMaxImagesMobile,
-  carouselSibling,
   showCarousel,
     hasSwitchedAfterDefer,
     deferThreeD,

@@ -3,6 +3,9 @@ import { useOV25UI } from '../contexts/ov25-ui-context.js';
 import { IFRAME_HEIGHT_RATIO } from '../utils/configurator-utils.js';
 import { MODAL_GALLERY_SLOT_ID } from '../components/ConfiguratorModal.js';
 
+/** Variant sheet UI (e.g. VariantContentDesktop) uses z-index 2147483644; iframe + deferThreeD poster must stack above it. */
+const DESKTOP_SHEET_IFRAME_Z_INDEX = '2147483645';
+
 /**
  * Helper function to find an element in Shadow DOM or regular DOM
  */
@@ -348,9 +351,8 @@ export const useIframePositioning = () => {
         container.style.top = '0';
         container.style.left = '0';
         container.style.right = '0';
-        container.style.zIndex = '0';
         container.style.borderRadius = '0';
-        container.style.zIndex = '100';
+        container.style.zIndex = DESKTOP_SHEET_IFRAME_Z_INDEX;
         container.style.overflow = 'hidden';
         container.style.visibility = 'visible';
         iframe.style.visibility = 'visible';
@@ -358,7 +360,9 @@ export const useIframePositioning = () => {
         iframe.style.position = 'fixed';
         iframe.style.top = '0';
         iframe.style.left = '0';
-        iframe.style.zIndex = '100';
+        // Keep iframe below ConfiguratorViewControls (z-[101]) inside the sheet; only the outer
+        // container needs DESKTOP_SHEET_IFRAME_Z_INDEX to sit above the variant overlay (2147483644).
+        iframe.style.zIndex = '1';
 
         container.style.transform = 'translateX(-100%)';
         iframe.style.transform = 'translateX(-100%)';
