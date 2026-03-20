@@ -72,6 +72,7 @@ export const STYLE_GROUPS: StyleGroup[] = [
     label: 'Product Variants & Collections',
     description: 'Variant thumbnails, collection buttons, highlight styles, and panel sizing',
     variables: [
+      { variable: '--ov25-highlight-color', label: 'Outline color', defaultValue: '#00fbff', control: 'color' },
       { variable: '--ov25-variant-thumb-border-radius', label: 'Variant shape', defaultValue: '9999px', control: 'corner' },
       { variable: '--ov25-primary-color', label: 'Collection button color', defaultValue: '#414141', control: 'color' },
       { variable: '--ov25-button-border-radius', label: 'Collection button corners', defaultValue: '0px', control: 'corner' },
@@ -80,7 +81,6 @@ export const STYLE_GROUPS: StyleGroup[] = [
       { variable: '--ov25-button-text-color', label: 'Collection text color', defaultValue: '#ffffff', control: 'color' },
       { variable: '--ov25-button-hover-background-color', label: 'Collection hover fill', defaultValue: '#fafafa', control: 'color' },
       { variable: '--ov25-button-hover-text-color', label: 'Collection hover text', defaultValue: '#000000', control: 'color' },
-      { variable: '--ov25-highlight-color', label: 'Current Variant Outline', defaultValue: '#00fbff', control: 'color' },
       { variable: '--ov25-wizard-variants-content-height', label: 'Variant panel height', defaultValue: '600px', control: 'slider', sliderMin: 200, sliderMax: 1200, sliderStep: 50, sliderUnit: 'px', sliderLabels: ['Short', 'Tall'] },
       { variable: '--ov25-configurator-variant-drawer-handle-color', label: 'Drawer handle color', defaultValue: '#000000', control: 'color' },
     ],

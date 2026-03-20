@@ -476,9 +476,14 @@ html #ov25-configurator-variant-menu-container {
   line-height: 2rem;
 }
 
-/* Variant/chrome ring: follows --ov25-highlight-color when set (configurator setup). */
+/*
+ * Variant/chrome ring (gradient mode). Always use fixed stops — do not use var(--ov25-highlight-color)
+ * as the sole background layer: that variable is always set when users pick “Current Variant Outline”,
+ * which would replace this gradient with a flat fill (often looks “invisible” on light UI).
+ * Solid outline mode uses border + --ov25-variant-thumb-ring-mode: solid on the thumb wrapper.
+ */
 .ov25-gradient {
-    background: var(--ov25-highlight-color, linear-gradient(90deg, #26E8FE 0%, #808AFF 50%, #A41EFE 100%)), #121214;
+    background: linear-gradient(90deg, #26E8FE 0%, #808AFF 50%, #A41EFE 100%), #121214;
 }
 
 /* Default OV logo mask only — never uses --ov25-highlight-color so variant outline edits don’t repaint the logo. */

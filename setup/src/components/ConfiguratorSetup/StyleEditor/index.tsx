@@ -75,38 +75,55 @@ export function StylePanel({ currentSettings, updateSettings, updateNested }: St
             </button>
           </div>
         )}
-        {STYLE_GROUPS.map((group, i) => (
-          <div key={group.id}>
-            <CollapsibleGroup label={group.label} description={group.description} defaultOpen={i < 2}>
-              {group.variables.map((v) => (
-                <div key={v.variable} className="space-y-2.5">
-                  <StyleControl variable={v} value={currentSettings.style[v.variable]} onChange={(val) => handleStyleChange(v.variable, val)} />
-                  {group.id === 'variants' && v.variable === '--ov25-highlight-color' && (
-                    <div className="pt-1 space-y-1">
-                      <SwitchRow
-                        label="Gradient selection ring"
-                        checked={
-                          (currentSettings.style[OV25_VARIANT_THUMB_RING_MODE_VAR]?.trim().toLowerCase() || '') !==
-                          OV25_VARIANT_RING_MODE_SOLID
-                        }
-                        onCheckedChange={(gradientOn) =>
-                          handleStyleChange(
-                            OV25_VARIANT_THUMB_RING_MODE_VAR,
-                            gradientOn ? '' : OV25_VARIANT_RING_MODE_SOLID,
-                          )
-                        }
-                      />
-                      <p className="text-[11px] text-muted-foreground pl-0">
-                        Off: solid outline using the color above. Does not affect the OV brand logo.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </CollapsibleGroup>
-            {i < STYLE_GROUPS.length - 1 && <div className="mt-6"><SectionDivider /></div>}
-          </div>
-        ))}
+        {STYLE_GROUPS.map((group, i) => {
+          const outlineColorVariable = group.variables.find((v) => v.variable === '--ov25-highlight-color');
+          const useCustomOutline =
+            (currentSettings.style[OV25_VARIANT_THUMB_RING_MODE_VAR]?.trim().toLowerCase() || '') ===
+            OV25_VARIANT_RING_MODE_SOLID;
+          const variantControls =
+            group.id === 'variants'
+              ? group.variables.filter((v) => v.variable !== '--ov25-highlight-color')
+              : group.variables;
+
+          return (
+            <div key={group.id}>
+              <CollapsibleGroup label={group.label} description={group.description} defaultOpen={i < 2}>
+                {group.id === 'variants' && outlineColorVariable && (
+                  <div className="rounded-md border border-border bg-muted/40 p-3 space-y-3 mb-2.5">
+                    <SectionHeader description="Padding around the selected thumb shows this frame: gradient by default, or outline color when custom is on.">
+                      Variant outline
+                    </SectionHeader>
+                    <SwitchRow
+                      label="Use custom outline color"
+                      checked={useCustomOutline}
+                      onCheckedChange={(on) =>
+                        handleStyleChange(OV25_VARIANT_THUMB_RING_MODE_VAR, on ? OV25_VARIANT_RING_MODE_SOLID : '')
+                      }
+                    />
+                    <StyleControl
+                      variable={outlineColorVariable}
+                      value={currentSettings.style[outlineColorVariable.variable]}
+                      onChange={(val) => handleStyleChange(outlineColorVariable.variable, val)}
+                    />
+                    <p className="text-[11px] text-muted-foreground">
+                      Off: multi-color gradient frame. On: solid fill for that padded frame. Does not change the default OV logo.
+                    </p>
+                  </div>
+                )}
+                {variantControls.map((v) => (
+                  <div key={v.variable} className="space-y-2.5">
+                    <StyleControl
+                      variable={v}
+                      value={currentSettings.style[v.variable]}
+                      onChange={(val) => handleStyleChange(v.variable, val)}
+                    />
+                  </div>
+                ))}
+              </CollapsibleGroup>
+              {i < STYLE_GROUPS.length - 1 && <div className="mt-6"><SectionDivider /></div>}
+            </div>
+          );
+        })}
         <SectionDivider />
         <ElementRuleBuilder elementStyles={currentSettings.elementStyles} onUpdate={handleElementStyleUpdate} />
         <SectionDivider />

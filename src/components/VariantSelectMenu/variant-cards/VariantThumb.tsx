@@ -85,13 +85,14 @@ export const VariantThumb = React.memo(({
   return (
     <div
       className={cn(
-        'ov25-variant-thumb-wrapper ov:relative ov:p-1 ov:bg-transparent',
+        'ov25-variant-thumb-wrapper ov:relative ov:p-1',
+        !selected && 'ov:bg-transparent',
         selected &&
           !useSolidThumbRing &&
-          'ov25-gradient ov:p-1 ov:shadow-sm',
+          'ov25-gradient ov:shadow-sm ov:rounded-[var(--ov25-variant-thumb-border-radius,9999px)]',
         selected &&
           useSolidThumbRing &&
-          'ov:border-2 ov:border-solid ov:border-[var(--ov25-highlight-color)] ov:p-1 ov:shadow-sm ov:rounded-[var(--ov25-variant-thumb-border-radius,9999px)]',
+          'ov:bg-[var(--ov25-highlight-color)] ov:shadow-sm ov:rounded-[var(--ov25-variant-thumb-border-radius,9999px)]',
       )}
     >
       {thumbAndOverlays}
