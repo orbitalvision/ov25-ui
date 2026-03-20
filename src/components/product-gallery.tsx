@@ -120,7 +120,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
     return (<>
 
         <div className={cn(
-            "ov:relative ov:font-[family-name:var(--ov25-font-family)] ov:h-auto ov:max-h-[90vh]",
+            "ov:relative ov:flex ov:flex-col ov:gap-[var(--ov25-gallery-gap)] ov:font-[family-name:var(--ov25-font-family)] ov:h-auto ov:max-h-[90vh] ov:isolate",
             isPreloading && "ov:hidden"
         )} id="ov-25-configurator-gallery-container">
             <div id="ov25-configurator-background-color" className={cn(
@@ -142,7 +142,11 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
                 {!isProductGalleryStacked && <IframeContainer />}
 
             </div>
-            {showCarousel && !carouselSibling && <div id='true-carousel' className="ov:mt-[var(--ov25-gallery-gap)]"><span></span></div>}
+            {showCarousel && !carouselSibling && (
+              <div id="true-carousel" className="ov:shrink-0">
+                <span />
+              </div>
+            )}
         </div>
         {isProductGalleryStacked && createPortal(
            <IframeContainer  />,

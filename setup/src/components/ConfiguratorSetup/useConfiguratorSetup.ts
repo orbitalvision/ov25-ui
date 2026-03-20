@@ -14,14 +14,18 @@ import type {
 import { DEFAULT_FORM_STATE, DEFAULT_TYPE_SETTINGS } from './types';
 import type { SerializableInjectConfig } from './preview-config-serializable';
 import { generateVariableCSS, generateElementCSS } from '../../lib/config/configurator-style-variables';
+import {
+  buildFormStateFromInitialPayload,
+  hasMeaningfulInitialConfig,
+  type ConfiguratorSetupPayload,
+} from './initial-config-from-payload';
+
+export type { ConfiguratorSetupPayload };
 
 const STORAGE_KEY = 'ov25-configurator-setup';
 const EXPORT_MESSAGE_TYPE = 'OV25_CONFIGURATOR_SETTINGS';
 const DEMO_IMAGE_COUNT = 9;
 const DEMO_IMAGES = Array.from({ length: DEMO_IMAGE_COUNT }, (_, i) => `https://picsum.photos/800/800?random=${i + 1}`);
-
-/** The payload onSave receives -- one SerializableInjectConfig per layout type */
-export type ConfiguratorSetupPayload = Record<LayoutType, Omit<SerializableInjectConfig, 'apiKey' | 'productLink' | 'images'>>;
 
 export interface ConfiguratorSetupOverrides {
   apiKey?: string;
@@ -167,23 +171,37 @@ function postToParent(data: unknown) {
 }
 
 export function useConfiguratorSetup(overrides?: ConfiguratorSetupOverrides) {
-  const hasInitialConfig = !!overrides?.initialConfig;
+  const initialConfigKey = useMemo(
+    () => JSON.stringify(overrides?.initialConfig ?? null),
+    [overrides?.initialConfig],
+  );
+  const serverWins = useMemo(() => {
+    if (initialConfigKey === 'null') return false;
+    try {
+      const parsed = JSON.parse(initialConfigKey) as Partial<ConfiguratorSetupPayload> | undefined;
+      return hasMeaningfulInitialConfig(parsed);
+    } catch {
+      return false;
+    }
+  }, [initialConfigKey]);
   const [formState, setFormState] = useState<ConfiguratorSetupFormState>(DEFAULT_FORM_STATE);
   const [hasHydrated, setHasHydrated] = useState(false);
 
   useEffect(() => {
-    if (hasInitialConfig) {
-      setHasHydrated(true);
-      return;
+    const parsed: Partial<ConfiguratorSetupPayload> | undefined =
+      initialConfigKey === 'null' ? undefined : (JSON.parse(initialConfigKey) as Partial<ConfiguratorSetupPayload>);
+    if (hasMeaningfulInitialConfig(parsed)) {
+      setFormState(buildFormStateFromInitialPayload(parsed));
+    } else {
+      setFormState(loadSavedState());
     }
-    setFormState(loadSavedState());
     setHasHydrated(true);
-  }, [hasInitialConfig]);
+  }, [initialConfigKey]);
 
   useEffect(() => {
-    if (!hasHydrated || hasInitialConfig) return;
+    if (!hasHydrated || serverWins) return;
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(formState)); } catch { /* quota exceeded */ }
-  }, [formState, hasHydrated, hasInitialConfig]);
+  }, [formState, hasHydrated, serverWins]);
 
   const currentSettings = formState.typeSettings[formState.layout];
 

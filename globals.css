@@ -476,8 +476,14 @@ html #ov25-configurator-variant-menu-container {
   line-height: 2rem;
 }
 
+/* Variant/chrome ring: follows --ov25-highlight-color when set (configurator setup). */
 .ov25-gradient {
     background: var(--ov25-highlight-color, linear-gradient(90deg, #26E8FE 0%, #808AFF 50%, #A41EFE 100%)), #121214;
+}
+
+/* Default OV logo mask only — never uses --ov25-highlight-color so variant outline edits don’t repaint the logo. */
+.ov25-brand-gradient {
+    background: linear-gradient(90deg, #26E8FE 0%, #808AFF 50%, #A41EFE 100%), #121214;
 }
 
 .ov25-swatch-icon {

@@ -1,5 +1,7 @@
 import { BanIcon } from 'lucide-react';
 import * as React from 'react';
+import { useOV25UI } from '../../../contexts/ov25-ui-context.js';
+import { OV25_VARIANT_RING_MODE_SOLID, OV25_VARIANT_THUMB_RING_MODE_VAR } from '../../../lib/config/variant-selection-style.js';
 import { cn } from '../../../lib/utils.js';
 
 type VariantThumbSize = 'sm' | 'md' | 'lg';
@@ -35,6 +37,16 @@ export const VariantThumb = React.memo(({
   overlay,
   asImageContainer = false,
 }: VariantThumbProps) => {
+  const { cssString } = useOV25UI();
+  const useSolidThumbRing = React.useMemo(() => {
+    if (typeof document === 'undefined') return false;
+    const mode = getComputedStyle(document.documentElement)
+      .getPropertyValue(OV25_VARIANT_THUMB_RING_MODE_VAR)
+      .trim()
+      .toLowerCase();
+    return mode === OV25_VARIANT_RING_MODE_SOLID;
+  }, [cssString]);
+
   const sizeClass = SIZE_CLASSES[size];
 
   const content = name.toLowerCase() === 'none' ? (
@@ -71,7 +83,17 @@ export const VariantThumb = React.memo(({
   );
 
   return (
-    <div className={cn('ov25-variant-thumb-wrapper ov:relative ov:p-1 ov:bg-transparent', selected && 'ov25-gradient  ov:p-1 shadow-sm')}>
+    <div
+      className={cn(
+        'ov25-variant-thumb-wrapper ov:relative ov:p-1 ov:bg-transparent',
+        selected &&
+          !useSolidThumbRing &&
+          'ov25-gradient ov:p-1 ov:shadow-sm',
+        selected &&
+          useSolidThumbRing &&
+          'ov:border-2 ov:border-solid ov:border-[var(--ov25-highlight-color)] ov:p-1 ov:shadow-sm ov:rounded-[var(--ov25-variant-thumb-border-radius,9999px)]',
+      )}
+    >
       {thumbAndOverlays}
     </div>
   );

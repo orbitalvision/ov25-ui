@@ -3,8 +3,9 @@ import { ChevronDown, ChevronRight, RotateCcw } from 'lucide-react';
 import { ScrollArea } from '../../ui/scroll-area';
 import { CSSEditor } from '../../ui/css-editor';
 import { STYLE_GROUPS } from '../../../lib/config/configurator-style-variables';
+import { OV25_VARIANT_RING_MODE_SOLID, OV25_VARIANT_THUMB_RING_MODE_VAR } from '../../../lib/config/variant-selection-style';
 import type { TypeSettings } from '../types';
-import { SectionHeader, SectionDivider } from '../shared-ui';
+import { SectionHeader, SectionDivider, SwitchRow } from '../shared-ui';
 import { StyleControl } from './controls';
 import { ElementRuleBuilder } from './ElementRuleBuilder';
 
@@ -78,7 +79,29 @@ export function StylePanel({ currentSettings, updateSettings, updateNested }: St
           <div key={group.id}>
             <CollapsibleGroup label={group.label} description={group.description} defaultOpen={i < 2}>
               {group.variables.map((v) => (
-                <StyleControl key={v.variable} variable={v} value={currentSettings.style[v.variable]} onChange={(val) => handleStyleChange(v.variable, val)} />
+                <div key={v.variable} className="space-y-2.5">
+                  <StyleControl variable={v} value={currentSettings.style[v.variable]} onChange={(val) => handleStyleChange(v.variable, val)} />
+                  {group.id === 'variants' && v.variable === '--ov25-highlight-color' && (
+                    <div className="pt-1 space-y-1">
+                      <SwitchRow
+                        label="Gradient selection ring"
+                        checked={
+                          (currentSettings.style[OV25_VARIANT_THUMB_RING_MODE_VAR]?.trim().toLowerCase() || '') !==
+                          OV25_VARIANT_RING_MODE_SOLID
+                        }
+                        onCheckedChange={(gradientOn) =>
+                          handleStyleChange(
+                            OV25_VARIANT_THUMB_RING_MODE_VAR,
+                            gradientOn ? '' : OV25_VARIANT_RING_MODE_SOLID,
+                          )
+                        }
+                      />
+                      <p className="text-[11px] text-muted-foreground pl-0">
+                        Off: solid outline using the color above. Does not affect the OV brand logo.
+                      </p>
+                    </div>
+                  )}
+                </div>
               ))}
             </CollapsibleGroup>
             {i < STYLE_GROUPS.length - 1 && <div className="mt-6"><SectionDivider /></div>}

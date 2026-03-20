@@ -14,7 +14,7 @@ export const OVOrBrandLogo: React.FC<OVOrBrandLogoProps> = ({ imageUrl, classNam
   if (isDefault) {
     return (
       <div
-        className={`ov25-variant-header-logo ov25-gradient ${className}`}
+        className={`ov25-variant-header-logo ov25-brand-gradient ${className}`}
         style={{
           width: '8.75rem',
           height: '4rem',
