@@ -3,6 +3,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 
 import { useOV25UI } from "../../contexts/ov25-ui-context.js";
+import { requestTransitionSnapshotFromIframe } from "../../utils/request-transition-snapshot-from-iframe.js";
+import { getConfiguratorIframeContainerScreenRect } from "../../utils/configurator-dom-queries.js";
 import { ProductVariantsWrapper } from './ProductVariantsWrapper.js';
 import { WizardVariants } from './WizardVariants.js';
 import { VariantsHeader } from './VariantsHeader.js';
@@ -15,6 +17,13 @@ export function VariantContentDesktop() {
         isDrawerOrDialogOpen,
         isSwatchBookOpen,
         variantDisplayStyleOverlay,
+        uniqueId,
+        setConfiguratorTransitionProxyBitmap,
+        setConfiguratorTransitionProxyMode,
+        setUseInstantIframeCloseRestore,
+        releaseConfiguratorTransitionProxy,
+        setConfiguratorClosingProxyRect,
+        isProductGalleryStacked,
       } = useOV25UI();
     
     const menuContainerRef = useRef<HTMLDivElement>(null);
@@ -31,8 +40,9 @@ export function VariantContentDesktop() {
     } | null>(null);
     
     useEffect(() => {
+      let cancelled = false;
+
       if (isVariantsOpen) {
-        // Store original styles before modifying
         const bodyStyles = {
           overflow: document.body.style.overflow,
           position: document.body.style.position,
@@ -49,11 +59,24 @@ export function VariantContentDesktop() {
         document.body.style.width = '100%';
         document.body.style.top = `-${window.scrollY}px`;
         document.documentElement.style.overflow = 'hidden';
-        setIsDrawerOrDialogOpen(true);
+
+        void (async () => {
+          const bitmap = await requestTransitionSnapshotFromIframe(uniqueId);
+          if (cancelled) {
+            bitmap?.close();
+            return;
+          }
+          if (bitmap) {
+            setConfiguratorTransitionProxyMode('opening');
+            setConfiguratorTransitionProxyBitmap(bitmap);
+          }
+          if (!cancelled) {
+            setIsDrawerOrDialogOpen(true);
+          }
+        })();
       } else {
         const scrollY = document.body.style.top;
-        
-        // Restore original styles if we have them
+
         if (originalStyles.current) {
           document.body.style.overflow = originalStyles.current.body.overflow;
           document.body.style.position = originalStyles.current.body.position;
@@ -61,19 +84,53 @@ export function VariantContentDesktop() {
           document.body.style.top = originalStyles.current.body.top;
           document.documentElement.style.overflow = originalStyles.current.html.overflow;
         } else {
-          // Fallback to empty strings
           document.body.style.overflow = '';
           document.body.style.position = '';
           document.body.style.width = '';
           document.body.style.top = '';
           document.documentElement.style.overflow = '';
         }
-        
-        window.scrollTo(0, parseInt(scrollY || '0') * -1);
-        setIsDrawerOrDialogOpen(false);
+
+        window.scrollTo(0, parseInt(scrollY || '0', 10) * -1);
+        if (isDrawerOrDialogOpen) {
+          void (async () => {
+            const bitmap = await requestTransitionSnapshotFromIframe(uniqueId);
+            if (cancelled) {
+              bitmap?.close();
+              return;
+            }
+            const rect = bitmap
+              ? getConfiguratorIframeContainerScreenRect(uniqueId, isProductGalleryStacked)
+              : null;
+            setConfiguratorClosingProxyRect(rect);
+            if (bitmap) {
+              setConfiguratorTransitionProxyMode('closing');
+              setConfiguratorTransitionProxyBitmap(bitmap);
+            }
+            setUseInstantIframeCloseRestore(true);
+            setIsDrawerOrDialogOpen(false);
+          })();
+        } else {
+          setIsDrawerOrDialogOpen(false);
+        }
         originalStyles.current = null;
       }
-    }, [isVariantsOpen]);
+
+      return () => {
+        cancelled = true;
+      };
+    }, [
+      isVariantsOpen,
+      uniqueId,
+      isDrawerOrDialogOpen,
+      setIsDrawerOrDialogOpen,
+      setConfiguratorTransitionProxyBitmap,
+      setConfiguratorTransitionProxyMode,
+      setUseInstantIframeCloseRestore,
+      releaseConfiguratorTransitionProxy,
+      setConfiguratorClosingProxyRect,
+      isProductGalleryStacked,
+    ]);
  
     // Cleanup function to reset body styles when component unmounts
     useEffect(() => {
@@ -91,9 +148,10 @@ export function VariantContentDesktop() {
           document.body.style.top = '';
           document.documentElement.style.overflow = '';
         }
+        releaseConfiguratorTransitionProxy();
         setIsDrawerOrDialogOpen(false);
       };
-    }, [originalStyles]);
+    }, [releaseConfiguratorTransitionProxy, setIsDrawerOrDialogOpen]);
 
     // Animation effect for the menu container
     useEffect(() => {

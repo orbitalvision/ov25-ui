@@ -11,6 +11,11 @@ import { stringSimilarity } from 'string-similarity-js';
 import { launchARWithGLBBlob } from '../utils/launchARWithGLBBlob.js';
 import { getProductGalleryImages, resolveImageUrl } from '../lib/utils.js';
 import type { OnChangePayload, OnChangePricePayload, OnChangeSkuPayload } from '../types/inject-config.js';
+import {
+  IFRAME_MSG_TRANSITION_SNAPSHOT,
+  IFRAME_MSG_TRANSITION_SNAPSHOT_ERROR,
+} from '../lib/config/iframe-transition-snapshot.js';
+import type { ConfiguratorIframeScreenRect } from '../utils/configurator-dom-queries.js';
 
 function throttle<T extends (...args: any[]) => void>(
   fn: T,
@@ -59,6 +64,7 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, React.Dispatch<Re
 // Define types
 export type DrawerSizes = 'closed' | 'small' | 'large';
 export type AnimationState = 'unavailable' | 'open' | 'close' | 'loop' | 'stop';
+export type TransitionProxyMode = 'opening' | 'closing' | null;
 
 export interface ProductFilters {
   [optionName: string]: {
@@ -205,6 +211,19 @@ interface OV25UIContextType {
   drawerSize: DrawerSizes;
   isVariantsOpen: boolean;
   isDrawerOrDialogOpen: boolean;
+  /** Last frame from the iframe shown in the gallery slot while the iframe moves to sheet/modal. */
+  configuratorTransitionProxyBitmap: ImageBitmap | null;
+  configuratorTransitionProxyMode: TransitionProxyMode;
+  /** Captured sheet/modal iframe bounds; closing proxy is portaled here and slides/fades with the shell. */
+  configuratorClosingProxyRect: ConfiguratorIframeScreenRect | null;
+  useInstantIframeCloseRestore: boolean;
+  setConfiguratorTransitionProxyBitmap: (bitmap: ImageBitmap | null) => void;
+  setConfiguratorTransitionProxyMode: (mode: TransitionProxyMode) => void;
+  setConfiguratorClosingProxyRect: (rect: ConfiguratorIframeScreenRect | null) => void;
+  setUseInstantIframeCloseRestore: React.Dispatch<React.SetStateAction<boolean>>;
+  releaseConfiguratorTransitionProxy: () => void;
+  /** Stacked gallery: next close sync should skip the legacy 500ms wait (instant iframe restore). Set in useIframePositioning; consumed in ProductGallery. */
+  stackedGalleryCloseSyncImmediateRef: React.MutableRefObject<boolean>;
   arPreviewLink: string | null;
   error: Error | null;
   canAnimate: boolean;
@@ -213,6 +232,8 @@ interface OV25UIContextType {
   isMobile: boolean;
   hasSwitchedAfterDefer: boolean;
   deferThreeD: boolean;
+  /** True when gallery mounts in the hidden preload container (no page slot): modal open should not wait on iframe ImageBitmap. */
+  configuratorGalleryIsDeferred: boolean;
   showOptional: boolean;
   hidePricing: boolean;
   hideAr: boolean;
@@ -422,6 +443,7 @@ export const OV25UIProvider: React.FC<{
     swatchbookPortal?: ShadowRoot;
   },
   cssString?: string,
+  configuratorGalleryIsDeferred?: boolean,
 }> = ({ 
   children,
   productLink,
@@ -433,6 +455,7 @@ export const OV25UIProvider: React.FC<{
   onChange,
   images,
   deferThreeD = false,
+  configuratorGalleryIsDeferred = false,
   showOptional = false,
   hidePricing = false,
   hideAr = false,
@@ -500,6 +523,21 @@ export const OV25UIProvider: React.FC<{
   const [drawerSize, setDrawerSize] = useState<DrawerSizes>("closed");
   const [isVariantsOpen, setIsVariantsOpen] = useState(false);
   const [isDrawerOrDialogOpen, setIsDrawerOrDialogOpen] = useState(false);
+  const [configuratorTransitionProxyBitmap, setConfiguratorTransitionProxyBitmapState] = useState<ImageBitmap | null>(null);
+  const [configuratorTransitionProxyMode, setConfiguratorTransitionProxyModeState] = useState<TransitionProxyMode>(null);
+  const [configuratorClosingProxyRect, setConfiguratorClosingProxyRectState] = useState<ConfiguratorIframeScreenRect | null>(null);
+  const [useInstantIframeCloseRestore, setUseInstantIframeCloseRestore] = useState(false);
+
+  const setConfiguratorTransitionProxyMode = useCallback((mode: TransitionProxyMode) => {
+    if (mode === 'opening') {
+      setConfiguratorClosingProxyRectState(null);
+    }
+    setConfiguratorTransitionProxyModeState(mode);
+  }, []);
+
+  const setConfiguratorClosingProxyRect = useCallback((rect: ConfiguratorIframeScreenRect | null) => {
+    setConfiguratorClosingProxyRectState(rect);
+  }, []);
   const [arPreviewLink, setArPreviewLink] = useState<string | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [canAnimate, setCanAnimate] = useState<boolean>(false);
@@ -539,6 +577,7 @@ export const OV25UIProvider: React.FC<{
   const [shareDialogTrigger, setShareDialogTrigger] = useState<'none' | 'save-button' | 'modal-close'>('none');
   const skipNextDrawerCloseRef = useRef(false);
   const skipNextShareClickRef = useRef(false);
+  const stackedGalleryCloseSyncImmediateRef = useRef(false);
   const [preloading, setPreloading] = useState(window.innerWidth < 768);
   const [iframeResetKey, setIframeResetKey] = useState(0);
   
@@ -566,8 +605,26 @@ export const OV25UIProvider: React.FC<{
     buyNowFunction({ skus: latestSkuRef.current ?? null, price: latestPriceRef.current ?? null });
   }, [buyNowFunction]);
 
+  const releaseConfiguratorTransitionProxy = useCallback(() => {
+    setConfiguratorTransitionProxyBitmapState((prev) => {
+      prev?.close();
+      return null;
+    });
+    setConfiguratorTransitionProxyModeState(null);
+    setConfiguratorClosingProxyRectState(null);
+  }, []);
+
+  const setConfiguratorTransitionProxyBitmap = useCallback((bitmap: ImageBitmap | null) => {
+    setConfiguratorTransitionProxyBitmapState((prev) => {
+      prev?.close();
+      return bitmap;
+    });
+  }, []);
+
   // Cleanup function for switching between configurators
   const cleanupConfigurator = useCallback(() => {
+    releaseConfiguratorTransitionProxy();
+    setUseInstantIframeCloseRestore(false);
     // Close any open modal/drawer
     setIsModalOpen(false);
     setIsVariantsOpen(false);
@@ -592,6 +649,8 @@ export const OV25UIProvider: React.FC<{
     setPreloading(false);
     setHasSwitchedAfterDefer(false);
   }, [
+    releaseConfiguratorTransitionProxy,
+    setUseInstantIframeCloseRestore,
     setIsModalOpen,
     setIsVariantsOpen,
     setConfiguratorState,
@@ -1039,6 +1098,7 @@ export const OV25UIProvider: React.FC<{
     } else {
       setIsModalOpen(true);
       setIsModulePanelOpen(true);
+      setIsVariantsOpen(true);
     }
   }, [allOptions, isMobile, setPreloading, setActiveOptionId, setIsVariantsOpen, setIsModalOpen, compatibleModules, setIsModulePanelOpen]);
 
@@ -1154,6 +1214,10 @@ export const OV25UIProvider: React.FC<{
           if (!iframe || event.source !== iframe.contentWindow) {
             return;
           }
+        }
+
+        if (type === IFRAME_MSG_TRANSITION_SNAPSHOT || type === IFRAME_MSG_TRANSITION_SNAPSHOT_ERROR) {
+          return;
         }
         
         // AR_GLB_DATA sends raw base64 string, don't parse it
@@ -1473,7 +1537,13 @@ export const OV25UIProvider: React.FC<{
     }
   }, [deferThreeD, allImages.length]);
 
-
+  // Iframe visibility follows `galleryIndex === galleryIndexToUse` (see IframeContainer). ProductCarousel
+  // also jumped to the 3D slot when variants opened, but deferred / no-carousel / hidden preload UIs never
+  // mount ProductCarousel, so galleryIndex stayed on a static image index while defer moved 3D to slot 1.
+  useEffect(() => {
+    if (!isVariantsOpen) return;
+    setGalleryIndex(galleryIndexToUse);
+  }, [isVariantsOpen, galleryIndexToUse, setGalleryIndex]);
 
   const contextValue: OV25UIContextType = {
     // Shadow DOM references
@@ -1497,6 +1567,16 @@ export const OV25UIProvider: React.FC<{
     drawerSize,
     isVariantsOpen,
     isDrawerOrDialogOpen,
+    configuratorTransitionProxyBitmap,
+    configuratorTransitionProxyMode,
+    configuratorClosingProxyRect,
+    useInstantIframeCloseRestore,
+    setConfiguratorTransitionProxyBitmap,
+    setConfiguratorTransitionProxyMode,
+    setConfiguratorClosingProxyRect,
+    setUseInstantIframeCloseRestore,
+    releaseConfiguratorTransitionProxy,
+    stackedGalleryCloseSyncImmediateRef,
     arPreviewLink,
     error,
     canAnimate,
@@ -1511,6 +1591,7 @@ export const OV25UIProvider: React.FC<{
   showCarousel,
     hasSwitchedAfterDefer,
     deferThreeD,
+    configuratorGalleryIsDeferred,
     showOptional,
     hidePricing,
     hideAr,

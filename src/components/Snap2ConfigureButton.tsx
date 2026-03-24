@@ -137,10 +137,10 @@ export const Snap2ConfigureUI: React.FC = () => {
       {!isMobile && (
         <Snap2ConfiguratorModal isOpen={isModalOpen} onClose={handleCloseModal}>
           <div className={cn(
-            "ov:relative ov:w-full ov:h-full ov:flex",
+            "ov:relative ov:w-full ov:h-full ov:min-h-0 ov:flex",
             !isModalOpen && "ov:hidden"
           )}>
-            <div className="ov:relative ov:flex-1 ov:min-h-0">
+            <div className="ov:relative ov:flex-1 ov:min-h-0 ov:flex ov:flex-col">
               <ProductGallery key={`gallery-${iframeResetKey}`} isInModal={isModalOpen} isPreloading={preloading} />
               <ConfiguratorViewControls />
             </div>

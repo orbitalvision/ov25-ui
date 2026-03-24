@@ -2,98 +2,31 @@ import { useEffect, useRef } from 'react';
 import { useOV25UI } from '../contexts/ov25-ui-context.js';
 import { IFRAME_HEIGHT_RATIO } from '../utils/configurator-utils.js';
 import { MODAL_GALLERY_SLOT_ID } from '../components/ConfiguratorModal.js';
+import {
+  findElementByIdInShadowOrRegularDOM,
+  findIframeWithUniqueId,
+} from '../utils/configurator-dom-queries.js';
 
 /** Variant sheet UI (e.g. VariantContentDesktop) uses z-index 2147483644; iframe + deferThreeD poster must stack above it. */
 const DESKTOP_SHEET_IFRAME_Z_INDEX = '2147483645';
 
 /**
- * Helper function to find an element in Shadow DOM or regular DOM
- */
-const findElementByIdInShadowOrRegularDOM = (id: string): HTMLElement | null => {
-  
-  // Try regular DOM first
-  const element = document.getElementById(id);
-  if (element) {
-    return element;
-  }
-  
-  // Special case for variant menu container - look in the variants shadow container
-  if (id === 'ov25-configurator-variant-menu-container') {
-    const variantsShadowContainer = document.getElementById('ov25-variants-shadow-container');
-    if (variantsShadowContainer?.shadowRoot) {
-      const elementInShadow = variantsShadowContainer.shadowRoot.getElementById(id);
-      if (elementInShadow) {
-        return elementInShadow;
-      }
-    }
-  }
-
-  // Snap2 mobile: iframe container lives inside mobile drawer shadow root
-  const mobileDrawerContainer = document.getElementById('ov25-mobile-drawer-container');
-  if (mobileDrawerContainer?.shadowRoot) {
-    const elementInShadow = mobileDrawerContainer.shadowRoot.getElementById(id);
-    if (elementInShadow) {
-      return elementInShadow;
-    }
-  }
-
-  // Modal gallery slot lives inside modal portal shadow root
-  const modalPortalContainer = document.getElementById('ov25-modal-portal-container');
-  if (modalPortalContainer?.shadowRoot) {
-    const elementInShadow = modalPortalContainer.shadowRoot.getElementById(id);
-    if (elementInShadow) {
-      return elementInShadow;
-    }
-  }
-
-  // If not found, search in all shadow roots
-  const shadowHosts = document.querySelectorAll('div[class^="ov25-configurator-"]');
-  
-  for (const host of Array.from(shadowHosts)) {
-    if (host.shadowRoot) {
-      const elementInShadow = host.shadowRoot.getElementById(id);
-      if (elementInShadow) {
-        return elementInShadow;
-      }
-      
-      // Also search nested shadow roots if needed
-      const nestedHosts = host.shadowRoot.querySelectorAll('div[class^="ov25-configurator-"]');
-      for (const nestedHost of Array.from(nestedHosts)) {
-        if (nestedHost.shadowRoot) {
-          const nestedElement = nestedHost.shadowRoot.getElementById(id);
-          if (nestedElement) {
-            return nestedElement;
-          }
-        }
-      }
-    }
-  }
-  
-  return null;
-};
-
-/**
- * Helper function to find iframe with unique ID pattern
- */
-const findIframeWithUniqueId = (uniqueId?: string): HTMLElement | null => {
-  const iframeId = uniqueId ? `ov25-configurator-iframe-${uniqueId}` : 'ov25-configurator-iframe';
-  const fromDoc = document.getElementById(iframeId);
-  if (fromDoc) return fromDoc;
-
-  const mobileDrawerContainer = document.getElementById('ov25-mobile-drawer-container');
-  if (mobileDrawerContainer?.shadowRoot) {
-    const fromShadow = mobileDrawerContainer.shadowRoot.getElementById(iframeId);
-    if (fromShadow) return fromShadow;
-  }
-
-  return null;
-};
-
-/**
  * Hook to position the iframe and its container at the top of the screen when drawer is open
  */
 export const useIframePositioning = () => {
-  const { isDrawerOrDialogOpen, isMobile, drawerSize, isProductGalleryStacked, isSnap2Mode, uniqueId, configuratorDisplayMode, configuratorDisplayModeMobile } = useOV25UI();
+  const {
+    isDrawerOrDialogOpen,
+    isMobile,
+    drawerSize,
+    isProductGalleryStacked,
+    isSnap2Mode,
+    uniqueId,
+    configuratorDisplayMode,
+    configuratorDisplayModeMobile,
+    useInstantIframeCloseRestore,
+    setUseInstantIframeCloseRestore,
+    stackedGalleryCloseSyncImmediateRef,
+  } = useOV25UI();
   const isModalMode = isMobile ? configuratorDisplayModeMobile === 'modal' : configuratorDisplayMode === 'modal';
   const originalStyles = useRef<{
     container: {
@@ -110,6 +43,7 @@ export const useIframePositioning = () => {
       visibility: string;
       transform: string;
       transition: string;
+      opacity: string;
     };
     iframe: {
       position: string;
@@ -122,6 +56,7 @@ export const useIframePositioning = () => {
       visibility: string;
       transform: string;
       transition: string;
+      opacity: string;
     };
     parent: {
       height: string;
@@ -159,6 +94,15 @@ export const useIframePositioning = () => {
     const handleDrawerClose = () => {
       if (!originalStyles.current) return;
       const styles = originalStyles.current;
+
+      if (useInstantIframeCloseRestore) {
+        Object.assign(container.style, styles.container);
+        Object.assign(iframe.style, styles.iframe);
+        Object.assign(parent.style, styles.parent);
+        setUseInstantIframeCloseRestore(false);
+        stackedGalleryCloseSyncImmediateRef.current = true;
+        return;
+      }
 
       if (isModalMode) {
         Object.assign(container.style, styles.container);
@@ -206,7 +150,8 @@ export const useIframePositioning = () => {
             pointerEvents: container.style.pointerEvents,
             visibility: container.style.visibility,
             transform: 'translateX(0) translateY(0)',
-            transition: 'none',
+            transition: container.style.transition || '',
+            opacity: container.style.opacity || '',
           },
           iframe: {
             position: iframe.style.position,
@@ -218,7 +163,8 @@ export const useIframePositioning = () => {
             pointerEvents: iframe.style.pointerEvents,
             visibility: iframe.style.visibility,
             transform: 'translateX(0) translateY(0)',
-            transition: 'none',
+            transition: iframe.style.transition || '',
+            opacity: iframe.style.opacity || '',
           },
           parent: {
             height: parent.style.height,
@@ -228,21 +174,30 @@ export const useIframePositioning = () => {
         };
       }
 
-      // Lock parent size to container's original dimensions before any changes
-      const containerOriginalHeight = container.offsetHeight;
-      const containerOriginalWidth = container.offsetWidth;
-      parent.style.height = `${containerOriginalHeight}px`;
-      parent.style.width = `${containerOriginalWidth}px`;
-      parent.style.overflow = 'hidden';
+      // Sheet/drawer: lock gallery row size so the slide animation has a stable box. Modal uses a fixed
+      // shell over the slot — locking the parent breaks mobile (wrong preload size, overflow fights).
+      if (!isModalMode) {
+        const containerOriginalHeight = container.offsetHeight;
+        const containerOriginalWidth = container.offsetWidth;
+        parent.style.height = `${containerOriginalHeight}px`;
+        parent.style.width = `${containerOriginalWidth}px`;
+        parent.style.overflow = 'hidden';
+      }
 
       // Opening animation code
       if (isModalMode) {
-        // Desktop modal: position iframe container to match the modal's gallery slot
+        // Modal: shell + optional bitmap animate in ConfiguratorModal first; then iframe snaps here in one step.
         const frameIdRef = { current: 0 };
-        const updateModalSlotPosition = () => {
+
+        const syncModalIframeToSlot = () => {
           const slot = findElementByIdInShadowOrRegularDOM(MODAL_GALLERY_SLOT_ID);
           if (!slot) return;
           const rect = slot.getBoundingClientRect();
+          if (rect.width < 1 || rect.height < 1) return;
+
+          container.style.transition = 'none';
+          iframe.style.transition = 'none';
+
           container.style.position = 'fixed';
           container.style.top = `${rect.top}px`;
           container.style.left = `${rect.left}px`;
@@ -256,8 +211,10 @@ export const useIframePositioning = () => {
           container.style.overflow = 'hidden';
           container.style.pointerEvents = 'auto';
           container.style.visibility = 'visible';
-          container.style.transition = 'none';
-          container.style.transform = 'none';
+          container.style.opacity = '1';
+          container.style.setProperty('transform', 'none', 'important');
+          container.style.willChange = 'auto';
+
           iframe.style.position = 'absolute';
           iframe.style.top = '0';
           iframe.style.left = '0';
@@ -266,24 +223,38 @@ export const useIframePositioning = () => {
           iframe.style.zIndex = '1';
           iframe.style.pointerEvents = 'auto';
           iframe.style.visibility = 'visible';
-          iframe.style.transition = 'none';
-          iframe.style.transform = 'none';
+          iframe.style.opacity = '1';
+          iframe.style.setProperty('transform', 'none', 'important');
+          iframe.style.willChange = 'auto';
         };
 
-        updateModalSlotPosition();
-        const tick = () => {
-          updateModalSlotPosition();
-          frameIdRef.current = requestAnimationFrame(tick);
+        const runSync = () => {
+          syncModalIframeToSlot();
         };
-        frameIdRef.current = requestAnimationFrame(tick);
 
-        const resizeObserver = new ResizeObserver(updateModalSlotPosition);
+        frameIdRef.current = requestAnimationFrame(() => {
+          frameIdRef.current = requestAnimationFrame(runSync);
+        });
+
+        const resizeObserver = new ResizeObserver(runSync);
         const slotEl = findElementByIdInShadowOrRegularDOM(MODAL_GALLERY_SLOT_ID);
         if (slotEl) resizeObserver.observe(slotEl);
+
+        const onVisualViewportChange = () => {
+          runSync();
+        };
+        if (isMobile && window.visualViewport) {
+          window.visualViewport.addEventListener('resize', onVisualViewportChange);
+          window.visualViewport.addEventListener('scroll', onVisualViewportChange);
+        }
 
         return () => {
           cancelAnimationFrame(frameIdRef.current);
           resizeObserver.disconnect();
+          if (isMobile && window.visualViewport) {
+            window.visualViewport.removeEventListener('resize', onVisualViewportChange);
+            window.visualViewport.removeEventListener('scroll', onVisualViewportChange);
+          }
         };
       } else if (isMobile) {
         const updateMobileHeight = () => {
@@ -322,13 +293,13 @@ export const useIframePositioning = () => {
         container.style.transform = 'translateY(-100%)';
         iframe.style.transform = 'translateY(-100%)';
 
-        setTimeout(() => {
+        requestAnimationFrame(() => {
           iframe.style.transition = 'transform 400ms cubic-bezier(0.4, 0, 0.2, 1)';
           container.style.transition = 'transform 400ms cubic-bezier(0.4, 0, 0.2, 1)';
           container.style.transform = 'translateY(0%)';
           iframe.style.transform = 'translateY(0%)';
           updateMobileHeight();
-        }, 50);
+        });
 
         return () => {
           window.visualViewport?.removeEventListener('resize', updateMobileHeight);
@@ -386,11 +357,23 @@ export const useIframePositioning = () => {
     return () => {
       window.removeEventListener('resize', updateIframeWidth);
     };
-  }, [isDrawerOrDialogOpen, isMobile, isSnap2Mode, uniqueId, isModalMode]);
+    // Intentionally omit useInstantIframeCloseRestore: including it re-ran this effect when the flag
+    // flipped false after instant restore, and handleDrawerClose() then applied the legacy slide-out.
+  }, [
+    isDrawerOrDialogOpen,
+    isMobile,
+    isSnap2Mode,
+    uniqueId,
+    isModalMode,
+    setUseInstantIframeCloseRestore,
+    stackedGalleryCloseSyncImmediateRef,
+  ]);
 
   // This useEffect handles drawer size changes (mobile drawer is always "large" when open)
   useEffect(() => {
     if (!(isDrawerOrDialogOpen && isMobile)) return;
+    if (isModalMode) return;
+
         const iframe = findIframeWithUniqueId(uniqueId);
         const containerId = uniqueId ? `ov25-configurator-iframe-container-${uniqueId}` : 'ov25-configurator-iframe-container';
         const container = findElementByIdInShadowOrRegularDOM(isProductGalleryStacked ? 'true-ov25-configurator-iframe-container' : containerId);
@@ -415,7 +398,7 @@ export const useIframePositioning = () => {
                 container.style.height = originalContainerHeight;
             }
         };
-  }, [drawerSize, isDrawerOrDialogOpen, isSnap2Mode, isMobile, isProductGalleryStacked, uniqueId])
+  }, [drawerSize, isDrawerOrDialogOpen, isModalMode, isSnap2Mode, isMobile, isProductGalleryStacked, uniqueId])
 };
 
 export default useIframePositioning;

@@ -28,10 +28,16 @@ export const IframeContainer = () => {
         isDrawerOrDialogOpen,
         configuratorDisplayMode,
         configuratorDisplayModeMobile,
+        isSnap2Mode,
     } = useOV25UI();
 
     const isModalMode =
         isMobile ? configuratorDisplayModeMobile === 'modal' : configuratorDisplayMode === 'modal';
+    const snap2MobileDrawerOpen =
+        isSnap2Mode && isMobile && isDrawerOrDialogOpen && !isModalMode;
+    const iframeRadiusClass = snap2MobileDrawerOpen
+        ? 'ov:rounded-none'
+        : 'ov:rounded-[var(--ov25-configurator-iframe-border-radius)]';
 
     const controlsContainerRef = useRef<HTMLDivElement>(null);
     const [controlsShadowRoot, setControlsShadowRoot] = useState<ShadowRoot | null>(null);
@@ -99,13 +105,13 @@ export const IframeContainer = () => {
 
     const isStackedStyles = cn(
         "ov:relative ov:aspect-square ov:md:aspect-[3/2] ov:2xl:aspect-video ov:overflow-hidden ov:z-[3]",
-        "ov:rounded-[var(--ov25-configurator-iframe-border-radius)]",
+        iframeRadiusClass,
         "ov:bg-[var(--ov25-configurator-iframe-background-color)]",
         "ov:transform-gpu ov:backface-hidden",
     )
     const isInlineStyles = cn(
         "ov:absolute ov:size-full ov:inset-0 ov:overflow-hidden ov:z-[3]",
-        "ov:rounded-[var(--ov25-configurator-iframe-border-radius)]",
+        iframeRadiusClass,
         "ov:bg-[var(--ov25-configurator-iframe-background-color)]",
         "ov:transform-gpu ov:backface-hidden",
     )
@@ -121,7 +127,7 @@ export const IframeContainer = () => {
                 ref={iframeRef}
                 id={uniqueId ? `ov25-configurator-iframe-${uniqueId}` : "ov25-configurator-iframe"}
                 src={iframeSrc}
-                className={`ov:w-full ov:bg-transparent ov:h-full ov:rounded-[var(--ov25-configurator-iframe-border-radius)] ov:transform-gpu ov:backface-hidden ${galleryIndex === galleryIndexToUse ? 'ov:block' : 'ov:ov25-controls-hidden'}`}
+                className={`ov:w-full ov:bg-transparent ov:h-full ${iframeRadiusClass} ov:transform-gpu ov:backface-hidden ${galleryIndex === galleryIndexToUse ? 'ov:block' : 'ov:ov25-controls-hidden'}`}
                 allow="camera; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; xr-spatial-tracking; fullscreen"
 
             />

@@ -459,36 +459,41 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     }
     swatchbookPortalShadowRoot.adoptedStyleSheets = swatchbookPortalStylesheets;
 
-    // Create modal portal Shadow DOM container (ConfiguratorModal)
-    const modalPortalContainer = document.createElement('div');
-    modalPortalContainer.id = 'ov25-modal-portal-container';
-    modalPortalContainer.setAttribute('data-clarity-mask', 'true');
-    modalPortalContainer.style.position = 'fixed';
-    modalPortalContainer.style.top = '0';
-    modalPortalContainer.style.left = '0';
-    modalPortalContainer.style.width = '100%';
-    modalPortalContainer.style.height = '100%';
-    modalPortalContainer.style.pointerEvents = 'none';
-    modalPortalContainer.style.zIndex = '2147483646'; // max - 1
-    document.body.appendChild(modalPortalContainer);
+    const isAnyModalMode =
+      configuratorDisplayMode === ConfiguratorDisplayMode.Modal ||
+      configuratorDisplayModeMobile === ConfiguratorDisplayMode.Modal;
 
-    const modalPortalEmptySpan = document.createElement('span');
-    modalPortalEmptySpan.style.width = '100%';
-    modalPortalEmptySpan.style.height = '100%';
-    modalPortalEmptySpan.style.pointerEvents = 'none';
-    modalPortalContainer.appendChild(modalPortalEmptySpan);
+    let modalPortalShadowRoot: ShadowRoot | undefined;
+    if (isAnyModalMode) {
+      const modalPortalContainer = document.createElement('div');
+      modalPortalContainer.id = 'ov25-modal-portal-container';
+      modalPortalContainer.setAttribute('data-clarity-mask', 'true');
+      modalPortalContainer.style.position = 'fixed';
+      modalPortalContainer.style.top = '0';
+      modalPortalContainer.style.left = '0';
+      modalPortalContainer.style.width = '100%';
+      modalPortalContainer.style.height = '100%';
+      modalPortalContainer.style.pointerEvents = 'none';
+      modalPortalContainer.style.zIndex = '2147483646'; // max - 1
+      document.body.appendChild(modalPortalContainer);
 
-    const modalPortalShadowRoot = modalPortalContainer.attachShadow({ mode: 'open' });
-    const modalPortalStylesheets = [sharedStylesheet];
-    if (cssString) {
-      const cssVariablesStylesheet = createCSSVariablesStylesheet(cssString);
-      modalPortalStylesheets.push(cssVariablesStylesheet);
+      const modalPortalEmptySpan = document.createElement('span');
+      modalPortalEmptySpan.style.width = '100%';
+      modalPortalEmptySpan.style.height = '100%';
+      modalPortalEmptySpan.style.pointerEvents = 'none';
+      modalPortalContainer.appendChild(modalPortalEmptySpan);
+
+      modalPortalShadowRoot = modalPortalContainer.attachShadow({ mode: 'open' });
+      const modalPortalStylesheets = [sharedStylesheet];
+      if (cssString) {
+        const cssVariablesStylesheet = createCSSVariablesStylesheet(cssString);
+        modalPortalStylesheets.push(cssVariablesStylesheet);
+      }
+      modalPortalShadowRoot.adoptedStyleSheets = modalPortalStylesheets;
     }
-    modalPortalShadowRoot.adoptedStyleSheets = modalPortalStylesheets;
 
     // When no gallery selector but deferThreeD, or modal mode with no gallery: render gallery in hidden container so iframe is preloaded
     const hasGallerySelector = !!getSelector(effectiveGallerySelector);
-    const isAnyModalMode = configuratorDisplayMode === ConfiguratorDisplayMode.Modal || configuratorDisplayModeMobile === ConfiguratorDisplayMode.Modal;
     const useDeferredGallery = !hasGallerySelector && (deferThreeD || isAnyModalMode);
     if (useDeferredGallery) {
       let deferredGalleryEl = document.getElementById('ov25-deferred-gallery-container');
@@ -496,7 +501,6 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
         deferredGalleryEl = document.createElement('div');
         deferredGalleryEl.id = 'ov25-deferred-gallery-container';
         deferredGalleryEl.setAttribute('data-clarity-mask', 'true');
-        deferredGalleryEl.style.pointerEvents = 'none';
         document.body.appendChild(deferredGalleryEl);
       }
     }
@@ -780,6 +784,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
         logoURL={logoURL}
         mobileLogoURL={mobileLogoURL}
         deferThreeD={deferThreeD}
+        configuratorGalleryIsDeferred={useDeferredGallery}
         showOptional={showOptional}
         hideAr={hideAr}
         hidePricing={hidePricing}

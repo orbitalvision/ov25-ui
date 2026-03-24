@@ -308,6 +308,34 @@ export function ProductVariantsWrapper({ isInline = false }: ProductVariantsWrap
       selectModule(modelPath, modelId);
     }, [isModuleSelectionLoading, setIsModuleSelectionLoading]);
 
+    const listFilterOptionIds = tabIds.filter(id => id !== 'size');
+    const listFilterKey = listFilterOptionIds.join(',');
+
+    const hasOptionVariants = (opt: { optionId: string; optionName: string; variants: any[] }) =>
+      opt.variants.some((g: { variants: any[] }) => g.variants.length > 0);
+
+    const listOptionsToShow = useMemo(() => {
+      const withVariants = allOptionsVariants.filter(hasOptionVariants);
+      if (effectiveVariantDisplayStyleOverlay !== VariantDisplayStyleOverlay.List) return withVariants;
+      const listOptionIdsWithSelectedFilters = availableProductFilters
+        ? listFilterOptionIds.filter((optionId) => {
+            const opt = allOptionsVariants.find((o) => o.optionId === optionId);
+            if (!opt) return false;
+            const optionFilters = availableProductFilters[opt.optionName];
+            if (!optionFilters) return false;
+            return Object.keys(optionFilters).some((key) =>
+              (optionFilters[key]?.some((f: { checked: boolean }) => f.checked) ?? false)
+            );
+          })
+        : [];
+      if (listOptionIdsWithSelectedFilters.length === 0) return withVariants;
+      return withVariants.filter((opt) => listOptionIdsWithSelectedFilters.includes(opt.optionId));
+    }, [allOptionsVariants, effectiveVariantDisplayStyleOverlay, listFilterOptionIds, availableProductFilters]);
+
+    const listFilterBlock = effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.List && listFilterOptionIds.length > 0 && (
+      renderFilterBlock(listFilterKey, listFilterOptionIds)
+    );
+
     if (isMobile && activeOptionId === 'modules') {
       const isLoading = (!compatibleModules || compatibleModules.length === 0) &&
         (!configuratorState?.snap2Objects || configuratorState.snap2Objects.length === 0);
@@ -347,34 +375,6 @@ export function ProductVariantsWrapper({ isInline = false }: ProductVariantsWrap
         />
       );
     }
-
-    const listFilterOptionIds = tabIds.filter(id => id !== 'size');
-    const listFilterKey = listFilterOptionIds.join(',');
-
-    const hasOptionVariants = (opt: { optionId: string; optionName: string; variants: any[] }) =>
-      opt.variants.some((g: { variants: any[] }) => g.variants.length > 0);
-
-    const listOptionsToShow = useMemo(() => {
-      const withVariants = allOptionsVariants.filter(hasOptionVariants);
-      if (effectiveVariantDisplayStyleOverlay !== VariantDisplayStyleOverlay.List) return withVariants;
-      const listOptionIdsWithSelectedFilters = availableProductFilters
-        ? listFilterOptionIds.filter((optionId) => {
-            const opt = allOptionsVariants.find((o) => o.optionId === optionId);
-            if (!opt) return false;
-            const optionFilters = availableProductFilters[opt.optionName];
-            if (!optionFilters) return false;
-            return Object.keys(optionFilters).some((key) =>
-              (optionFilters[key]?.some((f: { checked: boolean }) => f.checked) ?? false)
-            );
-          })
-        : [];
-      if (listOptionIdsWithSelectedFilters.length === 0) return withVariants;
-      return withVariants.filter((opt) => listOptionIdsWithSelectedFilters.includes(opt.optionId));
-    }, [allOptionsVariants, effectiveVariantDisplayStyleOverlay, listFilterOptionIds, availableProductFilters]);
-
-    const listFilterBlock = effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.List && listFilterOptionIds.length > 0 && (
-      renderFilterBlock(listFilterKey, listFilterOptionIds)
-    );
 
     const renderFilterSheet = (props: { optionId?: string; optionIds?: string[] }) => (
       <FilterContent optionId={props.optionId} optionIds={props.optionIds} wrapperVariant="sheet" />

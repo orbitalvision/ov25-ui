@@ -37,7 +37,7 @@ function App() {
         <button
           type="button"
           data-ov25-configure-button
-          className="ov:mt-4 ov:px-4 ov:py-2 ov:bg-neutral-900 ov:text-white ov:rounded-md ov:cursor-pointer hover:ov:bg-neutral-800"
+          className="ov:mt-4 ov:px-4 ov:py-2 ov:bg-transparent ov:text-white ov:rounded-md ov:cursor-pointer "
         >
           Configure
         </button>

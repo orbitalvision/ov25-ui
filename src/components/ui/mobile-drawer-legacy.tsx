@@ -9,6 +9,8 @@ import { gsap } from "gsap"
 import { CSSProperties } from "react"
 import { useOV25UI } from "../../contexts/ov25-ui-context.js"
 import { DRAWER_HEIGHT_RATIO } from "../../utils/configurator-utils.js"
+import { requestTransitionSnapshotFromIframe } from "../../utils/request-transition-snapshot-from-iframe.js"
+import { getConfiguratorIframeContainerScreenRect } from "../../utils/configurator-dom-queries.js"
 import { ChevronUpIcon, ChevronDownIcon } from "lucide-react"
 
 export interface MobileDrawerLegacyProps {
@@ -35,8 +37,19 @@ const MobileDrawerLegacyComponent = ({
   onStateChange,
 }: MobileDrawerLegacyProps) => {
   const [drawerState, setDrawerState] = useState<MobileDrawerLegacyState>(0)
-  const { setIsDrawerOrDialogOpen: setIsDrawerOpen, isMobile } = useOV25UI()
-  const [originalStyles, setOriginalStyles] = useState<{
+  const {
+    setIsDrawerOrDialogOpen: setIsDrawerOpen,
+    isMobile,
+    uniqueId,
+    setConfiguratorTransitionProxyBitmap,
+    setConfiguratorTransitionProxyMode,
+    setUseInstantIframeCloseRestore,
+    releaseConfiguratorTransitionProxy,
+    setConfiguratorClosingProxyRect,
+    isProductGalleryStacked,
+    shadowDOMs,
+  } = useOV25UI()
+  const originalStylesRef = useRef<{
     body: {
       overflow: string;
       position: string;
@@ -47,6 +60,7 @@ const MobileDrawerLegacyComponent = ({
       overflow: string;
     };
   } | null>(null);
+  const prevDrawerStateForShellRef = useRef<MobileDrawerLegacyState>(0)
 
   const [viewportHeightState, setViewportHeightState] = useState(window.visualViewport?.height !== undefined ? window.visualViewport?.height :  window.innerHeight)
   const [isViewportReady, setIsViewportReady] = useState(true)
@@ -109,18 +123,39 @@ const MobileDrawerLegacyComponent = ({
   }, [isOpen, isViewportReady])
 
   useEffect(() => {
+    let cancelled = false
+
+    const restoreBodyScroll = () => {
+      const scrollY = document.body.style.top
+      const stored = originalStylesRef.current
+      if (stored) {
+        document.body.style.overflow = stored.body.overflow
+        document.body.style.position = stored.body.position
+        document.body.style.width = stored.body.width
+        document.body.style.top = stored.body.top
+        document.documentElement.style.overflow = stored.html.overflow
+      } else {
+        document.body.style.overflow = ''
+        document.body.style.position = ''
+        document.body.style.width = ''
+        document.body.style.top = ''
+        document.documentElement.style.overflow = ''
+      }
+      window.scrollTo(0, parseInt(scrollY || '0', 10) * -1)
+      originalStylesRef.current = null
+    }
+
     if (drawerState !== 0) {
-      if (!originalStyles) {
-        const bodyStyles = {
-          overflow: document.body.style.overflow,
-          position: document.body.style.position,
-          width: document.body.style.width,
-          top: document.body.style.top,
-        };
-        const htmlStyles = {
-          overflow: document.documentElement.style.overflow,
-        };
-        setOriginalStyles({ body: bodyStyles, html: htmlStyles });
+      if (!originalStylesRef.current) {
+        originalStylesRef.current = {
+          body: {
+            overflow: document.body.style.overflow,
+            position: document.body.style.position,
+            width: document.body.style.width,
+            top: document.body.style.top,
+          },
+          html: { overflow: document.documentElement.style.overflow },
+        }
       }
 
       document.body.style.overflow = 'hidden'
@@ -128,37 +163,82 @@ const MobileDrawerLegacyComponent = ({
       document.body.style.width = '100%'
       document.body.style.top = `-${window.scrollY}px`
       document.documentElement.style.overflow = 'hidden'
-      setIsDrawerOpen(true)
-    } else {
-      const scrollY = document.body.style.top
 
-      if (originalStyles) {
-        document.body.style.overflow = originalStyles.body.overflow
-        document.body.style.position = originalStyles.body.position
-        document.body.style.width = originalStyles.body.width
-        document.body.style.top = originalStyles.body.top
-        document.documentElement.style.overflow = originalStyles.html.overflow
-        setOriginalStyles(null)
+      const wasClosed = prevDrawerStateForShellRef.current === 0
+      prevDrawerStateForShellRef.current = drawerState
+
+      if (wasClosed) {
+        void (async () => {
+          const bitmap = await requestTransitionSnapshotFromIframe(uniqueId)
+          if (cancelled) {
+            bitmap?.close()
+            return
+          }
+          if (bitmap) {
+            setConfiguratorTransitionProxyMode('opening')
+            setConfiguratorTransitionProxyBitmap(bitmap)
+          }
+          if (cancelled) {
+            bitmap?.close()
+            releaseConfiguratorTransitionProxy()
+            return
+          }
+          setIsDrawerOpen(true)
+        })()
       } else {
-        document.body.style.overflow = ''
-        document.body.style.position = ''
-        document.body.style.width = ''
-        document.body.style.top = ''
-        document.documentElement.style.overflow = ''
+        setIsDrawerOpen(true)
       }
-
-      window.scrollTo(0, parseInt(scrollY || '0') * -1)
-      setIsDrawerOpen(false)
+    } else {
+      prevDrawerStateForShellRef.current = 0
+      restoreBodyScroll()
+      if (isOpen) {
+        void (async () => {
+          const bitmap = await requestTransitionSnapshotFromIframe(uniqueId)
+          if (cancelled) {
+            bitmap?.close()
+            return
+          }
+          const rect = bitmap
+            ? getConfiguratorIframeContainerScreenRect(uniqueId, isProductGalleryStacked)
+            : null
+          setConfiguratorClosingProxyRect(rect)
+          if (bitmap) {
+            setConfiguratorTransitionProxyMode('closing')
+            setConfiguratorTransitionProxyBitmap(bitmap)
+          }
+          setUseInstantIframeCloseRestore(true)
+          setIsDrawerOpen(false)
+        })()
+      } else {
+        setIsDrawerOpen(false)
+      }
     }
 
     return () => {
-      if (originalStyles) {
-        document.body.style.overflow = originalStyles.body.overflow
-        document.body.style.position = originalStyles.body.position
-        document.body.style.width = originalStyles.body.width
-        document.body.style.top = originalStyles.body.top
-        document.documentElement.style.overflow = originalStyles.html.overflow
-        setOriginalStyles(null)
+      cancelled = true
+    }
+  }, [
+    drawerState,
+    setIsDrawerOpen,
+    uniqueId,
+    setConfiguratorTransitionProxyBitmap,
+    setConfiguratorTransitionProxyMode,
+    setUseInstantIframeCloseRestore,
+    releaseConfiguratorTransitionProxy,
+    setConfiguratorClosingProxyRect,
+    isProductGalleryStacked,
+    isOpen,
+  ])
+
+  useEffect(() => {
+    return () => {
+      const stored = originalStylesRef.current
+      if (stored) {
+        document.body.style.overflow = stored.body.overflow
+        document.body.style.position = stored.body.position
+        document.body.style.width = stored.body.width
+        document.body.style.top = stored.body.top
+        document.documentElement.style.overflow = stored.html.overflow
       } else {
         document.body.style.overflow = ''
         document.body.style.position = ''
@@ -166,9 +246,11 @@ const MobileDrawerLegacyComponent = ({
         document.body.style.top = ''
         document.documentElement.style.overflow = ''
       }
+      originalStylesRef.current = null
+      releaseConfiguratorTransitionProxy()
       setIsDrawerOpen(false)
     }
-  }, [drawerState, setIsDrawerOpen, originalStyles])
+  }, [releaseConfiguratorTransitionProxy, setIsDrawerOpen])
 
   const getHeightForState = (state: MobileDrawerLegacyState) => {
     switch (state) {
@@ -259,7 +341,6 @@ const MobileDrawerLegacyComponent = ({
     </div>
   );
 
-  const { shadowDOMs } = useOV25UI();
   const portalTarget = shadowDOMs?.mobileDrawer || document.body;
 
   return createPortal(drawerContent, portalTarget);

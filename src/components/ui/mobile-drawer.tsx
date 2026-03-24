@@ -9,6 +9,8 @@ import { gsap } from "gsap"
 import { CSSProperties } from "react"
 import { useOV25UI } from "../../contexts/ov25-ui-context.js"
 import { DRAWER_HEIGHT_RATIO } from "../../utils/configurator-utils.js"
+import { requestTransitionSnapshotFromIframe } from "../../utils/request-transition-snapshot-from-iframe.js"
+import { getConfiguratorIframeContainerScreenRect } from "../../utils/configurator-dom-queries.js"
 
 export interface MobileDrawerProps {
   children: ReactNode
@@ -35,8 +37,18 @@ const MobileDrawerComponent = ({
   maxHeightRatio = 5 / 6,
   onStateChange,
 }: MobileDrawerProps) => {
-  const { setIsDrawerOrDialogOpen: setIsDrawerOpen } = useOV25UI()
-  const [originalStyles, setOriginalStyles] = useState<{
+  const {
+    setIsDrawerOrDialogOpen: setIsDrawerOpen,
+    uniqueId,
+    setConfiguratorTransitionProxyBitmap,
+    setConfiguratorTransitionProxyMode,
+    setUseInstantIframeCloseRestore,
+    releaseConfiguratorTransitionProxy,
+    setConfiguratorClosingProxyRect,
+    isProductGalleryStacked,
+    shadowDOMs,
+  } = useOV25UI()
+  const originalStylesRef = useRef<{
     body: { overflow: string; position: string; width: string; top: string };
     html: { overflow: string };
   } | null>(null)
@@ -90,6 +102,8 @@ const MobileDrawerComponent = ({
   }, [isOpen])
 
   const prevOpenRef = useRef<boolean | null>(null)
+  /** Previous `isOpen` for shell/bitmap sync only — not reset by the gsap effect (see prevOpenRef). */
+  const prevIsOpenForShellRef = useRef(isOpen)
 
   useEffect(() => {
     if (!drawerRef.current) return
@@ -121,9 +135,33 @@ const MobileDrawerComponent = ({
   }, [isOpen, maxHeight])
 
   useEffect(() => {
+    let cancelled = false
+    const wasOpen = prevIsOpenForShellRef.current
+    prevIsOpenForShellRef.current = isOpen
+
+    const restoreBodyScroll = () => {
+      const scrollY = document.body.style.top
+      const stored = originalStylesRef.current
+      if (stored) {
+        document.body.style.overflow = stored.body.overflow
+        document.body.style.position = stored.body.position
+        document.body.style.width = stored.body.width
+        document.body.style.top = stored.body.top
+        document.documentElement.style.overflow = stored.html.overflow
+      } else {
+        document.body.style.overflow = ''
+        document.body.style.position = ''
+        document.body.style.width = ''
+        document.body.style.top = ''
+        document.documentElement.style.overflow = ''
+      }
+      window.scrollTo(0, parseInt(scrollY || '0', 10) * -1)
+      originalStylesRef.current = null
+    }
+
     if (isOpen) {
-      if (!originalStyles) {
-        setOriginalStyles({
+      if (!originalStylesRef.current) {
+        originalStylesRef.current = {
           body: {
             overflow: document.body.style.overflow,
             position: document.body.style.position,
@@ -131,51 +169,75 @@ const MobileDrawerComponent = ({
             top: document.body.style.top,
           },
           html: { overflow: document.documentElement.style.overflow },
-        })
+        }
       }
       document.body.style.overflow = 'hidden'
       document.body.style.position = 'fixed'
       document.body.style.width = '100%'
       document.body.style.top = `-${window.scrollY}px`
       document.documentElement.style.overflow = 'hidden'
-      setIsDrawerOpen(true)
+
+      void (async () => {
+        const bitmap = await requestTransitionSnapshotFromIframe(uniqueId)
+        if (cancelled) {
+          bitmap?.close()
+          return
+        }
+        if (bitmap) {
+          setConfiguratorTransitionProxyMode('opening')
+          setConfiguratorTransitionProxyBitmap(bitmap)
+        }
+        if (cancelled) {
+          bitmap?.close()
+          releaseConfiguratorTransitionProxy()
+          return
+        }
+        setIsDrawerOpen(true)
+      })()
     } else {
-      const scrollY = document.body.style.top
-      if (originalStyles) {
-        document.body.style.overflow = originalStyles.body.overflow
-        document.body.style.position = originalStyles.body.position
-        document.body.style.width = originalStyles.body.width
-        document.body.style.top = originalStyles.body.top
-        document.documentElement.style.overflow = originalStyles.html.overflow
-        setOriginalStyles(null)
+      restoreBodyScroll()
+      if (wasOpen) {
+        void (async () => {
+          const bitmap = await requestTransitionSnapshotFromIframe(uniqueId)
+          if (cancelled) {
+            bitmap?.close()
+            return
+          }
+          const rect = bitmap
+            ? getConfiguratorIframeContainerScreenRect(uniqueId, isProductGalleryStacked)
+            : null
+          setConfiguratorClosingProxyRect(rect)
+          if (bitmap) {
+            setConfiguratorTransitionProxyMode('closing')
+            setConfiguratorTransitionProxyBitmap(bitmap)
+          }
+          setUseInstantIframeCloseRestore(true)
+          setIsDrawerOpen(false)
+        })()
       } else {
-        document.body.style.overflow = ''
-        document.body.style.position = ''
-        document.body.style.width = ''
-        document.body.style.top = ''
-        document.documentElement.style.overflow = ''
+        setIsDrawerOpen(false)
       }
-      window.scrollTo(0, parseInt(scrollY || '0') * -1)
-      setIsDrawerOpen(false)
     }
+
     return () => {
-      if (originalStyles) {
-        document.body.style.overflow = originalStyles.body.overflow
-        document.body.style.position = originalStyles.body.position
-        document.body.style.width = originalStyles.body.width
-        document.body.style.top = originalStyles.body.top
-        document.documentElement.style.overflow = originalStyles.html.overflow
-        setOriginalStyles(null)
-      } else {
-        document.body.style.overflow = ''
-        document.body.style.position = ''
-        document.body.style.width = ''
-        document.body.style.top = ''
-        document.documentElement.style.overflow = ''
+      cancelled = true
+      if (isOpen && drawerRef.current && !drawerRef.current.isConnected) {
+        restoreBodyScroll()
+        releaseConfiguratorTransitionProxy()
+        setIsDrawerOpen(false)
       }
-      setIsDrawerOpen(false)
     }
-  }, [isOpen, setIsDrawerOpen, originalStyles])
+  }, [
+    isOpen,
+    setIsDrawerOpen,
+    uniqueId,
+    setConfiguratorTransitionProxyBitmap,
+    setConfiguratorTransitionProxyMode,
+    setUseInstantIframeCloseRestore,
+    releaseConfiguratorTransitionProxy,
+    setConfiguratorClosingProxyRect,
+    isProductGalleryStacked,
+  ])
 
   if (typeof window === 'undefined') {
     return null
@@ -206,7 +268,6 @@ const MobileDrawerComponent = ({
     </div>
   )
 
-  const { shadowDOMs } = useOV25UI()
   const portalTarget = shadowDOMs?.mobileDrawer || document.body
 
   return createPortal(drawerContent, portalTarget)

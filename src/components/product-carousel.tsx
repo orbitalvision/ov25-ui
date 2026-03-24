@@ -11,7 +11,6 @@ export function ProductCarousel() {
     setGalleryIndex,
     error,
     images: passedImages,
-    isVariantsOpen,
     galleryIndexToUse,
     carouselLayout,
     carouselLayoutMobile,
@@ -93,11 +92,6 @@ export function ProductCarousel() {
     items.splice(galleryIndexToUse, 0, { is3D: true })
     return items
   }, [images, galleryIndexToUse, useStackedLayout, cutoutIndex])
-
-  React.useEffect(() => {
-    if (!images.length) return;
-    if (isVariantsOpen) setGalleryIndex(galleryIndexToUse);
-  }, [isVariantsOpen])
 
   if (images.length === 0 || error) return null;
 

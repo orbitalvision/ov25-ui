@@ -130,7 +130,6 @@
     --ov25-wizard-variants-content-height: 600px;
     --ov25-wizard-variants-available-height: 100%;
 
-    --ov25-inline-list-aside-max-height: 45rem;
     /* Inline list: aside taller so scrollable area gets 600px + room for checkout button */
     --ov25-inline-list-aside-min-height: 1000px;
     --ov25-inline-list-aside-min-height-mobile: 100px;
@@ -577,16 +576,34 @@ html #ov25-configurator-variant-menu-container {
   pointer-events: all;
 }
 
-/* Snap2 variants slide panel */
-[data-ov25-variants-panel] {
+/* Snap2 desktop shell: slide variants column in/out (data-open syncs with modal overlay in Snap2ConfiguratorModal). */
+[data-ov25-snap2-variants-panel] {
   transform: translateX(100%);
   pointer-events: none;
   transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-[data-ov25-variants-panel][data-open="true"] {
+[data-ov25-snap2-variants-panel][data-open="true"] {
   transform: translateX(0);
   pointer-events: auto;
+}
+
+/* Standard modal configurator: variants panel is part of the modal layout — no slide. */
+[data-ov25-variants-panel]:not([data-ov25-variants-panel-layout="modal"]) {
+  transform: translateX(100%);
+  pointer-events: none;
+  transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-ov25-variants-panel]:not([data-ov25-variants-panel-layout="modal"])[data-open="true"] {
+  transform: translateX(0);
+  pointer-events: auto;
+}
+
+[data-ov25-variants-panel][data-ov25-variants-panel-layout="modal"] {
+  transform: none !important;
+  pointer-events: auto;
+  transition: none !important;
 }
 
 /* Custom gradient and shadow classes for variant cards */
@@ -601,32 +618,3 @@ html #ov25-configurator-variant-menu-container {
   box-shadow: inset 0 2px 8px 0 rgba(154, 154, 154, 0.5), 
               inset 0 2px 4px 0 rgba(243, 244, 246, 0.15);
 }
-
-#ov25-configurator-variant-menu-container:has([data-ov25-list-variants-mode="inline"]) {
-    max-height: var(--ov25-inline-list-aside-max-height);
-  }
-
-  .ov25-gallery-image-button{
-    background-color: var(--ov25-configurator-iframe-background-color);
-    object-fit: contain ;
-  }
-  #true-ov25-configurator-iframe-container img {
-    object-fit: contain;
-  }
-  .ov25-thumbnail-scroll {
-    padding-left: 0px;
-    padding-right: 0px;
-  }
-  .ov\:ring-2 {
-    --tw-ring-inset: inset; 
-  }
-  .ov25-gallery-image-button div{
-    display: none;
-  }
-  .ov25-gallery-image-button img {
-    object-fit: contain;
-  }
-
-  #true-carousel {
-    margin-top: var(--ov25-gallery-gap);
-  }

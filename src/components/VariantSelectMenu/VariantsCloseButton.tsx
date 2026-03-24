@@ -17,7 +17,6 @@ export const VariantsCloseButton = ({ onClick: onClickProp, ariaLabel = 'Close',
     setIsVariantsOpen,
     isModalOpen,
     isSnap2Mode,
-    hasConfigureButton,
     shareDialogTrigger,
     setShareDialogTrigger,
     configuratorState,
@@ -32,7 +31,7 @@ export const VariantsCloseButton = ({ onClick: onClickProp, ariaLabel = 'Close',
       setIsVariantsOpen(false);
       return;
     }
-    if (isSnap2Mode && hasConfigureButton && shareDialogTrigger === 'none' && (configuratorState?.snap2Objects?.length ?? 0) > 0) {
+    if (isSnap2Mode && shareDialogTrigger === 'none' && (configuratorState?.snap2Objects?.length ?? 0) > 0) {
       setShareDialogTrigger('modal-close');
     } else {
       setIsVariantsOpen(false);
