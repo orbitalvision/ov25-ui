@@ -5,7 +5,7 @@ import '../src/index.css';
 
 const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
   apiKey: () => '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d',
-  productLink: () => 'snap2/4',
+  productLink: () => 'snap2/292',
   selectors: {
     gallery: { selector: '.configurator-container', replace: true },
     configureButton: { selector: '#ov25-fullscreen-button', replace: false },

@@ -3,7 +3,7 @@ export type PreviewLayoutType = LayoutType;
 
 export const PREVIEW_PRODUCT_LINKS: Record<LayoutType, string> = {
   standard: '58',
-  snap2: 'snap2/4',
+  snap2: 'snap2/292',
 };
 
 export const DEFAULT_PREVIEW_API_KEY =
