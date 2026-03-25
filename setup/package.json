@@ -1,6 +1,6 @@
 {
   "name": "ov25-setup",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "OV25 Configurator Setup visual editor component",
   "type": "module",
   "main": "dist/index.js",
@@ -17,11 +17,12 @@
     "dist"
   ],
   "scripts": {
+    "type-check": "tsc --noEmit",
     "build": "vite build && tsc --emitDeclarationOnly --outDir dist && node ../scripts/strip-layers.js dist/index.css",
     "build:react18": "node scripts/build-react18.js",
     "clean": "rimraf dist",
-    "prepare": "npm run clean && npm run build",
-    "release": "npm run build && npm publish --ignore-scripts"
+    "release": "npm run type-check && npm run build && npm publish --ignore-scripts",
+    "publish:canary": "npm run type-check && npm run build && npm publish --tag canary --ignore-scripts"
   },
   "peerDependencies": {
     "react": "^19.0.0",

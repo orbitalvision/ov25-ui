@@ -22,6 +22,11 @@ import {
 
 export type { ConfiguratorSetupPayload };
 
+function parseVariantHideOptionsCsv(csv: string): string[] {
+  if (!csv?.trim()) return [];
+  return csv.split(',').map((s) => s.trim()).filter((s) => s.length > 0);
+}
+
 const STORAGE_KEY = 'ov25-configurator-setup';
 const EXPORT_MESSAGE_TYPE = 'OV25_CONFIGURATOR_SETTINGS';
 const DEMO_IMAGE_COUNT = 9;
@@ -92,6 +97,7 @@ export function buildSerializableConfig(
     productLink = `${productLink}${sep}configuration_uuid=${encodeURIComponent(SNAP2_PREVIEW_STARTING_CONFIG_UUID)}`;
   }
   const apiKey = overrides?.apiKey || DEFAULT_PREVIEW_API_KEY;
+  const parsedHideOptions = parseVariantHideOptionsCsv(settings.configurator.variantHideOptionsCsv);
 
   const selectors: Record<string, string | { selector: string; replace: boolean }> = {};
   const selectorEntries = Object.entries(settings.selectors) as [keyof TypeSettings['selectors'], SelectorFormState][];
@@ -117,7 +123,8 @@ export function buildSerializableConfig(
       triggerStyle: { desktop: settings.configurator.triggerStyleDesktop, mobile: settings.configurator.triggerStyleMobile },
       variants: {
         displayMode: { desktop: settings.configurator.variantDisplayDesktop, mobile: settings.configurator.variantDisplayMobile },
-        useSimpleVariantsSelector: true,
+        useSimpleVariantsSelector: settings.configurator.useSimpleVariantsSelector,
+        ...(parsedHideOptions.length > 0 ? { hideOptions: parsedHideOptions } : {}),
       },
     },
     flags: {

@@ -36,6 +36,8 @@ export interface TypeSettings {
     variantDisplayDesktop: FormVariantDisplayMode;
     variantDisplayMobile: FormVariantDisplayMode;
     useSimpleVariantsSelector: boolean;
+    /** Comma-separated option ids/names → saved as `variants.hideOptions` in JSON. */
+    variantHideOptionsCsv: string;
   };
   flags: {
     hidePricing: boolean;
@@ -84,6 +86,7 @@ const DEFAULT_STANDARD_SETTINGS: TypeSettings = {
     variantDisplayDesktop: 'tree',
     variantDisplayMobile: 'list',
     useSimpleVariantsSelector: true,
+    variantHideOptionsCsv: '',
   },
   flags: { hidePricing: false, hideAr: false, deferThreeD: false, showOptional: false, forceMobile: false, autoOpen: false },
   branding: { logoURL: '', mobileLogoURL: '', cssString: '' },

@@ -172,6 +172,19 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
                 onMobileChange={(v) => updateNested('configurator', 'variantDisplayMobile', v)}
                 options={VARIANT_OPTIONS}
               />
+              <div>
+                <Label className="text-[10px] text-muted-foreground">Hide variant options (comma-separated)</Label>
+                <p className="text-[10px] text-muted-foreground/80 mt-0.5 mb-1">
+                  Option ids or names to omit from the variant UI (e.g. fabric, size). Iframe defaults stay applied.
+                </p>
+                <Input
+                  type="text"
+                  value={currentSettings.configurator.variantHideOptionsCsv}
+                  onChange={(e) => updateNested('configurator', 'variantHideOptionsCsv', e.target.value)}
+                  placeholder="e.g. fabric, size"
+                  className="h-7 text-xs"
+                />
+              </div>
             </div>
 
             {/* --- Image Gallery --- */}

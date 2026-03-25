@@ -94,6 +94,11 @@ function mergeSerializableIntoTypeSettings(base: TypeSettings, saved: SavedLayou
     if (cf.variants?.useSimpleVariantsSelector !== undefined) {
       merged.configurator.useSimpleVariantsSelector = cf.variants.useSimpleVariantsSelector;
     }
+    if (Array.isArray(cf.variants?.hideOptions) && cf.variants.hideOptions.length > 0) {
+      merged.configurator.variantHideOptionsCsv = cf.variants.hideOptions
+        .filter((x): x is string => typeof x === 'string' && x.trim() !== '')
+        .join(', ');
+    }
   }
 
   if (saved.flags) {
