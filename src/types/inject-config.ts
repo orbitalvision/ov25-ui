@@ -41,6 +41,11 @@ export type VariantDisplayMode = 'wizard' | 'list' | 'tabs' | 'accordion' | 'tre
 export type VariantsConfig = {
   displayMode: ResponsiveValue<VariantDisplayMode>;
   useSimpleVariantsSelector?: boolean;
+  /**
+   * Option ids or display names (case-insensitive) to omit from variant UI (list, wizard, tabs, etc.).
+   * Iframe defaults and CURRENT_SKU state stay applied; users cannot change these options in the shell.
+   */
+  hideOptions?: string[];
 };
 
 export type SelectorsConfig = {
@@ -53,22 +58,6 @@ export type SelectorsConfig = {
 };
 
 /**
- * Price payload from CURRENT_PRICE message (useIframeMessaging).
- * @property {number} totalPrice - Final price after discount, in minor units (e.g. pence)
- * @property {number} subtotal - Subtotal before discount
- * @property {string} formattedPrice - Display string for final price after discount (e.g. '£1,200.00')
- * @property {string} formattedSubtotal - Display string for subtotal before discount
- * @property {{ amount: number, formattedAmount: string, percentage: number }} discount
- */
-export interface OnChangePricePayload {
-  totalPrice: number;
-  subtotal: number;
-  formattedPrice: string;
-  formattedSubtotal: string;
-  discount: { amount: number; formattedAmount: string; percentage: number };
-}
-
-/**
  * Maps option names to their selected SKU values.
  * Keys: option names (e.g. 'Color', 'Size'); reserved keys: 'Range', 'Product', 'Ranges', 'Products'.
  * @example { Color: 'RED-001', Size: 'M-001', Range: 'RANGE-123' }
@@ -77,26 +66,94 @@ export interface OptionSkuMap {
   [optionName: string]: string;
 }
 
-/**
- * SKU payload from CURRENT_SKU message (useIframeMessaging).
- * @property {string} skuString - Full concatenated SKU string
- * @property {OptionSkuMap} [skuMap] - Per-option SKU values
- */
-export interface OnChangeSkuPayload {
+/** One billable/configured product line after normalization (SKU side). */
+export interface CommerceLineItemSku {
+  /** Catalogue product id or other stable line id from the iframe. */
+  id: string;
+  skuString: string;
+  skuMap: Record<string, string>;
+  quantity: number;
+}
+
+/** One configured option row inside a price line (single-product breakdown or Snap2 selections). */
+export interface CommerceLineItemSelection {
+  category?: string;
+  name: string;
+  sku?: string;
+  price: number;
+  formattedPrice: string;
+  thumbnail?: string;
+}
+
+/** One billable product line after normalization (price side). */
+export interface CommerceLineItemPrice {
+  /** Same id semantics as {@link CommerceLineItemSku.id} when both messages come from Snap2 with `productId`. */
+  id: string;
+  name: string;
+  quantity: number;
+  price: number;
+  formattedPrice: string;
+  subtotal: number;
+  formattedSubtotal: string;
+  discountedAmount: number;
+  formattedDiscountAmount: string;
+  discountPercentage: number;
+  selections: CommerceLineItemSelection[];
+  /** Snap2 3D model id when present on the iframe breakdown. */
+  modelId?: string;
+}
+
+/** Single-product iframe: legacy top-level sku fields plus `lines` (length 1). */
+export interface UnifiedSkuPayloadSingle {
+  mode: 'single';
+  lines: CommerceLineItemSku[];
   skuString: string;
   skuMap?: OptionSkuMap;
 }
 
-/**
- * Payload passed to onChange when price or SKU changes.
- * Each key is null until that message type has been received at least once.
- * @property {OnChangeSkuPayload | null} skus - SKU data from CURRENT_SKU message, or null if not yet received
- * @property {OnChangePricePayload | null} price - Price data from CURRENT_PRICE message, or null if not yet received
- */
-export interface OnChangePayload {
-  skus: OnChangeSkuPayload | null;
-  price: OnChangePricePayload | null;
+/** Multi-product (Snap2): only `lines`; no top-level `skuString`. */
+export interface UnifiedSkuPayloadMulti {
+  mode: 'multi';
+  lines: CommerceLineItemSku[];
 }
+
+export type UnifiedSkuPayload = UnifiedSkuPayloadSingle | UnifiedSkuPayloadMulti;
+
+export interface UnifiedPricePayload {
+  mode: 'single' | 'multi';
+  totalPrice: number;
+  subtotal: number;
+  formattedPrice: string;
+  formattedSubtotal: string;
+  discount: { amount: number; formattedAmount: string; percentage: number };
+  lines: CommerceLineItemPrice[];
+  /** Raw single-product `priceBreakdown` from the iframe when present. */
+  priceBreakdown?: unknown[];
+  /** Raw Snap2 `productBreakdowns` from the iframe when present. */
+  productBreakdowns?: unknown[];
+}
+
+/**
+ * Callback payload: normalized SKU and price. Each half is null until that message was received at least once.
+ */
+export interface UnifiedOnChangePayload {
+  skus: UnifiedSkuPayload | null;
+  price: UnifiedPricePayload | null;
+}
+
+export type OnChangePayload = UnifiedOnChangePayload;
+
+/**
+ * Normalized SKU from CURRENT_SKU. Use `mode` / `lines` for multi-product; in `single` mode top-level `skuString` remains for legacy code.
+ * @deprecated Prefer the name {@link UnifiedSkuPayload} in new integrations.
+ */
+export type OnChangeSkuPayload = UnifiedSkuPayload;
+
+/**
+ * Normalized price from CURRENT_PRICE (includes `mode`, `lines`, optional raw breakdown passthrough).
+ * @deprecated Prefer the name {@link UnifiedPricePayload} in new integrations.
+ */
+export type OnChangePricePayload = UnifiedPricePayload;
 
 /** Callbacks for inject configurator. */
 export interface CallbacksConfig {
@@ -108,8 +165,7 @@ export interface CallbacksConfig {
   buySwatches: (swatches: Swatch[], swatchRulesData: SwatchRulesData) => void;
   /**
    * Called when price or SKU changes from configurator messages.
-   * Receives `{ skus, price }`; each is `null` until that message type has been received at least once.
-   * @param payload - `{ skus: OnChangeSkuPayload | null, price: OnChangePricePayload | null }`
+   * Receives normalized `{ skus, price }` (see {@link UnifiedOnChangePayload}); each is `null` until that message type has been received at least once.
    */
   onChange?: (payload: OnChangePayload) => void;
 }
@@ -200,6 +256,7 @@ export interface LegacyInjectConfiguratorOptions {
   variantDisplayStyle?: VariantDisplayMode;
   variantDisplayStyleMobile?: VariantDisplayMode;
   useInlineVariantControls?: boolean;
+  hideOptions?: string[];
 }
 
 export type InjectConfiguratorInput = InjectConfiguratorOptions | LegacyInjectConfiguratorOptions;
@@ -232,6 +289,8 @@ export interface NormalizedInjectConfig {
   variantDisplayMode: VariantDisplayMode;
   variantDisplayModeMobile: VariantDisplayMode;
   useSimpleVariantsSelector: boolean;
+  /** Lowercase trimmed option ids/names to hide from variant selectors (see {@link VariantsConfig.hideOptions}). */
+  hideVariantOptions: string[];
 
   addToBasketFunction: (payload?: OnChangePayload) => void;
   buyNowFunction: (payload?: OnChangePayload) => void;
@@ -252,6 +311,16 @@ export interface NormalizedInjectConfig {
 
 function pick<T, K extends keyof T>(obj: T, key: K): T[K] | undefined {
   return obj?.[key];
+}
+
+function normalizeHideVariantOptions(raw: string[] | undefined): string[] {
+  if (!raw?.length) return [];
+  const seen = new Set<string>();
+  for (const s of raw) {
+    const k = String(s).trim().toLowerCase();
+    if (k) seen.add(k);
+  }
+  return [...seen];
 }
 
 export function normalizeInjectConfig(opts: InjectConfiguratorInput): NormalizedInjectConfig {
@@ -288,6 +357,7 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
   const variantMobile = variantMobileRaw === 'accordion' ? 'tree' : variantMobileRaw;
 
   const useSimpleVariantsSelector = variants?.useSimpleVariantsSelector ?? c.useSimpleVariantsSelector ?? true;
+  const hideVariantOptions = normalizeHideVariantOptions(variants?.hideOptions ?? c.hideOptions);
 
   const addToBasketFunction = isGrouped ? (opts as InjectConfiguratorOptions).callbacks.addToBasket : c.addToBasketFunction;
   const buyNowFunction = isGrouped ? (opts as InjectConfiguratorOptions).callbacks.buyNow : c.buyNowFunction;
@@ -328,6 +398,7 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
     variantDisplayMode: variantDesktop,
     variantDisplayModeMobile: variantMobile,
     useSimpleVariantsSelector,
+    hideVariantOptions,
     addToBasketFunction,
     buyNowFunction,
     buySwatchesFunction,

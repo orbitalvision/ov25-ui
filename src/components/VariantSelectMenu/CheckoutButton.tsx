@@ -3,9 +3,33 @@ import { ShoppingCart } from 'lucide-react';
 import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 import { cn } from '../../lib/utils.js';
 
-const baseButtonClasses = 'ov:flex ov:items-center ov:justify-center ov:gap-2 ov:py-2 ov:px-6 ov:text-sm ov:rounded-[var(--ov25-cta-border-radius)] ov:bg-[var(--ov25-cta-color)] ov:text-[var(--ov25-cta-text-color)] ov:font-medium ov:cursor-pointer ov:hover:bg-[var(--ov25-cta-color-hover)] ov:transition-colors ov:border-0 ov:text-center ov:uppercase';
+const baseButtonClasses =
+  'ov:flex ov:items-center ov:justify-center ov:gap-2 ov:py-2 ov:px-6 ov:text-sm ov:rounded-[var(--ov25-cta-border-radius)] ov:bg-[var(--ov25-cta-color)] ov:text-[var(--ov25-cta-text-color)] ov:cursor-pointer ov:hover:bg-[var(--ov25-cta-color-hover)] ov:transition-colors ov:border-0 ov:text-center ov:uppercase';
 
-export const CheckoutButton = () => {
+function buttonFontWeight(embedded: boolean) {
+  return embedded ? 'ov:font-normal' : 'ov:font-medium';
+}
+
+function stopCommerceClick(e: React.SyntheticEvent) {
+  e.preventDefault();
+  e.stopPropagation();
+}
+
+export type CheckoutButtonProps = {
+  onAfterAddToBasket?: () => void;
+  onAfterBuyNow?: () => void;
+  /**
+   * Tighter layout for narrow panels (e.g. Snap2 checkout sheet): no extra horizontal padding on the wrapper
+   * so the CTA stays within the parent padding box and does not clip.
+   */
+  embedded?: boolean;
+};
+
+export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
+  onAfterAddToBasket,
+  onAfterBuyNow,
+  embedded = false,
+}) => {
   const {
     buyNowFunction,
     addToBasketFunction,
@@ -18,7 +42,9 @@ export const CheckoutButton = () => {
 
   if (!hasAddToBasket && !hasBuyNow) return null;
 
-  const wrapperClass = 'ov25-checkout-button-wrapper ov:shrink-0 ov:px-4 ov:pb-2 ov:pt-2';
+  const wrapperClass = embedded
+    ? 'ov25-checkout-button-wrapper ov25-checkout-button-wrapper--embedded ov:shrink-0 ov:w-full ov:min-w-0 ov:max-w-full'
+    : 'ov25-checkout-button-wrapper ov:shrink-0 ov:px-4 ov:pb-2 ov:pt-2';
 
   if (hasAddToBasket && !hasBuyNow) {
     return (
@@ -26,11 +52,13 @@ export const CheckoutButton = () => {
       <button
         id="ov25-add-to-basket-button"
         type="button"
-        onClick={() => {
+        onClick={(e) => {
+          stopCommerceClick(e);
           setIsVariantsOpen(false);
           addToBasketFunction();
+          onAfterAddToBasket?.();
         }}
-        className={cn(baseButtonClasses, 'ov:w-full')}
+        className={cn(baseButtonClasses, buttonFontWeight(embedded), 'ov:w-full ov:min-w-0 ov:max-w-full')}
       >
         <span>Add to basket</span>
         <span>{formattedPrice}</span>
@@ -45,8 +73,12 @@ export const CheckoutButton = () => {
       <button
         id="ov25-checkout-button"
         type="button"
-        onClick={() => buyNowFunction()}
-        className={cn(baseButtonClasses, 'ov:w-full')}
+        onClick={(e) => {
+          stopCommerceClick(e);
+          buyNowFunction();
+          onAfterBuyNow?.();
+        }}
+        className={cn(baseButtonClasses, buttonFontWeight(embedded), 'ov:w-full ov:min-w-0 ov:max-w-full')}
       >
         <span>Buy now</span>
         <span>{formattedPrice}</span>
@@ -64,11 +96,19 @@ export const CheckoutButton = () => {
 
   return (
     <div className={wrapperClass}>
-    <div className="ov:relative ov:flex ov:w-full ov:rounded-[var(--ov25-cta-border-radius)] ov:overflow-hidden ov:bg-[var(--ov25-cta-color)] ov:text-[var(--ov25-cta-text-color)] ov:uppercase ov:text-sm">
-      <div className="ov:flex ov:items-center ov:justify-center ov:gap-2 ov:py-2 ov:px-6 ov:pr-14 ov:min-w-0 ov:flex-1 ov:invisible" aria-hidden>
+    <div
+      className={cn(
+        'ov25-checkout-combo-button ov:relative ov:flex ov:w-full ov:min-w-0 ov:max-w-full ov:rounded-[var(--ov25-cta-border-radius)] ov:overflow-hidden ov:bg-[var(--ov25-cta-color)] ov:text-[var(--ov25-cta-text-color)] ov:uppercase ov:text-sm',
+        buttonFontWeight(embedded)
+      )}
+    >
+      <div
+        className="ov:pointer-events-none ov:flex ov:items-center ov:justify-center ov:gap-2 ov:py-2 ov:px-6 ov:pr-14 ov:min-w-0 ov:flex-1 ov:invisible"
+        aria-hidden
+      >
         {labelContent}
       </div>
-      <div className="ov:w-14 ov:shrink-0 ov:invisible" aria-hidden>
+      <div className="ov:pointer-events-none ov:w-14 ov:shrink-0 ov:invisible" aria-hidden>
         <ShoppingCart size={20} />
       </div>
       <div
@@ -80,17 +120,23 @@ export const CheckoutButton = () => {
       <button
         id="ov25-checkout-button"
         type="button"
-        onClick={() => buyNowFunction()}
-        className="ov:absolute ov:inset-0 ov:right-14 ov:z-0 ov:cursor-pointer ov:bg-transparent ov:border-0"
+        onClick={(e) => {
+          stopCommerceClick(e);
+          buyNowFunction();
+          onAfterBuyNow?.();
+        }}
+        className="ov:absolute ov:inset-0 ov:right-14 ov:z-[11] ov:cursor-pointer ov:bg-transparent ov:border-0"
         aria-label="Buy now"
       />
       <div className="ov:absolute ov:right-14 ov:top-0 ov:bottom-0 ov:w-px ov:bg-white/30 ov:z-10" aria-hidden />
       <button
         id="ov25-add-to-basket-button"
         type="button"
-        onClick={() => {
+        onClick={(e) => {
+          stopCommerceClick(e);
           setIsVariantsOpen(false);
           addToBasketFunction();
+          onAfterAddToBasket?.();
         }}
         className="ov:absolute ov:right-0 ov:top-0 ov:bottom-0 ov:w-14 ov:z-20 ov:flex ov:items-center ov:justify-center ov:cursor-pointer ov:bg-transparent ov:border-0 ov:hover:bg-white/10 ov:transition-colors"
         aria-label="Add to basket"

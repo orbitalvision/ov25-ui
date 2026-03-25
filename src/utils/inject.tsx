@@ -142,6 +142,14 @@ export type {
   OnChangePayload,
   OnChangePricePayload,
   OnChangeSkuPayload,
+  UnifiedOnChangePayload,
+  UnifiedSkuPayload,
+  UnifiedSkuPayloadSingle,
+  UnifiedSkuPayloadMulti,
+  UnifiedPricePayload,
+  CommerceLineItemSku,
+  CommerceLineItemPrice,
+  CommerceLineItemSelection,
   OptionSkuMap,
 } from '../types/inject-config.js';
 
@@ -184,6 +192,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     variantDisplayMode,
     variantDisplayModeMobile,
     useSimpleVariantsSelector,
+    hideVariantOptions,
     addToBasketFunction,
     buyNowFunction,
     buySwatchesFunction,
@@ -806,6 +815,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
         configuratorTriggerStyleMobile={configuratorTriggerStyleMobile}
         variantDisplayStyle={variantDisplayStyle}
         variantDisplayStyleMobile={variantDisplayStyleMobile}
+        hideVariantOptions={hideVariantOptions}
         shadowDOMs={{
           mobileDrawer: mobileDrawerShadowRoot,
           configuratorViewControls: configuratorViewControlsShadowRoot,

@@ -1,5 +1,5 @@
 @import "tailwindcss" prefix(ov);
-@import url("https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap");
 
 @theme inline {
   --radius: var(--ov25-rounded);
@@ -137,7 +137,8 @@
 
     --ov25-variant-thumb-border-radius: var(--ov25-rounded-full);
 
-    --ov25-360-font-family: 'Lato', sans-serif;
+    --ov25-360-font-family: 'IBM Plex Sans', sans-serif;
+    --ov25-font-family: var(--ov25-360-font-family);
 }
 
 @media (max-width: 640px) {
@@ -576,14 +577,14 @@ html #ov25-configurator-variant-menu-container {
   pointer-events: all;
 }
 
-/* Snap2 desktop shell: slide variants column in/out (data-open syncs with modal overlay in Snap2ConfiguratorModal). */
-[data-ov25-snap2-variants-panel] {
+/* Snap2 desktop shell: slide settings rails (variants + checkout) in/out (data-open syncs with modal overlay). */
+[data-ov25-snap2-settings-sheet] {
   transform: translateX(100%);
   pointer-events: none;
   transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-[data-ov25-snap2-variants-panel][data-open="true"] {
+[data-ov25-snap2-settings-sheet][data-open="true"] {
   transform: translateX(0);
   pointer-events: auto;
 }

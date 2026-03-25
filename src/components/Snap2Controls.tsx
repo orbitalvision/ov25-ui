@@ -1,13 +1,35 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { DimensionsIcon } from '../lib/svgs/DimensionsIcon.js';
 import { toggleDimensions, toggleFullscreen, toggleMiniDimensions } from '../utils/configurator-utils.js';
 import { useOV25UI } from '../contexts/ov25-ui-context.js';
 import { cn } from '../lib/utils.js';
-import { Eye, EyeClosed, TableRowsSplit } from 'lucide-react';
+import { Eye, EyeClosed, ShoppingBasket, TableRowsSplit } from 'lucide-react';
 import SaveSnap2Menu from './SaveSnap2Menu.js';
+import { Snap2CheckoutSheet } from './Snap2CheckoutSheet.js';
 
 const Snap2Controls: React.FC = () => {
-  const { controlsHidden, toggleHideAll, shareDialogTrigger, isVariantsOpen, setIsVariantsOpen, setActiveOptionId, allOptions, isMobile, configuratorState, isModalOpen, cssString } = useOV25UI();
+  const {
+    controlsHidden,
+    toggleHideAll,
+    shareDialogTrigger,
+    isVariantsOpen,
+    setIsVariantsOpen,
+    setActiveOptionId,
+    allOptions,
+    isMobile,
+    configuratorState,
+    isModalOpen,
+    cssString,
+    hidePricing,
+    formattedPrice,
+    addToBasketFunction,
+    buyNowFunction,
+    isSnap2CheckoutSheetOpen,
+    setIsSnap2CheckoutSheetOpen,
+  } = useOV25UI();
+
+  const hasCommerceActions =
+    typeof addToBasketFunction === 'function' || typeof buyNowFunction === 'function';
   
   const [canSeeDimensions, setCanSeeDimensions] = useState(false);
   const [canSeeMiniDimensions, setCanSeeMiniDimensions] = useState(false);
@@ -19,6 +41,11 @@ const Snap2Controls: React.FC = () => {
       setCanSeeMiniDimensions(false);
     }
   }, [isModalOpen]);
+
+  const openCheckoutSheet = useCallback(() => {
+    setIsVariantsOpen(false);
+    setIsSnap2CheckoutSheetOpen(true);
+  }, [setIsSnap2CheckoutSheetOpen, setIsVariantsOpen]);
 
   const handleToggleDimensions = () => {
     toggleDimensions(canSeeDimensions, setCanSeeDimensions, undefined, cssString);
@@ -48,6 +75,7 @@ const Snap2Controls: React.FC = () => {
   };
 
   return (
+    <>
     <div id="ov25-snap2-controls" className={cn(
       "ov:absolute ov:top-4 ov:left-1/2 ov:transform ov:-translate-x-1/2 ov:z-[102]",
       "ov:flex ov:gap-2 ov:pointer-events-none ov:transition-opacity ov:duration-200",
@@ -128,8 +156,29 @@ const Snap2Controls: React.FC = () => {
             <Eye className="ov:w-[16px] ov:h-[16px]" color="var(--ov25-text-color)"/>
           )}
         </button>
+
+        {!controlsHidden && !hidePricing && hasCommerceActions && (
+          <button
+            type="button"
+            id="ov25-snap2-basket-pill"
+            onClick={openCheckoutSheet}
+            className={cn(
+              'ov:cursor-pointer ov:h-8 ov:flex ov:items-center ov:justify-center ov:gap-2 ov:px-3 ov:transition-all ov:duration-200 ov:hover:opacity-80 ov:shadow-sm ov:rounded-full',
+              'ov:bg-[var(--ov25-overlay-button-color)] ov:text-[var(--ov25-text-color)] ov:text-sm  ov:max-w-[11rem]'
+            )}
+            aria-label="Open checkout summary"
+          >
+            <span className="ov:truncate ov:min-w-0">{formattedPrice}</span>
+            <ShoppingBasket className="ov:w-[16px] ov:h-[16px] ov:shrink-0" color="var(--ov25-text-color)" />
+          </button>
+        )}
       </div>
     </div>
+    <Snap2CheckoutSheet
+      open={isSnap2CheckoutSheetOpen}
+      onOpenChange={setIsSnap2CheckoutSheetOpen}
+    />
+    </>
   );
 };
 

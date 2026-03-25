@@ -108,6 +108,17 @@ Consumers install with `npm install ov25-ui@canary` or `npm install ov25-ui-reac
 
 When adding new dependencies to `package.json`, they will automatically be used for both React 18 and React 19 builds. The build scripts handle React version differences automatically.
 
+## Commerce payloads (`onChange` / cart callbacks)
+
+SKU and price data from the iframe are **normalized** before callbacks run:
+
+- **Canonical**: `payload.skus.lines` and `payload.price.lines` (one or many rows). Check `payload.skus.mode` (`'single' | 'multi'`).
+- **Legacy (single-product only)**: when `mode === 'single'`, `payload.skus.skuString` and `payload.skus.skuMap` remain set as before.
+- **Snap2**: `mode === 'multi'` on SKU payload; use `lines` (no top-level `skuString`).
+- Optional **`normalizeSkuPayload` / `normalizePricePayload`** are exported if you handle raw `postMessage` outside the package.
+
+See [CHANGELOG.md](./CHANGELOG.md) for version notes.
+
 ## Testing locally
 
 - There is a minimal react project in dev/react-test which build a simple webpage. 

@@ -39,7 +39,7 @@ export const CORNER_PRESETS = [
 ] as const;
 
 export const FONT_OPTIONS = [
-  { value: "'Lato', sans-serif", label: 'Lato' },
+  { value: "'IBM Plex Sans', sans-serif", label: 'IBM Plex Sans' },
   { value: "'Inter', sans-serif", label: 'Inter' },
   { value: "'Roboto', sans-serif", label: 'Roboto' },
   { value: "'Open Sans', sans-serif", label: 'Open Sans' },
@@ -118,7 +118,7 @@ export const STYLE_GROUPS: StyleGroup[] = [
     label: 'Typography',
     description: 'Font family, sizes, and product title/price colors',
     variables: [
-      { variable: '--ov25-360-font-family', label: 'Font', defaultValue: "'Lato', sans-serif", control: 'font' },
+      { variable: '--ov25-360-font-family', label: 'Font', defaultValue: "'IBM Plex Sans', sans-serif", control: 'font' },
       { variable: '--ov25-text-xs-size', label: 'Text XS', defaultValue: '0.75em', control: 'slider', sliderMin: 0.5, sliderMax: 1.5, sliderStep: 0.05, sliderUnit: 'em', sliderLabels: ['Smaller', 'Larger'] },
       { variable: '--ov25-text-sm-size', label: 'Text SM', defaultValue: '0.875em', control: 'slider', sliderMin: 0.5, sliderMax: 1.5, sliderStep: 0.05, sliderUnit: 'em', sliderLabels: ['Smaller', 'Larger'] },
       { variable: '--ov25-text-base-size', label: 'Text base', defaultValue: '1em', control: 'slider', sliderMin: 0.5, sliderMax: 2, sliderStep: 0.05, sliderUnit: 'em', sliderLabels: ['Smaller', 'Larger'] },
@@ -242,7 +242,7 @@ export const ELEMENT_SELECTORS: ElementSelector[] = [
   { selector: '[data-ov25-accordion-variants-mode="drawer"]', label: 'Accordion (drawer mode)', element: 'div' },
   { selector: '[data-ov25-inline-list]', label: 'Inline list marker', element: 'div' },
   { selector: '[data-ov25-variants-panel]', label: 'Variants panel (modal shell)', element: 'div' },
-  { selector: '[data-ov25-snap2-variants-panel]', label: 'Snap2 variants panel', element: 'div' },
+  { selector: '[data-ov25-snap2-settings-sheet]', label: 'Snap2 settings rail (variants / checkout)', element: 'div' },
   { selector: '[data-ov25-wizard-variants-content]', label: 'Wizard content', element: 'div' },
   { selector: '[data-ov25-wizard-variants-step-content]', label: 'Wizard step content', element: 'div' },
   { selector: '[data-ov25-list-variants-content]', label: 'List content', element: 'div' },
@@ -280,7 +280,7 @@ export const ELEMENT_SELECTORS: ElementSelector[] = [
   { selector: '[data-ov25-list-variants-mode="inline"] [data-ov25-list-variants-content]', label: 'List inline content', element: 'div' },
   { selector: '#ov25-configurator-iframe-container[data-stacked="true"]', label: 'Gallery (stacked)', element: 'div' },
   { selector: '[data-ov25-variants-panel][data-open="true"]', label: 'Variants panel (open)', element: 'div' },
-  { selector: '[data-ov25-snap2-variants-panel][data-open="true"]', label: 'Snap2 variants panel (open)', element: 'div' },
+  { selector: '[data-ov25-snap2-settings-sheet][data-open="true"]', label: 'Snap2 settings rail (open)', element: 'div' },
   { selector: '.filter-option[data-checked="true"]', label: 'Checked filter option', element: 'div' },
   { selector: '#ov25-filter-content-wrapper-desktop[data-open="true"]', label: 'Desktop filter (open)', element: 'div' },
   { selector: '#ov25-filter-content-wrapper-mobile[data-open="true"]', label: 'Mobile filter (open)', element: 'div' },

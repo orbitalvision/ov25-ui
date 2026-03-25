@@ -10,7 +10,8 @@ import {
 import { stringSimilarity } from 'string-similarity-js';
 import { launchARWithGLBBlob } from '../utils/launchARWithGLBBlob.js';
 import { getProductGalleryImages, resolveImageUrl } from '../lib/utils.js';
-import type { OnChangePayload, OnChangePricePayload, OnChangeSkuPayload } from '../types/inject-config.js';
+import type { OnChangePayload, UnifiedPricePayload, UnifiedSkuPayload } from '../types/inject-config.js';
+import { normalizePricePayload, normalizeSkuPayload } from '../commerce/normalize-iframe-commerce.js';
 import {
   IFRAME_MSG_TRANSITION_SNAPSHOT,
   IFRAME_MSG_TRANSITION_SNAPSHOT_ERROR,
@@ -283,6 +284,11 @@ interface OV25UIContextType {
   }>;
   // Snap2 state
   isSnap2Mode: boolean;
+  /** Latest normalized price payload from CURRENT_PRICE; drives Snap2 checkout sheet line items. */
+  commercePriceSnapshot: UnifiedPricePayload | null;
+  /** Desktop Snap2 modal: right-rail checkout panel open state (rendered next to variants in Snap2ConfiguratorModal). */
+  isSnap2CheckoutSheetOpen: boolean;
+  setIsSnap2CheckoutSheetOpen: React.Dispatch<React.SetStateAction<boolean>>;
   snap2SaveResponse: { success: boolean; shareUrl?: string; error?: string } | null;
   isModalOpen: boolean;
   controlsHidden: boolean;
@@ -435,6 +441,8 @@ export const OV25UIProvider: React.FC<{
   variantDisplayStyleInlineMobile?: VariantDisplayStyleOverlay,
   variantDisplayStyleOverlay?: VariantDisplayStyleOverlay,
   variantDisplayStyleOverlayMobile?: VariantDisplayStyleOverlay,
+  /** Normalized option keys (id or name, lowercase) to hide from variant UI; defaults stay from iframe. */
+  hideVariantOptions?: string[],
   shadowDOMs?: {
     mobileDrawer?: ShadowRoot;
     configuratorViewControls?: ShadowRoot;
@@ -484,6 +492,7 @@ export const OV25UIProvider: React.FC<{
   variantDisplayStyleInlineMobile: variantDisplayStyleInlineMobileProp,
   variantDisplayStyleOverlay: variantDisplayStyleOverlayProp,
   variantDisplayStyleOverlayMobile: variantDisplayStyleOverlayMobileProp,
+  hideVariantOptions = [],
   shadowDOMs,
   cssString,
 }) => {
@@ -497,6 +506,19 @@ export const OV25UIProvider: React.FC<{
   const variantDisplayStyleOverlay: VariantDisplayStyleOverlay = isListLike ? (variantDisplayStyle as VariantDisplayStyleOverlay) : (variantDisplayStyleOverlayProp ?? VariantDisplayStyleOverlay.Tree);
   const variantDisplayStyleInlineMobile: VariantDisplayStyleOverlay = variantDisplayStyleInlineMobileProp ?? (isListLikeMobile ? (variantDisplayStyleMobile as VariantDisplayStyleOverlay) : variantDisplayStyleInline);
   const variantDisplayStyleOverlayMobile: VariantDisplayStyleOverlay = variantDisplayStyleOverlayMobileProp ?? (isListLikeMobile ? (variantDisplayStyleMobile as VariantDisplayStyleOverlay) : variantDisplayStyleOverlay);
+  const hideVariantOptionKeys = useMemo(
+    () => new Set(hideVariantOptions.filter(Boolean)),
+    [hideVariantOptions]
+  );
+  const isVariantOptionHidden = useCallback(
+    (opt: { id: string; name: string }) => {
+      if (hideVariantOptionKeys.size === 0) return false;
+      const id = String(opt.id).toLowerCase();
+      const name = String(opt.name).toLowerCase();
+      return hideVariantOptionKeys.has(id) || hideVariantOptionKeys.has(name);
+    },
+    [hideVariantOptionKeys]
+  );
   // State definitions
   const [products, setProducts] = useState<Product[]>([]);
   const [currentProductId, setCurrentProductId] = useState<string>();
@@ -570,6 +592,8 @@ export const OV25UIProvider: React.FC<{
     maxSwatches: 0,
     enabled: false,
   });
+  const [commercePriceSnapshot, setCommercePriceSnapshot] = useState<UnifiedPricePayload | null>(null);
+  const [isSnap2CheckoutSheetOpen, setIsSnap2CheckoutSheetOpen] = useState(false);
   const [snap2SaveResponse, setSnap2SaveResponse] = useState<{ success: boolean; shareUrl?: string; error?: string } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [controlsHidden, setControlsHidden] = useState(false);
@@ -590,8 +614,8 @@ export const OV25UIProvider: React.FC<{
   // Configure handler ref for external access
   const configureHandlerRef = useRef<(() => void) | null>(null);
 
-  const latestPriceRef = useRef<OnChangePricePayload | null>(null);
-  const latestSkuRef = useRef<OnChangeSkuPayload | null>(null);
+  const latestPriceRef = useRef<UnifiedPricePayload | null>(null);
+  const latestSkuRef = useRef<UnifiedSkuPayload | null>(null);
   const configuratorStateRef = useRef<ConfiguratorState | undefined>(configuratorState);
   configuratorStateRef.current = configuratorState;
   const onChangeRef = useRef(onChange);
@@ -637,7 +661,11 @@ export const OV25UIProvider: React.FC<{
     setControlsHidden(false);
     setIsModulePanelOpen(false);
     setIsModuleSelectionLoading(false);
-    
+    setCommercePriceSnapshot(null);
+    setIsSnap2CheckoutSheetOpen(false);
+    latestPriceRef.current = null;
+    latestSkuRef.current = null;
+
     // Reset iframe
     setIframeResetKey(prev => prev + 1);
     
@@ -669,10 +697,11 @@ export const OV25UIProvider: React.FC<{
     setHasSwitchedAfterDefer
   ]);
 
-  // When variants open, auto-close bottom modules panel
+  // When variants open, auto-close bottom modules panel and Snap2 checkout sheet (one surface at a time).
   useEffect(() => {
     if (isVariantsOpen) {
       setIsModulePanelOpen(false);
+      setIsSnap2CheckoutSheetOpen(false);
     }
   }, [isVariantsOpen]);
 
@@ -681,14 +710,26 @@ export const OV25UIProvider: React.FC<{
   }, [isVariantsOpen]);
 
   useEffect(() => {
-    // auto-close variants when module panel opens on desktop
+    if (isSnap2CheckoutSheetOpen) {
+      setIsModulePanelOpen(false);
+      setIsVariantsOpen(false);
+    }
+  }, [isSnap2CheckoutSheetOpen]);
+
+  useEffect(() => {
+    // auto-close variants and checkout when module panel opens on desktop
     if (isModulePanelOpen && !isMobile) {
       setIsVariantsOpen(false);
+      setIsSnap2CheckoutSheetOpen(false);
     }
   }, [isModulePanelOpen, isMobile]);
 
   useEffect(() => {
     if (isModalOpen) skipNextShareClickRef.current = false;
+  }, [isModalOpen]);
+
+  useEffect(() => {
+    if (!isModalOpen) setIsSnap2CheckoutSheetOpen(false);
   }, [isModalOpen]);
 
   // Effect: Clear pending product ID when current product ID updates
@@ -909,11 +950,11 @@ export const OV25UIProvider: React.FC<{
       name: 'Modules',
       groups: [{ id: 'modules-group', name: 'Compatible Modules', selections: [] }]
     };
-    const options = [
-      ...(isSnap2Mode ? [modulesOption] : []),
-      ...(isSnap2Mode && (!configuratorState?.snap2Objects || configuratorState.snap2Objects.length === 0) ? [] : [
-        ...(products?.length > 1 && !isSnap2Mode ? [sizeOption] : []),
-        ...(configuratorState?.options || [])
+    const snap2Blocked = isSnap2Mode && (!configuratorState?.snap2Objects || configuratorState.snap2Objects.length === 0);
+    const sizeEntries = products?.length > 1 && !isSnap2Mode ? [sizeOption] : [];
+    const configEntries = snap2Blocked
+      ? []
+      : (configuratorState?.options || [])
           .filter(option => option.isVisible !== false)
           .map(option => ({
             ...option,
@@ -923,18 +964,29 @@ export const OV25UIProvider: React.FC<{
                 ...group,
                 selections: group.selections.filter(selection => selection.isVisible !== false)
               }))
-          }))
-      ])
+          }));
+
+    const rawList: (Option | SizeOption)[] = [
+      ...(isSnap2Mode && !isVariantOptionHidden(modulesOption) ? [modulesOption] : []),
+      ...sizeEntries.filter(opt => !isVariantOptionHidden(opt)),
+      ...configEntries.filter(opt => !isVariantOptionHidden(opt)),
     ];
-    options.forEach((option: Option | SizeOption) => {
+    rawList.forEach((option: Option | SizeOption) => {
       (option as Option).hasNonOption = option.groups.some(group =>
         group.selections.some(selection => selection.name.toLowerCase() === 'none')
       );
     });
-    return options;
-  }, [isSnap2Mode, products, configuratorState, sizeOption]);
+    return rawList;
+  }, [isSnap2Mode, products, configuratorState, sizeOption, isVariantOptionHidden]);
 
   const allOptionsWithoutModules = allOptions.filter(option => option.id !== 'modules');
+
+  useEffect(() => {
+    if (activeOptionId == null) return;
+    if (allOptions.some(o => o.id === activeOptionId)) return;
+    const fallback = allOptions.find(o => o.id !== 'modules') ?? allOptions[0];
+    setActiveOptionId(fallback ? fallback.id : null);
+  }, [activeOptionId, allOptions, setActiveOptionId]);
 
   const optionHasVisibleFilters = useCallback(
     (option: { id: string; name: string }) => {
@@ -1302,8 +1354,10 @@ export const OV25UIProvider: React.FC<{
             });
             break;
           case 'CURRENT_PRICE': {
-            const pricePayload = data as OnChangePricePayload;
+            const pricePayload = normalizePricePayload(data);
+            if (!pricePayload) break;
             latestPriceRef.current = pricePayload;
+            setCommercePriceSnapshot(pricePayload);
             setPrice(pricePayload.totalPrice);
             setSubtotal(pricePayload.subtotal);
             setFormattedSubtotal(pricePayload.formattedSubtotal);
@@ -1313,9 +1367,10 @@ export const OV25UIProvider: React.FC<{
             break;
           }
           case 'CURRENT_SKU': {
-            const skuPayload = data as OnChangeSkuPayload;
+            const skuPayload = normalizeSkuPayload(data);
+            if (!skuPayload) break;
             latestSkuRef.current = skuPayload;
-            setCurrentSku(data);
+            setCurrentSku(skuPayload);
             onChangeRef.current?.({ skus: skuPayload, price: latestPriceRef.current ?? null });
             break;
           }
@@ -1626,6 +1681,9 @@ export const OV25UIProvider: React.FC<{
     availableCameras,
     availableLights,
     isSnap2Mode,
+    commercePriceSnapshot,
+    isSnap2CheckoutSheetOpen,
+    setIsSnap2CheckoutSheetOpen,
     snap2SaveResponse,
     isModalOpen,
     controlsHidden,

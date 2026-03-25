@@ -31,8 +31,18 @@ export type {
   OnChangePayload,
   OnChangePricePayload,
   OnChangeSkuPayload,
+  UnifiedOnChangePayload,
+  UnifiedSkuPayload,
+  UnifiedSkuPayloadSingle,
+  UnifiedSkuPayloadMulti,
+  UnifiedPricePayload,
+  CommerceLineItemSku,
+  CommerceLineItemPrice,
+  CommerceLineItemSelection,
   OptionSkuMap,
 } from './utils/inject.js';
+
+export { normalizeSkuPayload, normalizePricePayload, parseIframeJsonPayload } from './commerce/normalize-iframe-commerce.js';
 export type { Swatch, SwatchRulesData } from './contexts/ov25-ui-context.js';
 
 // Default export object containing all exports
