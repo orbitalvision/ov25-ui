@@ -1,5 +1,8 @@
 import { test, expect } from '@playwright/test';
 
+/** Matches production and local AR preview URLs (path + UUID). */
+const AR_PREVIEW_URL_PATTERN = /https?:\/\/[^/]+\/ar-preview\/[a-f0-9-]{36}/;
+
 test.describe('Windrush - Loveseat. Single product without variants', () => {
 
     test('Initial load and model render', async ({ page }) => {
@@ -89,7 +92,7 @@ test.describe('Windrush - Loveseat. Single product without variants', () => {
         await expect(arDialog).toBeVisible();
         await expect(arDialog).toContainText('View in room');
         await expect(arDialog).toContainText('Scan the QR code on your phones camera to view this item in your room');
-        await expect(arDialog).toContainText(/https:\/\/configurator\.orbital\.vision\/ar-preview\/[a-f0-9-]{36}/);
+        await expect(arDialog).toContainText(AR_PREVIEW_URL_PATTERN);
         // contains an svg QR code
         const qrCode = arDialog.locator('#ov25-qr-code');
         await expect(qrCode).toBeVisible();
@@ -137,7 +140,7 @@ test.describe('Windrush - Loveseat. Single product without variants', () => {
         await expect(arDialog).toBeVisible();
         await expect(arDialog).toContainText('View in room');
         await expect(arDialog).toContainText('Scan the QR code on your phones camera to view this item in your room');
-        await expect(arDialog).toContainText(/https:\/\/configurator\.orbital\.vision\/ar-preview\/[a-f0-9-]{36}/);
+        await expect(arDialog).toContainText(AR_PREVIEW_URL_PATTERN);
         // contains an svg QR code
         await expect(qrCode).toBeVisible();
 
