@@ -192,7 +192,7 @@ export function VariantsOnlySheet() {
     document.body.appendChild(shadowContainer);
     if (!shadowContainer.shadowRoot) {
       shadowContainer.attachShadow({ mode: 'open' });
-      shadowContainer.shadowRoot!.adoptedStyleSheets = document.adoptedStyleSheets;
+      shadowContainer.shadowRoot!.adoptedStyleSheets = (window as any).ov25adoptedStyleSheets;
     }
   }
 
