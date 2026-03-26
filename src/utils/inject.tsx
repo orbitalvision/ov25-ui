@@ -28,6 +28,14 @@ const sharedStylesheet = getSharedStylesheet();
 // Apply to main document
 (window as any).ov25adoptedStyleSheets = [sharedStylesheet];
 
+const getWindowAdoptedStyleSheets = (): CSSStyleSheet[] => {
+  return ((window as any).ov25adoptedStyleSheets ?? []) as CSSStyleSheet[];
+};
+
+const mergeStyleSheets = (stylesheets: CSSStyleSheet[]): CSSStyleSheet[] => {
+  return Array.from(new Set([...stylesheets, ...getWindowAdoptedStyleSheets()]));
+};
+
 // Function to wait for an element to appear in the DOM
 function waitForElement(selector: string, timeout = 5000) {
   return new Promise<Element>((resolve, reject) => {
@@ -296,7 +304,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
       const userCustomCssStylesheet = createuserCustomCssStylesheet(cssString);
       stylesheets.push(userCustomCssStylesheet);
     }
-    shadowRoot.adoptedStyleSheets = stylesheets;
+    shadowRoot.adoptedStyleSheets = mergeStyleSheets(stylesheets);
   };
 
   // Elements like button, input, form don't support attachShadow - wrap in div
@@ -342,7 +350,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
       const userCustomCssStylesheet = createuserCustomCssStylesheet(cssString);
       mobileDrawerStylesheets.push(userCustomCssStylesheet);
     }
-    mobileDrawerShadowRoot.adoptedStyleSheets = mobileDrawerStylesheets;
+    mobileDrawerShadowRoot.adoptedStyleSheets = mergeStyleSheets(mobileDrawerStylesheets);
 
     // Create Shadow DOM container used as default dialog portal target (DialogContent portals here when not Snap2/SwatchBook/AR)
     const configuratorViewControlsContainer = document.createElement('div');
@@ -373,7 +381,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
       const userCustomCssStylesheet = createuserCustomCssStylesheet(cssString);
       configuratorViewControlsStylesheets.push(userCustomCssStylesheet);
     }
-    configuratorViewControlsShadowRoot.adoptedStyleSheets = configuratorViewControlsStylesheets;
+    configuratorViewControlsShadowRoot.adoptedStyleSheets = mergeStyleSheets(configuratorViewControlsStylesheets);
 
     // Create popover portal Shadow DOM container
     const popoverPortalContainer = document.createElement('div');
@@ -404,7 +412,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
       const userCustomCssStylesheet = createuserCustomCssStylesheet(cssString);
       popoverPortalStylesheets.push(userCustomCssStylesheet);
     }
-    popoverPortalShadowRoot.adoptedStyleSheets = popoverPortalStylesheets;
+    popoverPortalShadowRoot.adoptedStyleSheets = mergeStyleSheets(popoverPortalStylesheets);
 
     // Create toaster portal container
     const toasterContainer = document.createElement('div');
@@ -435,7 +443,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
       const userCustomCssStylesheet = createuserCustomCssStylesheet(cssString);
       toasterPortalStylesheets.push(userCustomCssStylesheet);
     }
-    toasterPortalShadowRoot.adoptedStyleSheets = toasterPortalStylesheets;
+    toasterPortalShadowRoot.adoptedStyleSheets = mergeStyleSheets(toasterPortalStylesheets);
 
     // Create swatchbook portal Shadow DOM container
     const swatchbookPortalContainer = document.createElement('div');
@@ -466,7 +474,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
       const userCustomCssStylesheet = createuserCustomCssStylesheet(cssString);
       swatchbookPortalStylesheets.push(userCustomCssStylesheet);
     }
-    swatchbookPortalShadowRoot.adoptedStyleSheets = swatchbookPortalStylesheets;
+    swatchbookPortalShadowRoot.adoptedStyleSheets = mergeStyleSheets(swatchbookPortalStylesheets);
 
     const isAnyModalMode =
       configuratorDisplayMode === ConfiguratorDisplayMode.Modal ||
@@ -498,7 +506,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
         const userCustomCssStylesheet = createuserCustomCssStylesheet(cssString);
         modalPortalStylesheets.push(userCustomCssStylesheet);
       }
-      modalPortalShadowRoot.adoptedStyleSheets = modalPortalStylesheets;
+      modalPortalShadowRoot.adoptedStyleSheets = mergeStyleSheets(modalPortalStylesheets);
     }
 
     // When no gallery selector but deferThreeD, or modal mode with no gallery: render gallery in hidden container so iframe is preloaded

@@ -21,6 +21,9 @@ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
   },
   callbacks: { addToBasket: () => alert('Add to basket'), buyNow: () => alert('Buy now'), buySwatches: () => alert('Add swatches to cart') },
   flags: { hidePricing: false },
+  cssString: `#ov25-checkout-button {
+  background-color: red !important;
+  }`,
 });
 
 function App() {
