@@ -20,7 +20,7 @@ import {
   getResolvedConfiguratorIframeBackgroundColor,
 } from "../utils/configurator-dom-queries.js"
 import { createPortal } from "react-dom"
-import { getSharedStylesheet, createCSSVariablesStylesheet } from "../utils/shadow-styles.js"
+import { getSharedStylesheet, createuserCustomCssStylesheet } from "../utils/shadow-styles.js"
 import { IframeContainer } from "./IframeContainer.js"
 import { ProductCarousel } from "./product-carousel.js"
 import { ArPreviewQRCodeDialog } from "./ar-preview-qr-code-dialog.js"
@@ -329,7 +329,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
         }
         const stylesheets: CSSStyleSheet[] = [getSharedStylesheet()];
         if (cssString) {
-            stylesheets.push(createCSSVariablesStylesheet(cssString));
+            stylesheets.push(createuserCustomCssStylesheet(cssString));
         }
         shadow.adoptedStyleSheets = stylesheets;
         setCarouselShadowRoot(shadow);

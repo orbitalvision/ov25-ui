@@ -4,7 +4,7 @@ import { createPortal } from 'react-dom'
 import { getIframeSrc } from '../utils/configurator-utils.js'
 import { useOV25UI } from "../contexts/ov25-ui-context.js"
 import { cn, getProductGalleryImages, resolveImageUrl } from "../lib/utils.js"
-import { getSharedStylesheet, createCSSVariablesStylesheet } from '../utils/shadow-styles.js'
+import { getSharedStylesheet, createuserCustomCssStylesheet } from '../utils/shadow-styles.js'
 import ConfiguratorViewControls from './ConfiguratorViewControls.js'
 
 
@@ -48,7 +48,7 @@ export const IframeContainer = () => {
         const shadowRoot = el.attachShadow({ mode: 'open' });
         const stylesheets: CSSStyleSheet[] = [getSharedStylesheet()];
         if (cssString) {
-            stylesheets.push(createCSSVariablesStylesheet(cssString));
+            stylesheets.push(createuserCustomCssStylesheet(cssString));
         }
         shadowRoot.adoptedStyleSheets = stylesheets;
         setControlsShadowRoot(shadowRoot);

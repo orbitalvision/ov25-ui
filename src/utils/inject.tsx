@@ -15,7 +15,7 @@ import { createPortal } from 'react-dom';
 // Import styles directly
 import '../../globals.css';
 import { Toaster } from 'sonner';
-import { getSharedStylesheet, createCSSVariablesStylesheet } from './shadow-styles.js';
+import { getSharedStylesheet, createuserCustomCssStylesheet } from './shadow-styles.js';
 
 // Import sonner CSS as string
 import sonnerCssText from 'sonner/dist/styles.css?inline';
@@ -293,8 +293,8 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     // Apply the shared stylesheet and CSS variables to the Shadow DOM
     const stylesheets = [sharedStylesheet];
     if (cssString) {
-      const cssVariablesStylesheet = createCSSVariablesStylesheet(cssString);
-      stylesheets.push(cssVariablesStylesheet);
+      const userCustomCssStylesheet = createuserCustomCssStylesheet(cssString);
+      stylesheets.push(userCustomCssStylesheet);
     }
     shadowRoot.adoptedStyleSheets = stylesheets;
   };
@@ -339,8 +339,8 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     const mobileDrawerShadowRoot = mobileDrawerContainer.attachShadow({ mode: 'open' });
     const mobileDrawerStylesheets = [sharedStylesheet];
     if (cssString) {
-      const cssVariablesStylesheet = createCSSVariablesStylesheet(cssString);
-      mobileDrawerStylesheets.push(cssVariablesStylesheet);
+      const userCustomCssStylesheet = createuserCustomCssStylesheet(cssString);
+      mobileDrawerStylesheets.push(userCustomCssStylesheet);
     }
     mobileDrawerShadowRoot.adoptedStyleSheets = mobileDrawerStylesheets;
 
@@ -370,8 +370,8 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     const configuratorViewControlsShadowRoot = configuratorViewControlsContainer.attachShadow({ mode: 'open' });
     const configuratorViewControlsStylesheets = [sharedStylesheet];
     if (cssString) {
-      const cssVariablesStylesheet = createCSSVariablesStylesheet(cssString);
-      configuratorViewControlsStylesheets.push(cssVariablesStylesheet);
+      const userCustomCssStylesheet = createuserCustomCssStylesheet(cssString);
+      configuratorViewControlsStylesheets.push(userCustomCssStylesheet);
     }
     configuratorViewControlsShadowRoot.adoptedStyleSheets = configuratorViewControlsStylesheets;
 
@@ -401,8 +401,8 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     const popoverPortalShadowRoot = popoverPortalContainer.attachShadow({ mode: 'open' });
     const popoverPortalStylesheets = [sharedStylesheet];
     if (cssString) {
-      const cssVariablesStylesheet = createCSSVariablesStylesheet(cssString);
-      popoverPortalStylesheets.push(cssVariablesStylesheet);
+      const userCustomCssStylesheet = createuserCustomCssStylesheet(cssString);
+      popoverPortalStylesheets.push(userCustomCssStylesheet);
     }
     popoverPortalShadowRoot.adoptedStyleSheets = popoverPortalStylesheets;
 
@@ -432,8 +432,8 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     const toasterPortalShadowRoot = toasterContainer.attachShadow({ mode: 'open' });
     const toasterPortalStylesheets = [sharedStylesheet, sonnerStylesheet];
     if (cssString) {
-      const cssVariablesStylesheet = createCSSVariablesStylesheet(cssString);
-      toasterPortalStylesheets.push(cssVariablesStylesheet);
+      const userCustomCssStylesheet = createuserCustomCssStylesheet(cssString);
+      toasterPortalStylesheets.push(userCustomCssStylesheet);
     }
     toasterPortalShadowRoot.adoptedStyleSheets = toasterPortalStylesheets;
 
@@ -463,8 +463,8 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     const swatchbookPortalShadowRoot = swatchbookPortalContainer.attachShadow({ mode: 'open' });
     const swatchbookPortalStylesheets = [sharedStylesheet];
     if (cssString) {
-      const cssVariablesStylesheet = createCSSVariablesStylesheet(cssString);
-      swatchbookPortalStylesheets.push(cssVariablesStylesheet);
+      const userCustomCssStylesheet = createuserCustomCssStylesheet(cssString);
+      swatchbookPortalStylesheets.push(userCustomCssStylesheet);
     }
     swatchbookPortalShadowRoot.adoptedStyleSheets = swatchbookPortalStylesheets;
 
@@ -495,8 +495,8 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
       modalPortalShadowRoot = modalPortalContainer.attachShadow({ mode: 'open' });
       const modalPortalStylesheets = [sharedStylesheet];
       if (cssString) {
-        const cssVariablesStylesheet = createCSSVariablesStylesheet(cssString);
-        modalPortalStylesheets.push(cssVariablesStylesheet);
+        const userCustomCssStylesheet = createuserCustomCssStylesheet(cssString);
+        modalPortalStylesheets.push(userCustomCssStylesheet);
       }
       modalPortalShadowRoot.adoptedStyleSheets = modalPortalStylesheets;
     }
@@ -596,7 +596,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
 
     const setupCSSVariables = (cssVariables: string) => {
       // Create CSS variables stylesheet and add to document
-      const userCustomCssStylesheet = createCSSVariablesStylesheet(cssVariables);
+      const userCustomCssStylesheet = createuserCustomCssStylesheet(cssVariables);
       (window as any).ov25adoptedStyleSheets = [...(window as any).ov25adoptedStyleSheets, userCustomCssStylesheet];
     };
 

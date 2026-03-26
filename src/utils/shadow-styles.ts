@@ -9,7 +9,7 @@ export function getSharedStylesheet(): CSSStyleSheet {
   return sharedStylesheet;
 }
 
-export function createCSSVariablesStylesheet(cssVariables: string): CSSStyleSheet {
+export function createuserCustomCssStylesheet(cssVariables: string): CSSStyleSheet {
   const sheet = new CSSStyleSheet();
   sheet.replaceSync(cssVariables);
   return sheet;
