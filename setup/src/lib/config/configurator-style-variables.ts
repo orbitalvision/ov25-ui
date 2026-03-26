@@ -338,7 +338,7 @@ export const DISPLAY_OPTIONS = [
 export function generateVariableCSS(styleValues: Record<string, string>): string {
   const entries = Object.entries(styleValues).filter(([, v]) => v);
   if (!entries.length) return '';
-  return `:root {\n${entries.map(([k, v]) => `  ${k}: ${v};`).join('\n')}\n}`;
+  return `:host {\n${entries.map(([k, v]) => `  ${k}: ${v};`).join('\n')}\n}`;
 }
 
 export function generateElementCSS(elementStyles: Record<string, Record<string, string>>): string {
