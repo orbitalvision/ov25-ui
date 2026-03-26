@@ -28,14 +28,6 @@ const sharedStylesheet = getSharedStylesheet();
 // Apply to main document
 (window as any).ov25adoptedStyleSheets = [sharedStylesheet];
 
-const getWindowAdoptedStyleSheets = (): CSSStyleSheet[] => {
-  return ((window as any).ov25adoptedStyleSheets ?? []) as CSSStyleSheet[];
-};
-
-const mergeStyleSheets = (stylesheets: CSSStyleSheet[]): CSSStyleSheet[] => {
-  return Array.from(new Set([...stylesheets, ...getWindowAdoptedStyleSheets()]));
-};
-
 // Function to wait for an element to appear in the DOM
 function waitForElement(selector: string, timeout = 5000) {
   return new Promise<Element>((resolve, reject) => {
@@ -273,6 +265,26 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
   (window as any).ov25OpenSwatchBookRef = { current: null };
   (window as any).ov25CloseSwatchBookRef = { current: null };
 
+  const customCssStylesheet = cssString ? createuserCustomCssStylesheet(cssString) : undefined;
+  const existingWindowStylesheets = Array.isArray((window as any).ov25adoptedStyleSheets)
+    ? (window as any).ov25adoptedStyleSheets
+    : [sharedStylesheet];
+  if (customCssStylesheet && !existingWindowStylesheets.includes(customCssStylesheet)) {
+    (window as any).ov25adoptedStyleSheets = [...existingWindowStylesheets, customCssStylesheet];
+  }
+
+  const getBaseShadowStylesheets = (): CSSStyleSheet[] => {
+    const windowStylesheets = Array.isArray((window as any).ov25adoptedStyleSheets)
+      ? (window as any).ov25adoptedStyleSheets
+      : [sharedStylesheet];
+
+    if (customCssStylesheet && !windowStylesheets.includes(customCssStylesheet)) {
+      return [...windowStylesheets, customCssStylesheet];
+    }
+
+    return [...windowStylesheets];
+  };
+
   // Resolve string or function
   const resolveStringOrFunction = (value: StringOrFunction): string => {
     return typeof value === 'function' ? value() : value;
@@ -298,13 +310,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
 
   // Function to inject CSS into Shadow DOM using adoptedStyleSheets
   const injectCSSIntoShadowDOM = (shadowRoot: ShadowRoot) => {
-    // Apply the shared stylesheet and CSS variables to the Shadow DOM
-    const stylesheets = [sharedStylesheet];
-    if (cssString) {
-      const userCustomCssStylesheet = createuserCustomCssStylesheet(cssString);
-      stylesheets.push(userCustomCssStylesheet);
-    }
-    shadowRoot.adoptedStyleSheets = mergeStyleSheets(stylesheets);
+    shadowRoot.adoptedStyleSheets = getBaseShadowStylesheets();
   };
 
   // Elements like button, input, form don't support attachShadow - wrap in div
@@ -345,12 +351,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
 
     // Create Shadow DOM root for mobile drawer
     const mobileDrawerShadowRoot = mobileDrawerContainer.attachShadow({ mode: 'open' });
-    const mobileDrawerStylesheets = [sharedStylesheet];
-    if (cssString) {
-      const userCustomCssStylesheet = createuserCustomCssStylesheet(cssString);
-      mobileDrawerStylesheets.push(userCustomCssStylesheet);
-    }
-    mobileDrawerShadowRoot.adoptedStyleSheets = mergeStyleSheets(mobileDrawerStylesheets);
+    mobileDrawerShadowRoot.adoptedStyleSheets = getBaseShadowStylesheets();
 
     // Create Shadow DOM container used as default dialog portal target (DialogContent portals here when not Snap2/SwatchBook/AR)
     const configuratorViewControlsContainer = document.createElement('div');
@@ -376,12 +377,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
 
     // Create Shadow DOM root for configurator view controls
     const configuratorViewControlsShadowRoot = configuratorViewControlsContainer.attachShadow({ mode: 'open' });
-    const configuratorViewControlsStylesheets = [sharedStylesheet];
-    if (cssString) {
-      const userCustomCssStylesheet = createuserCustomCssStylesheet(cssString);
-      configuratorViewControlsStylesheets.push(userCustomCssStylesheet);
-    }
-    configuratorViewControlsShadowRoot.adoptedStyleSheets = mergeStyleSheets(configuratorViewControlsStylesheets);
+    configuratorViewControlsShadowRoot.adoptedStyleSheets = getBaseShadowStylesheets();
 
     // Create popover portal Shadow DOM container
     const popoverPortalContainer = document.createElement('div');
@@ -407,12 +403,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
 
     // Create Shadow DOM root for popover portal
     const popoverPortalShadowRoot = popoverPortalContainer.attachShadow({ mode: 'open' });
-    const popoverPortalStylesheets = [sharedStylesheet];
-    if (cssString) {
-      const userCustomCssStylesheet = createuserCustomCssStylesheet(cssString);
-      popoverPortalStylesheets.push(userCustomCssStylesheet);
-    }
-    popoverPortalShadowRoot.adoptedStyleSheets = mergeStyleSheets(popoverPortalStylesheets);
+    popoverPortalShadowRoot.adoptedStyleSheets = getBaseShadowStylesheets();
 
     // Create toaster portal container
     const toasterContainer = document.createElement('div');
@@ -438,12 +429,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
 
     // Create Shadow DOM root for toaster portal
     const toasterPortalShadowRoot = toasterContainer.attachShadow({ mode: 'open' });
-    const toasterPortalStylesheets = [sharedStylesheet, sonnerStylesheet];
-    if (cssString) {
-      const userCustomCssStylesheet = createuserCustomCssStylesheet(cssString);
-      toasterPortalStylesheets.push(userCustomCssStylesheet);
-    }
-    toasterPortalShadowRoot.adoptedStyleSheets = mergeStyleSheets(toasterPortalStylesheets);
+    toasterPortalShadowRoot.adoptedStyleSheets = [...getBaseShadowStylesheets(), sonnerStylesheet];
 
     // Create swatchbook portal Shadow DOM container
     const swatchbookPortalContainer = document.createElement('div');
@@ -469,12 +455,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
 
     // Create Shadow DOM root for swatchbook portal
     const swatchbookPortalShadowRoot = swatchbookPortalContainer.attachShadow({ mode: 'open' });
-    const swatchbookPortalStylesheets = [sharedStylesheet];
-    if (cssString) {
-      const userCustomCssStylesheet = createuserCustomCssStylesheet(cssString);
-      swatchbookPortalStylesheets.push(userCustomCssStylesheet);
-    }
-    swatchbookPortalShadowRoot.adoptedStyleSheets = mergeStyleSheets(swatchbookPortalStylesheets);
+    swatchbookPortalShadowRoot.adoptedStyleSheets = getBaseShadowStylesheets();
 
     const isAnyModalMode =
       configuratorDisplayMode === ConfiguratorDisplayMode.Modal ||
@@ -501,12 +482,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
       modalPortalContainer.appendChild(modalPortalEmptySpan);
 
       modalPortalShadowRoot = modalPortalContainer.attachShadow({ mode: 'open' });
-      const modalPortalStylesheets = [sharedStylesheet];
-      if (cssString) {
-        const userCustomCssStylesheet = createuserCustomCssStylesheet(cssString);
-        modalPortalStylesheets.push(userCustomCssStylesheet);
-      }
-      modalPortalShadowRoot.adoptedStyleSheets = mergeStyleSheets(modalPortalStylesheets);
+      modalPortalShadowRoot.adoptedStyleSheets = getBaseShadowStylesheets();
     }
 
     // When no gallery selector but deferThreeD, or modal mode with no gallery: render gallery in hidden container so iframe is preloaded
@@ -600,12 +576,6 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
       } else {
         pushPortal(selector, component, useShadowDOM);
       }
-    };
-
-    const setupCSSVariables = (cssVariables: string) => {
-      // Create CSS variables stylesheet and add to document
-      const userCustomCssStylesheet = createuserCustomCssStylesheet(cssVariables);
-      (window as any).ov25adoptedStyleSheets = [...(window as any).ov25adoptedStyleSheets, userCustomCssStylesheet];
     };
 
     // Function to check if gallery or its parents have z-index set
@@ -735,10 +705,6 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     // Special handling for toaster - use body-level container for all modes to ensure visibility in fullscreen
     // Use body-level toaster container at max z-index to ensure it appears above fullscreen iframe
     portals.push(createPortal(<Toaster position="top-center" richColors style={{ zIndex: 2147483647 }} />, toasterPortalShadowRoot));
-
-    if (cssString) {
-      setupCSSVariables(cssString);
-    }
 
     // If no portals were created we can bail early
     if (portals.length === 0) {
