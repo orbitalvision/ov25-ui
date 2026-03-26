@@ -253,7 +253,7 @@ export function VariantContentDesktop() {
         const shadowRoot = shadowContainer.attachShadow({ mode: 'open' });
         // Inject CSS into the Shadow DOM using adoptedStyleSheets
         // Use the shared stylesheet from the main document
-        shadowRoot.adoptedStyleSheets = (window as any).ov25adoptedStyleSheets;
+        shadowRoot.adoptedStyleSheets = document.adoptedStyleSheets;
       }
     }
     

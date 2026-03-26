@@ -26,7 +26,7 @@ sonnerStylesheet.replaceSync(sonnerCssText);
 const sharedStylesheet = getSharedStylesheet();
 
 // Apply to main document
-(window as any).ov25adoptedStyleSheets = [sharedStylesheet];
+document.adoptedStyleSheets = [sharedStylesheet];
 
 // Function to wait for an element to appear in the DOM
 function waitForElement(selector: string, timeout = 5000) {
@@ -596,8 +596,8 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
 
     const setupCSSVariables = (cssVariables: string) => {
       // Create CSS variables stylesheet and add to document
-      const userCustomCssStylesheet = createCSSVariablesStylesheet(cssVariables);
-      (window as any).ov25adoptedStyleSheets = [...(window as any).ov25adoptedStyleSheets, userCustomCssStylesheet];
+      const cssVariablesStylesheet = createCSSVariablesStylesheet(cssVariables);
+      document.adoptedStyleSheets = [...document.adoptedStyleSheets, cssVariablesStylesheet];
     };
 
     // Function to check if gallery or its parents have z-index set
