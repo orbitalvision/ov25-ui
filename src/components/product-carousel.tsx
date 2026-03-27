@@ -25,6 +25,7 @@ export function ProductCarousel() {
   const effectiveCarouselLayout = isMobile ? carouselLayoutMobile : carouselLayout;
   if (effectiveCarouselLayout === CarouselDisplayMode.None) return null;
   const useStackedLayout = effectiveCarouselLayout === 'stacked';
+  const fullscreenScrollYRef = React.useRef(0);
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const dragRef = React.useRef({ isDragging: false, startX: 0, startScrollLeft: 0, didDrag: false });
 
@@ -79,31 +80,43 @@ export function ProductCarousel() {
     return () => document.removeEventListener('keydown', onKey);
   }, [galleryCarouselFullscreenImage, setGalleryCarouselFullscreenImage]);
 
-  React.useEffect(() => {
+  React.useLayoutEffect(() => {
     if (!galleryCarouselFullscreenImage) return;
+
+    const y =
+      window.scrollY ||
+      document.documentElement.scrollTop ||
+      document.body.scrollTop ||
+      0;
+    fullscreenScrollYRef.current = y;
 
     const body = {
       overflow: document.body.style.overflow,
       position: document.body.style.position,
       width: document.body.style.width,
       top: document.body.style.top,
+      left: document.body.style.left,
+      right: document.body.style.right,
     };
     const htmlOverflow = document.documentElement.style.overflow;
 
     document.body.style.overflow = 'hidden';
     document.body.style.position = 'fixed';
+    document.body.style.left = '0';
+    document.body.style.right = '0';
     document.body.style.width = '100%';
-    document.body.style.top = `-${window.scrollY}px`;
+    document.body.style.top = `-${y}px`;
     document.documentElement.style.overflow = 'hidden';
 
     return () => {
-      const scrollY = document.body.style.top;
       document.body.style.overflow = body.overflow;
       document.body.style.position = body.position;
       document.body.style.width = body.width;
       document.body.style.top = body.top;
+      document.body.style.left = body.left;
+      document.body.style.right = body.right;
       document.documentElement.style.overflow = htmlOverflow;
-      window.scrollTo(0, parseInt(scrollY || '0', 10) * -1);
+      window.scrollTo(0, fullscreenScrollYRef.current);
     };
   }, [galleryCarouselFullscreenImage]);
 
