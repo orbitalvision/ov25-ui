@@ -23,9 +23,14 @@ const capitalizeWords = (str: string) =>
 
 export interface ProductVariantsWrapperProps {
   isInline?: boolean;
+  /** Set when used inside VariantsOnlySheet (sheet supplies close + checkout). */
+  embeddedInVariantsOnlySheet?: boolean;
 }
 
-export function ProductVariantsWrapper({ isInline = false }: ProductVariantsWrapperProps = {}) {
+export function ProductVariantsWrapper({
+  isInline = false,
+  embeddedInVariantsOnlySheet = false,
+}: ProductVariantsWrapperProps = {}) {
     const {
         isVariantsOpen,
         setIsVariantsOpen,
@@ -540,7 +545,11 @@ export function ProductVariantsWrapper({ isInline = false }: ProductVariantsWrap
 
       return (
         <div className="ov:flex ov:flex-col ov:max-h-full ov:h-full ov:bg-[var(--ov25-background-color)]">
-          <VariantsHeader />
+          {embeddedInVariantsOnlySheet ? (
+            <div className="ov:w-full ov:shrink-0" aria-hidden />
+          ) : (
+            <VariantsHeader />
+          )}
           {isListMode && listFilterBlock}
           <div id="ov25-variants-content-wrapper" className="ov:relative ov:flex-1 ov:min-h-0 ov:flex ov:flex-col">
             <div ref={listScrollRef} className={`ov:min-h-0 ov:flex-1 ${(useAccordion || useTree || isTabs) ? 'ov:flex ov:flex-col' : ''} ${contentScrollClass} ${contentPaddingClass}`}>
@@ -548,9 +557,9 @@ export function ProductVariantsWrapper({ isInline = false }: ProductVariantsWrap
             </div>
             {isListMode && isFilterOpen[listFilterKey] && renderFilterSheet({ optionIds: listFilterOptionIds })}
           </div>
-          {(!isMobile || configuratorDisplayModeMobile === 'modal') && !hidePricing && (
-            <CheckoutButton />
-          )}
+          {(!isMobile || configuratorDisplayModeMobile === 'modal') &&
+            !hidePricing &&
+            !embeddedInVariantsOnlySheet && <CheckoutButton />}
         </div>
       );
     }

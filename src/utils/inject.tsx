@@ -16,6 +16,7 @@ import { createPortal } from 'react-dom';
 import '../../globals.css';
 import { Toaster } from 'sonner';
 import { getSharedStylesheet, createuserCustomCssStylesheet } from './shadow-styles.js';
+import { findIframeWithUniqueId } from './configurator-dom-queries.js';
 
 // Import sonner CSS as string
 import sonnerCssText from 'sonner/dist/styles.css?inline';
@@ -225,7 +226,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
   (window as any).ov25GenerateThumbnail = () => {
     return new Promise<string>((resolve, reject) => {
       // Find the iframe element
-      const iframe = document.getElementById('ov25-configurator-iframe') as HTMLIFrameElement;
+      const iframe = findIframeWithUniqueId(uniqueId) as HTMLIFrameElement | null;
       if (!iframe || !iframe.contentWindow) {
         reject(new Error('Configurator iframe not found'));
         return;

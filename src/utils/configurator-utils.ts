@@ -1,4 +1,5 @@
 import { Selection } from '../contexts/ov25-ui-context.js';
+import { findIframeWithUniqueId } from './configurator-dom-queries.js';
 
 /**
  * Configuration option type
@@ -55,10 +56,8 @@ export type SelectModuleReceivedMessage = {
 /**
  * Get the iframe element by ID
  */
-const getConfiguratorIframe = (uniqueId?: string): HTMLIFrameElement | null => {
-  const iframeId = uniqueId ? `ov25-configurator-iframe-${uniqueId}` : 'ov25-configurator-iframe';
-  return document.getElementById(iframeId) as HTMLIFrameElement;
-};
+const getConfiguratorIframe = (uniqueId?: string): HTMLIFrameElement | null =>
+  findIframeWithUniqueId(uniqueId) as HTMLIFrameElement | null;
 
 /**
  * Sends a message to the iframe

@@ -43,7 +43,7 @@
   flex-direction: column;
 }
 
-:root {
+:host {
     /* Custom CSS Variables */
     --ov25-background-color: #ffffff;
     --ov25-secondary-background-color: #f6f6f6;
@@ -142,7 +142,7 @@
 }
 
 @media (max-width: 640px) {
-  :root {
+  :host {
     --ov25-inline-list-aside-min-height: var(--ov25-inline-list-aside-min-height-mobile);
   }
   #ov25-configurator-variant-menu-container {
@@ -501,7 +501,7 @@ html #ov25-configurator-variant-menu-container {
 
 
 /* Swatch icon SVG flash animations - shared duration for icon + count */
-:root {
+:host {
   --ov25-swatch-flash-duration: 0.5s;
 }
 @keyframes ov25-swatch-flash-destructive {

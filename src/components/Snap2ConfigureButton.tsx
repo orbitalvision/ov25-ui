@@ -12,6 +12,7 @@ import { VariantsCloseButton } from './VariantSelectMenu/VariantsCloseButton.js'
 import { closeModuleSelectMenu, DRAWER_HEIGHT_RATIO, IFRAME_HEIGHT_RATIO } from '../utils/configurator-utils.js';
 import { createPortal } from 'react-dom';
 import { ConfigureButton } from './ConfigureButton.js';
+import { Ov25ShadowHost } from './Ov25ShadowHost.js';
 
 export const Snap2ConfigureUI: React.FC = () => {
   const { isVariantsOpen, isModalOpen, setIsModalOpen, setIsVariantsOpen, isMobile, allOptions, activeOptionId, setActiveOptionId, setShareDialogTrigger, shareDialogTrigger, isSnap2Mode, drawerSize, setDrawerSize, configuratorState, skipNextDrawerCloseRef, setCompatibleModules, setConfiguratorState, setPreloading, preloading, iframeResetKey, resetIframe } = useOV25UI();
@@ -84,37 +85,59 @@ export const Snap2ConfigureUI: React.FC = () => {
   return (
     <>
       {isMobile && shouldRenderIframe && createPortal(
-        <>
-          <div className={cn(
-            "ov:fixed ov:inset-0 ov:w-full ov:h-full ov:z-[2147483644]",
-            (!isVariantsOpen || showModuleSelect) && "ov:opacity-0 ov:pointer-events-none"
-          )}>
-            <ProductGallery key={`gallery-${iframeResetKey}`} isInModal={false} isPreloading={preloading} />
-          </div>
-          <div
-            className={cn(
-              "ov:fixed ov:top-0 ov:left-0 ov:w-full ov:z-[2147483644] ov:pointer-events-none ov:transition-[height] ov:duration-500",
+        <Ov25ShadowHost
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 2147483644,
+            width: '100%',
+            height: '100%',
+            pointerEvents: !isVariantsOpen || showModuleSelect ? 'none' : 'auto',
+          }}
+        >
+          <>
+            <div className={cn(
+              "ov:fixed ov:inset-0 ov:w-full ov:h-full ov:z-[2147483644]",
               (!isVariantsOpen || showModuleSelect) && "ov:opacity-0 ov:pointer-events-none"
-            )}
-            style={{
-              height: drawerSize === 'large'
-                ? `${typeof window !== 'undefined' ? window.innerHeight * IFRAME_HEIGHT_RATIO : 0}px`
-                : `${typeof window !== 'undefined' ? window.innerHeight * DRAWER_HEIGHT_RATIO : 0}px`
-            }}
-          >
-            <ConfiguratorViewControls />
-          </div>
-        </>,
+            )}>
+              <ProductGallery key={`gallery-${iframeResetKey}`} isInModal={false} isPreloading={preloading} />
+            </div>
+            <div
+              className={cn(
+                "ov:fixed ov:top-0 ov:left-0 ov:w-full ov:z-[2147483644] ov:pointer-events-none ov:transition-[height] ov:duration-500",
+                (!isVariantsOpen || showModuleSelect) && "ov:opacity-0 ov:pointer-events-none"
+              )}
+              style={{
+                height: drawerSize === 'large'
+                  ? `${typeof window !== 'undefined' ? window.innerHeight * IFRAME_HEIGHT_RATIO : 0}px`
+                  : `${typeof window !== 'undefined' ? window.innerHeight * DRAWER_HEIGHT_RATIO : 0}px`
+              }}
+            >
+              <ConfiguratorViewControls />
+            </div>
+          </>
+        </Ov25ShadowHost>,
         document.body
       )}
 
       {isMobile && isVariantsOpen && showModuleSelect && createPortal(
-        <div className="ov:fixed ov:inset-0 ov:z-[2147483645] ov:flex ov:flex-col ov:bg-[var(--ov25-background-color)] ov:pt-[env(safe-area-inset-top)]">
-          <VariantsCloseButton className="ov:!top-[max(0.5rem,env(safe-area-inset-top))] ov:!right-3" />
-          <div className="ov:flex-1 ov:min-h-0 ov:overflow-y-auto ov:px-2 ov:pb-[env(safe-area-inset-bottom)]">
-            <InitialiseMenu />
+        <Ov25ShadowHost
+          style={{
+            position: 'fixed',
+            inset: 0,
+            zIndex: 2147483645,
+            width: '100%',
+            height: '100%',
+            pointerEvents: 'auto',
+          }}
+        >
+          <div className="ov:fixed ov:inset-0 ov:z-[2147483645] ov:flex ov:flex-col ov:bg-[var(--ov25-background-color)] ov:pt-[env(safe-area-inset-top)]">
+            <VariantsCloseButton className="ov:!top-[max(0.5rem,env(safe-area-inset-top))] ov:!right-3" />
+            <div className="ov:flex-1 ov:min-h-0 ov:overflow-y-auto ov:px-2 ov:pb-[env(safe-area-inset-bottom)]">
+              <InitialiseMenu />
+            </div>
           </div>
-        </div>,
+        </Ov25ShadowHost>,
         document.body
       )}
 

@@ -26,6 +26,7 @@ const Snap2Controls: React.FC = () => {
     buyNowFunction,
     isSnap2CheckoutSheetOpen,
     setIsSnap2CheckoutSheetOpen,
+    uniqueId,
   } = useOV25UI();
 
   const hasCommerceActions =
@@ -48,16 +49,16 @@ const Snap2Controls: React.FC = () => {
   }, [setIsSnap2CheckoutSheetOpen, setIsVariantsOpen]);
 
   const handleToggleDimensions = () => {
-    toggleDimensions(canSeeDimensions, setCanSeeDimensions, undefined, cssString);
+    toggleDimensions(canSeeDimensions, setCanSeeDimensions, uniqueId, cssString);
   };
 
   const handleToggleMiniDimensionsClick = () => {
-    toggleMiniDimensions(canSeeMiniDimensions, setCanSeeMiniDimensions, undefined, cssString);
+    toggleMiniDimensions(canSeeMiniDimensions, setCanSeeMiniDimensions, uniqueId, cssString);
   };
   
   const handleVariantsClick = () => {
     if (document.fullscreenElement) {
-      toggleFullscreen();
+      toggleFullscreen(uniqueId);
     }
     if (isVariantsOpen) {
       setIsVariantsOpen(false);

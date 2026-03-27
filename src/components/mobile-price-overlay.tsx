@@ -1,6 +1,7 @@
 import React from 'react';
 import { useOV25UI } from '../contexts/ov25-ui-context.js';
 import { createPortal } from 'react-dom';
+import { findElementByIdInShadowOrRegularDOM } from '../utils/configurator-dom-queries.js';
 
 export const MobilePriceOverlay = () => {
   const { isMobile, isVariantsOpen, drawerSize, mobileLogoURL } = useOV25UI();
@@ -11,7 +12,7 @@ export const MobilePriceOverlay = () => {
   }
 
   // Find the target container
-  const container = document.getElementById('true-ov25-configurator-iframe-container');
+  const container = findElementByIdInShadowOrRegularDOM('true-ov25-configurator-iframe-container');
   if (!container) {
     return null;
   }

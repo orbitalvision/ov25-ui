@@ -17,6 +17,7 @@ import {
 } from "../lib/config/iframe-transition-snapshot.js"
 import {
   type ConfiguratorIframeScreenRect,
+  findElementByIdInShadowOrRegularDOM,
   getResolvedConfiguratorIframeBackgroundColor,
 } from "../utils/configurator-dom-queries.js"
 import { createPortal } from "react-dom"
@@ -313,7 +314,9 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
     const modalStackBoost = isDrawerOrDialogOpen && isModalMode;
 
     const carouselHostRef = useRef<HTMLDivElement>(null);
+    const galleryHostRef = useRef<HTMLDivElement>(null);
     const [carouselShadowRoot, setCarouselShadowRoot] = useState<ShadowRoot | null>(null);
+    const [galleryShadowRoot, setGalleryShadowRoot] = useState<ShadowRoot | null>(null);
 
     useLayoutEffect(() => {
         if (!showCarousel || modalStackBoost) {
@@ -333,7 +336,24 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
         }
         shadow.adoptedStyleSheets = stylesheets;
         setCarouselShadowRoot(shadow);
-    }, [showCarousel, modalStackBoost, cssString]);
+    }, [showCarousel, modalStackBoost, cssString, galleryShadowRoot]);
+
+    useLayoutEffect(() => {
+        const host = galleryHostRef.current;
+        if (!host) return;
+
+        let shadow = host.shadowRoot;
+        if (!shadow) {
+            shadow = host.attachShadow({ mode: 'open' });
+        }
+
+        const stylesheets: CSSStyleSheet[] = [getSharedStylesheet()];
+        if (cssString) {
+            stylesheets.push(createuserCustomCssStylesheet(cssString));
+        }
+        shadow.adoptedStyleSheets = stylesheets;
+        setGalleryShadowRoot(shadow);
+    }, [cssString]);
 
     // Use the custom hook to handle iframe positioning
     useIframePositioning();
@@ -380,8 +400,8 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
         let frameId: number;
         
         const positionIframeContainer = () => {
-            const originalContainer = document.getElementById(uniqueId ? `ov25-configurator-iframe-container-${uniqueId}` : 'ov25-configurator-iframe-container');
-            const trueContainer = document.getElementById('true-ov25-configurator-iframe-container');
+            const originalContainer = findElementByIdInShadowOrRegularDOM(uniqueId ? `ov25-configurator-iframe-container-${uniqueId}` : 'ov25-configurator-iframe-container');
+            const trueContainer = findElementByIdInShadowOrRegularDOM('true-ov25-configurator-iframe-container');
             
             if (originalContainer && trueContainer && !isDrawerOrDialogOpen) {
                 const rect = originalContainer.getBoundingClientRect();
@@ -442,8 +462,8 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
     const showOpeningProxy =
         configuratorTransitionProxyMode === 'opening' && configuratorTransitionProxyBitmap;
 
-    return (<>
-
+    const galleryContent = (
+        <>
         <div className={cn(
             "ov:relative ov:flex ov:flex-col ov:font-[family-name:var(--ov25-font-family)]",
             isInModal
@@ -451,7 +471,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
               : "ov:h-auto ov:max-h-full",
             modalStackBoost ? "ov:z-[2147483647]" : "ov:z-[2] ov:isolate",
             isPreloading && "ov:hidden"
-        )} id="ov-25-configurator-gallery-container">
+        )}>
             {showClosingProxy && configuratorClosingProxyRect ? (
               <ConfiguratorClosingTransitionProxyCanvas
                 bitmap={configuratorTransitionProxyBitmap}
@@ -514,13 +534,28 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
             {carouselShadowRoot &&
               createPortal(<ProductCarousel />, carouselShadowRoot)}
         </div>
-        {isProductGalleryStacked && createPortal(
+        {isProductGalleryStacked && galleryShadowRoot && createPortal(
            <IframeContainer  />,
-            document.body
+            galleryShadowRoot
         )}
         <ArPreviewQRCodeDialog arPreviewLink={arPreviewLink} setArPreviewLink={setArPreviewLink} />
 
     </>
+    );
+
+    return (
+      <div
+        ref={galleryHostRef}
+        id="ov-25-configurator-gallery-container"
+        className={cn(
+          "ov25-configurator-gallery",
+          isInModal &&
+            "ov:flex ov:flex-1 ov:flex-col ov:min-h-0 ov:h-full ov:max-h-full ov:overflow-hidden",
+        )}
+        data-clarity-mask="true"
+      >
+        {galleryShadowRoot && createPortal(galleryContent, galleryShadowRoot)}
+      </div>
     )
 }
 

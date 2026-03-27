@@ -52,12 +52,12 @@ function App() {
             </div>
             <div className="ov:flex ov:flex-col">
                 <div>
-              <button id="ov25-fullscreen-button" className="ov:cursor-pointer ov:bg-transparent ov:text-white ov:p-2 ov:rounded-md ov:mb-2">
+              <button id="ov25-fullscreen-button" className="ov:cursor-pointer ov:bg-black ov:text-white ov:p-2 ov:rounded-md ov:mb-2">
                 Configure Otti (100cm)
               </button>
               </div>
               <div>
-              <button id="test" className="ov:cursor-pointer ov:bg-transparent ov:text-white ov:p-2 ov:rounded-md ov:mt-2">
+              <button id="test" className="ov:cursor-pointer ov:bg-black ov:text-white ov:p-2 ov:rounded-md ov:mt-2">
                 Configure Otto (115cm)
               </button>
               </div>

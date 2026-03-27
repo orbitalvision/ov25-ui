@@ -16,7 +16,7 @@ import {
   IFRAME_MSG_TRANSITION_SNAPSHOT,
   IFRAME_MSG_TRANSITION_SNAPSHOT_ERROR,
 } from '../lib/config/iframe-transition-snapshot.js';
-import type { ConfiguratorIframeScreenRect } from '../utils/configurator-dom-queries.js';
+import { findIframeWithUniqueId, type ConfiguratorIframeScreenRect } from '../utils/configurator-dom-queries.js';
 
 function throttle<T extends (...args: any[]) => void>(
   fn: T,
@@ -1261,8 +1261,7 @@ export const OV25UIProvider: React.FC<{
         
         // For standard configurators with uniqueId, filter messages by iframe source
         if (uniqueId) {
-          const iframeId = `ov25-configurator-iframe-${uniqueId}`;
-          const iframe = document.getElementById(iframeId) as HTMLIFrameElement;
+          const iframe = findIframeWithUniqueId(uniqueId) as HTMLIFrameElement | null;
           if (!iframe || event.source !== iframe.contentWindow) {
             return;
           }

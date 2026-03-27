@@ -5,6 +5,38 @@ import {
 } from '../lib/config/iframe-transition-snapshot.js';
 
 /**
+ * Walks every open shadow tree (including nesting) so ids resolve when OV UI is under
+ * `Ov25ShadowHost` or other hosts that are not `div[class^="ov25-configurator-"]`.
+ */
+function findElementByIdInOpenShadowTrees(id: string): HTMLElement | null {
+  const searchShadowRoot = (sr: ShadowRoot): HTMLElement | null => {
+    const hit = sr.getElementById(id);
+    if (hit) return hit;
+    for (const el of Array.from(sr.querySelectorAll('*'))) {
+      if (el.shadowRoot) {
+        const nested = searchShadowRoot(el.shadowRoot);
+        if (nested) return nested;
+      }
+    }
+    return null;
+  };
+
+  const walkLightDom = (el: Element): HTMLElement | null => {
+    if (el.shadowRoot) {
+      const found = searchShadowRoot(el.shadowRoot);
+      if (found) return found;
+    }
+    for (const child of Array.from(el.children)) {
+      const found = walkLightDom(child);
+      if (found) return found;
+    }
+    return null;
+  };
+
+  return walkLightDom(document.documentElement);
+}
+
+/**
  * Resolves configurator iframe-related nodes whether they live in light DOM or shadow roots
  * (variants shell, mobile drawer, modal portal).
  */
@@ -61,7 +93,7 @@ export function findElementByIdInShadowOrRegularDOM(id: string): HTMLElement | n
     }
   }
 
-  return null;
+  return findElementByIdInOpenShadowTrees(id);
 }
 
 /**
@@ -89,16 +121,7 @@ export function getResolvedConfiguratorIframeBackgroundColor(): string {
 
 export function findIframeWithUniqueId(uniqueId?: string): HTMLElement | null {
   const iframeId = uniqueId ? `ov25-configurator-iframe-${uniqueId}` : 'ov25-configurator-iframe';
-  const fromDoc = document.getElementById(iframeId);
-  if (fromDoc) return fromDoc;
-
-  const mobileDrawerContainer = document.getElementById('ov25-mobile-drawer-container');
-  if (mobileDrawerContainer?.shadowRoot) {
-    const fromShadow = mobileDrawerContainer.shadowRoot.getElementById(iframeId);
-    if (fromShadow) return fromShadow;
-  }
-
-  return null;
+  return findElementByIdInShadowOrRegularDOM(iframeId);
 }
 
 export interface ConfiguratorIframeScreenRect {

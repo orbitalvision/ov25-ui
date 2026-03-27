@@ -1,11 +1,10 @@
-import { useState, useMemo, useRef, useEffect } from "react"
+import { useState, useMemo, useRef, useLayoutEffect } from "react"
 import * as React from 'react'
-import { createPortal } from 'react-dom'
 import { getIframeSrc } from '../utils/configurator-utils.js'
 import { useOV25UI } from "../contexts/ov25-ui-context.js"
 import { cn, getProductGalleryImages, resolveImageUrl } from "../lib/utils.js"
-import { getSharedStylesheet, createuserCustomCssStylesheet } from '../utils/shadow-styles.js'
 import ConfiguratorViewControls from './ConfiguratorViewControls.js'
+import { Ov25ShadowHost } from './Ov25ShadowHost.js'
 
 
 export const IframeContainer = () => {
@@ -24,15 +23,22 @@ export const IframeContainer = () => {
         uniqueId,
         isMobile,
         deferThreeD,
-        cssString,
         isDrawerOrDialogOpen,
         configuratorDisplayMode,
         configuratorDisplayModeMobile,
         isSnap2Mode,
+        isModalOpen,
     } = useOV25UI();
 
     const isModalMode =
         isMobile ? configuratorDisplayModeMobile === 'modal' : configuratorDisplayMode === 'modal';
+    /** Stacked slot uses aspect-ratio; Snap2 desktop modal keeps gallery in-flow without `isDrawerOrDialogOpen`, so fill height instead of overflowing the dialog. */
+    const snap2DesktopModalStackedFill =
+        isStacked &&
+        isSnap2Mode &&
+        !isMobile &&
+        isModalMode &&
+        isModalOpen;
     const snap2MobileDrawerOpen =
         isSnap2Mode && isMobile && isDrawerOrDialogOpen && !isModalMode;
     const iframeRadiusClass = snap2MobileDrawerOpen
@@ -40,19 +46,21 @@ export const IframeContainer = () => {
         : 'ov:rounded-[var(--ov25-configurator-iframe-border-radius)]';
 
     const controlsContainerRef = useRef<HTMLDivElement>(null);
-    const [controlsShadowRoot, setControlsShadowRoot] = useState<ShadowRoot | null>(null);
+    const dummyIframeRef = useRef<HTMLIFrameElement>(null);
 
-    useEffect(() => {
-        const el = controlsContainerRef.current;
-        if (!el || el.shadowRoot) return;
-        const shadowRoot = el.attachShadow({ mode: 'open' });
-        const stylesheets: CSSStyleSheet[] = [getSharedStylesheet()];
-        if (cssString) {
-            stylesheets.push(createuserCustomCssStylesheet(cssString));
-        }
-        shadowRoot.adoptedStyleSheets = stylesheets;
-        setControlsShadowRoot(shadowRoot);
-    }, [cssString]);
+    useLayoutEffect(() => {
+        const el = dummyIframeRef.current;
+        if (!el) return;
+        el.style.setProperty('display', 'none', 'important');
+        el.style.setProperty('height', '0', 'important');
+        el.style.setProperty('width', '0', 'important');
+        el.style.setProperty('border', '0', 'important');
+        el.style.setProperty('margin', '0', 'important');
+        el.style.setProperty('padding', '0', 'important');
+        el.style.setProperty('position', 'absolute', 'important');
+        el.style.setProperty('visibility', 'hidden', 'important');
+        el.style.setProperty('pointer-events', 'none', 'important');
+    }, []);
 
     const hasCutout = !!(currentProduct?.metadata as any)?.cutoutImage
     const cutoutFirst = hasCutout && (isMobile || !deferThreeD)
@@ -104,7 +112,9 @@ export const IframeContainer = () => {
         [productLink, apiKey, configurationUuid, hexBgColor]);
 
     const isStackedStyles = cn(
-        "ov:relative ov:aspect-square ov:md:aspect-[3/2] ov:2xl:aspect-video ov:overflow-hidden ov:z-[3]",
+        snap2DesktopModalStackedFill
+            ? "ov:relative ov:h-full ov:min-h-0 ov:w-full ov:max-h-full ov:overflow-hidden ov:z-[3]"
+            : "ov:relative ov:aspect-square ov:md:aspect-[3/2] ov:2xl:aspect-video ov:overflow-hidden ov:z-[3]",
         iframeRadiusClass,
         "ov:bg-[var(--ov25-configurator-iframe-background-color)]",
         "ov:transform-gpu ov:backface-hidden",
@@ -120,7 +130,7 @@ export const IframeContainer = () => {
         <div id="true-ov25-configurator-iframe-container"
             data-clarity-mask="true"
             className={cn(isStacked ? isStackedStyles : isInlineStyles)}>
-            <iframe id="ov25-dummy-iframe" allow="camera; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; xr-spatial-tracking; fullscreen" style={{ display: 'none !important', height: '0 !important', width: '0 !important' }}></iframe> {/* Used as bait to stop Trustpilot from hijacking our iframe. it looks for first iframe in the DOM */}
+            <iframe ref={dummyIframeRef} id="ov25-dummy-iframe" allow="camera; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; xr-spatial-tracking; fullscreen" hidden></iframe> {/* Used as bait to stop Trustpilot from hijacking our iframe. it looks for first iframe in the DOM */}
             <iframe
                 data-fullscreen={isVariantsOpen}
                 data-clarity-mask="true"
@@ -152,13 +162,13 @@ export const IframeContainer = () => {
                 ) : null;
             })()}
 
-            {/* Container for ConfiguratorViewControls - we attach shadow here and portal controls into it */}
-            <div
+            <Ov25ShadowHost
                 ref={controlsContainerRef}
                 id={uniqueId ? `true-configurator-view-controls-container-${uniqueId}` : "true-configurator-view-controls-container"}
                 className="ov:absolute ov:inset-0 ov:w-full ov:h-full ov:pointer-events-none"
-            />
-            {controlsShadowRoot && createPortal(<ConfiguratorViewControls />, controlsShadowRoot)}
+            >
+                <ConfiguratorViewControls />
+            </Ov25ShadowHost>
 
             {/* Container for Toaster portal - must be inside fullscreen element */}
             <div id={uniqueId ? `true-toaster-container-${uniqueId}` : "true-toaster-container"} className="ov:absolute ov:inset-0 ov:w-full ov:h-full ov:pointer-events-none ov:z-999"></div>

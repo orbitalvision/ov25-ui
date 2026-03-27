@@ -4,18 +4,14 @@ import {
   IFRAME_MSG_TRANSITION_SNAPSHOT_ERROR,
   TRANSITION_SNAPSHOT_TIMEOUT_MS,
 } from '../lib/config/iframe-transition-snapshot.js'
-
-function getConfiguratorIframe(uniqueId?: string): HTMLIFrameElement | null {
-  const iframeId = uniqueId ? `ov25-configurator-iframe-${uniqueId}` : 'ov25-configurator-iframe'
-  return document.getElementById(iframeId) as HTMLIFrameElement | null
-}
+import { findIframeWithUniqueId } from './configurator-dom-queries.js'
 
 /**
  * Asks the OV25 iframe for one composited WebGL frame (ImageBitmap transfer).
  * Returns null on timeout, missing iframe, or capture failure.
  */
 export function requestTransitionSnapshotFromIframe(uniqueId?: string): Promise<ImageBitmap | null> {
-  const iframe = getConfiguratorIframe(uniqueId)
+  const iframe = findIframeWithUniqueId(uniqueId) as HTMLIFrameElement | null
   const contentWindow = iframe?.contentWindow ?? null
   if (!contentWindow) {
     return Promise.resolve(null)

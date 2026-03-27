@@ -168,7 +168,7 @@ export function VariantsOnlySheet() {
               <>
                 <div className="ov:shrink-0 ov:min-h-12" />
                 <div className="ov:flex-1 ov:min-h-0 ov:overflow-auto">
-                  <ProductVariantsWrapper />
+                  <ProductVariantsWrapper embeddedInVariantsOnlySheet />
                 </div>
                 <div className="ov:flex-shrink-0">
                   <MobileCheckoutButton />
