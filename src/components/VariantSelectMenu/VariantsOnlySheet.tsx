@@ -131,7 +131,7 @@ export function VariantsOnlySheet() {
   if (!shouldRender) return null;
 
   const menuContent = (
-    <div data-clarity-mask="true" className="ov:inset-0 ov:size-full ov:fixed ov:z-[2147483644]">
+    <div data-clarity-mask="true" className="ov:fixed ov:inset-0 ov:z-[2147483644]">
       <div
         ref={backdropRef}
         role="button"

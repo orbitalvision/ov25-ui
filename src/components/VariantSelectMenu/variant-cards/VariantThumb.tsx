@@ -38,13 +38,20 @@ export const VariantThumb = React.memo(({
   asImageContainer = false,
 }: VariantThumbProps) => {
   const { cssString } = useOV25UI();
-  const useSolidThumbRing = React.useMemo(() => {
-    if (typeof document === 'undefined') return false;
-    const mode = getComputedStyle(document.documentElement)
+  const wrapperRef = React.useRef<HTMLDivElement>(null);
+  const [useSolidThumbRing, setUseSolidThumbRing] = React.useState(false);
+
+  React.useLayoutEffect(() => {
+    const el = wrapperRef.current;
+    if (!el) return;
+    const root = el.getRootNode();
+    const target =
+      root instanceof ShadowRoot ? root.host : document.documentElement;
+    const mode = getComputedStyle(target)
       .getPropertyValue(OV25_VARIANT_THUMB_RING_MODE_VAR)
       .trim()
       .toLowerCase();
-    return mode === OV25_VARIANT_RING_MODE_SOLID;
+    setUseSolidThumbRing(mode === OV25_VARIANT_RING_MODE_SOLID);
   }, [cssString]);
 
   const sizeClass = SIZE_CLASSES[size];
@@ -84,6 +91,7 @@ export const VariantThumb = React.memo(({
 
   return (
     <div
+      ref={wrapperRef}
       className={cn(
         'ov25-variant-thumb-wrapper ov:relative ov:p-1',
         !selected && 'ov:bg-transparent',

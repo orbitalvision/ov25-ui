@@ -18,12 +18,13 @@ export function ProductCarousel() {
     carouselMaxImagesMobile,
     isMobile,
     deferThreeD,
+    galleryCarouselFullscreenImage,
+    setGalleryCarouselFullscreenImage,
   } = useOV25UI();
 
   const effectiveCarouselLayout = isMobile ? carouselLayoutMobile : carouselLayout;
   if (effectiveCarouselLayout === CarouselDisplayMode.None) return null;
   const useStackedLayout = effectiveCarouselLayout === 'stacked';
-  const [fullscreenImage, setFullscreenImage] = React.useState<string | null>(null);
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const dragRef = React.useRef({ isDragging: false, startX: 0, startScrollLeft: 0, didDrag: false });
 
@@ -71,11 +72,12 @@ export function ProductCarousel() {
   }, [useStackedLayout]);
 
   React.useEffect(() => {
-    if (!fullscreenImage) return;
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setFullscreenImage(null);
+    if (!galleryCarouselFullscreenImage) return;
+    const onKey = (e: KeyboardEvent) =>
+      e.key === 'Escape' && setGalleryCarouselFullscreenImage(null);
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [fullscreenImage]);
+  }, [galleryCarouselFullscreenImage, setGalleryCarouselFullscreenImage]);
 
   const hasCutout = !!(currentProduct?.metadata as any)?.cutoutImage
   const cutoutFirst = hasCutout && (isMobile || !deferThreeD)
@@ -153,7 +155,7 @@ export function ProductCarousel() {
     return (
       <button
         key={index}
-        onClick={() => setFullscreenImage(fullscreenSrc)}
+        onClick={() => setGalleryCarouselFullscreenImage(fullscreenSrc)}
         className="ov25-gallery-image-button ov:relative ov:aspect-[3/2] ov:w-full ov:overflow-hidden ov:rounded-[var(--ov25-configurator-iframe-border-radius)] ov:bg-muted ov:cursor-pointer"
       >
         <img
@@ -187,13 +189,13 @@ export function ProductCarousel() {
           </div>
         )}
       </div>
-      {fullscreenImage && (
+      {galleryCarouselFullscreenImage && (
         <div
           className="ov:fixed ov:inset-0 ov:z-[2147483647] ov:bg-black/90 ov:flex ov:items-center ov:justify-center ov:cursor-pointer"
-          onClick={() => setFullscreenImage(null)}
+          onClick={() => setGalleryCarouselFullscreenImage(null)}
         >
           <img
-            src={fullscreenImage}
+            src={galleryCarouselFullscreenImage}
             alt="Fullscreen"
             draggable={false}
             onDragStart={(e) => e.preventDefault()}

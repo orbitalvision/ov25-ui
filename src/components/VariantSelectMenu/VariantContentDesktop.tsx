@@ -199,8 +199,8 @@ export function VariantContentDesktop() {
     // Always render the container for transform effects, but conditionally render the content
     // z-index 2147483644 is max - 3
     const menuContent = (
-        <div data-clarity-mask="true" className="ov:inset-0 ov:size-full ov:fixed ov:pointer-events-none ov:z-2147483644">
-            <div className="ov:w-full ov:h-full ov:relative ov:pointer-events-none">
+        <div data-clarity-mask="true" className="ov:fixed ov:inset-0 ov:pointer-events-none ov:z-2147483644">
+            <div className="ov:absolute ov:inset-0 ov:pointer-events-none">
             <div 
               ref={menuContainerRef}
               className="ov:absolute ov:top-0 ov:right-0 ov:h-full ov:w-[384px] ov:pointer-events-auto"
@@ -240,10 +240,9 @@ export function VariantContentDesktop() {
       shadowContainer.appendChild(shadowContainerEmptySpan);
       shadowContainer.id = 'ov25-variants-shadow-container';
       shadowContainer.style.position = 'fixed';
-      shadowContainer.style.top = '0';
-      shadowContainer.style.left = '0';
-      shadowContainer.style.width = '100%';
-      shadowContainer.style.height = '100%';
+      shadowContainer.style.inset = '0';
+      shadowContainer.style.width = 'auto';
+      shadowContainer.style.height = 'auto';
       shadowContainer.style.pointerEvents = 'none';
       shadowContainer.style.zIndex = '2147483644'; // max - 3
       document.body.appendChild(shadowContainer);

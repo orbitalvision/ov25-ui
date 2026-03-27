@@ -212,6 +212,8 @@ interface OV25UIContextType {
   drawerSize: DrawerSizes;
   isVariantsOpen: boolean;
   isDrawerOrDialogOpen: boolean;
+  galleryCarouselFullscreenImage: string | null;
+  setGalleryCarouselFullscreenImage: React.Dispatch<React.SetStateAction<string | null>>;
   /** Last frame from the iframe shown in the gallery slot while the iframe moves to sheet/modal. */
   configuratorTransitionProxyBitmap: ImageBitmap | null;
   configuratorTransitionProxyMode: TransitionProxyMode;
@@ -545,6 +547,7 @@ export const OV25UIProvider: React.FC<{
   const [drawerSize, setDrawerSize] = useState<DrawerSizes>("closed");
   const [isVariantsOpen, setIsVariantsOpen] = useState(false);
   const [isDrawerOrDialogOpen, setIsDrawerOrDialogOpen] = useState(false);
+  const [galleryCarouselFullscreenImage, setGalleryCarouselFullscreenImage] = useState<string | null>(null);
   const [configuratorTransitionProxyBitmap, setConfiguratorTransitionProxyBitmapState] = useState<ImageBitmap | null>(null);
   const [configuratorTransitionProxyMode, setConfiguratorTransitionProxyModeState] = useState<TransitionProxyMode>(null);
   const [configuratorClosingProxyRect, setConfiguratorClosingProxyRectState] = useState<ConfiguratorIframeScreenRect | null>(null);
@@ -676,6 +679,7 @@ export const OV25UIProvider: React.FC<{
     setArPreviewLink(null);
     setPreloading(false);
     setHasSwitchedAfterDefer(false);
+    setGalleryCarouselFullscreenImage(null);
   }, [
     releaseConfiguratorTransitionProxy,
     setUseInstantIframeCloseRestore,
@@ -694,7 +698,8 @@ export const OV25UIProvider: React.FC<{
     setError,
     setArPreviewLink,
     setPreloading,
-    setHasSwitchedAfterDefer
+    setHasSwitchedAfterDefer,
+    setGalleryCarouselFullscreenImage,
   ]);
 
   // When variants open, auto-close bottom modules panel and Snap2 checkout sheet (one surface at a time).
@@ -1621,6 +1626,8 @@ export const OV25UIProvider: React.FC<{
     drawerSize,
     isVariantsOpen,
     isDrawerOrDialogOpen,
+    galleryCarouselFullscreenImage,
+    setGalleryCarouselFullscreenImage,
     configuratorTransitionProxyBitmap,
     configuratorTransitionProxyMode,
     configuratorClosingProxyRect,

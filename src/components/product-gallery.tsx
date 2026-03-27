@@ -285,6 +285,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
         releaseConfiguratorTransitionProxy,
         stackedGalleryCloseSyncImmediateRef,
         isSnap2Mode,
+        galleryCarouselFullscreenImage,
     } = useOV25UI();
 
     const isModalMode = isMobile ? configuratorDisplayModeMobile === 'modal' : configuratorDisplayMode === 'modal';
@@ -358,30 +359,27 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
     // Use the custom hook to handle iframe positioning
     useIframePositioning();
 
-    // Lift gallery host above modal backdrop (ConfiguratorModal uses z-2147483646). Stacked layout skips
-    // .ov25-configurator-gallery on the outer host — true-iframe is portaled to body; modal path there sets z in useIframePositioning.
-    useEffect(() => {
-        if (isProductGalleryStacked) return;
-
-        if (isDrawerOrDialogOpen) {
-            const container = document.querySelector('.ov25-configurator-gallery') as HTMLElement;
-            if (!container) return;
-            const originalZIndex = container.style.zIndex;
-            const originalPointerEvents = container.style.pointerEvents;
-
-            if (isModalMode) {
-                container.style.zIndex = '2147483647';
-                container.style.pointerEvents = 'auto';
-            } else {
-                container.style.zIndex = '2147483644';
-            }
-
-            return () => {
-                container.style.zIndex = originalZIndex || '';
-                container.style.pointerEvents = originalPointerEvents || '';
-            };
-        }
-    }, [isProductGalleryStacked, isDrawerOrDialogOpen, isModalMode]);
+    /** Sheet/drawer/modal: lift gallery host above page + variant shell; stacked path uses portaled iframe (useIframePositioning). */
+    const liftGalleryStacking = isDrawerOrDialogOpen && !isProductGalleryStacked;
+    const carouselFullscreenOpen = galleryCarouselFullscreenImage != null;
+    const galleryHostStackStyle: React.CSSProperties | undefined = (() => {
+        if (!carouselFullscreenOpen && !liftGalleryStacking) return undefined;
+        const zIndex = carouselFullscreenOpen
+            ? 2147483647
+            : liftGalleryStacking
+              ? isModalMode
+                  ? 2147483647
+                  : 2147483644
+              : undefined;
+        if (zIndex === undefined) return undefined;
+        const pointerEvents =
+            carouselFullscreenOpen || (liftGalleryStacking && isModalMode) ? ('auto' as const) : undefined;
+        return {
+            position: 'relative' as const,
+            zIndex,
+            ...(pointerEvents ? { pointerEvents } : {}),
+        };
+    })();
 
 
     const containerRef = useRef<HTMLDivElement>(null);
@@ -552,6 +550,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
           isInModal &&
             "ov:flex ov:flex-1 ov:flex-col ov:min-h-0 ov:h-full ov:max-h-full ov:overflow-hidden",
         )}
+        style={galleryHostStackStyle}
         data-clarity-mask="true"
       >
         {galleryShadowRoot && createPortal(galleryContent, galleryShadowRoot)}
