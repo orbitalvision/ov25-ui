@@ -44,6 +44,33 @@
 }
 
 :host {
+    /*
+     * Tailwind v4 `ov:*` utilities use `var(--tw-translate-x)` / `var(--tw-translate-y)` etc.
+     * The framework also emits @layer properties / @property rules; on some storefronts those
+     * defaults do not apply reliably inside shadow roots. Define the same bases on :host so
+     * descendants inherit safe values (e.g. translate-y-full needs a defined --tw-translate-x).
+     */
+    --tw-translate-x: 0;
+    --tw-translate-y: 0;
+    --tw-translate-z: 0;
+    --tw-rotate-x: initial;
+    --tw-rotate-y: initial;
+    --tw-rotate-z: initial;
+    --tw-skew-x: initial;
+    --tw-skew-y: initial;
+    --tw-space-y-reverse: 0;
+    --tw-space-x-reverse: 0;
+    --tw-border-style: solid;
+    --tw-shadow: 0 0 #0000;
+    --tw-shadow-alpha: 100%;
+    --tw-inset-shadow: 0 0 #0000;
+    --tw-inset-shadow-alpha: 100%;
+    --tw-ring-shadow: 0 0 #0000;
+    --tw-inset-ring-shadow: 0 0 #0000;
+    --tw-ring-offset-width: 0px;
+    --tw-ring-offset-color: #fff;
+    --tw-ring-offset-shadow: 0 0 #0000;
+
     /* Custom CSS Variables */
     --ov25-background-color: #ffffff;
     --ov25-secondary-background-color: #f6f6f6;
