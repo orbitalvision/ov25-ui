@@ -158,7 +158,7 @@ export const Snap2ConfiguratorModal: React.FC<Snap2ConfiguratorModalProps> = ({ 
         >
           <div
             ref={setPortalTargetEl}
-            className="ov:relative ov:w-[90vw] ov:h-full ov:flex ov:rounded-3xl"
+            className="ov:relative ov:w-[min(90vw,1980px)] ov:h-full ov:flex ov:rounded-3xl"
             style={{ clipPath: 'inset(0 round 1.5rem)' }}
           >
             <VariantsCloseButton

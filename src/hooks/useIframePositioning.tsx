@@ -248,9 +248,17 @@ export const useIframePositioning = () => {
           window.visualViewport.addEventListener('scroll', onVisualViewportChange);
         }
 
+        const onWindowResizeModal = () => runSync();
+        if (!isSnap2Mode) {
+          window.addEventListener('resize', onWindowResizeModal);
+        }
+
         return () => {
           cancelAnimationFrame(frameIdRef.current);
           resizeObserver.disconnect();
+          if (!isSnap2Mode) {
+            window.removeEventListener('resize', onWindowResizeModal);
+          }
           if (isMobile && window.visualViewport) {
             window.visualViewport.removeEventListener('resize', onVisualViewportChange);
             window.visualViewport.removeEventListener('scroll', onVisualViewportChange);

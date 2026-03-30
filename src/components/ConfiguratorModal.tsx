@@ -196,13 +196,15 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({
       <div
         className={cn(
           'ov:relative ov:bg-transparent ov:shadow-xl ov:rounded-3xl',
-          isMobile ? 'ov:w-full ov:h-full ov:max-w-none' : 'ov:w-auto ov:h-full ov:max-w-[1980px]'
+          isMobile
+            ? 'ov:w-full ov:h-full ov:max-w-none'
+            : 'ov:box-border ov:h-full ov:min-w-0 ov:w-[min(90vw,1980px)] ov:max-w-full'
         )}
       >
         <div
           className={cn(
-            'ov:relative ov:h-full ov:flex ov:rounded-3xl',
-            isMobile ? 'ov:w-full ov:flex-col' : 'ov:w-[90vw] ov:flex-row'
+            'ov:relative ov:h-full ov:flex ov:min-w-0 ov:w-full ov:rounded-3xl',
+            isMobile ? 'ov:flex-col' : 'ov:flex-row'
           )}
           style={{ clipPath: 'inset(0 round 1.5rem)' }}
         >
@@ -215,7 +217,7 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({
           <div
             className={cn(
               'ov:relative ov:flex ov:items-stretch ov:min-w-0',
-              isMobile ? 'ov:flex-col ov:w-full ov:h-full ov:min-h-0' : 'ov:flex-row ov:flex-1 ov:h-full'
+              isMobile ? 'ov:flex-col ov:w-full ov:h-full ov:min-h-0' : 'ov:flex-row ov:flex-1 ov:h-full ov:min-w-0 ov:w-full'
             )}
           >
             <div
