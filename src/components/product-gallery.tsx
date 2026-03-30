@@ -286,6 +286,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
         stackedGalleryCloseSyncImmediateRef,
         isSnap2Mode,
         galleryCarouselFullscreenImage,
+        isModalOpen,
     } = useOV25UI();
 
     const isModalMode = isMobile ? configuratorDisplayModeMobile === 'modal' : configuratorDisplayMode === 'modal';
@@ -313,6 +314,9 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
     /** Drawer/sheet only; modal still fades the overlay in sync with the modal shell. */
     const openingProxySkipOpacityFade = isMobile && !isModalMode;
     const modalStackBoost = isDrawerOrDialogOpen && isModalMode;
+    /** Snap2 desktop shell uses `isModalOpen` without toggling `isDrawerOrDialogOpen` (see IframeContainer). Hide in-flow carousel so theme CSS cannot size `#true-carousel` inside the modal. */
+    const hideEmbeddedCarousel =
+      modalStackBoost || (isSnap2Mode && !isMobile && isModalOpen);
 
     const carouselHostRef = useRef<HTMLDivElement>(null);
     const galleryHostRef = useRef<HTMLDivElement>(null);
@@ -320,7 +324,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
     const [galleryShadowRoot, setGalleryShadowRoot] = useState<ShadowRoot | null>(null);
 
     useLayoutEffect(() => {
-        if (!showCarousel || modalStackBoost) {
+        if (!showCarousel || hideEmbeddedCarousel) {
             setCarouselShadowRoot(null);
             return;
         }
@@ -337,7 +341,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
         }
         shadow.adoptedStyleSheets = stylesheets;
         setCarouselShadowRoot(shadow);
-    }, [showCarousel, modalStackBoost, cssString, galleryShadowRoot]);
+    }, [showCarousel, hideEmbeddedCarousel, cssString, galleryShadowRoot]);
 
     useLayoutEffect(() => {
         const host = galleryHostRef.current;
@@ -519,7 +523,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
 
                 </div>
             </div>
-            {showCarousel && !modalStackBoost && (
+            {showCarousel && !hideEmbeddedCarousel && (
               <div
                 ref={carouselHostRef}
                 id="true-carousel"

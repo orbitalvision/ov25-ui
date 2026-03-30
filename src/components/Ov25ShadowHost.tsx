@@ -51,7 +51,9 @@ export const Ov25ShadowHost = forwardRef<
 
   return (
     <>
-      <div ref={setRefs} {...hostProps} />
+      <div ref={setRefs} {...hostProps}>
+        <span className="ov:w-full ov:h-full ov:pointer-events-none" />
+      </div>
       {shadowRoot && createPortal(children, shadowRoot)}
     </>
   );
