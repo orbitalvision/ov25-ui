@@ -114,7 +114,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
                     <SwatchImage
                       src={swatch.thumbnail && swatch.thumbnail.miniThumbnails ? swatch.thumbnail.miniThumbnails.medium : '/placeholder.svg?height=200&width=200'}
                       alt={swatch.name}
-                      className='ov25-swatch-image ov:w-full ov:h-full'
+                      className='ov25-swatch-image ov:w-full ov:h-full ov:scale-120'
                     />
                     <VariantsCloseButton
                       onClick={() => toggleSwatch(swatch)}
