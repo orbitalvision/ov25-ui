@@ -1,5 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useMemo, useCallback } from 'react';
-import { sendMessageToIframe, toggleAR, CompatibleModule, detectUserAgent } from '../utils/configurator-utils.js';
+import {
+  sendMessageToIframe,
+  toggleAR,
+  CompatibleModule,
+  detectUserAgent,
+  orderConfiguratorSelectionsWithNoneFirst,
+} from '../utils/configurator-utils.js';
 import { SaveSnap2Dialog } from '../components/SaveSnap2Dialog.js';
 import {
   CarouselDisplayMode,
@@ -99,6 +105,7 @@ export interface Selection {
   }
   swatch?: Swatch;
   isVisible?: boolean;
+  metadata?: { bedSize?: string };
 }
 
 export interface Group {
@@ -905,15 +912,15 @@ export const OV25UIProvider: React.FC<{
         return !currentSearchQuery; // Only return true if there's no search query
       }).map(group => ({
         ...group,
-          selections: (searchQueries[optionId] && !searchFilter(group.name) 
-          ? group.selections.filter(selection => {
-              const matchesSearch = checkSelectionSearch(selection);
-              const matchesFilters = checkSelectionFilters(selection);
-              
-              return matchesSearch && matchesFilters;
-            })
-          : group.selections.filter(selection => checkSelectionFilters(selection))
-          ).filter(selection => selection.isVisible !== false)
+          selections: (searchQueries[optionId] && !searchFilter(group.name)
+            ? group.selections.filter(selection => {
+                const matchesSearch = checkSelectionSearch(selection);
+                const matchesFilters = checkSelectionFilters(selection);
+
+                return matchesSearch && matchesFilters;
+              })
+            : group.selections.filter(selection => checkSelectionFilters(selection))
+          ).filter(selection => selection.isVisible !== false),
       }))
     } as Option;
   }, [availableProductFilters, searchQueries]);
@@ -1341,14 +1348,16 @@ export const OV25UIProvider: React.FC<{
                         isVisible: group.isVisible !== undefined
                           ? group.isVisible
                           : (existingGroup?.group !== undefined ? existingGroup.group : true),
-                        selections: (group.selections || []).map((selection: Selection) => ({
-                          ...selection,
-                          isVisible: selection.isVisible !== undefined
-                            ? selection.isVisible
-                            : (existingGroup?.selections.get(selection.id) !== undefined 
-                                ? existingGroup.selections.get(selection.id) 
-                                : true)
-                        }))
+                        selections: orderConfiguratorSelectionsWithNoneFirst(
+                          (group.selections || []).map((selection: Selection) => ({
+                            ...selection,
+                            isVisible: selection.isVisible !== undefined
+                              ? selection.isVisible
+                              : (existingGroup?.selections.get(selection.id) !== undefined
+                                  ? existingGroup.selections.get(selection.id)
+                                  : true),
+                          })),
+                        )
                       };
                     }).filter(group => group.selections.length > 0)
                   };

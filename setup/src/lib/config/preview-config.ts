@@ -1,9 +1,10 @@
-export type LayoutType = 'standard' | 'snap2';
+export type LayoutType = 'standard' | 'snap2' | 'bedConfigurator';
 export type PreviewLayoutType = LayoutType;
 
 export const PREVIEW_PRODUCT_LINKS: Record<LayoutType, string> = {
   standard: '58',
   snap2: 'snap2/292',
+  bedConfigurator: 'bed-configurator/2',
 };
 
 export const DEFAULT_PREVIEW_API_KEY =

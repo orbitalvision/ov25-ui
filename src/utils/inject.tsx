@@ -555,7 +555,9 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
         if (target && target.parentNode) {
           const emptyDiv = document.createElement('div');
           emptyDiv.setAttribute('data-clarity-mask', 'true');
-          emptyDiv.className = `${target.className} ov25-configurator-${componentName}`.trim();
+          const stickyGallery =
+            useInlineVariantControls && componentName === 'gallery' ? ' ov25-inline-gallery-sticky' : '';
+          emptyDiv.className = `${target.className} ov25-configurator-${componentName}${stickyGallery}`.trim();
           if (target.id) emptyDiv.id = target.id;
 
           target.parentNode.replaceChild(emptyDiv, target);
@@ -623,7 +625,12 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
         const target = document.querySelector(gallerySel);
         if (target) {
           const column = document.createElement('div');
-          column.className = 'ov25-configurator-inject-column';
+          column.className = [
+            'ov25-configurator-inject-column',
+            useInlineVariantControls ? 'ov25-inline-gallery-sticky' : '',
+          ]
+            .filter(Boolean)
+            .join(' ');
           column.setAttribute('data-clarity-mask', 'true');
           column.style.display = 'flex';
           column.style.flexDirection = 'column';

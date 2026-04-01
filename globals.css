@@ -43,6 +43,20 @@
   flex-direction: column;
 }
 
+html {
+  /* Desktop inline layout: distance from viewport top while gallery is sticky */
+  --ov25-inline-gallery-sticky-top: 1rem;
+}
+
+@media (min-width: 768px) {
+  .ov25-inline-gallery-sticky {
+    position: sticky;
+    top: var(--ov25-inline-gallery-sticky-top);
+    align-self: flex-start;
+    z-index: 1;
+  }
+}
+
 :host {
     /*
      * Tailwind v4 `ov:*` utilities use `var(--tw-translate-x)` / `var(--tw-translate-y)` etc.

@@ -21,6 +21,8 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
     const isSwatchSelected = isSwatchSelectedFor(variant.swatch);
 
     const spacingClass = compactSpacing ? 'ov:mb-4 ov:pb-1' : (isGrouped && isMobile ? '' : 'ov:my-4 ov:pb-1');
+    const title =
+      variant.name + (variant.bedSize ? ` · ${variant.bedSize}` : '');
 
     return (
     <div 
@@ -28,7 +30,7 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
         key={variant.id + variant.groupId + variant.optionId}
         data-selected={variant.isSelected}
         data-swatch-selected={isSwatchSelected}
-        title={variant.name}
+        title={title}
     >
         <VariantThumb
             imageUrl={variant.image}
@@ -48,6 +50,11 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
             <span className={`ov25-variant-name ov:text-xs ov:text-center ov:text-black ov:line-clamp-3 ${isGrouped && isMobile ? '' : 'ov:pt-2'}`}>
                 {variant.name}
             </span>
+            {variant.bedSize ? (
+              <span className="ov:block ov:text-center ov:text-[11px] ov:text-[var(--ov25-secondary-text-color)] ov:opacity-85 ov:mt-0.5 ov:line-clamp-2">
+                {variant.bedSize}
+              </span>
+            ) : null}
         </div>
     </div>
     )
@@ -58,6 +65,7 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
     return (
       prevProps.variant.id === nextProps.variant.id &&
       prevProps.variant.isSelected === nextProps.variant.isSelected &&
+      prevProps.variant.bedSize === nextProps.variant.bedSize &&
       prevProps.index === nextProps.index &&
       prevProps.isMobile === nextProps.isMobile
     );

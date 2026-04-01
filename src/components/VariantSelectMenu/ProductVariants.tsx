@@ -13,6 +13,8 @@ export interface Variant {
   groupId?: string
   optionId?: string
   name: string
+  /** From selection metadata (e.g. bed line size); rendered under `name`, not concatenated into title. */
+  bedSize?: string
   sku?: string
   price: number
   image: string

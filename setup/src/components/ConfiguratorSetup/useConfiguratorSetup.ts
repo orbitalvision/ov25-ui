@@ -4,7 +4,6 @@ import {
   DEFAULT_PREVIEW_API_KEY,
   SNAP2_PREVIEW_STARTING_CONFIG_UUID,
 } from '../../lib/config/preview-config';
-import type { LayoutType } from '../../lib/config/preview-config';
 import type {
   ConfiguratorSetupFormState,
   TypeSettings,
@@ -74,6 +73,10 @@ function loadSavedState(): ConfiguratorSetupFormState {
       typeSettings: {
         standard: mergeTypeSettings(DEFAULT_TYPE_SETTINGS.standard, parsed.typeSettings?.standard),
         snap2: mergeTypeSettings(DEFAULT_TYPE_SETTINGS.snap2, parsed.typeSettings?.snap2),
+        bedConfigurator: mergeTypeSettings(
+          DEFAULT_TYPE_SETTINGS.bedConfigurator,
+          parsed.typeSettings?.bedConfigurator,
+        ),
       },
     };
   } catch {

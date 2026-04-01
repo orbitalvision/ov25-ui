@@ -5,7 +5,6 @@ import { Label } from '../../ui/label';
 import { Input } from '../../ui/input';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../../ui/dialog';
-import { PREVIEW_PRODUCT_LINKS } from '../../../lib/config/preview-config';
 import type { PreviewLayoutType } from '../../../lib/config/preview-config';
 import type {
   ConfiguratorSetupFormState, TypeSettings,
@@ -30,7 +29,18 @@ interface ConfigPanelProps {
 const LAYOUT_OPTIONS: { value: PreviewLayoutType; label: string; description: string }[] = [
   { value: 'standard', label: 'Standard', description: 'Single product / range configurator' },
   { value: 'snap2', label: 'Snap2', description: 'Modal-based configurator' },
+  {
+    value: 'bedConfigurator',
+    label: 'Bed',
+    description: 'Bed configurator (standard shell, bed UX options)',
+  },
 ];
+
+const LAYOUT_EXPORT_LABELS: Record<PreviewLayoutType, string> = {
+  standard: 'Standard',
+  snap2: 'Snap2',
+  bedConfigurator: 'Bed configurator',
+};
 
 const CAROUSEL_OPTIONS = [
   { value: 'none' as FormCarouselDisplayMode, label: 'None', desc: 'No product images' },
@@ -227,20 +237,20 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
             <SectionDivider />
             <div className="space-y-3">
               <SectionHeader description="The type of configurator experience for this product">Product Type</SectionHeader>
-              <div className="flex gap-1.5">
+              <div className="grid grid-cols-3 gap-1.5">
                 {LAYOUT_OPTIONS.map((opt) => (
                   <button
                     key={opt.value}
                     type="button"
                     onClick={() => setLayout(opt.value)}
-                    className={`flex-1 rounded-md px-2.5 py-2 text-center transition-all border ${
+                    className={`rounded-md px-1.5 py-2 text-center transition-all border ${
                       formState.layout === opt.value
                         ? 'border-foreground bg-foreground text-background shadow-sm'
                         : 'border-border bg-white text-muted-foreground hover:border-foreground/30'
                     }`}
                   >
-                    <div className="text-xs font-medium">{opt.label}</div>
-                    <div className={`text-[9px] mt-0.5 ${formState.layout === opt.value ? 'text-background/70' : 'text-muted-foreground/60'}`}>{opt.description}</div>
+                    <div className="text-xs font-medium leading-tight">{opt.label}</div>
+                    <div className={`text-[8px] mt-0.5 leading-snug ${formState.layout === opt.value ? 'text-background/70' : 'text-muted-foreground/60'}`}>{opt.description}</div>
                   </button>
                 ))}
               </div>
@@ -343,7 +353,7 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
                   exportMode === 'current' ? 'bg-foreground text-background shadow-sm' : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
-                {formState.layout === 'snap2' ? 'Snap2' : 'Standard'} only
+                {LAYOUT_EXPORT_LABELS[formState.layout]} only
               </button>
               <button
                 type="button"
