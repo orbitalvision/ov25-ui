@@ -7,7 +7,7 @@ import { Carousel, CarouselContent, CarouselItem } from '../ui/carousel.js';
 import { Variant } from './ProductVariants.js';
 import { cn } from '../../lib/utils.js';
 
-export const ModuleBottomPanel: React.FC<{ portalTarget?: Element }> = ({ portalTarget }) => {
+export const ModuleBottomPanel: React.FC<{ portalTarget: Element }> = ({ portalTarget }) => {
   const {
     compatibleModules,
     isModulePanelOpen,
@@ -288,22 +288,21 @@ export const ModuleBottomPanel: React.FC<{ portalTarget?: Element }> = ({ portal
                           )}
                         </div>
                         
-                        {/* Custom tooltip - render outside carousel */}
-                        {(() => {
-                          return hoveredModule === `${module.productId}-${module.model.modelId}`;
-                        })() && createPortal(
-                          <div 
-                            className="ov:fixed ov:px-3 ov:py-2 ov:bg-gray-900 ov:text-white ov:text-sm ov:rounded-lg ov:shadow-lg ov:z-2147483646 ov:pointer-events-none ov:whitespace-nowrap"
-                            style={{ 
-                              left: `${tooltipPosition.x}px`,
-                              top: `${tooltipPosition.y}px`,
-                              transform: 'translateX(-50%)' // Center horizontally
-                            }}
-                          >
-                            {module.product.name}
-                          </div>,
-                          document.body
-                        )}
+                        {/* Same shadow root as panel (portalTarget) so ov:* applies */}
+                        {hoveredModule === `${module.productId}-${module.model.modelId}` &&
+                          createPortal(
+                            <div
+                              className="ov:fixed ov:px-3 ov:py-2 ov:bg-gray-900 ov:text-white ov:text-sm ov:rounded-lg ov:shadow-lg ov:z-2147483646 ov:pointer-events-none ov:whitespace-nowrap"
+                              style={{
+                                left: `${tooltipPosition.x}px`,
+                                top: `${tooltipPosition.y}px`,
+                                transform: 'translateX(-50%)',
+                              }}
+                            >
+                              {module.product.name}
+                            </div>,
+                            portalTarget
+                          )}
                       </div>
                     </CarouselItem>
                   );
@@ -316,7 +315,5 @@ export const ModuleBottomPanel: React.FC<{ portalTarget?: Element }> = ({ portal
     </div>
   );
 
-  // Render into provided target if available (e.g., modal), otherwise fallback to document.body
-  const target = portalTarget ?? document.body;
-  return createPortal(panelContent, target);
+  return createPortal(panelContent, portalTarget);
 };
