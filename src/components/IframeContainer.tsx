@@ -162,13 +162,15 @@ export const IframeContainer = () => {
                 ) : null;
             })()}
 
-            <Ov25ShadowHost
-                ref={controlsContainerRef}
-                id={uniqueId ? `true-configurator-view-controls-container-${uniqueId}` : "true-configurator-view-controls-container"}
-                className="ov:absolute ov:inset-0 ov:w-full ov:h-full ov:pointer-events-none"
-            >
-                <ConfiguratorViewControls />
-            </Ov25ShadowHost>
+            {galleryIndex === galleryIndexToUse && (
+                <Ov25ShadowHost
+                    ref={controlsContainerRef}
+                    id={uniqueId ? `true-configurator-view-controls-container-${uniqueId}` : "true-configurator-view-controls-container"}
+                    className="ov:absolute ov:inset-0 ov:w-full ov:h-full ov:pointer-events-none"
+                >
+                    <ConfiguratorViewControls />
+                </Ov25ShadowHost>
+            )}
 
             {/* Container for Toaster portal - must be inside fullscreen element */}
             <div id={uniqueId ? `true-toaster-container-${uniqueId}` : "true-toaster-container"} className="ov:absolute ov:inset-0 ov:w-full ov:h-full ov:pointer-events-none ov:z-999"></div>
