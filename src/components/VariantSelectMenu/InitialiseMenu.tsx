@@ -44,7 +44,7 @@ export const InitialiseMenu: React.FC = () => {
       compact ? "ov:justify-start ov:p-2" : "ov:justify-center ov:p-4"
     )}>
       <div className={cn(
-        "ov:w-full ov:mx-auto ov:flex ov:flex-col ov:items-center",
+        "ov:mx-auto ov:flex ov:flex-col ov:items-center",
         compact ? "ov:max-w-none" : "ov:max-w-[960px] ov:pt-4"
       )}>
         <p className={cn(
@@ -82,13 +82,13 @@ export const InitialiseMenu: React.FC = () => {
                 "ov:w-full ov:flex ov:items-center ov:justify-center ov:cursor-pointer ov:overflow-hidden",
                 compact
                   ? "ov:aspect-square ov:min-h-0 ov:rounded-lg"
-                  : "ov:w-[170px] ov:md:w-[235px] ov:h-[100px] ov:sm:h-[140px] ov:rounded-xl ov:p-1 ov:sm:p-2 ov:border ov:border-[#F0F0F0] ov:bg-white"
+                  : "ov:w-[100px] ov:md:w-[150px] ov:h-[100px] ov:sm:h-[150px] ov:p-1 ov:sm:p-2 ov:bg-white"
               )}>
                 {module.product.hasImage && module.product.imageUrl ? (
                   <img
                     src={module.product.imageUrl.replace('thumbnail', 'small_image')}
                     alt={module.product.name}
-                    className={cn("ov:w-full ov:h-full ov:object-cover", compact && "ov:rounded-lg")}
+                    className={cn("ov:w-full ov:h-full ov:object-contain", compact && "ov:rounded-lg")}
                   />
                 ) : (
                   <div className={cn(
