@@ -96,7 +96,7 @@ const Snap2Controls: React.FC = () => {
               onClick={handleToggleDimensions} 
               className="ov:cursor-pointer ov:w-8 ov:h-8 ov:flex ov:items-center ov:justify-center ov:transition-all ov:duration-200 ov:hover:opacity-80 ov:shadow-sm ov:rounded-full ov:bg-[var(--ov25-overlay-button-color)]"
             >
-              <DimensionsIcon className="ov:w-[16px] ov:h-[16px]" color="var(--ov25-text-color)"/>
+              <DimensionsIcon className="ov:w-[16px] ov:h-[16px]" color="var(--ov25-configurator-view-controls-text-color)"/>
             </button>
 
             {/* Mini Dimensions Switch */}
@@ -107,7 +107,7 @@ const Snap2Controls: React.FC = () => {
                 className={cn(
                   'ov:cursor-pointer ov:relative ov:w-8 ov:h-4 ov:rounded-full ov:shadow-sm ov:transition-all ov:duration-200',
                   canSeeMiniDimensions 
-                    ? 'ov:bg-[var(--ov25-text-color)]' 
+                    ? 'ov:bg-[var(--ov25-configurator-view-controls-text-color)]' 
                     : 'ov:bg-[var(--ov25-overlay-button-color)]',
                   'ov:hover:opacity-80'
                 )}
@@ -116,7 +116,7 @@ const Snap2Controls: React.FC = () => {
                   'ov:absolute ov:top-[1px] ov:left-[1px] ov:w-3 ov:h-3 ov:rounded-full ov:transition-all ov:duration-200',
                   canSeeMiniDimensions 
                     ? 'ov:translate-x-4 ov:bg-[var(--ov25-overlay-button-color)]' 
-                    : 'ov:translate-x-0 ov:bg-[var(--ov25-text-color)] ov:opacity-60'
+                    : 'ov:translate-x-0 ov:bg-[var(--ov25-configurator-view-controls-text-color)] ov:opacity-60'
                 )}></div>
               </button>
             )}
@@ -137,7 +137,7 @@ const Snap2Controls: React.FC = () => {
           >
             <TableRowsSplit 
               className="ov:w-[16px] ov:h-[16px]"
-              color="var(--ov25-text-color)"
+              color="var(--ov25-configurator-view-controls-text-color)"
             />
           </button>
         )}
@@ -152,9 +152,9 @@ const Snap2Controls: React.FC = () => {
           className="ov:cursor-pointer ov:w-8 ov:h-8 ov:flex ov:items-center ov:justify-center ov:transition-all ov:duration-200 ov:hover:opacity-80 ov:shadow-sm ov:rounded-full ov:bg-[var(--ov25-overlay-button-color)]"
         >
           {controlsHidden ? (
-            <EyeClosed className="ov:w-[16px] ov:h-[16px]" color="var(--ov25-text-color)"/>
+            <EyeClosed className="ov:w-[16px] ov:h-[16px]" color="var(--ov25-configurator-view-controls-text-color)"/>
           ) : (
-            <Eye className="ov:w-[16px] ov:h-[16px]" color="var(--ov25-text-color)"/>
+            <Eye className="ov:w-[16px] ov:h-[16px]" color="var(--ov25-configurator-view-controls-text-color)"/>
           )}
         </button>
 
@@ -165,12 +165,12 @@ const Snap2Controls: React.FC = () => {
             onClick={openCheckoutSheet}
             className={cn(
               'ov:cursor-pointer ov:h-8 ov:flex ov:items-center ov:justify-center ov:gap-2 ov:px-3 ov:transition-all ov:duration-200 ov:hover:opacity-80 ov:shadow-sm ov:rounded-full',
-              'ov:bg-[var(--ov25-overlay-button-color)] ov:text-[var(--ov25-text-color)] ov:text-sm  ov:max-w-[11rem]'
+              'ov:bg-[var(--ov25-overlay-button-color)] ov:text-[var(--ov25-configurator-view-controls-text-color)] ov:text-sm  ov:max-w-[11rem]'
             )}
             aria-label="Open checkout summary"
           >
             <span className="ov:truncate ov:min-w-0">{formattedPrice}</span>
-            <ShoppingBasket className="ov:w-[16px] ov:h-[16px] ov:shrink-0" color="var(--ov25-text-color)" />
+            <ShoppingBasket className="ov:w-[16px] ov:h-[16px] ov:shrink-0" color="var(--ov25-configurator-view-controls-text-color)" />
           </button>
         )}
       </div>

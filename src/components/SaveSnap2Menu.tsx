@@ -32,7 +32,7 @@ export const SaveSnap2Menu: React.FC = () => {
         'ov:transition-all ov:duration-200 ov:hover:opacity-80'
       )}
     >
-      <Share className="ov:w-[16px] ov:h-[16px]" color="var(--ov25-text-color)" />
+      <Share className="ov:w-[16px] ov:h-[16px]" color="var(--ov25-configurator-view-controls-text-color)" />
     </button>
   );
 };
