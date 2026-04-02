@@ -173,7 +173,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
             'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
             'ov:shadow-sm ov:bg-[var(--ov25-overlay-button-color)]',
           )}>
-            <Upload strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" />
+            <Upload strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" color="var(--ov25-configurator-view-controls-text-color)"/>
             {!isMobile && (
               <p className="ov25-controls-text ov:text-sm ov:text-[var(--ov25-text-color)]">Share</p>
             )}
@@ -184,7 +184,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
               'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
               'ov:shadow-sm ov:bg-[var(--ov25-overlay-button-color)]',
             )}>
-              <Rotate3D strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" />
+              <Rotate3D strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" color="var(--ov25-configurator-view-controls-text-color)" />
               {!isMobile && (
                 <p className="ov25-controls-text ov25-360-label ov:text-sm ov:font-light">{handleAnimationButtonText()}</p>
               )}
@@ -197,7 +197,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
               'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
               'ov:shadow-sm ov:bg-[var(--ov25-overlay-button-color)]',
             )}>
-              <DimensionsIcon className="ov:w-[19px] ov:h-[19px] p-1" color="var(--ov25-text-color)" />
+              <DimensionsIcon className="ov:w-[19px] ov:h-[19px] p-1" color="var(--ov25-configurator-view-controls-text-color)" />
               {!isMobile && (
                 <p className="ov25-controls-text ov:text-sm ov:text-[var(--ov25-text-color)]">Dimensions</p>
               )}
@@ -263,7 +263,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
                       'ov:shadow-sm ov:bg-[var(--ov25-overlay-button-color)]',
                     )}
                   >
-                    <Lightbulb strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" />
+                    <Lightbulb strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" color="var(--ov25-configurator-view-controls-text-color)" />
                     {!isMobile && (
                       <p className="ov25-controls-text ov:text-sm ov:text-[var(--ov25-text-color)]">Lights</p>
                     )}
@@ -302,7 +302,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
               'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
               'ov:shadow-sm ov:bg-[var(--ov25-overlay-button-color)]',
             )}>
-              <ArIcon className="ov:w-[19px] ov:h-[19px] p-1" color="var(--ov25-text-color)" />
+              <ArIcon className="ov:w-[19px] ov:h-[19px] p-1" color="var(--ov25-configurator-view-controls-text-color)" />
               {!isMobile && (
                 <p className="ov25-controls-text ov:text-sm ov:text-[var(--ov25-text-color)]">View in your room</p>
               )}
@@ -328,7 +328,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
             'ov:shadow-sm ov:bg-[var(--ov25-overlay-button-color)]',
           )}
             onClick={() => toggleFullscreen(uniqueId)}>
-            <ExpandIcon strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" />
+            <ExpandIcon strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" color="var(--ov25-configurator-view-controls-text-color)" />
           </button>
         </div>
       )}
