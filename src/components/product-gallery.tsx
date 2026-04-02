@@ -467,7 +467,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
     const galleryContent = (
         <>
         <div className={cn(
-            "ov:relative ov:flex ov:flex-col ov:font-[family-name:var(--ov25-font-family)]",
+            "ov:relative ov:flex ov:flex-col ov:font-[family-name:var(--ov25-font-family)] ov:gap-[var(--ov25-gallery-gap)]",
             isInModal
               ? "ov:h-full ov:min-h-0 ov:overflow-hidden"
               : "ov:h-auto ov:max-h-full",
