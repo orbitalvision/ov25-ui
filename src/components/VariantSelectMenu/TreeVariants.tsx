@@ -177,7 +177,10 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
   const sizeChildView = (
     <div className="ov:flex ov:flex-col ov:min-h-0 ov:flex-1 ov:overflow-hidden">
       {backHeader(capitalizeWords('Size'))}
-      <div className={`ov:min-h-0 ov:flex-1 ov:overflow-y-auto ov:px-4 ov:pt-4 ov:pb-4 ${scrollContentClass}`}>
+      <div
+        className={`ov:min-h-0 ov:flex-1 ov:overflow-y-auto ov:px-4 ov:pt-4 ov:pb-4 ${scrollContentClass}`}
+        {...(mode === 'inline' ? { 'data-ov25-list-variants-content': true as const } : {})}
+      >
         <div className={`ov:grid ${getGridColsClass(2)}`}>
           <VariantsContent
             variantsToRender={sizeVariants}
@@ -203,7 +206,10 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
             optionId={currentView}
           />
         <div className="ov:relative ov:min-h-0 ov:flex-1 ov:flex ov:flex-col ov:pt-0 ov:overflow-hidden">
-          <div className={`ov:min-h-0 ov:flex-1 ov:pt-0 ${scrollContentClass} ${isFilterOpen[currentView] ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}>
+          <div
+            className={`ov:min-h-0 ov:flex-1 ov:pt-0 ${scrollContentClass} ${isFilterOpen[currentView] ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}
+            {...(mode === 'inline' ? { 'data-ov25-list-variants-content': true as const } : {})}
+          >
             <GroupedVariantsList
               groups={opt.variants}
               gridColsClass={getGridColsClass(4)}

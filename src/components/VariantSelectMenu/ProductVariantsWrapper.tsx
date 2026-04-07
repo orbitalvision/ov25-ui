@@ -469,6 +469,35 @@ export function ProductVariantsWrapper({
       </>
     );
 
+    const useTree = effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.Tree;
+    const useAccordion = effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.Accordion && !isMobile;
+    const isTabs = effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.Tabs;
+
+    const tabsScrollAreaClassName = `ov:flex-1 ov:min-h-0 ov:pt-0 ${needsBottomMarginForButton ? 'ov:pb-20' : 'ov:pb-2'} ${activeTab !== 'size' && isFilterOpen[activeTab] ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`;
+
+    const tabsPanelScrollInner = (
+      <>
+        {activeTab === 'size' && showSize && renderSizeSection(false)}
+        {activeTab !== 'size' &&
+          allOptionsVariants.map((opt) => (opt.optionId === activeTab ? renderOptionSection(opt, false, false, false) : null))}
+      </>
+    );
+
+    const renderTabsScrollColumn = (withListVariantContentAttr: boolean) => (
+      <div id="ov25-variants-content-wrapper" className={`ov:relative ov:flex-1 ov:min-h-0 ov:flex ov:flex-col ${isInline ? 'ov:overflow-hidden' : ''}`}>
+        <div
+          ref={listScrollRef}
+          {...(withListVariantContentAttr ? { 'data-ov25-list-variants-content': true as const } : {})}
+          className={tabsScrollAreaClassName}
+        >
+          {tabsPanelScrollInner}
+        </div>
+        {activeTab !== 'size' && isFilterOpen[activeTab] && (
+          <FilterContent optionId={activeTab} wrapperVariant="sheet" />
+        )}
+      </div>
+    );
+
     const tabsContent = (
       <div className={`ov:flex ov:flex-col ov:min-h-0 ${isInline ? 'ov:flex-1 ov:overflow-hidden' : 'ov:min-h-full'}`} data-ov25-tabs-container>
         {isInline ? (
@@ -478,21 +507,9 @@ export function ProductVariantsWrapper({
         ) : (
           tabsHeaderAndFilter
         )}
-        <div id="ov25-variants-content-wrapper" className={`ov:relative ov:flex-1 ov:min-h-0 ov:flex ov:flex-col ${isInline ? 'ov:overflow-hidden' : ''}`}>
-          <div className={`ov:flex-1 ov:min-h-0 ov:pt-0 ${needsBottomMarginForButton ? 'ov:pb-20' : 'ov:pb-2'} ${activeTab !== 'size' && isFilterOpen[activeTab] ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}>
-            {activeTab === 'size' && showSize && renderSizeSection(false)}
-            {activeTab !== 'size' && allOptionsVariants.map((opt) => (opt.optionId === activeTab ? renderOptionSection(opt, false, false, false) : null))}
-          </div>
-          {activeTab !== 'size' && isFilterOpen[activeTab] && (
-            <FilterContent optionId={activeTab} wrapperVariant="sheet" />
-          )}
-        </div>
+        {renderTabsScrollColumn(isInline)}
       </div>
     );
-
-    const useTree = effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.Tree;
-    const useAccordion = effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.Accordion && !isMobile;
-    const isTabs = effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.Tabs;
 
     // tabs, tree, accordion, list
     const displayContent =
@@ -526,6 +543,20 @@ export function ProductVariantsWrapper({
     if (isListLike) {
       const isListMode = effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.List;
       if (isInline) {
+        if (isTabs) {
+          return (
+            <div
+              data-ov25-list-variants-mode="inline"
+              className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:h-full ov:overflow-hidden ov:bg-[var(--ov25-background-color)]"
+            >
+              {isListMode && listFilterBlock}
+              <div className="ov:shrink-0 ov:bg-[var(--ov25-background-color)]">{tabsHeaderAndFilter}</div>
+              {renderTabsScrollColumn(true)}
+              {!hidePricing && <CheckoutButton />}
+            </div>
+          );
+        }
+
         return (
           <div
             data-ov25-list-variants-mode="inline"
@@ -535,8 +566,10 @@ export function ProductVariantsWrapper({
             <div id="ov25-variants-content-wrapper" className="ov:relative ov:flex-1 ov:min-h-0 ov:flex ov:flex-col">
               <div
                 ref={listScrollRef}
-                data-ov25-list-variants-content
-                className={`ov:min-h-0 ov:flex-1 ${(useAccordion || useTree || isTabs) ? 'ov:flex ov:flex-col' : ''} ${contentScrollClass} ${contentPaddingClass}`}
+                {...(effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.List
+                  ? { 'data-ov25-list-variants-content': true as const }
+                  : {})}
+                className={`ov:min-h-0 ov:flex-1 ${useAccordion || useTree ? 'ov:flex ov:flex-col' : ''} ${contentScrollClass} ${contentPaddingClass}`}
               >
                 {displayContent}
               </div>

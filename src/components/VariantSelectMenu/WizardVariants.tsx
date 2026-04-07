@@ -187,7 +187,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
   const prevStepLabel = !isFirstStep ? getStepLabel(currentStep - 1) : null;
   const nextStepLabel = !isLastStep ? getStepLabel(currentStep + 1) : null;
   const stepContentClasses = mode === 'inline'
-    ? 'ov:flex ov:flex-col ov:min-w-[460px] ov:bg-[var(--ov25-background-color)]'
+    ? 'ov:flex ov:flex-col ov:bg-[var(--ov25-background-color)]'
     : 'ov:flex ov:flex-col ov:bg-[var(--ov25-background-color)]';
 
   const stepIndicatorBlock = (

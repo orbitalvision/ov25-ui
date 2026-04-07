@@ -164,9 +164,6 @@ html {
     --ov25-configurator-qr-code-popup-description-text-color: var(--ov25-text-color);
     --ov25-configurator-qr-code-popup-link-text-color: var(--ov25-text-color-secondary);
 
-    /* Drawer Styles */
-    --ov25-configurator-variant-drawer-handle-color: var(--ov25-color-handle);
-
     /* Wizard variants: inline mode uses fixed height; drawer mode fills */
     --ov25-wizard-variants-content-height: 600px;
     --ov25-wizard-variants-available-height: 100%;
@@ -217,6 +214,7 @@ html {
 
 [data-ov25-list-variants-mode="inline"] [data-ov25-list-variants-content] {
   height: var(--ov25-wizard-variants-content-height);
+  max-height: var(--ov25-wizard-variants-content-height);
 }
 
 /* Selection thumbnail: fabric icons, review images, etc. Edit globally to change appearance.
