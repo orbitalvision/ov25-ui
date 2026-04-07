@@ -104,6 +104,7 @@ html {
     --ov25-cta-color-light: #4ade80;
     --ov25-cta-border-radius: 9999px;
     --ov25-cta-text-color: #ffffff;
+    --ov25-cta-text-color-hover: #ffffff;
 
     --ov25-destructive: #ef4444;
 

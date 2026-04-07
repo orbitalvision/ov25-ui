@@ -163,7 +163,7 @@ export const SaveSnap2Dialog: React.FC = () => {
               <div className="ov:flex ov:gap-2 pt-8">
                 <button
                   onClick={handleConfirmSave}
-                  className="ov:flex-1 ov:flex ov:items-center ov:justify-center ov:py-2 ov:px-6 ov:text-sm ov:rounded-[var(--ov25-cta-border-radius)] ov:bg-[var(--ov25-cta-color)] ov:text-[var(--ov25-cta-text-color)] ov:font-medium ov:cursor-pointer ov:hover:bg-[var(--ov25-cta-color-hover)] ov:transition-colors ov:border-0 ov:text-center ov:uppercase"
+                  className="ov:flex-1 ov:flex ov:items-center ov:justify-center ov:py-2 ov:px-6 ov:text-sm ov:rounded-[var(--ov25-cta-border-radius)] ov:bg-[var(--ov25-cta-color)] ov:text-[var(--ov25-cta-text-color)] ov:font-medium ov:cursor-pointer ov:hover:bg-[var(--ov25-cta-color-hover)] ov:hover:text-[var(--ov25-cta-text-color-hover)] ov:transition-colors ov:border-0 ov:text-center ov:uppercase"
                 >
                   Yes
                 </button>
@@ -201,7 +201,7 @@ export const SaveSnap2Dialog: React.FC = () => {
                 />
                 <button
                   onClick={copyToClipboard}
-                  className="ov:w-full ov:flex ov:items-center ov:justify-center ov:py-2 ov:px-6 ov:text-sm ov:rounded-[var(--ov25-cta-border-radius)] ov:bg-[var(--ov25-cta-color)] ov:text-[var(--ov25-cta-text-color)] ov:font-medium ov:cursor-pointer ov:hover:bg-[var(--ov25-cta-color-hover)] ov:transition-colors ov:border-0 ov:text-center ov:uppercase"
+                  className="ov:w-full ov:flex ov:items-center ov:justify-center ov:py-2 ov:px-6 ov:text-sm ov:rounded-[var(--ov25-cta-border-radius)] ov:bg-[var(--ov25-cta-color)] ov:text-[var(--ov25-cta-text-color)] ov:font-medium ov:cursor-pointer ov:hover:bg-[var(--ov25-cta-color-hover)] ov:hover:text-[var(--ov25-cta-text-color-hover)] ov:transition-colors ov:border-0 ov:text-center ov:uppercase"
                 >
                   Copy Link
                 </button>

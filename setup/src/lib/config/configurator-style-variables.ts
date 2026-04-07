@@ -82,7 +82,6 @@ export const STYLE_GROUPS: StyleGroup[] = [
       { variable: '--ov25-button-hover-background-color', label: 'Collection hover fill', defaultValue: '#fafafa', control: 'color' },
       { variable: '--ov25-button-hover-text-color', label: 'Collection hover text', defaultValue: '#000000', control: 'color' },
       { variable: '--ov25-wizard-variants-content-height', label: 'Variant panel height', defaultValue: '600px', control: 'slider', sliderMin: 200, sliderMax: 1200, sliderStep: 50, sliderUnit: 'px', sliderLabels: ['Short', 'Tall'] },
-      { variable: '--ov25-configurator-variant-drawer-handle-color', label: 'Drawer handle color', defaultValue: '#000000', control: 'color' },
     ],
   },
   {
@@ -95,6 +94,7 @@ export const STYLE_GROUPS: StyleGroup[] = [
       { variable: '--ov25-cta-color-light', label: 'Action disabled tint', defaultValue: '#4ade80', control: 'color' },
       { variable: '--ov25-cta-border-radius', label: 'Action button corners', defaultValue: '9999px', control: 'corner' },
       { variable: '--ov25-cta-text-color', label: 'Action text color', defaultValue: '#ffffff', control: 'color' },
+      { variable: '--ov25-cta-text-color-hover', label: 'Action text color (hover)', defaultValue: '#ffffff', control: 'color' },
     ],
   },
   {
