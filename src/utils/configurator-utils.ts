@@ -275,7 +275,7 @@ export const getIframeSrc = (
   configurationUuid?: string | null,
   hexBgColor?: string | null,
 ): string => {
-  const baseUrl = 'http://configurator.localhost:3000';
+  const baseUrl = 'https://configurator.orbital.vision';
   
   if (!apiKey) {
     apiKey = '';
