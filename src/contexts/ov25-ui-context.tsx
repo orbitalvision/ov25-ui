@@ -1296,6 +1296,41 @@ export const OV25UIProvider: React.FC<{
           case 'CURRENT_PRODUCT_ID':
             setCurrentProductId(data);
             break;
+          case 'SELECTED_SELECTIONS': {
+            const raw = Array.isArray(data)
+              ? data.filter(
+                  (r: unknown): r is { optionId: string; groupId: string; selectionId: string } =>
+                    !!r &&
+                    typeof r === 'object' &&
+                    typeof (r as { optionId?: unknown }).optionId === 'string' &&
+                    typeof (r as { groupId?: unknown }).groupId === 'string' &&
+                    typeof (r as { selectionId?: unknown }).selectionId === 'string'
+                )
+              : [];
+            const byOptionId = new Map<
+              string,
+              { optionId: string; groupId: string; selectionId: string }
+            >();
+            for (const r of raw) {
+              byOptionId.set(r.optionId, {
+                optionId: r.optionId,
+                groupId: r.groupId,
+                selectionId: r.selectionId,
+              });
+            }
+            const fromIframe = Array.from(byOptionId.values());
+            setSelectedSelections(fromIframe);
+            setConfiguratorState((prev) => {
+              if (!prev) return prev;
+              return {
+                options: prev.options,
+                configuratorSettings: prev.configuratorSettings,
+                snap2Objects: prev.snap2Objects,
+                selectedSelections: fromIframe,
+              };
+            });
+            break;
+          }
           case 'ANIMATION_STATE':
             setCanAnimate(data !== 'unavailable');
             setAnimationState(data);
