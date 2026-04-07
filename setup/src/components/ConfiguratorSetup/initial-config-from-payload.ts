@@ -10,7 +10,7 @@ export type ConfiguratorSetupPayload = Record<
 
 type SavedLayout = Partial<Omit<SerializableInjectConfig, 'apiKey' | 'productLink' | 'images'>>;
 
-const LAYOUTS: LayoutType[] = ['standard', 'snap2'];
+const LAYOUTS: LayoutType[] = ['standard', 'snap2', 'bedConfigurator'];
 
 function deserializeSelector(val: string | { selector: string; replace: boolean }): SelectorFormState {
   if (typeof val === 'string') {

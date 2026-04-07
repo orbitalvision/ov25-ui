@@ -9,6 +9,10 @@ import { Variant } from './ProductVariants.js';
 import { getGridColsClass } from './DesktopVariants.js';
 import { FilterControls } from './FilterControls.js';
 import { FilterContent } from './FilterContent.js';
+import {
+  selectionBedSizeFromMetadata,
+  type ConfiguratorSelectionBedMetadata,
+} from '../../utils/configurator-utils.js';
 
 const capitalizeWords = (str: string) =>
   str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
@@ -70,6 +74,7 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
       id: selection?.id,
       optionId: 'size',
       name: selection?.name,
+      bedSize: selectionBedSizeFromMetadata(selection as { metadata?: ConfiguratorSelectionBedMetadata }),
       price: selection?.price,
       image: selection?.thumbnail || '/placeholder.svg?height=200&width=200',
       blurHash: (selection as any)?.blurHash,
@@ -97,6 +102,7 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
                 groupId: group?.id,
                 optionId: option.id,
                 name: selection?.name,
+                bedSize: selectionBedSizeFromMetadata(selection as { metadata?: ConfiguratorSelectionBedMetadata }),
                 price: selection?.price,
                 image: (selection as any)?.miniThumbnails?.medium || '/placeholder.svg?height=200&width=200',
                 blurHash: (selection as any).blurHash,
@@ -106,7 +112,7 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
                     sel.selectionId === selection.id
                 ),
                 swatch: (selection as any)?.swatch
-              })).sort((a, b) => a.name.localeCompare(b.name))
+              })) ?? []
             })) || []
         };
       })

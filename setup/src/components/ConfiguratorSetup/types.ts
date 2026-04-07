@@ -103,9 +103,23 @@ const DEFAULT_SNAP2_SETTINGS: TypeSettings = {
   },
 };
 
+/** Single-product bed flow: same shell as standard, with configure trigger and bed preview selectors. */
+const DEFAULT_BED_CONFIGURATOR_SETTINGS: TypeSettings = {
+  ...DEFAULT_STANDARD_SETTINGS,
+  selectors: {
+    ...DEFAULT_STANDARD_SETTINGS.selectors,
+    configureButton: { enabled: true, selector: '#ov25-fullscreen-button', replace: false },
+  },
+  branding: {
+    ...DEFAULT_STANDARD_SETTINGS.branding,
+    cssString: 'ov25-selection-thumbnail: bg-white;',
+  },
+};
+
 export const DEFAULT_TYPE_SETTINGS: Record<PreviewLayoutType, TypeSettings> = {
   standard: DEFAULT_STANDARD_SETTINGS,
   snap2: DEFAULT_SNAP2_SETTINGS,
+  bedConfigurator: DEFAULT_BED_CONFIGURATOR_SETTINGS,
 };
 
 export const DEFAULT_FORM_STATE: ConfiguratorSetupFormState = {

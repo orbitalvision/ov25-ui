@@ -12,6 +12,10 @@ import { VariantsContent } from './VariantsContent.js';
 import { DefaultVariantCard } from './variant-cards/DefaultVariantCard.js';
 import { CheckoutButton } from './CheckoutButton.js';
 import { getGridColsClass } from './DesktopVariants.js';
+import {
+  selectionBedSizeFromMetadata,
+  type ConfiguratorSelectionBedMetadata,
+} from '../../utils/configurator-utils.js';
 import { VariantDisplayStyleOverlay } from '../../types/config-enums.js';
 import { FilterControls } from './FilterControls.js';
 import { FilterContent } from './FilterContent.js';
@@ -116,6 +120,7 @@ export function ProductVariantsWrapper({
         id: selection?.id,
         optionId: 'size', // Required for handleVariantSelect to work
         name: selection?.name,
+        bedSize: selectionBedSizeFromMetadata(selection as { metadata?: ConfiguratorSelectionBedMetadata }),
         price: selection?.price,
         image: selection?.thumbnail || '/placeholder.svg?height=200&width=200',
         blurHash: (selection as any)?.blurHash,
@@ -145,16 +150,17 @@ export function ProductVariantsWrapper({
                   groupId: group?.id,
                   optionId: option.id,
                   name: selection?.name,
+                  bedSize: selectionBedSizeFromMetadata(selection as { metadata?: ConfiguratorSelectionBedMetadata }),
                   price: selection?.price,
                   image: (selection as any)?.miniThumbnails?.medium || '/placeholder.svg?height=200&width=200',
                   blurHash: (selection as any).blurHash,
                   isSelected: selectedSelections.some(
-                    sel => sel.optionId === option.id && 
-                          sel.groupId === group.id && 
+                    sel => sel.optionId === option.id &&
+                          sel.groupId === group.id &&
                           sel.selectionId === selection.id
                   ),
                   swatch: (selection as any)?.swatch
-                })).sort((a, b) => a.name.localeCompare(b.name))
+                })) ?? []
               })) || []
           };
         })

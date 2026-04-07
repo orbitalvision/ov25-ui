@@ -19,6 +19,53 @@ export type SelectionItem = {
   selectionId: string;
 };
 
+export type ConfiguratorSelectionBedMetadata = {
+  bedSize?: string;
+};
+
+/** Reads `metadata.bedSize` from API/configurator selections (e.g. bed catalogue lines). */
+export function selectionBedSizeFromMetadata(
+  selection: { metadata?: ConfiguratorSelectionBedMetadata | null } | null | undefined,
+): string | undefined {
+  const v = selection?.metadata?.bedSize?.trim();
+  return v || undefined;
+}
+
+function orderWithNoneLabelFirst<T>(
+  items: readonly T[],
+  getLabel: (item: T) => string | undefined | null,
+): T[] {
+  if (items.length <= 1) return [...items];
+  const none: T[] = [];
+  const rest: T[] = [];
+  for (const item of items) {
+    const label = getLabel(item);
+    const isNone = typeof label === 'string' && label.trim().toLowerCase() === 'none';
+    (isNone ? none : rest).push(item);
+  }
+  return [...none, ...rest];
+}
+
+/** Label used only to detect "None" rows (name or bed line metadata). */
+function selectionNoneSortLabel(
+  s: { name?: string | null; metadata?: ConfiguratorSelectionBedMetadata | null },
+): string {
+  const n = s.name?.trim().toLowerCase();
+  if (n === 'none') return 'none';
+  const bed = selectionBedSizeFromMetadata(s);
+  if (bed?.trim().toLowerCase() === 'none') return 'none';
+  return s.name ?? '';
+}
+
+/**
+ * Per-group selection order from the iframe: "None" (any case, trimmed) first; stable order otherwise.
+ */
+export function orderConfiguratorSelectionsWithNoneFirst<
+  T extends { name: string; metadata?: ConfiguratorSelectionBedMetadata | null },
+>(items: readonly T[]): T[] {
+  return orderWithNoneLabelFirst(items, (s) => selectionNoneSortLabel(s));
+}
+
 /**
  * Animation state options
  */
@@ -228,7 +275,7 @@ export const getIframeSrc = (
   configurationUuid?: string | null,
   hexBgColor?: string | null,
 ): string => {
-  const baseUrl = 'https://configurator.orbital.vision';
+  const baseUrl = 'http://configurator.localhost:3000';
   
   if (!apiKey) {
     apiKey = '';

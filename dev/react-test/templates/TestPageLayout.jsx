@@ -95,7 +95,7 @@ export function TestPageLayout({
         <h1>{title}</h1>
         <p className="ov:mb-4 ov:text-[#525252]">{description}</p>
         {topContent}
-        <div className="ov:flex ov:flex-col ov:md:flex-row">
+        <div className="ov:flex ov:flex-col ov:md:flex-row ov:md:items-start">
           <div className="ov:w-full ov:md:w-[55%]">
             <div className="configurator-container ov:w-full">
               <img src={sofaImage} alt="Product" />
