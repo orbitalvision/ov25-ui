@@ -156,13 +156,13 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
                         data-open={isFilterOpen}
                         aria-label="Filters"
                     >
-                        <Funnel size={18} className="ov:text-[var(--ov25-secondary-text-color)]/60" />
+                        <Funnel size={18} className="ov:text-(--ov25-secondary-text-color)/60" />
                     </button>
                 )}
-                <div id="ov25-filter-controls-search" className="ov:flex ov:flex-1 ov:items-center ov:py-1.5 ov:px-2 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:hover:bg-[var(--ov25-hover-color)]">
-                    <Search size={18} className="ov:shrink-0 ov:text-[var(--ov25-secondary-text-color)]/60"/>
-                    <input value={localSearchQuery} onChange={handleSearchInputChange} type="text" placeholder="Search" className="ov:w-full ov:pl-2 ov:text-sm ov:text-[var(--ov25-secondary-text-color)] ov:bg-transparent ov:outline-none ov:placeholder:text-[var(--ov25-secondary-text-color)]/70" />
-                    {localSearchQuery && (<X size={18} className="ov:shrink-0 ov:pl-1 ov:cursor-pointer ov:text-[var(--ov25-secondary-text-color)]" onClick={() => setLocalSearchQuery('')} />)}
+                <div id="ov25-filter-controls-search" className="ov:flex ov:flex-1 ov:items-center ov:py-1.5 ov:px-2 ov:rounded-full ov:border ov:border-(--ov25-border-color) ov:hover:bg-(--ov25-hover-color)">
+                    <Search size={18} className="ov:shrink-0 ov:text-(--ov25-secondary-text-color)/60"/>
+                    <input value={localSearchQuery} onChange={handleSearchInputChange} type="text" placeholder="Search" className="ov:w-full ov:pl-2 ov:text-sm ov:text-(--ov25-secondary-text-color) ov:bg-transparent ov:outline-none ov:placeholder:text-(--ov25-secondary-text-color)/70" />
+                    {localSearchQuery && (<X size={18} className="ov:shrink-0 ov:pl-1 ov:cursor-pointer ov:text-(--ov25-secondary-text-color)" onClick={() => setLocalSearchQuery('')} />)}
                 </div>
                 {swatchRulesData.enabled && hasSelectionsWithSwatches && (
                 <button 
@@ -208,7 +208,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
                                 return null;
                             }
                             return (
-                                <div className="ov25-filter-pill ov:flex ov:flex-row ov:gap-1.5 ov:px-2 ov:py-1 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:whitespace-nowrap ov:cursor-pointer ov:transition-all ov:text-xs">
+                                <div className="ov25-filter-pill ov:flex ov:flex-row ov:gap-1.5 ov:px-2 ov:py-1 ov:rounded-full ov:border ov:border-(--ov25-border-color) ov:whitespace-nowrap ov:cursor-pointer ov:transition-all ov:text-xs">
                                     All Collections
                                 </div>
                             );
@@ -216,14 +216,14 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
 
                         if (selectedFilters.length === 0) {
                             return (
-                                <div id="ov25-filter-pill-all" className="ov25-filter-pill ov:flex-row ov:hidden ov:gap-1.5 ov:px-2 ov:py-1 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:whitespace-nowrap ov:cursor-default ov:transition-all ov:text-xs">
+                                <div id="ov25-filter-pill-all" className="ov25-filter-pill ov:flex-row ov:hidden ov:gap-1.5 ov:px-2 ov:py-1 ov:rounded-full ov:border ov:border-(--ov25-border-color) ov:whitespace-nowrap ov:cursor-default ov:transition-all ov:text-xs">
                                     All Collections
                                 </div>
                             );
                         }
 
                         return selectedFilters.map((filter, i) => (
-                            <div key={`${filter.optionName}-${filter.filterCategory}-${filter.value}-${i}`} className="ov25-filter-pill ov:flex ov:flex-row ov:gap-1.5 ov:px-2 ov:py-1 ov:rounded-full ov:border ov:border-[var(--ov25-border-color)] ov:whitespace-nowrap ov:cursor-pointer ov:transition-all ov:text-xs">
+                            <div key={`${filter.optionName}-${filter.filterCategory}-${filter.value}-${i}`} className="ov25-filter-pill ov:flex ov:flex-row ov:gap-1.5 ov:px-2 ov:py-1 ov:rounded-full ov:border ov:border-(--ov25-border-color) ov:whitespace-nowrap ov:cursor-pointer ov:transition-all ov:text-xs">
                                 <span>
                                     {filter.value}
                                 </span>

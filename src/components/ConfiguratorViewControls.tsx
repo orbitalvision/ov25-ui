@@ -175,7 +175,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
           )}>
             <Upload strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" color="var(--ov25-configurator-view-controls-text-color)"/>
             {!isMobile && (
-              <p className="ov25-controls-text ov:text-sm ov:text-[var(--ov25-text-color)]">Share</p>
+              <p className="ov25-controls-text ov:text-sm ov:text-(--ov25-text-color)">Share</p>
             )}
           </button>}
           {canAnimate && (

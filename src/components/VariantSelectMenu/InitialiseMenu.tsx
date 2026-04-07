@@ -31,7 +31,7 @@ export const InitialiseMenu: React.FC = () => {
   if (!compatibleModules || compatibleModules.length === 0) {
     return (
       <div className="ov:w-full ov:h-full ov:flex ov:items-center ov:justify-center">
-        <p className="ov:text-sm ov:text-[var(--ov25-secondary-text-color)]">Loading modules...</p>
+        <p className="ov:text-sm ov:text-(--ov25-secondary-text-color)">Loading modules...</p>
       </div>
     );
   }
@@ -48,7 +48,7 @@ export const InitialiseMenu: React.FC = () => {
         compact ? "ov:max-w-none" : "ov:max-w-[960px] ov:pt-4"
       )}>
         <p className={cn(
-          "ov:text-center ov:text-[var(--ov25-text-color)] ov:flex-shrink-0",
+          "ov:text-center ov:text-(--ov25-text-color) ov:shrink-0",
           compact ? "ov:text-sm ov:mb-2 ov:mt-1" : "ov:text-base ov:mb-4"
         )}>
           Select a model to get started
@@ -93,7 +93,7 @@ export const InitialiseMenu: React.FC = () => {
                 ) : (
                   <div className={cn(
                     "ov:w-full ov:h-full ov:flex ov:items-center ov:justify-center ov:min-h-[80px]",
-                    compact ? "ov:bg-[var(--ov25-border-color)] ov:rounded-lg" : "ov:bg-gray-200 ov:rounded-lg"
+                    compact ? "ov:bg-(--ov25-border-color) ov:rounded-lg" : "ov:bg-gray-200 ov:rounded-lg"
                   )}>
                     <span className="ov:text-gray-400 ov:text-xs">No Image</span>
                   </div>

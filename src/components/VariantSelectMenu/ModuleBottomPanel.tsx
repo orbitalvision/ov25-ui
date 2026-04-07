@@ -157,7 +157,7 @@ export const ModuleBottomPanel: React.FC<{ portalTarget: Element }> = ({ portalT
 
   const panelContent = (
     <div 
-      className={`${positionClass} ov:bottom-0 ov:left-0 ov:right-0 ov:h-[15rem] ov:bg-gray-100 ov:shadow-inner-top ov:z-[102] ov:border-t ov:border-[var(--ov25-border-color)] ov:transition-transform ov:duration-300 ov:ease-out ov:shadow-inner-top ${isEntering ? 'ov:translate-y-0' : 'ov:translate-y-full'}`}
+      className={`${positionClass} ov:bottom-0 ov:left-0 ov:right-0 ov:h-60 ov:bg-gray-100 ov:shadow-inner-top ov:z-102 ov:border-t ov:border-(--ov25-border-color) ov:transition-transform ov:duration-300 ov:ease-out ov:shadow-inner-top ${isEntering ? 'ov:translate-y-0' : 'ov:translate-y-full'}`}
       style={{ boxShadow: '0 -4px 6px -1px rgba(0,0,0,0.05), 0 -2px 4px -2px rgba(0,0,0,0.03)' }}
       onTransitionEnd={handleTransitionEnd}
     >
@@ -219,9 +219,9 @@ export const ModuleBottomPanel: React.FC<{ portalTarget: Element }> = ({ portalT
           </div>
           <button 
             onClick={handleClose}
-            className="ov:p-2 ov:hover:bg-[var(--ov25-accent-color)] ov:rounded-full ov:cursor-pointer"
+            className="ov:p-2 ov:hover:bg-(--ov25-accent-color) ov:rounded-full ov:cursor-pointer"
           >
-            <svg className="ov:w-5 ov:h-5 ov:text-[var(--ov25-secondary-text-color)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="ov:w-5 ov:h-5 ov:text-(--ov25-secondary-text-color)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
@@ -231,7 +231,7 @@ export const ModuleBottomPanel: React.FC<{ portalTarget: Element }> = ({ portalT
         <div className="ov:flex-1 ov:overflow-visible">
           {filteredModules.length === 0 ? (
             <div className="ov:flex ov:flex-col ov:items-center ov:justify-center ov:py-8 ov:space-y-4">
-              <p className="ov:text-sm ov:text-[var(--ov25-secondary-text-color)]">
+              <p className="ov:text-sm ov:text-(--ov25-secondary-text-color)">
                 Loading modules...
               </p>
             </div>
@@ -250,7 +250,7 @@ export const ModuleBottomPanel: React.FC<{ portalTarget: Element }> = ({ portalT
                   };
 
                   return (
-                    <CarouselItem key={module.productId} className="ov:basis-[150px] ov:flex-shrink-0">
+                    <CarouselItem key={module.productId} className="ov:basis-[150px] ov:shrink-0">
                       <div 
                         className={cn(
                           "ov:p-2 ov:flex ov:flex-col ov:gap-2 ov:items-center ov:z-50 ov:w-[150px] ov:h-[150px] ov:relative",
