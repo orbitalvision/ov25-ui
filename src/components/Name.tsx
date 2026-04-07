@@ -1,6 +1,7 @@
 import React from 'react'
 import { useOV25UI } from "../contexts/ov25-ui-context.js"
 import { cn } from '../utils/cn.js';
+import { Ov25ShadowHost } from './Ov25ShadowHost.js';
 
 
 const Name: React.FC = () => {
@@ -8,10 +9,11 @@ const Name: React.FC = () => {
   const name =  currentProduct?.name ? (range?.name + '-' + currentProduct?.name) :  range?.name
   
   return (
-    
-    <div className={cn("ov:flex ov:flex-col ov:gap-2 ")}>
-        <h1 className="ov:text-3xl ov:text-[var(--ov25-configurator-title-text-color)]">{name}</h1>
-    </div>
+    <Ov25ShadowHost style={{ display: 'block', width: '100%' }}>
+      <div className={cn("ov:flex ov:flex-col ov:gap-2 ")}>
+        <h1 className="ov:text-3xl ov:text-(--ov25-configurator-title-text-color)">{name}</h1>
+      </div>
+    </Ov25ShadowHost>
   )
 }
 
