@@ -2,6 +2,11 @@
 @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap");
 
 @theme inline {
+  /*
+   * Preflight and text utilities use --ov-default-font-family → var(--ov-font-sans) (prefixed theme).
+   * Point sans at the configurator token so shadow-only UI matches style editor / IBM Plex import.
+   */
+  --font-sans: var(--ov25-360-font-family);
   --radius: var(--ov25-rounded);
   --radius-xs: var(--ov25-rounded-xs);
   --radius-sm: var(--ov25-rounded-sm);
