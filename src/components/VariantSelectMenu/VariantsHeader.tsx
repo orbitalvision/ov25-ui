@@ -8,7 +8,12 @@ import { VariantsCloseButton } from './VariantsCloseButton.js';
 
 
 
-export const VariantsHeader = () => {
+export interface VariantsHeaderProps {
+  /** When true, omit {@link VariantsCloseButton} (e.g. variants-only sheet already has its own X). */
+  hideCloseButton?: boolean;
+}
+
+export const VariantsHeader = ({ hideCloseButton = false }: VariantsHeaderProps = {}) => {
   const { logoURL, handleNextOption, handlePreviousOption, activeOptionId, allOptions, showOptional, isSnap2Mode, isMobile } = useOV25UI();
 
   if (isMobile) return <div id="ov25-variants-header-mobile" className='w-full h-1'></div>;
@@ -27,7 +32,7 @@ export const VariantsHeader = () => {
             'ov:bg-[var(--ov25-background-color)]'
           )}>
             <OVOrBrandLogo imageUrl={logoURL} className="ov:h-10" />
-            <VariantsCloseButton />
+            {!hideCloseButton && <VariantsCloseButton />}
           </div>
         </div>
    

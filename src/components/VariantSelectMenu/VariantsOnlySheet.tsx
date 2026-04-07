@@ -159,7 +159,7 @@ export function VariantsOnlySheet() {
             </button>
             {effectiveOverlayStyle === 'wizard' ? (
               <>
-                <VariantsHeader />
+                <VariantsHeader hideCloseButton />
                 <div className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:overflow-hidden">
                   <WizardVariants mode="drawer" />
                 </div>
