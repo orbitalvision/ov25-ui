@@ -74,11 +74,11 @@ export const STYLE_GROUPS: StyleGroup[] = [
     variables: [
       { variable: '--ov25-highlight-color', label: 'Outline color', defaultValue: '#00fbff', control: 'color' },
       { variable: '--ov25-variant-thumb-border-radius', label: 'Variant shape', defaultValue: '9999px', control: 'corner' },
-      { variable: '--ov25-primary-color', label: 'Collection button color', defaultValue: '#414141', control: 'color' },
+      { variable: '--ov25-primary-color', label: 'Collection button color', defaultValue: '#ffffff', control: 'color' },
       { variable: '--ov25-button-border-radius', label: 'Collection button corners', defaultValue: '0px', control: 'corner' },
       { variable: '--ov25-button-border-width', label: 'Collection button border', defaultValue: '1px', control: 'slider', sliderMin: 0, sliderMax: 4, sliderStep: 0.5, sliderUnit: 'px', sliderLabels: ['None', 'Thick'] },
       { variable: '--ov25-button-border-color', label: 'Collection border color', defaultValue: '#E5E5E5', control: 'color' },
-      { variable: '--ov25-button-text-color', label: 'Collection text color', defaultValue: '#ffffff', control: 'color' },
+      { variable: '--ov25-button-text-color', label: 'Collection text color', defaultValue: '#000000', control: 'color' },
       { variable: '--ov25-button-hover-background-color', label: 'Collection hover fill', defaultValue: '#fafafa', control: 'color' },
       { variable: '--ov25-button-hover-text-color', label: 'Collection hover text', defaultValue: '#000000', control: 'color' },
       { variable: '--ov25-wizard-variants-content-height', label: 'Variant panel height', defaultValue: '600px', control: 'slider', sliderMin: 200, sliderMax: 1200, sliderStep: 50, sliderUnit: 'px', sliderLabels: ['Short', 'Tall'] },

@@ -22,13 +22,13 @@ export function ProductOptions({ label, value, optionId, onClick }: ProductOptio
       className={cn(
         'ov25-variant-control',
         'ov:flex ov:justify-between ov:w-full ov:p-3 ov:py-2 ov:my-2 ov:cursor-pointer',
-        'ov:bg-[var(--ov25-primary-color)]',
-        'ov:hover:bg-[var(--ov25-button-hover-background-color)]',
-        'ov:text-[var(--ov25-button-text-color)]',
-        'ov:hover:text-[var(--ov25-button-hover-text-color)]',
-        'ov:border-[length:var(--ov25-button-border-width)]',
-        'ov:border-[var(--ov25-button-border-color)]',
-        'ov:rounded-[var(--ov25-button-border-radius)]',
+        'ov:bg-(--ov25-primary-color)',
+        'ov:hover:bg-(--ov25-button-hover-background-color)',
+        'ov:text-(--ov25-button-text-color)',
+        'ov:hover:text-(--ov25-button-hover-text-color)',
+        'ov:border-(length:--ov25-button-border-width)',
+        'ov:border-(--ov25-button-border-color)',
+        'ov:rounded-(--ov25-button-border-radius)',
       )}
       data-ov25-variant-option={optionId}
     >

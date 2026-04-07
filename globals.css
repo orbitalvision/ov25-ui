@@ -92,7 +92,7 @@ html {
     --ov25-text-color: black;
     --ov25-secondary-text-color: #000000;
 
-    --ov25-primary-color: rgb(65, 65, 65);
+    --ov25-primary-color: #ffffff;
     --ov25-border-color: #E5E5E5;
     --ov25-border-color-secondary: #282828;
     
@@ -110,9 +110,9 @@ html {
     --ov25-button-border-radius: 0px;
     --ov25-button-border-width: 1px;
     --ov25-button-border-color: var(--ov25-border-color);
-    --ov25-button-text-color: #ffffff;
+    --ov25-button-text-color: #000000;
     --ov25-button-hover-background-color: var(--ov25-hover-color);
-    --ov25-button-hover-text-color: var(--ov25-text-color);
+    --ov25-button-hover-text-color: #000000;
 
     /* Border radius – ov:rounded-* utilities use these; override to customize */
     --ov25-rounded: 0.25rem;
@@ -268,11 +268,8 @@ html {
 }
 
 .ov25-variant-control {
-  background: white;
   margin-top: 1em;
   padding: .5em;
-  border: 1px solid var(--ov25-border-color);
-  border-radius: .375em;
 }
 
 .ov25-variant-control svg {
