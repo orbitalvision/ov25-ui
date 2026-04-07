@@ -5,7 +5,7 @@ import '../src/index.css';
 
 const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
   apiKey: () => '64-cded72a1485f2a14fbc30d0e41dfc702aed35dd77605628a3a839dc8d523ffca',
-  productLink: () => '/bed-configurator/2',
+  productLink: () => '/bed-configurator/3',
   selectors: {
     gallery: { selector: '.configurator-container', replace: true },
     configureButton: { selector: '#ov25-fullscreen-button', replace: false },
@@ -16,9 +16,9 @@ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
   },
   carousel: { desktop: 'stacked', mobile: 'carousel' },
   configurator: {
-    displayMode: { desktop: 'sheet', mobile: 'drawer' },
+    displayMode: { desktop: 'inline', mobile: 'drawer' },
     triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
-    variants: { displayMode: { desktop: 'list', mobile: 'list' } },
+    variants: { displayMode: { desktop: 'tree', mobile: 'list' } },
   },
   callbacks: {
     addToBasket: (payload) => {
@@ -33,7 +33,9 @@ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
   },
   flags: { hidePricing: false },
   cssString:`
-    ov25-selection-thumbnail: bg-white;
+    #ov25-configurator-variant-menu-container {
+        height: 700px
+}
   `
 });
 

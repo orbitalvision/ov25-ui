@@ -290,9 +290,11 @@ export const getIframeSrc = (
   }
   
   const cleanedLink = productLink.startsWith('/') ? productLink.substring(1) : productLink;
+
+  const parentQueryParams = window.location.search
   
   // Create fresh query params (don't read from window.location to avoid including browser URL params)
-  const queryParams = new URLSearchParams();
+  const queryParams = new URLSearchParams(parentQueryParams);
   
   if (configurationUuid) {
     queryParams.set('configuration_uuid', configurationUuid);
