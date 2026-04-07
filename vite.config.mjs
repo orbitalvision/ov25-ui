@@ -1,10 +1,16 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import tailwindcss from '@tailwindcss/vite'
 
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  // process.env does not include .env until loadEnv runs (config is evaluated first).
+  const env = loadEnv(mode, process.cwd(), '')
+  return {
   plugins: [
     tailwindcss(),
   ],
+  define: {
+    'import.meta.env.USE_LOCAL_DEV': JSON.stringify(env.USE_LOCAL_DEV ?? ''),
+  },
   build: {
     lib: {
       entry: 'src/index.ts',
@@ -25,5 +31,6 @@ export default defineConfig({
     },
     cssCodeSplit: false,
     emptyOutDir: true
+  }
   }
 })

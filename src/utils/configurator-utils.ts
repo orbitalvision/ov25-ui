@@ -275,8 +275,12 @@ export const getIframeSrc = (
   configurationUuid?: string | null,
   hexBgColor?: string | null,
 ): string => {
-  const baseUrl = 'https://configurator.orbital.vision';
-  
+  const useLocal =
+    import.meta.env.USE_LOCAL_DEV === 'true' || import.meta.env.USE_LOCAL_DEV === '1';
+  const baseUrl = useLocal
+    ? 'http://configurator.localhost:3000'
+    : 'https://configurator.orbital.vision';
+
   if (!apiKey) {
     apiKey = '';
   }
