@@ -448,10 +448,10 @@ export function ProductVariantsWrapper({
                     data-ov25-tab
                     data-ov25-tab-id={id}
                     data-ov25-tab-active={isActive ? 'true' : undefined}
-                    className={`ov25-tabs-button ov:shrink-0 ov:px-4 ov:py-2.5 ov:text-sm ov:rounded-t-md ov:font-medium ov:transition-colors ov:border ov:border-b-0 ov:border-transparent ${
+                    className={`ov25-tabs-button ov:shrink-0 ov:px-4 ov:py-2.5 ov:text-sm ov:rounded-t-md ov:font-medium ov:transition-colors ov:border ov:border-b-0 ${
                       isActive
-                        ? 'ov:bg-[var(--ov25-text-color)] ov:text-[var(--ov25-background-color)] ov:-[var(--ov25-text-color)] ov:border-[var(--ov25-border-color)] ov:shadow-[0_-1px_0_0_var(--ov25-background-color)]'
-                        : 'ov:bg-[var(--ov25-secondary-background-color)] ov:text-[var(--ov25-secondary-text-color)] hover:ov:text-[var(--ov25-text-color)] hover:ov:bg-[var(--ov25-hover-color)] ov:cursor-pointer'
+                        ? 'ov:bg-(--ov25-background-color) ov:text-(--ov25-text-color) ov:-[var(--ov25-text-color)] ov:border-(--ov25-border-color) ov:shadow-[0_-1px_0_0_var(--ov25-background-color)]'
+                        : 'ov:bg-(--ov25-secondary-background-color) ov:text-(--ov25-secondary-text-color) hover:ov:text-[var(--ov25-text-color)] hover:ov:bg-[var(--ov25-hover-color)] ov:border-(--ov25-border-color) ov:cursor-pointer'
                     }`}
                   >
                     {capitalizeWords(label)}
