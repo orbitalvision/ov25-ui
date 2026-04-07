@@ -4,6 +4,10 @@ import { CarouselDisplayMode } from "../types/config-enums.js"
 import { cn } from "../lib/utils.js"
 import { getProductGalleryImages, getCutoutIndex, resolveImageUrl } from "../lib/utils.js"
 
+function isThreeDPlaceholder(item: unknown): item is { is3D: true } {
+  return typeof item === 'object' && item !== null && 'is3D' in item && (item as { is3D: boolean }).is3D === true
+}
+
 export function ProductCarousel() {
   const {
     currentProduct,
@@ -126,22 +130,27 @@ export function ProductCarousel() {
   const maxImages = isMobile ? carouselMaxImagesMobile : carouselMaxImagesDesktop
   const allImages = [...(passedImages || []), ...productImages]
   const images = maxImages != null && maxImages > 0 ? allImages.slice(0, maxImages) : allImages
-  const cutoutIndex = getCutoutIndex(currentProduct?.metadata, { cutoutFirst })
+  const cutoutIndexInProductGallery = getCutoutIndex(currentProduct?.metadata, { cutoutFirst })
+  const passedLen = (passedImages || []).length
+  const cutoutIndexCombined =
+    cutoutIndexInProductGallery >= 0 ? passedLen + cutoutIndexInProductGallery : -1
+  const useCutoutOnlyStrip =
+    !deferThreeD && cutoutIndexCombined >= 0 && cutoutIndexCombined < images.length
 
-  const carouselItems = React.useMemo(() => {
-    if (useStackedLayout) return images
-    if (cutoutIndex >= 0) return images
-    const items: (typeof images[0] | { is3D: boolean })[] = [...images]
-    items.splice(galleryIndexToUse, 0, { is3D: true })
-    return items
-  }, [images, galleryIndexToUse, useStackedLayout, cutoutIndex])
+  let carouselItems: (typeof images[0] | { is3D: boolean })[]
+  if (useCutoutOnlyStrip) {
+    carouselItems = images
+  } else {
+    carouselItems = [...images]
+    carouselItems.splice(galleryIndexToUse, 0, { is3D: true })
+  }
 
   if (images.length === 0 || error) return null;
 
   const renderCarouselThumbnail = (item: { is3D?: boolean } | typeof images[0], index: number) => {
 
-    const is3DSlot = item && typeof item === 'object' && 'is3D' in item && item.is3D
-    const isCutout = cutoutIndex >= 0 && index === cutoutIndex
+    const is3DSlot = isThreeDPlaceholder(item)
+    const isCutout = useCutoutOnlyStrip && index === cutoutIndexCombined
     if (is3DSlot) {
       const isSelected = galleryIndex === galleryIndexToUse
       return (
@@ -159,12 +168,12 @@ export function ProductCarousel() {
         </button>
       )
     }
-    const galleryIndexForSlot = isCutout ? galleryIndexToUse : (cutoutIndex === 0 ? index + 1 : index)
+    const galleryIndexForSlot = isCutout ? galleryIndexToUse : (cutoutIndexCombined === 0 ? index + 1 : index)
     const isSelected = galleryIndex === galleryIndexForSlot
     return (
       <button
         key={index}
-        onClick={() => setGalleryIndex(isCutout ? galleryIndexToUse : (cutoutIndex === 0 ? index + 1 : index))}
+        onClick={() => setGalleryIndex(isCutout ? galleryIndexToUse : (cutoutIndexCombined === 0 ? index + 1 : index))}
         className={cn(
           "ov25-gallery-image-button ov:relative ov:aspect-square ov:w-full ov:overflow-hidden ov:rounded-[var(--ov25-configurator-iframe-border-radius)] ov:bg-muted ov:cursor-pointer",
           isSelected && "ov:ring-2 ov:ring-[var(--ov25-primary-color)]"
@@ -190,12 +199,32 @@ export function ProductCarousel() {
     )
   }
 
-  const renderStackedThumbnail = (item: typeof images[0], index: number) => {
-    const src = resolveImageUrl(item as any, 'stacked') || "/placeholder.svg"
+  const renderStackedThumbnail = (item: typeof images[0] | { is3D?: boolean }, index: number) => {
+    const is3DSlot = isThreeDPlaceholder(item)
+    if (is3DSlot) {
+      const isSelected = galleryIndex === galleryIndexToUse
+      return (
+        <button
+          key={index}
+          type="button"
+          onClick={() => setGalleryIndex(galleryIndexToUse)}
+          className={cn(
+            'ov:cursor-pointer ov:relative ov:aspect-[3/2] ov:w-full ov:flex ov:justify-center ov:items-center ov:overflow-hidden ov:rounded-[var(--ov25-configurator-iframe-border-radius)] ov:bg-white ov:ring-2',
+            isSelected ? 'ov:ring-[var(--ov25-primary-color)]' : 'ov:ring-[var(--ov25-configurator-view-controls-border-color)]'
+          )}
+        >
+          <span className="ov25-360-label ov:py-0.5 ov:rounded-full ov:bg-transparent ov:text-neutral-500 ov:text-xs ov:font-[250]">
+            360°
+          </span>
+        </button>
+      )
+    }
+    const src = resolveImageUrl(item as any, 'stacked') || '/placeholder.svg'
     const fullscreenSrc = resolveImageUrl(item as any, 'fullscreen') || src
     return (
       <button
         key={index}
+        type="button"
         onClick={() => setGalleryCarouselFullscreenImage(fullscreenSrc)}
         className="ov25-gallery-image-button ov:relative ov:aspect-[3/2] ov:w-full ov:overflow-hidden ov:rounded-[var(--ov25-configurator-iframe-border-radius)] ov:bg-muted ov:cursor-pointer"
       >
@@ -226,7 +255,7 @@ export function ProductCarousel() {
         )}
         {useStackedLayout && (
           <div className="ov:grid ov:grid-cols-2 ov:gap-[var(--ov25-gallery-gap)] ov:w-full">
-            {images.map((item, index) => renderStackedThumbnail(item, index))}
+            {carouselItems.map((item, index) => renderStackedThumbnail(item, index))}
           </div>
         )}
       </div>

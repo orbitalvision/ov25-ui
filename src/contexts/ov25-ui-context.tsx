@@ -1598,7 +1598,7 @@ export const OV25UIProvider: React.FC<{
   
   const [galleryIndex, setGalleryIndex] = useState(0);
 
-  const [galleryIndexToUse, setGalleryIndexToUse] = useState(galleryIndex);
+  const galleryIndexToUse = deferThreeD && allImages.length > 0 ? 1 : 0;
 
   const handleSelectionSelectImpl = useCallback((selection: Selection, optionId?: string) => {
     const currentOptionId = optionId || activeOptionId;
@@ -1631,14 +1631,6 @@ export const OV25UIProvider: React.FC<{
     }
   }, [activeOptionId, currentProductId, galleryIndex, galleryIndexToUse, deferThreeD, hasSwitchedAfterDefer, uniqueId]);
   handleSelectionSelectRef.current = handleSelectionSelectImpl;
-
-  const didDeferGallery = useRef(false);
-  useEffect(() => {
-    if (deferThreeD && allImages.length > 0 && !didDeferGallery.current) {
-      didDeferGallery.current = true;
-      setGalleryIndexToUse(1);
-    }
-  }, [deferThreeD, allImages.length]);
 
   // Iframe visibility follows `galleryIndex === galleryIndexToUse` (see IframeContainer). ProductCarousel
   // also jumped to the 3D slot when variants opened, but deferred / no-carousel / hidden preload UIs never
