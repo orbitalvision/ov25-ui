@@ -110,7 +110,6 @@ export const STYLE_GROUPS: StyleGroup[] = [
       { variable: '--ov25-border-color-secondary', label: 'Dark border', defaultValue: '#282828', control: 'color' },
       { variable: '--ov25-hover-color', label: 'Hover tint', defaultValue: '#fafafa', control: 'color' },
       { variable: '--ov25-destructive', label: 'Error / delete', defaultValue: '#ef4444', control: 'color' },
-      { variable: '--ov25-color-handle', label: 'Drawer handle', defaultValue: '#000000', control: 'color' },
     ],
   },
   {
