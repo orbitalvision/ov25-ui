@@ -3,6 +3,16 @@
 
 @theme inline {
   --font-sans: var(--ov25-360-font-family);
+  --text-xs: var(--ov25-text-xs-size);
+  --text-xs--line-height: var(--ov25-text-xs-line-height);
+  --text-sm: var(--ov25-text-sm-size);
+  --text-sm--line-height: var(--ov25-text-sm-line-height);
+  --text-base: var(--ov25-text-base-size);
+  --text-base--line-height: var(--ov25-text-base-line-height);
+  --text-lg: var(--ov25-text-lg-size);
+  --text-lg--line-height: var(--ov25-text-lg-line-height);
+  --text-xl: var(--ov25-text-xl-size);
+  --text-xl--line-height: var(--ov25-text-xl-line-height);
   --radius: var(--ov25-rounded);
   --radius-xs: var(--ov25-rounded-xs);
   --radius-sm: var(--ov25-rounded-sm);
@@ -502,16 +512,6 @@ html #ov25-configurator-variant-menu-container {
 #ov25-variant-swatch-icon-container div img {
   width: 80%;
   height: 80%;
-}
-
-.ov25-variant-name {
-  font-size: 0.75rem;
-  line-height: 1.25rem;
-}
-
-.ov25-group-name {
-  font-size: 1.25rem;
-  line-height: 2rem;
 }
 
 /*

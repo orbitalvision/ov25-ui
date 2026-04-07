@@ -41,7 +41,7 @@ export const FilterContent: React.FC<FilterContentProps> = ({ optionId, optionId
 
     const innerContent = !availableProductFilters || optionsToRender.length === 0 ? (
         <div id="ov25-filter-empty" className="ov:w-full ov:max-h-fit ov:p-4 ov:pt-16 ov:flex ov:justify-center">
-            <h3 className="ov:text-sm ov:text-[var(--ov25-secondary-text-color)]">No filters available</h3>
+            <h3 className="ov:text-sm ov:text-(--ov25-secondary-text-color)">No filters available</h3>
         </div>
     ) : (
         <div id="ov25-filter-content" className="ov:w-full ov:max-h-fit ov:pr-4 ov:pb-40 ov:overflow-y-auto">
@@ -67,13 +67,13 @@ export const FilterContent: React.FC<FilterContentProps> = ({ optionId, optionId
                             .map(([filterKey, options]) => (
                                 options.length > 0 && (
                                     <div key={filterKey} className="ov:mb-3">
-                                        <h3 className="ov25-filter-group-header ov:text-xs ov:font-medium ov:text-[var(--ov25-secondary-text-color)] ov:mb-1.5 ov:uppercase">{filterKey}</h3>
+                                        <h3 className="ov25-filter-group-header ov:text-xs ov:font-medium ov:text-(--ov25-secondary-text-color) ov:mb-1.5 ov:uppercase">{filterKey}</h3>
                                         <div className="ov:flex ov:flex-wrap ov:gap-1.5 ov:w-full">
                                             {options.map((option) => (
                                                 <button
                                                     key={option.value}
                                                     onClick={() => handleFilterChange(filterKey, option.value, !option.checked, targetOption.name)}
-                                                    className={`ov25-filter-pill ov:px-3 ov:py-1.5 ov:rounded-full ov:text-xs ov:border ov:text-[var(--ov25-secondary-text-color)] ov:transition-all ov:cursor-pointer ov:hover:bg-gray-50 ${option.checked ? 'ov:border-[var(--ov25-highlight-color,#26E8FE)] ov:bg-[color-mix(in_srgb,var(--ov25-highlight-color,#26E8FE)_20%,transparent)]' : 'ov:border-[var(--ov25-border-color)]'}`}
+                                                    className={`ov25-filter-pill ov:px-3 ov:py-1.5 ov:rounded-full ov:text-xs ov:border ov:text-(--ov25-secondary-text-color) ov:transition-all ov:cursor-pointer ov:hover:bg-gray-50 ${option.checked ? 'ov:border-[var(--ov25-highlight-color,#26E8FE)] ov:bg-[color-mix(in_srgb,var(--ov25-highlight-color,#26E8FE)_20%,transparent)]' : 'ov:border-[var(--ov25-border-color)]'}`}
                                                     data-checked={option.checked}
                                                 >
                                                     {option.value}

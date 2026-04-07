@@ -188,7 +188,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
                             <div 
                                 data-ov25-swatch-book-count
                                 className={cn(
-                                "ov:absolute ov:top-1/2 ov:left-1/2 ov:transform ov:-translate-x-1/2 ov:-translate-y-1/2 ov:text-[var(--ov25-text-color)] ov:font-medium ov:text-xs",
+                                "ov:absolute ov:top-1/2 ov:left-1/2 ov:transform ov:-translate-x-1/2 ov:-translate-y-1/2 ov:text-(--ov25-text-color) ov:font-medium ov:text-xs",
                                 isAnimating && swatchBookFlash === 'destructive' && "ov25-swatch-count-flash-destructive",
                                 isAnimating && swatchBookFlash === 'cta' && "ov25-swatch-count-flash-cta"
                             )}>

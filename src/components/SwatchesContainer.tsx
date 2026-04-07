@@ -27,16 +27,16 @@ export const SwatchesContainer: React.FC = () => {
       <div className="ov:flex ov:flex-col">
         {swatchRulesData.canExeedFreeLimit ? (
           <>
-            <span className="ov:text-(--ov25-text-color) ov:text-[12px] ov:font-light">
+            <span className="ov:text-(--ov25-text-color) ov:text-sm ov:font-light">
               {swatchRulesData.maxSwatches === swatchRulesData.freeSwatchLimit 
                 ? `+ Order ${swatchRulesData.maxSwatches} Free Swatches`
                 : `+ Order up to ${swatchRulesData.maxSwatches} Swatches`
               }
             </span>
-            {swatchRulesData.freeSwatchLimit > 0 && swatchRulesData.maxSwatches !== swatchRulesData.freeSwatchLimit && <span className="ov:text-[12px] ov:font-light ov:italic">First {swatchRulesData.freeSwatchLimit} are free</span>}
+            {swatchRulesData.freeSwatchLimit > 0 && swatchRulesData.maxSwatches !== swatchRulesData.freeSwatchLimit && <span className="ov:text-sm ov:font-light ov:italic">First {swatchRulesData.freeSwatchLimit} are free</span>}
           </>
         ) : (
-          <span className="ov:text-[12px] ov:font-light">+ Order up to {swatchRulesData.freeSwatchLimit} Free Swatches</span>
+          <span className="ov:text-sm ov:font-light">+ Order up to {swatchRulesData.freeSwatchLimit} Free Swatches</span>
         )}
       </div>
     </div>
