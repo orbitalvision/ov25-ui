@@ -55,9 +55,9 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
     <>
 
     {allOptionsWithoutModules.length > 6 && (
-         <div id="ov25-carousel-controls" className="ov25-desktop-variants-carousel-controls ov:relative   ov:hidden ov:cursor-pointer ov:md:flex ov:items-center ov:justify-between ov:w-full ov:p-4 ov:py-[1.125rem] pt-0 ">
-         <div className="ov:absolute ov:inset-0 ov:w-full ov:flex ov:justify-center ov:items-center ov:pb-5 ov:pt-5 ov:border-b ov:border-[var(--ov25-border-color)]">
-             <p data-optional={currentOption?.hasNonOption ? 'true' : 'false'} className="ov:text-[var(--ov25-secondary-text-color)]">
+         <div id="ov25-carousel-controls" className="ov25-desktop-variants-carousel-controls ov:relative ov:hidden ov:cursor-pointer ov:md:flex ov:items-center ov:justify-between ov:w-full ov:p-4 ov:py-4.5 pt-0 ">
+         <div className="ov:absolute ov:inset-0 ov:w-full ov:flex ov:justify-center ov:items-center ov:pb-5 ov:pt-5 ov:border-b ov:border-(--ov25-border-color)">
+             <p data-optional={currentOption?.hasNonOption ? 'true' : 'false'} className="ov:text-(--ov25-secondary-text-color)">
              {currentOption && capitalizeWords(currentOption.name) }
              </p>
          </div>
@@ -68,7 +68,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
          }}
          className="ov:p-2 ov:-m-2 ov:hover:bg-accent ov:rounded-full ov:cursor-pointer ov:pt-2"
        >
-         <ChevronUp strokeWidth={1} className="ov:rotate-270 ov:fill-transparent ov:text-[var(--ov25-secondary-text-color)] ov:h-5.5" />
+         <ChevronUp strokeWidth={1} className="ov:rotate-270 ov:fill-transparent ov:text-(--ov25-secondary-text-color) ov:h-5.5" />
        </button>
        <button 
          onClick={(e) => {
@@ -77,7 +77,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
          }}
          className="ov:p-2 ov:-m-2 ov:hover:bg-accent ov:hover:full ov:cursor-pointer ov:pt-2"
        >
-         <ChevronUp strokeWidth={1} className="ov:rotate-90 ov:h-5.5 ov:fill-transparent ov:text-[var(--ov25-secondary-text-color)]" />
+         <ChevronUp strokeWidth={1} className="ov:rotate-90 ov:h-5.5 ov:fill-transparent ov:text-(--ov25-secondary-text-color)" />
        </button>
      </div>
     )}
@@ -103,13 +103,13 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
               return (
                 <div
                   key={`${option.id}-desktop-render`}
-                  className={`ov:cursor-pointer ov:flex ov:justify-center ov:items-center ov:my-0 ov:border-b ov:border-[var(--ov25-border-color)] ov:data-[selected=true]:bg-[var(--ov25-text-color)] ${widthClass} ${borderClass}`}
+                  className={`ov:cursor-pointer ov:flex ov:justify-center ov:items-center ov:my-0 ov:border-b ov:border-(--ov25-border-color) ov:data-[selected=true]:bg-(--ov25-text-color) ${widthClass} ${borderClass}`}
                   onClick={() => handleOptionClick(option?.id)}
                   style={{ maxWidth: itemsThisRow === 1 ? '100%' : itemsThisRow === 2 ? '50%' : '33.333%' }}
                   data-selected={option.id === activeOptionId ? "true" : "false"}
                 >
                   <div
-                    className={`ov:w-full ov:text-center ov:cursor-pointer ov:my-4 ov:data-[selected=true]:text-[var(--ov25-background-color)] ov:data-[selected=false]:text-[var(--ov25-secondary-text-color)]`}
+                    className={`ov:w-full ov:text-center ov:cursor-pointer ov:my-4 ov:data-[selected=true]:text-(--ov25-background-color) ov:data-[selected=false]:text-(--ov25-secondary-text-color)`}
                     data-selected={option.id === activeOptionId ? "true" : "false"}
                     data-optional={option.hasNonOption ? 'true' : 'false'}
                   >
@@ -142,7 +142,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
                   variantGroup.variants.length > 0 && (
                     <div key={variantGroup.groupName}>
                       <div className="ov:flex ov:items-center ov:mx-4 ov:justify-between ov:border-t ov:border-gray-200 ">
-                        <h3 className="ov25-group-name ov:text-lg ov:py-2 ov:text-[var(--ov25-secondary-text-color)]">{variantGroup.groupName}</h3>
+                        <h3 className="ov25-group-name ov:text-lg ov:py-2 ov:text-(--ov25-secondary-text-color)">{variantGroup.groupName}</h3>
                       </div>
                       <div id="ov25-variant-group-content" className={`ov:grid ${getGridColsClass(gridDivide)} ov:pb-4`}>
                         <VariantsContent variantsToRender={variantGroup.variants} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />

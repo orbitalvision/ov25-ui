@@ -196,7 +196,7 @@ export const SaveSnap2Dialog: React.FC = () => {
                   value={shareUrl}
                   rows={2}
                   readOnly
-                  className="ov:min-h-[80px] ov:w-full ov:resize-none ov:bg-(--ov25-background-color) ov:border-(--ov25-border-color) ov:text-(--ov25-text-color)"
+                  className="ov:min-h-[80px] ov:w-full ov:resize-none ov:bg-(--ov25-background-color) ov:border-(--ov25-border-color) ov:text-base ov:text-(--ov25-text-color)"
                   placeholder="Shareable link will appear here..."
                 />
                 <button

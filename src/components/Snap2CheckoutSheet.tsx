@@ -29,7 +29,7 @@ function LineCard({ line, index }: { line: CommerceLineItemPrice; index: number 
             {line.name}
           </span>
           <div className="ov25-snap2-checkout-line-meta ov:flex ov:flex-wrap ov:items-center ov:gap-2 ov:text-xs ov:text-neutral-600">
-            <span className="ov:font-normal ov:text-neutral-900">{line.formattedSubtotal}</span>
+            <span className="ov:text-sm ov:font-normal ov:text-neutral-900">{line.formattedSubtotal}</span>
             <span className="ov:text-sm ov:text-neutral-500">× {line.quantity}</span>
             {line.discountPercentage > 0 && (
               <span className="ov:text-xs ov:text-red-500">(-{line.discountPercentage}%)</span>

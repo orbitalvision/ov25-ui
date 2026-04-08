@@ -227,7 +227,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
             <p className=" ov:text-[var(--ov25-secondary-text-color)] ov:font-light ov:text-sm">
               Step {currentStep + 1} of {totalSteps}
             </p>
-            <p className="ov:text-base ov:font-semibold ov:text-[var(--ov25-primary-color)]">
+            <p className="ov:text-base ov:font-semibold ov:text-(--ov25-primary-color)">
               {currentStepLabel}
             </p>
           </div>

@@ -104,7 +104,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
             {selectedSwatches.length === 0 && (
               <div id="ov25-swatchbook-empty" className={cn(`ov:flex ov:flex-col ov:items-center ov:py-8 ov:px-4`, maxSwatches <= 4 ? 'ov:justify-center' : 'ov:justify-start')}>
                 <p className='ov25-swatchbook-empty-title ov:text-black ov:text-lg ov:font-medium ov:mb-2'>No swatches selected</p>
-                <p className='ov25-swatchbook-empty-description ov:text-gray-600 text-sm text-center'>Use the <span onClick={handleOpen3DConfigurator} className="ov:underline ov:cursor-pointer">3D Configurator</span> to view fabrics and select swatch samples</p>
+                <p className='ov25-swatchbook-empty-description ov:text-gray-600 ov:text-sm text-center'>Use the <span onClick={handleOpen3DConfigurator} className="ov:underline ov:cursor-pointer">3D Configurator</span> to view fabrics and select swatch samples</p>
               </div>  
             )}
             <div id="ov25-swatchbook-swatches-list" className={cn(`ov:overflow-y-auto ov:flex ov:flex-wrap ov:gap-2 ov:md:gap-2 ov:w-full ov:px-4 ov:py-2`, maxSwatches <= 4 ? 'ov:justify-center' : 'ov:justify-start')}>
@@ -152,7 +152,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
           </div>
           <div id="ov25-swatchbook-controls" className="ov:flex ov:justify-between ov:items-center ov:shrink-0">
             <div className="ov25-swatchbook-total-cost">
-              <span>Total cost: </span>
+              <span className="ov:text-sm">Total cost: </span>
               <span>£{(swatchRulesData.pricePerSwatch * Math.max(selectedSwatches.length - swatchRulesData.freeSwatchLimit, 0)).toFixed(2)}</span>
             </div>
             <div id="ov25-swatchbook-add-to-cart-button" className="ov:flex ov:gap-2">
