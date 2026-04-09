@@ -101,7 +101,7 @@ export function TestPageLayout({
               <img src={sofaImage} alt="Product" />
             </div>
           </div>
-          <div id="ov25-aside-menu" className="ov:w-full ov:md:w-[35%] ov:h-full ov:md:h-[600px] ov:md:mt-0 ov:md:ml-4">
+          <div id="ov25-aside-menu" className="ov:w-full ov:md:w-[35%] ov:h-full ov:md:mt-0 ov:md:ml-4">
             <div id="price-name" className="ov:w-full">
               {showPrice && <div id="price">PRICE: £123</div>}
               <div id="name">NAME: Product Name</div>
