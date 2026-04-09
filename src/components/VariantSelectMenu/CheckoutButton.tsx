@@ -44,7 +44,7 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
 
   const wrapperClass = embedded
     ? 'ov25-checkout-button-wrapper ov25-checkout-button-wrapper--embedded ov:shrink-0 ov:w-full ov:min-w-0 ov:max-w-full'
-    : 'ov25-checkout-button-wrapper ov:shrink-0 ov:px-4 ov:pb-2 ov:pt-2';
+    : 'ov25-checkout-button-wrapper ov:shrink-0';
 
   if (hasAddToBasket && !hasBuyNow) {
     return (
@@ -125,9 +125,12 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
           buyNowFunction();
           onAfterBuyNow?.();
         }}
-        className="ov:absolute ov:inset-0 ov:right-14 ov:z-[11] ov:cursor-pointer ov:bg-transparent ov:border-0"
+        className={cn(baseButtonClasses, 'ov:absolute ov:inset-0 ov:right-14 ov:z-11 ov:cursor-pointer ov:bg-transparent ov:border-0 ov:rounded-none')}
         aria-label="Buy now"
-      />
+      >
+        <span>Buy now</span>
+        <span>{formattedPrice}</span>
+      </button>
       <div className="ov:absolute ov:right-14 ov:top-0 ov:bottom-0 ov:w-px ov:bg-white/30 ov:z-10" aria-hidden />
       <button
         id="ov25-add-to-basket-button"

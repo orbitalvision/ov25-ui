@@ -191,7 +191,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
     : 'ov:flex ov:flex-col ov:bg-[var(--ov25-background-color)]';
 
   const stepIndicatorBlock = (
-    <div className="ov:flex ov:flex-col ov:gap-2 ov:px-4 ov:py-3">
+    <div className="ov25-option-header ov:flex ov:flex-col ov:gap-2 ov:px-4 ov:py-3">
       {useDropdown ? (
         <div className="ov:relative">
           <select
@@ -227,7 +227,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
             <p className=" ov:text-[var(--ov25-secondary-text-color)] ov:font-light ov:text-sm">
               Step {currentStep + 1} of {totalSteps}
             </p>
-            <p className="ov:text-base ov:font-semibold ov:text-(--ov25-primary-color)">
+            <p className="ov:text-base ov:font-semibold ov:text-(--ov25-secondary-color)">
               {currentStepLabel}
             </p>
           </div>
@@ -249,7 +249,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
 
   const filterBlock = !isReviewStep && currentOption && currentOption.id !== 'size' && (
     <div className="ov:shrink-0 ov:h-[var(--ov25-wizard-variants-filter-height)] ov:flex ov:items-center">
-      <div className="ov:w-full ov:p-1">
+      <div className="ov:w-full">
         <FilterControls
           isFilterOpen={isFilterOpenForOption}
           setIsFilterOpen={() => toggleFilter(currentOption!.id)}
@@ -261,7 +261,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
   );
 
   const buttonsBlock = totalSteps > 1 && (
-    <div className="ov:shrink-0 ov:flex ov:items-center ov:justify-between ov:gap-3 ov:px-4 ov:py-3">
+    <div className="ov25-checkout-button-wrapper ov:shrink-0 ov:flex ov:items-center ov:justify-between ov:gap-3 ov:px-4 ov:py-2">
       <button
         onClick={goBack}
         disabled={isFirstStep}
@@ -292,7 +292,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
       {isReviewStep ? (
         <div
           data-ov25-wizard-variants-step-content
-          className={stepContentClasses}
+          className={`${stepContentClasses} ov25-variant-group-content`}
         >
           <div
               data-ov25-wizard-variants-content
@@ -341,7 +341,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
             </div>
           </div>
         ) : (
-        <div data-ov25-wizard-variants-step-content className={stepContentClasses}>
+        <div data-ov25-wizard-variants-step-content className={`${stepContentClasses} ov25-variant-group-content`}>
           <div data-ov25-wizard-variants-content className="ov:relative ov:w-full ov:flex ov:flex-col ov:flex-1 ov:min-h-0">
             <div className="ov:relative ov:w-full ov:h-full ov:flex ov:flex-col">
               {filteredOption && allVariants.length === 0 && (
