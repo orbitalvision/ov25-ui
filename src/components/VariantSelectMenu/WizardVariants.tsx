@@ -375,7 +375,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
             {isFilterOpenForOption && currentOption && (
               <div
                 data-open={isFilterOpenForOption}
-                className="ov:flex ov:justify-end ov:flex-wrap ov:overflow-y-auto ov:absolute ov:inset-0 ov:h-full ov:p-2 ov:px-4 ov:bg-[var(--ov25-background-color)] ov:transition-transform ov:duration-500 ov:ease-in-out ov:translate-y-0"
+                className="ov:flex ov:justify-end ov:flex-wrap ov:overflow-y-auto ov:z-8 ov:absolute ov:inset-0 ov:h-full ov:p-2 ov:px-4 ov:bg-[var(--ov25-background-color)] ov:transition-transform ov:duration-500 ov:ease-in-out ov:translate-y-0"
               >
                 <FilterContent optionId={currentOption.id} />
               </div>
