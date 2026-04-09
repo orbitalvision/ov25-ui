@@ -70,7 +70,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
             <div id="ov25-swatchbook-title" className="ov:shrink-0 ov:text-black ov:text-[1.5em] ov:font-normal">
               <DialogTitle>Swatch Book</DialogTitle>
             </div>
-            <VariantsCloseButton onClick={() => setIsSwatchBookOpen(false)} ariaLabel="Close swatch book" />
+            <VariantsCloseButton onClick={() => setIsSwatchBookOpen(false)} ariaLabel="Close swatch book" className="ov:top-0 ov:right-0" />
           </div>     
           {/* Featured/zoomed swatch section */}
           {zoomedSwatch && zoomedSwatch.thumbnail && zoomedSwatch.thumbnail.miniThumbnails && (
@@ -97,7 +97,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
           
           <div 
             id="ov25-swatchbook-content" 
-            className="ov:flex-1 ov:overflow-y-hidden ov:overflow-x-hidden ov:min-h-0 ov:focus:outline-none"
+            className="ov:pt-6 ov:flex-1 ov:overflow-y-hidden ov:overflow-x-hidden ov:min-h-0 ov:focus:outline-none"
             tabIndex={0}
             onWheel={(e) => e.currentTarget.scrollTop += e.deltaY}
           >
@@ -107,7 +107,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
                 <p className='ov25-swatchbook-empty-description ov:text-gray-600 ov:text-sm text-center'>Use the <span onClick={handleOpen3DConfigurator} className="ov:underline ov:cursor-pointer">3D Configurator</span> to view fabrics and select swatch samples</p>
               </div>  
             )}
-            <div id="ov25-swatchbook-swatches-list" className={cn(`ov:overflow-y-auto ov:flex ov:flex-wrap ov:gap-2 ov:md:gap-2 ov:w-full ov:px-4 ov:py-2`, maxSwatches <= 4 ? 'ov:justify-center' : 'ov:justify-start')}>
+            <div id="ov25-swatchbook-swatches-list" className={cn(`ov:overflow-y-hidden ov:flex ov:flex-wrap ov:gap-2 ov:md:gap-2 ov:w-full ov:px-4 ov:py-2`, maxSwatches <= 4 ? 'ov:justify-center' : 'ov:justify-start')}>
               {selectedSwatches.map((swatch) => (
                 <div key={`${swatch.manufacturerId}-${swatch.name}-${swatch.option}`} className='ov25-swatch-item ov:flex ov:flex-col ov:gap-2 ov:items-center ov:text-center ov:sm:w-[calc(33.333%-5.33px)] ov:md:w-[calc(25%-6px)] ov:min-h-[85px]'>
                   <div className='ov25-swatch-image-container ov:group ov:relative ov:w-[85px] ov:h-[85px] ov:md:w-[105px] ov:md:h-[105px]'>
