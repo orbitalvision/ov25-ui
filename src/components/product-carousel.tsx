@@ -202,6 +202,9 @@ export function ProductCarousel() {
   const renderStackedThumbnail = (item: typeof images[0] | { is3D?: boolean }, index: number) => {
     const is3DSlot = isThreeDPlaceholder(item)
     if (is3DSlot) {
+      if (!deferThreeD) {
+        return null
+      }
       const isSelected = galleryIndex === galleryIndexToUse
       return (
         <button
@@ -269,7 +272,7 @@ export function ProductCarousel() {
             alt="Fullscreen"
             draggable={false}
             onDragStart={(e) => e.preventDefault()}
-            className="ov:max-w-full ov:max-h-full ov:object-contain"
+            className="ov:max-w-full ov:max-h-full ov:object-contain ov:pointer-events-none"
             onClick={(e) => e.stopPropagation()}
           />
         </div>
