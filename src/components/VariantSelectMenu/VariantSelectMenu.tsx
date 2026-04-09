@@ -153,7 +153,7 @@ export const VariantSelectMenu: React.FC = () => {
           return <Overlay />;
         })()}
         {renderTriggerOrInlineVariants()}
-        {!isModalOpen && !isMobile ? renderDesktop() : renderMobile()}
+        {isMobile ? renderMobile() : !isModalOpen ? renderDesktop() : null}
       </div>
     </>
   );

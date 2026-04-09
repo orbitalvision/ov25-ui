@@ -354,6 +354,29 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     const mobileDrawerShadowRoot = mobileDrawerContainer.attachShadow({ mode: 'open' });
     mobileDrawerShadowRoot.adoptedStyleSheets = getBaseShadowStylesheets();
 
+    const snap2CheckoutSheetContainer = document.createElement('div');
+    snap2CheckoutSheetContainer.id = uniqueId
+      ? `ov25-snap2-checkout-sheet-container-${uniqueId}`
+      : 'ov25-snap2-checkout-sheet-container';
+    snap2CheckoutSheetContainer.setAttribute('data-clarity-mask', 'true');
+    snap2CheckoutSheetContainer.style.position = 'fixed';
+    snap2CheckoutSheetContainer.style.top = '0';
+    snap2CheckoutSheetContainer.style.left = '0';
+    snap2CheckoutSheetContainer.style.width = '100%';
+    snap2CheckoutSheetContainer.style.height = '100%';
+    snap2CheckoutSheetContainer.style.pointerEvents = 'none';
+    snap2CheckoutSheetContainer.style.zIndex = '2147483647';
+    document.body.appendChild(snap2CheckoutSheetContainer);
+
+    const snap2CheckoutSheetEmptySpan = document.createElement('span');
+    snap2CheckoutSheetEmptySpan.style.width = '100%';
+    snap2CheckoutSheetEmptySpan.style.height = '100%';
+    snap2CheckoutSheetEmptySpan.style.pointerEvents = 'none';
+    snap2CheckoutSheetContainer.appendChild(snap2CheckoutSheetEmptySpan);
+
+    const snap2CheckoutSheetShadowRoot = snap2CheckoutSheetContainer.attachShadow({ mode: 'open' });
+    snap2CheckoutSheetShadowRoot.adoptedStyleSheets = getBaseShadowStylesheets();
+
     // Create Shadow DOM container used as default dialog portal target (DialogContent portals here when not Snap2/SwatchBook/AR)
     const configuratorViewControlsContainer = document.createElement('div');
     configuratorViewControlsContainer.id = uniqueId ? `ov25-configurator-view-controls-container-${uniqueId}` : 'ov25-configurator-view-controls-container';
@@ -486,9 +509,11 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
       modalPortalShadowRoot.adoptedStyleSheets = getBaseShadowStylesheets();
     }
 
-    // When no gallery selector but deferThreeD, or modal mode with no gallery: render gallery in hidden container so iframe is preloaded
     const hasGallerySelector = !!getSelector(effectiveGallerySelector);
-    const useDeferredGallery = !hasGallerySelector && (deferThreeD || isAnyModalMode);
+    const useDeferredGallery =
+    !hasGallerySelector &&
+    (deferThreeD || configuratorDisplayMode === ConfiguratorDisplayMode.Modal);
+
     if (useDeferredGallery) {
       let deferredGalleryEl = document.getElementById('ov25-deferred-gallery-container');
       if (!deferredGalleryEl) {
@@ -800,6 +825,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
         hideVariantOptions={hideVariantOptions}
         shadowDOMs={{
           mobileDrawer: mobileDrawerShadowRoot,
+          snap2CheckoutSheet: snap2CheckoutSheetShadowRoot,
           configuratorViewControls: configuratorViewControlsShadowRoot,
           popoverPortal: popoverPortalShadowRoot,
           modalPortal: modalPortalShadowRoot,

@@ -76,7 +76,7 @@ const VARIANT_OPTIONS = [
 ];
 
 const ELEMENT_TOGGLES: { key: keyof TypeSettings['selectors']; label: string }[] = [
-  { key: 'gallery', label: 'Gallery' },
+  { key: 'gallery', label: 'Configurator' },
   { key: 'price', label: 'Price' },
   { key: 'name', label: 'Product name' },
   { key: 'variants', label: 'Variant controls' },
@@ -152,6 +152,53 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
       <TabsContent value="settings" className="flex-1 min-h-0 mt-0">
         <ScrollArea className="h-full">
           <div className="space-y-6 py-2 pr-4">
+
+            {/* --- Product Type --- */}
+            <div className="space-y-3">
+              <SectionHeader description="The type of configurator experience for this product">Product Type</SectionHeader>
+              <div className="grid grid-cols-3 gap-1.5">
+                {LAYOUT_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setLayout(opt.value)}
+                    className={`rounded-md px-1.5 py-2 text-center transition-all border ${
+                      formState.layout === opt.value
+                        ? 'border-foreground bg-foreground text-background shadow-sm'
+                        : 'border-border bg-white text-muted-foreground hover:border-foreground/30'
+                    }`}
+                  >
+                    <div className="text-xs font-medium leading-tight">{opt.label}</div>
+                    <div className={`text-[8px] mt-0.5 leading-snug ${formState.layout === opt.value ? 'text-background/70' : 'text-muted-foreground/60'}`}>{opt.description}</div>
+                  </button>
+                ))}
+              </div>
+              {isSnap2 && (
+                <SwitchRow
+                  label="Starting configuration"
+                  checked={!!currentSettings.snap2UseStartingConfig}
+                  onCheckedChange={(v) => updateSettings('snap2UseStartingConfig', v)}
+                />
+              )}
+            </div>
+
+            {!isSnap2 && (
+              <>
+                {/* --- Elements --- */}
+                <SectionDivider />
+                <div className="space-y-2.5">
+                  <SectionHeader description="Toggle which UI elements the configurator injects into your page">Elements</SectionHeader>
+                  {ELEMENT_TOGGLES.map(({ key, label }) => (
+                    <SwitchRow
+                      key={key}
+                      label={label}
+                      checked={currentSettings.selectors[key].enabled}
+                      onCheckedChange={(v) => handleSelectorToggle(key, v)}
+                    />
+                  ))}
+                </div>
+              </>
+            )}
 
             {/* --- Configurator --- */}
             <SectionDivider />
@@ -233,36 +280,6 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
               </div>
             </div>
 
-            {/* --- Product Type --- */}
-            <SectionDivider />
-            <div className="space-y-3">
-              <SectionHeader description="The type of configurator experience for this product">Product Type</SectionHeader>
-              <div className="grid grid-cols-3 gap-1.5">
-                {LAYOUT_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setLayout(opt.value)}
-                    className={`rounded-md px-1.5 py-2 text-center transition-all border ${
-                      formState.layout === opt.value
-                        ? 'border-foreground bg-foreground text-background shadow-sm'
-                        : 'border-border bg-white text-muted-foreground hover:border-foreground/30'
-                    }`}
-                  >
-                    <div className="text-xs font-medium leading-tight">{opt.label}</div>
-                    <div className={`text-[8px] mt-0.5 leading-snug ${formState.layout === opt.value ? 'text-background/70' : 'text-muted-foreground/60'}`}>{opt.description}</div>
-                  </button>
-                ))}
-              </div>
-              {isSnap2 && (
-                <SwitchRow
-                  label="Starting configuration"
-                  checked={!!currentSettings.snap2UseStartingConfig}
-                  onCheckedChange={(v) => updateSettings('snap2UseStartingConfig', v)}
-                />
-              )}
-            </div>
-
             {/* --- Branding --- */}
             <SectionDivider />
             <div className="space-y-3">
@@ -285,20 +302,6 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
                   className="h-7 text-xs mt-0.5"
                 />
               </div>
-            </div>
-
-            {/* --- Elements --- */}
-            <SectionDivider />
-            <div className="space-y-2.5">
-              <SectionHeader description="Toggle which UI elements the configurator injects into your page">Elements</SectionHeader>
-              {ELEMENT_TOGGLES.map(({ key, label }) => (
-                <SwitchRow
-                  key={key}
-                  label={label}
-                  checked={currentSettings.selectors[key].enabled}
-                  onCheckedChange={(v) => handleSelectorToggle(key, v)}
-                />
-              ))}
             </div>
 
             {/* --- Behaviour --- */}

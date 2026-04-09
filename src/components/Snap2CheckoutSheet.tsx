@@ -145,7 +145,19 @@ export function Snap2CheckoutSheetFooter({ onRequestClose }: { onRequestClose: (
  * Snap2ConfiguratorModal.
  */
 export const Snap2CheckoutSheet: React.FC<Snap2CheckoutSheetProps> = ({ open, onOpenChange }) => {
-  const { isMobile, hidePricing, addToBasketFunction, buyNowFunction } = useOV25UI();
+  const {
+    isMobile,
+    hidePricing,
+    addToBasketFunction,
+    buyNowFunction,
+    shadowDOMs,
+    uniqueId,
+    isSnap2Mode,
+    configuratorDisplayModeMobile,
+  } = useOV25UI();
+
+  const checkoutStacksInConfiguratorHost =
+    isSnap2Mode && isMobile && configuratorDisplayModeMobile === 'modal';
 
   const hasCheckout =
     typeof addToBasketFunction === 'function' || typeof buyNowFunction === 'function';
@@ -164,16 +176,21 @@ export const Snap2CheckoutSheet: React.FC<Snap2CheckoutSheetProps> = ({ open, on
 
   const handleClose = () => onOpenChange(false);
 
+  const sheetDomId = uniqueId
+    ? `ov25-snap2-checkout-sheet-${uniqueId}`
+    : 'ov25-snap2-checkout-sheet';
+
   const drawer = (
     <Snap2SettingsSheet
       mode="drawer"
       open={open}
       onOpenChange={onOpenChange}
       withBackdrop
+      stackWithinConfigurator={checkoutStacksInConfiguratorHost}
       role="dialog"
       aria-modal
       aria-labelledby="ov25-snap2-checkout-sheet-title"
-      id="ov25-snap2-checkout-sheet"
+      id={sheetDomId}
       footer={<Snap2CheckoutSheetFooter onRequestClose={handleClose} />}
     >
       <Snap2CheckoutSheetBody />
@@ -181,5 +198,9 @@ export const Snap2CheckoutSheet: React.FC<Snap2CheckoutSheetProps> = ({ open, on
   );
 
   if (typeof document === 'undefined') return null;
-  return createPortal(drawer, document.body);
+  if (checkoutStacksInConfiguratorHost) {
+    return drawer;
+  }
+  const portalTarget = shadowDOMs?.snap2CheckoutSheet ?? document.body;
+  return createPortal(drawer, portalTarget);
 };

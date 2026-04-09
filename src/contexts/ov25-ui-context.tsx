@@ -191,6 +191,7 @@ interface OV25UIContextType {
   // Shadow DOM references
   shadowDOMs?: {
     mobileDrawer?: ShadowRoot;
+    snap2CheckoutSheet?: ShadowRoot;
     configuratorViewControls?: ShadowRoot;
     popoverPortal?: ShadowRoot;
     modalPortal?: ShadowRoot;
@@ -454,6 +455,7 @@ export const OV25UIProvider: React.FC<{
   hideVariantOptions?: string[],
   shadowDOMs?: {
     mobileDrawer?: ShadowRoot;
+    snap2CheckoutSheet?: ShadowRoot;
     configuratorViewControls?: ShadowRoot;
     popoverPortal?: ShadowRoot;
     modalPortal?: ShadowRoot;
@@ -614,7 +616,18 @@ export const OV25UIProvider: React.FC<{
   const stackedGalleryCloseSyncImmediateRef = useRef(false);
   const [preloading, setPreloading] = useState(window.innerWidth < 768);
   const [iframeResetKey, setIframeResetKey] = useState(0);
-  
+
+  const effectiveConfiguratorDisplayModeMobile = useMemo(
+    () =>
+      configuratorDisplayModeMobileProp ??
+      (configuratorDisplayMode === 'inline'
+        ? 'inline'
+        : configuratorDisplayMode === 'modal'
+          ? 'modal'
+          : 'drawer'),
+    [configuratorDisplayModeMobileProp, configuratorDisplayMode]
+  );
+
   // Module selection state
   const [compatibleModules, setCompatibleModules] = useState<CompatibleModule[] | null>(null);
   const [isModuleSelectionLoading, setIsModuleSelectionLoading] = useState<boolean>(false);
@@ -723,10 +736,13 @@ export const OV25UIProvider: React.FC<{
 
   useEffect(() => {
     if (isSnap2CheckoutSheetOpen) {
+      const snap2Mobile = isMobile && productLink?.startsWith('snap2/');
       setIsModulePanelOpen(false);
-      setIsVariantsOpen(false);
+      if (!snap2Mobile) {
+        setIsVariantsOpen(false);
+      }
     }
-  }, [isSnap2CheckoutSheetOpen]);
+  }, [isSnap2CheckoutSheetOpen, isMobile, productLink]);
 
   useEffect(() => {
     // auto-close variants and checkout when module panel opens on desktop
@@ -1159,12 +1175,37 @@ export const OV25UIProvider: React.FC<{
         setActiveOptionId('modules');
       }
       setIsVariantsOpen(true);
+      if (isSnap2Mode && effectiveConfiguratorDisplayModeMobile === 'modal') {
+        setIsModalOpen(true);
+      }
     } else {
       setIsModalOpen(true);
       setIsModulePanelOpen(true);
       setIsVariantsOpen(true);
     }
-  }, [allOptions, isMobile, setPreloading, setActiveOptionId, setIsVariantsOpen, setIsModalOpen, compatibleModules, setIsModulePanelOpen]);
+  }, [
+    allOptions,
+    isMobile,
+    isSnap2Mode,
+    effectiveConfiguratorDisplayModeMobile,
+    setPreloading,
+    setActiveOptionId,
+    setIsVariantsOpen,
+    setIsModalOpen,
+    setIsModulePanelOpen,
+  ]);
+
+  useEffect(() => {
+    if (!isVariantsOpen && isSnap2Mode && isMobile && effectiveConfiguratorDisplayModeMobile === 'modal') {
+      setIsModalOpen(false);
+    }
+  }, [
+    isVariantsOpen,
+    isSnap2Mode,
+    isMobile,
+    effectiveConfiguratorDisplayModeMobile,
+    setIsModalOpen,
+  ]);
 
   /** Open variant configurator: close swatch book, open variants drawer. Optional optionName uses fuzzy match; fallback to first option. */
   const openConfigurator = useCallback((optionName?: string) => {
@@ -1732,7 +1773,7 @@ export const OV25UIProvider: React.FC<{
     hasConfigureButton: hasConfigureButtonState,
     useInlineVariantControls: isMobile ? (useInlineVariantControlsMobileProp ?? useInlineVariantControls) : useInlineVariantControls,
     configuratorDisplayMode,
-    configuratorDisplayModeMobile: configuratorDisplayModeMobileProp ?? (configuratorDisplayMode === 'inline' ? 'inline' : configuratorDisplayMode === 'modal' ? 'modal' : 'drawer'),
+    configuratorDisplayModeMobile: effectiveConfiguratorDisplayModeMobile,
     useSimpleVariantsSelector,
     configuratorTriggerStyle: isMobile ? (configuratorTriggerStyleMobileProp ?? configuratorTriggerStyle) : configuratorTriggerStyle,
     variantDisplayStyleMobile,

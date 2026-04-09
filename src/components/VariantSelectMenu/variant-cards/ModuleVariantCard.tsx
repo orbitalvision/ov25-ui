@@ -40,11 +40,11 @@ export const ModuleVariantCard = React.memo(
               />
             ) : (
               <div className="ov:w-12 ov:h-12 ov:bg-gray-200 ov:rounded ov:mb-1 ov:flex ov:items-center ov:justify-center">
-                <span className="ov:text-gray-400 ov:text-xs">No Image</span>
+                <span className="ov:p-1 ov:text-gray-400 ov:text-xs ov:text-center">No Image</span>
               </div>
             )}
             
-            <h3 className="ov:font-[350] ov:text-sm ov:text-center ov:leading-tight ov:text-[var(--ov25-secondary-text-color)]">
+            <h3 className="ov:font-[350] ov:text-sm ov:text-center ov:leading-tight ov:text-(--ov25-secondary-text-color)">
               {module.product.name}
             </h3>
           </div>
@@ -56,7 +56,7 @@ export const ModuleVariantCard = React.memo(
               <div className="ov:w-[2px] ov:h-3 ov:bg-[#E5E5E5]"></div>
               <div className="ov:h-[2px] ov:flex-1 ov:bg-[#E5E5E5]"></div>
             </div>
-            <span className="ov:text-[12px] ov:font-[350] ov:whitespace-nowrap ov:text-[var(--ov25-secondary-text-color)]">
+            <span className="ov:text-[12px] ov:font-[350] ov:whitespace-nowrap ov:text-(--ov25-secondary-text-color)">
               {module.dimensions.x}cm
             </span>
             <div className="ov:flex ov:items-center ov:flex-1">

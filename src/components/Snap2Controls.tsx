@@ -43,10 +43,12 @@ const Snap2Controls: React.FC = () => {
     }
   }, [isModalOpen]);
 
-  const openCheckoutSheet = useCallback(() => {
-    setIsVariantsOpen(false);
-    setIsSnap2CheckoutSheetOpen(true);
-  }, [setIsSnap2CheckoutSheetOpen, setIsVariantsOpen]);
+  const toggleCheckoutSheet = useCallback(() => {
+    if (!isMobile) {
+      setIsVariantsOpen(false);
+    }
+    setIsSnap2CheckoutSheetOpen(!isSnap2CheckoutSheetOpen);
+  }, [isMobile, isSnap2CheckoutSheetOpen, setIsSnap2CheckoutSheetOpen, setIsVariantsOpen]);
 
   const handleToggleDimensions = () => {
     toggleDimensions(canSeeDimensions, setCanSeeDimensions, uniqueId, cssString);
@@ -162,7 +164,7 @@ const Snap2Controls: React.FC = () => {
           <button
             type="button"
             id="ov25-snap2-basket-pill"
-            onClick={openCheckoutSheet}
+            onClick={toggleCheckoutSheet}
             className={cn(
               'ov:cursor-pointer ov:h-8 ov:flex ov:items-center ov:justify-center ov:gap-2 ov:px-3 ov:transition-all ov:duration-200 ov:hover:opacity-80 ov:shadow-sm ov:rounded-full',
               'ov:bg-[var(--ov25-overlay-button-color)] ov:text-[var(--ov25-configurator-view-controls-text-color)] ov:text-sm  ov:max-w-[11rem]'

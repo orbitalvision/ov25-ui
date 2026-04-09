@@ -5,6 +5,8 @@ import { VariantsCloseButton } from './VariantSelectMenu/VariantsCloseButton.js'
 /** Drawer backdrop/panel z-index when portaled to document (above host page UI). */
 const DRAWER_BACKDROP_Z = 2147483645;
 const DRAWER_PANEL_Z = 2147483646;
+const CONFIGURATOR_DRAWER_BACKDROP_Z = 103;
+const CONFIGURATOR_DRAWER_PANEL_Z = 104;
 
 export type Snap2SettingsSheetMode = 'modal' | 'drawer';
 
@@ -17,6 +19,7 @@ export type Snap2SettingsSheetProps = {
   footer?: React.ReactNode;
   /** Modal column z-index; checkout should stack above variants (e.g. z-[110] vs z-102). */
   sheetZClass?: string;
+  stackWithinConfigurator?: boolean;
   withBackdrop?: boolean;
   showCloseButton?: boolean;
   closeButtonAriaLabel?: string;
@@ -38,6 +41,7 @@ export const Snap2SettingsSheet: React.FC<Snap2SettingsSheetProps> = ({
   children,
   footer,
   sheetZClass = 'ov:z-102',
+  stackWithinConfigurator = false,
   withBackdrop = false,
   showCloseButton = true,
   closeButtonAriaLabel = 'Close',
@@ -48,6 +52,8 @@ export const Snap2SettingsSheet: React.FC<Snap2SettingsSheetProps> = ({
   className,
 }) => {
   const dataOpen = open ? 'true' : 'false';
+  const drawerBackdropZ = stackWithinConfigurator ? CONFIGURATOR_DRAWER_BACKDROP_Z : DRAWER_BACKDROP_Z;
+  const drawerPanelZ = stackWithinConfigurator ? CONFIGURATOR_DRAWER_PANEL_Z : DRAWER_PANEL_Z;
 
   const shellClassModal = cn(
     'ov:absolute ov:top-0 ov:right-0 ov:h-full ov:w-[384px] ov:border-l ov:border-gray-200 ov:bg-white ov:box-border',
@@ -80,7 +86,7 @@ export const Snap2SettingsSheet: React.FC<Snap2SettingsSheetProps> = ({
       style={
         mode === 'drawer'
           ? {
-              zIndex: DRAWER_PANEL_Z,
+              zIndex: drawerPanelZ,
               height: 'min(100svh, 100dvh)',
               maxHeight: 'min(100svh, 100dvh)',
             }
@@ -111,7 +117,7 @@ export const Snap2SettingsSheet: React.FC<Snap2SettingsSheetProps> = ({
             'ov:fixed ov:inset-0 ov:z-[1] ov:border-0 ov:cursor-default',
             open ? 'ov:bg-black/30 ov:pointer-events-auto' : 'ov:pointer-events-none ov:opacity-0'
           )}
-          style={{ zIndex: DRAWER_BACKDROP_Z }}
+          style={{ zIndex: drawerBackdropZ }}
           onClick={() => onOpenChange(false)}
         />
         {panel}

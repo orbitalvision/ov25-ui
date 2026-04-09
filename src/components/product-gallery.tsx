@@ -316,7 +316,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
     const modalStackBoost = isDrawerOrDialogOpen && isModalMode;
     /** Snap2 desktop shell uses `isModalOpen` without toggling `isDrawerOrDialogOpen` (see IframeContainer). Hide in-flow carousel so theme CSS cannot size `#true-carousel` inside the modal. */
     const hideEmbeddedCarousel =
-      modalStackBoost || (isSnap2Mode && !isMobile && isModalOpen);
+      modalStackBoost || (isSnap2Mode && isModalOpen && (!isMobile || isModalMode));
 
     const carouselHostRef = useRef<HTMLDivElement>(null);
     const galleryHostRef = useRef<HTMLDivElement>(null);
