@@ -261,7 +261,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
   );
 
   const buttonsBlock = totalSteps > 1 && (
-    <div className="ov25-checkout-button-wrapper ov:shrink-0 ov:flex ov:items-center ov:justify-between ov:gap-3 ov:px-4 ov:py-2">
+    <div className={`ov25-checkout-button-wrapper ov:shrink-0 ov:flex ov:items-center ov:justify-between ov:gap-3 ${isReviewStep ? '' : 'ov:px-4 ov:py-2'}`}>
       <button
         onClick={goBack}
         disabled={isFirstStep}

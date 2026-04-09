@@ -44,7 +44,7 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
 
   const wrapperClass = embedded
     ? 'ov25-checkout-button-wrapper ov25-checkout-button-wrapper--embedded ov:shrink-0 ov:w-full ov:min-w-0 ov:max-w-full'
-    : 'ov25-checkout-button-wrapper ov:shrink-0';
+    : 'ov25-checkout-button-wrapper ov:shrink-0 ov:px-4 ov:pb-2 ov:pt-2';
 
   if (hasAddToBasket && !hasBuyNow) {
     return (
@@ -112,7 +112,7 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
         <ShoppingCart size={20} />
       </div>
       <div
-        className="ov25-checkout-combo-button-text ov:absolute ov:z-1 ov:inset-0 ov:flex ov:items-center ov:justify-center ov:gap-2 ov:pointer-events-none"
+        className="ov25-checkout-combo-button-text ov:absolute ov:z-12 ov:inset-0 ov:flex ov:items-center ov:justify-center ov:gap-2 ov:pointer-events-none"
         aria-hidden
       >
         {labelContent}
@@ -128,8 +128,6 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
         className={cn(baseButtonClasses, 'ov:absolute ov:inset-0 ov:right-14 ov:z-11 ov:cursor-pointer ov:bg-transparent ov:border-0 ov:rounded-none')}
         aria-label="Buy now"
       >
-        <span>Buy now</span>
-        <span>{formattedPrice}</span>
       </button>
       <div className="ov:absolute ov:right-14 ov:top-0 ov:bottom-0 ov:w-px ov:bg-white/30 ov:z-10" aria-hidden />
       <button
