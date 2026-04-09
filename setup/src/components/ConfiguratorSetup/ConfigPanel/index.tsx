@@ -100,6 +100,7 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
   const [exportMode, setExportMode] = useState<ExportMode>('current');
   const [modalCopied, setModalCopied] = useState(false);
   const isSnap2 = formState.layout === 'snap2';
+  const isBed = formState.layout === 'bedConfigurator';
 
   const handleSelectorToggle = (key: keyof TypeSettings['selectors'], enabled: boolean) => {
     updateNested('selectors', key, { ...currentSettings.selectors[key], enabled });
@@ -278,6 +279,76 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
                   />
                 </div>
               </div>
+            </div>
+
+            {/* --- Product Type --- */}
+            <SectionDivider />
+            <div className="space-y-3">
+              <SectionHeader description="The type of configurator experience for this product">Product Type</SectionHeader>
+              <div className="grid grid-cols-3 gap-1.5">
+                {LAYOUT_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.value}
+                    type="button"
+                    onClick={() => setLayout(opt.value)}
+                    className={`rounded-md px-1.5 py-2 text-center transition-all border ${
+                      formState.layout === opt.value
+                        ? 'border-foreground bg-foreground text-background shadow-sm'
+                        : 'border-border bg-white text-muted-foreground hover:border-foreground/30'
+                    }`}
+                  >
+                    <div className="text-xs font-medium leading-tight">{opt.label}</div>
+                    <div className={`text-[8px] mt-0.5 leading-snug ${formState.layout === opt.value ? 'text-background/70' : 'text-muted-foreground/60'}`}>{opt.description}</div>
+                  </button>
+                ))}
+              </div>
+              {isSnap2 && (
+                <SwitchRow
+                  label="Starting configuration"
+                  checked={!!currentSettings.snap2UseStartingConfig}
+                  onCheckedChange={(v) => updateSettings('snap2UseStartingConfig', v)}
+                />
+              )}
+              {isBed && currentSettings.bed && (
+                <div className="space-y-2.5 pt-1">
+                  <SectionHeader description="When checked, this part of the bed for example the headboard is allowed to be empty or not have a headboard selected.">
+                    Bed — allow “None”
+                  </SectionHeader>
+                  <SwitchRow
+                    label="Headboard"
+                    checked={currentSettings.bed.allowNoneHeadboard}
+                    onCheckedChange={(v) => updateNested('bed', 'allowNoneHeadboard', v)}
+                  />
+                  <SwitchRow
+                    label="Base"
+                    checked={currentSettings.bed.allowNoneBase}
+                    onCheckedChange={(v) => updateNested('bed', 'allowNoneBase', v)}
+                  />
+                  <SwitchRow
+                    label="Mattress"
+                    checked={currentSettings.bed.allowNoneMattress}
+                    onCheckedChange={(v) => updateNested('bed', 'allowNoneMattress', v)}
+                  />
+                  <SectionHeader description="When checked, this part of the bed for example the base will only display matching sizes.">
+                    Bed — only matching sizes
+                  </SectionHeader>
+                  <SwitchRow
+                    label="Headboard"
+                    checked={currentSettings.bed.filterMatchingSizeHeadboard}
+                    onCheckedChange={(v) => updateNested('bed', 'filterMatchingSizeHeadboard', v)}
+                  />
+                  <SwitchRow
+                    label="Base"
+                    checked={currentSettings.bed.filterMatchingSizeBase}
+                    onCheckedChange={(v) => updateNested('bed', 'filterMatchingSizeBase', v)}
+                  />
+                  <SwitchRow
+                    label="Mattress"
+                    checked={currentSettings.bed.filterMatchingSizeMattress}
+                    onCheckedChange={(v) => updateNested('bed', 'filterMatchingSizeMattress', v)}
+                  />
+                </div>
+              )}
             </div>
 
             {/* --- Branding --- */}

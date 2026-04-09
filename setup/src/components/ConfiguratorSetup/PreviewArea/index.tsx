@@ -1,17 +1,22 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Monitor, Smartphone } from 'lucide-react';
 import { cn } from '../../../lib/utils';
+import {
+  CONFIGURATOR_PREVIEW_LOCAL_BASE_URL,
+  CONFIGURATOR_PREVIEW_PRODUCTION_BASE_URL,
+} from '../../../lib/config/preview-config';
 import type { SerializableInjectConfig } from '../preview-config-serializable';
 
 const OV25_CONFIG_MESSAGE = 'OV25_CONFIG';
 const OV25_PREVIEW_READY = 'OV25_PREVIEW_READY';
-const PREVIEW_BASE_URL = 'https://app.ov25.ai/configurator-preview';
 
-function getPreviewBase(useLocalhost?: boolean) {
-  if (useLocalhost && typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-    return `http://localhost:${window.location.port}/configurator-preview`;
-  }
-  return PREVIEW_BASE_URL;
+function previewIframeSrc(previewBaseUrl: string | undefined, useLocalPreview: boolean | undefined) {
+  if (previewBaseUrl) return previewBaseUrl;
+  if (typeof window === 'undefined') return CONFIGURATOR_PREVIEW_PRODUCTION_BASE_URL;
+  if (useLocalPreview === false) return CONFIGURATOR_PREVIEW_PRODUCTION_BASE_URL;
+  const h = window.location.hostname;
+  if (h === 'localhost' || h === '127.0.0.1') return CONFIGURATOR_PREVIEW_LOCAL_BASE_URL;
+  return CONFIGURATOR_PREVIEW_PRODUCTION_BASE_URL;
 }
 
 type DeviceMode = 'desktop' | 'mobile';
@@ -40,7 +45,7 @@ export function PreviewArea({ serializableConfig, previewBaseUrl, useLocalPrevie
 
   configRef.current = serializableConfig;
 
-  const src = previewBaseUrl || getPreviewBase(useLocalPreview);
+  const src = previewIframeSrc(previewBaseUrl, useLocalPreview);
 
   const sendConfig = useCallback(() => {
     postConfig(iframeRef.current, configRef.current);

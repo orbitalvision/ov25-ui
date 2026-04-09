@@ -50,11 +50,7 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
             <span className={`ov25-variant-name ov:text-xs ov:text-center ov:text-black ov:line-clamp-3 ${isGrouped && isMobile ? '' : 'ov:pt-2'}`}>
                 {variant.name}
             </span>
-            {variant.bedSize ? (
-              <span className="ov:block ov:text-center ov:text-[11px] ov:text-[var(--ov25-secondary-text-color)] ov:opacity-85 ov:mt-0.5 ov:line-clamp-2">
-                {variant.bedSize}
-              </span>
-            ) : null}
+            
         </div>
     </div>
     )
