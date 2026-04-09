@@ -32,6 +32,10 @@ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
     buySwatches: () => alert('buySwatches'),
   },
   flags: { hidePricing: false },
+  bed: {
+    allowNone: { headboard: false, base: true, mattress: true },
+    filterSelectionsByCurrentSize: { headboard: false, base: true, mattress: true },
+  },
   cssString:`
     #ov25-configurator-variant-menu-container {
         height: 700px

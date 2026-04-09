@@ -1,4 +1,5 @@
 import { Selection } from '../contexts/ov25-ui-context.js';
+import { BED_IFRAME_ALLOW_NONE_QUERY_KEY } from '../lib/config/bed-embed-query.js';
 import { findIframeWithUniqueId } from './configurator-dom-queries.js';
 
 /**
@@ -267,13 +268,15 @@ export const getAnimationButtonText = (
 };
 
 /**
- * Generate the iframe source URL based on productLink and apiKey
+ * Generate the iframe source URL based on productLink and apiKey.
+ * Merges query strings: params on `productLink`, then parent page (missing keys only), then uuid / hex / bedAllowNone.
  */
 export const getIframeSrc = (
   apiKey: string | null,
   productLink: string | null,
   configurationUuid?: string | null,
   hexBgColor?: string | null,
+  bedAllowNone?: string | null,
 ): string => {
   const useLocal =
     import.meta.env.USE_LOCAL_DEV === 'true' || import.meta.env.USE_LOCAL_DEV === '1';
@@ -284,29 +287,39 @@ export const getIframeSrc = (
   if (!apiKey) {
     apiKey = '';
   }
-  
+
   if (!productLink) {
     productLink = '';
   }
-  
+
   const cleanedLink = productLink.startsWith('/') ? productLink.substring(1) : productLink;
 
-  const parentQueryParams = window.location.search
-  
-  // Create fresh query params (don't read from window.location to avoid including browser URL params)
-  const queryParams = new URLSearchParams(parentQueryParams);
-  
+  const qIdx = cleanedLink.indexOf('?');
+  const pathPart = qIdx >= 0 ? cleanedLink.slice(0, qIdx) : cleanedLink;
+  const merged = new URLSearchParams(qIdx >= 0 ? cleanedLink.slice(qIdx + 1) : '');
+
+  const parentQueryParams = window.location.search;
+  new URLSearchParams(parentQueryParams).forEach((v, k) => {
+    if (!merged.has(k)) {
+      merged.set(k, v);
+    }
+  });
+
   if (configurationUuid) {
-    queryParams.set('configuration_uuid', configurationUuid);
+    merged.set('configuration_uuid', configurationUuid);
   }
-  
+
   if (hexBgColor) {
     const hexValue = hexBgColor.startsWith('#') ? hexBgColor.substring(1) : hexBgColor;
-    queryParams.set('hexBgColor', hexValue);
+    merged.set('hexBgColor', hexValue);
   }
-  
-  const queryString = queryParams.toString();
-  const linkWithParams = queryString ? `${cleanedLink}?${queryString}` : cleanedLink;
+
+  if (bedAllowNone != null && bedAllowNone !== '') {
+    merged.set(BED_IFRAME_ALLOW_NONE_QUERY_KEY, bedAllowNone);
+  }
+
+  const queryString = merged.toString();
+  const linkWithParams = queryString ? `${pathPart}?${queryString}` : pathPart;
 
   return `${baseUrl}/${apiKey}/${linkWithParams}`;
 };

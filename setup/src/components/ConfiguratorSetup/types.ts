@@ -55,6 +55,18 @@ export interface TypeSettings {
   style: Record<string, string>;
   elementStyles: Record<string, Record<string, string>>;
   snap2UseStartingConfig?: boolean;
+  /**
+   * Bed layout only: when checked, that part may use the “None” line on the OV25 bed iframe (`bedAllowNone` query).
+   */
+  bed?: {
+    allowNoneHeadboard: boolean;
+    allowNoneBase: boolean;
+    allowNoneMattress: boolean;
+    /** Variant UI: hide selections whose bed size metadata ≠ iframe current size (per line). */
+    filterMatchingSizeHeadboard: boolean;
+    filterMatchingSizeBase: boolean;
+    filterMatchingSizeMattress: boolean;
+  };
 }
 
 export interface ConfiguratorSetupFormState {
@@ -113,6 +125,14 @@ const DEFAULT_BED_CONFIGURATOR_SETTINGS: TypeSettings = {
   branding: {
     ...DEFAULT_STANDARD_SETTINGS.branding,
     cssString: 'ov25-selection-thumbnail: bg-white;',
+  },
+  bed: {
+    allowNoneHeadboard: true,
+    allowNoneBase: true,
+    allowNoneMattress: true,
+    filterMatchingSizeHeadboard: false,
+    filterMatchingSizeBase: false,
+    filterMatchingSizeMattress: false,
   },
 };
 

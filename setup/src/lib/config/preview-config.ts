@@ -1,6 +1,9 @@
 export type LayoutType = 'standard' | 'snap2' | 'bedConfigurator';
 export type PreviewLayoutType = LayoutType;
 
+export const CONFIGURATOR_PREVIEW_PRODUCTION_BASE_URL = 'https://app.ov25.ai/configurator-preview';
+export const CONFIGURATOR_PREVIEW_LOCAL_BASE_URL = 'http://app.localhost:3000/configurator-preview';
+
 export const PREVIEW_PRODUCT_LINKS: Record<LayoutType, string> = {
   standard: '58',
   snap2: 'snap2/292',

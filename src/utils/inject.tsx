@@ -209,6 +209,8 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     forceMobile,
     autoOpen = false,
     uniqueId,
+    bedAllowNoneQueryValue,
+    bedFilterSelectionsByCurrentSize,
   } = n;
 
   const showCarousel = carouselDisplayMode !== CarouselDisplayMode.None;
@@ -806,6 +808,8 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
           swatchbookPortal: swatchbookPortalShadowRoot
         }}
         cssString={cssString}
+        bedAllowNoneQueryValue={bedAllowNoneQueryValue}
+        bedFilterSelectionsByCurrentSize={bedFilterSelectionsByCurrentSize}
       >
         {portals}
       </OV25UIProvider>

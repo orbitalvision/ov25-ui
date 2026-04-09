@@ -1,4 +1,6 @@
 import type { Swatch, SwatchRulesData } from '../contexts/ov25-ui-context.js';
+import type { BedAllowNonePartsInput } from '../lib/config/bed-embed-query.js';
+import { serializeBedAllowNoneQueryValue } from '../lib/config/bed-embed-query.js';
 
 export type StringOrFunction = string | (() => string);
 
@@ -187,6 +189,19 @@ export type FlagsConfig = {
   autoOpen?: boolean;
 };
 
+/** Per bed line: when true, variant UI hides selections whose `metadata.bedSize` ≠ iframe current size. */
+export type BedPartSizeFilterFlags = {
+  headboard: boolean;
+  base: boolean;
+  mattress: boolean;
+};
+
+/** Bed iframe (OV25): optional `bedAllowNone` query param on the configurator URL. */
+export type BedEmbedConfig = {
+  allowNone?: BedAllowNonePartsInput;
+  filterSelectionsByCurrentSize?: BedPartSizeFilterFlags;
+};
+
 /** Primary inject config: grouped structure. */
 export interface InjectConfiguratorOptions {
   apiKey: StringOrFunction;
@@ -202,6 +217,7 @@ export interface InjectConfiguratorOptions {
   callbacks: CallbacksConfig;
   branding?: BrandingConfig;
   flags?: FlagsConfig;
+  bed?: BedEmbedConfig;
 }
 
 /** Legacy flat config. Supported for backward compatibility. */
@@ -246,6 +262,11 @@ export interface LegacyInjectConfiguratorOptions {
   showOptional?: boolean;
   forceMobile?: boolean;
   autoOpen?: boolean;
+
+  /** @see {@link BedEmbedConfig} */
+  bedAllowNone?: BedAllowNonePartsInput;
+  /** @see {@link BedEmbedConfig.filterSelectionsByCurrentSize} */
+  bedFilterSelectionsByCurrentSize?: BedPartSizeFilterFlags;
 
   galleryId?: ElementSelector;
   priceId?: ElementSelector;
@@ -307,6 +328,11 @@ export interface NormalizedInjectConfig {
   showOptional?: boolean;
   forceMobile?: boolean;
   autoOpen?: boolean;
+
+  /** Serialized `bedAllowNone` query value; omit when unset (OV25 default: all parts may use None). */
+  bedAllowNoneQueryValue?: string;
+  /** Bed variant UI: hide non-matching `metadata.bedSize` per line when enabled. */
+  bedFilterSelectionsByCurrentSize: BedPartSizeFilterFlags;
 }
 
 function pick<T, K extends keyof T>(obj: T, key: K): T[K] | undefined {
@@ -333,6 +359,7 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
   const variants = configurator?.variants ?? (isGrouped ? pick(c, 'variants') : undefined);
   const branding = isGrouped ? pick(c, 'branding') : undefined;
   const flags = isGrouped ? pick(c, 'flags') : undefined;
+  const bedGrouped = isGrouped ? pick(c, 'bed') : undefined;
 
   const gallerySelector = selectors?.gallery ?? c.gallerySelector ?? c.galleryId;
   const priceSelector = selectors?.price ?? c.priceSelector ?? c.priceId;
@@ -375,6 +402,21 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
   const forceMobile = flags?.forceMobile ?? c.forceMobile;
   const autoOpen = flags?.autoOpen ?? c.autoOpen ?? false;
 
+  const bedAllowNoneParts: BedAllowNonePartsInput | undefined =
+    bedGrouped?.allowNone ?? c.bedAllowNone;
+  const bedAllowNoneQueryValue =
+    bedAllowNoneParts !== undefined
+      ? serializeBedAllowNoneQueryValue(bedAllowNoneParts)
+      : undefined;
+
+  const bedFilterRaw: BedPartSizeFilterFlags | undefined =
+    bedGrouped?.filterSelectionsByCurrentSize ?? c.bedFilterSelectionsByCurrentSize;
+  const bedFilterSelectionsByCurrentSize: BedPartSizeFilterFlags = {
+    headboard: Boolean(bedFilterRaw?.headboard),
+    base: Boolean(bedFilterRaw?.base),
+    mattress: Boolean(bedFilterRaw?.mattress),
+  };
+
   return {
     apiKey: opts.apiKey,
     productLink: opts.productLink,
@@ -412,5 +454,7 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
     showOptional,
     forceMobile,
     autoOpen,
+    bedAllowNoneQueryValue,
+    bedFilterSelectionsByCurrentSize,
   };
 }

@@ -59,6 +59,20 @@ function mergeTypeSettings(defaults: TypeSettings, saved: Partial<TypeSettings> 
     style: { ...defaults.style, ...saved.style },
     elementStyles: { ...defaults.elementStyles, ...saved.elementStyles },
     snap2UseStartingConfig: saved.snap2UseStartingConfig ?? defaults.snap2UseStartingConfig,
+    bed:
+      saved.bed !== undefined
+        ? {
+            ...(defaults.bed ?? {
+              allowNoneHeadboard: true,
+              allowNoneBase: true,
+              allowNoneMattress: true,
+              filterMatchingSizeHeadboard: false,
+              filterMatchingSizeBase: false,
+              filterMatchingSizeMattress: false,
+            }),
+            ...saved.bed,
+          }
+        : defaults.bed,
   };
 }
 
@@ -155,6 +169,26 @@ export function buildSerializableConfig(
 
   if (settings.flags.hidePricing && config.selectors) {
     delete config.selectors.price;
+  }
+
+  if (layout === 'bedConfigurator' && settings.bed) {
+    const filterSelectionsByCurrentSize = {
+      headboard: settings.bed.filterMatchingSizeHeadboard,
+      base: settings.bed.filterMatchingSizeBase,
+      mattress: settings.bed.filterMatchingSizeMattress,
+    };
+    config.bed = {
+      allowNone: {
+        headboard: settings.bed.allowNoneHeadboard,
+        base: settings.bed.allowNoneBase,
+        mattress: settings.bed.allowNoneMattress,
+      },
+      ...(filterSelectionsByCurrentSize.headboard ||
+      filterSelectionsByCurrentSize.base ||
+      filterSelectionsByCurrentSize.mattress
+        ? { filterSelectionsByCurrentSize }
+        : {}),
+    };
   }
 
   return config;

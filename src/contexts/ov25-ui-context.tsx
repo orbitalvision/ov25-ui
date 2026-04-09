@@ -6,6 +6,7 @@ import {
   detectUserAgent,
   orderConfiguratorSelectionsWithNoneFirst,
 } from '../utils/configurator-utils.js';
+import { selectionVisibleForBedSizeFilter } from '../lib/bed/bed-variant-size-filter.js';
 import { SaveSnap2Dialog } from '../components/SaveSnap2Dialog.js';
 import {
   CarouselDisplayMode,
@@ -16,7 +17,12 @@ import {
 import { stringSimilarity } from 'string-similarity-js';
 import { launchARWithGLBBlob } from '../utils/launchARWithGLBBlob.js';
 import { getProductGalleryImages, resolveImageUrl } from '../lib/utils.js';
-import type { OnChangePayload, UnifiedPricePayload, UnifiedSkuPayload } from '../types/inject-config.js';
+import type {
+  BedPartSizeFilterFlags,
+  OnChangePayload,
+  UnifiedPricePayload,
+  UnifiedSkuPayload,
+} from '../types/inject-config.js';
 import { normalizePricePayload, normalizeSkuPayload } from '../commerce/normalize-iframe-commerce.js';
 import {
   IFRAME_MSG_TRANSITION_SNAPSHOT,
@@ -251,6 +257,12 @@ interface OV25UIContextType {
   productLink: string | null;
   apiKey: string;
   configurationUuid: string | null;
+  /** OV25 bed iframe: `bedAllowNone` query segment (omit when all parts may use None). */
+  bedAllowNoneQueryValue?: string;
+  /** Bed iframe: latest size from `CURRENT_BED_SIZE` postMessage (`null` until first message or non-bed). */
+  currentBedSize: string | null;
+  /** When true for a part, selections in that option hide if `metadata.bedSize` ≠ {@link currentBedSize}. */
+  bedFilterSelectionsByCurrentSize: BedPartSizeFilterFlags;
   buyNowFunction: (payload?: OnChangePayload) => void;
   addToBasketFunction: (payload?: OnChangePayload) => void;
   buySwatches: () => void;
@@ -415,6 +427,8 @@ export const OV25UIProvider: React.FC<{
   productLink: string | null, 
   apiKey: string, 
   configurationUuid: string,
+  bedAllowNoneQueryValue?: string,
+  bedFilterSelectionsByCurrentSize?: BedPartSizeFilterFlags,
   buyNowFunction: (payload?: OnChangePayload) => void,
   addToBasketFunction: (payload?: OnChangePayload) => void,
   buySwatchesFunction: (swatches: Swatch[], swatchRulesData: SwatchRulesData) => void,
@@ -466,6 +480,8 @@ export const OV25UIProvider: React.FC<{
   productLink,
   apiKey,
   configurationUuid,
+  bedAllowNoneQueryValue,
+  bedFilterSelectionsByCurrentSize: bedFilterSelectionsByCurrentSizeProp,
   buyNowFunction,
   addToBasketFunction,
   buySwatchesFunction,
@@ -528,6 +544,20 @@ export const OV25UIProvider: React.FC<{
     },
     [hideVariantOptionKeys]
   );
+
+  const bedFilterSelectionsByCurrentSize = useMemo<BedPartSizeFilterFlags>(
+    () => ({
+      headboard: Boolean(bedFilterSelectionsByCurrentSizeProp?.headboard),
+      base: Boolean(bedFilterSelectionsByCurrentSizeProp?.base),
+      mattress: Boolean(bedFilterSelectionsByCurrentSizeProp?.mattress),
+    }),
+    [
+      bedFilterSelectionsByCurrentSizeProp?.headboard,
+      bedFilterSelectionsByCurrentSizeProp?.base,
+      bedFilterSelectionsByCurrentSizeProp?.mattress,
+    ],
+  );
+
   // State definitions
   const [products, setProducts] = useState<Product[]>([]);
   const [currentProductId, setCurrentProductId] = useState<string>();
@@ -551,6 +581,7 @@ export const OV25UIProvider: React.FC<{
   const [formattedSubtotal, setFormattedSubtotal] = useState<string>('£0.00')
   const [currentSku, setCurrentSku] = useState<any>(null);
   const [range, setRange] = useState<any>(null);
+  const [currentBedSize, setCurrentBedSize] = useState<string | null>(null);
   const [drawerSize, setDrawerSize] = useState<DrawerSizes>("closed");
   const [isVariantsOpen, setIsVariantsOpen] = useState(false);
   const [isDrawerOrDialogOpen, setIsDrawerOrDialogOpen] = useState(false);
@@ -675,6 +706,7 @@ export const OV25UIProvider: React.FC<{
     setIsSnap2CheckoutSheetOpen(false);
     latestPriceRef.current = null;
     latestSkuRef.current = null;
+    setCurrentBedSize(null);
 
     // Reset iframe
     setIframeResetKey(prev => prev + 1);
@@ -882,6 +914,14 @@ export const OV25UIProvider: React.FC<{
       return false;
     };
 
+    const checkBedSizeFilter = (selection: any) =>
+      selectionVisibleForBedSizeFilter({
+        selection,
+        optionDisplayName: option.name,
+        currentBedSize,
+        flags: bedFilterSelectionsByCurrentSize,
+      });
+
     return {
       ...option,
       groups: (option.groups as Group[])
@@ -895,7 +935,9 @@ export const OV25UIProvider: React.FC<{
 
         // If group name doesn't match, check if any selections in this group match
         if (currentSearchQuery) {
-          const hasMatchingSelections = group.selections.some(selection => checkSelectionSearch(selection));
+          const hasMatchingSelections = group.selections.some(
+            (selection) => checkSelectionSearch(selection) && checkBedSizeFilter(selection),
+          );
           if (hasMatchingSelections) {
             return true;
           }
@@ -917,13 +959,21 @@ export const OV25UIProvider: React.FC<{
                 const matchesSearch = checkSelectionSearch(selection);
                 const matchesFilters = checkSelectionFilters(selection);
 
-                return matchesSearch && matchesFilters;
+                return matchesSearch && matchesFilters && checkBedSizeFilter(selection);
               })
-            : group.selections.filter(selection => checkSelectionFilters(selection))
+            : group.selections.filter(
+                (selection) =>
+                  checkSelectionFilters(selection) && checkBedSizeFilter(selection),
+              )
           ).filter(selection => selection.isVisible !== false),
       }))
     } as Option;
-  }, [availableProductFilters, searchQueries]);
+  }, [
+    availableProductFilters,
+    searchQueries,
+    currentBedSize,
+    bedFilterSelectionsByCurrentSize,
+  ]);
 
   // Active option based on activeOptionId
   const baseActiveOption = configuratorState?.options?.find(opt => opt.id === activeOptionId);
@@ -1447,6 +1497,13 @@ export const OV25UIProvider: React.FC<{
             currentUrl.search = data;
             window.history.replaceState(window.history.state, '', currentUrl.toString());
             break;
+          case 'CURRENT_BED_SIZE': {
+            const raw = data?.size;
+            const next =
+              typeof raw === 'string' && raw.trim() !== '' ? raw.trim() : null;
+            setCurrentBedSize(next);
+            break;
+          }
           case 'ERROR':
             setError(new Error(data));
             break;
@@ -1697,6 +1754,9 @@ export const OV25UIProvider: React.FC<{
     productLink,
     apiKey,
     configurationUuid,
+    bedAllowNoneQueryValue,
+    currentBedSize,
+    bedFilterSelectionsByCurrentSize,
     buyNowFunction: buyNowWithPayload,
     addToBasketFunction: addToBasketWithPayload,
     buySwatches,

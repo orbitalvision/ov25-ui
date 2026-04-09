@@ -23,6 +23,11 @@ export interface SerializableInjectConfig {
   };
   flags?: Record<string, boolean>;
   branding?: { logoURL?: string; mobileLogoURL?: string; cssString?: string };
+  /** OV25 bed iframe `bedAllowNone` (see main package `InjectConfiguratorOptions.bed`). */
+  bed?: {
+    allowNone: { headboard: boolean; base: boolean; mattress: boolean };
+    filterSelectionsByCurrentSize?: { headboard: boolean; base: boolean; mattress: boolean };
+  };
   images?: string[];
   uniqueId?: string;
 }

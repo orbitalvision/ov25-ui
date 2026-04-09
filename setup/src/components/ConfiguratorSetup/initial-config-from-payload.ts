@@ -116,6 +116,24 @@ function mergeSerializableIntoTypeSettings(base: TypeSettings, saved: SavedLayou
     }
   }
 
+  if (saved.bed) {
+    merged.bed = {
+      ...(merged.bed ?? DEFAULT_TYPE_SETTINGS.bedConfigurator.bed!),
+    };
+    if (saved.bed.allowNone) {
+      const a = saved.bed.allowNone;
+      merged.bed.allowNoneHeadboard = Boolean(a.headboard);
+      merged.bed.allowNoneBase = Boolean(a.base);
+      merged.bed.allowNoneMattress = Boolean(a.mattress);
+    }
+    if (saved.bed.filterSelectionsByCurrentSize) {
+      const f = saved.bed.filterSelectionsByCurrentSize;
+      merged.bed.filterMatchingSizeHeadboard = Boolean(f.headboard);
+      merged.bed.filterMatchingSizeBase = Boolean(f.base);
+      merged.bed.filterMatchingSizeMattress = Boolean(f.mattress);
+    }
+  }
+
   return merged;
 }
 

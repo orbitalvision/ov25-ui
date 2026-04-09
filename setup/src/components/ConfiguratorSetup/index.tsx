@@ -7,7 +7,10 @@ export interface ConfiguratorSetupProps {
   apiKey?: string;
   productLink?: string;
   previewBaseUrl?: string;
-  /** Only set to true during local OV25 development to use localhost preview */
+  /**
+   * `false`: always `https://app.ov25.ai/configurator-preview`.
+   * Otherwise: if setup is on `localhost` / `127.0.0.1`, `http://localhost:3000/configurator-preview`; else hosted preview.
+   */
   useLocalPreview?: boolean;
   initialConfig?: ConfiguratorSetupPayload;
   onSave?: (payload: ConfiguratorSetupPayload) => void;

@@ -100,6 +100,7 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
   const [exportMode, setExportMode] = useState<ExportMode>('current');
   const [modalCopied, setModalCopied] = useState(false);
   const isSnap2 = formState.layout === 'snap2';
+  const isBed = formState.layout === 'bedConfigurator';
 
   const handleSelectorToggle = (key: keyof TypeSettings['selectors'], enabled: boolean) => {
     updateNested('selectors', key, { ...currentSettings.selectors[key], enabled });
@@ -260,6 +261,46 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
                   checked={!!currentSettings.snap2UseStartingConfig}
                   onCheckedChange={(v) => updateSettings('snap2UseStartingConfig', v)}
                 />
+              )}
+              {isBed && currentSettings.bed && (
+                <div className="space-y-2.5 pt-1">
+                  <SectionHeader description="When checked, this part of the bed for example the headboard is allowed to be empty or not have a headboard selected.">
+                    Bed — allow “None”
+                  </SectionHeader>
+                  <SwitchRow
+                    label="Headboard"
+                    checked={currentSettings.bed.allowNoneHeadboard}
+                    onCheckedChange={(v) => updateNested('bed', 'allowNoneHeadboard', v)}
+                  />
+                  <SwitchRow
+                    label="Base"
+                    checked={currentSettings.bed.allowNoneBase}
+                    onCheckedChange={(v) => updateNested('bed', 'allowNoneBase', v)}
+                  />
+                  <SwitchRow
+                    label="Mattress"
+                    checked={currentSettings.bed.allowNoneMattress}
+                    onCheckedChange={(v) => updateNested('bed', 'allowNoneMattress', v)}
+                  />
+                  <SectionHeader description="When checked, this part of the bed for example the base will only display matching sizes.">
+                    Bed — only matching sizes
+                  </SectionHeader>
+                  <SwitchRow
+                    label="Headboard"
+                    checked={currentSettings.bed.filterMatchingSizeHeadboard}
+                    onCheckedChange={(v) => updateNested('bed', 'filterMatchingSizeHeadboard', v)}
+                  />
+                  <SwitchRow
+                    label="Base"
+                    checked={currentSettings.bed.filterMatchingSizeBase}
+                    onCheckedChange={(v) => updateNested('bed', 'filterMatchingSizeBase', v)}
+                  />
+                  <SwitchRow
+                    label="Mattress"
+                    checked={currentSettings.bed.filterMatchingSizeMattress}
+                    onCheckedChange={(v) => updateNested('bed', 'filterMatchingSizeMattress', v)}
+                  />
+                </div>
               )}
             </div>
 
