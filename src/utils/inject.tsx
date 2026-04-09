@@ -467,7 +467,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     swatchbookPortalContainer.style.width = '100%';
     swatchbookPortalContainer.style.height = '100%';
     swatchbookPortalContainer.style.pointerEvents = 'none';
-    swatchbookPortalContainer.style.zIndex = '2147483646'; // max - 1
+    swatchbookPortalContainer.style.zIndex = '2147483647';
     document.body.appendChild(swatchbookPortalContainer);
 
     // add an empty <span> inside the swatchbook portal container to stop shopify themes with empty div rules from hiding the div
