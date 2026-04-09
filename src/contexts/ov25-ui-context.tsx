@@ -1183,7 +1183,9 @@ export const OV25UIProvider: React.FC<{
   const handleOptionClick = (optionId: string) => {
     setExpandToOptionIdOnOpen(optionId);
     setActiveOptionId(optionId);
-    setIsVariantsOpen(true);
+    if (!useInlineVariantControls) {
+      setIsVariantsOpen(true);
+    }
   };
 
   const toggleHideAll = useCallback(() => {
