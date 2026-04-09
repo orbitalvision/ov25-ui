@@ -17,7 +17,7 @@ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
   configurator: {
     displayMode: { desktop: 'inline', mobile: 'inline' },
     triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
-    variants: { displayMode: { desktop: 'accordion', mobile: 'list' } },
+    variants: { displayMode: { desktop: 'accordion', mobile: 'accordion' } },
   },
   callbacks: { addToBasket: () => alert('Add to basket'), buyNow: () => alert('Buy now'), buySwatches: () => alert('Add swatches to cart') },
   flags: { hidePricing: false },
