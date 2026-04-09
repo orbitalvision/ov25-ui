@@ -168,7 +168,7 @@ export const IframeContainer = () => {
                 <Ov25ShadowHost
                     ref={controlsContainerRef}
                     id={uniqueId ? `true-configurator-view-controls-container-${uniqueId}` : "true-configurator-view-controls-container"}
-                    className="ov:absolute ov:inset-0 ov:z-10 ov:w-full ov:h-full ov:pointer-events-none"
+                    className="ov:absolute ov:inset-0 ov:z-101 ov:w-full ov:h-full ov:pointer-events-none"
                 >
                     <ConfiguratorViewControls />
                 </Ov25ShadowHost>
