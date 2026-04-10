@@ -28,6 +28,10 @@ import {
   IFRAME_MSG_TRANSITION_SNAPSHOT,
   IFRAME_MSG_TRANSITION_SNAPSHOT_ERROR,
 } from '../lib/config/iframe-transition-snapshot.js';
+import {
+  applyDisplayCurrencySymbolToPricePayload,
+  DEFAULT_CURRENCY_SYMBOL,
+} from '../lib/config/currency-display.js';
 import { findIframeWithUniqueId, type ConfiguratorIframeScreenRect } from '../utils/configurator-dom-queries.js';
 
 function throttle<T extends (...args: any[]) => void>(
@@ -264,6 +268,8 @@ interface OV25UIContextType {
   currentBedSize: string | null;
   /** When true for a part, selections in that option hide if `metadata.bedSize` ≠ {@link currentBedSize}. */
   bedFilterSelectionsByCurrentSize: BedPartSizeFilterFlags;
+  /** Display symbol for prices; see inject `flags.currencySymbol`. */
+  currencySymbol: string;
   buyNowFunction: (payload?: OnChangePayload) => void;
   addToBasketFunction: (payload?: OnChangePayload) => void;
   buySwatches: () => void;
@@ -477,6 +483,8 @@ export const OV25UIProvider: React.FC<{
   },
   cssString?: string,
   configuratorGalleryIsDeferred?: boolean,
+  /** Display symbol for iframe price strings; default £. */
+  currencySymbol?: string,
 }> = ({ 
   children,
   productLink,
@@ -522,7 +530,11 @@ export const OV25UIProvider: React.FC<{
   hideVariantOptions = [],
   shadowDOMs,
   cssString,
+  currencySymbol = DEFAULT_CURRENCY_SYMBOL,
 }) => {
+  const effectiveCurrencySymbol =
+    String(currencySymbol).trim() || DEFAULT_CURRENCY_SYMBOL;
+
   const carouselLayout = carouselDisplayModeProp ?? carouselLayoutProp ?? CarouselDisplayMode.Stacked;
   const carouselLayoutMobile = carouselDisplayModeMobileProp ?? carouselDisplayModeProp ?? carouselLayoutProp ?? CarouselDisplayMode.Stacked;
   const variantDisplayStyleMobile = variantDisplayStyleMobileProp ?? variantDisplayStyle ?? VariantDisplayStyle.Tree;
@@ -574,13 +586,17 @@ export const OV25UIProvider: React.FC<{
   const [quantity, setQuantity] = useState(1);
   const [price, setPrice] = useState(0);
   const [subtotal, setSubtotal] = useState(0);
-  const [discount, setDiscount] = useState<Discount>({
+  const [discount, setDiscount] = useState<Discount>(() => ({
     percentage: 0,
     amount: 0,
-    formattedAmount: '£0.00'
-  });
-  const [formattedPrice, setFormattedPrice] = useState<string>('£0.00')
-  const [formattedSubtotal, setFormattedSubtotal] = useState<string>('£0.00')
+    formattedAmount: `${effectiveCurrencySymbol}0.00`,
+  }));
+  const [formattedPrice, setFormattedPrice] = useState<string>(
+    () => `${effectiveCurrencySymbol}0.00`,
+  );
+  const [formattedSubtotal, setFormattedSubtotal] = useState<string>(
+    () => `${effectiveCurrencySymbol}0.00`,
+  );
   const [currentSku, setCurrentSku] = useState<any>(null);
   const [range, setRange] = useState<any>(null);
   const [currentBedSize, setCurrentBedSize] = useState<string | null>(null);
@@ -1495,8 +1511,12 @@ export const OV25UIProvider: React.FC<{
             });
             break;
           case 'CURRENT_PRICE': {
-            const pricePayload = normalizePricePayload(data);
-            if (!pricePayload) break;
+            const normalizedPrice = normalizePricePayload(data);
+            if (!normalizedPrice) break;
+            const pricePayload = applyDisplayCurrencySymbolToPricePayload(
+              normalizedPrice,
+              effectiveCurrencySymbol,
+            );
             latestPriceRef.current = pricePayload;
             setCommercePriceSnapshot(pricePayload);
             setPrice(pricePayload.totalPrice);
@@ -1689,7 +1709,7 @@ export const OV25UIProvider: React.FC<{
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [handleARGLBData]);
+  }, [handleARGLBData, effectiveCurrencySymbol]);
 
   const hasCutout = !!(currentProduct?.metadata as any)?.cutoutImage
   const cutoutFirst = hasCutout && (isMobile || !deferThreeD)
@@ -1800,6 +1820,7 @@ export const OV25UIProvider: React.FC<{
     bedAllowNoneQueryValue,
     currentBedSize,
     bedFilterSelectionsByCurrentSize,
+    currencySymbol: effectiveCurrencySymbol,
     buyNowFunction: buyNowWithPayload,
     addToBasketFunction: addToBasketWithPayload,
     buySwatches,

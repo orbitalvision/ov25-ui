@@ -1,6 +1,7 @@
 import type { Swatch, SwatchRulesData } from '../contexts/ov25-ui-context.js';
 import type { BedAllowNonePartsInput } from '../lib/config/bed-embed-query.js';
 import { serializeBedAllowNoneQueryValue } from '../lib/config/bed-embed-query.js';
+import { DEFAULT_CURRENCY_SYMBOL } from '../lib/config/currency-display.js';
 
 export type StringOrFunction = string | (() => string);
 
@@ -187,6 +188,11 @@ export type FlagsConfig = {
   forceMobile?: boolean;
   /** Auto-open configurator modal on load. Only applies when not using inline display mode. Default false. */
   autoOpen?: boolean;
+  /**
+   * Display symbol for formatted prices from the iframe (OV25 emits GBP/`£`). Replaces `£` in `CURRENT_PRICE`
+   * strings after normalization; not FX conversion. Default `£`.
+   */
+  currencySymbol?: string;
 };
 
 /** Per bed line: when true, variant UI hides selections whose `metadata.bedSize` ≠ iframe current size. */
@@ -262,6 +268,8 @@ export interface LegacyInjectConfiguratorOptions {
   showOptional?: boolean;
   forceMobile?: boolean;
   autoOpen?: boolean;
+  /** @see {@link FlagsConfig.currencySymbol} */
+  currencySymbol?: string;
 
   /** @see {@link BedEmbedConfig} */
   bedAllowNone?: BedAllowNonePartsInput;
@@ -333,6 +341,8 @@ export interface NormalizedInjectConfig {
   bedAllowNoneQueryValue?: string;
   /** Bed variant UI: hide non-matching `metadata.bedSize` per line when enabled. */
   bedFilterSelectionsByCurrentSize: BedPartSizeFilterFlags;
+  /** Display symbol for iframe price strings; see {@link FlagsConfig.currencySymbol}. */
+  currencySymbol: string;
 }
 
 function pick<T, K extends keyof T>(obj: T, key: K): T[K] | undefined {
@@ -402,6 +412,12 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
   const forceMobile = flags?.forceMobile ?? c.forceMobile;
   const autoOpen = flags?.autoOpen ?? c.autoOpen ?? false;
 
+  const rawCurrencySymbol = flags?.currencySymbol ?? c.currencySymbol;
+  const trimmedCurrency =
+    typeof rawCurrencySymbol === 'string' ? rawCurrencySymbol.trim() : '';
+  const currencySymbol =
+    trimmedCurrency !== '' ? trimmedCurrency : DEFAULT_CURRENCY_SYMBOL;
+
   const bedAllowNoneParts: BedAllowNonePartsInput | undefined =
     bedGrouped?.allowNone ?? c.bedAllowNone;
   const bedAllowNoneQueryValue =
@@ -456,5 +472,6 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
     autoOpen,
     bedAllowNoneQueryValue,
     bedFilterSelectionsByCurrentSize,
+    currencySymbol,
   };
 }

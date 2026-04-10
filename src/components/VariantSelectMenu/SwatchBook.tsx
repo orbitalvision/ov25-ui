@@ -14,7 +14,17 @@ interface SwatchBookProps {
 export const SwatchBook: React.FC<SwatchBookProps> = ({
   isMobile,
 }) => {
-  const { buySwatches, toggleSwatch, selectedSwatches, swatchRulesData, isSwatchBookOpen, setIsSwatchBookOpen, isVariantsOpen, openConfigurator } = useOV25UI();
+  const {
+    buySwatches,
+    toggleSwatch,
+    selectedSwatches,
+    swatchRulesData,
+    isSwatchBookOpen,
+    setIsSwatchBookOpen,
+    isVariantsOpen,
+    openConfigurator,
+    currencySymbol,
+  } = useOV25UI();
 
   const calculateEmptySquares = () => {
     const selectedCount = selectedSwatches.length;
@@ -153,7 +163,10 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
           <div id="ov25-swatchbook-controls" className="ov:flex ov:justify-between ov:items-center ov:shrink-0">
             <div className="ov25-swatchbook-total-cost">
               <span className="ov:text-sm">Total cost: </span>
-              <span>£{(swatchRulesData.pricePerSwatch * Math.max(selectedSwatches.length - swatchRulesData.freeSwatchLimit, 0)).toFixed(2)}</span>
+              <span>
+                {currencySymbol}
+                {(swatchRulesData.pricePerSwatch * Math.max(selectedSwatches.length - swatchRulesData.freeSwatchLimit, 0)).toFixed(2)}
+              </span>
             </div>
             <div id="ov25-swatchbook-add-to-cart-button" className="ov:flex ov:gap-2">
               <Button

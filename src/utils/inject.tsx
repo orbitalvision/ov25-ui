@@ -211,6 +211,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     uniqueId,
     bedAllowNoneQueryValue,
     bedFilterSelectionsByCurrentSize,
+    currencySymbol,
   } = n;
 
   const showCarousel = carouselDisplayMode !== CarouselDisplayMode.None;
@@ -836,6 +837,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
         cssString={cssString}
         bedAllowNoneQueryValue={bedAllowNoneQueryValue}
         bedFilterSelectionsByCurrentSize={bedFilterSelectionsByCurrentSize}
+        currencySymbol={currencySymbol}
       >
         {portals}
       </OV25UIProvider>
