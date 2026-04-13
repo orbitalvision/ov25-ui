@@ -280,9 +280,7 @@ export const getIframeSrc = (
 ): string => {
   const useLocal =
     import.meta.env.USE_LOCAL_DEV === 'true' || import.meta.env.USE_LOCAL_DEV === '1';
-  const baseUrl = useLocal
-    ? 'http://configurator.localhost:3000'
-    : 'https://configurator.orbital.vision';
+  const baseUrl = 'https://configurator.orbital.vision';
 
   if (!apiKey) {
     apiKey = '';
