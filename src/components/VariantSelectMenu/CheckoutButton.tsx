@@ -35,18 +35,22 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
     addToBasketFunction,
     setIsVariantsOpen,
     formattedPrice,
+    disableAddToCart,
   } = useOV25UI();
 
   const hasAddToBasket = typeof addToBasketFunction === 'function';
   const hasBuyNow = typeof buyNowFunction === 'function';
+  const effectiveHasAddToBasket = hasAddToBasket && !disableAddToCart;
 
-  if (!hasAddToBasket && !hasBuyNow) return null;
+  if (!effectiveHasAddToBasket && !hasBuyNow) {
+    return null;
+  }
 
   const wrapperClass = embedded
     ? 'ov25-checkout-button-wrapper ov25-checkout-button-wrapper--embedded ov:shrink-0 ov:w-full ov:min-w-0 ov:max-w-full'
     : 'ov25-checkout-button-wrapper ov:shrink-0 ov:px-4 ov:pb-2 ov:pt-2';
 
-  if (hasAddToBasket && !hasBuyNow) {
+  if (effectiveHasAddToBasket && !hasBuyNow) {
     return (
       <div className={wrapperClass}>
       <button
@@ -67,7 +71,7 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
     );
   }
 
-  if (hasBuyNow && !hasAddToBasket) {
+  if (hasBuyNow && !effectiveHasAddToBasket) {
     return (
       <div className={wrapperClass}>
       <button

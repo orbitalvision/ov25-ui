@@ -148,6 +148,7 @@ export const Snap2CheckoutSheet: React.FC<Snap2CheckoutSheetProps> = ({ open, on
   const {
     isMobile,
     hidePricing,
+    disableAddToCart,
     addToBasketFunction,
     buyNowFunction,
     shadowDOMs,
@@ -160,7 +161,8 @@ export const Snap2CheckoutSheet: React.FC<Snap2CheckoutSheetProps> = ({ open, on
     isSnap2Mode && isMobile && configuratorDisplayModeMobile === 'modal';
 
   const hasCheckout =
-    typeof addToBasketFunction === 'function' || typeof buyNowFunction === 'function';
+    (typeof addToBasketFunction === 'function' && !disableAddToCart) ||
+    typeof buyNowFunction === 'function';
 
   useEffect(() => {
     if (!open || !isMobile) return;

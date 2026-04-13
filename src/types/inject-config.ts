@@ -209,6 +209,7 @@ export type BrandingConfig = {
 
 export type FlagsConfig = {
   hidePricing?: boolean;
+  disableAddToCart?: boolean;
   hideAr?: boolean;
   deferThreeD?: boolean;
   showOptional?: boolean;
@@ -291,6 +292,7 @@ export interface LegacyInjectConfiguratorOptions {
   cssString?: string;
 
   hidePricing?: boolean;
+  disableAddToCart?: boolean;
   hideAr?: boolean;
   deferThreeD?: boolean;
   showOptional?: boolean;
@@ -359,6 +361,7 @@ export interface NormalizedInjectConfig {
   cssString?: string;
 
   hidePricing?: boolean;
+  disableAddToCart?: boolean;
   hideAr?: boolean;
   deferThreeD?: boolean;
   showOptional?: boolean;
@@ -434,6 +437,7 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
   const cssString = branding?.cssString ?? c.cssString;
 
   const hidePricing = flags?.hidePricing ?? c.hidePricing;
+  const disableAddToCart = flags?.disableAddToCart ?? c.disableAddToCart ?? false;
   const hideAr = flags?.hideAr ?? c.hideAr;
   const deferThreeD = flags?.deferThreeD ?? c.deferThreeD;
   const showOptional = flags?.showOptional ?? c.showOptional;
@@ -493,6 +497,7 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
     mobileLogoURL,
     cssString,
     hidePricing,
+    disableAddToCart,
     hideAr,
     deferThreeD,
     showOptional,

@@ -27,8 +27,11 @@ test.describe('Windrush - Loveseat. Single product without variants', () => {
         await expect(variants).not.toBeVisible();
 
         // need to wait for the iframe to load and render
-        //watch the console for the message "OV25 3D Loaded"
-        await page.waitForEvent('console', msg => msg.text().includes('OV25 3D Loaded'));
+        // watch the console for the message "OV25 3D Loaded" (bounded: global test timeout was 16m+ without this)
+        await page.waitForEvent('console', {
+            predicate: (msg) => msg.text().includes('OV25 3D Loaded'),
+            timeout: 40000,
+        });
 
         const iframe = page.frameLocator('#ov25-configurator-iframe');
 
@@ -105,10 +108,15 @@ test.describe('Windrush - Loveseat. Single product without variants', () => {
         const fullscreenButton = page.locator('#ov25-desktop-fullscreen-button');
         await expect(fullscreenButton).toBeVisible();
         await fullscreenButton.click();
-        // iframe should be fullscreen
-        const fullscreenParent = page.locator('#true-ov25-configurator-iframe-container');
-        // check document.fullscreenElement is this element by comparing IDs
-        await expect(page.evaluate(() => document.fullscreenElement?.id)).resolves.toBe('true-ov25-configurator-iframe-container');
+        // iframe should be fullscreen: toggleFullscreen calls requestFullscreen on
+        // #true-ov25-configurator-iframe-container (parent of #ov25-configurator-iframe). With stacked
+        // gallery, that node can sit directly under the gallery shadow root; Chromium may then expose
+        // document.fullscreenElement as the shadow host #ov-25-configurator-gallery-container instead.
+        const fullscreenId = await page.evaluate(() => document.fullscreenElement?.id);
+        expect(
+          fullscreenId === 'true-ov25-configurator-iframe-container' ||
+            fullscreenId === 'ov-25-configurator-gallery-container'
+        ).toBe(true);
 
         // Check share button still works
         await expect(shareButton).toBeVisible();

@@ -86,6 +86,7 @@ const ELEMENT_TOGGLES: { key: keyof TypeSettings['selectors']; label: string }[]
 
 const FLAG_TOGGLES: { key: keyof TypeSettings['flags']; label: string }[] = [
   { key: 'hidePricing', label: 'Hide pricing' },
+  { key: 'disableAddToCart', label: 'Disable Add to Cart button' },
   { key: 'hideAr', label: 'Hide AR button' },
   { key: 'deferThreeD', label: 'Defer 3D loading' },
   { key: 'showOptional', label: 'Show optional variants' },

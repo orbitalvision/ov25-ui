@@ -12,6 +12,7 @@ const testPages = [
   'single-with-discounts',
   'single-with-groups',
   'single-inline-variants',
+  'inline-variants-disable-add-to-cart',
   'single-custom-button',
   'single-custom-css',
   'single-defer-threed-no-gallery',

@@ -146,6 +146,7 @@ export function buildSerializableConfig(
     },
     flags: {
       hidePricing: settings.flags.hidePricing,
+      disableAddToCart: settings.flags.disableAddToCart,
       hideAr: settings.flags.hideAr,
       deferThreeD: settings.flags.deferThreeD,
       showOptional: settings.flags.showOptional,

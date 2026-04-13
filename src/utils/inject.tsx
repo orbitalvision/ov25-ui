@@ -205,6 +205,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     deferThreeD,
     showOptional,
     hidePricing,
+    disableAddToCart,
     hideAr,
     forceMobile,
     autoOpen = false,
@@ -807,6 +808,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
         showOptional={showOptional}
         hideAr={hideAr}
         hidePricing={hidePricing}
+        disableAddToCart={disableAddToCart}
         forceMobile={forceMobile}
         isProductGalleryStacked={isProductGalleryStacked}
         carouselDisplayMode={carouselDisplayMode}

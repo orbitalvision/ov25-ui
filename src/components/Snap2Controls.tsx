@@ -21,6 +21,7 @@ const Snap2Controls: React.FC = () => {
     isModalOpen,
     cssString,
     hidePricing,
+    disableAddToCart,
     formattedPrice,
     addToBasketFunction,
     buyNowFunction,
@@ -30,7 +31,8 @@ const Snap2Controls: React.FC = () => {
   } = useOV25UI();
 
   const hasCommerceActions =
-    typeof addToBasketFunction === 'function' || typeof buyNowFunction === 'function';
+    (typeof addToBasketFunction === 'function' && !disableAddToCart) ||
+    typeof buyNowFunction === 'function';
   
   const [canSeeDimensions, setCanSeeDimensions] = useState(false);
   const [canSeeMiniDimensions, setCanSeeMiniDimensions] = useState(false);

@@ -18,7 +18,8 @@ export default defineConfig({
     /* Run tests in headed mode (browser visible) */
     headless: false,
   },
-  timeout: 1000000,
+  // 45 seconds max wait
+  timeout: 45000,
 
   /* Configure projects for major browsers */
   projects: [

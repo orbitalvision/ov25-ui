@@ -43,13 +43,15 @@ export const Snap2ConfiguratorModal: React.FC<Snap2ConfiguratorModalProps> = ({ 
     isSnap2CheckoutSheetOpen,
     setIsSnap2CheckoutSheetOpen,
     hidePricing,
+    disableAddToCart,
     addToBasketFunction,
     buyNowFunction,
   } = useOV25UI();
   const effectiveOverlayStyle = isMobile ? variantDisplayStyleOverlayMobile : variantDisplayStyleOverlay;
   const isShareDialogOpen = shareDialogTrigger !== 'none';
   const hasSnap2Checkout =
-    typeof addToBasketFunction === 'function' || typeof buyNowFunction === 'function';
+    (typeof addToBasketFunction === 'function' && !disableAddToCart) ||
+    typeof buyNowFunction === 'function';
   const showSnap2CheckoutRail = hasSnap2Checkout && !hidePricing;
   const modalRef = useRef<HTMLDivElement>(null);
   const portalTarget = shadowDOMs?.modalPortal ?? document.body;
