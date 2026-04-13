@@ -34,11 +34,23 @@ export function applyDisplayCurrencySymbolToPricePayload(
     })),
   }));
 
+  const productBreakdowns = payload.productBreakdowns?.map((b) => ({
+    ...b,
+    formattedSubtotal: replacePoundWithSymbol(b.formattedSubtotal, displaySymbol),
+    formattedDiscountAmount: replacePoundWithSymbol(b.formattedDiscountAmount, displaySymbol),
+    formattedPrice: replacePoundWithSymbol(b.formattedPrice, displaySymbol),
+    selections: b.selections.map((s) => ({
+      ...s,
+      formattedPrice: replacePoundWithSymbol(s.formattedPrice, displaySymbol),
+    })),
+  }));
+
   return {
     ...payload,
     formattedPrice: replacePoundWithSymbol(payload.formattedPrice, displaySymbol),
     formattedSubtotal: replacePoundWithSymbol(payload.formattedSubtotal, displaySymbol),
     discount,
     lines,
+    productBreakdowns,
   };
 }

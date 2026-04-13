@@ -2,6 +2,7 @@ import type {
   CommerceLineItemPrice,
   CommerceLineItemSku,
   OptionSkuMap,
+  ProductPriceBreakdown,
   UnifiedPricePayload,
   UnifiedSkuPayload,
   UnifiedSkuPayloadMulti,
@@ -195,7 +196,7 @@ export function normalizePricePayload(data: unknown): UnifiedPricePayload | null
       discount,
       lines,
     };
-    out.productBreakdowns = productBreakdownsRaw;
+    out.productBreakdowns = productBreakdownsRaw as ProductPriceBreakdown[];
     return out;
   }
 

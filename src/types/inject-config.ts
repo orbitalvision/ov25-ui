@@ -106,6 +106,34 @@ export interface CommerceLineItemPrice {
   modelId?: string;
 }
 
+/** One selection row inside {@link ProductPriceBreakdown} (Snap2; aligns with OV25 `useSnap2TotalPrice`). */
+export interface SelectionPriceBreakdown {
+  name: string;
+  price: number;
+  formattedPrice: string;
+  thumbnail?: string;
+}
+
+/**
+ * Per-product Snap2 totals (aligns with OV25 `ProductPriceBreakdown` in `useSnap2TotalPrice`).
+ * Optional on {@link UnifiedPricePayload} for host consumers (cart, invoices).
+ */
+export interface ProductPriceBreakdown {
+  productId: string;
+  formattedSubtotal: string;
+  subtotal: number;
+  discountedAmount: number;
+  formattedDiscountAmount: string;
+  discountPercentage: number;
+  name: string;
+  quantity: number;
+  price: number;
+  formattedPrice: string;
+  selections: SelectionPriceBreakdown[];
+  modelId: string;
+  image?: string;
+}
+
 /** Single-product iframe: legacy top-level sku fields plus `lines` (length 1). */
 export interface UnifiedSkuPayloadSingle {
   mode: 'single';
@@ -132,8 +160,8 @@ export interface UnifiedPricePayload {
   lines: CommerceLineItemPrice[];
   /** Raw single-product `priceBreakdown` from the iframe when present. */
   priceBreakdown?: unknown[];
-  /** Raw Snap2 `productBreakdowns` from the iframe when present. */
-  productBreakdowns?: unknown[];
+  /** Snap2 `productBreakdowns` from the iframe when present (same shape as OV25 `ProductPriceBreakdown[]`). */
+  productBreakdowns?: ProductPriceBreakdown[];
 }
 
 /**
