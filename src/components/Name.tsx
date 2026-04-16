@@ -10,7 +10,7 @@ const Name: React.FC = () => {
   
   return (
     <Ov25ShadowHost style={{ display: 'block', width: '100%' }}>
-      <div className={cn("ov:flex ov:flex-col ov:gap-2 ")}>
+      <div id="ov25-configurator-name" className={cn("ov:flex ov:flex-col ov:gap-2 ")}>
         <h1 className="ov:text-3xl ov:text-(--ov25-configurator-title-text-color)">{name}</h1>
       </div>
     </Ov25ShadowHost>
