@@ -52,6 +52,7 @@ export interface TypeSettings {
     logoURL: string;
     mobileLogoURL: string;
     cssString: string;
+    hideLogo: boolean;
   };
   style: Record<string, string>;
   elementStyles: Record<string, Record<string, string>>;
@@ -102,7 +103,7 @@ const DEFAULT_STANDARD_SETTINGS: TypeSettings = {
     variantHideOptionsCsv: '',
   },
   flags: { hidePricing: false, disableAddToCart: false, hideAr: false, deferThreeD: false, showOptional: false, forceMobile: false, autoOpen: false },
-  branding: { logoURL: '', mobileLogoURL: '', cssString: '' },
+  branding: { logoURL: '', mobileLogoURL: '', cssString: '', hideLogo: false },
   style: {},
   elementStyles: {},
 };

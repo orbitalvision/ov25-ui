@@ -276,6 +276,7 @@ interface OV25UIContextType {
   buySwatches: () => void;
   images?: string[];
   logoURL?: string;
+  hideLogo: boolean;
   isProductGalleryStacked: boolean;
   carouselLayout: CarouselLayout;
   carouselLayoutMobile: CarouselLayout;
@@ -449,6 +450,7 @@ export const OV25UIProvider: React.FC<{
   hideAr?: boolean,
   forceMobile?: boolean,
   logoURL?: string,
+  hideLogo?: boolean,
   isProductGalleryStacked: boolean,
   carouselDisplayMode?: CarouselDisplayMode,
   carouselDisplayModeMobile?: CarouselDisplayMode,
@@ -507,6 +509,7 @@ export const OV25UIProvider: React.FC<{
   hideAr = false,
   forceMobile = false,
   logoURL,
+  hideLogo = false,
   isProductGalleryStacked,
   carouselDisplayMode: carouselDisplayModeProp,
   carouselDisplayModeMobile: carouselDisplayModeMobileProp,
@@ -1830,6 +1833,7 @@ export const OV25UIProvider: React.FC<{
     buySwatches,
     images,
     logoURL,
+    hideLogo,
     mobileLogoURL,
     uniqueId,
     // Computed values

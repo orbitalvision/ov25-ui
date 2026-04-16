@@ -202,6 +202,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     logoURL,
     mobileLogoURL,
     cssString,
+    hideLogo,
     deferThreeD,
     showOptional,
     hidePricing,
@@ -802,6 +803,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
         onChange={onChangeFunction}
         images={images}
         logoURL={logoURL}
+        hideLogo={hideLogo}
         mobileLogoURL={mobileLogoURL}
         deferThreeD={deferThreeD}
         configuratorGalleryIsDeferred={useDeferredGallery}

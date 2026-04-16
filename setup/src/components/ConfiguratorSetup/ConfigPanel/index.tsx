@@ -344,6 +344,11 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
                   className="h-7 text-xs mt-0.5"
                 />
               </div>
+              <SwitchRow
+                label="Hide logo"
+                checked={currentSettings.branding.hideLogo}
+                onCheckedChange={(v) => updateNested('branding', 'hideLogo', v)}
+              />
             </div>
 
             {/* --- Behaviour --- */}

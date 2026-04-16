@@ -161,11 +161,17 @@ export function buildSerializableConfig(
   const manualCSS = settings.branding.cssString;
   const combinedCSS = [variableCSS, elementCSS, manualCSS].filter(Boolean).join('\n\n');
 
-  if (combinedCSS || settings.branding.logoURL || settings.branding.mobileLogoURL) {
+  if (
+    combinedCSS ||
+    settings.branding.logoURL ||
+    settings.branding.mobileLogoURL ||
+    settings.branding.hideLogo
+  ) {
     config.branding = {};
     if (settings.branding.logoURL) config.branding.logoURL = settings.branding.logoURL;
     if (settings.branding.mobileLogoURL) config.branding.mobileLogoURL = settings.branding.mobileLogoURL;
     if (combinedCSS) config.branding.cssString = combinedCSS;
+    if (settings.branding.hideLogo) config.branding.hideLogo = true;
   }
 
   if (settings.flags.hidePricing && config.selectors) {
