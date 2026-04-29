@@ -96,6 +96,7 @@ export const InitialiseMenu: React.FC = () => {
         )}
       >
         <p
+          data-ov25-initialise-menu-intro
           className={cn(
             'ov:text-center ov:text-(--ov25-text-color) ov:shrink-0',
             compact ? 'ov:text-sm ov:mb-2 ov:mt-1' : 'ov:text-base ov:mb-3'

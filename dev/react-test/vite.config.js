@@ -26,7 +26,6 @@ const testPages = [
   'snap2-inline',
   'snap2-uuid',
   'snap2-in-gallery',
-  'snap2-custom-initialise-config',
   'bed-configurator',
   'product-with-swatches',
   'multiple-configurators',
@@ -58,15 +57,6 @@ const testPages = [
 const testInputs = Object.fromEntries(
   testPages.map((name) => [name, path.resolve(__dirname, `tests/${name}.html`)])
 );
-
-/** Same path as OV25 `app/.../configurator-preview` — iframe target for ConfiguratorSetup local preview. */
-function rewriteConfiguratorPreviewUrl(req) {
-  const raw = req.url || '';
-  const [pathname, search] = raw.split('?');
-  if (pathname === '/configurator-preview' || pathname === '/configurator-preview/') {
-    req.url = '/configurator-preview.html' + (search ? `?${search}` : '');
-  }
-}
 
 /** ov25-ui resolves to ../../dist (outside this package); default watcher misses it. Full reload when built artifacts change.
  * Do not reload on setup/src alone: watch-library-build rebuilds setup/dist asynchronously; reloading on src races stale dist. */
@@ -106,26 +96,8 @@ function watchLinkedPackagesReload() {
   };
 }
 
-function configuratorPreviewRoutePlugin() {
-  return {
-    name: 'configurator-preview-route',
-    configureServer(server) {
-      server.middlewares.use((req, _res, next) => {
-        rewriteConfiguratorPreviewUrl(req);
-        next();
-      });
-    },
-    configurePreviewServer(server) {
-      server.middlewares.use((req, _res, next) => {
-        rewriteConfiguratorPreviewUrl(req);
-        next();
-      });
-    },
-  };
-}
-
 export default defineConfig({
-  plugins: [react(), configuratorPreviewRoutePlugin(), watchLinkedPackagesReload()],
+  plugins: [react(), watchLinkedPackagesReload()],
   resolve: {
     alias: {
       'ov25-ui': path.resolve(__dirname, '../../dist'),
@@ -140,7 +112,6 @@ export default defineConfig({
       input: {
         main: path.resolve(__dirname, 'index.html'),
         'mobile-preview': path.resolve(__dirname, 'mobile-preview.html'),
-        'configurator-preview': path.resolve(__dirname, 'configurator-preview.html'),
         ...testInputs,
       },
     },
