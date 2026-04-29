@@ -175,7 +175,7 @@ const Snap2Controls: React.FC = () => {
               title="Toggle floor grid"
               aria-label="Toggle floor grid"
               className={cn(
-                'ov:cursor-pointer ov:w-8 ov:h-8 ov:flex ov:items-center ov:justify-center ov:transition-all ov:duration-200 ov:hover:opacity-80 ov:shadow-sm ov:rounded-full',
+                'ov:hidden ov:cursor-pointer ov:w-8 ov:h-8 ov:items-center ov:justify-center ov:transition-all ov:duration-200 ov:hover:opacity-80 ov:shadow-sm ov:rounded-full',
                 showFloor ? 'ov:ring-2 ov:ring-neutral-400' : '',
                 'ov:bg-(--ov25-overlay-button-color)'
               )}
@@ -189,7 +189,7 @@ const Snap2Controls: React.FC = () => {
               id="ov25-snap2-view-select"
               value={String(viewGroupId)}
               onChange={handleViewGroupChange}
-              className="ov:h-8 ov:min-w-36 ov:max-w-44 ov:cursor-pointer ov:rounded-full ov:border-0 ov:bg-(--ov25-overlay-button-color) ov:px-2 ov:text-xs ov:font-medium ov:text-(--ov25-configurator-view-controls-text-color) ov:shadow-sm"
+              className="ov:hidden ov:h-8 ov:min-w-36 ov:max-w-44 ov:cursor-pointer ov:rounded-full ov:border-0 ov:bg-(--ov25-overlay-button-color) ov:px-2 ov:text-xs ov:font-medium ov:text-(--ov25-configurator-view-controls-text-color) ov:shadow-sm"
               aria-label="Camera view"
             >
               {Snap2ViewCameras.map((cam) => (
@@ -206,7 +206,7 @@ const Snap2Controls: React.FC = () => {
               disabled={isCapturingScreenshots}
               onClick={() => void handleCaptureScreenshots()}
               className={cn(
-                'ov:cursor-pointer ov:w-8 ov:h-8 ov:flex ov:items-center ov:justify-center ov:transition-all ov:duration-200 ov:shadow-sm ov:rounded-full ov:bg-(--ov25-overlay-button-color)',
+                'ov:cursor-pointer ov:w-8 ov:h-8 ov:hidden ov:items-center ov:justify-center ov:transition-all ov:duration-200 ov:shadow-sm ov:rounded-full ov:bg-(--ov25-overlay-button-color)',
                 'ov:hover:opacity-80 ov:disabled:opacity-50 ov:disabled:cursor-not-allowed',
               )}
             >
