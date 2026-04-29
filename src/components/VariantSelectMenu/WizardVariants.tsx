@@ -9,8 +9,10 @@ import { SizeVariantCard } from './variant-cards/SizeVariantCard.js';
 import { VariantThumb } from './variant-cards/VariantThumb.js';
 import { FilterControls } from './FilterControls.js';
 import { FilterContent } from './FilterContent.js';
+import { Snap2ModulesOptionBody } from './Snap2ModulesOptionBody.js';
 import { Button } from '../ui/button.js';
 import { CheckoutButton } from './CheckoutButton.js';
+import { Snap2VariantSheetColumn } from '../Snap2VariantSheetColumn.js';
 import {
   selectionBedSizeFromMetadata,
   type ConfiguratorSelectionBedMetadata,
@@ -28,7 +30,7 @@ export interface WizardVariantsProps {
 
 export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
   const {
-    allOptionsWithoutModules,
+    variantPanelOptions,
     selectedSelections,
     handleSelectionSelect,
     getSelectedValue,
@@ -38,6 +40,8 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
     applySearchAndFilters,
     buyNowFunction,
     addToBasketFunction,
+    disableAddToCart,
+    isSnap2Mode,
     activeOptionId,
     setActiveOptionId,
   } = useOV25UI();
@@ -45,9 +49,9 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
   const [currentStep, setCurrentStep] = useState(0);
 
   useEffect(() => {
-    const idx = allOptionsWithoutModules.findIndex(o => o.id === activeOptionId);
+    const idx = variantPanelOptions.findIndex(o => o.id === activeOptionId);
     if (idx >= 0) setCurrentStep(idx);
-  }, [activeOptionId, allOptionsWithoutModules]);
+  }, [activeOptionId, variantPanelOptions]);
   const [visibleCount, setVisibleCount] = useState<{ [optionId: string]: number }>({});
   const [isFilterOpen, setIsFilterOpen] = useState<{ [optionId: string]: boolean }>({});
   const [previousFilteredCounts, setPreviousFilteredCounts] = useState<{ [optionId: string]: number }>({});
@@ -55,9 +59,9 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
   const rootRef = useRef<HTMLDivElement>(null);
   const sentinelRefs = useRef<{ [optionId: string]: HTMLDivElement | null }>({});
 
-  const totalSteps = allOptionsWithoutModules.length + 1;
+  const totalSteps = variantPanelOptions.length + 1;
   const isReviewStep = currentStep === totalSteps - 1;
-  const currentOption = isReviewStep ? null : allOptionsWithoutModules[currentStep];
+  const currentOption = isReviewStep ? null : variantPanelOptions[currentStep];
   const isFirstStep = currentStep === 0;
   const isLastStep = currentStep === totalSteps - 1;
 
@@ -73,12 +77,12 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
   const goNext = () => {
     const nextStep = Math.min(currentStep + 1, totalSteps - 1);
     setCurrentStep(nextStep);
-    setActiveOptionId(nextStep < allOptionsWithoutModules.length ? allOptionsWithoutModules[nextStep].id : null);
+    setActiveOptionId(nextStep < variantPanelOptions.length ? variantPanelOptions[nextStep].id : null);
   };
   const goBack = () => {
     const prevStep = Math.max(currentStep - 1, 0);
     setCurrentStep(prevStep);
-    setActiveOptionId(allOptionsWithoutModules[prevStep]?.id ?? null);
+    setActiveOptionId(variantPanelOptions[prevStep]?.id ?? null);
   };
 
   const toggleFilter = (optionId: string) => {
@@ -89,7 +93,8 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
   };
 
   useEffect(() => {
-    allOptionsWithoutModules.forEach(option => {
+    variantPanelOptions.forEach(option => {
+      if (option.id === 'modules') return;
       const filteredOption = option.id === 'size' ? option : applySearchAndFilters(option, option.id);
       const currentFilteredCount = filteredOption.groups?.flatMap(group => group.selections || []).length || 0;
       const previousCount = previousFilteredCounts[option.id] || 0;
@@ -105,7 +110,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
         }));
       }
     });
-  }, [allOptionsWithoutModules, applySearchAndFilters, previousFilteredCounts]);
+  }, [variantPanelOptions, applySearchAndFilters, previousFilteredCounts]);
 
   useEffect(() => {
     setCurrentStep(s => Math.min(s, Math.max(0, totalSteps - 1)));
@@ -140,10 +145,12 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
     return () => observers.forEach(o => o.disconnect());
   }, [loadMore, currentStep, visibleCount]);
 
-  if (allOptionsWithoutModules.length === 0) return null;
+  if (variantPanelOptions.length === 0) return null;
 
   const filteredOption = !isReviewStep && currentOption
-    ? (currentOption.id === 'size' ? currentOption : applySearchAndFilters(currentOption, currentOption.id))
+    ? (currentOption.id === 'size' || currentOption.id === 'modules'
+      ? currentOption
+      : applySearchAndFilters(currentOption, currentOption.id))
     : null;
   const allVariants = (filteredOption?.groups?.flatMap((group: any) =>
     group.selections?.map((selection: any) => ({
@@ -177,12 +184,12 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
   const isFilterOpenForOption = currentOption ? (isFilterOpen[currentOption.id] || false) : false;
 
   const useDropdown = totalSteps > DROPDOWN_STEP_THRESHOLD;
-  const hasAddToBasket = typeof addToBasketFunction === 'function';
+  const hasAddToBasket = typeof addToBasketFunction === 'function' && !disableAddToCart;
   const hasBuyNow = typeof buyNowFunction === 'function';
   const hasCheckoutActions = hasAddToBasket || hasBuyNow;
   const reviewStepLabel = hasCheckoutActions ? 'Review' : 'Overview';
   const getStepLabel = (idx: number) =>
-    idx === totalSteps - 1 ? reviewStepLabel : allOptionsWithoutModules[idx]?.name ?? '';
+    idx === totalSteps - 1 ? reviewStepLabel : variantPanelOptions[idx]?.name ?? '';
   const currentStepLabel = getStepLabel(currentStep);
   const prevStepLabel = !isFirstStep ? getStepLabel(currentStep - 1) : null;
   const nextStepLabel = !isLastStep ? getStepLabel(currentStep + 1) : null;
@@ -199,11 +206,11 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
             onChange={(e) => {
               const step = Number(e.target.value);
               setCurrentStep(step);
-              setActiveOptionId(step < allOptionsWithoutModules.length ? allOptionsWithoutModules[step].id : null);
+              setActiveOptionId(step < variantPanelOptions.length ? variantPanelOptions[step].id : null);
             }}
             className="ov:w-full ov:appearance-none ov:bg-transparent ov:border ov:border-[var(--ov25-border-color)] ov:rounded-md ov:px-3 ov:py-2 ov:text-sm ov:pr-8 ov:cursor-pointer ov:focus:outline-none ov:focus:ring-1 ov:focus:ring-[var(--ov25-primary-color)]"
           >
-            {allOptionsWithoutModules.map((option, idx) => (
+            {variantPanelOptions.map((option, idx) => (
               <option key={option.id} value={idx}>{idx + 1}. {option.name}</option>
             ))}
             <option value={totalSteps - 1}>{totalSteps}. {reviewStepLabel}</option>
@@ -247,7 +254,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
     </div>
   );
 
-  const filterBlock = !isReviewStep && currentOption && currentOption.id !== 'size' && (
+  const filterBlock = !isReviewStep && currentOption && currentOption.id !== 'size' && currentOption.id !== 'modules' && (
     <div className="ov:shrink-0 ov:h-[var(--ov25-wizard-variants-filter-height)] ov:flex ov:items-center">
       <div className="ov:w-full">
         <FilterControls
@@ -271,9 +278,13 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
         Back
       </button>
       {isReviewStep && hasCheckoutActions ? (
-        <div className="ov:flex-1 ov:min-w-0">
-          <CheckoutButton />
-        </div>
+        isSnap2Mode ? (
+          <div className="ov:flex-1 ov:min-w-0" aria-hidden />
+        ) : (
+          <div className="ov:flex-1 ov:min-w-0">
+            <CheckoutButton />
+          </div>
+        )
       ) : !isReviewStep ? (
         <Button
           onClick={goNext}
@@ -299,7 +310,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
               className="ov:flex ov:flex-col ov:min-h-0 ov:p-4 ov:overflow-y-auto"
             >
             <dl className="ov:space-y-3 ov:text-sm ov:flex-1">
-              {allOptionsWithoutModules.map((option, idx) => {
+              {variantPanelOptions.map((option, idx) => {
                 let value = '';
                 let imageUrl = '';
                 if (option.id === 'size') {
@@ -307,6 +318,9 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
                   const sizeSelection = sizeGroup?.selections?.find((s: any) => s.id === currentProductId);
                   value = (range?.name ? range.name + ' ' : '') + (sizeSelection?.name || getSelectedValue(option));
                   imageUrl = sizeSelection?.thumbnail || '';
+                } else if (option.id === 'modules') {
+                  value = '—';
+                  imageUrl = '';
                 } else {
                   const sel = selectedSelections.find(s => s.optionId === option.id);
                   const group = option.groups?.find((g: any) => g.id === sel?.groupId);
@@ -322,7 +336,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
                       type="button"
                       onClick={() => {
                         setCurrentStep(idx);
-                        setActiveOptionId(allOptionsWithoutModules[idx]?.id ?? null);
+                        setActiveOptionId(variantPanelOptions[idx]?.id ?? null);
                       }}
                       className="ov:flex ov:items-center ov:gap-3 ov:w-full ov:text-left ov:cursor-pointer ov:hover:bg-[var(--ov25-hover-color)] ov:rounded-md ov:p-2 ov:-m-2 ov:transition-colors"
                     >
@@ -340,6 +354,15 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
             </dl>
             </div>
           </div>
+        ) : !isReviewStep && currentOption?.id === 'modules' ? (
+        <div data-ov25-wizard-variants-step-content className={`${stepContentClasses} ov25-variant-group-content`}>
+          <div
+            data-ov25-wizard-variants-content
+            className="ov:relative ov:w-full ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:overflow-y-auto"
+          >
+            <Snap2ModulesOptionBody />
+          </div>
+        </div>
         ) : (
         <div data-ov25-wizard-variants-step-content className={`${stepContentClasses} ov25-variant-group-content`}>
           <div data-ov25-wizard-variants-content className="ov:relative ov:w-full ov:flex ov:flex-col ov:flex-1 ov:min-h-0">
@@ -372,7 +395,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
               )}
             </div>
 
-            {isFilterOpenForOption && currentOption && (
+            {isFilterOpenForOption && currentOption && currentOption.id !== 'modules' && (
               <div
                 data-open={isFilterOpenForOption}
                 className="ov:flex ov:justify-end ov:flex-wrap ov:overflow-y-auto ov:z-8 ov:absolute ov:inset-0 ov:h-full ov:p-2 ov:px-4 ov:bg-[var(--ov25-background-color)] ov:transition-transform ov:duration-500 ov:ease-in-out ov:translate-y-0"
@@ -403,7 +426,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
   );
 
   if (mode === 'inline') {
-    return (
+    const inlineNode = (
       <div
         data-ov25-list-variants-mode="inline"
         className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:h-full ov:overflow-hidden ov:bg-[var(--ov25-background-color)]"
@@ -421,7 +444,8 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
         {buttonsBlock}
       </div>
     );
+    return isSnap2Mode ? <Snap2VariantSheetColumn>{inlineNode}</Snap2VariantSheetColumn> : inlineNode;
   }
 
-  return wizardContent;
+  return isSnap2Mode ? <Snap2VariantSheetColumn>{wizardContent}</Snap2VariantSheetColumn> : wizardContent;
 };

@@ -18,6 +18,7 @@ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
     triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
     variants: {
       displayMode: { desktop: 'list', mobile: 'list' },
+      position: { desktop: 'LEFT', mobile: 'LEFT' },
       useSimpleVariantsSelector: true,
     },
   },
@@ -29,7 +30,7 @@ function App() {
   return (
     <TestPageLayout
       title="Variants only sheet"
-      description="Configurator display mode variants-only-sheet (desktop + mobile): full-height sheet from the right with variant controls only. Open via Configure."
+      description="Configurator display mode variants-only-sheet (desktop + mobile): full-height sheet from the edge given by configurator.variants.position (LEFT here) with variant controls only. Open via Configure."
       injectConfig={config}
       renderControls={false}
       showProductTabs

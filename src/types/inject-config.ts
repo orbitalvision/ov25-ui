@@ -29,20 +29,34 @@ export type CarouselConfig = ResponsiveValue<CarouselDisplayMode> & {
   maxImages?: number | ResponsiveValue<number>;
 };
 
-/** Configurator layout: desktop 'inline' | 'sheet' | 'modal', mobile 'inline' | 'drawer'. */
-export type ConfiguratorDisplayMode = 'inline' | 'sheet' | 'drawer' | 'modal';
+export type ConfiguratorDisplayMode = 'inline' | 'sheet' | 'drawer' | 'modal' | 'inline-sheet';
 
 export type ConfiguratorConfig = {
   displayMode: ResponsiveValue<ConfiguratorDisplayMode>;
   triggerStyle?: ResponsiveValue<'single-button' | 'split-buttons'>;
   variants?: VariantsConfig;
+  modules?: ModulesConfig;
 };
 
 /** Variant UI style: wizard | list | tabs | accordion | tree. Accordion not available on mobile. */
 export type VariantDisplayMode = 'wizard' | 'list' | 'tabs' | 'accordion' | 'tree';
 
+/** Snap2 / inline-sheet: which horizontal edge the variant settings sheet attaches to. */
+export type Snap2VariantSheetSide = 'LEFT' | 'RIGHT';
+
+/**
+ * Snap2 (sheet / drawer / modal): where the compatible-modules UI is shown when not using {@link ConfiguratorDisplayMode} `inline` or `inline-sheet` (those modes always keep modules in the variants column; this value is ignored there).
+ * If this matches {@link Snap2VariantSheetSide} (both LEFT or both RIGHT), modules render inside the variant sheet; otherwise a separate module rail/sheet is used. `BOTTOM` uses the bottom dock.
+ */
+export type Snap2ModulePanelPosition = 'LEFT' | 'RIGHT' | 'BOTTOM';
+
+export type ModulesConfig = {
+  position?: ResponsiveValue<Snap2ModulePanelPosition>;
+};
+
 export type VariantsConfig = {
   displayMode: ResponsiveValue<VariantDisplayMode>;
+  position?: ResponsiveValue<Snap2VariantSheetSide>;
   useSimpleVariantsSelector?: boolean;
   /**
    * Option ids or display names (case-insensitive) to omit from variant UI (list, wizard, tabs, etc.).
@@ -58,6 +72,7 @@ export type SelectorsConfig = {
   variants?: ElementSelector;
   swatches?: ElementSelector;
   configureButton?: ElementSelector;
+  initialiseMenu?: ElementSelector;
 };
 
 /**
@@ -270,11 +285,12 @@ export interface LegacyInjectConfiguratorOptions {
   variantsSelector?: ElementSelector;
   swatchesSelector?: ElementSelector;
   configureButtonSelector?: ElementSelector;
+  initialiseMenuSelector?: ElementSelector;
 
   carouselDisplayMode?: CarouselDisplayMode;
   carouselDisplayModeMobile?: CarouselDisplayMode;
 
-  configuratorDisplayMode?: 'inline' | 'sheet' | 'modal';
+  configuratorDisplayMode?: 'inline' | 'sheet' | 'modal' | 'inline-sheet';
   configuratorDisplayModeMobile?: 'inline' | 'drawer' | 'modal';
   configuratorTriggerStyle?: 'single-button' | 'split-buttons';
   configuratorTriggerStyleMobile?: 'single-button' | 'split-buttons';
@@ -314,6 +330,7 @@ export interface LegacyInjectConfiguratorOptions {
   variantsId?: ElementSelector;
   swatchesId?: ElementSelector;
   configureButtonId?: ElementSelector;
+  initialiseMenuId?: ElementSelector;
   variantDisplayStyle?: VariantDisplayMode;
   variantDisplayStyleMobile?: VariantDisplayMode;
   useInlineVariantControls?: boolean;
@@ -336,13 +353,14 @@ export interface NormalizedInjectConfig {
   variantsSelector?: ElementSelector;
   swatchesSelector?: ElementSelector;
   configureButtonSelector?: ElementSelector;
+  initialiseMenuSelector?: ElementSelector;
 
   carouselDisplayMode: CarouselDisplayMode;
   carouselDisplayModeMobile: CarouselDisplayMode;
   carouselMaxImagesDesktop?: number;
   carouselMaxImagesMobile?: number;
 
-  configuratorDisplayMode: 'inline' | 'sheet' | 'modal';
+  configuratorDisplayMode: 'inline' | 'sheet' | 'modal' | 'inline-sheet';
   configuratorDisplayModeMobile: 'inline' | 'drawer' | 'modal';
   configuratorTriggerStyle: 'single-button' | 'split-buttons';
   configuratorTriggerStyleMobile: 'single-button' | 'split-buttons';
@@ -377,6 +395,13 @@ export interface NormalizedInjectConfig {
   bedFilterSelectionsByCurrentSize: BedPartSizeFilterFlags;
   /** Display symbol for iframe price strings; see {@link FlagsConfig.currencySymbol}. */
   currencySymbol: string;
+
+  /** Snap2 variant rail (normalized lowercase for UI). Defaults: right (desktop/mobile). */
+  snap2VariantSheetSideDesktop: 'left' | 'right';
+  snap2VariantSheetSideMobile: 'left' | 'right';
+  /** Snap2 module picker placement. Default bottom (desktop/mobile). */
+  snap2ModulePanelPositionDesktop: 'left' | 'right' | 'bottom';
+  snap2ModulePanelPositionMobile: 'left' | 'right' | 'bottom';
 }
 
 function pick<T, K extends keyof T>(obj: T, key: K): T[K] | undefined {
@@ -401,6 +426,7 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
   const carousel = isGrouped ? pick(c, 'carousel') : undefined;
   const configurator = isGrouped ? pick(c, 'configurator') : undefined;
   const variants = configurator?.variants ?? (isGrouped ? pick(c, 'variants') : undefined);
+  const modulesCfg = configurator?.modules;
   const branding = isGrouped ? pick(c, 'branding') : undefined;
   const flags = isGrouped ? pick(c, 'flags') : undefined;
   const bedGrouped = isGrouped ? pick(c, 'bed') : undefined;
@@ -411,15 +437,30 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
   const variantsSelector = selectors?.variants ?? c.variantsSelector ?? c.variantsId;
   const swatchesSelector = selectors?.swatches ?? c.swatchesSelector ?? c.swatchesId;
   const configureButtonSelector = selectors?.configureButton ?? c.configureButtonSelector ?? c.configureButtonId;
+  const initialiseMenuSelector =
+    selectors?.initialiseMenu ?? c.initialiseMenuSelector ?? c.initialiseMenuId;
 
   const carouselDesktop = carousel?.desktop ?? c.carouselDisplayMode ?? 'stacked';
   const carouselMobile = carousel?.mobile ?? c.carouselDisplayModeMobile ?? carouselDesktop;
+  // Snap2 (`productLink` snap2/…) does not use the image carousel; ignore inject carousel settings.
+  const resolvedProductLinkForSnap2 =
+    typeof opts.productLink === 'function' ? opts.productLink() : opts.productLink;
+  const isSnap2Inject = String(resolvedProductLinkForSnap2 ?? '').startsWith('snap2/');
+  const carouselDisplayModeResolved: CarouselDisplayMode = isSnap2Inject ? 'none' : carouselDesktop;
+  const carouselDisplayModeMobileResolved: CarouselDisplayMode = isSnap2Inject ? 'none' : carouselMobile;
   const maxImagesRaw = carousel?.maxImages;
   const carouselMaxImagesDesktop = typeof maxImagesRaw === 'number' ? maxImagesRaw : (typeof maxImagesRaw === 'object' && maxImagesRaw ? maxImagesRaw.desktop : undefined);
   const carouselMaxImagesMobile = typeof maxImagesRaw === 'number' ? maxImagesRaw : (typeof maxImagesRaw === 'object' && maxImagesRaw ? maxImagesRaw.mobile ?? maxImagesRaw.desktop : undefined);
 
   const configDesktop = configurator?.displayMode?.desktop ?? c.configuratorDisplayMode ?? 'sheet';
-  const configMobile = configurator?.displayMode?.mobile ?? c.configuratorDisplayModeMobile ?? (configDesktop === 'sheet' ? 'drawer' : configDesktop === 'modal' ? 'modal' : 'inline');
+  const configMobile =
+    configurator?.displayMode?.mobile ??
+    c.configuratorDisplayModeMobile ??
+    (configDesktop === 'sheet' || configDesktop === 'inline-sheet'
+      ? 'drawer'
+      : configDesktop === 'modal'
+        ? 'modal'
+        : 'inline');
   const triggerDesktop = configurator?.triggerStyle?.desktop ?? c.configuratorTriggerStyle ?? 'single-button';
   const triggerMobile = configurator?.triggerStyle?.mobile ?? c.configuratorTriggerStyleMobile ?? triggerDesktop;
 
@@ -429,6 +470,25 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
 
   const useSimpleVariantsSelector = variants?.useSimpleVariantsSelector ?? c.useSimpleVariantsSelector ?? true;
   const hideVariantOptions = normalizeHideVariantOptions(variants?.hideOptions ?? c.hideOptions);
+
+  const snap2VariantSheetSideDesktop = String(variants?.position?.desktop ?? 'right').trim().toLowerCase() as
+    | 'left'
+    | 'right';
+  const snap2VariantSheetSideMobile = String(
+    variants?.position?.mobile ?? variants?.position?.desktop ?? snap2VariantSheetSideDesktop
+  )
+    .trim()
+    .toLowerCase() as 'left' | 'right';
+
+  const snap2ModulePanelPositionDesktop = String(modulesCfg?.position?.desktop ?? 'bottom').trim().toLowerCase() as
+    | 'left'
+    | 'right'
+    | 'bottom';
+  const snap2ModulePanelPositionMobile = String(
+    modulesCfg?.position?.mobile ?? modulesCfg?.position?.desktop ?? snap2ModulePanelPositionDesktop
+  )
+    .trim()
+    .toLowerCase() as 'left' | 'right' | 'bottom';
 
   const addToBasketFunction = isGrouped ? (opts as InjectConfiguratorOptions).callbacks.addToBasket : c.addToBasketFunction;
   const buyNowFunction = isGrouped ? (opts as InjectConfiguratorOptions).callbacks.buyNow : c.buyNowFunction;
@@ -481,8 +541,9 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
     variantsSelector,
     swatchesSelector,
     configureButtonSelector,
-    carouselDisplayMode: carouselDesktop,
-    carouselDisplayModeMobile: carouselMobile,
+    initialiseMenuSelector,
+    carouselDisplayMode: carouselDisplayModeResolved,
+    carouselDisplayModeMobile: carouselDisplayModeMobileResolved,
     carouselMaxImagesDesktop,
     carouselMaxImagesMobile,
     configuratorDisplayMode: configDesktop,
@@ -511,5 +572,9 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
     bedAllowNoneQueryValue,
     bedFilterSelectionsByCurrentSize,
     currencySymbol,
+    snap2VariantSheetSideDesktop,
+    snap2VariantSheetSideMobile,
+    snap2ModulePanelPositionDesktop,
+    snap2ModulePanelPositionMobile,
   };
 }

@@ -5,6 +5,7 @@ export const ConfiguratorDisplayMode = {
   Drawer: 'drawer',
   Modal: 'modal',
   VariantsOnlySheet: 'variants-only-sheet',
+  InlineSheet: 'inline-sheet',
 } as const;
 export type ConfiguratorDisplayMode = (typeof ConfiguratorDisplayMode)[keyof typeof ConfiguratorDisplayMode];
 
@@ -30,11 +31,6 @@ export const VariantDisplayMode = {
   Tree: 'tree',
 } as const;
 export type VariantDisplayMode = (typeof VariantDisplayMode)[keyof typeof VariantDisplayMode];
-
-/** @deprecated Use VariantDisplayMode */
-export const VariantDisplayStyle = VariantDisplayMode;
-/** @deprecated Use VariantDisplayMode */
-export type VariantDisplayStyle = VariantDisplayMode;
 
 /** Variant display style for inline and overlay variant selectors. */
 export const VariantDisplayStyleOverlay = {

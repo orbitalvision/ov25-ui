@@ -20,7 +20,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
     optionId,
     optionIds,
 }) => {
-    const { searchQueries, setSearchQuery, activeOptionId, availableProductFilters, optionHasVisibleFilters, activeOption, isMobile, setAvailableProductFilters, setIsVariantsOpen, openSwatchBook, swatchRulesData, selectedSwatches, allOptionsWithoutModules, hasSelectionsWithSwatches, swatchBookFlash, setSwatchBookFlash } = useOV25UI();
+    const { searchQueries, setSearchQuery, activeOptionId, availableProductFilters, optionHasVisibleFilters, activeOption, isMobile, setAvailableProductFilters, setIsVariantsOpen, openSwatchBook, swatchRulesData, selectedSwatches, allOptions, hasSelectionsWithSwatches, swatchBookFlash, setSwatchBookFlash } = useOV25UI();
     const [localSearchQuery, setLocalSearchQuery] = React.useState('');
     const debouncedSearchQuery = useDebounce(localSearchQuery, 1);
     const previousOptionIdRef = React.useRef<string | null>(null);
@@ -91,8 +91,8 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
     };
 
     const targetOptions = React.useMemo(() =>
-        resolvedOptionIds.map(id => allOptionsWithoutModules?.find(opt => opt.id === id)).filter(Boolean) as { id: string; name: string }[],
-        [resolvedOptionIds, allOptionsWithoutModules]
+        resolvedOptionIds.map(id => allOptions?.find(opt => opt.id === id)).filter(Boolean) as { id: string; name: string }[],
+        [resolvedOptionIds, allOptions]
     );
     const targetOption = targetOptions[0];
 

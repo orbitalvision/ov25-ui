@@ -3,8 +3,10 @@ import { ShoppingCart } from 'lucide-react';
 import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 import { cn } from '../../lib/utils.js';
 
-const baseButtonClasses =
+export const checkoutCommerceCtaButtonClasses =
   'ov:flex ov:items-center ov:justify-center ov:gap-2 ov:py-2 ov:px-6 ov:text-sm ov:rounded-[var(--ov25-cta-border-radius)] ov:bg-[var(--ov25-cta-color)] ov:text-[var(--ov25-cta-text-color)] ov:cursor-pointer ov:hover:bg-[var(--ov25-cta-color-hover)] ov:hover:text-[var(--ov25-cta-text-color-hover)] ov:transition-colors ov:border-0 ov:text-center ov:uppercase';
+
+const baseButtonClasses = checkoutCommerceCtaButtonClasses;
 
 function buttonFontWeight(embedded: boolean) {
   return embedded ? 'ov:font-normal' : 'ov:font-medium';

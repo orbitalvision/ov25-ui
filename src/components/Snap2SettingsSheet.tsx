@@ -14,7 +14,8 @@ export type Snap2SettingsSheetProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   mode: Snap2SettingsSheetMode;
-  children: React.ReactNode;
+  sheetSide?: 'left' | 'right';
+  children: React.ReactNode; 
   /** When set, main area scrolls and footer stays pinned at the bottom of the column. */
   footer?: React.ReactNode;
   /** Modal column z-index; checkout should stack above variants (e.g. z-[110] vs z-102). */
@@ -31,13 +32,13 @@ export type Snap2SettingsSheetProps = {
 };
 
 /**
- * Shared Snap2 right rail: same slide animation as variants via globals.css
  * (`data-ov25-snap2-settings-sheet` + `data-open`), and the same corner close control.
  */
 export const Snap2SettingsSheet: React.FC<Snap2SettingsSheetProps> = ({
   open,
   onOpenChange,
   mode,
+  sheetSide = 'right',
   children,
   footer,
   sheetZClass = 'ov:z-102',
@@ -56,7 +57,9 @@ export const Snap2SettingsSheet: React.FC<Snap2SettingsSheetProps> = ({
   const drawerPanelZ = stackWithinConfigurator ? CONFIGURATOR_DRAWER_PANEL_Z : DRAWER_PANEL_Z;
 
   const shellClassModal = cn(
-    'ov:absolute ov:top-0 ov:right-0 ov:h-full ov:w-[384px] ov:border-l ov:border-gray-200 ov:bg-white ov:box-border',
+    sheetSide === 'left'
+      ? 'ov:absolute ov:top-0 ov:left-0 ov:right-auto ov:h-full ov:w-[384px] ov:border-r ov:border-gray-200 ov:bg-white ov:box-border'
+      : 'ov:absolute ov:top-0 ov:right-0 ov:left-auto ov:h-full ov:w-[384px] ov:border-l ov:border-gray-200 ov:bg-white ov:box-border',
     sheetZClass
   );
 
@@ -64,23 +67,22 @@ export const Snap2SettingsSheet: React.FC<Snap2SettingsSheetProps> = ({
     'ov:fixed ov:top-0 ov:right-0 ov:left-auto ov:w-full ov:min-w-0 ov:max-w-[min(100%,24rem)] ov:border-l ov:border-gray-200 ov:bg-neutral-100 ov:shadow-xl ov:box-border'
   );
 
-  const innerWithFooter = footer != null;
-  const bodyScrollClass = innerWithFooter
-    ? 'ov:flex-1 ov:min-h-0 ov:min-w-0 ov:overflow-y-auto ov:overflow-x-hidden'
-    : 'ov:h-full ov:min-h-0 ov:overflow-y-auto ov:overflow-x-hidden';
+  const bodyScrollClass =
+    'ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:min-w-0 ov:overflow-y-auto ov:overflow-x-hidden';
 
   const panel = (
     <div
       data-ov25-snap2-settings-sheet
+      data-ov25-snap2-settings-sheet-side={mode === 'modal' ? sheetSide : undefined}
       data-open={dataOpen}
       id={id}
       role={role}
       aria-modal={ariaModal}
       aria-labelledby={ariaLabelledby}
       className={cn(
-        'ov:font-[family-name:var(--ov25-360-font-family)]',
+        'ov:font-(family-name:--ov25-360-font-family)',
         mode === 'modal' ? shellClassModal : shellClassDrawer,
-        innerWithFooter && 'ov:flex ov:flex-col ov:overflow-hidden ov:min-h-0',
+        'ov:flex ov:flex-col ov:min-h-0 ov:overflow-hidden',
         className
       )}
       style={
@@ -100,7 +102,7 @@ export const Snap2SettingsSheet: React.FC<Snap2SettingsSheetProps> = ({
           className="ov:z-10"
         />
       ) : null}
-      <div className={cn('ov:min-w-0', bodyScrollClass)}>{children}</div>
+      <div className={cn('ov25-snap2-settings-sheet-body ov:min-w-0', bodyScrollClass)}>{children}</div>
       {footer != null ? (
         <div className="ov:shrink-0 ov:min-w-0 ov:max-w-full ov:overflow-x-hidden ov:box-border">{footer}</div>
       ) : null}
@@ -112,9 +114,10 @@ export const Snap2SettingsSheet: React.FC<Snap2SettingsSheetProps> = ({
       <>
         <button
           type="button"
+          id="ov25-snap2-settings-sheet-backdrop"
           aria-label="Close panel"
           className={cn(
-            'ov:fixed ov:inset-0 ov:z-[1] ov:border-0 ov:cursor-default',
+            'ov:fixed ov:inset-0 ov:z-1 ov:border-0 ov:cursor-default',
             open ? 'ov:bg-black/30 ov:pointer-events-auto' : 'ov:pointer-events-none ov:opacity-0'
           )}
           style={{ zIndex: drawerBackdropZ }}

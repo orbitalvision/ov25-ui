@@ -22,7 +22,6 @@ html, body {
 
 .app {
   margin: 0 auto;
-  padding: 1em;
   height: 100%;
   max-width: 1400px;
   font-family: 'IBM Plex Sans', sans-serif;

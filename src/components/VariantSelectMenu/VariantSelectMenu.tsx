@@ -8,6 +8,7 @@ import { VariantContentDesktop } from './VariantContentDesktop.js';
 import { ModalConfiguratorDesktop } from './ModalConfiguratorDesktop.js';
 import { VariantsOnlySheet } from './VariantsOnlySheet.js';
 import { ProductVariantsWrapper } from './ProductVariantsWrapper.js';
+import { Snap2Wrapper } from './Snap2Wrapper.js';
 import { MobileCheckoutButton } from './MobileCheckoutButton.js';
 import { WizardVariants } from './WizardVariants.js';
 import { VariantsHeader } from './VariantsHeader.js';
@@ -26,7 +27,7 @@ export const VariantSelectMenu: React.FC = () => {
     isMobile,
     setDrawerSize,
     drawerSize,
-    allOptionsWithoutModules,
+    allOptions,
     handleOptionClick,
     range,
     getSelectedValue,
@@ -43,8 +44,15 @@ export const VariantSelectMenu: React.FC = () => {
     variantDisplayStyleInline,
     variantDisplayStyleInlineMobile,
     openConfiguratorOrSnap2,
+    configuratorState,
   } = useOV25UI();
 
+
+  useEffect(() => {
+    if (useInlineVariantControls && isSnap2Mode) {
+      setIsVariantsOpen(true);
+    }
+  }, [useInlineVariantControls, isSnap2Mode, setIsVariantsOpen]);
 
   const handleMobileDrawerClose = (open: boolean) => {
     if (!open && hasConfigureButton && isMobile && isSnap2Mode) {
@@ -68,6 +76,16 @@ export const VariantSelectMenu: React.FC = () => {
   const isInlineTall = isInlineListLike || isInlineWizard;
   const useTriggerArea = useSimpleVariantsSelector && (!useInlineVariantControls || (!isInlineWizard && !isInlineListLike));
 
+  const hasSnap2Objects = (configuratorState?.snap2Objects?.length ?? 0) > 0;
+  const snap2InlineGalleryShowingInitialise =
+    isSnap2Mode &&
+    !isMobile &&
+    configuratorDisplayMode === 'inline' &&
+    !isModalOpen &&
+    !hasSnap2Objects;
+  const holdVariantsPanelForSnap2Initialise =
+    useInlineVariantControls && snap2InlineGalleryShowingInitialise;
+
   useEffect(() => {
     const aside = containerRef.current?.getRootNode() instanceof ShadowRoot
       ? (containerRef.current.getRootNode() as ShadowRoot).host.closest('#ov25-aside-menu')
@@ -83,7 +101,7 @@ export const VariantSelectMenu: React.FC = () => {
   }, [isInlineTall]);
 
   const inlineTallWrapperClass = 'ov:flex-1 ov:min-h-0 ov:h-full ov:flex ov:flex-col ov:overflow-hidden';
-  const productOptionsGroupProps = { allOptions: allOptionsWithoutModules, handleOptionClick, range, getSelectedValue };
+  const productOptionsGroupProps = { allOptions, handleOptionClick, range, getSelectedValue };
 
   /** Trigger area (configure button or options) when useTriggerArea; otherwise inline wizard/list/options when there's no configure button. */
   const renderTriggerOrInlineVariants = () => {
@@ -94,7 +112,7 @@ export const VariantSelectMenu: React.FC = () => {
     }
     if (!hasConfigureButton) {
       if (isInlineWizard) return <div className={inlineTallWrapperClass}><WizardVariants mode="inline" /></div>;
-      if (isInlineListLike) return <div className={inlineTallWrapperClass}><ProductVariantsWrapper isInline /></div>;
+      if (isInlineListLike) return <div className={inlineTallWrapperClass}>{isSnap2Mode ? <Snap2Wrapper isInline /> : <ProductVariantsWrapper isInline />}</div>;
       return <ProductOptionsGroup {...productOptionsGroupProps} />;
     }
     return null;
@@ -104,7 +122,7 @@ export const VariantSelectMenu: React.FC = () => {
     if (useInlineVariantControls) {
       if (!hasConfigureButton) return null;
       if (isInlineWizard) return <div className={inlineTallWrapperClass}><WizardVariants mode="inline" /></div>;
-      if (isInlineListLike) return <div className={inlineTallWrapperClass}><ProductVariantsWrapper isInline /></div>;
+      if (isInlineListLike) return <div className={inlineTallWrapperClass}>{isSnap2Mode ? <Snap2Wrapper isInline /> : <ProductVariantsWrapper isInline />}</div>;
       return <ProductOptionsGroup {...productOptionsGroupProps} />;
     }
     if (configuratorDisplayModeMobile === 'variants-only-sheet') return <VariantsOnlySheet />;
@@ -126,7 +144,7 @@ export const VariantSelectMenu: React.FC = () => {
               </div>
             </div>
           ) : (
-            <ProductVariantsWrapper />
+            isSnap2Mode ? <Snap2Wrapper /> : <ProductVariantsWrapper />
           )}
           {variantDisplayStyleMobile !== 'wizard' && (
             <div className={`${drawerSize === 'large' || drawerSize === 'small' ? 'ov:fixed ov:bottom-0 ov:left-0 ov:w-full ov:z-[20]' : ''}`}>
@@ -139,6 +157,7 @@ export const VariantSelectMenu: React.FC = () => {
   };
 
   const renderDesktop = () => {
+    if (configuratorDisplayMode === 'inline-sheet') return null;
     if (configuratorDisplayMode === 'variants-only-sheet') return <VariantsOnlySheet />;
     if (configuratorDisplayMode === 'modal') return <ModalConfiguratorDesktop />;
     if (!useInlineVariantControls) return <VariantContentDesktop />;
@@ -148,12 +167,20 @@ export const VariantSelectMenu: React.FC = () => {
   return (
     <>
       <div ref={containerRef} id="ov25-configurator-variant-menu-container" className="ov:relative ov:h-full ov:flex ov:flex-col ov:font-[family-name:var(--ov25-font-family)]">
-        {(() => {
-          const Overlay = MobilePriceOverlay as any;
-          return <Overlay />;
-        })()}
-        {renderTriggerOrInlineVariants()}
-        {isMobile ? renderMobile() : !isModalOpen ? renderDesktop() : null}
+        {holdVariantsPanelForSnap2Initialise ? (
+          <div className="ov:flex-1 ov:min-h-0 ov:flex ov:flex-col ov:items-center ov:justify-center ov:px-4 ov:py-8 ov:text-center">
+            <p className="ov:text-base ov:text-(--ov25-text-color) ov:shrink-0">Select a model to get started</p>
+          </div>
+        ) : (
+          <>
+            {(() => {
+              const Overlay = MobilePriceOverlay as any;
+              return <Overlay />;
+            })()}
+            {renderTriggerOrInlineVariants()}
+            {isMobile ? renderMobile() : !isModalOpen ? renderDesktop() : null}
+          </>
+        )}
       </div>
     </>
   );

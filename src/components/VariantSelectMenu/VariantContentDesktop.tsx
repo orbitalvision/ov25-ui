@@ -6,6 +6,7 @@ import { useOV25UI } from "../../contexts/ov25-ui-context.js";
 import { requestTransitionSnapshotFromIframe } from "../../utils/request-transition-snapshot-from-iframe.js";
 import { getConfiguratorIframeContainerScreenRect } from "../../utils/configurator-dom-queries.js";
 import { ProductVariantsWrapper } from './ProductVariantsWrapper.js';
+import { Snap2Wrapper } from './Snap2Wrapper.js';
 import { WizardVariants } from './WizardVariants.js';
 import { VariantsHeader } from './VariantsHeader.js';
 
@@ -24,6 +25,7 @@ export function VariantContentDesktop() {
         releaseConfiguratorTransitionProxy,
         setConfiguratorClosingProxyRect,
         isProductGalleryStacked,
+        isSnap2Mode,
       } = useOV25UI();
     
     const menuContainerRef = useRef<HTMLDivElement>(null);
@@ -210,14 +212,14 @@ export function VariantContentDesktop() {
               }}
             >
                 {variantDisplayStyleOverlay === 'wizard' ? (
-                  <div className="ov:flex ov:flex-col ov:h-full ov:bg-[var(--ov25-background-color)]">
+                  <div className="ov:flex ov:flex-col ov:h-full ov:bg-(--ov25-background-color)">
                     <VariantsHeader />
                     <div className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:overflow-hidden">
                       <WizardVariants mode="drawer" />
                     </div>
                   </div>
                 ) : (
-                  <ProductVariantsWrapper />
+                  isSnap2Mode ? <Snap2Wrapper /> : <ProductVariantsWrapper />
                 )}
             </div>
         </div>

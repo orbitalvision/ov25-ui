@@ -7,14 +7,15 @@ import {
   TRANSITION_MODAL_OVERLAY_OUT_MS,
   TRANSITION_PROXY_CLOSE_EASING,
 } from '../lib/config/iframe-transition-snapshot.js';
-import { ProductVariantsWrapper } from './VariantSelectMenu/ProductVariantsWrapper.js';
+import { Snap2Wrapper } from './VariantSelectMenu/Snap2Wrapper.js';
 import { WizardVariants } from './VariantSelectMenu/WizardVariants.js';
 import { VariantsHeader } from './VariantSelectMenu/VariantsHeader.js';
 import { ModuleBottomPanel } from './VariantSelectMenu/ModuleBottomPanel.js';
+import { Snap2ModulesSheet } from './Snap2ModulesSheet.js';
+import { closeModuleSelectMenu } from '../utils/configurator-utils.js';
 import { VariantsCloseButton } from './VariantSelectMenu/VariantsCloseButton.js';
 import InitialiseMenu from './VariantSelectMenu/InitialiseMenu.js';
 import { Snap2SettingsSheet } from './Snap2SettingsSheet.js';
-import { Snap2CheckoutSheetBody, Snap2CheckoutSheetFooter } from './Snap2CheckoutSheet.js';
 import { Ov25ShadowHost } from './Ov25ShadowHost.js';
 import { findElementByIdInShadowOrRegularDOM } from '../utils/configurator-dom-queries.js';
 
@@ -42,17 +43,16 @@ export const Snap2ConfiguratorModal: React.FC<Snap2ConfiguratorModalProps> = ({ 
     setIsVariantsOpen,
     isSnap2CheckoutSheetOpen,
     setIsSnap2CheckoutSheetOpen,
-    hidePricing,
-    disableAddToCart,
-    addToBasketFunction,
-    buyNowFunction,
+    useInlineVariantControls,
+    snap2VariantSheetSide,
+    snap2ModulesEmbedInVariantSheet,
+    snap2ModuleSheetPosition,
+    isModulePanelOpen,
+    setIsModulePanelOpen,
+    initialiseMenuUsesExternalSelector,
   } = useOV25UI();
   const effectiveOverlayStyle = isMobile ? variantDisplayStyleOverlayMobile : variantDisplayStyleOverlay;
   const isShareDialogOpen = shareDialogTrigger !== 'none';
-  const hasSnap2Checkout =
-    (typeof addToBasketFunction === 'function' && !disableAddToCart) ||
-    typeof buyNowFunction === 'function';
-  const showSnap2CheckoutRail = hasSnap2Checkout && !hidePricing;
   const modalRef = useRef<HTMLDivElement>(null);
   const portalTarget = shadowDOMs?.modalPortal ?? document.body;
   const [portalTargetEl, setPortalTargetEl] = useState<HTMLDivElement | null>(null);
@@ -93,6 +93,11 @@ export const Snap2ConfiguratorModal: React.FC<Snap2ConfiguratorModalProps> = ({ 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key !== 'Escape' || !isOpen) return;
+      if (isModulePanelOpen) {
+        setIsModulePanelOpen(false);
+        closeModuleSelectMenu();
+        return;
+      }
       if (isSnap2CheckoutSheetOpen) {
         setIsSnap2CheckoutSheetOpen(false);
         return;
@@ -105,6 +110,8 @@ export const Snap2ConfiguratorModal: React.FC<Snap2ConfiguratorModalProps> = ({ 
     },
     [
       isOpen,
+      isModulePanelOpen,
+      setIsModulePanelOpen,
       isSnap2CheckoutSheetOpen,
       setIsSnap2CheckoutSheetOpen,
       isVariantsOpen,
@@ -131,6 +138,7 @@ export const Snap2ConfiguratorModal: React.FC<Snap2ConfiguratorModalProps> = ({ 
 
   return createPortal(
     <Ov25ShadowHost
+      id="ov25-snap2-modal-shell"
       ref={modalRef}
       style={{
         position: 'fixed',
@@ -146,6 +154,7 @@ export const Snap2ConfiguratorModal: React.FC<Snap2ConfiguratorModalProps> = ({ 
       tabIndex={-1}
     >
       <div
+        id="ov25-snap2-modal-backdrop"
         className={cn(
           'ov:flex ov:flex-row ov:items-start ov:justify-center ov:p-4',
           'ov:w-full ov:h-full ov:min-h-0 ov:box-border ov:bg-black/50'
@@ -159,9 +168,11 @@ export const Snap2ConfiguratorModal: React.FC<Snap2ConfiguratorModalProps> = ({ 
           )}
         >
           <div
+            id="ov25-snap2-modal-frame"
             ref={setPortalTargetEl}
             className="ov:relative ov:w-[min(90vw,1980px)] ov:h-full ov:flex ov:rounded-3xl"
-            style={{ clipPath: 'inset(0 round 1.5rem)' }}
+            style={{ clipPath: 'inset(0 round var(--ov25-rounded-3xl))' }}
+            data-ov25-snap2-shell="modal"
           >
             <VariantsCloseButton
               onClick={onClose}
@@ -175,47 +186,41 @@ export const Snap2ConfiguratorModal: React.FC<Snap2ConfiguratorModalProps> = ({ 
 
             <Snap2SettingsSheet
               mode="modal"
+              sheetSide={snap2VariantSheetSide}
               open={Boolean(overlayOpaque && isVariantsOpen)}
               onOpenChange={setIsVariantsOpen}
               sheetZClass="ov:z-102"
               showCloseButton={false}
             >
               {effectiveOverlayStyle === 'wizard' ? (
-                <div className="ov:flex ov:flex-col ov:h-full ov:bg-[var(--ov25-background-color)]">
+                <div className="ov:flex ov:flex-col ov:h-full ov:bg-(--ov25-background-color)">
                   <VariantsHeader />
-                  <div className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:overflow-hidden">
+                  <div
+                    className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:overflow-hidden"
+                  >
                     <WizardVariants mode="drawer" />
                   </div>
                 </div>
               ) : (
-                <ProductVariantsWrapper />
+                <div id="ov25-snap2-variants-layout" className="ov:h-full">
+                  <Snap2Wrapper />
+                </div>
               )}
             </Snap2SettingsSheet>
 
-            {showSnap2CheckoutRail ? (
-              <Snap2SettingsSheet
-                mode="modal"
-                open={Boolean(overlayOpaque && isSnap2CheckoutSheetOpen)}
-                onOpenChange={setIsSnap2CheckoutSheetOpen}
-                sheetZClass="ov:z-[110]"
-                className="ov:bg-neutral-100"
-                role="dialog"
-                aria-modal
-                aria-labelledby="ov25-snap2-checkout-sheet-title"
-                id="ov25-snap2-checkout-sheet"
-                footer={
-                  <Snap2CheckoutSheetFooter
-                    onRequestClose={() => setIsSnap2CheckoutSheetOpen(false)}
-                  />
-                }
-              >
-                <Snap2CheckoutSheetBody />
-              </Snap2SettingsSheet>
-            ) : null}
+            {portalTargetEl &&
+              !useInlineVariantControls &&
+              !snap2ModulesEmbedInVariantSheet &&
+              snap2ModuleSheetPosition === 'bottom' && <ModuleBottomPanel portalTarget={portalTargetEl} />}
+            {portalTargetEl &&
+              !useInlineVariantControls &&
+              !snap2ModulesEmbedInVariantSheet &&
+              (snap2ModuleSheetPosition === 'left' || snap2ModuleSheetPosition === 'right') && (
+                <Snap2ModulesSheet portalTarget={portalTargetEl} sheetSide={snap2ModuleSheetPosition} />
+              )}
 
-            {portalTargetEl && <ModuleBottomPanel portalTarget={portalTargetEl} />}
-
-            {(!configuratorState?.snap2Objects || configuratorState.snap2Objects.length === 0) &&
+            {!initialiseMenuUsesExternalSelector &&
+              (!configuratorState?.snap2Objects || configuratorState.snap2Objects.length === 0) &&
               (isProductGalleryStacked ? (
                 createPortal(
                   <Ov25ShadowHost
@@ -228,14 +233,14 @@ export const Snap2ConfiguratorModal: React.FC<Snap2ConfiguratorModalProps> = ({ 
                       pointerEvents: 'auto',
                     }}
                   >
-                    <div className="ov:absolute ov:inset-0 ov:z-[103] ov:bg-[var(--ov25-background-color)]">
+                    <div className="ov:absolute ov:inset-0 ov:z-103 ov:bg-(--ov25-background-color)">
                       <InitialiseMenu />
                     </div>
                   </Ov25ShadowHost>,
                   initialiseMenuPortalParent
                 )
               ) : (
-                <div className="ov:absolute ov:inset-0 ov:z-[103] ov:bg-[var(--ov25-background-color)]">
+                <div className="ov:absolute ov:inset-0 ov:z-103 ov:bg-(--ov25-background-color)">
                   <InitialiseMenu />
                 </div>
               ))}

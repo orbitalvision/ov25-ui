@@ -6,6 +6,7 @@ import { ProductGallery, DeferredGalleryContainer } from '../components/product-
 import Price from '../components/Price.js';
 import Name from '../components/Name.js';
 import VariantSelectMenu from '../components/VariantSelectMenu/VariantSelectMenu.js';
+import InitialiseMenu from '../components/VariantSelectMenu/InitialiseMenu.js';
 import { SwatchesContainer } from '../components/SwatchesContainer.js';
 import { SwatchBook } from '../components/VariantSelectMenu/SwatchBook.js';
 import { Snap2ConfigureButton, Snap2ConfigureUI } from '../components/Snap2ConfigureButton.js';
@@ -17,6 +18,7 @@ import '../../globals.css';
 import { Toaster } from 'sonner';
 import { getSharedStylesheet, createuserCustomCssStylesheet } from './shadow-styles.js';
 import { findIframeWithUniqueId } from './configurator-dom-queries.js';
+import { computeIsMobileViewport } from './viewport-mobile.js';
 
 // Import sonner CSS as string
 import sonnerCssText from 'sonner/dist/styles.css?inline';
@@ -127,7 +129,6 @@ export {
   VariantDisplayMode,
   VariantDisplayStyleOverlay,
   CarouselLayout,
-  VariantDisplayStyle,
 } from '../types/config-enums.js';
 export type {
   InjectConfiguratorOptions,
@@ -136,6 +137,9 @@ export type {
   CarouselConfig,
   ConfiguratorConfig,
   VariantsConfig,
+  ModulesConfig,
+  Snap2VariantSheetSide,
+  Snap2ModulePanelPosition,
   SelectorsConfig,
   CallbacksConfig,
   BrandingConfig,
@@ -182,6 +186,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     variantsSelector,
     swatchesSelector,
     configureButtonSelector,
+    initialiseMenuSelector,
     carouselDisplayMode,
     carouselDisplayModeMobile,
     carouselMaxImagesDesktop,
@@ -214,18 +219,38 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     bedAllowNoneQueryValue,
     bedFilterSelectionsByCurrentSize,
     currencySymbol,
+    snap2VariantSheetSideDesktop,
+    snap2VariantSheetSideMobile,
+    snap2ModulePanelPositionDesktop,
+    snap2ModulePanelPositionMobile,
   } = n;
 
   const showCarousel = carouselDisplayMode !== CarouselDisplayMode.None;
-  const useInlineVariantControls = configuratorDisplayMode === ConfiguratorDisplayMode.Inline
-    || (opts as any).useInlineVariantControls === true;
+  const useInlineVariantControls =
+    configuratorDisplayMode === ConfiguratorDisplayMode.Inline ||
+    configuratorDisplayMode === ConfiguratorDisplayMode.InlineSheet ||
+    (opts as any).useInlineVariantControls === true;
   const useInlineVariantControlsMobile = configuratorDisplayModeMobile === ConfiguratorDisplayMode.Inline;
   const variantDisplayStyle = variantDisplayMode;
   const variantDisplayStyleMobile = variantDisplayModeMobile;
 
-  // Snap2 ignores gallery selector - gallery is always inside the modal
   const resolvedProductLinkForGallery = typeof productLink === 'function' ? productLink() : productLink;
-  const effectiveGallerySelector = resolvedProductLinkForGallery?.startsWith('snap2/') ? undefined : gallerySelector;
+  const isSnap2Product = Boolean(resolvedProductLinkForGallery?.startsWith('snap2/'));
+  const injectInitialIsMobile = computeIsMobileViewport({
+    width: typeof window !== 'undefined' ? window.innerWidth : 0,
+    height: typeof window !== 'undefined' ? window.innerHeight : 0,
+    forceMobile,
+    isSnap2: isSnap2Product,
+  });
+  const snap2InlinePathActive =
+    isSnap2Product &&
+    ((injectInitialIsMobile &&
+      configuratorDisplayModeMobile === ConfiguratorDisplayMode.Inline) ||
+      (!injectInitialIsMobile &&
+        (configuratorDisplayMode === ConfiguratorDisplayMode.Inline ||
+          configuratorDisplayMode === ConfiguratorDisplayMode.InlineSheet)));
+  const snap2ShellOwnsGalleryOutsideInject = isSnap2Product && !snap2InlinePathActive;
+  const effectiveGallerySelector = snap2ShellOwnsGalleryOutsideInject ? undefined : gallerySelector;
 
   // Add generateThumbnail function to window object
   (window as any).ov25GenerateThumbnail = () => {
@@ -516,8 +541,9 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
 
     const hasGallerySelector = !!getSelector(effectiveGallerySelector);
     const useDeferredGallery =
-    !hasGallerySelector &&
-    (deferThreeD || configuratorDisplayMode === ConfiguratorDisplayMode.Modal);
+      !snap2ShellOwnsGalleryOutsideInject &&
+      !hasGallerySelector &&
+      (deferThreeD || configuratorDisplayMode === ConfiguratorDisplayMode.Modal);
 
     if (useDeferredGallery) {
       let deferredGalleryEl = document.getElementById('ov25-deferred-gallery-container');
@@ -586,13 +612,32 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
           const emptyDiv = document.createElement('div');
           emptyDiv.setAttribute('data-clarity-mask', 'true');
           const stickyGallery =
-            useInlineVariantControls && componentName === 'gallery' ? ' ov25-inline-gallery-sticky' : '';
+            useInlineVariantControls && !injectInitialIsMobile && componentName === 'gallery'
+              ? ' ov25-inline-gallery-sticky'
+              : '';
           emptyDiv.className = `${target.className} ov25-configurator-${componentName}${stickyGallery}`.trim();
           if (target.id) emptyDiv.id = target.id;
 
           target.parentNode.replaceChild(emptyDiv, target);
-          // Create portal into the empty div
-          portals.push(createPortal(el, emptyDiv));
+          if (
+            componentName === 'gallery' &&
+            isSnap2Product &&
+            configuratorDisplayMode === ConfiguratorDisplayMode.InlineSheet
+          ) {
+            emptyDiv.style.display = 'flex';
+            emptyDiv.style.flexDirection = 'column';
+            const stage = document.createElement('div');
+            stage.className = 'ov25-snap2-inline-sheet-stage';
+            stage.id = uniqueId ? `ov25-snap2-inline-sheet-stage-${uniqueId}` : 'ov25-snap2-inline-sheet-stage';
+            stage.setAttribute('data-clarity-mask', 'true');
+            stage.style.cssText =
+              'flex:1;min-height:0;position:relative;width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;';
+            emptyDiv.appendChild(stage);
+            portals.push(createPortal(el, stage));
+          } else {
+            // Create portal into the empty div
+            portals.push(createPortal(el, emptyDiv));
+          }
         } else {
           console.warn(`[OV25-UI] Element or parent not found for selector "${selector}"`);
         }
@@ -644,6 +689,14 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     const variantsTarget = variantsSelectorStr ? document.querySelector(variantsSelectorStr) : null;
     const configureTarget = configureSelector ? document.querySelector(configureSelector) : null;
 
+    /** Desktop Snap2 `inline-sheet` renders variants in {@link Snap2InlineSheetDesktopShell} over the gallery; skip the inject variants slot only then. */
+    const mountVariantSelectMenuInVariantsSlot =
+      !(
+        isSnap2Product &&
+        configuratorDisplayMode === ConfiguratorDisplayMode.InlineSheet &&
+        !injectInitialIsMobile
+      );
+
     // Process each component
     // Show gallery in page slot when selector is provided (including modal mode — iframe shows on page, then repositions into modal).
     // Non-replace: mount inside a dedicated flex column so iframe + thumbnails stay one layout unit (avoids grid splitting vs siblings).
@@ -657,7 +710,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
           const column = document.createElement('div');
           column.className = [
             'ov25-configurator-inject-column',
-            useInlineVariantControls ? 'ov25-inline-gallery-sticky' : '',
+            useInlineVariantControls && !injectInitialIsMobile ? 'ov25-inline-gallery-sticky' : '',
           ]
             .filter(Boolean)
             .join(' ');
@@ -666,7 +719,20 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
           column.style.flexDirection = 'column';
           column.style.width = '100%';
           target.appendChild(column);
-          portals.push(createPortal(<ProductGallery />, column));
+          const useSnap2InlineSheetStage =
+            isSnap2Product && configuratorDisplayMode === ConfiguratorDisplayMode.InlineSheet;
+          let galleryMountParent: HTMLElement = column;
+          if (useSnap2InlineSheetStage) {
+            const stage = document.createElement('div');
+            stage.className = 'ov25-snap2-inline-sheet-stage';
+            stage.id = uniqueId ? `ov25-snap2-inline-sheet-stage-${uniqueId}` : 'ov25-snap2-inline-sheet-stage';
+            stage.setAttribute('data-clarity-mask', 'true');
+            stage.style.cssText =
+              'flex:1;min-height:0;position:relative;width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;';
+            column.appendChild(stage);
+            galleryMountParent = stage;
+          }
+          portals.push(createPortal(<ProductGallery />, galleryMountParent));
         } else {
           console.warn(`[OV25-UI] Element not found for selector "${gallerySel}"`);
         }
@@ -680,11 +746,11 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
       if (useSimpleVariantsSelector) {
         if (configureTarget && configureButtonSelector) {
           processElement(configureButtonSelector, <VariantSelectMenu />, 'configure-button');
-        } else if (variantsTarget) {
+        } else if (variantsTarget && mountVariantSelectMenuInVariantsSlot) {
           processElement(variantsSelector, <VariantSelectMenu />, 'variants');
         }
       } else {
-        if (variantsTarget) {
+        if (variantsTarget && mountVariantSelectMenuInVariantsSlot) {
           processElement(variantsSelector, <VariantSelectMenu />, 'variants');
         } else if (configureTarget && configureButtonSelector) {
           processElement(configureButtonSelector, <Snap2ConfigureButton />, 'configure-button');
@@ -704,6 +770,11 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     processElement(priceSelector, <Price />, 'price');
     processElement(nameSelector, <Name />, 'name');
     processElement(swatchesSelector, <SwatchesContainer />, 'swatches');
+
+    const initialiseMenuUsesExternalSelector = Boolean(getSelector(initialiseMenuSelector));
+    if (initialiseMenuUsesExternalSelector) {
+      processElement(initialiseMenuSelector, <InitialiseMenu />, 'initialise-menu');
+    }
 
     // Configure button handling when both variants and configure button exist (Snap2 only, not useSimpleVariantsSelector)
     if (configureButtonSelector && variantsTarget && configureTarget && !useSimpleVariantsSelector) {
@@ -842,6 +913,11 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
         bedAllowNoneQueryValue={bedAllowNoneQueryValue}
         bedFilterSelectionsByCurrentSize={bedFilterSelectionsByCurrentSize}
         currencySymbol={currencySymbol}
+        snap2VariantSheetSideDesktop={snap2VariantSheetSideDesktop}
+        snap2VariantSheetSideMobile={snap2VariantSheetSideMobile}
+        snap2ModulePanelPositionDesktop={snap2ModulePanelPositionDesktop}
+        snap2ModulePanelPositionMobile={snap2ModulePanelPositionMobile}
+        initialiseMenuUsesExternalSelector={initialiseMenuUsesExternalSelector}
       >
         {portals}
       </OV25UIProvider>

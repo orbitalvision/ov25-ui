@@ -142,47 +142,49 @@ export const SaveSnap2Dialog: React.FC = () => {
   return (
     <Dialog open={showShareDialog || shareDialogTrigger !== 'none'} onOpenChange={handleShareDialogClose}>
       <DialogContent
+        id="ov25-snap2-save-dialog"
         aria-describedby={undefined}
         className="snap2-dialog ov:rounded-2xl ov:p-8 ov:bg-(--ov25-background-color) ov:border-(--ov25-border-color)"
         closeClassName="ov:right-6 ov:top-6 ov:rounded-full ov:text-[var(--ov25-text-color)] ov:opacity-70 hover:ov:opacity-100 ov:transition-opacity"
       >
-        <DialogHeader>
-          <DialogTitle className="ov:text-lg ov:font-normal ov:text-(--ov25-text-color) ov:tracking-tight">
+        <DialogHeader className="ov:space-y-1 ov:text-left">
+          <DialogTitle className="ov:text-xl ov:font-semibold ov:text-(--ov25-text-color) ov:tracking-tight">
             {shareDialogTrigger === 'modal-close' ? 'Save Your Configuration' : 'Share Configuration'}
           </DialogTitle>
         </DialogHeader>
-        <div className="ov:space-y-4 mt-4">
+        <div className="ov:mt-6 ov:flex ov:flex-col ov:gap-6">
           {showConfirmation ? (
-            <>  
-              <p className="ov:text-base ov:font-light ov:text-(--ov25-secondary-text-color) ov:leading-relaxed">
+            <>
+              <p className="ov:text-base ov:font-normal ov:text-(--ov25-secondary-text-color) ov:leading-relaxed">
                 {shareDialogTrigger === 'modal-close'
                   ? 'Do you want to save your progress? Without saving, your configuration will be lost.'
                   : 'Do you want to save your configuration?'}
               </p>
-              <div className="w-full h-4"></div>
-              <div className="ov:flex ov:gap-2 pt-8">
+              <div className="ov:flex ov:flex-col ov:gap-3 ov:sm:flex-row ov:sm:justify-end">
                 <button
-                  onClick={handleConfirmSave}
-                  className="ov:flex-1 ov:flex ov:items-center ov:justify-center ov:py-2 ov:px-6 ov:text-sm ov:rounded-(--ov25-cta-border-radius) ov:bg-(--ov25-cta-color) ov:text-(--ov25-cta-text-color) ov:font-medium ov:cursor-pointer ov:hover:bg-(--ov25-cta-color-hover) ov:hover:text-(--ov25-cta-text-color-hover) ov:transition-colors ov:border-0 ov:text-center ov:uppercase"
-                >
-                  Yes
-                </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    handleNoSave();
-                  }}
-                  className="ov:flex-1 ov:flex ov:items-center ov:justify-center ov:py-2 ov:px-6 ov:text-sm ov:rounded-(--ov25-cta-border-radius) ov:border-(--ov25-border-color) ov:bg-transparent ov:text-(--ov25-text-color) ov:cursor-pointer ov:hover:opacity-90 ov:transition-colors ov:text-center ov:uppercase"
+                  type="button"
+                  id="ov25-snap2-save-dialog-no"
+                  onClick={handleNoSave}
+                  className="ov:order-2 ov:sm:order-1 ov:flex-1 ov:sm:flex-none ov:inline-flex ov:min-h-11 ov:items-center ov:justify-center ov:rounded-(--ov25-cta-border-radius) ov:border ov:border-(--ov25-border-color) ov:bg-(--ov25-secondary-background-color) ov:px-6 ov:text-sm ov:font-medium ov:text-(--ov25-text-color) ov:transition-colors hover:ov:bg-(--ov25-hover-color) ov:sm:min-w-30"
                 >
                   No
+                </button>
+                <button
+                  type="button"
+                  id="ov25-snap2-save-dialog-yes"
+                  onClick={handleConfirmSave}
+                  className="ov:order-1 ov:sm:order-2 ov:flex-1 ov:inline-flex ov:min-h-11 ov:items-center ov:justify-center ov:rounded-(--ov25-cta-border-radius) ov:bg-(--ov25-cta-color) ov:px-6 ov:text-sm ov:font-medium ov:text-(--ov25-cta-text-color) ov:transition-colors hover:ov:bg-(--ov25-cta-color-hover) hover:ov:text-(--ov25-cta-text-color-hover) ov:sm:min-w-30"
+                >
+                  Yes
                 </button>
               </div>
             </>
           ) : isSaving ? (
-            <div className="ov:flex ov:flex-col ov:items-center ov:justify-center ov:py-8 ov:space-y-4">
-              <Loader2 className="ov:w-8 ov:h-8 ov:animate-spin ov:text-(--ov25-text-color)" />
-              <p className="ov:text-base ov:font-normal ov:text-(--ov25-secondary-text-color)">Saving configuration...</p>
+            <div className="ov:flex ov:flex-col ov:items-center ov:justify-center ov:gap-4 ov:py-10">
+              <Loader2 className="ov:h-10 ov:w-10 ov:animate-spin ov:text-(--ov25-cta-color)" aria-hidden />
+              <p className="ov:text-center ov:text-base ov:font-medium ov:text-(--ov25-secondary-text-color)">
+                Saving configuration…
+              </p>
             </div>
           ) : (
             <>
@@ -191,19 +193,20 @@ export const SaveSnap2Dialog: React.FC = () => {
                   ? 'Save this link to return to your configuration later. Without it, your progress will be lost:'
                   : 'Copy this link to share with others or save your custom configuration for later:'}
               </p>
-              <div className="ov:space-y-2">
+              <div className="ov:flex ov:flex-col ov:gap-3">
                 <textarea
                   value={shareUrl}
-                  rows={2}
+                  rows={3}
                   readOnly
-                  className="ov:min-h-[80px] ov:w-full ov:resize-none ov:bg-(--ov25-background-color) ov:border-(--ov25-border-color) ov:text-base ov:text-(--ov25-text-color)"
-                  placeholder="Shareable link will appear here..."
+                  className="ov:min-h-22 ov:w-full ov:resize-none ov:rounded-lg ov:border ov:border-(--ov25-border-color) ov:bg-(--ov25-secondary-background-color) ov:p-3 ov:font-mono ov:text-sm ov:leading-snug ov:text-(--ov25-text-color) ov:outline-none focus-visible:ov:ring-2 focus-visible:ov:ring-(--ov25-cta-color) focus-visible:ov:ring-offset-2 focus-visible:ov:ring-offset-(--ov25-background-color)"
+                  placeholder="Shareable link will appear here…"
                 />
                 <button
+                  type="button"
                   onClick={copyToClipboard}
-                  className="ov:w-full ov:flex ov:items-center ov:justify-center ov:py-2 ov:px-6 ov:text-sm ov:rounded-(--ov25-cta-border-radius) ov:bg-(--ov25-cta-color) ov:text-(--ov25-cta-text-color) ov:font-medium ov:cursor-pointer ov:hover:bg-(--ov25-cta-color-hover) ov:hover:text-(--ov25-cta-text-color-hover) ov:transition-colors ov:border-0 ov:text-center ov:uppercase"
+                  className="ov:inline-flex ov:min-h-11 ov:w-full ov:items-center ov:justify-center ov:rounded-(--ov25-cta-border-radius) ov:bg-(--ov25-cta-color) ov:px-6 ov:text-sm ov:font-medium ov:text-(--ov25-cta-text-color) ov:transition-colors hover:ov:bg-(--ov25-cta-color-hover) hover:ov:text-(--ov25-cta-text-color-hover)"
                 >
-                  Copy Link
+                  Copy link
                 </button>
               </div>
             </>

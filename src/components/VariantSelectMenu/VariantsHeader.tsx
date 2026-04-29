@@ -11,9 +11,11 @@ import { VariantsCloseButton } from './VariantsCloseButton.js';
 export interface VariantsHeaderProps {
   /** When true, omit {@link VariantsCloseButton} (e.g. variants-only sheet already has its own X). */
   hideCloseButton?: boolean;
+  /** When set, used as {@link VariantsCloseButton} `onClick` instead of the default sheet close behavior. */
+  onCloseButtonClick?: () => void;
 }
 
-export const VariantsHeader = ({ hideCloseButton = false }: VariantsHeaderProps = {}) => {
+export const VariantsHeader = ({ hideCloseButton = false, onCloseButtonClick }: VariantsHeaderProps = {}) => {
   const { logoURL, hideLogo, handleNextOption, handlePreviousOption, activeOptionId, allOptions, showOptional, isSnap2Mode, isMobile, currentProduct } = useOV25UI();
 
   if (isMobile) return <div id="ov25-variants-header-mobile" className='w-full h-1'></div>;
@@ -34,7 +36,13 @@ export const VariantsHeader = ({ hideCloseButton = false }: VariantsHeaderProps 
           {!hideLogo ?
             <OVOrBrandLogo imageUrl={logoURL} className="ov:h-full" /> :
             <div className="ov25-variants-header-name ov:w-full ov:h-full ov:text-(--ov25-secondary-text-color) ov:text-xl ov:text-center">{currentProduct?.name}</div>}
-          {!hideCloseButton && <VariantsCloseButton />}
+          {!hideCloseButton && (
+            onCloseButtonClick ? (
+              <VariantsCloseButton onClick={onCloseButtonClick} />
+            ) : (
+              <VariantsCloseButton />
+            )
+          )}
         </div>
       </div>}
 

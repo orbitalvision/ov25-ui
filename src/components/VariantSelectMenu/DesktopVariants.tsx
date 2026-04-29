@@ -10,6 +10,7 @@ import { NoResults } from './NoResults.js';
 
 export const getGridColsClass = (gridDivide: number) => {
   switch (gridDivide) {
+    case 1: return 'ov:grid-cols-1!';
     case 2: return 'ov:grid-cols-2!';
     case 4: return 'ov:grid-cols-4!';
     case 5: return 'ov:grid-cols-5!';
@@ -38,7 +39,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
   const variantsToRender = isGrouped ? (variants as VariantGroup[]) : variants as Variant[];
 
   const {
-    allOptionsWithoutModules,
+    variantPanelOptions,
     handleOptionClick,
     activeOptionId,
     handlePreviousOption,
@@ -47,14 +48,14 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
     showOptional,
   } = useOV25UI();
 
-  const currentOption = allOptionsWithoutModules.find(opt => opt.id === activeOptionId)
+  const currentOption = variantPanelOptions.find(opt => opt.id === activeOptionId)
 
   const shouldShowFilters = ((isGrouped && !shouldDestructureGroups) && (variantsToRender as VariantGroup[]).some(group => group.variants.length > 0)) || showFilters;
 
   return (
     <>
 
-    {allOptionsWithoutModules.length > 6 && (
+    {variantPanelOptions.length > 6 && (
          <div id="ov25-carousel-controls" className="ov25-desktop-variants-carousel-controls ov:relative ov:hidden ov:cursor-pointer ov:md:flex ov:items-center ov:justify-between ov:w-full ov:p-4 ov:py-4.5 pt-0 ">
          <div className="ov:absolute ov:inset-0 ov:w-full ov:flex ov:justify-center ov:items-center ov:pb-5 ov:pt-5 ov:border-b ov:border-(--ov25-border-color)">
              <p data-optional={currentOption?.hasNonOption ? 'true' : 'false'} className="ov:text-(--ov25-secondary-text-color)">
@@ -82,12 +83,12 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
      </div>
     )}
       {
-        allOptionsWithoutModules.length > 1 && allOptionsWithoutModules.length <= 6 && (
+        variantPanelOptions.length > 1 && variantPanelOptions.length <= 6 && (
           <div id="ov25-option-selector-tabs" className="ov:flex ov:flex-wrap">
-            {allOptionsWithoutModules.map((option, index) => {
+            {variantPanelOptions.map((option, index) => {
               // Determine items per row: max 3 per row
-              const itemsInFirstRow = Math.min(3, allOptionsWithoutModules.length);
-              const itemsInSecondRow = allOptionsWithoutModules.length > 3 ? allOptionsWithoutModules.length - 3 : 0;
+              const itemsInFirstRow = Math.min(3, variantPanelOptions.length);
+              const itemsInSecondRow = variantPanelOptions.length > 3 ? variantPanelOptions.length - 3 : 0;
               // Figure out if this item is in the first or second row
               const isFirstRow = index < 3;
               const itemsThisRow = isFirstRow ? itemsInFirstRow : itemsInSecondRow;

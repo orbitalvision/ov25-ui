@@ -1,9 +1,10 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useState, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 import { selectModule, CompatibleModule, closeModuleSelectMenu } from '../../utils/configurator-utils.js';
-import { ChevronsRight, CornerDownRight, Layers, Sofa } from 'lucide-react';
-import { Carousel, CarouselContent, CarouselItem } from '../ui/carousel.js';
+import { ChevronsRight, CornerDownRight, Layers, Move, Ruler, Sofa } from 'lucide-react';
+import { Snap2CustomDimensionForm } from './Snap2CustomDimensionForm.js';
+import { Carousel, CarouselContent, CarouselItem, type CarouselApi } from '../ui/carousel.js';
 import { Variant } from './ProductVariants.js';
 import { cn } from '../../lib/utils.js';
 
@@ -16,6 +17,7 @@ export const ModuleBottomPanel: React.FC<{ portalTarget: Element }> = ({ portalT
     setSelectedModuleType,
     isModuleSelectionLoading,
     setIsModuleSelectionLoading,
+    uniqueId,
   } = useOV25UI();
 
   // Mount/animation state
@@ -25,7 +27,11 @@ export const ModuleBottomPanel: React.FC<{ portalTarget: Element }> = ({ portalT
   // Hover state for tooltips
   const [hoveredModule, setHoveredModule] = useState<string | null>(null);
   const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
-  
+  const [customDimsProductId, setCustomDimsProductId] = useState<number | null>(null);
+  const [dimsPopoverStyle, setDimsPopoverStyle] = useState<React.CSSProperties | null>(null);
+  const [moduleCarouselApi, setModuleCarouselApi] = useState<CarouselApi | null>(null);
+  const moduleCardDomRef = useRef<Partial<Record<number, HTMLDivElement | null>>>({});
+
   // Tab underline animation state
   const tabTypes = ['all', 'middle', 'corner', 'end'];
   const [activeTabIndex, setActiveTabIndex] = useState(0);
@@ -66,27 +72,92 @@ export const ModuleBottomPanel: React.FC<{ portalTarget: Element }> = ({ portalT
 
   const availableTabTypes = getAvailableTabTypes();
 
+  const placeMovableForModule = (module: CompatibleModule) => {
+    if (isModuleSelectionLoading) return;
+    const modelPath = module.model?.modelPath;
+    const modelId = module.model?.modelId;
+    if (!modelPath || !modelId) return;
+    setIsModuleSelectionLoading(true);
+    selectModule({ modelPath, modelId, placeMovable: true }, uniqueId);
+    setIsModulePanelOpen(false);
+    closeModuleSelectMenu(uniqueId);
+  };
+
+  const handlePlaceMovable = (e: React.MouseEvent, module: CompatibleModule) => {
+    e.stopPropagation();
+    placeMovableForModule(module);
+  };
+
   const handleModuleSelect = (variant: Variant) => {
     if (isModuleSelectionLoading) {
       return;
     }
-    
+
     const module = variant.data as CompatibleModule;
+    if (customDimsProductId === module.product.id) {
+      return;
+    }
+
+    if (module.isMovable) {
+      placeMovableForModule(module);
+      return;
+    }
+
     const modelPath = module?.model?.modelPath;
     const modelId = module?.model?.modelId;
-    
+
     if (!modelPath || !modelId) {
       return;
     }
-    
+
     setIsModuleSelectionLoading(true);
-    selectModule(modelPath, modelId);
+    selectModule({ modelPath, modelId }, uniqueId);
   };
 
   const handleClose = () => {
+    setCustomDimsProductId(null);
     setIsModulePanelOpen(false);
-    closeModuleSelectMenu();
+    closeModuleSelectMenu(uniqueId);
   };
+
+  useLayoutEffect(() => {
+    if (customDimsProductId == null) {
+      setDimsPopoverStyle(null);
+      return;
+    }
+    const measure = () => {
+      const el = moduleCardDomRef.current[customDimsProductId];
+      if (!el || typeof window === 'undefined') {
+        setDimsPopoverStyle(null);
+        return;
+      }
+      const r = el.getBoundingClientRect();
+      const width = Math.min(280, window.innerWidth - 16);
+      const centerX = r.left + r.width / 2;
+      const leftPx = Math.max(width / 2 + 8, Math.min(centerX, window.innerWidth - width / 2 - 8));
+      setDimsPopoverStyle({
+        position: 'fixed',
+        left: `${leftPx}px`,
+        top: `${r.top - 8}px`,
+        transform: 'translate(-50%, -100%)',
+        width: `${width}px`,
+        maxHeight: 'min(50vh, 22rem)',
+        overflowY: 'auto',
+        zIndex: 2147483640,
+        boxSizing: 'border-box',
+      });
+    };
+    measure();
+  }, [customDimsProductId, isEntering, selectedModuleType]);
+
+  useEffect(() => {
+    if (customDimsProductId == null || !moduleCarouselApi) return;
+    const dismiss = () => setCustomDimsProductId(null);
+    moduleCarouselApi.on('scroll', dismiss);
+    return () => {
+      moduleCarouselApi.off('scroll', dismiss);
+    };
+  }, [moduleCarouselApi, customDimsProductId]);
 
   // Handle mount/unmount with transition classes; unmount on transition end
   useEffect(() => {
@@ -236,7 +307,7 @@ export const ModuleBottomPanel: React.FC<{ portalTarget: Element }> = ({ portalT
               </p>
             </div>
           ) : (
-            <Carousel className="ov:w-full ov:pointer-events-auto">
+            <Carousel className="ov:w-full ov:pointer-events-auto" setApi={setModuleCarouselApi}>
               <CarouselContent className="ov:justify-center">
                 {filteredModules.map((module) => {
                   const variant: Variant = {
@@ -249,11 +320,22 @@ export const ModuleBottomPanel: React.FC<{ portalTarget: Element }> = ({ portalT
                     isSelected: false
                   };
 
+                  const hasVariableDims = Boolean(
+                    module.variableDimensions?.x ||
+                      module.variableDimensions?.y ||
+                      module.variableDimensions?.z
+                  );
+                  const isMovable = Boolean(module.isMovable);
+
                   return (
                     <CarouselItem key={module.productId} className="ov:basis-[150px] ov:shrink-0">
                       <div 
+                        ref={(el) => {
+                          if (el) moduleCardDomRef.current[module.product.id] = el;
+                          else delete moduleCardDomRef.current[module.product.id];
+                        }}
                         className={cn(
-                          "ov:p-2 ov:flex ov:flex-col ov:gap-2 ov:items-center ov:z-50 ov:w-[150px] ov:h-[150px] ov:relative",
+                          'ov:p-2 ov:flex ov:flex-col ov:gap-2 ov:items-center ov:z-50 ov:w-[150px] ov:relative ov:min-h-[150px] ov:overflow-visible',
                           isModuleSelectionLoading ? 'ov:cursor-not-allowed ov:opacity-50' : 'ov:cursor-pointer'
                         )}
                         onClick={() => handleModuleSelect(variant)}
@@ -272,6 +354,34 @@ export const ModuleBottomPanel: React.FC<{ portalTarget: Element }> = ({ portalT
                           setHoveredModule(null);
                         }}
                       >
+                        {isMovable && (
+                          <button
+                            type="button"
+                            aria-label="Place movable"
+                            onClick={(e) => handlePlaceMovable(e, module)}
+                            className={cn(
+                              'ov:absolute ov:top-1 ov:z-30 ov:flex ov:h-7 ov:w-7 ov:items-center ov:justify-center ov:rounded-lg ov:border-0 ov:bg-white ov:shadow-md ov:cursor-pointer',
+                              hasVariableDims ? 'ov:right-9' : 'ov:right-1'
+                            )}
+                          >
+                            <Move className="ov:h-3.5 ov:w-3.5 ov:text-(--ov25-text-color)" />
+                          </button>
+                        )}
+                        {hasVariableDims && (
+                          <button
+                            type="button"
+                            aria-label="Custom size"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setCustomDimsProductId((prev) =>
+                                prev === module.product.id ? null : module.product.id
+                              );
+                            }}
+                            className="ov:absolute ov:top-1 ov:right-1 ov:z-30 ov:flex ov:h-7 ov:w-7 ov:items-center ov:justify-center ov:rounded-lg ov:border-0 ov:bg-white ov:shadow-md ov:cursor-pointer"
+                          >
+                            <Ruler className="ov:h-3.5 ov:w-3.5 ov:text-(--ov25-text-color)" />
+                          </button>
+                        )}
                         <div 
                           className="ov:w-[100px] ov:h-[100px] ov:flex ov:items-center ov:justify-center ov:rounded-xl ov:shadow-lg ov:bg-white ov:cursor-pointer ov:p-2"
                         >
@@ -315,5 +425,33 @@ export const ModuleBottomPanel: React.FC<{ portalTarget: Element }> = ({ portalT
     </div>
   );
 
-  return createPortal(panelContent, portalTarget);
+  const dimsModule =
+    customDimsProductId != null
+      ? filteredModules.find((m) => m.product.id === customDimsProductId)
+      : undefined;
+
+  return (
+    <>
+      {createPortal(panelContent, portalTarget)}
+      {dimsModule != null &&
+        dimsPopoverStyle != null &&
+        createPortal(
+          <div style={dimsPopoverStyle}>
+            <Snap2CustomDimensionForm
+              module={dimsModule}
+              onCancel={() => setCustomDimsProductId(null)}
+              onConfirm={(customDimensions) => {
+                const modelPath = dimsModule.model?.modelPath;
+                const modelId = dimsModule.model?.modelId;
+                if (!modelPath || !modelId) return;
+                setIsModuleSelectionLoading(true);
+                selectModule({ modelPath, modelId, customDimensions }, uniqueId);
+                setCustomDimsProductId(null);
+              }}
+            />
+          </div>,
+          portalTarget
+        )}
+    </>
+  );
 };

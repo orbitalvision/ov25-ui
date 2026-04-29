@@ -16,14 +16,14 @@ interface FilterContentProps {
 }
 
 export const FilterContent: React.FC<FilterContentProps> = ({ optionId, optionIds, wrapperVariant = 'sheet', isOpen = true }) => {
-    const { availableProductFilters, setAvailableProductFilters, activeOption, allOptionsWithoutModules, isMobile, variantDisplayStyleOverlay } = useOV25UI();
+    const { availableProductFilters, setAvailableProductFilters, activeOption, allOptions, isMobile, variantDisplayStyleOverlay } = useOV25UI();
 
     const targetOptions = React.useMemo(() => {
         const ids = optionIds ?? (optionId ? [optionId] : []);
-        return ids.map(id => allOptionsWithoutModules?.find(opt => opt.id === id)).filter(Boolean) as { id: string; name: string; groups?: { name: string }[] }[];
-    }, [optionIds, optionId, allOptionsWithoutModules]);
+        return ids.map(id => allOptions?.find(opt => opt.id === id)).filter(Boolean) as { id: string; name: string; groups?: { name: string }[] }[];
+    }, [optionIds, optionId, allOptions]);
 
-    const fallbackOption = optionId ? allOptionsWithoutModules?.find(opt => opt.id === optionId) : activeOption;
+    const fallbackOption = optionId ? allOptions?.find(opt => opt.id === optionId) : activeOption;
     const optionsToRender = targetOptions.length > 0 ? targetOptions : (fallbackOption ? [fallbackOption] : []);
 
     const handleFilterChange = React.useCallback((filterKey: string, optionValue: string, checked: boolean, optionName: string) => {

@@ -3,12 +3,14 @@ import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 import { ProductVariantsWrapper } from './ProductVariantsWrapper.js';
+import { Snap2Wrapper } from './Snap2Wrapper.js';
 import { WizardVariants } from './WizardVariants.js';
 import { VariantsHeader } from './VariantsHeader.js';
 import { MobileCheckoutButton } from './MobileCheckoutButton.js';
 
 /**
- * Standalone sheet for variants-only-sheet mode. Animates in from the right, full height.
+ * Standalone sheet for variants-only-sheet mode. Full-height rail; horizontal edge comes from
+ * inject `configurator.variants.position` ({@link useOV25UI} `snap2VariantSheetSide`).
  * Does NOT set isDrawerOrDialogOpen, so useIframePositioning is never triggered.
  */
 export function VariantsOnlySheet() {
@@ -20,6 +22,8 @@ export function VariantsOnlySheet() {
     isSwatchBookOpen,
     variantDisplayStyleOverlay,
     variantDisplayStyleOverlayMobile,
+    snap2VariantSheetSide,
+    isSnap2Mode,
   } = useOV25UI();
 
   const menuContainerRef = useRef<HTMLDivElement>(null);
@@ -90,12 +94,14 @@ export function VariantsOnlySheet() {
     if (isVariantsOpen) setClosingComplete(true);
   }, [isVariantsOpen]);
 
+  const offScreenX = snap2VariantSheetSide === 'left' ? '-100%' : '100%';
+
   useEffect(() => {
     const el = menuContainerRef.current;
     const backdrop = backdropRef.current;
     if (!el) return;
     if (isVariantsOpen) {
-      el.style.transform = 'translateX(100%)';
+      el.style.transform = `translateX(${offScreenX})`;
       if (backdrop) backdrop.style.opacity = '0';
       setTimeout(() => {
         el.style.transition = 'transform 500ms cubic-bezier(0.4, 0, 0.2, 1)';
@@ -107,7 +113,7 @@ export function VariantsOnlySheet() {
       }, 50);
     } else if (shouldRender) {
       el.style.transition = 'transform 500ms cubic-bezier(0.4, 0, 0.2, 1)';
-      el.style.transform = 'translateX(100%)';
+      el.style.transform = `translateX(${offScreenX})`;
       if (backdrop) {
         backdrop.style.transition = 'opacity 500ms cubic-bezier(0.4, 0, 0.2, 1)';
         backdrop.style.opacity = '0';
@@ -118,7 +124,7 @@ export function VariantsOnlySheet() {
       }, 500);
       return () => clearTimeout(t);
     }
-  }, [isVariantsOpen, shouldRender]);
+  }, [isVariantsOpen, shouldRender, offScreenX]);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -131,7 +137,7 @@ export function VariantsOnlySheet() {
   if (!shouldRender) return null;
 
   const menuContent = (
-    <div data-clarity-mask="true" className="ov:fixed ov:inset-0 ov:z-[2147483644]">
+    <div data-clarity-mask="true" className="ov:fixed ov:inset-0 ov:z-2147483644">
       <div
         ref={backdropRef}
         role="button"
@@ -145,17 +151,27 @@ export function VariantsOnlySheet() {
       <div className="ov:absolute ov:inset-0 ov:pointer-events-none">
         <div
           ref={menuContainerRef}
-          className={`ov:absolute ov:top-0 ov:right-0 ov:h-full ov:pointer-events-auto ov:bg-[var(--ov25-background-color)] ov:shadow-lg ${isMobile ? 'ov:w-[85vw]' : 'ov:w-[384px]'}`}
-          style={{ transform: 'translateX(100%)' }}
+          className={
+            snap2VariantSheetSide === 'left'
+              ? `ov:absolute ov:top-0 ov:left-0 ov:right-auto ov:h-full ov:pointer-events-auto ov:bg-(--ov25-background-color) ov:shadow-lg ov:border-r ov:border-gray-200 ${isMobile ? 'ov:w-[85vw]' : 'ov:w-[384px]'}`
+              : `ov:absolute ov:top-0 ov:right-0 ov:left-auto ov:h-full ov:pointer-events-auto ov:bg-(--ov25-background-color) ov:shadow-lg ov:border-l ov:border-gray-200 ${isMobile ? 'ov:w-[85vw]' : 'ov:w-[384px]'}`
+          }
+          style={{
+            transform: `translateX(${snap2VariantSheetSide === 'left' ? '-100%' : '100%'})`,
+          }}
           onClick={(e) => e.stopPropagation()}
         >
           <div className="ov:relative ov:h-full ov:flex ov:flex-col">
             <button
               onClick={handleClose}
-              className="ov:absolute ov:top-3 ov:right-3 ov:z-10 ov:p-1.5 ov:rounded-full ov:hover:bg-neutral-100 ov:cursor-pointer ov:flex ov:items-center ov:justify-center"
+              className={
+                snap2VariantSheetSide === 'left'
+                  ? 'ov:absolute ov:top-3 ov:left-3 ov:right-auto ov:z-10 ov:p-1.5 ov:rounded-full ov:hover:bg-neutral-100 ov:cursor-pointer ov:flex ov:items-center ov:justify-center'
+                  : 'ov:absolute ov:top-3 ov:right-3 ov:left-auto ov:z-10 ov:p-1.5 ov:rounded-full ov:hover:bg-neutral-100 ov:cursor-pointer ov:flex ov:items-center ov:justify-center'
+              }
               aria-label="Close"
             >
-              <X size={24} className="ov:text-[var(--ov25-secondary-text-color)]" strokeWidth={2} />
+              <X size={24} className="ov:text-(--ov25-secondary-text-color)" strokeWidth={2} />
             </button>
             {effectiveOverlayStyle === 'wizard' ? (
               <>
@@ -168,11 +184,17 @@ export function VariantsOnlySheet() {
               <>
                 <div className="ov:shrink-0 ov:min-h-12" />
                 <div className="ov:flex-1 ov:min-h-0 ov:overflow-auto">
-                  <ProductVariantsWrapper embeddedInVariantsOnlySheet />
+                  {isSnap2Mode ? (
+                    <Snap2Wrapper embeddedInVariantsOnlySheet />
+                  ) : (
+                    <ProductVariantsWrapper embeddedInVariantsOnlySheet />
+                  )}
                 </div>
-                <div className="ov:flex-shrink-0">
-                  <MobileCheckoutButton />
-                </div>
+                {!isSnap2Mode ? (
+                  <div className="ov:shrink-0">
+                    <MobileCheckoutButton />
+                  </div>
+                ) : null}
               </>
             )}
           </div>

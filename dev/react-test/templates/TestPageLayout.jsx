@@ -60,6 +60,8 @@ function ProductTabs() {
  * @param {boolean} [props.renderControls]
  * @param {boolean} [props.renderSwatches]
  * @param {boolean} [props.dynamicConfig] - When true, re-initializes when injectConfig changes
+ * @param {boolean} [props.showTestBackButton] - When false, hides the fixed “Back to list” control (e.g. embedded in another test page)
+ * @param {boolean} [props.fullWidthGallery] - When true, gallery column is full width and aside stacks below (single column layout)
  */
 export function TestPageLayout({
   title,
@@ -72,6 +74,8 @@ export function TestPageLayout({
   renderControls = true,
   renderSwatches = true,
   dynamicConfig = false,
+  showTestBackButton = true,
+  fullWidthGallery = false,
 }) {
   useEffect(() => {
     if (!dynamicConfig && configuratorInitialized) return;
@@ -91,17 +95,30 @@ export function TestPageLayout({
   return (
     <ViewportWrapper>
       <div className="app">
-        <TestBackButton />
+        {showTestBackButton ? <TestBackButton /> : null}
         <h1>{title}</h1>
         <p className="ov:mb-4 ov:text-[#525252]">{description}</p>
         {topContent}
-        <div className="ov:flex ov:flex-col ov:md:flex-row ov:md:items-start">
-          <div className="ov:w-full ov:md:w-[55%]">
+        <div
+          className={
+            fullWidthGallery
+              ? 'ov:flex ov:flex-col ov:items-stretch ov:gap-4'
+              : 'ov:flex ov:flex-col ov:md:flex-row ov:md:items-start'
+          }
+        >
+          <div className={fullWidthGallery ? 'ov:w-full' : 'ov:w-full ov:md:w-[55%]'}>
             <div className="configurator-container ov:w-full">
               <img src={sofaImage} alt="Product" />
             </div>
           </div>
-          <div id="ov25-aside-menu" className="ov:w-full ov:md:w-[35%] ov:h-full ov:md:mt-0 ov:md:ml-4">
+          <div
+            id="ov25-aside-menu"
+            className={
+              fullWidthGallery
+                ? 'ov:w-full ov:h-full'
+                : 'ov:w-full ov:md:w-[35%] ov:h-full ov:md:mt-0 ov:md:ml-4'
+            }
+          >
             <div id="price-name" className="ov:w-full">
               {showPrice && <div id="price">PRICE: £123</div>}
               <div id="name">NAME: Product Name</div>

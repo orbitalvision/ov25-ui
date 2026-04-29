@@ -4,9 +4,7 @@ import { ProductVariants, Variant } from './ProductVariants.js';
 import { AccordionVariants } from './AccordionVariants.js';
 import { TreeVariants } from './TreeVariants.js';
 import { useOV25UI } from "../../contexts/ov25-ui-context.js";
-import { closeModuleSelectMenu, selectModule, CompatibleModule } from '../../utils/configurator-utils.js';
 import { SizeVariantCard } from "./variant-cards/SizeVariantCard.js";
-import { ModuleVariantCard } from "./variant-cards/ModuleVariantCard.js";
 import { VariantsHeader } from './VariantsHeader.js';
 import { VariantsContent } from './VariantsContent.js';
 import { DefaultVariantCard } from './variant-cards/DefaultVariantCard.js';
@@ -19,7 +17,6 @@ import {
 import { VariantDisplayStyleOverlay } from '../../types/config-enums.js';
 import { FilterControls } from './FilterControls.js';
 import { FilterContent } from './FilterContent.js';
-
 export type DrawerSizes = 'closed' | 'small' | 'large';
 
 const capitalizeWords = (str: string) =>
@@ -29,11 +26,13 @@ export interface ProductVariantsWrapperProps {
   isInline?: boolean;
   /** Set when used inside VariantsOnlySheet (sheet supplies close + checkout). */
   embeddedInVariantsOnlySheet?: boolean;
+  hideVariantsHeader?: boolean;
 }
 
 export function ProductVariantsWrapper({
   isInline = false,
   embeddedInVariantsOnlySheet = false,
+  hideVariantsHeader = false,
 }: ProductVariantsWrapperProps = {}) {
     const {
         isVariantsOpen,
@@ -41,18 +40,13 @@ export function ProductVariantsWrapper({
         isMobile,
         drawerSize,
         activeOptionId,
-        setActiveOptionId,
         handleOptionClick,
         sizeOption,
         handleSelectionSelect,
         currentProductId,
         selectedSelections,
         products,
-        compatibleModules,
-        isModuleSelectionLoading,
-        setIsModuleSelectionLoading,
-        configuratorState,
-        allOptionsWithoutModules,
+        variantPanelOptions,
         applySearchAndFilters,
         searchQueries,
         availableProductFilters,
@@ -61,16 +55,10 @@ export function ProductVariantsWrapper({
         variantDisplayStyleMobile,
         hidePricing,
         configuratorDisplayModeMobile,
+        isSnap2Mode,
       } = useOV25UI();
 
-    const hasSnap2Objects = (configuratorState?.snap2Objects?.length ?? 0) > 0;
-    const hasNoModulesToShow = !compatibleModules || compatibleModules.length === 0;
-
-    useEffect(() => {
-      if (isMobile && !isInline && activeOptionId === 'modules' && hasSnap2Objects && hasNoModulesToShow && allOptionsWithoutModules.length > 0) {
-        setActiveOptionId(allOptionsWithoutModules[0].id);
-      }
-    }, [isMobile, isInline, activeOptionId, hasSnap2Objects, hasNoModulesToShow, allOptionsWithoutModules, setActiveOptionId]);
+    const panelOpts = variantPanelOptions;
 
     const [activeTab, setActiveTab] = useState<string>('size');
     const [useTabsDropdown, setUseTabsDropdown] = useState(false);
@@ -84,9 +72,6 @@ export function ProductVariantsWrapper({
     }, []);
 
     const handleCloseVariants = () => {
-      if (activeOptionId === 'modules') {
-        closeModuleSelectMenu();
-      }
       setIsVariantsOpen(false);
     };
 
@@ -107,11 +92,11 @@ export function ProductVariantsWrapper({
 
     // Apply filters and search to all options (memoized to recalculate when filters/search change)
     const filteredOptions = useMemo(() => {
-      return allOptionsWithoutModules.map(option => {
-        if (option.id === 'size') return option; // Size doesn't need filtering
+      return panelOpts.map((option) => {
+        if (option.id === 'size') return option;
         return applySearchAndFilters(option, option.id);
       });
-    }, [allOptionsWithoutModules, applySearchAndFilters, searchQueries, availableProductFilters]);
+    }, [panelOpts, applySearchAndFilters, searchQueries, availableProductFilters]);
 
     // Memoize size variants to recalculate when selectedSelections changes
     const sizeVariants = useMemo(() => {
@@ -135,9 +120,9 @@ export function ProductVariantsWrapper({
     const allOptionsVariants = useMemo(() => {
       return filteredOptions
         .map((filteredOption, index) => {
-          const option = allOptionsWithoutModules[index];
-          if (option.id === 'size') return null; // Size is handled separately
-          
+          const option = panelOpts[index];
+          if (option.id === 'size') return null;
+
           return {
             optionId: option.id,
             optionName: option.name,
@@ -165,9 +150,9 @@ export function ProductVariantsWrapper({
           };
         })
         .filter((item): item is { optionId: string; optionName: string; variants: any[] } => item !== null);
-    }, [filteredOptions, allOptionsWithoutModules, selectedSelections]);
+    }, [filteredOptions, panelOpts, selectedSelections]);
 
-    const showSize = allOptionsWithoutModules.some((o) => o.id === 'size') && sizeVariants.length > 0;
+    const showSize = panelOpts.some((o) => o.id === 'size') && sizeVariants.length > 0;
 
     const listLikeOverlays: VariantDisplayStyleOverlay[] = [
       VariantDisplayStyleOverlay.List,
@@ -183,12 +168,17 @@ export function ProductVariantsWrapper({
       : isMobile
         ? variantDisplayStyleOverlayMobile
         : variantDisplayStyleOverlay;
-    const isListLike = listLikeOverlays.includes(effectiveVariantDisplayStyleOverlay);
+    const variantShellOverlayStyle = effectiveVariantDisplayStyleOverlay;
+    const isListLike = listLikeOverlays.includes(variantShellOverlayStyle);
 
     const tabIds = useMemo(() => {
-      const ids = showSize ? ['size', ...allOptionsVariants.map((o) => o.optionId)] : allOptionsVariants.map((o) => o.optionId);
-      return ids;
-    }, [showSize, allOptionsVariants]);
+      return panelOpts
+        .map((o) => o.id)
+        .filter((id) => {
+          if (id === 'size') return showSize;
+          return allOptionsVariants.some((v) => v.optionId === id);
+        });
+    }, [panelOpts, showSize, allOptionsVariants]);
 
     useEffect(() => {
       if (activeOptionId && tabIds.includes(activeOptionId)) {
@@ -217,7 +207,7 @@ export function ProductVariantsWrapper({
       const el = listScrollRef.current;
       if (!el) return;
       const updateHeight = () => {
-        if (effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.List) {
+        if (variantShellOverlayStyle === VariantDisplayStyleOverlay.List) {
           setListScrollHeight(el.clientHeight);
         }
       };
@@ -225,10 +215,14 @@ export function ProductVariantsWrapper({
       ro.observe(el);
       updateHeight();
       return () => ro.disconnect();
-    }, [effectiveVariantDisplayStyleOverlay]);
+    }, [variantShellOverlayStyle]);
 
     const getTabLabel = (id: string) =>
-      id === 'size' ? 'Size' : allOptionsVariants.find((o) => o.optionId === id)?.optionName ?? id;
+      id === 'size'
+        ? 'Size'
+        : panelOpts.find((o) => o.id === id)?.name ??
+          allOptionsVariants.find((o) => o.optionId === id)?.optionName ??
+          id;
 
     const renderSizeSection = (showHeader = true, isMobileListSticky = false) => (
       <div className=" ov:pb-6">
@@ -299,27 +293,17 @@ export function ProductVariantsWrapper({
     );
 
     const needsBottomMarginForButton = isMobile && !isInline;
-    const isMobileList = isMobile && !isInline && effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.List;
+    const isMobileList = isMobile && !isInline && variantShellOverlayStyle === VariantDisplayStyleOverlay.List;
 
     // When the active option changes, scroll to the active option (list mode only, used for when you have a custom button to open the configurator on an option)
     useEffect(() => {
-      if (effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.List && activeOptionId && listScrollRef.current) {
+      if (variantShellOverlayStyle === VariantDisplayStyleOverlay.List && activeOptionId && listScrollRef.current) {
         const el = listScrollRef.current.querySelector(`[data-ov25-option-id="${activeOptionId}"]`);
         el?.scrollIntoView({ block: 'start', behavior: 'smooth' });
       }
-    }, [activeOptionId, effectiveVariantDisplayStyleOverlay]);
+    }, [activeOptionId, variantShellOverlayStyle]);
 
-    const handleModuleSelect = useCallback((variant: Variant) => {
-      if (isModuleSelectionLoading) return;
-      const module = variant.data as CompatibleModule;
-      const modelPath = module?.model?.modelPath;
-      const modelId = module?.model?.modelId;
-      if (!modelPath || !modelId) return;
-      setIsModuleSelectionLoading(true);
-      selectModule(modelPath, modelId);
-    }, [isModuleSelectionLoading, setIsModuleSelectionLoading]);
-
-    const listFilterOptionIds = tabIds.filter(id => id !== 'size');
+    const listFilterOptionIds = tabIds.filter((id) => id !== 'size');
     const listFilterKey = listFilterOptionIds.join(',');
 
     const hasOptionVariants = (opt: { optionId: string; optionName: string; variants: any[] }) =>
@@ -327,7 +311,7 @@ export function ProductVariantsWrapper({
 
     const listOptionsToShow = useMemo(() => {
       const withVariants = allOptionsVariants.filter(hasOptionVariants);
-      if (effectiveVariantDisplayStyleOverlay !== VariantDisplayStyleOverlay.List) return withVariants;
+      if (variantShellOverlayStyle !== VariantDisplayStyleOverlay.List) return withVariants;
       const listOptionIdsWithSelectedFilters = availableProductFilters
         ? listFilterOptionIds.filter((optionId) => {
             const opt = allOptionsVariants.find((o) => o.optionId === optionId);
@@ -341,51 +325,11 @@ export function ProductVariantsWrapper({
         : [];
       if (listOptionIdsWithSelectedFilters.length === 0) return withVariants;
       return withVariants.filter((opt) => listOptionIdsWithSelectedFilters.includes(opt.optionId));
-    }, [allOptionsVariants, effectiveVariantDisplayStyleOverlay, listFilterOptionIds, availableProductFilters]);
+    }, [allOptionsVariants, variantShellOverlayStyle, listFilterOptionIds, availableProductFilters]);
 
-    const listFilterBlock = effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.List && listFilterOptionIds.length > 0 && (
+    const listFilterBlock = variantShellOverlayStyle === VariantDisplayStyleOverlay.List && listFilterOptionIds.length > 0 && (
       renderFilterBlock(listFilterKey, listFilterOptionIds)
     );
-
-    if (isMobile && activeOptionId === 'modules') {
-      const isLoading = (!compatibleModules || compatibleModules.length === 0) &&
-        (!configuratorState?.snap2Objects || configuratorState.snap2Objects.length === 0);
-
-      if (isLoading) {
-        return (
-          <div className="ov:flex ov:flex-col ov:items-center ov:justify-center ov:py-8 ov:space-y-4">
-            <p className="ov:text-sm ov:text-[var(--ov25-secondary-text-color)]">Loading...</p>
-          </div>
-        );
-      }
-
-      return (
-        <ProductVariants
-          isOpen={isVariantsOpen}
-          gridDivide={2}
-          onClose={handleCloseVariants}
-          title="Modules"
-          variants={(compatibleModules || []).map(module => ({
-            id: `${module.productId}-${module.model.modelId}`,
-            name: module.product.name,
-            price: 0,
-            image: module.product.hasImage ? module.product.imageUrl : '/placeholder.svg?height=200&width=200',
-            blurHash: '',
-            data: module,
-            isSelected: false
-          } as Variant))}
-          VariantCard={(props) => (
-            <ModuleVariantCard
-              {...props}
-              isLoading={isModuleSelectionLoading}
-            />
-          )}
-          drawerSize={drawerSize}
-          onSelect={handleModuleSelect}
-          isMobile={isMobile}
-        />
-      );
-    }
 
     const renderFilterSheet = (props: { optionId?: string; optionIds?: string[] }) => (
       <FilterContent optionId={props.optionId} optionIds={props.optionIds} wrapperVariant="sheet" />
@@ -393,7 +337,7 @@ export function ProductVariantsWrapper({
 
     const tabsHeaderAndFilter = (
       <>
-        <div className="ov25-tabs-header ov:relative ov:shrink-0 ov:flex ov:items-stretch ov:gap-0 ov:px-4 ov:pt-4 ov:pb-0 ov:bg-[var(--ov25-background-color)]">
+        <div className="ov25-tabs-header ov:relative ov:shrink-0 ov:flex ov:items-stretch ov:gap-0 ov:px-4 ov:pt-4 ov:pb-0 ov:bg-transparent">
           <div className="ov:absolute ov:left-4 ov:right-4 ov:top-4 ov:overflow-hidden ov:opacity-0 ov:pointer-events-none ov:invisible" aria-hidden>
             <div ref={tabsMeasureRef} className="ov:inline-flex ov:gap-2 ov:whitespace-nowrap">
               {tabIds.map((id) => (
@@ -469,9 +413,9 @@ export function ProductVariantsWrapper({
       </>
     );
 
-    const useTree = effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.Tree;
-    const useAccordion = effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.Accordion && !isMobile;
-    const isTabs = effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.Tabs;
+    const useTree = variantShellOverlayStyle === VariantDisplayStyleOverlay.Tree;
+    const useAccordion = variantShellOverlayStyle === VariantDisplayStyleOverlay.Accordion && !isMobile;
+    const isTabs = variantShellOverlayStyle === VariantDisplayStyleOverlay.Tabs;
 
     const tabsScrollAreaClassName = `ov:flex-1 ov:min-h-0 ov:pt-0 ${needsBottomMarginForButton ? 'ov:pb-20' : 'ov:pb-2'} ${activeTab !== 'size' && isFilterOpen[activeTab] ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`;
 
@@ -513,7 +457,7 @@ export function ProductVariantsWrapper({
 
     // tabs, tree, accordion, list
     const displayContent =
-      effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.Tabs
+      variantShellOverlayStyle === VariantDisplayStyleOverlay.Tabs
         ? tabsContent
         : useTree
           ? <TreeVariants mode={isInline ? 'inline' : 'drawer'} />
@@ -528,20 +472,20 @@ export function ProductVariantsWrapper({
                   )}
                   {listOptionsToShow.map((opt) => (
                     <div key={opt.optionId} data-ov25-option-id={opt.optionId}>
-                      {renderOptionSection(opt, true, isMobileList, effectiveVariantDisplayStyleOverlay !== VariantDisplayStyleOverlay.List)}
+                      {renderOptionSection(opt, true, isMobileList, variantShellOverlayStyle !== VariantDisplayStyleOverlay.List)}
                     </div>
                   ))}
                 </div>
               );
 
-    const isListModeFilterOpen = effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.List && !!isFilterOpen[listFilterKey];
+    const isListModeFilterOpen = variantShellOverlayStyle === VariantDisplayStyleOverlay.List && !!isFilterOpen[listFilterKey];
     const contentScrollClass = (useAccordion || useTree || isTabs) ? 'ov:overflow-hidden' : isListModeFilterOpen ? 'ov:overflow-hidden' : 'ov:overflow-y-auto';
     const contentPaddingClass = (useAccordion || useTree || isTabs)
       ? (needsBottomMarginForButton ? 'ov:pb-16' : '')
       : (needsBottomMarginForButton ? 'ov:pt-0 ov:pb-20' : 'ov:pt-0 ov:pb-2');
 
     if (isListLike) {
-      const isListMode = effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.List;
+      const isListMode = variantShellOverlayStyle === VariantDisplayStyleOverlay.List;
       if (isInline) {
         if (isTabs) {
           return (
@@ -552,7 +496,7 @@ export function ProductVariantsWrapper({
               {isListMode && listFilterBlock}
               <div className="ov:shrink-0 ov:bg-[var(--ov25-background-color)]">{tabsHeaderAndFilter}</div>
               {renderTabsScrollColumn(true)}
-              {!hidePricing && <CheckoutButton />}
+              {!hidePricing && !isSnap2Mode && <CheckoutButton />}
             </div>
           );
         }
@@ -566,7 +510,7 @@ export function ProductVariantsWrapper({
             <div id="ov25-variants-content-wrapper" className="ov:relative ov:flex-1 ov:min-h-0 ov:flex ov:flex-col">
               <div
                 ref={listScrollRef}
-                {...(effectiveVariantDisplayStyleOverlay === VariantDisplayStyleOverlay.List
+                {...(variantShellOverlayStyle === VariantDisplayStyleOverlay.List
                   ? { 'data-ov25-list-variants-content': true as const }
                   : {})}
                 className={`ov:min-h-0 ov:flex-1 ${useAccordion || useTree ? 'ov:flex ov:flex-col' : ''} ${contentScrollClass} ${contentPaddingClass}`}
@@ -575,7 +519,7 @@ export function ProductVariantsWrapper({
               </div>
               {isListMode && isFilterOpen[listFilterKey] && renderFilterSheet({ optionIds: listFilterOptionIds })}
             </div>
-            {!hidePricing && (
+            {!hidePricing && !isSnap2Mode && (
                 <CheckoutButton />
             )}
           </div>
@@ -584,7 +528,7 @@ export function ProductVariantsWrapper({
 
       return (
         <div className="ov:flex ov:flex-col ov:max-h-full ov:h-full ov:bg-[var(--ov25-background-color)]">
-          {embeddedInVariantsOnlySheet ? (
+          {embeddedInVariantsOnlySheet || hideVariantsHeader ? (
             <div className="ov:w-full ov:shrink-0" aria-hidden />
           ) : (
             <VariantsHeader />
@@ -598,7 +542,8 @@ export function ProductVariantsWrapper({
           </div>
           {(!isMobile || configuratorDisplayModeMobile === 'modal') &&
             !hidePricing &&
-            !embeddedInVariantsOnlySheet && <CheckoutButton />}
+            !embeddedInVariantsOnlySheet &&
+            !isSnap2Mode && <CheckoutButton />}
         </div>
       );
     }
@@ -624,25 +569,25 @@ export function ProductVariantsWrapper({
           </div>
         )}
         {allOptionsVariants.map(({ optionId, optionName, variants }) => (
-          <div
-            key={optionId}
-            className="ov:absolute ov:inset-0"
-            style={{ display: activeOptionId === optionId ? 'block' : 'none' }}
-          >
-            <ProductVariants
-              isOpen={isVariantsOpen}
-              basis={isMobile ? 'ov:basis-[33%]' : undefined}
-              gridDivide={4}
-              onClose={handleCloseVariants}
-              title={optionName}
-              variants={variants}
-              VariantCard={undefined}
-              drawerSize={drawerSize}
-              onSelect={handleVariantSelect}
-              isMobile={isMobile}
-            />
-          </div>
-        ))}
+            <div
+              key={optionId}
+              className="ov:absolute ov:inset-0"
+              style={{ display: activeOptionId === optionId ? 'block' : 'none' }}
+            >
+              <ProductVariants
+                isOpen={isVariantsOpen}
+                basis={isMobile ? 'ov:basis-[33%]' : undefined}
+                gridDivide={4}
+                onClose={handleCloseVariants}
+                title={optionName}
+                variants={variants}
+                VariantCard={undefined}
+                drawerSize={drawerSize}
+                onSelect={handleVariantSelect}
+                isMobile={isMobile}
+              />
+            </div>
+          ))}
       </div>
     );
   }

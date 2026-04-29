@@ -3,6 +3,7 @@ import {
   sendMessageToIframe,
   toggleAR,
   CompatibleModule,
+  compatibleModuleListsEqual,
   detectUserAgent,
   orderConfiguratorSelectionsWithNoneFirst,
 } from '../utils/configurator-utils.js';
@@ -11,7 +12,7 @@ import { SaveSnap2Dialog } from '../components/SaveSnap2Dialog.js';
 import {
   CarouselDisplayMode,
   CarouselLayout,
-  VariantDisplayStyle,
+  VariantDisplayMode,
   VariantDisplayStyleOverlay,
 } from '../types/config-enums.js';
 import { stringSimilarity } from 'string-similarity-js';
@@ -33,6 +34,7 @@ import {
   DEFAULT_CURRENCY_SYMBOL,
 } from '../lib/config/currency-display.js';
 import { findIframeWithUniqueId, type ConfiguratorIframeScreenRect } from '../utils/configurator-dom-queries.js';
+import { computeIsMobileViewport } from '../utils/viewport-mobile.js';
 
 function throttle<T extends (...args: any[]) => void>(
   fn: T,
@@ -285,6 +287,7 @@ interface OV25UIContextType {
   showCarousel: boolean;
   mobileLogoURL?: string;
   uniqueId?: string;
+  initialiseMenuUsesExternalSelector?: boolean;
 
   // Computed values
   currentProduct?: Product;
@@ -295,6 +298,7 @@ interface OV25UIContextType {
   showFilters?: boolean;
   allOptions: (Option | SizeOption)[];
   allOptionsWithoutModules: (Option | SizeOption)[];
+  variantPanelOptions: (Option | SizeOption)[];
   galleryIndexToUse: number;
   filteredActiveOption?: Option | null;
   searchQueries: { [optionId: string]: string };
@@ -316,7 +320,6 @@ interface OV25UIContextType {
   isSnap2Mode: boolean;
   /** Latest normalized price payload from CURRENT_PRICE; drives Snap2 checkout sheet line items. */
   commercePriceSnapshot: UnifiedPricePayload | null;
-  /** Desktop Snap2 modal: right-rail checkout panel open state (rendered next to variants in Snap2ConfiguratorModal). */
   isSnap2CheckoutSheetOpen: boolean;
   setIsSnap2CheckoutSheetOpen: React.Dispatch<React.SetStateAction<boolean>>;
   snap2SaveResponse: { success: boolean; shareUrl?: string; error?: string } | null;
@@ -324,16 +327,19 @@ interface OV25UIContextType {
   controlsHidden: boolean;
   hasConfigureButton: boolean;
   useInlineVariantControls: boolean;
-  configuratorDisplayMode: 'inline' | 'sheet' | 'drawer' | 'variants-only-sheet' | 'modal';
+  configuratorDisplayMode: 'inline' | 'sheet' | 'drawer' | 'variants-only-sheet' | 'modal' | 'inline-sheet';
   configuratorDisplayModeMobile: 'inline' | 'drawer' | 'modal' | 'variants-only-sheet';
   useSimpleVariantsSelector: boolean;
   /** Drawer trigger: single Configure button or per-option buttons (ProductOptionsGroup). */
   configuratorTriggerStyle: 'single-button' | 'split-buttons';
-  variantDisplayStyleMobile: VariantDisplayStyle;
+  variantDisplayStyleMobile: VariantDisplayMode;
   variantDisplayStyleInline: VariantDisplayStyleOverlay;
   variantDisplayStyleInlineMobile: VariantDisplayStyleOverlay;
   variantDisplayStyleOverlay: VariantDisplayStyleOverlay;
   variantDisplayStyleOverlayMobile: VariantDisplayStyleOverlay;
+  snap2VariantSheetSide: 'left' | 'right';
+  snap2ModuleSheetPosition: 'left' | 'right' | 'bottom';
+  snap2ModulesEmbedInVariantSheet: boolean;
   shareDialogTrigger: 'none' | 'save-button' | 'modal-close';
   skipNextDrawerCloseRef: React.MutableRefObject<boolean>;
   skipNextShareClickRef: React.MutableRefObject<boolean>;
@@ -464,13 +470,13 @@ export const OV25UIProvider: React.FC<{
   uniqueId?: string,
   useInlineVariantControls?: boolean,
   useInlineVariantControlsMobile?: boolean,
-  configuratorDisplayMode?: 'inline' | 'sheet' | 'drawer' | 'modal' | 'variants-only-sheet',
+  configuratorDisplayMode?: 'inline' | 'sheet' | 'drawer' | 'modal' | 'variants-only-sheet' | 'inline-sheet',
   configuratorDisplayModeMobile?: 'inline' | 'drawer' | 'modal' | 'variants-only-sheet',
   useSimpleVariantsSelector?: boolean,
   configuratorTriggerStyle?: 'single-button' | 'split-buttons',
   configuratorTriggerStyleMobile?: 'single-button' | 'split-buttons',
-  variantDisplayStyle?: VariantDisplayStyle,
-  variantDisplayStyleMobile?: VariantDisplayStyle,
+  variantDisplayStyle?: VariantDisplayMode,
+  variantDisplayStyleMobile?: VariantDisplayMode,
   variantDisplayStyleInline?: VariantDisplayStyleOverlay,
   variantDisplayStyleInlineMobile?: VariantDisplayStyleOverlay,
   variantDisplayStyleOverlay?: VariantDisplayStyleOverlay,
@@ -489,6 +495,11 @@ export const OV25UIProvider: React.FC<{
   configuratorGalleryIsDeferred?: boolean,
   /** Display symbol for iframe price strings; default £. */
   currencySymbol?: string,
+  snap2VariantSheetSideDesktop?: 'left' | 'right',
+  snap2VariantSheetSideMobile?: 'left' | 'right',
+  snap2ModulePanelPositionDesktop?: 'left' | 'right' | 'bottom',
+  snap2ModulePanelPositionMobile?: 'left' | 'right' | 'bottom',
+  initialiseMenuUsesExternalSelector?: boolean,
 }> = ({ 
   children,
   productLink,
@@ -537,20 +548,26 @@ export const OV25UIProvider: React.FC<{
   shadowDOMs,
   cssString,
   currencySymbol = DEFAULT_CURRENCY_SYMBOL,
+  snap2VariantSheetSideDesktop: snap2VariantSheetSideDesktopProp = 'right',
+  snap2VariantSheetSideMobile: snap2VariantSheetSideMobileProp,
+  snap2ModulePanelPositionDesktop: snap2ModulePanelPositionDesktopProp = 'bottom',
+  snap2ModulePanelPositionMobile: snap2ModulePanelPositionMobileProp,
+  initialiseMenuUsesExternalSelector = false,
 }) => {
   const effectiveCurrencySymbol =
     String(currencySymbol).trim() || DEFAULT_CURRENCY_SYMBOL;
 
   const carouselLayout = carouselDisplayModeProp ?? carouselLayoutProp ?? CarouselDisplayMode.Stacked;
   const carouselLayoutMobile = carouselDisplayModeMobileProp ?? carouselDisplayModeProp ?? carouselLayoutProp ?? CarouselDisplayMode.Stacked;
-  const variantDisplayStyleMobile = variantDisplayStyleMobileProp ?? variantDisplayStyle ?? VariantDisplayStyle.Tree;
-  const listLikeStyles: VariantDisplayStyle[] = [VariantDisplayStyle.Wizard, VariantDisplayStyle.List, VariantDisplayStyle.Tabs, VariantDisplayStyle.Accordion, VariantDisplayStyle.Tree];
+  const variantDisplayStyleMobile = variantDisplayStyleMobileProp ?? variantDisplayStyle ?? VariantDisplayMode.Tree;
+  const listLikeStyles: VariantDisplayMode[] = [VariantDisplayMode.Wizard, VariantDisplayMode.List, VariantDisplayMode.Tabs, VariantDisplayMode.Accordion, VariantDisplayMode.Tree];
   const isListLike = variantDisplayStyle != null && listLikeStyles.includes(variantDisplayStyle);
   const isListLikeMobile = variantDisplayStyleMobile != null && listLikeStyles.includes(variantDisplayStyleMobile);
   const variantDisplayStyleInline: VariantDisplayStyleOverlay = isListLike ? (variantDisplayStyle as VariantDisplayStyleOverlay) : (variantDisplayStyleInlineProp ?? VariantDisplayStyleOverlay.Wizard);
   const variantDisplayStyleOverlay: VariantDisplayStyleOverlay = isListLike ? (variantDisplayStyle as VariantDisplayStyleOverlay) : (variantDisplayStyleOverlayProp ?? VariantDisplayStyleOverlay.Tree);
   const variantDisplayStyleInlineMobile: VariantDisplayStyleOverlay = variantDisplayStyleInlineMobileProp ?? (isListLikeMobile ? (variantDisplayStyleMobile as VariantDisplayStyleOverlay) : variantDisplayStyleInline);
   const variantDisplayStyleOverlayMobile: VariantDisplayStyleOverlay = variantDisplayStyleOverlayMobileProp ?? (isListLikeMobile ? (variantDisplayStyleMobile as VariantDisplayStyleOverlay) : variantDisplayStyleOverlay);
+  const isSnap2ProductLink = productLink?.startsWith('snap2/') || false;
   const hideVariantOptionKeys = useMemo(
     () => new Set(hideVariantOptions.filter(Boolean)),
     [hideVariantOptions]
@@ -630,7 +647,14 @@ export const OV25UIProvider: React.FC<{
   const [canAnimate, setCanAnimate] = useState<boolean>(false);
   const [animationState, setAnimationState] = useState<AnimationState>('unavailable');
   const iframeRef = useRef<HTMLIFrameElement>(null!);
-  const [isMobile, setIsMobile] = useState(forceMobile || window.innerWidth < 768);
+  const [isMobile, setIsMobile] = useState(
+    computeIsMobileViewport({
+      width: window.innerWidth,
+      height: window.innerHeight,
+      forceMobile,
+      isSnap2: isSnap2ProductLink,
+    })
+  );
   const [hasSwitchedAfterDefer, setHasSwitchedAfterDefer] = useState(false)
   const [pendingProductId, setPendingProductId] = useState<string | null>(null);
   const [availableProductFilters, setAvailableProductFilters] = useState<ProductFilters>({});
@@ -667,7 +691,14 @@ export const OV25UIProvider: React.FC<{
   const skipNextDrawerCloseRef = useRef(false);
   const skipNextShareClickRef = useRef(false);
   const stackedGalleryCloseSyncImmediateRef = useRef(false);
-  const [preloading, setPreloading] = useState(window.innerWidth < 768);
+  const [preloading, setPreloading] = useState(
+    computeIsMobileViewport({
+      width: window.innerWidth,
+      height: window.innerHeight,
+      forceMobile,
+      isSnap2: isSnap2ProductLink,
+    })
+  );
   const [iframeResetKey, setIframeResetKey] = useState(0);
 
   const effectiveConfiguratorDisplayModeMobile = useMemo(
@@ -696,6 +727,8 @@ export const OV25UIProvider: React.FC<{
   configuratorStateRef.current = configuratorState;
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
+
+  const prevSnap2ObjectCountRef = useRef(0);
 
   const addToBasketWithPayload = useCallback(() => {
     addToBasketFunction({ skus: latestSkuRef.current ?? null, price: latestPriceRef.current ?? null });
@@ -766,6 +799,7 @@ export const OV25UIProvider: React.FC<{
     setControlsHidden,
     setIsModulePanelOpen,
     setIsModuleSelectionLoading,
+    setIsSnap2CheckoutSheetOpen,
     setIframeResetKey,
     setActiveOptionId,
     setSelectedSelections,
@@ -790,13 +824,9 @@ export const OV25UIProvider: React.FC<{
 
   useEffect(() => {
     if (isSnap2CheckoutSheetOpen) {
-      const snap2Mobile = isMobile && productLink?.startsWith('snap2/');
       setIsModulePanelOpen(false);
-      if (!snap2Mobile) {
-        setIsVariantsOpen(false);
-      }
     }
-  }, [isSnap2CheckoutSheetOpen, isMobile, productLink]);
+  }, [isSnap2CheckoutSheetOpen]);
 
   useEffect(() => {
     // auto-close variants and checkout when module panel opens on desktop
@@ -829,12 +859,19 @@ export const OV25UIProvider: React.FC<{
       return;
     }
     const checkIfMobile = () => {
-      setIsMobile(window.innerWidth < 768);
+      setIsMobile(
+        computeIsMobileViewport({
+          width: window.innerWidth,
+          height: window.innerHeight,
+          forceMobile,
+          isSnap2: isSnap2ProductLink,
+        })
+      );
     };
     checkIfMobile();
     window.addEventListener('resize', checkIfMobile);
     return () => window.removeEventListener('resize', checkIfMobile);
-  }, [forceMobile]);
+  }, [forceMobile, isSnap2ProductLink]);
 
   const setSearchQuery = useCallback((optionId: string, query: string) => {
     setSearchQueries(prev => ({
@@ -879,8 +916,46 @@ export const OV25UIProvider: React.FC<{
   
   // Check if we're in snap2 mode based on productLink
   const isSnap2Mode = useMemo(() => {
-    return productLink?.startsWith('snap2/') || false;
-  }, [productLink]);
+    return isSnap2ProductLink;
+  }, [isSnap2ProductLink]);
+
+  const snap2VariantSheetSideDesktop = snap2VariantSheetSideDesktopProp;
+  const snap2VariantSheetSideMobile =
+    snap2VariantSheetSideMobileProp ?? snap2VariantSheetSideDesktop;
+  const snap2ModulePanelPositionDesktop = snap2ModulePanelPositionDesktopProp;
+  const snap2ModulePanelPositionMobile =
+    snap2ModulePanelPositionMobileProp ?? snap2ModulePanelPositionDesktop;
+
+  const snap2VariantSheetSide = useMemo(
+    () => (isMobile ? snap2VariantSheetSideMobile : snap2VariantSheetSideDesktop),
+    [isMobile, snap2VariantSheetSideDesktop, snap2VariantSheetSideMobile]
+  );
+
+  const snap2ModuleSheetPosition = useMemo(
+    () => (isMobile ? snap2ModulePanelPositionMobile : snap2ModulePanelPositionDesktop),
+    [isMobile, snap2ModulePanelPositionDesktop, snap2ModulePanelPositionMobile]
+  );
+
+  const snap2ModulesEmbedInVariantSheet = useMemo(() => {
+    if (!isSnap2Mode) return false;
+    // Inline / inline-sheet: modules always use the variants column (PIECES / OPTIONS); `modules.position` is for sheet / drawer / modal only.
+    if (
+      configuratorDisplayMode === 'inline' ||
+      configuratorDisplayMode === 'inline-sheet' ||
+      (isMobile && effectiveConfiguratorDisplayModeMobile === 'inline')
+    ) {
+      return true;
+    }
+    if (snap2ModuleSheetPosition === 'bottom') return false;
+    return snap2VariantSheetSide === snap2ModuleSheetPosition;
+  }, [
+    isSnap2Mode,
+    configuratorDisplayMode,
+    isMobile,
+    effectiveConfiguratorDisplayModeMobile,
+    snap2ModuleSheetPosition,
+    snap2VariantSheetSide,
+  ]);
 
   // Helper function to apply search and filter logic to any option
   const applySearchAndFilters = useCallback((option: Option | SizeOption, optionId: string) => {
@@ -1079,7 +1154,16 @@ export const OV25UIProvider: React.FC<{
     return rawList;
   }, [isSnap2Mode, products, configuratorState, sizeOption, isVariantOptionHidden]);
 
-  const allOptionsWithoutModules = allOptions.filter(option => option.id !== 'modules');
+  const allOptionsWithoutModules = useMemo(
+    () => allOptions.filter((option) => option.id !== 'modules'),
+    [allOptions]
+  );
+
+  /** Snap2 lists modules under PIECES, not as a variant option — always omit `modules` here. */
+  const variantPanelOptions = useMemo(
+    () => (isSnap2Mode ? allOptionsWithoutModules : allOptions),
+    [isSnap2Mode, allOptions, allOptionsWithoutModules]
+  );
 
   useEffect(() => {
     if (activeOptionId == null) return;
@@ -1092,14 +1176,14 @@ export const OV25UIProvider: React.FC<{
     (option: { id: string; name: string }) => {
       const optionFilters = availableProductFilters?.[option.name];
       if (!optionFilters || Object.keys(optionFilters).length === 0) return false;
-      const fullOption = allOptionsWithoutModules?.find((o) => o.id === option.id);
+      const fullOption = allOptions?.find((o) => o.id === option.id);
       const groupCount = fullOption?.groups?.length ?? 0;
       return Object.keys(optionFilters).some((key) => {
         if (key === 'Collections') return groupCount > 1 && (optionFilters[key]?.length ?? 0) > 0;
         return (optionFilters[key]?.length ?? 0) > 0;
       });
     },
-    [availableProductFilters, allOptionsWithoutModules]
+    [availableProductFilters, allOptions]
   );
 
   useEffect(() => {
@@ -1167,12 +1251,14 @@ export const OV25UIProvider: React.FC<{
     if (configuratorState?.configuratorSettings?.swatchSettings) {
       setSwatchRulesData(configuratorState.configuratorSettings.swatchSettings);
     }
-    if (configuratorState?.snap2Objects && configuratorState.snap2Objects.length > 0) {
+    const snapCount = configuratorState?.snap2Objects?.length ?? 0;
+    if (snapCount > 0 && prevSnap2ObjectCountRef.current === 0) {
       const firstNonModulesOption = allOptions.find(opt => opt.id !== 'modules');
       if (firstNonModulesOption) {
-        setActiveOptionId(firstNonModulesOption.id);
+        setActiveOptionId((prev) => (prev === 'modules' ? prev : firstNonModulesOption.id));
       }
     }
+    prevSnap2ObjectCountRef.current = snapCount;
   }, [configuratorState, allOptions]);
 
   // Check if any selection in the current product has a swatch
@@ -1205,6 +1291,15 @@ export const OV25UIProvider: React.FC<{
   const handleOptionClick = (optionId: string) => {
     setExpandToOptionIdOnOpen(optionId);
     setActiveOptionId(optionId);
+    if (
+      isSnap2Mode &&
+      optionId === 'modules' &&
+      !snap2ModulesEmbedInVariantSheet &&
+      !isMobile
+    ) {
+      setIsModulePanelOpen(true);
+      return;
+    }
     if (!useInlineVariantControls) {
       setIsVariantsOpen(true);
     }
@@ -1224,15 +1319,21 @@ export const OV25UIProvider: React.FC<{
 
   // Navigation functions
   const handleNextOption = () => {
-    const findIndex = allOptions.findIndex(opt => opt.id === activeOptionId);
-    const newIndex = (findIndex + 1) % allOptions?.length;
-    setActiveOptionId(allOptions[newIndex].id);
+    const options = isSnap2Mode ? allOptionsWithoutModules : allOptions;
+    if (!options.length) return;
+    const findIndex = options.findIndex((opt) => opt.id === activeOptionId);
+    const idx = findIndex >= 0 ? findIndex : 0;
+    const newIndex = (idx + 1) % options.length;
+    setActiveOptionId(options[newIndex].id);
   };
 
   const handlePreviousOption = () => {
-    const currentIndex = allOptions.findIndex(opt => opt.id === activeOptionId);
-    const newIndex = (currentIndex - 1 + allOptions?.length) % allOptions?.length;
-    setActiveOptionId(allOptions[newIndex].id);
+    const options = isSnap2Mode ? allOptionsWithoutModules : allOptions;
+    if (!options.length) return;
+    const currentIndex = options.findIndex((opt) => opt.id === activeOptionId);
+    const idx = currentIndex >= 0 ? currentIndex : 0;
+    const newIndex = (idx - 1 + options.length) % options.length;
+    setActiveOptionId(options[newIndex].id);
   };
 
   // Configure button handler for Snap2 mode
@@ -1254,7 +1355,6 @@ export const OV25UIProvider: React.FC<{
       }
     } else {
       setIsModalOpen(true);
-      setIsModulePanelOpen(true);
       setIsVariantsOpen(true);
     }
   }, [
@@ -1266,7 +1366,6 @@ export const OV25UIProvider: React.FC<{
     setActiveOptionId,
     setIsVariantsOpen,
     setIsModalOpen,
-    setIsModulePanelOpen,
   ]);
 
   useEffect(() => {
@@ -1588,17 +1687,32 @@ export const OV25UIProvider: React.FC<{
               setSnap2SaveResponse({ success: false, error: data.error || 'Failed to save configuration' });
             }
             break;
-          case 'COMPATIBLE_MODULES':
-            setCompatibleModules(data.modules || []);
-            if (data.modules.length > 0) {
+          case 'COMPATIBLE_MODULES': {
+            const modulesList = Array.isArray(data?.modules) ? data.modules : [];
+            setCompatibleModules((prev) =>
+              compatibleModuleListsEqual(prev, modulesList) ? prev : modulesList
+            );
+            if (modulesList.length > 0) {
               setIsModuleSelectionLoading(false);
+              setIsSnap2CheckoutSheetOpen(false);
+              const effectiveInlineVariants = isMobile
+                ? (useInlineVariantControlsMobileProp ?? useInlineVariantControls)
+                : useInlineVariantControls;
+              const openModulesInVariantSheet =
+                effectiveInlineVariants || snap2ModulesEmbedInVariantSheet;
               if (isMobile) {
-                setExpandToOptionIdOnOpen(null);
+                setExpandToOptionIdOnOpen(openModulesInVariantSheet ? 'modules' : null);
                 setActiveOptionId('modules');
-                if (!hasConfigureButton && !data.isInitialLoad) {
+                if (!hasConfigureButtonState && !data.isInitialLoad) {
                   setIsVariantsOpen(true);
                 }
-              } else {
+              } else if (openModulesInVariantSheet) {
+                setExpandToOptionIdOnOpen('modules');
+                setActiveOptionId('modules');
+                if (data?.isInitialLoad !== true) {
+                  setIsVariantsOpen(true);
+                }
+              } else if (data?.isInitialLoad !== true) {
                 setIsModulePanelOpen(true);
               }
             } else if (isMobile && configuratorStateRef.current?.snap2Objects?.length) {
@@ -1608,6 +1722,7 @@ export const OV25UIProvider: React.FC<{
               }
             }
             break;
+          }
           case 'SELECT_MODULE_RECEIVED':
             // Loading state is now managed by InitialiseMenu component (when configuratorState.snap2Objects.length > 0). this is too early to set it to false, since 3D scene is not yet loaded.
             break;
@@ -1715,7 +1830,15 @@ export const OV25UIProvider: React.FC<{
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
-  }, [handleARGLBData, effectiveCurrencySymbol]);
+  }, [
+    handleARGLBData,
+    effectiveCurrencySymbol,
+    isMobile,
+    useInlineVariantControls,
+    useInlineVariantControlsMobileProp,
+    hasConfigureButtonState,
+    snap2ModulesEmbedInVariantSheet,
+  ]);
 
   const hasCutout = !!(currentProduct?.metadata as any)?.cutoutImage
   const cutoutFirst = hasCutout && (isMobile || !deferThreeD)
@@ -1836,6 +1959,7 @@ export const OV25UIProvider: React.FC<{
     hideLogo,
     mobileLogoURL,
     uniqueId,
+    initialiseMenuUsesExternalSelector,
     // Computed values
     currentProduct,
     sizeOption,
@@ -1845,6 +1969,7 @@ export const OV25UIProvider: React.FC<{
     showFilters,
     allOptions,
     allOptionsWithoutModules,
+    variantPanelOptions,
     searchQueries,
     selectedSwatches,
     swatchRulesData,
@@ -1872,6 +1997,9 @@ export const OV25UIProvider: React.FC<{
     variantDisplayStyleInlineMobile,
     variantDisplayStyleOverlay,
     variantDisplayStyleOverlayMobile,
+    snap2VariantSheetSide,
+    snap2ModuleSheetPosition,
+    snap2ModulesEmbedInVariantSheet,
     shareDialogTrigger,
     skipNextDrawerCloseRef,
     skipNextShareClickRef,

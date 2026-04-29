@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { cn } from '../lib/utils.js';
 import { Snap2ConfiguratorModal } from './Snap2ConfiguratorModal.js';
+import { Snap2InlineSheetDesktopShell } from './Snap2InlineSheetDesktopShell.js';
 import { ProductGallery } from './product-gallery.js';
 import ConfiguratorViewControls from './ConfiguratorViewControls.js';
 import { useOV25UI } from '../contexts/ov25-ui-context.js';
-import { ProductVariantsWrapper } from './VariantSelectMenu/ProductVariantsWrapper.js';
-import { MobileCheckoutButton } from './VariantSelectMenu/MobileCheckoutButton.js';
+import { Snap2Wrapper } from './VariantSelectMenu/Snap2Wrapper.js';
 import { MobileDrawer } from './ui/mobile-drawer.js';
 import { InitialiseMenu } from './VariantSelectMenu/InitialiseMenu.js';
 import { VariantsCloseButton } from './VariantSelectMenu/VariantsCloseButton.js';
@@ -15,21 +15,23 @@ import { ConfigureButton } from './ConfigureButton.js';
 import { Ov25ShadowHost } from './Ov25ShadowHost.js';
 
 export const Snap2ConfigureUI: React.FC = () => {
-  const { isVariantsOpen, isModalOpen, setIsModalOpen, setIsVariantsOpen, isMobile, allOptions, activeOptionId, setActiveOptionId, setShareDialogTrigger, shareDialogTrigger, isSnap2Mode, drawerSize, setDrawerSize, configuratorState, skipNextDrawerCloseRef, setCompatibleModules, setConfiguratorState, setPreloading, preloading, iframeResetKey, resetIframe } = useOV25UI();
+  const { isVariantsOpen, isModalOpen, setIsModalOpen, setIsVariantsOpen, isMobile, allOptions, activeOptionId, setActiveOptionId, setShareDialogTrigger, shareDialogTrigger, isSnap2Mode, drawerSize, setDrawerSize, configuratorState, skipNextDrawerCloseRef, setCompatibleModules, setConfiguratorState, setPreloading, preloading, iframeResetKey, resetIframe, configuratorDisplayMode, configuratorDisplayModeMobile, initialiseMenuUsesExternalSelector } = useOV25UI();
   const [shouldRenderIframe, setShouldRenderIframe] = useState(false);
   const [pendingOpen, setPendingOpen] = useState(false);
   const hasInitializedMobileRef = React.useRef(false);
 
   const hasSnap2Objects = (configuratorState?.snap2Objects?.length ?? 0) > 0;
   const showModuleSelect = activeOptionId === 'modules' && !hasSnap2Objects;
+  const snap2MobileInline =
+    isSnap2Mode && isMobile && configuratorDisplayModeMobile === 'inline';
 
   useEffect(() => {
     if (isMobile && !hasInitializedMobileRef.current) {
       hasInitializedMobileRef.current = true;
       setShouldRenderIframe(true);
-      setIsVariantsOpen(false);
+      setIsVariantsOpen(snap2MobileInline);
     }
-  }, [isMobile, setIsVariantsOpen]);
+  }, [isMobile, setIsVariantsOpen, snap2MobileInline]);
 
   useEffect(() => {
     if (pendingOpen && allOptions.length > 0 && !isVariantsOpen) {
@@ -84,7 +86,7 @@ export const Snap2ConfigureUI: React.FC = () => {
 
   return (
     <>
-      {isMobile && shouldRenderIframe && createPortal(
+      {isMobile && shouldRenderIframe && !snap2MobileInline && createPortal(
         <Ov25ShadowHost
           style={{
             position: 'fixed',
@@ -97,14 +99,14 @@ export const Snap2ConfigureUI: React.FC = () => {
         >
           <>
             <div className={cn(
-              "ov:fixed ov:inset-0 ov:w-full ov:h-full ov:z-[2147483644]",
+              "ov:fixed ov:inset-0 ov:w-full ov:h-full ov:z-2147483644",
               (!isVariantsOpen || showModuleSelect) && "ov:opacity-0 ov:pointer-events-none"
             )}>
               <ProductGallery key={`gallery-${iframeResetKey}`} isInModal={false} isPreloading={preloading} />
             </div>
             <div
               className={cn(
-                "ov:fixed ov:top-0 ov:left-0 ov:w-full ov:z-[2147483644] ov:pointer-events-none ov:transition-[height] ov:duration-500",
+                "ov:fixed ov:top-0 ov:left-0 ov:w-full ov:z-2147483644 ov:pointer-events-none ov:transition-[height] ov:duration-500",
                 (!isVariantsOpen || showModuleSelect) && "ov:opacity-0 ov:pointer-events-none"
               )}
               style={{
@@ -120,7 +122,7 @@ export const Snap2ConfigureUI: React.FC = () => {
         document.body
       )}
 
-      {isMobile && isVariantsOpen && showModuleSelect && createPortal(
+      {isMobile && isVariantsOpen && showModuleSelect && !snap2MobileInline && !initialiseMenuUsesExternalSelector && createPortal(
         <Ov25ShadowHost
           style={{
             position: 'fixed',
@@ -131,8 +133,8 @@ export const Snap2ConfigureUI: React.FC = () => {
             pointerEvents: 'auto',
           }}
         >
-          <div className="ov:fixed ov:inset-0 ov:z-[2147483645] ov:flex ov:flex-col ov:bg-[var(--ov25-background-color)] ov:pt-[env(safe-area-inset-top)]">
-            <VariantsCloseButton className="ov:!top-[max(0.5rem,env(safe-area-inset-top))] ov:!right-3" />
+          <div className="ov:fixed ov:inset-0 ov:z-2147483645 ov:flex ov:flex-col ov:bg-(--ov25-background-color) ov:pt-[env(safe-area-inset-top)]">
+            <VariantsCloseButton className="ov:top-[max(0.5rem,env(safe-area-inset-top))]! ov:right-3!" />
             <div className="ov:flex-1 ov:min-h-0 ov:overflow-y-auto ov:px-2 ov:pb-[env(safe-area-inset-bottom)]">
               <InitialiseMenu />
             </div>
@@ -141,23 +143,22 @@ export const Snap2ConfigureUI: React.FC = () => {
         document.body
       )}
 
-      {isMobile && hasSnap2Objects && (
+      {isMobile && hasSnap2Objects && !snap2MobileInline && (
         <MobileDrawer
           isOpen={isVariantsOpen}
           onOpenChange={handleMobileDrawerClose}
           onStateChange={(value: number) => setDrawerSize(value === 0 ? 'closed' : value === 1 ? 'small' : 'large')}
-          className="ov:z-[10]"
+          className="ov:z-10"
         >
           <div className="ov:w-full ov:h-full ov:flex ov:flex-col ov:absolute ov:top-0 ov:left-0 ov:pointer-events-auto">
-            <ProductVariantsWrapper />
-            <div className={cn(drawerSize === 'large' || drawerSize === 'small' ? 'ov:fixed ov:bottom-0 ov:left-0 ov:w-full' : '')}>
-              <MobileCheckoutButton />
-            </div>
+            <Snap2Wrapper />
           </div>
         </MobileDrawer>
       )}
 
-      {!isMobile && (
+      {!isMobile && configuratorDisplayMode === 'inline-sheet' && <Snap2InlineSheetDesktopShell />}
+
+      {!isMobile && configuratorDisplayMode !== 'inline-sheet' && (
         <Snap2ConfiguratorModal isOpen={isModalOpen} onClose={handleCloseModal}>
           <div className={cn(
             "ov:relative ov:w-full ov:h-full ov:min-h-0 ov:flex",
@@ -175,13 +176,17 @@ export const Snap2ConfigureUI: React.FC = () => {
 };
 
 export const Snap2ConfigureButton: React.FC = () => {
-  const { configureHandlerRef } = useOV25UI();
+  const { configureHandlerRef, isModalOpen, isVariantsOpen } = useOV25UI();
 
   return (
-    <>
+    <div
+      style={{ display: 'contents' }}
+      data-ov25-snap2-modal-open={isModalOpen ? 'true' : 'false'}
+      data-ov25-snap2-drawer-open={isVariantsOpen ? 'true' : 'false'}
+    >
       <ConfigureButton onClick={() => configureHandlerRef.current?.()} />
       <Snap2ConfigureUI />
-    </>
+    </div>
   );
 };
 

@@ -4,7 +4,7 @@ import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 import { cn } from '../../lib/utils.js';
 
 const closeButtonBaseClass =
-  'ov:absolute ov:top-5 ov:right-4 ov:group ov:p-1 max-h-fit aspect-square ov:rounded-full ov:hover:bg-neutral-50 ov:cursor-pointer ov:max-w-fit ov:flex ov:items-center ov:justify-center ov:pointer-events-auto';
+  'ov:absolute ov:top-5 ov:right-4 ov:z-20 ov:group ov:p-1 max-h-fit aspect-square ov:rounded-full ov:hover:bg-neutral-50 ov:cursor-pointer ov:max-w-fit ov:flex ov:items-center ov:justify-center ov:pointer-events-auto';
 
 interface VariantsCloseButtonProps {
   onClick?: () => void;
@@ -20,6 +20,7 @@ export const VariantsCloseButton = ({ onClick: onClickProp, ariaLabel = 'Close',
     shareDialogTrigger,
     setShareDialogTrigger,
     configuratorState,
+    configuratorDisplayMode,
   } = useOV25UI();
 
   const handleClose = () => {
@@ -28,6 +29,10 @@ export const VariantsCloseButton = ({ onClick: onClickProp, ariaLabel = 'Close',
       return;
     }
     if (isModalOpen) {
+      setIsVariantsOpen(false);
+      return;
+    }
+    if (configuratorDisplayMode === 'inline-sheet') {
       setIsVariantsOpen(false);
       return;
     }
@@ -40,7 +45,11 @@ export const VariantsCloseButton = ({ onClick: onClickProp, ariaLabel = 'Close',
 
   return (
     <button
-      onClick={handleClose}
+      type="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        handleClose();
+      }}
       className={cn('ov25-close-button',closeButtonBaseClass, className)}
       aria-label={ariaLabel}
     >

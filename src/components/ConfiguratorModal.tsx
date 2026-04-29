@@ -9,6 +9,7 @@ import {
 } from '../lib/config/iframe-transition-snapshot.js';
 import { ModalGalleryOpeningBitmap } from './ModalGalleryOpeningBitmap.js';
 import { ProductVariantsWrapper } from './VariantSelectMenu/ProductVariantsWrapper.js';
+import { Snap2Wrapper } from './VariantSelectMenu/Snap2Wrapper.js';
 import { WizardVariants } from './VariantSelectMenu/WizardVariants.js';
 import { VariantsHeader } from './VariantSelectMenu/VariantsHeader.js';
 import { VariantsCloseButton } from './VariantSelectMenu/VariantsCloseButton.js';
@@ -51,6 +52,7 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({
     variantDisplayStyleOverlay,
     variantDisplayStyleOverlayMobile,
     shadowDOMs,
+    isSnap2Mode,
   } = useOV25UI();
   const effectiveOverlayStyle = isMobile ? variantDisplayStyleOverlayMobile : variantDisplayStyleOverlay;
   const isShareDialogOpen = shareDialogTrigger !== 'none';
@@ -238,14 +240,14 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({
               )}
             >
               {effectiveOverlayStyle === 'wizard' ? (
-                <div className="ov:flex ov:flex-col ov:h-full ov:bg-[var(--ov25-background-color)]">
+                <div className="ov:flex ov:flex-col ov:h-full ov:bg-(--ov25-background-color)">
                   <VariantsHeader />
                   <div className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:overflow-hidden">
                     <WizardVariants mode="drawer" />
                   </div>
                 </div>
               ) : (
-                <ProductVariantsWrapper />
+                isSnap2Mode ? <Snap2Wrapper /> : <ProductVariantsWrapper />
               )}
             </div>
           </div>

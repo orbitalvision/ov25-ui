@@ -10,6 +10,7 @@ import { Variant } from './ProductVariants.js';
 import { getGridColsClass } from './DesktopVariants.js';
 import { FilterControls } from './FilterControls.js';
 import { FilterContent } from './FilterContent.js';
+import { Snap2ModulesOptionBody } from './Snap2ModulesOptionBody.js';
 import {
   selectionBedSizeFromMetadata,
   type ConfiguratorSelectionBedMetadata,
@@ -31,14 +32,14 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
     currentProductId,
     selectedSelections,
     products,
-    allOptionsWithoutModules,
+    variantPanelOptions,
     applySearchAndFilters,
     searchQueries,
     availableProductFilters,
     isMobile,
     isVariantsOpen,
+    activeOptionId,
     setActiveOptionId,
-    expandToOptionIdOnOpen,
   } = useOV25UI();
 
   const [currentView, setCurrentView] = useState<string | null>(null);
@@ -72,11 +73,11 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
   }, [handleSelectionSelect]);
 
   const filteredOptions = useMemo(() => {
-    return allOptionsWithoutModules.map(option => {
-      if (option.id === 'size') return option;
+    return variantPanelOptions.map((option) => {
+      if (option.id === 'size' || option.id === 'modules') return option;
       return applySearchAndFilters(option, option.id);
     });
-  }, [allOptionsWithoutModules, applySearchAndFilters, searchQueries, availableProductFilters]);
+  }, [variantPanelOptions, applySearchAndFilters, searchQueries, availableProductFilters]);
 
   const sizeVariants = useMemo(() => {
     if (!sizeOption?.groups?.[0]?.selections) return [];
@@ -98,8 +99,11 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
   const allOptionsVariants = useMemo(() => {
     return filteredOptions
       .map((filteredOption, index) => {
-        const option = allOptionsWithoutModules[index];
+        const option = variantPanelOptions[index];
         if (option.id === 'size') return null;
+        if (option.id === 'modules') {
+          return { optionId: 'modules', optionName: option.name, variants: [] as any[] };
+        }
         return {
           optionId: option.id,
           optionName: option.name,
@@ -127,23 +131,28 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
         };
       })
       .filter((item): item is { optionId: string; optionName: string; variants: any[] } => item !== null);
-  }, [filteredOptions, allOptionsWithoutModules, selectedSelections]);
+  }, [filteredOptions, variantPanelOptions, selectedSelections]);
 
-  const showSize = allOptionsWithoutModules.some((o) => o.id === 'size') && sizeVariants.length > 0;
+  const showSize = variantPanelOptions.some((o) => o.id === 'size') && sizeVariants.length > 0;
 
   const validOptionIds = useMemo(() => {
     const ids = allOptionsVariants.map((o) => o.optionId);
     return showSize ? ['size', ...ids] : ids;
   }, [showSize, allOptionsVariants]);
 
-  const prevOpenRef = React.useRef(false);
+  const isTreePanelOpen = mode === 'inline' || isVariantsOpen;
+
   useEffect(() => {
-    const justOpened = isVariantsOpen && !prevOpenRef.current;
-    prevOpenRef.current = isVariantsOpen;
-    if (justOpened) {
-      setCurrentView(expandToOptionIdOnOpen && validOptionIds.includes(expandToOptionIdOnOpen) ? expandToOptionIdOnOpen : null);
+    if (!isTreePanelOpen) {
+      setCurrentView(null);
+      return;
     }
-  }, [isVariantsOpen, expandToOptionIdOnOpen, validOptionIds]);
+    if (activeOptionId != null && validOptionIds.includes(activeOptionId)) {
+      setCurrentView(activeOptionId);
+      return;
+    }
+    setCurrentView(null);
+  }, [isTreePanelOpen, activeOptionId, validOptionIds]);
 
   const scrollContentClass = mode === 'drawer' && isMobile ? 'ov:pb-20' : '';
 
@@ -151,7 +160,7 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
     <button
       type="button"
       onClick={handleBack}
-      className="ov25-option-header ov:shrink-0 ov:w-full ov:flex ov:items-center ov:gap-2 ov:px-4 ov:py-3 ov:text-left ov:bg-[var(--ov25-background-color)] ov:text-[var(--ov25-secondary-text-color)] hover:ov:bg-[var(--ov25-hover-bg-color,transparent)] ov:border-b ov:border-[var(--ov25-border-color)] ov:cursor-pointer"
+      className="ov25-option-header ov:shrink-0 ov:w-full ov:flex ov:items-center ov:gap-2 ov:px-4 ov:py-3 ov:text-left ov:bg-(--ov25-background-color) ov:text-(--ov25-secondary-text-color) hover:ov:bg-[var(--ov25-hover-bg-color,transparent)] ov:border-b ov:border-(--ov25-border-color) ov:cursor-pointer"
     >
       <ChevronLeft className="ov:size-5" />
       <span className="ov:text-lg ov:font-medium">{title}</span>
@@ -194,6 +203,20 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
   );
 
   const optionChildView = currentView ? (() => {
+    if (currentView === 'modules') {
+      const label = allOptionsVariants.find((o) => o.optionId === 'modules')?.optionName ?? 'Modules';
+      return (
+        <div className="ov:flex ov:flex-col ov:min-h-0 ov:flex-1 ov:overflow-hidden">
+          {backHeader(capitalizeWords(label))}
+          <div
+            className={`ov:min-h-0 ov:flex-1 ov:overflow-y-auto ov:px-4 ov:pt-0 ov:pb-4 ${scrollContentClass}`}
+            {...(mode === 'inline' ? { 'data-ov25-list-variants-content': true as const } : {})}
+          >
+            <Snap2ModulesOptionBody />
+          </div>
+        </div>
+      );
+    }
     const opt = allOptionsVariants.find(o => o.optionId === currentView);
     if (!opt) return null;
     return (

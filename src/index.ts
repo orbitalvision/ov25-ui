@@ -12,7 +12,6 @@ export {
   VariantDisplayMode,
   VariantDisplayStyleOverlay,
   CarouselLayout,
-  VariantDisplayStyle,
 } from './utils/inject.js';
 export type {
   InjectConfiguratorOptions,

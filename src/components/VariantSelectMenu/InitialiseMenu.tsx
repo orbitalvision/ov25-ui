@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 import { CompatibleModule, selectModule } from '../../utils/configurator-utils.js';
 import { Variant } from './ProductVariants.js';
 import { cn } from '../../lib/utils.js';
+import { ModuleVariantCard } from './variant-cards/ModuleVariantCard.js';
 
 export const InitialiseMenu: React.FC = () => {
   const {
@@ -10,9 +11,10 @@ export const InitialiseMenu: React.FC = () => {
     isModuleSelectionLoading,
     setIsModuleSelectionLoading,
     isMobile,
+    configuratorState,
+    initialiseMenuUsesExternalSelector,
   } = useOV25UI();
-
-  const [hoveredModule, setHoveredModule] = useState<string | null>(null);
+  const hasSnap2Objects = (configuratorState?.snap2Objects?.length ?? 0) > 0;
 
   const handleModuleSelect = (variant: Variant) => {
     if (isModuleSelectionLoading) {
@@ -25,13 +27,53 @@ export const InitialiseMenu: React.FC = () => {
       return;
     }
     setIsModuleSelectionLoading(true);
-    selectModule(modelPath, modelId);
+    selectModule({ modelPath, modelId });
   };
 
-  if (!compatibleModules || compatibleModules.length === 0) {
+  const initialiseMenuShellClass =
+    'ov:bg-[var(--ov25-configurator-iframe-background-color)] ov:w-full ov:h-full';
+
+  if (compatibleModules === null) {
     return (
-      <div className="ov:w-full ov:h-full ov:flex ov:items-center ov:justify-center">
-        <p className="ov:text-sm ov:text-(--ov25-secondary-text-color)">Loading modules...</p>
+      <div
+        id="ov25-initialise-menu"
+        className={cn(initialiseMenuShellClass, 'ov:flex ov:items-center ov:justify-center')}
+      >
+        <p className="ov:text-sm ov:text-(--ov25-secondary-text-color)">Loading products...</p>
+      </div>
+    );
+  }
+
+  /** Full-screen inject host: collapse shadow host so fixed/inset page chrome does not stay opaque over the scene. */
+  if (
+    initialiseMenuUsesExternalSelector &&
+    (hasSnap2Objects ||
+      (isModuleSelectionLoading && compatibleModules.length === 0))
+  ) {
+    return (
+      <style>
+        {
+          ':host { display: none !important; pointer-events: none !important; visibility: hidden !important; }'
+        }
+      </style>
+    );
+  }
+
+  if (compatibleModules.length === 0) {
+    if (!initialiseMenuUsesExternalSelector && (isModuleSelectionLoading || hasSnap2Objects)) {
+      return null;
+    }
+    return (
+      <div
+        id="ov25-initialise-menu"
+        className={cn(
+          initialiseMenuShellClass,
+          'ov:flex ov:items-center ov:justify-center ov:px-4 ov:text-center'
+        )}
+      >
+        <p className="ov:text-sm ov:text-(--ov25-secondary-text-color)">
+          Select an attachment point or model to replace
+        </p>
       </div>
     );
   }
@@ -39,74 +81,59 @@ export const InitialiseMenu: React.FC = () => {
   const compact = isMobile;
 
   return (
-    <div className={cn(
-      "ov:w-full ov:h-full ov:flex ov:flex-col ov:overflow-y-auto",
-      compact ? "ov:justify-start ov:p-2" : "ov:justify-center ov:p-4"
-    )}>
-      <div className={cn(
-        "ov:mx-auto ov:flex ov:flex-col ov:items-center",
-        compact ? "ov:max-w-none" : "ov:max-w-[960px] ov:pt-4"
-      )}>
-        <p className={cn(
-          "ov:text-center ov:text-(--ov25-text-color) ov:shrink-0",
-          compact ? "ov:text-sm ov:mb-2 ov:mt-1" : "ov:text-base ov:mb-4"
-        )}>
-          Select a model to get started
+    <div
+      id="ov25-initialise-menu"
+      className={cn(
+        initialiseMenuShellClass,
+        'ov:flex ov:flex-col ov:min-h-0 ov:overflow-hidden',
+        compact ? 'ov:p-2' : 'ov:p-4'
+      )}
+    >
+      <div
+        className={cn(
+          'ov:mx-auto ov:flex ov:min-h-0 ov:w-full ov:flex-1 ov:flex-col ov:items-stretch',
+          compact ? 'ov:max-w-md' : 'ov:max-w-md ov:md:max-w-3xl'
+        )}
+      >
+        <p
+          className={cn(
+            'ov:text-center ov:text-(--ov25-text-color) ov:shrink-0',
+            compact ? 'ov:text-sm ov:mb-2 ov:mt-1' : 'ov:text-base ov:mb-3'
+          )}
+        >
+          Select a product to get started
         </p>
-        <div className={cn(
-          "ov:grid ov:grid-cols-2 ov:w-full",
-          compact ? "ov:gap-1 ov:sm:grid-cols-3" : "ov:gap-2 ov:sm:grid-cols-4 ov:sm:gap-1"
-        )}>
-        {compatibleModules.map((module) => {
-          const variant: Variant = {
-            id: `${module.productId}-${module.model.modelId}`,
-            name: module.product.name,
-            price: 0,
-            image: module.product.hasImage ? module.product.imageUrl : '/placeholder.svg?height=200&width=200',
-            blurHash: '',
-            data: module,
-            isSelected: false,
-          };
-          return (
-            <div 
-              key={`${module.productId}-${module.model.modelId}`} 
-              className={cn(
-                "ov:w-full ov:flex ov:flex-col ov:relative",
-                isModuleSelectionLoading ? "ov:cursor-not-allowed ov:opacity-50" : "ov:cursor-pointer"
-              )}
-              onClick={() => !isModuleSelectionLoading && handleModuleSelect(variant)}
-              onMouseEnter={() => setHoveredModule(`${module.productId}-${module.model.modelId}`)}
-              onMouseLeave={() => setHoveredModule(null)}
-            >
-              <div className={cn(
-                "ov:w-full ov:flex ov:items-center ov:justify-center ov:cursor-pointer ov:overflow-hidden",
-                compact
-                  ? "ov:aspect-square ov:min-h-0 ov:rounded-lg"
-                  : "ov:w-[100px] ov:md:w-[150px] ov:h-[100px] ov:sm:h-[150px] ov:p-1 ov:sm:p-2 ov:bg-white"
-              )}>
-                {module.product.hasImage && module.product.imageUrl ? (
-                  <img
-                    src={module.product.imageUrl.replace('thumbnail', 'small_image')}
-                    alt={module.product.name}
-                    className={cn("ov:w-full ov:h-full ov:object-contain", compact && "ov:rounded-lg")}
-                  />
-                ) : (
-                  <div className={cn(
-                    "ov:w-full ov:h-full ov:flex ov:items-center ov:justify-center ov:min-h-[80px]",
-                    compact ? "ov:bg-(--ov25-border-color) ov:rounded-lg" : "ov:bg-gray-200 ov:rounded-lg"
-                  )}>
-                    <span className="ov:text-gray-400 ov:text-xs">No Image</span>
-                  </div>
-                )}
-              </div>
-              {!compact && hoveredModule === `${module.productId}-${module.model.modelId}` && (
-                <div className="ov:absolute ov:bottom-full ov:left-1/2 ov:transform ov:-translate-x-1/2 ov:mb-2 ov:px-2 ov:py-1 ov:bg-gray-900 ov:text-white ov:text-xs ov:rounded ov:whitespace-nowrap ov:z-10">
-                  {module.product.name}
-                </div>
-              )}
-            </div>
-          );
-        })}
+        <div
+          className={cn(
+            'ov25-initialise-menu-module-list ov:grid ov:min-h-0 ov:flex-1 ov:grid-cols-1 ov:content-start ov:gap-3 ov:overflow-y-auto ov:overflow-x-hidden ov:pb-2',
+            !compact && 'ov:md:grid-cols-2'
+          )}
+          data-ov25-initialise-menu-part="module-list"
+        >
+          {compatibleModules.map((module, index) => {
+            const variant: Variant = {
+              id: `${module.productId}-${module.model.modelId}`,
+              name: module.product.name,
+              price: 0,
+              image: module.product.hasImage ? module.product.imageUrl : '/placeholder.svg?height=200&width=200',
+              blurHash: '',
+              data: module,
+              isSelected: false,
+            };
+            return (
+              <ModuleVariantCard
+                key={`${module.productId}-${module.model.modelId}`}
+                variant={variant}
+                onSelect={handleModuleSelect}
+                index={index}
+                isMobile={compact}
+                isLoading={isModuleSelectionLoading}
+                pickOnActivate
+                className="ov:mb-0 ov:h-[185px] ov:px-4"
+                thumbDualClassName="ov:p-[0.5rem]"
+              />
+            );
+          })}
         </div>
       </div>
     </div>
@@ -114,5 +141,3 @@ export const InitialiseMenu: React.FC = () => {
 };
 
 export default InitialiseMenu;
-
-

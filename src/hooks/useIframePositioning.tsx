@@ -74,6 +74,12 @@ export const useIframePositioning = () => {
 
     if (!iframe || !container || !parent) return;
 
+    const snap2MobileInline =
+      isSnap2Mode && isMobile && !isModalMode && configuratorDisplayModeMobile === 'inline';
+    if (snap2MobileInline) {
+      return () => {};
+    }
+
     const updateIframeWidth = () => {
       if (!isDrawerOrDialogOpen || isMobile) return;
       
@@ -373,6 +379,7 @@ export const useIframePositioning = () => {
     isSnap2Mode,
     uniqueId,
     isModalMode,
+    configuratorDisplayModeMobile,
     setUseInstantIframeCloseRestore,
     stackedGalleryCloseSyncImmediateRef,
   ]);
@@ -381,6 +388,7 @@ export const useIframePositioning = () => {
   useEffect(() => {
     if (!(isDrawerOrDialogOpen && isMobile)) return;
     if (isModalMode) return;
+    if (isSnap2Mode && configuratorDisplayModeMobile === 'inline') return;
 
         const iframe = findIframeWithUniqueId(uniqueId);
         const containerId = uniqueId ? `ov25-configurator-iframe-container-${uniqueId}` : 'ov25-configurator-iframe-container';
@@ -406,7 +414,7 @@ export const useIframePositioning = () => {
                 container.style.height = originalContainerHeight;
             }
         };
-  }, [drawerSize, isDrawerOrDialogOpen, isModalMode, isSnap2Mode, isMobile, isProductGalleryStacked, uniqueId])
+  }, [drawerSize, isDrawerOrDialogOpen, isModalMode, isSnap2Mode, isMobile, isProductGalleryStacked, uniqueId, configuratorDisplayModeMobile])
 };
 
 export default useIframePositioning;

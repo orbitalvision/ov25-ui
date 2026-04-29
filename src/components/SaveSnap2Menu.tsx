@@ -25,10 +25,14 @@ export const SaveSnap2Menu: React.FC = () => {
 
   return (
     <button
+      type="button"
+      id="ov25-snap2-save-button"
+      aria-label="Save or share configuration"
+      title="Save or share configuration"
       onClick={handleSave}
       className={cn(
         'ov:cursor-pointer ov:w-8 ov:h-8 ov:flex ov:items-center ov:justify-center',
-        'ov:shadow-sm ov:rounded-full ov:bg-[var(--ov25-overlay-button-color)]',
+        'ov:shadow-sm ov:rounded-full ov:bg-(--ov25-overlay-button-color)',
         'ov:transition-all ov:duration-200 ov:hover:opacity-80'
       )}
     >

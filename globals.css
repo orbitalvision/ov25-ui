@@ -259,16 +259,28 @@ html {
   width: 0 !important;
 }
 
-/* Aspect ratio media queries for configurator iframe */
-#ov25-configurator-iframe-container,
-[id^="ov25-configurator-iframe-container-"] {
-    aspect-ratio: 1/1; /* Default square aspect ratio for mobile */
+#ov25-configurator-iframe-container:not([data-stacked="true"]),
+[id^="ov25-configurator-iframe-container-"]:not([data-stacked="true"]) {
+    min-height: 0;
+    height: 100%;
     padding: 0px !important;
     margin: 0px !important;
     overflow: hidden;
 }
+@media (max-width: 767px) {
+    #ov25-configurator-iframe-container:not([data-stacked="true"]),
+    [id^="ov25-configurator-iframe-container-"]:not([data-stacked="true"]) {
+        aspect-ratio: 1 / 1;
+        height: auto;
+    }
+}
 #ov25-configurator-iframe-container[data-stacked="true"],
 [id^="ov25-configurator-iframe-container-"][data-stacked="true"] {
+    aspect-ratio: 1 / 1;
+    min-height: 0;
+    height: 100%;
+    padding: 0px !important;
+    margin: 0px !important;
     overflow: visible !important;
 }
 
@@ -614,16 +626,68 @@ html #ov25-configurator-variant-menu-container {
   pointer-events: all;
 }
 
-/* Snap2 desktop shell: slide settings rails (variants + checkout) in/out (data-open syncs with modal overlay). */
+/* Snap2 desktop shell: slide settings sheets (variants + checkout) in/out (data-open syncs with modal overlay). */
 [data-ov25-snap2-settings-sheet] {
   transform: translateX(100%);
   pointer-events: none;
   transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+[data-ov25-snap2-settings-sheet][data-ov25-snap2-settings-sheet-side="left"] {
+  transform: translateX(-100%);
+  border-top-left-radius: var(--ov25-rounded-3xl);
+  border-bottom-left-radius: var(--ov25-rounded-3xl);
+}
+
+[data-ov25-snap2-settings-sheet][data-ov25-snap2-settings-sheet-side="right"] {
+  border-top-right-radius: var(--ov25-rounded-3xl);
+  border-bottom-right-radius: var(--ov25-rounded-3xl);
 }
 
 [data-ov25-snap2-settings-sheet][data-open="true"] {
   transform: translateX(0);
   pointer-events: auto;
+}
+
+[data-ov25-snap2-module-panel] {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  overflow: hidden;
+}
+
+[data-ov25-snap2-module-panel][data-open="true"] {
+  pointer-events: auto;
+}
+
+[data-ov25-snap2-module-panel][data-ov25-snap2-module-panel-pos="bottom"] {
+  border-bottom-left-radius: var(--ov25-rounded-3xl);
+  border-bottom-right-radius: var(--ov25-rounded-3xl);
+  transform: translateY(100%);
+}
+
+[data-ov25-snap2-module-panel][data-ov25-snap2-module-panel-pos="bottom"][data-open="true"] {
+  transform: translateY(0);
+}
+
+[data-ov25-snap2-module-panel][data-ov25-snap2-module-panel-pos="left"] {
+  border-top-left-radius: var(--ov25-rounded-3xl);
+  border-bottom-left-radius: var(--ov25-rounded-3xl);
+  transform: translateX(-100%);
+}
+
+[data-ov25-snap2-module-panel][data-ov25-snap2-module-panel-pos="left"][data-open="true"] {
+  transform: translateX(0);
+}
+
+[data-ov25-snap2-module-panel][data-ov25-snap2-module-panel-pos="right"] {
+  border-top-right-radius: var(--ov25-rounded-3xl);
+  border-bottom-right-radius: var(--ov25-rounded-3xl);
+  transform: translateX(100%);
+}
+
+[data-ov25-snap2-module-panel][data-ov25-snap2-module-panel-pos="right"][data-open="true"] {
+  transform: translateX(0);
 }
 
 /* Standard modal configurator: variants panel is part of the modal layout — no slide. */

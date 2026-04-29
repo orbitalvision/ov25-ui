@@ -25,6 +25,7 @@ import { getSharedStylesheet, createuserCustomCssStylesheet } from "../utils/sha
 import { IframeContainer } from "./IframeContainer.js"
 import { ProductCarousel } from "./product-carousel.js"
 import { ArPreviewQRCodeDialog } from "./ar-preview-qr-code-dialog.js"
+import InitialiseMenu from "./VariantSelectMenu/InitialiseMenu.js"
 
 type ClosingProxyExit = 'sheet-slide-left' | 'drawer-slide-up' | 'modal-fade'
 
@@ -287,12 +288,18 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
         isSnap2Mode,
         galleryCarouselFullscreenImage,
         isModalOpen,
+        configuratorState,
+        initialiseMenuUsesExternalSelector,
     } = useOV25UI();
 
     const isModalMode = isMobile ? configuratorDisplayModeMobile === 'modal' : configuratorDisplayMode === 'modal';
     const snap2MobileDrawerOpen =
-      isSnap2Mode && isMobile && isDrawerOrDialogOpen && !isModalMode;
-    const iframeSlotBorderRadiusClass = snap2MobileDrawerOpen
+      isSnap2Mode &&
+      isMobile &&
+      isDrawerOrDialogOpen &&
+      !isModalMode &&
+      configuratorDisplayModeMobile !== 'inline';
+    const iframeSlotBorderRadiusClass = snap2MobileDrawerOpen || (isSnap2Mode && configuratorDisplayMode === 'inline')
       ? 'ov:rounded-none'
       : 'ov:rounded-[var(--ov25-configurator-iframe-border-radius)]';
     const closingExit: ClosingProxyExit = isModalMode
@@ -464,11 +471,41 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
     const showOpeningProxy =
         configuratorTransitionProxyMode === 'opening' && configuratorTransitionProxyBitmap;
 
+    const hasSnap2Objects = (configuratorState?.snap2Objects?.length ?? 0) > 0;
+    /** Modal always fills the column; non-modal full-height flex is Snap2-only (classic desktop `inline` stays h-auto / max-h-full). */
+    const galleryUsesColumnFlexFill =
+      isInModal ||
+      (isSnap2Mode &&
+        !isInModal &&
+        ((!isMobile &&
+          (configuratorDisplayMode === 'inline' || configuratorDisplayMode === 'inline-sheet')) ||
+          (isMobile && configuratorDisplayModeMobile === 'inline')));
+    // Should we show the initialise menu in the inline gallery?
+    const showSnap2InitialiseInInlineGallery =
+        isSnap2Mode &&
+        !isInModal &&
+        !hasSnap2Objects &&
+        !initialiseMenuUsesExternalSelector &&
+        ((!isMobile &&
+            (configuratorDisplayMode === 'inline' || configuratorDisplayMode === 'inline-sheet')) ||
+            (isMobile && configuratorDisplayModeMobile === 'inline'));
+
     const galleryContent = (
         <>
+        {showSnap2InitialiseInInlineGallery ? (
+            <div
+                className={cn(
+                    'ov:shrink-0 ov:w-full ov:h-full ov:z-5 ov:absolute',
+                    'ov:border-b ov:border-(--ov25-border-color) ov:bg-(--ov25-background-color)',
+                    'ov:overflow-y-auto',
+                )}
+            >
+                <InitialiseMenu />
+            </div>
+        ) : null}
         <div className={cn(
             "ov:relative ov:flex ov:flex-col ov:font-[family-name:var(--ov25-font-family)] ov:gap-[var(--ov25-gallery-gap)]",
-            isInModal
+            galleryUsesColumnFlexFill
               ? "ov:h-full ov:min-h-0 ov:overflow-hidden"
               : "ov:h-auto ov:max-h-full",
             modalStackBoost ? "ov:z-[2147483647]" : "ov:z-[2] ov:isolate",
@@ -499,7 +536,9 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
                 ref={iframeSlotMeasureRef}
                 className={cn(
                   "ov:relative ov:w-full",
-                  isInModal && "ov:flex-1 ov:min-h-0 ov:flex ov:flex-col"
+                  galleryUsesColumnFlexFill
+                    ? "ov:flex-1 ov:min-h-0 ov:flex ov:flex-col"
+                    : "ov:aspect-square"
                 )}
             >
                 <div id="ov25-configurator-background-color" className={cn(
@@ -551,7 +590,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
         id="ov-25-configurator-gallery-container"
         className={cn(
           "ov25-configurator-gallery",
-          isInModal &&
+          galleryUsesColumnFlexFill &&
             "ov:flex ov:flex-1 ov:flex-col ov:min-h-0 ov:h-full ov:max-h-full ov:overflow-hidden",
         )}
         style={galleryHostStackStyle}

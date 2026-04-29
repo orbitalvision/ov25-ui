@@ -1,16 +1,13 @@
-import React, { useEffect } from 'react';
-import { createPortal } from 'react-dom';
+import React from 'react';
 import { Sofa } from 'lucide-react';
 import { useOV25UI } from '../contexts/ov25-ui-context.js';
 import { cn } from '../lib/utils.js';
 import { CheckoutButton } from './VariantSelectMenu/CheckoutButton.js';
-import { Snap2SettingsSheet } from './Snap2SettingsSheet.js';
 import type { CommerceLineItemPrice } from '../types/inject-config.js';
 
-export type Snap2CheckoutSheetProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-};
+export function getSnap2CheckoutSheetDomId(uniqueId: string | undefined | null) {
+  return uniqueId ? `ov25-snap2-checkout-sheet-${uniqueId}` : 'ov25-snap2-checkout-sheet';
+}
 
 function LineCard({ line, index }: { line: CommerceLineItemPrice; index: number }) {
   const slug = line.id ? line.id.replace(/[^a-zA-Z0-9_-]/g, '_') : `idx-${index}`;
@@ -68,14 +65,14 @@ function LineCard({ line, index }: { line: CommerceLineItemPrice; index: number 
   );
 }
 
-/** Scrollable header + line list for Snap2 checkout (modal rail or mobile drawer body). */
+/** Scrollable header + line list for Snap2 checkout (modal sheet or mobile drawer body). */
 export function Snap2CheckoutSheetBody() {
   const { commercePriceSnapshot } = useOV25UI();
   const lines = commercePriceSnapshot?.lines ?? [];
 
   return (
     <>
-      <div className="ov25-snap2-checkout-sheet-header ov:flex ov:items-center ov:justify-stretch ov:gap-2 ov:pt-14 ov:pb-2 ov:px-4 ov:shrink-0 ov:min-w-0">
+      <div className="ov25-snap2-checkout-sheet-header ov:flex ov:items-center ov:justify-stretch ov:gap-2 ov:pt-14 ov:pb-2 ov:px-8 ov:shrink-0 ov:min-w-0">
         <h2
           id="ov25-snap2-checkout-sheet-title"
           className="ov25-snap2-checkout-sheet-title ov:text-xl ov:font-normal ov:text-neutral-800 ov:min-w-0 ov:flex-1 ov:pr-10 ov:truncate"
@@ -86,7 +83,7 @@ export function Snap2CheckoutSheetBody() {
       <div className="ov25-snap2-checkout-sheet-divider ov:border-t ov:border-neutral-200 ov:mx-4 ov:shrink-0" />
       <div
         id="ov25-snap2-checkout-sheet-scroll"
-        className="ov25-snap2-checkout-sheet-scroll ov:px-4 ov:pt-4 ov:pb-4 ov:min-w-0"
+        className="ov25-snap2-checkout-sheet-scroll ov:px-8 ov:pt-4 ov:pb-2 ov:min-w-0"
       >
         {lines.length === 0 ? (
           <p className="ov25-snap2-checkout-sheet-empty ov:text-sm ov:text-neutral-600">
@@ -104,7 +101,7 @@ export function Snap2CheckoutSheetBody() {
   );
 }
 
-/** Pinned totals + commerce actions for Snap2 checkout rail. */
+/** Pinned totals + commerce actions for Snap2 checkout sheet. */
 export function Snap2CheckoutSheetFooter({ onRequestClose }: { onRequestClose: () => void }) {
   const { commercePriceSnapshot, formattedPrice } = useOV25UI();
   const totalLabel = commercePriceSnapshot?.formattedPrice ?? formattedPrice;
@@ -114,7 +111,7 @@ export function Snap2CheckoutSheetFooter({ onRequestClose }: { onRequestClose: (
       id="ov25-snap2-checkout-sheet-footer"
       className={cn(
         'ov25-snap2-checkout-sheet-footer ov:min-w-0 ov:max-w-full ov:overflow-x-hidden ov:box-border',
-        'ov:bg-white ov:px-4 ov:pt-3 ov:pb-[max(1rem,env(safe-area-inset-bottom))]',
+        'ov:bg-white ov:px-8 ov:pt-3 ov:pb-[max(0.5rem,env(safe-area-inset-bottom))] ov:md:pb-[max(1rem,env(safe-area-inset-bottom))]',
         'ov:shadow-[0_-4px_24px_rgba(0,0,0,0.08)] ov:flex ov:flex-col ov:gap-3'
       )}
       onClick={(e) => e.stopPropagation()}
@@ -139,70 +136,3 @@ export function Snap2CheckoutSheetFooter({ onRequestClose }: { onRequestClose: (
     </div>
   );
 }
-
-/**
- * Mobile Snap2: checkout drawer using Snap2SettingsSheet. Desktop modal renders the same UI from
- * Snap2ConfiguratorModal.
- */
-export const Snap2CheckoutSheet: React.FC<Snap2CheckoutSheetProps> = ({ open, onOpenChange }) => {
-  const {
-    isMobile,
-    hidePricing,
-    disableAddToCart,
-    addToBasketFunction,
-    buyNowFunction,
-    shadowDOMs,
-    uniqueId,
-    isSnap2Mode,
-    configuratorDisplayModeMobile,
-  } = useOV25UI();
-
-  const checkoutStacksInConfiguratorHost =
-    isSnap2Mode && isMobile && configuratorDisplayModeMobile === 'modal';
-
-  const hasCheckout =
-    (typeof addToBasketFunction === 'function' && !disableAddToCart) ||
-    typeof buyNowFunction === 'function';
-
-  useEffect(() => {
-    if (!open || !isMobile) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onOpenChange(false);
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open, onOpenChange, isMobile]);
-
-  if (!isMobile) return null;
-  if (!open || hidePricing || !hasCheckout) return null;
-
-  const handleClose = () => onOpenChange(false);
-
-  const sheetDomId = uniqueId
-    ? `ov25-snap2-checkout-sheet-${uniqueId}`
-    : 'ov25-snap2-checkout-sheet';
-
-  const drawer = (
-    <Snap2SettingsSheet
-      mode="drawer"
-      open={open}
-      onOpenChange={onOpenChange}
-      withBackdrop
-      stackWithinConfigurator={checkoutStacksInConfiguratorHost}
-      role="dialog"
-      aria-modal
-      aria-labelledby="ov25-snap2-checkout-sheet-title"
-      id={sheetDomId}
-      footer={<Snap2CheckoutSheetFooter onRequestClose={handleClose} />}
-    >
-      <Snap2CheckoutSheetBody />
-    </Snap2SettingsSheet>
-  );
-
-  if (typeof document === 'undefined') return null;
-  if (checkoutStacksInConfiguratorHost) {
-    return drawer;
-  }
-  const portalTarget = shadowDOMs?.snap2CheckoutSheet ?? document.body;
-  return createPortal(drawer, portalTarget);
-};

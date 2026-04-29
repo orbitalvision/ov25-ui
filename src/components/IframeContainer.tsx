@@ -33,15 +33,19 @@ export const IframeContainer = () => {
 
     const isModalMode =
         isMobile ? configuratorDisplayModeMobile === 'modal' : configuratorDisplayMode === 'modal';
-    /** Stacked slot uses aspect-ratio; Snap2 desktop modal keeps gallery in-flow without `isDrawerOrDialogOpen`, so fill height instead of overflowing the dialog. */
+    const snap2DesktopInlineSheet =
+        isSnap2Mode && !isMobile && configuratorDisplayMode === 'inline-sheet';
     const snap2DesktopModalStackedFill =
         isStacked &&
         isSnap2Mode &&
         !isMobile &&
-        isModalMode &&
-        isModalOpen;
+        ((isModalMode && isModalOpen) || snap2DesktopInlineSheet);
     const snap2MobileDrawerOpen =
-        isSnap2Mode && isMobile && isDrawerOrDialogOpen && !isModalMode;
+        isSnap2Mode &&
+        isMobile &&
+        isDrawerOrDialogOpen &&
+        !isModalMode &&
+        configuratorDisplayModeMobile !== 'inline';
     const iframeRadiusClass = snap2MobileDrawerOpen
         ? 'ov:rounded-none'
         : 'ov:rounded-[var(--ov25-configurator-iframe-border-radius)]';
@@ -158,13 +162,13 @@ export const IframeContainer = () => {
                         id={`ov-25-configurator-product-image-${galleryIndex}`}
                         src={src}
                         alt={`Product image ${galleryIndex}`}
-                        className="ov:object-cover ov:min-h-full ov:min-w-full ov:z-[5] ov:absolute ov:inset-0 ov:bg-[var(--ov25-configurator-iframe-background-color)]"
+                        className="ov:object-cover ov:min-h-full ov:min-w-full ov:z-5 ov:absolute ov:inset-0 ov:bg-[var(--ov25-configurator-iframe-background-color)]"
                     />
                 ) : null;
             })()}
 
             {galleryIndex === galleryIndexToUse &&
-                !(isSnap2Mode && isMobile && !isModalMode) && (
+                !(isSnap2Mode && isMobile && !isModalMode && configuratorDisplayModeMobile !== 'inline') && (
                 <Ov25ShadowHost
                     ref={controlsContainerRef}
                     id={uniqueId ? `true-configurator-view-controls-container-${uniqueId}` : "true-configurator-view-controls-container"}

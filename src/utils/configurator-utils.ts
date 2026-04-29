@@ -1,6 +1,7 @@
 import { Selection } from '../contexts/ov25-ui-context.js';
 import { BED_IFRAME_ALLOW_NONE_QUERY_KEY } from '../lib/config/bed-embed-query.js';
 import { findIframeWithUniqueId } from './configurator-dom-queries.js';
+import type { ModuleProductImageUrls } from './module-product-image-srcset.js';
 
 /**
  * Configuration option type
@@ -72,17 +73,40 @@ export function orderConfiguratorSelectionsWithNoneFirst<
  */
 export type AnimationState = 'unavailable' | 'open' | 'close' | 'loop' | 'stop';
 
+export type { ModuleProductImageUrls };
+
+export type Snap2VariableDimensionAxisConfig = {
+  min: number;
+  max: number;
+  increment: number;
+};
+
 /**
  * Module selection types for Snap2
  */
 export type CompatibleModule = {
   productId: number;
   position: string;
+  isMovable?: boolean;
+  variableDimensions?: {
+    x?: Snap2VariableDimensionAxisConfig;
+    y?: Snap2VariableDimensionAxisConfig;
+    z?: Snap2VariableDimensionAxisConfig;
+  };
   product: {
     id: number;
     name: string;
     imageUrl: string;
+    imageUrls?: ModuleProductImageUrls;
     hasImage: boolean;
+    shortDescription?: string;
+    longDescription?: string;
+    cutoutImage?: string;
+    heroImage?: string;
+    images?: string[];
+    dimensionX?: number | null;
+    dimensionY?: number | null;
+    dimensionZ?: number | null;
   };
   model: {
     modelPath: string;
@@ -94,6 +118,51 @@ export type CompatibleModule = {
     z: number;
   }
 };
+
+/**
+ * Best-effort: CONFIGURATOR_STATE `snap2Objects` rows may expose `productId`/`modelId` at the root
+ * or under `product` / `model` (iframe payload shapes vary).
+ */
+export function snap2SceneContainsModule(
+  snap2Objects: unknown[] | undefined,
+  productId: number,
+  modelId: number
+): boolean {
+  if (!Array.isArray(snap2Objects) || snap2Objects.length === 0) return false;
+  const pickNum = (...vals: unknown[]) => {
+    for (const v of vals) {
+      if (v === undefined || v === null) continue;
+      const n = Number(v);
+      if (!Number.isNaN(n)) return n;
+    }
+    return NaN;
+  };
+  return snap2Objects.some((row) => {
+    if (!row || typeof row !== 'object') return false;
+    const o = row as Record<string, unknown>;
+    const prod = o.product && typeof o.product === 'object' ? (o.product as { id?: unknown }) : undefined;
+    const mod = o.model && typeof o.model === 'object' ? (o.model as { modelId?: unknown }) : undefined;
+    const pid = pickNum(o.productId, o.product_id, prod?.id);
+    const mid = pickNum(o.modelId, o.model_id, mod?.modelId);
+    return pid === Number(productId) && mid === Number(modelId);
+  });
+}
+
+/**
+ * True when `next` is the same Snap2 compatible-module list as `prev` (order-sensitive),
+ * comparing only `productId` per row — enough to drop duplicate `COMPATIBLE_MODULES` bursts.
+ */
+export function compatibleModuleListsEqual(
+  prev: CompatibleModule[] | null,
+  next: CompatibleModule[]
+): boolean {
+  if (prev === null) return false;
+  if (prev.length !== next.length) return false;
+  for (let i = 0; i < prev.length; i++) {
+    if (Number(prev[i].productId) !== Number(next[i].productId)) return false;
+  }
+  return true;
+}
 
 export type SelectModuleReceivedMessage = {
   success: boolean;
@@ -197,14 +266,29 @@ export const requestSnap2Save = (uniqueId?: string): void => {
   sendMessageToIframe('REQUEST_SNAP2_SAVE', {}, uniqueId);
 };
 
+// backwards compatibility - use productName going forward.
+export type SelectModuleMessagePayload =
+  | {
+      modelPath: string;
+      modelId: number;
+      placeMovable?: boolean;
+      customDimensions?: { x?: number; y?: number; z?: number };
+    }
+  | { productName: string; placeMovable?: boolean; customDimensions?: { x?: number; y?: number; z?: number } };
+
 /**
- * Send SELECT_MODULE message to iframe
+ * Send SELECT_MODULE message to iframe (`{ modelPath, modelId }` or `{ productName }`).
  */
-export const selectModule = (modelPath: string, modelId: number, uniqueId?: string): void => {
-  sendMessageToIframe('SELECT_MODULE', {
-    modelPath,
-    modelId
-  }, uniqueId);
+export const selectModule = (payload: SelectModuleMessagePayload, uniqueId?: string): void => {
+  sendMessageToIframe('SELECT_MODULE', payload, uniqueId);
+};
+
+export const toggleSnap2ShowFloor = (uniqueId?: string): void => {
+  sendMessageToIframe('TOGGLE_SNAP2_SHOW_FLOOR', {}, uniqueId);
+};
+
+export const switchSnap2ViewGroup = (groupId: number, uniqueId?: string): void => {
+  sendMessageToIframe('SNAP2_SWITCH_VIEW_GROUP', { groupId }, uniqueId);
 };
 
 /**

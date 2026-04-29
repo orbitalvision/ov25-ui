@@ -71,8 +71,8 @@ export const ProductVariants = ({
   return (
     <div className={cn(
       'ov:md:flex ov:md:flex-col ov:max-h-full ov:h-full',
-      'ov:md:bg-[var(--ov25-background-color)]',
-      'ov:xl:border-[var(--ov25-border-color)]',
+      'ov:md:bg-(--ov25-background-color)',
+      'ov:xl:border-(--ov25-border-color)',
       'ov:w-full'
     )}>
       <VariantsHeader />
@@ -93,7 +93,7 @@ export const ProductVariants = ({
           gridDivide={gridDivide}
         />
       )}
-      {!isMobile && !hidePricing ? (
+      {!isMobile && !hidePricing && !isSnap2Mode ? (
           <CheckoutButton />
       ) : null}
     </div>

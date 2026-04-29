@@ -9,6 +9,7 @@ import { Variant } from './ProductVariants.js';
 import { getGridColsClass } from './DesktopVariants.js';
 import { FilterControls } from './FilterControls.js';
 import { FilterContent } from './FilterContent.js';
+import { Snap2ModulesOptionBody } from './Snap2ModulesOptionBody.js';
 import {
   selectionBedSizeFromMetadata,
   type ConfiguratorSelectionBedMetadata,
@@ -30,7 +31,7 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
     currentProductId,
     selectedSelections,
     products,
-    allOptionsWithoutModules,
+    variantPanelOptions,
     applySearchAndFilters,
     searchQueries,
     availableProductFilters,
@@ -62,11 +63,11 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
   }, [handleSelectionSelect]);
 
   const filteredOptions = useMemo(() => {
-    return allOptionsWithoutModules.map(option => {
-      if (option.id === 'size') return option;
+    return variantPanelOptions.map((option) => {
+      if (option.id === 'size' || option.id === 'modules') return option;
       return applySearchAndFilters(option, option.id);
     });
-  }, [allOptionsWithoutModules, applySearchAndFilters, searchQueries, availableProductFilters]);
+  }, [variantPanelOptions, applySearchAndFilters, searchQueries, availableProductFilters]);
 
   const sizeVariants = useMemo(() => {
     if (!sizeOption?.groups?.[0]?.selections) return [];
@@ -88,8 +89,11 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
   const allOptionsVariants = useMemo(() => {
     return filteredOptions
       .map((filteredOption, index) => {
-        const option = allOptionsWithoutModules[index];
+        const option = variantPanelOptions[index];
         if (option.id === 'size') return null;
+        if (option.id === 'modules') {
+          return { optionId: 'modules', optionName: option.name, variants: [] as any[] };
+        }
         return {
           optionId: option.id,
           optionName: option.name,
@@ -117,9 +121,9 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
         };
       })
       .filter((item): item is { optionId: string; optionName: string; variants: any[] } => item !== null);
-  }, [filteredOptions, allOptionsWithoutModules, selectedSelections]);
+  }, [filteredOptions, variantPanelOptions, selectedSelections]);
 
-  const showSize = allOptionsWithoutModules.some((o) => o.id === 'size') && sizeVariants.length > 0;
+  const showSize = variantPanelOptions.some((o) => o.id === 'size') && sizeVariants.length > 0;
 
   const tabIds = useMemo(() => {
     return showSize ? ['size', ...allOptionsVariants.map((o) => o.optionId)] : allOptionsVariants.map((o) => o.optionId);
@@ -180,28 +184,34 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
             />
             {isExpanded && (
               <div className="ov:relative ov:min-h-0 ov:max-h-full ov:flex ov:flex-col">
+                {optionId !== 'modules' && (
                   <FilterControls
                     isFilterOpen={!!isFilterOpen[optionId]}
                     setIsFilterOpen={() => toggleFilter(optionId)}
                     isGrouped={false}
                     optionId={optionId}
                   />
+                )}
                 <div className="ov:relative ov:min-h-0 ov:flex-1 ov:flex ov:flex-col ov:pb-4">
                   <div
-                    className={`ov:min-h-0 ov:flex-1 ${mode === 'drawer' && isMobile ? 'ov:pb-20' : ''} ${isFilterOpen[optionId] ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}
+                    className={`ov:min-h-0 ov:flex-1 ${mode === 'drawer' && isMobile ? 'ov:pb-20' : ''} ${optionId !== 'modules' && isFilterOpen[optionId] ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}
                     {...(mode === 'inline' ? { 'data-ov25-list-variants-content': true as const } : {})}
                   >
-                    <GroupedVariantsList
-                      groups={variants}
-                      gridColsClass={getGridColsClass(4)}
-                      VariantCard={DefaultVariantCard}
-                      isMobile={isMobile}
-                      onSelect={handleVariantSelect}
-                      showGroupHeaders={variants.length > 1}
-                      compactSpacing
-                    />
+                    {optionId === 'modules' ? (
+                      <Snap2ModulesOptionBody />
+                    ) : (
+                      <GroupedVariantsList
+                        groups={variants}
+                        gridColsClass={getGridColsClass(4)}
+                        VariantCard={DefaultVariantCard}
+                        isMobile={isMobile}
+                        onSelect={handleVariantSelect}
+                        showGroupHeaders={variants.length > 1}
+                        compactSpacing
+                      />
+                    )}
                   </div>
-                  {isFilterOpen[optionId] && (
+                  {optionId !== 'modules' && isFilterOpen[optionId] && (
                     <FilterContent optionId={optionId} wrapperVariant="accordion" />
                   )}
                 </div>

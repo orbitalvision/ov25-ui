@@ -29,6 +29,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
     availableLights,
     selectLightGroup,
     isSnap2Mode,
+    configuratorDisplayModeMobile,
     controlsHidden,
     shareDialogTrigger,
     setShareDialogTrigger,
@@ -311,7 +312,9 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
 
         </div>
       </div>
-      {isVariantsOpen && isMobile && (
+      {isVariantsOpen &&
+        isMobile &&
+        !(isSnap2Mode && configuratorDisplayModeMobile === 'inline') && (
         <div className={cn(
           "ov:absolute ov:w-full ov:pointer-events-none ov:h-full ov:inset-0 ov:z-101",
           "ov:transition-opacity ov:duration-200",
