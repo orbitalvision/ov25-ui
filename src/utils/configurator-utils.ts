@@ -298,6 +298,65 @@ export const closeModuleSelectMenu = (uniqueId?: string): void => {
   sendMessageToIframe('CLOSE_MODULE_SELECT_MENU', {}, uniqueId);
 };
 
+/** PNG data URLs returned from iframe after {@link requestSnap2Screenshots}. */
+export type Snap2ScreenshotItem = { label: string; dataUrl: string };
+
+const SNAP2_SCREENSHOT_CAPTURE_TIMEOUT_MS = 120_000;
+
+/**
+ * Ask the OV25 Snap2 iframe to capture the main MSAA view plus optional multi-camera angles.
+ * Distinct from legacy `CAPTURE_SCREENSHOT` / `ov25-screenshot` (single upload flow).
+ */
+export function requestSnap2Screenshots(uniqueId?: string): Promise<Snap2ScreenshotItem[]> {
+  return new Promise((resolve, reject) => {
+    const iframe = getConfiguratorIframe(uniqueId);
+    if (!iframe?.contentWindow) {
+      reject(new Error('Configurator iframe not found'));
+      return;
+    }
+    const contentWindow = iframe.contentWindow;
+    const requestId = `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+    const timer = window.setTimeout(() => {
+      window.removeEventListener('message', onMessage);
+      reject(new Error('Snap2 screenshot capture timed out'));
+    }, SNAP2_SCREENSHOT_CAPTURE_TIMEOUT_MS);
+
+    const onMessage = (ev: MessageEvent) => {
+      if (ev.source !== contentWindow) return;
+      const d = ev.data as { type?: string; payload?: string } | null;
+      if (!d || typeof d.type !== 'string' || typeof d.payload !== 'string') return;
+      if (d.type === 'SNAP2_SCREENSHOTS_RESULT') {
+        let parsed: { items?: Snap2ScreenshotItem[]; requestId?: string };
+        try {
+          parsed = JSON.parse(d.payload) as { items?: Snap2ScreenshotItem[]; requestId?: string };
+        } catch {
+          return;
+        }
+        if (parsed.requestId !== requestId) return;
+        window.clearTimeout(timer);
+        window.removeEventListener('message', onMessage);
+        resolve(Array.isArray(parsed.items) ? parsed.items : []);
+        return;
+      }
+      if (d.type === 'ERROR') {
+        let errPayload: { message?: string; requestId?: string };
+        try {
+          errPayload = JSON.parse(d.payload) as { message?: string; requestId?: string };
+        } catch {
+          return;
+        }
+        if (errPayload.requestId !== requestId) return;
+        window.clearTimeout(timer);
+        window.removeEventListener('message', onMessage);
+        reject(new Error(errPayload.message || 'Screenshot capture failed'));
+      }
+    };
+
+    window.addEventListener('message', onMessage);
+    sendMessageToIframe('SNAP2_CAPTURE_SCREENSHOTS', { requestId }, uniqueId);
+  });
+}
+
 /**
  * Toggle animation in the 3D viewer
  */
