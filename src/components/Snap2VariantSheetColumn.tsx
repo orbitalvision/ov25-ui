@@ -89,7 +89,7 @@ export function Snap2VariantSheetColumn({ children }: { children: React.ReactNod
             Back to builder
           </button>
         </div>
-        <div className="ov:flex-1 ov:min-h-0 ov:min-w-0 ov:overflow-y-auto ov:overflow-x-hidden">
+        <div className="ov25-snap2-checkout-sheet-body ov:flex-1 ov:min-h-0 ov:min-w-0 ov:overflow-y-auto ov:overflow-x-hidden">
           <Snap2CheckoutSheetBody />
         </div>
         <Snap2CheckoutSheetFooter onRequestClose={handleCloseCheckout} />
