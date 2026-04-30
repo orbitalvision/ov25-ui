@@ -136,7 +136,7 @@ export function Snap2ModulesOptionBody() {
               {mobileVariants.map((variant, index) => (
                 <CarouselItem
                   key={variant.id}
-                  className="ov:border-0! ov:basis-[min(84vw,22rem)] ov:shrink-0 ov:pl-2"
+                  className="ov:border-0! ov:basis-[min(74vw,22rem)] ov:shrink-0 ov:pl-2"
                 >
                   <ModuleVariantCard
                     variant={variant}

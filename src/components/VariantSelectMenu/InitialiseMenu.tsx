@@ -31,7 +31,7 @@ export const InitialiseMenu: React.FC = () => {
   };
 
   const initialiseMenuShellClass =
-    'ov:bg-[var(--ov25-configurator-iframe-background-color)] ov:w-full ov:h-full';
+    'ov:bg-[var(--ov25-background-color)] ov:w-full ov:h-full';
 
   if (compatibleModules === null) {
     return (
@@ -95,22 +95,27 @@ export const InitialiseMenu: React.FC = () => {
           compact ? 'ov:max-w-md' : 'ov:max-w-md ov:md:max-w-3xl'
         )}
       >
-        <p
-          data-ov25-initialise-menu-intro
-          className={cn(
-            'ov:text-center ov:text-(--ov25-text-color) ov:shrink-0',
-            compact ? 'ov:text-sm ov:mb-2 ov:mt-1' : 'ov:text-base ov:mb-3'
-          )}
-        >
-          Select a product to get started
-        </p>
         <div
           className={cn(
-            'ov25-initialise-menu-module-list ov:grid ov:min-h-0 ov:flex-1 ov:grid-cols-1 ov:content-start ov:gap-3 ov:overflow-y-auto ov:overflow-x-hidden ov:pb-2',
-            !compact && 'ov:md:grid-cols-2'
+            'ov25-initialise-menu-module-list ov:min-h-0 ov:flex-1 ov:overflow-y-auto ov:overflow-x-hidden ov:pb-2'
           )}
           data-ov25-initialise-menu-part="module-list"
         >
+          <p
+            data-ov25-initialise-menu-intro
+            className={cn(
+              'ov:text-center ov:text-(--ov25-text-color)',
+              compact ? 'ov:text-sm ov:mb-2 ov:mt-1' : 'ov:text-base ov:mb-3'
+            )}
+          >
+            Select a product to get started
+          </p>
+          <div
+            className={cn(
+              'ov:grid ov:grid-cols-1 ov:content-start ov:gap-3',
+              !compact && 'ov:md:grid-cols-2'
+            )}
+          >
           {compatibleModules.map((module, index) => {
             const variant: Variant = {
               id: `${module.productId}-${module.model.modelId}`,
@@ -135,6 +140,7 @@ export const InitialiseMenu: React.FC = () => {
               />
             );
           })}
+          </div>
         </div>
       </div>
     </div>

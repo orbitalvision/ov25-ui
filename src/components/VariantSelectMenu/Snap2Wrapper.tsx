@@ -1,4 +1,5 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useLayoutEffect, useRef } from 'react';
+import { gsap } from 'gsap';
 import { Variant } from './ProductVariants.js';
 import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 import {
@@ -14,6 +15,7 @@ import { Snap2ModulesOptionBody } from './Snap2ModulesOptionBody.js';
 import { Snap2ModulesEmptyState } from './Snap2ModulesEmptyState.js';
 import { ProductVariantsWrapper } from './ProductVariantsWrapper.js';
 import { Carousel, CarouselContent, CarouselItem } from '../ui/carousel.js';
+import { cn } from '../../lib/utils.js';
 
 export interface Snap2WrapperProps {
   isInline?: boolean;
@@ -111,7 +113,7 @@ function Snap2PiecesPanel({
                 return (
                   <CarouselItem
                     key={`${module.productId}-${module.model.modelId}`}
-                    className="ov:basis-[min(84vw,22rem)] ov:shrink-0 ov:pl-2"
+                    className="ov:basis-[min(74vw,22rem)] ov:shrink-0 ov:pl-2"
                   >
                     <ModuleVariantCard
                       variant={variant}
@@ -140,7 +142,7 @@ function Snap2PiecesPanel({
       {!embeddedInVariantsOnlySheet && !isInline && !hideVariantsHeader && (
         <VariantsHeader onCloseButtonClick={onCloseHeaderOverride} />
       )}
-      <div className="ov:flex-1 ov:min-h-0 ov:overflow-y-auto ov:md:px-0">
+      <div className="ov:flex-1 ov:min-h-0 ov:overflow-y-hidden ov:md:px-0">
         <Snap2ModulesOptionBody />
       </div>
     </div>
@@ -173,6 +175,10 @@ function Snap2PiecesOptionsLayout({
   const { activeOptionId, setActiveOptionId, variantPanelOptions, snap2ModulesEmbedInVariantSheet } =
     useOV25UI();
   const [segment, setSegment] = useState<'pieces' | 'options'>('options');
+  const tabsIndicatorRef = useRef<HTMLDivElement>(null);
+  const piecesTabRef = useRef<HTMLButtonElement>(null);
+  const optionsTabRef = useRef<HTMLButtonElement>(null);
+  const hasPositionedIndicatorRef = useRef(false);
 
   useEffect(() => {
     if (activeOptionId !== 'modules') return;
@@ -184,11 +190,45 @@ function Snap2PiecesOptionsLayout({
   }, [activeOptionId, variantPanelOptions, setActiveOptionId, snap2ModulesEmbedInVariantSheet]);
 
   const tabBtn = (active: boolean) =>
-    `ov25-filter-pill ov25-tabs-button ov:flex ov:flex-1 ov:min-w-0 ov:flex-row ov:items-center ov:justify-center ov:px-5 ov:py-2.5 ov:text-sm ov:font-medium ov:rounded-full ov:border ov:border-(--ov25-border-color) ov:whitespace-nowrap ov:cursor-pointer ov:transition-colors ${
+    `ov25-filter-pill ov25-tabs-button ov:flex ov:flex-1 ov:min-w-0 ov:flex-row ov:items-center ov:justify-center ov:px-5 ov:py-2 ov:text-sm ov:font-semibold ov:rounded-full ov:whitespace-nowrap ov:cursor-pointer ov:transition-colors ${
       active
-        ? 'ov:bg-(--ov25-background-color) ov:text-(--ov25-text-color)'
-        : 'ov:bg-(--ov25-secondary-background-color) ov:text-(--ov25-secondary-text-color) hover:ov:bg-(--ov25-hover-color) hover:ov:text-(--ov25-text-color)'
+        ? 'ov:text-gray-800'
+        : 'ov:text-gray-500 hover:ov:text-gray-700'
     }`;
+
+  const syncTabsIndicator = useCallback(
+    (instant = false) => {
+      const indicator = tabsIndicatorRef.current;
+      const activeTab = segment === 'pieces' ? piecesTabRef.current : optionsTabRef.current;
+      if (!indicator || !activeTab) return;
+      const nextX = activeTab.offsetLeft;
+      const nextWidth = activeTab.offsetWidth;
+      gsap.killTweensOf(indicator);
+      if (instant) {
+        gsap.set(indicator, { x: nextX, width: nextWidth, opacity: 1 });
+        return;
+      }
+      gsap.to(indicator, {
+        x: nextX,
+        width: nextWidth,
+        duration: 0.4,
+        ease: 'power3.out',
+      });
+    },
+    [segment]
+  );
+
+  useLayoutEffect(() => {
+    const shouldSetInstantly = !hasPositionedIndicatorRef.current;
+    syncTabsIndicator(shouldSetInstantly);
+    hasPositionedIndicatorRef.current = true;
+  }, [syncTabsIndicator]);
+
+  useEffect(() => {
+    const handleResize = () => syncTabsIndicator(true);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [syncTabsIndicator]);
 
   const hoistVariantsHeader =
     snap2ModulesEmbedInVariantSheet && !embeddedInVariantsOnlySheet && !isInline;
@@ -214,31 +254,43 @@ function Snap2PiecesOptionsLayout({
       {hoistVariantsHeader ? <VariantsHeader /> : null}
       <div
         id="ov25-snap2-options-wrapper"
-        className="ov:shrink-0 ov:flex ov:w-full ov:max-w-full ov:items-center ov:justify-center ov:gap-2 ov:py-1 ov:md:px-4 ov:md:pt-4 ov:md:pb-3 ov:bg-(--ov25-background-color)"
+        className="ov:shrink-0 ov:flex ov:w-full ov:max-w-full ov:items-center ov:justify-center ov:py-1 ov:md:px-4 ov:md:pt-4 ov:md:pb-3 ov:bg-(--ov25-background-color)"
         role="tablist"
       >
+        <div className="ov:relative ov:flex ov:w-full ov:bg-gray-200/50 ov:p-1 ov:rounded-full">
+        <div
+          ref={tabsIndicatorRef}
+          className="ov25-filter-pill ov25-tabs-button ov:absolute ov:top-1 ov:bottom-1 ov:left-0 ov:rounded-full ov:pointer-events-none"
+          data-ov25-tab-indicator="true"
+          data-ov25-tab-active="true"
+          data-selected="true"
+          aria-hidden="true"
+        />
         <button
+          ref={piecesTabRef}
           type="button"
           role="tab"
           aria-selected={segment === 'pieces'}
-          className={tabBtn(segment === 'pieces')}
+          className={cn(tabBtn(segment === 'pieces'), 'ov:relative ov:z-10')}
           onClick={() => setSegment('pieces')}
           data-ov25-snap2-primary-segment-tab="pieces"
           data-selected={segment === 'pieces' ? 'true' : 'false'}
         >
-          PIECES
+          Pieces
         </button>
         <button
+          ref={optionsTabRef}
           type="button"
           role="tab"
           aria-selected={segment === 'options'}
-          className={tabBtn(segment === 'options')}
+          className={cn(tabBtn(segment === 'options'), 'ov:relative ov:z-10')}
           onClick={() => setSegment('options')}
           data-ov25-snap2-primary-segment-tab="options"
           data-selected={segment === 'options' ? 'true' : 'false'}
         >
-          FINISH
+          Finish
         </button>
+        </div>
       </div>
       <div className="ov:flex-1 ov:min-h-0 ov:flex ov:flex-col ov:overflow-hidden">
         {segment === 'options' ? (

@@ -208,6 +208,7 @@ export function ModuleVariantCard({
   const footerSource = shortLine || longLine;
   const renderHiddenLong =
     Boolean(longLine && shortLine && longLine !== shortLine);
+  const showDescriptions = !pickOnActivate && !isMobile && Boolean(footerSource);
   const isDualThumbLayout = previewUrls.length >= 2;
 
   const handleThumbAdd = () => {
@@ -257,18 +258,18 @@ export function ModuleVariantCard({
           role="dialog"
           aria-modal="true"
           aria-labelledby={detailTitleId}
-          className="ov:relative ov:flex ov:h-full ov:w-full ov:min-h-0 ov:flex-col ov:overflow-hidden ov:bg-(--ov25-background-color)"
+          className="ov:relative ov:flex ov:h-full ov:w-full ov:min-h-0 ov:flex-col ov:overflow-hidden "
           data-ov25-module-variant-detail-sheet="true"
           onClick={(e) => e.stopPropagation()}
         >
           <h2 id={detailTitleId} className="ov:sr-only">
             {module.product.name}
           </h2>
-          <div className="ov:flex-1 ov:min-h-0 ov:overflow-y-auto ov:overflow-x-hidden ov:px-4 ov:pb-4 ov:pt-4">
+          <div className="ov:flex-1 ov:min-h-0 ov:overflow-y-auto ov:overflow-x-hidden ov:px-4 ov:pb-4 ov:pt-4 ov:bg-(--ov25-background-color)">
             <ModuleVariantDetailPanel module={module} />
           </div>
           <VariantsCloseButton onClick={() => setDetailOpen(false)} ariaLabel="Close product details" />
-          <div className="ov25-module-variant-detail-sheet-footer ov:shrink-0 ov:border-t ov:border-(--ov25-border-color) ov:bg-(--ov25-background-color) ov:px-4 ov:pb-2 ov:md:pb-4 ov:pt-2">
+          <div className="ov25-module-variant-detail-sheet-footer ov:shrink-0 ov:border-t ov:border-(--ov25-border-color) ov:bg-(--ov25-background-color)  ov:px-4 ov:pb-2 ov:md:pb-4 ov:pt-2">
             <button
               type="button"
               data-ov25-module-variant-detail-sheet-add="true"
@@ -279,6 +280,7 @@ export function ModuleVariantCard({
                 handleAddFromSheet();
               }}
               className={cn(
+                'ov25-module-variant-detail-sheet-add-button',
                 checkoutCommerceCtaButtonClasses,
                 'ov:font-medium ov:w-full ov:min-w-0 ov:max-w-full ov:uppercase',
                 isLoading && 'ov:opacity-50 ov:cursor-not-allowed'
@@ -346,60 +348,13 @@ export function ModuleVariantCard({
         className
       )}
     >
-      {!pickOnActivate && isMobile ? (
-        <button
-          type="button"
+      <div className="ov:flex ov:items-center ov:justify-between ov:gap-1 ov:px-2">
+        <p
           className={cn(
-            'ov:absolute ov:top-1 ov:right-1 ov:z-20',
-            'ov:cursor-pointer ov:w-8 ov:h-8 ov:flex ov:items-center ov:justify-center',
-            'ov:transition-all ov:duration-200 ov:hover:opacity-80',
-            'ov:border-0 ov:bg-transparent',
-            'ov:disabled:opacity-50 ov:disabled:cursor-not-allowed',
-          )}
-          aria-label={`${module.product.name} — product details`}
-          data-ov25-module-variant-card-part="details-trigger"
-          disabled={isLoading}
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            handleOpenDetailSheet();
-          }}
-        >
-          <Info
-            className="ov:h-5 ov:w-5 ov:text-(--ov25-configurator-view-controls-text-color)"
-            aria-hidden
-          />
-        </button>
-      ) : null}
-      <p
-        className={cn(
-          'ov25-module-variant-card__name ov:shrink-0 ov:px-1 ov:md:px-0 ov:pt-1 ov:pb-0.5 ov:text-start ov:text-sm ov:font-medium ov:leading-tight ov:text-(--ov25-text-color) ov:line-clamp-2',
-          !pickOnActivate && (isMobile ? 'ov:cursor-pointer ov:pr-9' : 'ov:cursor-pointer')
-        )}
-        data-ov25-module-variant-card-part="name"
-        onClick={
-          pickOnActivate
-            ? undefined
-            : (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                if (isMobile) {
-                  handleThumbAdd();
-                } else {
-                  handleOpenDetailSheet();
-                }
-              }
-        }
-      >
-        {module.product.name}
-      </p>
-      {dimensionString ? (
-        <span
-          className={cn(
-            'ov25-module-variant-card__dimensions ov:shrink-0 ov:block ov:w-full ov:px-1 ov:md:px-0 ov:pb-0.5 ov:text-start ov:text-xs ov:leading-tight ov:text-gray-500',
+            'ov25-module-variant-card__name ov:min-w-0 ov:shrink ov:px-1 ov:md:px-0 ov:pt-1 ov:pb-0.5 ov:text-start ov:text-sm ov:font-medium ov:leading-tight ov:text-(--ov25-text-color) ov:line-clamp-2',
             !pickOnActivate && 'ov:cursor-pointer'
           )}
-          data-ov25-module-variant-card-part="dimensions"
+          data-ov25-module-variant-card-part="name"
           onClick={
             pickOnActivate
               ? undefined
@@ -414,9 +369,58 @@ export function ModuleVariantCard({
                 }
           }
         >
-          {dimensionString}
-        </span>
-      ) : null}
+          {module.product.name}
+        </p>
+        {!pickOnActivate && isMobile ? (
+          <button
+            type="button"
+            className={cn(
+              'ov:shrink-0',
+              'ov:cursor-pointer ov:w-8 ov:h-8 ov:flex ov:items-center ov:justify-center',
+              'ov:transition-all ov:duration-200 ov:hover:opacity-80',
+              'ov:border-0 ov:bg-transparent',
+              'ov:disabled:opacity-50 ov:disabled:cursor-not-allowed',
+            )}
+            aria-label={`${module.product.name} — product details`}
+            data-ov25-module-variant-card-part="details-trigger"
+            disabled={isLoading}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              handleOpenDetailSheet();
+            }}
+          >
+            <Info
+              className="ov:h-5 ov:w-5 ov:text-(--ov25-configurator-view-controls-text-color)"
+              aria-hidden
+            />
+          </button>
+        ) : null}
+      </div>
+      <span
+        className={cn(
+          'ov25-module-variant-card__dimensions ov:hidden ov:shrink-0 ov:w-full ov:px-1 ov:md:px-0 ov:pb-0.5 ov:text-start ov:text-xs ov:leading-tight ov:text-gray-500',
+          !pickOnActivate && 'ov:cursor-pointer',
+          !dimensionString && 'ov:pointer-events-none'
+        )}
+        data-ov25-module-variant-card-part="dimensions"
+        aria-hidden={dimensionString ? undefined : true}
+        onClick={
+          pickOnActivate
+            ? undefined
+            : (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (isMobile) {
+                  handleThumbAdd();
+                } else {
+                  handleOpenDetailSheet();
+                }
+              }
+        }
+      >
+        {dimensionString || ''}
+      </span>
 
       <div
         className={cn(
@@ -492,37 +496,47 @@ export function ModuleVariantCard({
         )}
       </div>
 
-      {!pickOnActivate && !isMobile && footerSource ? (
+      <div
+        className={cn(
+          'ov25-module-variant-card-descriptions',
+          !showDescriptions && 'ov:hidden'
+        )}
+        data-ov25-module-variant-card-part="descriptions"
+        aria-hidden={showDescriptions ? undefined : true}
+      >
         <div
-          className="ov25-module-variant-card-descriptions"
-          data-ov25-module-variant-card-part="descriptions"
+          className="ov25-module-variant-card-description-short"
+          data-ov25-module-variant-card-part="description-short"
         >
-          <div
-            className="ov25-module-variant-card-description-short"
-            data-ov25-module-variant-card-part="description-short"
-          >
+          {footerSource ? (
             <ModuleCardDescriptionFooter
               key={`${shortLine}\0${longLine}`}
               description={footerSource}
               onSeeMore={() => setDetailOpen(true)}
             />
-          </div>
-          {renderHiddenLong ? (
-            <div
-              className="ov25-module-variant-card-description-long ov:hidden ov:pb-2"
-              data-ov25-module-variant-card-part="description-long"
-              aria-hidden="true"
-            >
-              <p
-                className={DESC_FOOTER_P_CLASS}
-                data-ov25-module-variant-card-part="description-long-text"
-              >
-                {longLine}
-              </p>
-            </div>
-          ) : null}
+          ) : (
+            <p
+              className={DESC_FOOTER_P_CLASS}
+              data-ov25-module-variant-card-part="description-short-text"
+            />
+          )}
         </div>
-      ) : null}
+        <div
+          className={cn(
+            'ov25-module-variant-card-description-long ov:pb-2',
+            !renderHiddenLong && 'ov:hidden'
+          )}
+          data-ov25-module-variant-card-part="description-long"
+          aria-hidden={renderHiddenLong ? undefined : true}
+        >
+          <p
+            className={DESC_FOOTER_P_CLASS}
+            data-ov25-module-variant-card-part="description-long-text"
+          >
+            {renderHiddenLong ? longLine : ''}
+          </p>
+        </div>
+      </div>
 
       {detailSheetPortal}
     </div>

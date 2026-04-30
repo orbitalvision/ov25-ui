@@ -28,10 +28,10 @@ export type ModulePositionTypeTabsProps = {
 };
 
 const tabPillBase =
-  'ov25-filter-pill ov25-tabs-button ov:flex ov:flex-row ov:items-center ov:gap-1.5 ov:px-2 ov:py-1 ov:rounded-full ov:border ov:border-(--ov25-border-color) ov:whitespace-nowrap ov:cursor-pointer ov:transition-all ov:text-xs ov:font-medium ov:shrink-0';
-const tabPillActive = 'ov:bg-(--ov25-background-color) ov:text-(--ov25-text-color)';
+  'ov25-filter-pill ov25-tabs-button ov:flex ov:flex-row ov:items-center ov:gap-1.5 ov:px-3 ov:py-2 ov:rounded-full ov:border ov:border-(--ov25-border-color) ov:whitespace-nowrap ov:cursor-pointer ov:transition-all ov:text-xs ov:font-normal ov:shrink-0';
+const tabPillActive = '';
 const tabPillInactive =
-  'ov:bg-(--ov25-secondary-background-color) ov:text-(--ov25-secondary-text-color) hover:ov:text-[var(--ov25-text-color)] hover:ov:bg-[var(--ov25-hover-color)]';
+  ' ov:text-(--ov25-secondary-text-color) hover:ov:text-[var(--ov25-text-color)]';
 
 /**
  * All / Middle / Corner / End tabs for Snap2 compatible modules. Syncs with {@link useOV25UI}

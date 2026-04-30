@@ -96,7 +96,7 @@ export function Snap2VariantSheetColumn({ children }: { children: React.ReactNod
       </div>
 
       {!isSnap2CheckoutSheetOpen && !hidePricing && hasCheckout ? (
-        <div className="ov25-checkout-button-wrapper ov:shrink-0 ov:w-full ov:min-w-0 ov:max-w-full ov:md:border-t ov:border-(--ov25-border-color) ov:bg-(--ov25-background-color) ov:p-0 ov:md:px-4 ov:md:pb-2 ov:pt-2">
+        <div className="ov25-checkout-button-wrapper ov:shrink-0 ov:w-full ov:min-w-0 ov:max-w-full ov:bg-(--ov25-background-color) ov:p-0 ov:md:px-4 ov:md:pb-2 ov:pt-2">
           <button
             type="button"
             id="ov25-snap2-panel-checkout-button"

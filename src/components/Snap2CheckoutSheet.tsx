@@ -111,7 +111,7 @@ export function Snap2CheckoutSheetFooter({ onRequestClose }: { onRequestClose: (
       id="ov25-snap2-checkout-sheet-footer"
       className={cn(
         'ov25-snap2-checkout-sheet-footer ov:min-w-0 ov:max-w-full ov:overflow-x-hidden ov:box-border',
-        'ov:bg-white ov:px-8 ov:pt-3 ov:pb-[max(0.5rem,env(safe-area-inset-bottom))] ov:md:pb-[max(1rem,env(safe-area-inset-bottom))]',
+        'ov:bg-white ov:px-4 ov:pt-3 ov:pb-[max(0.5rem,env(safe-area-inset-bottom))] ov:md:pb-[max(1rem,env(safe-area-inset-bottom))]',
         'ov:shadow-[0_-4px_24px_rgba(0,0,0,0.08)] ov:flex ov:flex-col ov:gap-3'
       )}
       onClick={(e) => e.stopPropagation()}
