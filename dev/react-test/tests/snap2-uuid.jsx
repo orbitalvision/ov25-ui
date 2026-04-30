@@ -3,10 +3,11 @@ import ReactDOM from 'react-dom/client';
 import { TestPageLayout } from '../templates/TestPageLayout.jsx';
 import '../src/index.css';
 
+const MAZE_APIKEY = import.meta.env.VITE_MAZE_APIKEY;
 const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
-  apiKey: () => '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d',
-  productLink: () => 'snap2/292',
-  configurationUuid: () => '86ee031f-2daa-4cac-9495-58ec36d6de70',
+  apiKey: () => MAZE_APIKEY,
+  productLink: () => 'snap2/445',
+  configurationUuid: () => '141544de-e5d1-491e-b9aa-3b9c9e51f7f8',
   selectors: {
     gallery: { selector: '.configurator-container', replace: true },
     configureButton: { selector: '#ov25-fullscreen-button', replace: false },

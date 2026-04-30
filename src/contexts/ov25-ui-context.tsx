@@ -946,6 +946,11 @@ export const OV25UIProvider: React.FC<{
     ) {
       return true;
     }
+    // Mobile Snap2 sheet/drawer/modal: the variants surface is the primary navigation; keep modules there too
+    // (especially when `modules.position` is `bottom`, where a separate bottom chrome is easy to miss / overlap).
+    if (isMobile && effectiveConfiguratorDisplayModeMobile !== 'inline') {
+      return true;
+    }
     if (snap2ModuleSheetPosition === 'bottom') return false;
     return snap2VariantSheetSide === snap2ModuleSheetPosition;
   }, [

@@ -220,7 +220,7 @@ const Snap2Controls: React.FC = () => {
         )}
 
         {/* Variants Button */}
-        {!controlsHidden && allOptions.length > 0 && !useInlineVariantControls && (
+        {!controlsHidden && allOptions.length > 0 && !useInlineVariantControls && !isMobile && (
           <button 
             id="ov25-snap2-variants-button" 
             onClick={handleVariantsClick} 

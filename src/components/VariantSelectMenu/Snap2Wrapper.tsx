@@ -1,20 +1,13 @@
 import React, { useCallback, useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { gsap } from 'gsap';
-import { Variant } from './ProductVariants.js';
 import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 import {
   closeModuleSelectMenu,
-  selectModule,
-  CompatibleModule,
-  snap2SceneContainsModule,
 } from '../../utils/configurator-utils.js';
-import { ModuleVariantCard } from './variant-cards/ModuleVariantCard.js';
 import { VariantsHeader } from './VariantsHeader.js';
 import { Snap2VariantSheetColumn } from '../Snap2VariantSheetColumn.js';
 import { Snap2ModulesOptionBody } from './Snap2ModulesOptionBody.js';
-import { Snap2ModulesEmptyState } from './Snap2ModulesEmptyState.js';
 import { ProductVariantsWrapper } from './ProductVariantsWrapper.js';
-import { Carousel, CarouselContent, CarouselItem } from '../ui/carousel.js';
 import { cn } from '../../lib/utils.js';
 
 export interface Snap2WrapperProps {
@@ -42,93 +35,21 @@ function Snap2PiecesPanel({
     isVariantsOpen,
     setIsVariantsOpen,
     isMobile,
-    drawerSize,
     compatibleModules,
-    isModuleSelectionLoading,
-    setIsModuleSelectionLoading,
     configuratorState,
   } = useOV25UI();
-
-  const hasSnap2Objects = (configuratorState?.snap2Objects?.length ?? 0) > 0;
 
   const handleClosePieces = () => {
     closeModuleSelectMenu();
     setIsVariantsOpen(false);
   };
 
-  const handleModuleSelect = useCallback(
-    (variant: Variant) => {
-      if (isModuleSelectionLoading) return;
-      const module = variant.data as CompatibleModule;
-      const modelPath = module?.model?.modelPath;
-      const modelId = module?.model?.modelId;
-      if (!modelPath || !modelId) return;
-      setIsModuleSelectionLoading(true);
-      selectModule({ modelPath, modelId });
-    },
-    [isModuleSelectionLoading, setIsModuleSelectionLoading]
-  );
-
   if (isMobile && !isInline) {
-    if (!hasSnap2Objects) {
-      return (
-        <div className="ov:flex ov:flex-col ov:items-center ov:justify-center ov:py-8 ov:space-y-4">
-          <p className="ov:text-sm ov:text-(--ov25-secondary-text-color)">Loading...</p>
-        </div>
-      );
-    }
-    if (compatibleModules === null) {
-      return (
-        <div className="ov:flex ov:flex-col ov:items-center ov:justify-center ov:py-8 ov:space-y-4">
-          <p className="ov:text-sm ov:text-(--ov25-secondary-text-color)">Loading...</p>
-        </div>
-      );
-    }
-    if (compatibleModules.length === 0) {
-      return <Snap2ModulesEmptyState />;
-    }
     return (
       <div className="ov:md:flex ov:md:flex-col ov:max-h-full ov:h-full ov:md:bg-(--ov25-background-color) ov:xl:border-(--ov25-border-color) ov:w-full">
         <VariantsHeader onCloseButtonClick={handleClosePieces} />
         <div className="ov:flex ov:min-h-0 ov:flex-1 ov:flex-col ov:overflow-hidden ov:px-2 ov:pb-4">
-          <Carousel
-            className="ov:w-full ov:min-h-0 ov:flex-1 ov:min-w-0"
-            opts={{ align: 'start', containScroll: 'trimSnaps' }}
-          >
-            <CarouselContent className="ov:-ml-2 ov:min-h-0">
-              {compatibleModules.map((module, index) => {
-                const variant: Variant = {
-                  id: `${module.productId}-${module.model.modelId}`,
-                  name: module.product.name,
-                  price: 0,
-                  image: module.product.hasImage ? module.product.imageUrl : '/placeholder.svg?height=200&width=200',
-                  blurHash: '',
-                  data: module,
-                  isSelected: snap2SceneContainsModule(
-                    configuratorState?.snap2Objects,
-                    module.productId,
-                    module.model.modelId
-                  ),
-                };
-                return (
-                  <CarouselItem
-                    key={`${module.productId}-${module.model.modelId}`}
-                    className="ov:basis-[min(74vw,22rem)] ov:shrink-0 ov:pl-2"
-                  >
-                    <ModuleVariantCard
-                      variant={variant}
-                      onSelect={handleModuleSelect}
-                      index={index}
-                      isMobile={isMobile}
-                      isLoading={isModuleSelectionLoading}
-                      className="ov:mb-0"
-                      thumbDualClassName="ov:p-[0.5rem] ov:px-2"
-                    />
-                  </CarouselItem>
-                );
-              })}
-            </CarouselContent>
-          </Carousel>
+          <Snap2ModulesOptionBody />
         </div>
       </div>
     );
@@ -142,7 +63,7 @@ function Snap2PiecesPanel({
       {!embeddedInVariantsOnlySheet && !isInline && !hideVariantsHeader && (
         <VariantsHeader onCloseButtonClick={onCloseHeaderOverride} />
       )}
-      <div className="ov:flex-1 ov:min-h-0 ov:overflow-y-hidden ov:md:px-0">
+      <div className="ov:flex-1 ov:min-h-0 ov:overflow-y-auto ov:md:px-0">
         <Snap2ModulesOptionBody />
       </div>
     </div>
@@ -260,7 +181,7 @@ function Snap2PiecesOptionsLayout({
         <div className="ov:relative ov:flex ov:w-full ov:bg-gray-200/50 ov:p-1 ov:rounded-full">
         <div
           ref={tabsIndicatorRef}
-          className="ov25-filter-pill ov25-tabs-button ov:absolute ov:top-1 ov:bottom-1 ov:left-0 ov:rounded-full ov:pointer-events-none"
+          className="ov25-filter-pill ov25-tabs-button ov:absolute ov:bg-(--ov25-background-color) ov:top-1 ov:bottom-1 ov:left-0 ov:rounded-full ov:pointer-events-none"
           data-ov25-tab-indicator="true"
           data-ov25-tab-active="true"
           data-selected="true"

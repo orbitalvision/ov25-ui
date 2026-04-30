@@ -250,7 +250,7 @@ export function ModuleVariantCard({
       <Ov25ShadowHost
         data-ov25-module-variant-detail-sheet-open="true"
         className={cn(
-          'ov:inset-0 ov:z-50 ov:pointer-events-auto',
+          'ov:inset-0 ov:z-2147483647 ov:pointer-events-auto',
           isMobile || variantSheetPortalEl == null ? 'ov:fixed' : 'ov:absolute'
         )}
       >

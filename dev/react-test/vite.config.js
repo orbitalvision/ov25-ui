@@ -25,7 +25,6 @@ const testPages = [
   'snap2-dialog',
   'snap2-inline',
   'snap2-uuid',
-  'snap2-in-gallery',
   'bed-configurator',
   'product-with-swatches',
   'multiple-configurators',
