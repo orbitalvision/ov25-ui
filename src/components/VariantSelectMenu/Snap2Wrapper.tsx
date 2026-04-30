@@ -175,7 +175,7 @@ function Snap2PiecesOptionsLayout({
       {hoistVariantsHeader ? <VariantsHeader /> : null}
       <div
         id="ov25-snap2-options-wrapper"
-        className="ov:shrink-0 ov:flex ov:w-full ov:max-w-full ov:items-center ov:justify-center ov:py-1 ov:md:px-4 ov:md:pt-4 ov:md:pb-3 ov:bg-(--ov25-background-color)"
+        className="ov:shrink-0 ov:flex ov:w-full ov:max-w-full ov:items-center ov:justify-center ov:py-1 ov:px-2 ov:md:px-2 ov:md:pt-4 ov:md:pb-3 ov:bg-(--ov25-background-color)"
         role="tablist"
       >
         <div className="ov:relative ov:flex ov:w-full ov:bg-gray-200/50 ov:p-1 ov:rounded-full">

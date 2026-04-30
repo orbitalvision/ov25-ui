@@ -376,7 +376,7 @@ export function ModuleVariantCard({
             type="button"
             className={cn(
               'ov:shrink-0',
-              'ov:cursor-pointer ov:w-8 ov:h-8 ov:flex ov:items-center ov:justify-center',
+              'ov:cursor-pointer ov:w-5 ov:h-5 ov:flex ov:items-center ov:justify-center',
               'ov:transition-all ov:duration-200 ov:hover:opacity-80',
               'ov:border-0 ov:bg-transparent',
               'ov:disabled:opacity-50 ov:disabled:cursor-not-allowed',
