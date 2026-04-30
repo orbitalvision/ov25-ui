@@ -9,9 +9,11 @@ let configuratorInitialized = false;
 const initializeConfigurator = () => {
   if (configuratorInitialized) return;
 
+  const DEMO_RETAILER_APIKEY = import.meta.env.VITE_DEMO_RETAILER_APIKEY;
+
   // Inject the configurator
   injectConfigurator(/** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
-    apiKey: () => '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d',
+    apiKey: () => DEMO_RETAILER_APIKEY,
     productLink: () => '607',
     selectors: {
       gallery: { selector: '.configurator-container', replace: true },

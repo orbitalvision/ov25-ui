@@ -4,6 +4,8 @@ import { TestPageLayout } from '../templates/TestPageLayout.jsx';
 import sofaImage from '../src/images/sofa.png';
 import '../src/index.css';
 
+const DEMO_RETAILER_APIKEY = import.meta.env.VITE_DEMO_RETAILER_APIKEY;
+
 /** Explicit URLs so the carousel has data even if product 58 API metadata has no gallery images. */
 const DEMO_GALLERY_IMAGES = [
   sofaImage,
@@ -11,7 +13,7 @@ const DEMO_GALLERY_IMAGES = [
 ];
 
 const baseConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
-  apiKey: () => '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d',
+  apiKey: () => DEMO_RETAILER_APIKEY,
   productLink: () => '58',
   images: DEMO_GALLERY_IMAGES,
   selectors: {

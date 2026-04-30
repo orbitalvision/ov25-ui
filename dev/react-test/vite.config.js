@@ -1,4 +1,5 @@
 import { defineConfig } from 'vite';
+import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
 
@@ -96,7 +97,7 @@ function watchLinkedPackagesReload() {
 }
 
 export default defineConfig({
-  plugins: [react(), watchLinkedPackagesReload()],
+  plugins: [tailwindcss(), react(), watchLinkedPackagesReload()],
   resolve: {
     alias: {
       'ov25-ui': path.resolve(__dirname, '../../dist'),

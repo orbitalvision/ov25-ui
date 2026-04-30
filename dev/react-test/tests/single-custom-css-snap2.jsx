@@ -8,6 +8,8 @@ import { readSnap2LayoutQuery, Snap2PositionControls } from '../templates/Snap2P
 import { SINGLE_CUSTOM_CSS_BRANDING } from './single-custom-css-branding.js';
 import '../src/index.css';
 
+const MAZE_APIKEY = import.meta.env.VITE_MAZE_APIKEY;
+
 /** Same host-page CSS as `snap2-inline.jsx` (sticky gallery override). */
 const SNAP2_INLINE_PAGE_CSS = `
 html.snap2-inline-root,
@@ -151,7 +153,7 @@ function Snap2InlineCustomCss({ displayFromUrl, mobileVariantDisplay, layout }) 
     snap2CustomCssInlineInitialized = true;
     const forceMobile = typeof window !== 'undefined' && window.location.search.includes('viewport=mobile');
     const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
-      apiKey: () => process.env.MAZE_APIKEY,
+      apiKey: () => MAZE_APIKEY,
       productLink: () => 'snap2/445',
       selectors: {
         gallery: { selector: '.configurator-container', replace: true },
@@ -233,7 +235,7 @@ function Snap2DialogCustomCss({ displayFromUrl, mobileVariantDisplay, layout }) 
   const injectConfig = React.useMemo(
     () =>
       /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
-        apiKey: () => process.env.MAZE_APIKEY,
+        apiKey: () => MAZE_APIKEY,
         productLink: () => 'snap2/445',
         selectors: {
           gallery: { selector: '.configurator-container', replace: true },

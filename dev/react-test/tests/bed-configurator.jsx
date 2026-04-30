@@ -3,9 +3,11 @@ import ReactDOM from 'react-dom/client';
 import { TestPageLayout } from '../templates/TestPageLayout.jsx';
 import '../src/index.css';
 
+const DIAMOND_APIKEY = import.meta.env.VITE_DIAMOND_APIKEY;
+
 const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
-  apiKey: () => '64-cded72a1485f2a14fbc30d0e41dfc702aed35dd77605628a3a839dc8d523ffca',
-  productLink: () => '/bed-configurator/3',
+  apiKey: () => DIAMOND_APIKEY,
+  productLink: () => '/bed-configurator/16',
   selectors: {
     gallery: { selector: '.configurator-container', replace: true },
     configureButton: { selector: '#ov25-fullscreen-button', replace: false },
@@ -40,14 +42,15 @@ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
     #ov25-configurator-variant-menu-container {
         height: 700px
 }
-  `
+  `,
+  currencySymbol: '€'
 });
 
 function App() {
   return (
     <TestPageLayout
       title="Bed configurator"
-      description="Bed configurator product id 2."
+      description="Bed configurator product id 3 (alexis)."
       injectConfig={config}
       asideSlot={
         <button

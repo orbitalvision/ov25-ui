@@ -5,6 +5,8 @@ import { ViewportWrapper } from '../templates/ViewportWrapper.jsx';
 import { TestBackButton } from '../templates/TestBackButton.jsx';
 import '../src/index.css';
 
+const MAZE_APIKEY = import.meta.env.VITE_MAZE_APIKEY;
+
 /** Undo globals.css `.ov25-inline-gallery-sticky` (sticky + z-index:1) on the gallery host so flex `min-h-0` can cap height. */
 const SNAP2_INLINE_PAGE_CSS = `
 html.snap2-inline-root,
@@ -39,7 +41,7 @@ const SNAP2_INLINE_OV25_CSS = `
 let snap2InlineConfiguratorInitialized = false;
 
 const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
-  apiKey: () => '27-87235dc13ef0089116f2bcd35dda712a8a26880541681261e9399016a89a4782',
+  apiKey: () => MAZE_APIKEY,
   productLink: () => 'snap2/445',
   selectors: {
     gallery: { selector: '.configurator-container', replace: true },

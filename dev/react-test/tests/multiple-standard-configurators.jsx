@@ -4,6 +4,8 @@ import { injectConfigurator } from 'ov25-ui';
 import { TestBackButton } from '../templates/TestBackButton.jsx';
 import '../src/index.css';
 
+const DEMO_RETAILER_APIKEY = import.meta.env.VITE_DEMO_RETAILER_APIKEY;
+
 let configuratorInitialized = false;
 
 const initializeConfigurator = () => {
@@ -11,7 +13,7 @@ const initializeConfigurator = () => {
 
   injectConfigurator(/** @type {import('ov25-ui').InjectConfiguratorInput[]} */ ([
     {
-      apiKey: () => '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d',
+      apiKey: () => DEMO_RETAILER_APIKEY,
       productLink: () => '607',
       selectors: {
         gallery: '#gallery-1',
@@ -25,7 +27,7 @@ const initializeConfigurator = () => {
       },
     },
     {
-      apiKey: () => '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d',
+      apiKey: () => DEMO_RETAILER_APIKEY,
       productLink: () => '576',
       selectors: {
         gallery: '#gallery-2',
@@ -39,7 +41,7 @@ const initializeConfigurator = () => {
       },
     },
     {
-      apiKey: () => '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d',
+      apiKey: () => DEMO_RETAILER_APIKEY,
       productLink: () => '1284',
       selectors: {
         gallery: '#gallery-3',
@@ -53,7 +55,7 @@ const initializeConfigurator = () => {
       },
     },
     {
-      apiKey: () => '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d',
+      apiKey: () => DEMO_RETAILER_APIKEY,
       productLink: () => '1287',
       selectors: {
         gallery: '#gallery-4',

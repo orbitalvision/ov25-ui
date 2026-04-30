@@ -3,12 +3,11 @@ import ReactDOM from 'react-dom/client';
 import { ConfiguratorSetup } from 'ov25-setup';
 import 'ov25-setup/dist/index.css';
 
-const BED_PREVIEW_API_KEY =
-  '64-cded72a1485f2a14fbc30d0e41dfc702aed35dd77605628a3a839dc8d523ffca';
+const DIAMOND_APIKEY = import.meta.env.VITE_DIAMOND_APIKEY;
 
 function App() {
   return (
-    <ConfiguratorSetup apiKey={BED_PREVIEW_API_KEY} />
+    <ConfiguratorSetup apiKey={DIAMOND_APIKEY} />
   );
 }
 

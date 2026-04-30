@@ -2,10 +2,15 @@ import React, { useEffect, useMemo, useState } from 'react';
 import ReactDOM from 'react-dom/client';
 import { injectConfigurator } from 'ov25-ui';
 
+//This uses tailwindcss, we checked your site to make sure you were using it. We did not check the version, so if you are using a different
+//one you may need to change the imports/source at the top of the css file.
 import '../src/index.css';
+
+const MAZE_APIKEY = import.meta.env.VITE_MAZE_APIKEY;
 
 let mazeSnap2Initialized = false;
 
+// Custom CSS for styling the configurator to Maze branding
 const MAZE_SNAP2_PAGE_CSS = `
 .ov25-option-header {
   display: none;
@@ -21,8 +26,13 @@ const MAZE_SNAP2_PAGE_CSS = `
   text-transform: none;
 }
 
+.ov25-checkout-button-wrapper {
+  padding: 0.5rem;
+}
+
 .ov25-module-variant-detail-sheet-footer {
   padding-bottom: 0.5rem;
+  padding-inline: 0.5rem;
 }
 
 #ov25-checkout-button span {
@@ -73,47 +83,52 @@ const MAZE_SNAP2_PAGE_CSS = `
     color: #fff;
   }
 }
+
+.ov25-default-variant-card[data-selected="true"] .ov25-variant-thumb-wrapper {
+  background: #3d4149;
+}
+
+#ov25-snap2-modules-tabs-wrap {
+  padding: 0.5rem;
+}
 `;
 
-/** Inject InitialiseMenu host (`portalReplaceElement` adds this class). */
+//These selectors are used to find and edit the content of the configurator to be
+//more inline with Maze branding.
 const INITIALISE_MENU_HOST_SELECTOR = '.ov25-configurator-initialise-menu';
 
-/**
- * Variants slot from config (`variants: '#ov25-controls'`). With `pushPortal` + shadow, inject
- * `attachShadow`s on this node and portals `VariantSelectMenu` into `#ov25-controls`’s shadow root
- * (not `.ov25-configurator-variants`, which is only used when the slot uses `replace: true`).
- */
 const VARIANTS_CONTROLS_HOST_SELECTOR = '#ov25-controls';
 const CHECKOUT_SHEET_BODY_CLASS = 'ov25-snap2-checkout-sheet-body';
 const MAZE_CHECKOUT_BODY_FLAG = 'data-maze-snap2-checkout-body';
 
 const INITIALISE_MENU_INTRO_SELECTOR = '[data-ov25-initialise-menu-intro]';
+
+
 const DEFAULT_INITIALISE_INTRO = 'Select a product to get started';
 const EMBER_TITLE = 'Ember Configurator';
 const EMBER_INITIALISE_MENU_INTRO =
   'Build your dream Ember Kitchen by selecting a starting component. Use the filters to easily browse Middle, Corner, or End sections. To grow your layout, simply click the (+) icon next to any item to add a module to that side. You can select any component to replace it, click (+) anywhere to insert a new piece, or use delete to remove items.';
 
-/**
- * Single InitialiseMenu host (`.ov25-configurator-initialise-menu`). Stale `dist` may omit
- * `data-ov25-initialise-menu-intro`; React can revert `textContent` — we re-apply on an interval and
- * MutationObserver on that host’s shadow root.
- */
-function findInitialiseMenuIntroParagraph() {
+// Replace initialise menu intro text with some
+// custom content. 
+function replaceIntroText() {
   const host = document.querySelector(INITIALISE_MENU_HOST_SELECTOR);
   const sr = host?.shadowRoot;
-  if (!sr) return null;
+  if (!sr) return;
   const menuRoot = sr.querySelector('#ov25-initialise-menu');
-  if (!menuRoot) return null;
+  if (!menuRoot) return;
   const byData = menuRoot.querySelector(INITIALISE_MENU_INTRO_SELECTOR);
-  if (byData instanceof HTMLParagraphElement) return byData;
-  for (const p of Array.from(menuRoot.querySelectorAll('p'))) {
-    if ((p.textContent || '').trim() === DEFAULT_INITIALISE_INTRO) return p;
+  let el = null;
+  if (byData instanceof HTMLParagraphElement) {
+    el = byData;
+  } else {
+    for (const p of Array.from(menuRoot.querySelectorAll('p'))) {
+      if ((p.textContent || '').trim() === DEFAULT_INITIALISE_INTRO) {
+        el = p;
+        break;
+      }
+    }
   }
-  return null;
-}
-
-function applyEmberInitialiseMenuIntro() {
-  const el = findInitialiseMenuIntroParagraph();
   if (!el) return;
   const parent = el.parentElement;
   if (!parent) return;
@@ -137,31 +152,35 @@ function applyEmberInitialiseMenuIntro() {
   el.replaceWith(wrapper);
 }
 
-function findCheckoutSheetBody() {
+// Replace checkout sheet with custom HTML (red div placeholder)
+//This is where you will inject your custom checkout that reads the 
+//post messages and matches up the payload data with your 
+//custom ecommerce system.
+function replaceCheckoutSheet() {
   const host = document.querySelector(VARIANTS_CONTROLS_HOST_SELECTOR);
   const sr = host?.shadowRoot;
-  if (!sr) return null;
-  return sr.querySelector(`.${CHECKOUT_SHEET_BODY_CLASS}`);
-}
-
-/** Replace {@link Snap2VariantSheetColumn} body wrapper contents with a visible placeholder (React may revert; we re-apply). */
-function applyMazeCheckoutSheetBodyPlaceholder() {
-  const body = findCheckoutSheetBody();
+  if (!sr) return;
+  const body = sr.querySelector(`.${CHECKOUT_SHEET_BODY_CLASS}`);
   if (!body) return;
   if (body.firstElementChild?.getAttribute(MAZE_CHECKOUT_BODY_FLAG) === 'true') return;
   const red = document.createElement('div');
   red.setAttribute(MAZE_CHECKOUT_BODY_FLAG, 'true');
   red.style.cssText = 'min-height:8rem;flex:1 1 auto;width:100%;height:100%;background:red';
   body.replaceChildren(red);
-  const host = document.querySelector(VARIANTS_CONTROLS_HOST_SELECTOR);
-  const sr = host?.shadowRoot;
-  const footer = sr?.querySelector('#ov25-snap2-checkout-sheet-footer');
+  const footer = sr.querySelector('#ov25-snap2-checkout-sheet-footer');
   if (footer instanceof HTMLElement) {
     footer.style.setProperty('display', 'none', 'important');
   }
 }
 
-function installMazeSnap2DomDemoPatches() {
+// This is abit janky and uses a interval to check the DOM for changes and ensure the changes are applied.
+// You could try to use something like the following to listen for the DOMContentLoaded event instead.
+
+// const myFrame = document.querySelector('#my-iframe');
+// myFrame.addEventListener('load', () => {
+//   console.log('This specific iframe has finished loading.');
+// });
+function installMazeSnap2Patches() {
   const disposers = [];
 
   const tryObserveShadow = (selector, datasetKey, onMutate) => {
@@ -181,14 +200,13 @@ function installMazeSnap2DomDemoPatches() {
   };
 
   const tick = () => {
-    applyEmberInitialiseMenuIntro();
-    applyMazeCheckoutSheetBodyPlaceholder();
-    tryObserveShadow(INITIALISE_MENU_HOST_SELECTOR, 'ov25MazeIntroObserved', applyEmberInitialiseMenuIntro);
-    tryObserveShadow(VARIANTS_CONTROLS_HOST_SELECTOR, 'ov25MazeCheckoutBodyObserved', applyMazeCheckoutSheetBodyPlaceholder);
+    replaceIntroText();
+    replaceCheckoutSheet();
+    tryObserveShadow(INITIALISE_MENU_HOST_SELECTOR, 'ov25MazeIntroObserved', replaceIntroText);
+    tryObserveShadow(VARIANTS_CONTROLS_HOST_SELECTOR, 'ov25MazeCheckoutBodyObserved', replaceCheckoutSheet);
   };
 
   tick();
-
   const intervalId = window.setInterval(tick, 120);
 
   disposers.push(() => window.clearInterval(intervalId));
@@ -204,15 +222,10 @@ function installMazeSnap2DomDemoPatches() {
   };
 }
 
-/**
- * Client baseline settings for Snap2 inline usage:
- * - selectors.gallery + selectors.variants + selectors.swatches are required.
- * - selectors.initialiseMenu is required for inline mode so the initial module chooser has a dedicated host.
- * - carousel should be none for both breakpoints.
- * - displayMode must be inline for both desktop and mobile.
- */
+// Settings for passing to injectConfigurator, this is what would've been generated
+// by ov25-setup in a perfect world. This api key is the public configurator access key.
 const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
-  apiKey: () => '27-87235dc13ef0089116f2bcd35dda712a8a26880541681261e9399016a89a4782',
+  apiKey: () => MAZE_APIKEY,
   productLink: () => 'snap2/445',
   cssString: MAZE_SNAP2_PAGE_CSS,
   selectors: {
@@ -227,15 +240,9 @@ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
     variants: { displayMode: { desktop: 'list', mobile: 'list' } },
   },
   callbacks: {
-    addToBasket: (payload) => {
-      alert('buyNow' + payload);
-      console.log('payload', payload);
-    },
-    buyNow: (payload) => {
-      alert('buyNow' + payload);
-      console.log('payload', payload);
-    },
-    buySwatches: () => alert('buySwatches'),
+    addToBasket: () => {},
+    buyNow: () => {},
+    buySwatches: () => {},
   },
 });
 
@@ -253,7 +260,8 @@ function App() {
     return () => window.removeEventListener('resize', onResize);
   }, []);
 
-  /** Match Snap2 mobile behavior: phones + portrait tablets. */
+  // Make portrait viewports (tablets) use the mobile layout.
+
   const useMobileLayout = useMemo(() => {
     const { width, height } = viewport;
     const isPortraitTablet = width >= 768 && width <= 1024 && height > width;
@@ -269,6 +277,7 @@ function App() {
     };
   }, []);
 
+  // Initialise the configurator once
   useEffect(() => {
     if (mazeSnap2Initialized) return;
     mazeSnap2Initialized = true;
@@ -280,30 +289,27 @@ function App() {
     });
   }, []);
 
-  useEffect(() => installMazeSnap2DomDemoPatches(), []);
+  useEffect(() => installMazeSnap2Patches(), []);
 
   return (
     <>
       <div
         id="ov25-initialise-menu"
-        className="ov:fixed ov:inset-0 ov:z-2147483000 ov:pointer-events-auto"
+        className="fixed inset-0 z-[2147483000] pointer-events-auto"
       />
-      <div className="snap2-inline-page ov:flex ov:h-dvh ov:w-full ov:flex-col">
-        <main className={`ov:flex ov:min-h-0 ov:flex-1 ov:flex-col ov:overflow-hidden ${useMobileLayout ? '' : 'ov:md:flex-row'}`}>
-          <div className="configurator-container ov:flex ov:h-full ov:w-full ov:flex-1 ov:flex-col ov:overflow-hidden" />
+      <div className="flex h-full w-calc(100dvw - 32px) flex-col">
+        <main className={`flex min-h-0 flex-1 flex-col overflow-hidden ${useMobileLayout ? '' : 'md:flex-row'}`}>
+          {/* Gallery */}
+          <div className="configurator-container flex h-full w-full flex-1 flex-col overflow-hidden" />
+          {/* Variants */}
           <aside
             id="ov25-aside-menu"
-            className={`ov:flex ov:min-h-0 ov:w-full ov:flex-1 ov:flex-col ov:overflow-hidden  ${
-              useMobileLayout ? '' : 'ov:md:w-[min(420px,40vw)] ov:md:max-w-[480px] ov:md:flex-none ov:md:shrink-0'
+            className={`flex min-h-0 w-full flex-1 flex-col overflow-hidden ${
+              useMobileLayout ? '' : 'md:w-[384px] md:flex-none md:shrink-0'
             }`}
           >
-            <div
-              className={`ov:flex ov:min-h-0 ov:flex-1 ov:flex-col ov:overflow-hidden ov:px-4 ${
-                useMobileLayout ? '' : 'ov:md:pb-4'
-              }`}
-            >
-              <div id="ov25-controls" className="ov:min-h-0 ov:flex-1 ov:overflow-y-auto ov:overflow-x-hidden" />
-            </div>
+              <div id="ov25-controls" className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden" />
+           
           </aside>
         </main>
       </div>

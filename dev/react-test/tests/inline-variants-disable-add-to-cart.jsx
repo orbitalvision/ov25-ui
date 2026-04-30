@@ -3,8 +3,9 @@ import ReactDOM from 'react-dom/client';
 import { TestPageLayout } from '../templates/TestPageLayout.jsx';
 import '../src/index.css';
 
-const apiKey = () =>
-  '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d';
+const DEMO_RETAILER_APIKEY = import.meta.env.VITE_DEMO_RETAILER_APIKEY;
+
+const apiKey = () => DEMO_RETAILER_APIKEY;
 
 const callbacks = {
   addToBasket: () => alert('Add to basket function called'),

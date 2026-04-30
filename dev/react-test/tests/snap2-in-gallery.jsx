@@ -6,6 +6,8 @@ import '../src/index.css';
 import { TestBackButton } from '../templates/TestBackButton.jsx';
 import { readSnap2LayoutQuery, Snap2PositionControls } from '../templates/Snap2PositionControls.jsx';
 
+const MAZE_APIKEY = import.meta.env.VITE_MAZE_APIKEY;
+
 const LAYOUT_DEFAULTS = {
   variantsDesktop: 'RIGHT',
   variantsMobile: 'LEFT',
@@ -21,8 +23,8 @@ function App() {
   const injectConfig = React.useMemo(
     () =>
       /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
-        apiKey: () => '15-5f9c5d4197f8b45ee615ac2476e8354a160f384f01c72cd7f2638f41e164c21d',
-        productLink: () => 'snap2/4',
+        apiKey: () => MAZE_APIKEY,
+        productLink: () => 'snap2/445',
         selectors: {
           gallery: { selector: '.configurator-container', replace: true },
           variants: { selector: '#ov25-controls', replace: true },

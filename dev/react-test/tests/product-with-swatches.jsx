@@ -3,8 +3,10 @@ import ReactDOM from 'react-dom/client';
 import { TestPageLayout } from '../templates/TestPageLayout.jsx';
 import '../src/index.css';
 
+const DEV_RETAILER_APIKEY = import.meta.env.VITE_DEV_RETAILER_APIKEY;
+
 const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
-  apiKey: () => '51-dd7de4d1dabdd994b22c406595cfe15589623ec85622b9f721ca4d1dbdb58721',
+  apiKey: () => DEV_RETAILER_APIKEY,
   productLink: () => '1682',
   selectors: {
     gallery: { selector: '.configurator-container', replace: true },
