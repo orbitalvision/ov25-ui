@@ -295,20 +295,20 @@ function App() {
     <>
       <div
         id="ov25-initialise-menu"
-        className="fixed inset-0 z-[2147483000] pointer-events-auto"
+        className="ov:fixed ov:inset-0 ov:z-[2147483000] ov:pointer-events-auto"
       />
-      <div className="flex h-full w-calc(100dvw - 32px) flex-col">
-        <main className={`flex min-h-0 flex-1 flex-col overflow-hidden ${useMobileLayout ? '' : 'md:flex-row'}`}>
+      <div className="ov:flex ov:h-full ov:w-[calc(100dvw-32px)] ov:flex-col">
+        <main className={`ov:flex ov:min-h-0 ov:flex-1 ov:flex-col ov:overflow-hidden ${useMobileLayout ? '' : 'ov:md:flex-row'}`}>
           {/* Gallery */}
-          <div className="configurator-container flex h-full w-full flex-1 flex-col overflow-hidden" />
+          <div className="configurator-container ov:flex ov:h-full ov:w-full ov:flex-1 ov:flex-col ov:overflow-hidden" />
           {/* Variants */}
           <aside
             id="ov25-aside-menu"
-            className={`flex min-h-0 w-full flex-1 flex-col overflow-hidden ${
-              useMobileLayout ? '' : 'md:w-[384px] md:flex-none md:shrink-0'
+            className={`ov:flex ov:min-h-0 ov:w-full ov:flex-1 ov:flex-col ov:overflow-hidden ${
+              useMobileLayout ? '' : 'ov:md:w-[384px] ov:md:flex-none ov:md:shrink-0'
             }`}
           >
-              <div id="ov25-controls" className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden" />
+              <div id="ov25-controls" className="ov:min-h-0 ov:flex-1 ov:overflow-y-auto ov:overflow-x-hidden" />
            
           </aside>
         </main>

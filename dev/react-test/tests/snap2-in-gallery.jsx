@@ -86,7 +86,7 @@ function App() {
         <div className="snap2-body ov:flex ov:min-h-0 ov:w-full ov:flex-1 ov:flex-col max-md:ov:overflow-hidden md:ov:items-center md:ov:justify-center md:ov:overflow-auto">
           <section
             aria-label="Configurator gallery"
-            className="snap2-gallery-row ov:flex ov:shrink-0 ov:justify-center ov:aspect-square md:aspect-auto ov:overflow-hidden max-md:ov:h-[50dvh] max-md:ov:items-stretch md:ov:min-h-0 md:ov:flex-1 md:ov:items-center"
+            className="snap2-gallery-row ov:flex ov:shrink-0 ov:justify-center ov:aspect-square md:ov:aspect-auto ov:overflow-hidden max-md:ov:h-[50dvh] max-md:ov:items-stretch md:ov:min-h-0 md:ov:flex-1 md:ov:items-center"
           >
             <div className="configurator-container ov:box-border ov:w-full ov:max-w-full ov:shrink-0 max-md:ov:h-full max-md:ov:w-full max-md:ov:aspect-square ov:md:h-[800px] ov:md:w-[1500px] ov:md:max-w-full" />
           </section>

@@ -1,6 +1,3 @@
-// Import the CSS
-import '../globals.css';
-
 // Export the injectConfigurator function from inject.ts
 import { injectConfigurator } from './utils/inject.js';
 import type { InjectConfiguratorOptions, InjectConfiguratorInput } from './utils/inject.js';

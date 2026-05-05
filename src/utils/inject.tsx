@@ -13,8 +13,6 @@ import { Snap2ConfigureButton, Snap2ConfigureUI } from '../components/Snap2Confi
 import { ConfigureButton } from '../components/ConfigureButton.js';
 import { createPortal } from 'react-dom';
 
-// Import styles directly
-import '../../globals.css';
 import { Toaster } from 'sonner';
 import { getSharedStylesheet, createuserCustomCssStylesheet } from './shadow-styles.js';
 import { findIframeWithUniqueId } from './configurator-dom-queries.js';
@@ -22,14 +20,28 @@ import { computeIsMobileViewport } from './viewport-mobile.js';
 
 // Import sonner CSS as string
 import sonnerCssText from 'sonner/dist/styles.css?inline';
-// Create sonner stylesheet
-const sonnerStylesheet = new CSSStyleSheet();
-sonnerStylesheet.replaceSync(sonnerCssText);
 
-const sharedStylesheet = getSharedStylesheet();
+let sonnerStylesheet: CSSStyleSheet | undefined;
 
-// Apply to main document
-(window as any).ov25adoptedStyleSheets = [sharedStylesheet];
+function getSonnerStylesheet(): CSSStyleSheet {
+  if (typeof CSSStyleSheet === 'undefined') {
+    throw new Error('getSonnerStylesheet() requires constructable stylesheets (browser only)');
+  }
+  if (!sonnerStylesheet) {
+    sonnerStylesheet = new CSSStyleSheet();
+    sonnerStylesheet.replaceSync(sonnerCssText);
+  }
+  return sonnerStylesheet;
+}
+
+/** Run on first inject path so Node/SSR never touches CSSStyleSheet or window. */
+function ensureOv25WindowStyleSheets(): void {
+  if (typeof window === 'undefined' || typeof CSSStyleSheet === 'undefined') return;
+  const w = window as Window & { ov25adoptedStyleSheets?: CSSStyleSheet[] };
+  if (!w.ov25adoptedStyleSheets) {
+    w.ov25adoptedStyleSheets = [getSharedStylesheet()];
+  }
+}
 
 // Function to wait for an element to appear in the DOM
 function waitForElement(selector: string, timeout = 5000) {
@@ -176,6 +188,7 @@ export function injectConfigurator(opts: InjectConfiguratorInput | InjectConfigu
 function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions?: InjectInternalOptions) {
   const skipConfigureButton = internalOptions?.skipConfigureButton ?? false;
   const n = normalizeInjectConfig(opts);
+  ensureOv25WindowStyleSheets();
   const {
     apiKey,
     productLink,
@@ -299,7 +312,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
   const customCssStylesheet = cssString ? createuserCustomCssStylesheet(cssString) : undefined;
   const existingWindowStylesheets = Array.isArray((window as any).ov25adoptedStyleSheets)
     ? (window as any).ov25adoptedStyleSheets
-    : [sharedStylesheet];
+    : [getSharedStylesheet()];
   if (customCssStylesheet && !existingWindowStylesheets.includes(customCssStylesheet)) {
     (window as any).ov25adoptedStyleSheets = [...existingWindowStylesheets, customCssStylesheet];
   }
@@ -307,7 +320,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
   const getBaseShadowStylesheets = (): CSSStyleSheet[] => {
     const windowStylesheets = Array.isArray((window as any).ov25adoptedStyleSheets)
       ? (window as any).ov25adoptedStyleSheets
-      : [sharedStylesheet];
+      : [getSharedStylesheet()];
 
     if (customCssStylesheet && !windowStylesheets.includes(customCssStylesheet)) {
       return [...windowStylesheets, customCssStylesheet];
@@ -483,7 +496,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
 
     // Create Shadow DOM root for toaster portal
     const toasterPortalShadowRoot = toasterContainer.attachShadow({ mode: 'open' });
-    toasterPortalShadowRoot.adoptedStyleSheets = [...getBaseShadowStylesheets(), sonnerStylesheet];
+    toasterPortalShadowRoot.adoptedStyleSheets = [...getBaseShadowStylesheets(), getSonnerStylesheet()];
 
     // Create swatchbook portal Shadow DOM container
     const swatchbookPortalContainer = document.createElement('div');
