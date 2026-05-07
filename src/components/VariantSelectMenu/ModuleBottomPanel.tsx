@@ -84,7 +84,6 @@ export const ModuleBottomPanel: React.FC<{ portalTarget: Element }> = ({ portalT
   };
 
   const handlePlaceMovable = (e: React.MouseEvent, module: CompatibleModule) => {
-    console.log('handlePlaceMovable', module);
     e.stopPropagation();
     placeMovableForModule(module);
   };
