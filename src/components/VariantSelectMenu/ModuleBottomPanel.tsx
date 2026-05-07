@@ -84,6 +84,7 @@ export const ModuleBottomPanel: React.FC<{ portalTarget: Element }> = ({ portalT
   };
 
   const handlePlaceMovable = (e: React.MouseEvent, module: CompatibleModule) => {
+    console.log('handlePlaceMovable', module);
     e.stopPropagation();
     placeMovableForModule(module);
   };
@@ -95,11 +96,6 @@ export const ModuleBottomPanel: React.FC<{ portalTarget: Element }> = ({ portalT
 
     const module = variant.data as CompatibleModule;
     if (customDimsProductId === module.product.id) {
-      return;
-    }
-
-    if (module.isMovable) {
-      placeMovableForModule(module);
       return;
     }
 
