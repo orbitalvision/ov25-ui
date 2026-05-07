@@ -82,10 +82,10 @@ export const VariantThumb = React.memo(({
         onClick={onClick}
       >
         {content}
+        <div className={cn('ov25-variant-card-gradient ov25-variant-thumb-overlay', sizeClass, 'radial_gradient ov:mix-blend-multiply')} aria-hidden />
+        <div className={cn('ov25-variant-card-gradient ov25-variant-thumb-overlay', sizeClass, !selected && 'ov:shadow-sm', 'ov:bg-black  ov:mix-blend-difference')} aria-hidden />
       </div>
       {overlay}
-      <div className={cn('ov25-variant-card-gradient ov25-variant-thumb-overlay', sizeClass, 'radial_gradient ov:mix-blend-multiply')} aria-hidden />
-      <div className={cn('ov25-variant-card-gradient ov25-variant-thumb-overlay', sizeClass, !selected && 'ov:shadow-sm', 'ov:bg-black  ov:mix-blend-difference')} aria-hidden />
     </>
   );
 
