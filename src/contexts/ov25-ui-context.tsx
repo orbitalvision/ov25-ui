@@ -24,6 +24,7 @@ import type {
   UnifiedPricePayload,
   UnifiedSkuPayload,
 } from '../types/inject-config.js';
+import type { StringReplacementsConfig } from '../types/string-replacements.js';
 import { normalizePricePayload, normalizeSkuPayload } from '../commerce/normalize-iframe-commerce.js';
 import {
   IFRAME_MSG_TRANSITION_SNAPSHOT,
@@ -35,6 +36,7 @@ import {
 } from '../lib/config/currency-display.js';
 import { findIframeWithUniqueId, type ConfiguratorIframeScreenRect } from '../utils/configurator-dom-queries.js';
 import { computeIsMobileViewport } from '../utils/viewport-mobile.js';
+import { resolveStringReplacement, type StringInterpolationVars } from '../lib/strings/resolve-string-replacement.js';
 
 function throttle<T extends (...args: any[]) => void>(
   fn: T,
@@ -265,6 +267,7 @@ interface OV25UIContextType {
   productLink: string | null;
   apiKey: string;
   configurationUuid: string | null;
+  stringReplacements?: StringReplacementsConfig;
   /** OV25 bed iframe: `bedAllowNone` query segment (omit when all parts may use None). */
   bedAllowNoneQueryValue?: string;
   /** Bed iframe: latest size from `CURRENT_BED_SIZE` postMessage (`null` until first message or non-bed). */
@@ -426,6 +429,8 @@ interface OV25UIContextType {
   openSwatchBook: () => void;
   /** Close the swatch book. Exposed for custom buttons. */
   closeSwatchBook: () => void;
+  /** Resolve a configured replacement by key. */
+  getString: (key: string, vars?: StringInterpolationVars, fallback?: string) => string;
 }
 
 // Create the context
@@ -442,6 +447,7 @@ export const OV25UIProvider: React.FC<{
   productLink: string | null, 
   apiKey: string, 
   configurationUuid: string,
+  stringReplacements?: StringReplacementsConfig,
   bedAllowNoneQueryValue?: string,
   bedFilterSelectionsByCurrentSize?: BedPartSizeFilterFlags,
   buyNowFunction: (payload?: OnChangePayload) => void,
@@ -505,6 +511,7 @@ export const OV25UIProvider: React.FC<{
   productLink,
   apiKey,
   configurationUuid,
+  stringReplacements,
   bedAllowNoneQueryValue,
   bedFilterSelectionsByCurrentSize: bedFilterSelectionsByCurrentSizeProp,
   buyNowFunction,
@@ -1424,6 +1431,16 @@ export const OV25UIProvider: React.FC<{
     setIsSwatchBookOpen(false);
   },[setIsSwatchBookOpen])
 
+  const getString = useCallback(
+    (key: string, vars?: StringInterpolationVars, fallback: string = '') =>
+      resolveStringReplacement({
+        rules: stringReplacements?.[key],
+        vars,
+        fallback,
+      }),
+    [stringReplacements],
+  );
+
   const openConfiguratorOrSnap2 = useCallback(() => {
     if (isSnap2Mode) {
       handleConfigureClick();
@@ -1952,6 +1969,7 @@ export const OV25UIProvider: React.FC<{
     productLink,
     apiKey,
     configurationUuid,
+    stringReplacements,
     bedAllowNoneQueryValue,
     currentBedSize,
     bedFilterSelectionsByCurrentSize,
@@ -2076,6 +2094,7 @@ export const OV25UIProvider: React.FC<{
     closeConfigurator,
     openSwatchBook,
     closeSwatchBook,
+    getString,
   };
 
   return (

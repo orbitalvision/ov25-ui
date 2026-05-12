@@ -18,6 +18,7 @@ export const ModuleBottomPanel: React.FC<{ portalTarget: Element }> = ({ portalT
     isModuleSelectionLoading,
     setIsModuleSelectionLoading,
     uniqueId,
+    getString,
   } = useOV25UI();
 
   // Mount/animation state
@@ -251,6 +252,7 @@ export const ModuleBottomPanel: React.FC<{ portalTarget: Element }> = ({ portalT
                     };
 
                     const { icon: Icon, label } = getTabConfig(tabType);
+                    const tabLabel = getString('modulePositionTypeTabLabel', { TAB_LABEL: label, TAB_TYPE: tabType }, label);
                     
                     return (
                       <button
@@ -264,7 +266,7 @@ export const ModuleBottomPanel: React.FC<{ portalTarget: Element }> = ({ portalT
                         }`}
                       >
                         <Icon className="ov:w-3.5 ov:h-3.5" />
-                        <span>{label}</span>
+                        <span>{tabLabel}</span>
                       </button>
                     );
                   })}
@@ -298,13 +300,14 @@ export const ModuleBottomPanel: React.FC<{ portalTarget: Element }> = ({ portalT
           {filteredModules.length === 0 ? (
             <div className="ov:flex ov:flex-col ov:items-center ov:justify-center ov:py-8 ov:space-y-4">
               <p className="ov:text-sm ov:text-(--ov25-secondary-text-color)">
-                Loading modules...
+                {getString('snap2ModulesLoading', undefined, 'Loading...')}
               </p>
             </div>
           ) : (
             <Carousel className="ov:w-full ov:pointer-events-auto" setApi={setModuleCarouselApi}>
               <CarouselContent className="ov:justify-center">
                 {filteredModules.map((module) => {
+                  const moduleProductName = getString('productName', { PRODUCT_NAME: module.product.name }, module.product.name);
                   const variant: Variant = {
                     id: `${module.productId}-${module.model.modelId}`,
                     name: module.product.name,
@@ -352,7 +355,7 @@ export const ModuleBottomPanel: React.FC<{ portalTarget: Element }> = ({ portalT
                         {isMovable && (
                           <button
                             type="button"
-                            aria-label="Place movable"
+                            aria-label={getString('moduleBottomPlaceMovableLabel', undefined, 'Place movable')}
                             onClick={(e) => handlePlaceMovable(e, module)}
                             className={cn(
                               'ov:absolute ov:top-1 ov:z-30 ov:flex ov:h-7 ov:w-7 ov:items-center ov:justify-center ov:rounded-lg ov:border-0 ov:bg-white ov:shadow-md ov:cursor-pointer',
@@ -365,7 +368,7 @@ export const ModuleBottomPanel: React.FC<{ portalTarget: Element }> = ({ portalT
                         {hasVariableDims && (
                           <button
                             type="button"
-                            aria-label="Custom size"
+                            aria-label={getString('moduleBottomCustomSizeLabel', undefined, 'Custom size')}
                             onClick={(e) => {
                               e.stopPropagation();
                               setCustomDimsProductId((prev) =>
@@ -383,12 +386,12 @@ export const ModuleBottomPanel: React.FC<{ portalTarget: Element }> = ({ portalT
                           {module.product.hasImage && module.product.imageUrl ? (
                             <img
                               src={module.product.imageUrl}
-                              alt={module.product.name}
+                              alt={moduleProductName}
                               className="ov:w-full ov:h-full ov:object-contain ov:rounded-lg"
                             />
                           ) : (
                             <div className="ov:w-full ov:h-full ov:bg-gray-200 ov:rounded-lg ov:flex ov:items-center ov:justify-center">
-                              <span className="ov:text-gray-400 ov:text-xs">No Image</span>
+                              <span className="ov:text-gray-400 ov:text-xs">{getString('moduleCardNoImage', undefined, 'No Image')}</span>
                             </div>
                           )}
                         </div>
@@ -404,7 +407,7 @@ export const ModuleBottomPanel: React.FC<{ portalTarget: Element }> = ({ portalT
                                 transform: 'translateX(-50%)',
                               }}
                             >
-                              {module.product.name}
+                              {moduleProductName}
                             </div>,
                             portalTarget
                           )}

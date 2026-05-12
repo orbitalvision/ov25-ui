@@ -13,6 +13,7 @@ export const InitialiseMenu: React.FC = () => {
     isMobile,
     configuratorState,
     initialiseMenuUsesExternalSelector,
+    getString,
   } = useOV25UI();
   const hasSnap2Objects = (configuratorState?.snap2Objects?.length ?? 0) > 0;
 
@@ -39,7 +40,7 @@ export const InitialiseMenu: React.FC = () => {
         id="ov25-initialise-menu"
         className={cn(initialiseMenuShellClass, 'ov:flex ov:items-center ov:justify-center')}
       >
-        <p className="ov:text-sm ov:text-(--ov25-secondary-text-color)">Loading products...</p>
+        <p className="ov:text-sm ov:text-(--ov25-secondary-text-color)">{getString('initialiseMenuLoadingProducts', undefined, 'Loading products...')}</p>
       </div>
     );
   }
@@ -72,7 +73,7 @@ export const InitialiseMenu: React.FC = () => {
         )}
       >
         <p className="ov:text-sm ov:text-(--ov25-secondary-text-color)">
-          Select an attachment point or model to replace
+          {getString('initialiseMenuNoModules', undefined, 'Select an attachment point or model to replace')}
         </p>
       </div>
     );
@@ -108,7 +109,7 @@ export const InitialiseMenu: React.FC = () => {
               compact ? 'ov:text-sm ov:mb-2 ov:mt-1' : 'ov:text-base ov:mb-3'
             )}
           >
-            Select a product to get started
+            {getString('initialiseMenuIntro', undefined, 'Select a product to get started')}
           </p>
           <div
             className={cn(

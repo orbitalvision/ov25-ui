@@ -10,6 +10,7 @@ export function getSnap2CheckoutSheetDomId(uniqueId: string | undefined | null) 
 }
 
 function LineCard({ line, index }: { line: CommerceLineItemPrice; index: number }) {
+  const { getString } = useOV25UI();
   const slug = line.id ? line.id.replace(/[^a-zA-Z0-9_-]/g, '_') : `idx-${index}`;
   return (
     <div
@@ -23,17 +24,23 @@ function LineCard({ line, index }: { line: CommerceLineItemPrice; index: number 
         </div>
         <div className="ov25-snap2-checkout-line-copy ov:flex ov:flex-col ov:min-w-0 ov:flex-1 ov:gap-1">
           <span className="ov25-snap2-checkout-line-name ov:font-normal ov:text-base ov:text-neutral-800 ov:line-clamp-2">
-            {line.name}
+            {getString('snap2CheckoutLineName', { LINE_NAME: line.name }, line.name)}
           </span>
           <div className="ov25-snap2-checkout-line-meta ov:flex ov:flex-wrap ov:items-center ov:gap-2 ov:text-xs ov:text-neutral-600">
-            <span className="ov:text-sm ov:font-normal ov:text-neutral-900">{line.formattedSubtotal}</span>
-            <span className="ov:text-sm ov:text-neutral-500">× {line.quantity}</span>
+            <span className="ov25-snap2-checkout-line-subtotal ov:text-sm ov:font-normal ov:text-neutral-900">
+              {getString('snap2CheckoutSubtotal', { FORMATTED_SUBTOTAL: line.formattedSubtotal }, line.formattedSubtotal)}
+            </span>
+            <span className="ov25-snap2-checkout-line-quantity ov:text-sm ov:text-neutral-500">
+              {getString('snap2CheckoutQuantity', { QUANTITY: line.quantity }, `× ${line.quantity}`)}
+            </span>
             {line.discountPercentage > 0 && (
-              <span className="ov:text-xs ov:text-red-500">(-{line.discountPercentage}%)</span>
+              <span className="ov25-snap2-checkout-line-discount ov:text-xs ov:text-red-500">
+                {getString('snap2CheckoutDiscountPercentage', { DISCOUNT_PERCENTAGE: line.discountPercentage }, `(-${line.discountPercentage}%)`)}
+              </span>
             )}
           </div>
           <div className="ov25-snap2-checkout-line-total ov:text-sm ov:font-normal ov:text-neutral-900">
-            Total: {line.formattedPrice}
+            {getString('snap2CheckoutLineTotal', { FORMATTED_PRICE: line.formattedPrice }, `Total: ${line.formattedPrice}`)}
           </div>
         </div>
       </div>
@@ -52,7 +59,9 @@ function LineCard({ line, index }: { line: CommerceLineItemPrice; index: number 
                     className="ov25-snap2-checkout-line-selection-thumb ov:w-6 ov:h-6 ov:rounded-full ov:object-cover ov:shrink-0"
                   />
                 ) : null}
-                <span className="ov:font-normal ov:text-neutral-800 ov:min-w-0 ov:truncate">{sel.name}</span>
+                <span className="ov:font-normal ov:text-neutral-800 ov:min-w-0 ov:truncate">
+                  {getString('snap2CheckoutSelectionName', { SELECTION_NAME: sel.name }, sel.name)}
+                </span>
                 {sel.price > 0 && (
                   <span className="ov:text-neutral-600 ov:shrink-0">+ {sel.formattedPrice}</span>
                 )}
@@ -67,7 +76,7 @@ function LineCard({ line, index }: { line: CommerceLineItemPrice; index: number 
 
 /** Scrollable header + line list for Snap2 checkout (modal sheet or mobile drawer body). */
 export function Snap2CheckoutSheetBody() {
-  const { commercePriceSnapshot } = useOV25UI();
+  const { commercePriceSnapshot, getString } = useOV25UI();
   const lines = commercePriceSnapshot?.lines ?? [];
 
   return (
@@ -77,7 +86,7 @@ export function Snap2CheckoutSheetBody() {
           id="ov25-snap2-checkout-sheet-title"
           className="ov25-snap2-checkout-sheet-title ov:text-xl ov:font-normal ov:text-neutral-800 ov:min-w-0 ov:flex-1 ov:pr-10 ov:truncate"
         >
-          Total items
+          {getString('snap2CheckoutTotalItemsTitle', undefined, 'Total items')}
         </h2>
       </div>
       <div className="ov25-snap2-checkout-sheet-divider ov:border-t ov:border-neutral-200 ov:mx-4 ov:shrink-0" />
@@ -87,7 +96,7 @@ export function Snap2CheckoutSheetBody() {
       >
         {lines.length === 0 ? (
           <p className="ov25-snap2-checkout-sheet-empty ov:text-sm ov:text-neutral-600">
-            Pricing updates appear here when the configurator sends price data.
+            {getString('snap2CheckoutEmpty', undefined, 'Pricing updates appear here when the configurator sends price data.')}
           </p>
         ) : (
           <div className="ov25-snap2-checkout-sheet-list ov:flex ov:flex-col ov:gap-4 ov:min-w-0">
@@ -103,7 +112,7 @@ export function Snap2CheckoutSheetBody() {
 
 /** Pinned totals + commerce actions for Snap2 checkout sheet. */
 export function Snap2CheckoutSheetFooter({ onRequestClose }: { onRequestClose: () => void }) {
-  const { commercePriceSnapshot, formattedPrice } = useOV25UI();
+  const { commercePriceSnapshot, formattedPrice, getString } = useOV25UI();
   const totalLabel = commercePriceSnapshot?.formattedPrice ?? formattedPrice;
 
   return (
@@ -119,7 +128,7 @@ export function Snap2CheckoutSheetFooter({ onRequestClose }: { onRequestClose: (
     >
       <div className="ov25-snap2-checkout-sheet-totals ov:flex ov:items-center ov:justify-between ov:gap-2 ov:min-w-0">
         <div className="ov25-snap2-checkout-sheet-total-block ov:flex ov:flex-col ov:min-w-0 ov:max-w-full">
-          <span className="ov25-snap2-checkout-sheet-total-label ov:text-sm ov:text-neutral-600">Total</span>
+          <span className="ov25-snap2-checkout-sheet-total-label ov:text-sm ov:text-neutral-600">{getString('snap2CheckoutFooterTotalLabel', undefined, 'Total')}</span>
           <span
             id="ov25-snap2-checkout-sheet-total-value"
             className="ov25-snap2-checkout-sheet-total-value ov:text-2xl ov:font-normal ov:text-neutral-900 ov:truncate ov:block ov:max-w-full"

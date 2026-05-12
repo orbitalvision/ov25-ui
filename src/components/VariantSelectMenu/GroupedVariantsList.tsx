@@ -1,6 +1,7 @@
 import React from 'react';
 import { Variant, VariantCardProps } from './ProductVariants.js';
 import { VariantsContent } from './VariantsContent.js';
+import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 
 const capitalizeWords = (str: string) =>
   str.split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
@@ -40,6 +41,8 @@ export const GroupedVariantsList: React.FC<GroupedVariantsListProps> = ({
   showDimensions,
   compactSpacing,
 }) => {
+  const { getString } = useOV25UI();
+
   return (
     <>
       {groups.map((group) =>
@@ -47,7 +50,9 @@ export const GroupedVariantsList: React.FC<GroupedVariantsListProps> = ({
           <div key={group.groupName} className="ov25-variant-group-content ov:mb-0 last:ov:mb-0">
             {showGroupHeaders && (
               <h4 className={`${STICKY_GROUP_HEADER_CLASS} ${stickyTopClass}`}>
-                {capitalizeWords(group.groupName)}
+                {capitalizeWords(
+                  getString('variantGroupHeader', { GROUP_NAME: group.groupName }, group.groupName)
+                )}
               </h4>
             )}
             <div className={`ov:grid ${gridColsClass}`}>

@@ -8,6 +8,7 @@ const testPages = [
   'configure-button-modal',
   'single-product-gallery',
   'split-variant-triggers',
+  'string-replacement',
   'single-no-variants',
   'single-no-pricing',
   'single-no-groups',

@@ -16,6 +16,7 @@ import { Ov25ShadowHost } from '../../Ov25ShadowHost.js';
 import { checkoutCommerceCtaButtonClasses } from '../CheckoutButton.js';
 import { VariantsCloseButton } from '../VariantsCloseButton.js';
 import { useSnap2VariantSheetMainRoot } from '../../Snap2VariantSheetColumn.js';
+import { useOV25UI } from '../../../contexts/ov25-ui-context.js';
 
 const DESC_FOOTER_P_CLASS =
   'ov:text-xs ov:leading-snug ov:wrap-break-word ov:text-(--ov25-secondary-text-color) ov:px-1 ov:md:px-0';
@@ -76,9 +77,11 @@ function applySeeMoreLineLeeway(rawChars: number, fullLength: number): number {
 function ModuleCardDescriptionFooter({
   description,
   onSeeMore,
+  seeMoreLabel,
 }: {
   description: string;
   onSeeMore: () => void;
+  seeMoreLabel: string;
 }) {
   const wrapRef = useRef<HTMLDivElement>(null);
   const [visibleChars, setVisibleChars] = useState(description.length);
@@ -146,7 +149,7 @@ function ModuleCardDescriptionFooter({
             onSeeMore();
           }}
         >
-          See more...
+          {seeMoreLabel}
         </button>
       </p>
     </div>
@@ -165,7 +168,6 @@ export interface ModuleVariantCardProps extends VariantCardProps {
 export function ModuleVariantCard({
   variant,
   onSelect,
-  index: _index,
   isMobile,
   isLoading = false,
   pickOnActivate = false,
@@ -173,7 +175,13 @@ export function ModuleVariantCard({
   thumbDualClassName,
 }: ModuleVariantCardProps) {
   const module = variant.data as CompatibleModule;
+  const { getString } = useOV25UI();
+  const moduleProductName = getString('productName', { PRODUCT_NAME: module.product.name }, module.product.name);
   const variantSheetPortalEl = useSnap2VariantSheetMainRoot();
+  const seeMoreLabel = getString('moduleCardSeeMore', undefined, 'See more...');
+  const addProductLabel = getString('moduleCardAddProduct', undefined, 'Add Product');
+  const noImageLabel = getString('moduleCardNoImage', undefined, 'No Image');
+  const closeProductDetailsAria = getString('moduleCardCloseDetailsLabel', undefined, 'Close product details');
   const [detailOpen, setDetailOpen] = useState(false);
   const detailTitleId = useId();
 
@@ -263,12 +271,12 @@ export function ModuleVariantCard({
           onClick={(e) => e.stopPropagation()}
         >
           <h2 id={detailTitleId} className="ov:sr-only">
-            {module.product.name}
+            {moduleProductName}
           </h2>
           <div className="ov:flex-1 ov:min-h-0 ov:overflow-y-auto ov:overflow-x-hidden ov:px-4 ov:pb-4 ov:pt-4 ov:bg-(--ov25-background-color)">
             <ModuleVariantDetailPanel module={module} />
           </div>
-          <VariantsCloseButton onClick={() => setDetailOpen(false)} ariaLabel="Close product details" />
+          <VariantsCloseButton onClick={() => setDetailOpen(false)} ariaLabel={closeProductDetailsAria} />
           <div className="ov25-module-variant-detail-sheet-footer ov:shrink-0 ov:border-t ov:border-(--ov25-border-color) ov:bg-(--ov25-background-color)  ov:px-4 ov:pb-2 ov:md:pb-4 ov:pt-2">
             <button
               type="button"
@@ -286,7 +294,7 @@ export function ModuleVariantCard({
                 isLoading && 'ov:opacity-50 ov:cursor-not-allowed'
               )}
             >
-              Add Product
+              {addProductLabel}
             </button>
           </div>
         </div>
@@ -311,10 +319,10 @@ export function ModuleVariantCard({
       aria-expanded={pickOnActivate ? undefined : detailOpen}
       aria-label={
         pickOnActivate
-          ? `${module.product.name}. Select this product.`
+          ? getString('moduleCardSelectLabel', { PRODUCT_NAME: module.product.name }, `${module.product.name}. Select this product.`)
           : isMobile
-            ? `${module.product.name}. Tap to add product. Use details button for more information.`
-            : `${module.product.name}. Click images to add, description to view details.`
+            ? getString('moduleCardMobileLabel', { PRODUCT_NAME: module.product.name }, `${module.product.name}. Tap to add product. Use details button for more information.`)
+            : getString('moduleCardDesktopLabel', { PRODUCT_NAME: module.product.name }, `${module.product.name}. Click images to add, description to view details.`)
       }
       onKeyDown={(e) => {
         if (isLoading) return;
@@ -369,7 +377,7 @@ export function ModuleVariantCard({
                 }
           }
         >
-          {module.product.name}
+          {moduleProductName}
         </p>
         {!pickOnActivate && isMobile ? (
           <button
@@ -381,7 +389,7 @@ export function ModuleVariantCard({
               'ov:border-0 ov:bg-transparent',
               'ov:disabled:opacity-50 ov:disabled:cursor-not-allowed',
             )}
-            aria-label={`${module.product.name} — product details`}
+            aria-label={getString('moduleCardDetailsLabel', { PRODUCT_NAME: module.product.name }, `${module.product.name} — product details`)}
             data-ov25-module-variant-card-part="details-trigger"
             disabled={isLoading}
             onClick={(e) => {
@@ -491,7 +499,7 @@ export function ModuleVariantCard({
             className="ov25-module-variant-card__thumb-placeholder ov:absolute ov:inset-0 ov:flex ov:items-center ov:justify-center ov:bg-transparent"
             data-ov25-module-variant-card-part="thumb-placeholder"
           >
-            <span className="ov:p-2 ov:text-center ov:text-gray-400 ov:text-xs">No Image</span>
+            <span className="ov:p-2 ov:text-center ov:text-gray-400 ov:text-xs">{noImageLabel}</span>
           </div>
         )}
       </div>
@@ -513,6 +521,7 @@ export function ModuleVariantCard({
               key={`${shortLine}\0${longLine}`}
               description={footerSource}
               onSeeMore={() => setDetailOpen(true)}
+              seeMoreLabel={seeMoreLabel}
             />
           ) : (
             <p

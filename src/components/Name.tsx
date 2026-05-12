@@ -5,8 +5,12 @@ import { Ov25ShadowHost } from './Ov25ShadowHost.js';
 
 
 const Name: React.FC = () => {
-  const { range, currentProduct } = useOV25UI();
-  const name =  currentProduct?.name ? (range?.name + '-' + currentProduct?.name) :  range?.name
+  const { range, currentProduct, getString } = useOV25UI();
+  const fallbackName = currentProduct?.name ? (range?.name + '-' + currentProduct?.name) : range?.name;
+  const name = getString('productTitle', {
+    RANGE_NAME: range?.name ?? '',
+    PRODUCT_NAME: currentProduct?.name ?? '',
+  }, fallbackName ?? '');
   
   return (
     <Ov25ShadowHost style={{ display: 'block', width: '100%' }}>

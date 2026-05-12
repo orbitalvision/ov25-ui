@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import type { CompatibleModule } from '../../../utils/configurator-utils.js';
 import { getModuleProductPreviewImageUrls } from '../../../utils/module-product-image-srcset.js';
 import { cn } from '../../../lib/utils.js';
+import { useOV25UI } from '../../../contexts/ov25-ui-context.js';
 
 export function dimensionStringFromModule(dimensions: CompatibleModule['dimensions']): string {
   const parts: string[] = [];
@@ -19,6 +20,8 @@ export function ModuleVariantDetailPanel({
   module: CompatibleModule;
   className?: string;
 }) {
+  const { getString } = useOV25UI();
+  const moduleProductName = getString('productName', { PRODUCT_NAME: module.product.name }, module.product.name);
   const dimensionString = useMemo(
     () => dimensionStringFromModule(module.dimensions),
     [module.dimensions]
@@ -47,7 +50,7 @@ export function ModuleVariantDetailPanel({
           className="ov25-module-variant-detail-panel__title ov:w-full ov:text-lg ov:font-semibold"
           data-ov25-module-variant-detail-part="title"
         >
-          {module.product.name}
+          {moduleProductName}
         </h3>
         {dimensionString ? (
           <span

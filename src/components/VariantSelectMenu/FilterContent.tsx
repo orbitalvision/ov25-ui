@@ -16,7 +16,7 @@ interface FilterContentProps {
 }
 
 export const FilterContent: React.FC<FilterContentProps> = ({ optionId, optionIds, wrapperVariant = 'sheet', isOpen = true }) => {
-    const { availableProductFilters, setAvailableProductFilters, activeOption, allOptions, isMobile, variantDisplayStyleOverlay } = useOV25UI();
+    const { availableProductFilters, setAvailableProductFilters, activeOption, allOptions, isMobile, variantDisplayStyleOverlay, getString } = useOV25UI();
 
     const targetOptions = React.useMemo(() => {
         const ids = optionIds ?? (optionId ? [optionId] : []);
@@ -41,7 +41,7 @@ export const FilterContent: React.FC<FilterContentProps> = ({ optionId, optionId
 
     const innerContent = !availableProductFilters || optionsToRender.length === 0 ? (
         <div id="ov25-filter-empty" className="ov:w-full ov:max-h-fit ov:p-4 ov:pt-16 ov:flex ov:justify-center">
-            <h3 className="ov:text-sm ov:text-(--ov25-secondary-text-color)">No filters available</h3>
+            <h3 className="ov:text-sm ov:text-(--ov25-secondary-text-color)">{getString('filtersNoFiltersAvailable', undefined, 'No filters available')}</h3>
         </div>
     ) : (
         <div id="ov25-filter-content" className="ov:w-full ov:max-h-fit ov:pr-4 ov:pb-40 ov:overflow-y-auto">
@@ -52,7 +52,7 @@ export const FilterContent: React.FC<FilterContentProps> = ({ optionId, optionId
 
                 return (
                     <div key={targetOption.id} className="ov:mb-6">
-                        {isMobile || variantDisplayStyleOverlay === VariantDisplayStyleOverlay.List ? <h4 className="ov25-filter-option-header ov:text-sm ov:font-medium ov:text-[var(--ov25-secondary-text-color)] ov:mb-2 ov:capitalize">{targetOption.name}</h4> : null}
+                        {isMobile || variantDisplayStyleOverlay === VariantDisplayStyleOverlay.List ? <h4 className="ov25-filter-option-header ov:text-sm ov:font-medium ov:text-[var(--ov25-secondary-text-color)] ov:mb-2 ov:capitalize">{getString('filtersOptionHeader', { OPTION_NAME: targetOption.name }, targetOption.name)}</h4> : null}
                         {Object.entries(activeFilters)
                             .filter(([filterKey]) => {
                                 if (filterKey !== 'Collections') return true;
@@ -67,7 +67,7 @@ export const FilterContent: React.FC<FilterContentProps> = ({ optionId, optionId
                             .map(([filterKey, options]) => (
                                 options.length > 0 && (
                                     <div key={filterKey} className="ov:mb-3">
-                                        <h3 className="ov25-filter-group-header ov:text-xs ov:font-medium ov:text-(--ov25-secondary-text-color) ov:mb-1.5 ov:uppercase">{filterKey}</h3>
+                                        <h3 className="ov25-filter-group-header ov:text-xs ov:font-medium ov:text-(--ov25-secondary-text-color) ov:mb-1.5 ov:uppercase">{getString('filtersGroupHeader', { FILTER_GROUP: filterKey }, filterKey)}</h3>
                                         <div className="ov:flex ov:flex-wrap ov:gap-1.5 ov:w-full">
                                             {options.map((option) => (
                                                 <button
@@ -76,7 +76,7 @@ export const FilterContent: React.FC<FilterContentProps> = ({ optionId, optionId
                                                     className={`ov25-filter-pill ov:px-3 ov:py-1.5 ov:rounded-full ov:text-xs ov:border ov:text-(--ov25-secondary-text-color) ov:transition-all ov:cursor-pointer ov:hover:bg-gray-50 ${option.checked ? 'ov:border-[var(--ov25-highlight-color,#26E8FE)] ov:bg-[color-mix(in_srgb,var(--ov25-highlight-color,#26E8FE)_20%,transparent)]' : 'ov:border-[var(--ov25-border-color)]'}`}
                                                     data-checked={option.checked}
                                                 >
-                                                    {option.value}
+                                                    {getString('filtersOptionValue', { FILTER_VALUE: option.value }, option.value)}
                                                 </button>
                                             ))}
                                         </div>

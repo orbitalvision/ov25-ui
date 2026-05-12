@@ -2,6 +2,17 @@ import type { Swatch, SwatchRulesData } from '../contexts/ov25-ui-context.js';
 import type { BedAllowNonePartsInput } from '../lib/config/bed-embed-query.js';
 import { serializeBedAllowNoneQueryValue } from '../lib/config/bed-embed-query.js';
 import { DEFAULT_CURRENCY_SYMBOL } from '../lib/config/currency-display.js';
+import type { StringReplacementsConfig } from './string-replacements.js';
+export type {
+  StringReplacementRuleTrigger,
+  StringReplacementDefinitionKey,
+  StringReplacementRule,
+  StringReplacementsConfig,
+  StringReplacementDefinition,
+  StringInterpolationValueDefinition,
+  StringReplacements,
+} from './string-replacements.js';
+export { optionNameReplacement } from './string-replacements.js';
 
 export type StringOrFunction = string | (() => string);
 
@@ -269,6 +280,7 @@ export interface InjectConfiguratorOptions {
   branding?: BrandingConfig;
   flags?: FlagsConfig;
   bed?: BedEmbedConfig;
+  stringReplacements?: StringReplacementsConfig;
 }
 
 /** Legacy flat config. Supported for backward compatibility. */
@@ -278,6 +290,7 @@ export interface LegacyInjectConfiguratorOptions {
   configurationUuid?: StringOrFunction;
   images?: string[];
   uniqueId?: string;
+  stringReplacements?: StringReplacementsConfig;
 
   gallerySelector?: ElementSelector;
   priceSelector?: ElementSelector;
@@ -346,6 +359,7 @@ export interface NormalizedInjectConfig {
   configurationUuid?: StringOrFunction;
   images?: string[];
   uniqueId?: string;
+  stringReplacements?: StringReplacementsConfig;
 
   gallerySelector?: ElementSelector;
   priceSelector?: ElementSelector;
@@ -430,6 +444,7 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
   const branding = isGrouped ? pick(c, 'branding') : undefined;
   const flags = isGrouped ? pick(c, 'flags') : undefined;
   const bedGrouped = isGrouped ? pick(c, 'bed') : undefined;
+  const stringReplacements = c.stringReplacements;
 
   const gallerySelector = selectors?.gallery ?? c.gallerySelector ?? c.galleryId;
   const priceSelector = selectors?.price ?? c.priceSelector ?? c.priceId;
@@ -535,6 +550,7 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
     configurationUuid: opts.configurationUuid,
     images: opts.images,
     uniqueId: opts.uniqueId,
+    stringReplacements,
     gallerySelector,
     priceSelector,
     nameSelector,

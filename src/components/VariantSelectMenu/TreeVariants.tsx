@@ -40,6 +40,7 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
     isVariantsOpen,
     activeOptionId,
     setActiveOptionId,
+    getString,
   } = useOV25UI();
 
   const [currentView, setCurrentView] = useState<string | null>(null);
@@ -156,6 +157,12 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
 
   const scrollContentClass = mode === 'drawer' && isMobile ? 'ov:pb-20' : '';
 
+  const getOptionHeaderLabel = useCallback(
+    (optionName: string) =>
+      capitalizeWords(getString('variantOptionHeader', { OPTION_NAME: optionName }, optionName)),
+    [getString]
+  );
+
   const backHeader = (title: string) => (
     <button
       type="button"
@@ -171,12 +178,12 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
     <div className="ov:flex ov:flex-col ov:min-h-0 ov:h-full ov:overflow-hidden ">
 
       {showSize && (
-        <TreeTrigger label={capitalizeWords('Size')} onClick={() => handleTreeClick('size')} />
+        <TreeTrigger label={getOptionHeaderLabel('Size')} onClick={() => handleTreeClick('size')} />
       )}
       {allOptionsVariants.map(({ optionId, optionName }) => (
         <TreeTrigger
           key={optionId}
-          label={capitalizeWords(optionName)}
+          label={getOptionHeaderLabel(optionName)}
           onClick={() => handleTreeClick(optionId)}
         />
       ))}
@@ -185,7 +192,7 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
 
   const sizeChildView = (
     <div className="ov:flex ov:flex-col ov:min-h-0 ov:flex-1 ov:overflow-hidden">
-      {backHeader(capitalizeWords('Size'))}
+      {backHeader(getOptionHeaderLabel('Size'))}
       <div
         className={`ov:min-h-0 ov:flex-1 ov:overflow-y-auto ov:px-4 ov:pt-4 ov:pb-4 ${scrollContentClass}`}
         {...(mode === 'inline' ? { 'data-ov25-list-variants-content': true as const } : {})}
@@ -207,7 +214,7 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
       const label = allOptionsVariants.find((o) => o.optionId === 'modules')?.optionName ?? 'Modules';
       return (
         <div className="ov:flex ov:flex-col ov:min-h-0 ov:flex-1 ov:overflow-hidden">
-          {backHeader(capitalizeWords(label))}
+          {backHeader(getOptionHeaderLabel(label))}
           <div
             className={`ov:min-h-0 ov:flex-1 ov:overflow-y-auto ov:px-4 ov:pt-0 ov:pb-4 ${scrollContentClass}`}
             {...(mode === 'inline' ? { 'data-ov25-list-variants-content': true as const } : {})}
@@ -221,7 +228,7 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
     if (!opt) return null;
     return (
       <div className="ov:flex ov:flex-col ov:min-h-0 ov:flex-1 ov:overflow-hidden">
-        {backHeader(capitalizeWords(opt.optionName))}
+        {backHeader(getOptionHeaderLabel(opt.optionName))}
           <FilterControls
             isFilterOpen={!!isFilterOpen[currentView]}
             setIsFilterOpen={() => toggleFilter(currentView)}

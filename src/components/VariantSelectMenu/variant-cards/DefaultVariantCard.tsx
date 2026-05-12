@@ -3,6 +3,7 @@ import { Variant } from '../ProductVariants.js';
 import { SwatchIconOverlay } from './SwatchIconOverlay.js';
 import { VariantThumb } from './VariantThumb.js';
 import { useSwatchActions } from '../../../hooks/useSwatchActions.js';
+import { useOV25UI } from '../../../contexts/ov25-ui-context.js';
 
 interface VariantCardProps {
     variant: Variant;
@@ -14,6 +15,7 @@ interface VariantCardProps {
   }
 
 export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobile, isGrouped = false, compactSpacing = false }: VariantCardProps) => {
+    const { getString } = useOV25UI();
     const { shouldShowSwatchOverlay, isSwatchSelectedFor, getSwatchClickHandler } = useSwatchActions();
     const isSwatchInBook = isSwatchSelectedFor(variant.swatch);
     const swatchVisible = shouldShowSwatchOverlay(!!variant.isSelected, variant.swatch);
@@ -48,7 +50,7 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
             className="ov:cursor-pointer ov:max-w-full"
         >
             <span className={`ov25-variant-name ov:text-xs ov:text-center ov:text-black ov:line-clamp-3 ${isGrouped && isMobile ? '' : 'ov:pt-2'}`}>
-                {variant.name}
+                {getString('variantName', { VARIANT_NAME: variant.name }, variant.name)}
             </span>
             
         </div>

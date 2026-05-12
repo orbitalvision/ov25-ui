@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import type { CompatibleModule, Snap2VariableDimensionAxisConfig } from '../../utils/configurator-utils.js';
 import { cn } from '../../lib/utils.js';
+import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 
 type AxisKey = 'x' | 'y' | 'z';
 
@@ -27,8 +28,10 @@ export function Snap2CustomDimensionForm({
   onConfirm: (dims: { x?: number; y?: number; z?: number }) => void;
   onCancel: () => void;
 }) {
+  const { getString } = useOV25UI();
   const variableDimensions = module.variableDimensions;
   const product = module.product;
+  const productName = getString('productName', { PRODUCT_NAME: product.name }, product.name);
 
   const getDefaultMm = (axis: AxisKey): number => {
     const k = AXIS_PRODUCT_KEYS[axis];
@@ -86,15 +89,19 @@ export function Snap2CustomDimensionForm({
       )}
       onClick={(e) => e.stopPropagation()}
     >
-      <p className="ov:mb-2 ov:text-center ov:text-xs ov:font-medium ov:text-(--ov25-text-color)">Custom size (cm)</p>
-      <p className="ov:mb-2 ov:text-center ov:text-[10px] ov:text-(--ov25-secondary-text-color)">{product.name}</p>
+      <p className="ov:mb-2 ov:text-center ov:text-xs ov:font-medium ov:text-(--ov25-text-color)">{getString('snap2CustomDimensionsTitle', undefined, 'Custom size (cm)')}</p>
+      <p className="ov:mb-2 ov:text-center ov:text-[10px] ov:text-(--ov25-secondary-text-color)">{productName}</p>
       {axes.map((axis) => {
         const cfg = variableDimensions![axis] as Snap2VariableDimensionAxisConfig;
         const value = values[axis] ?? getDefaultMm(axis);
         return (
           <div key={axis} className="ov:mb-2">
             <label className="ov:mb-0.5 ov:block ov:text-[10px] ov:text-(--ov25-secondary-text-color)">
-              {AXIS_LABELS[axis]}
+              {getString(
+                'dimensionsLabel',
+                { DIMENSION_LABEL: AXIS_LABELS[axis], AXIS: axis.toUpperCase() },
+                AXIS_LABELS[axis]
+              )}
             </label>
             <input
               type="number"
@@ -106,7 +113,7 @@ export function Snap2CustomDimensionForm({
               className="ov:w-full ov:rounded ov:border ov:border-(--ov25-border-color) ov:px-1 ov:py-0.5 ov:text-xs"
             />
             <p className="ov:mt-0.5 ov:text-[9px] ov:text-(--ov25-secondary-text-color)">
-              Min {cfg.min} · Max {cfg.max} · Step {cfg.increment}
+              {getString('snap2CustomDimensionsRange', { MIN: cfg.min, MAX: cfg.max, STEP: cfg.increment }, `Min ${cfg.min} · Max ${cfg.max} · Step ${cfg.increment}`)}
             </p>
           </div>
         );
@@ -117,7 +124,7 @@ export function Snap2CustomDimensionForm({
           onClick={onCancel}
           className="ov:flex-1 ov:rounded ov:border ov:border-(--ov25-border-color) ov:bg-(--ov25-secondary-background-color) ov:px-2 ov:py-1 ov:text-xs"
         >
-          Cancel
+          {getString('snap2CustomDimensionsCancel', undefined, 'Cancel')}
         </button>
         <button
           type="button"
@@ -130,7 +137,7 @@ export function Snap2CustomDimensionForm({
               : 'ov:cursor-not-allowed ov:opacity-50'
           )}
         >
-          Add
+          {getString('snap2CustomDimensionsAdd', undefined, 'Add')}
         </button>
       </div>
     </div>

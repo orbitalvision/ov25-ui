@@ -8,6 +8,7 @@ import {
 } from './ui/dialog.js';
 import { cn } from '../lib/utils.js';
 import type { Snap2ScreenshotItem } from '../utils/configurator-utils.js';
+import { useOV25UI } from '../contexts/ov25-ui-context.js';
 
 function safeFilename(label: string): string {
   return `snap2-${label.replace(/\s+/g, '-').toLowerCase()}.png`;
@@ -20,6 +21,7 @@ type Snap2ScreenshotDialogProps = {
 };
 
 export function Snap2ScreenshotDialog({ open, onOpenChange, screenshots }: Snap2ScreenshotDialogProps) {
+  const { getString } = useOV25UI();
   const [downloading, setDownloading] = useState(false);
 
   const handleDownloadOne = useCallback((item: Snap2ScreenshotItem) => {
@@ -52,11 +54,15 @@ export function Snap2ScreenshotDialog({ open, onOpenChange, screenshots }: Snap2
         )}
       >
         <DialogHeader className="ov:sr-only">
-          <DialogTitle>Snap2 screenshots</DialogTitle>
+          <DialogTitle>{getString('snap2ScreenshotsTitle', undefined, 'Snap2 screenshots')}</DialogTitle>
         </DialogHeader>
         <div className="ov:flex ov:items-center ov:justify-between ov:px-5 ov:pt-5 ov:pb-2">
           <p className="ov:text-sm ov:text-(--ov25-secondary-text-color)">
-            {screenshots.length} screenshot{screenshots.length !== 1 ? 's' : ''}
+            {getString(
+              'snap2ScreenshotsCount',
+              { SCREENSHOT_COUNT: screenshots.length, SCREENSHOT_SUFFIX: screenshots.length !== 1 ? 's' : '' },
+              `${screenshots.length} screenshot${screenshots.length !== 1 ? 's' : ''}`
+            )}
           </p>
           <button
             type="button"
@@ -68,7 +74,9 @@ export function Snap2ScreenshotDialog({ open, onOpenChange, screenshots }: Snap2
             disabled={downloading || screenshots.length === 0}
           >
             <Download className="ov:mr-1.5 ov:h-3.5 ov:w-3.5" aria-hidden />
-            {downloading ? 'Downloading…' : 'Download all'}
+            {downloading
+              ? getString('snap2ScreenshotsDownloading', undefined, 'Downloading…')
+              : getString('snap2ScreenshotsDownloadAll', undefined, 'Download all')}
           </button>
         </div>
         <div
@@ -89,7 +97,7 @@ export function Snap2ScreenshotDialog({ open, onOpenChange, screenshots }: Snap2
                 className="ov:self-start ov:border-0 ov:bg-transparent ov:p-0 ov:text-xs ov:font-medium ov:text-(--ov25-text-color) ov:underline ov:cursor-pointer"
                 onClick={() => handleDownloadOne(screenshot)}
               >
-                Download
+                {getString('snap2ScreenshotsDownloadOne', undefined, 'Download')}
               </button>
             </div>
           ))}

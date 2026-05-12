@@ -12,7 +12,6 @@ export const SwatchIconOverlay = ({ isSelected, isVariantSelected, onClick }: { 
         !isVariantSelected && "ov:pointer-events-none"
       )}
       onClick={onClick}
-      title="Order a swatch sample"
       data-selected={isSelected}
     >
       <SwatchIconSvg

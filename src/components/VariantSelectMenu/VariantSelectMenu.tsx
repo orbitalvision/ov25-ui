@@ -45,6 +45,7 @@ export const VariantSelectMenu: React.FC = () => {
     variantDisplayStyleInlineMobile,
     openConfiguratorOrSnap2,
     configuratorState,
+    getString,
   } = useOV25UI();
 
 
@@ -133,11 +134,11 @@ export const VariantSelectMenu: React.FC = () => {
         isOpen={isVariantsOpen}
         onOpenChange={handleMobileDrawerClose}
         onStateChange={(value: any) => setDrawerSize(value === 0 ? 'closed' : value === 1 ? 'small' : 'large')}
-        className="ov:z-[10]"
+        className="ov:z-10"
       >
         <div className='ov:w-full ov:h-full ov:flex ov:flex-col ov:absolute ov:top-0 ov:left-0 ov:pointer-events-auto'>
           {variantDisplayStyleMobile === 'wizard' ? (
-            <div className="ov:flex ov:flex-col ov:h-full ov:bg-[var(--ov25-background-color)]">
+            <div className="ov:flex ov:flex-col ov:h-full ov:bg-(--ov25-background-color)">
               <VariantsHeader />
               <div className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:overflow-hidden">
                 <WizardVariants mode="drawer" />
@@ -147,7 +148,7 @@ export const VariantSelectMenu: React.FC = () => {
             isSnap2Mode ? <Snap2Wrapper /> : <ProductVariantsWrapper />
           )}
           {variantDisplayStyleMobile !== 'wizard' && (
-            <div className={`${drawerSize === 'large' || drawerSize === 'small' ? 'ov:fixed ov:bottom-0 ov:left-0 ov:w-full ov:z-[20]' : ''}`}>
+            <div className={`${drawerSize === 'large' || drawerSize === 'small' ? 'ov:fixed ov:bottom-0 ov:left-0 ov:w-full ov:z-20' : ''}`}>
               <MobileCheckoutButton />
             </div>
           )}
@@ -166,10 +167,10 @@ export const VariantSelectMenu: React.FC = () => {
 
   return (
     <>
-      <div ref={containerRef} id="ov25-configurator-variant-menu-container" className="ov:relative ov:h-full ov:flex ov:flex-col ov:font-[family-name:var(--ov25-font-family)]">
+      <div ref={containerRef} id="ov25-configurator-variant-menu-container" className="ov:relative ov:h-full ov:flex ov:flex-col ov:font-(family-name:--ov25-font-family)">
         {holdVariantsPanelForSnap2Initialise ? (
           <div className="ov:flex-1 ov:min-h-0 ov:flex ov:flex-col ov:items-center ov:justify-center ov:px-4 ov:py-8 ov:text-center">
-            <p className="ov:text-base ov:text-(--ov25-text-color) ov:shrink-0">Select a model to get started</p>
+            <p className="ov:text-base ov:text-(--ov25-text-color) ov:shrink-0">{getString('initialiseMenuIntro', undefined, 'Select a product to get started')}</p>
           </div>
         ) : (
           <>

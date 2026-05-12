@@ -38,7 +38,10 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
     setIsVariantsOpen,
     formattedPrice,
     disableAddToCart,
+    getString,
   } = useOV25UI();
+  const addToBasketText = getString('checkoutAddToBasket', undefined, 'Add to basket');
+  const buyNowText = getString('checkoutBuyNow', undefined, 'Buy now');
 
   const hasAddToBasket = typeof addToBasketFunction === 'function';
   const hasBuyNow = typeof buyNowFunction === 'function';
@@ -66,7 +69,7 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
         }}
         className={cn(baseButtonClasses, buttonFontWeight(embedded), 'ov:w-full ov:min-w-0 ov:max-w-full')}
       >
-        <span>Add to basket</span>
+        <span>{addToBasketText}</span>
         <span>{formattedPrice}</span>
       </button>
       </div>
@@ -86,7 +89,7 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
         }}
         className={cn(baseButtonClasses, buttonFontWeight(embedded), 'ov:w-full ov:min-w-0 ov:max-w-full')}
       >
-        <span>Buy now</span>
+        <span>{buyNowText}</span>
         <span>{formattedPrice}</span>
       </button>
       </div>
@@ -95,7 +98,7 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
 
   const labelContent = (
     <>
-      <span>Buy now</span>
+      <span>{buyNowText}</span>
       <span>{formattedPrice}</span>
     </>
   );
@@ -132,7 +135,7 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
           onAfterBuyNow?.();
         }}
         className={cn(baseButtonClasses, 'ov:absolute ov:inset-0 ov:right-14 ov:z-11 ov:cursor-pointer ov:bg-transparent ov:border-0 ov:rounded-none')}
-        aria-label="Buy now"
+        aria-label={buyNowText}
       >
       </button>
       <div className="ov:absolute ov:right-14 ov:top-0 ov:bottom-0 ov:w-px ov:bg-white/30 ov:z-10" aria-hidden />
@@ -146,7 +149,7 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
           onAfterAddToBasket?.();
         }}
         className="ov:absolute ov:right-0 ov:top-0 ov:bottom-0 ov:w-14 ov:z-20 ov:flex ov:items-center ov:justify-center ov:cursor-pointer ov:bg-transparent ov:border-0 ov:hover:bg-white/10 ov:transition-colors"
-        aria-label="Add to basket"
+        aria-label={addToBasketText}
       >
         <ShoppingCart size={20} />
       </button>

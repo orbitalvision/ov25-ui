@@ -3,7 +3,7 @@ import { useOV25UI } from '../contexts/ov25-ui-context.js';
 import { SwatchImage } from './SwatchImage.js';
 
 export const SwatchesContainer: React.FC = () => {
-  const { selectedSwatches, swatchRulesData, setIsSwatchBookOpen, hasSelectionsWithSwatches } = useOV25UI();
+  const { selectedSwatches, swatchRulesData, setIsSwatchBookOpen, hasSelectionsWithSwatches, getString } = useOV25UI();
 
   const toggleSwatchBook = () => {
     setIsSwatchBookOpen(true);
@@ -28,15 +28,36 @@ export const SwatchesContainer: React.FC = () => {
         {swatchRulesData.canExeedFreeLimit ? (
           <>
             <span className="ov:text-(--ov25-text-color) ov:text-sm ov:font-light">
-              {swatchRulesData.maxSwatches === swatchRulesData.freeSwatchLimit 
-                ? `+ Order ${swatchRulesData.maxSwatches} Free Swatches`
-                : `+ Order up to ${swatchRulesData.maxSwatches} Swatches`
-              }
+              {swatchRulesData.maxSwatches === swatchRulesData.freeSwatchLimit
+                ? getString(
+                    'swatchesContainerOrderMaxFreeSwatches',
+                    { MAX_SWATCHES: swatchRulesData.maxSwatches },
+                    `+ Order ${swatchRulesData.maxSwatches} Free Swatches`,
+                  )
+                : getString(
+                    'swatchesContainerOrderUpToMaxSwatches',
+                    { MAX_SWATCHES: swatchRulesData.maxSwatches },
+                    `+ Order up to ${swatchRulesData.maxSwatches} Swatches`,
+                  )}
             </span>
-            {swatchRulesData.freeSwatchLimit > 0 && swatchRulesData.maxSwatches !== swatchRulesData.freeSwatchLimit && <span className="ov:text-sm ov:font-light ov:italic">First {swatchRulesData.freeSwatchLimit} are free</span>}
+            {swatchRulesData.freeSwatchLimit > 0 && swatchRulesData.maxSwatches !== swatchRulesData.freeSwatchLimit && (
+              <span className="ov:text-sm ov:font-light ov:italic">
+                {getString(
+                  'swatchesContainerFirstFreeCount',
+                  { FREE_SWATCH_LIMIT: swatchRulesData.freeSwatchLimit },
+                  `First ${swatchRulesData.freeSwatchLimit} are free`,
+                )}
+              </span>
+            )}
           </>
         ) : (
-          <span className="ov:text-sm ov:font-light">+ Order up to {swatchRulesData.freeSwatchLimit} Free Swatches</span>
+          <span className="ov:text-sm ov:font-light">
+            {getString(
+              'swatchesContainerOrderUpToFreeSwatches',
+              { FREE_SWATCH_LIMIT: swatchRulesData.freeSwatchLimit },
+              `+ Order up to ${swatchRulesData.freeSwatchLimit} Free Swatches`,
+            )}
+          </span>
         )}
       </div>
     </div>

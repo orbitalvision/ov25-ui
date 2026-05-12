@@ -9,6 +9,7 @@ export {
   VariantDisplayMode,
   VariantDisplayStyleOverlay,
   CarouselLayout,
+  STRING_REPLACEMENT_DEFINITIONS,
 } from './utils/inject.js';
 export type {
   InjectConfiguratorOptions,
@@ -36,10 +37,18 @@ export type {
   CommerceLineItemPrice,
   CommerceLineItemSelection,
   OptionSkuMap,
+  StringReplacementRuleTrigger,
+  StringReplacementDefinitionKey,
+  StringReplacementRule,
+  StringReplacementsConfig,
+  StringReplacementDefinition,
+  StringInterpolationValueDefinition,
+  StringReplacements,
 } from './utils/inject.js';
 
 export { normalizeSkuPayload, normalizePricePayload, parseIframeJsonPayload } from './commerce/normalize-iframe-commerce.js';
 export type { Swatch, SwatchRulesData } from './contexts/ov25-ui-context.js';
+export { useOv25String } from './lib/strings/use-ov25-string.js';
 
 // Default export object containing all exports
 const OV25UI = {

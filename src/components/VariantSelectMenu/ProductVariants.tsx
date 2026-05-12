@@ -44,7 +44,6 @@ export interface VariantCardProps {
 interface ProductVariantsProps {
   isOpen: boolean
   onClose: () => void
-  title: string
   variants: Variant[] | VariantGroup[]
   onSelect: (variant: Variant) => void
   VariantCard?: React.ComponentType<VariantCardProps>

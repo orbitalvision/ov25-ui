@@ -22,6 +22,7 @@ export const SaveSnap2Dialog: React.FC = () => {
     setCompatibleModules,
     setConfiguratorState,
     resetIframe,
+    getString,
   } = useOV25UI();
 
   const [isSaving, setIsSaving] = useState(false);
@@ -61,7 +62,7 @@ export const SaveSnap2Dialog: React.FC = () => {
       requestSnap2Save();
     } catch (error) {
       console.error('Save error:', error);
-      toast.error('Failed to save configuration');
+      toast.error(getString('snap2SaveFailedToast', undefined, 'Failed to save configuration'));
       setShowShareDialog(false);
       setIsSaving(false);
       setShareDialogTrigger('none');
@@ -72,7 +73,7 @@ export const SaveSnap2Dialog: React.FC = () => {
     try {
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(shareUrl);
-        toast.success('Link copied to clipboard!');
+        toast.success(getString('snap2SaveDialogCopySuccessToast', undefined, 'Link copied to clipboard!'));
         return;
       }
       const textarea = document.querySelector('textarea[readonly]') as HTMLTextAreaElement;
@@ -81,7 +82,7 @@ export const SaveSnap2Dialog: React.FC = () => {
         textarea.select();
         if (textarea.setSelectionRange) textarea.setSelectionRange(0, shareUrl.length);
         if (document.execCommand('copy')) {
-          toast.success('Link copied to clipboard!');
+          toast.success(getString('snap2SaveDialogCopySuccessToast', undefined, 'Link copied to clipboard!'));
           return;
         }
       }
@@ -93,11 +94,11 @@ export const SaveSnap2Dialog: React.FC = () => {
       textArea.select();
       const ok = document.execCommand('copy');
       document.body.removeChild(textArea);
-      if (ok) toast.success('Link copied to clipboard!');
+      if (ok) toast.success(getString('snap2SaveDialogCopySuccessToast', undefined, 'Link copied to clipboard!'));
       else throw new Error('execCommand failed');
     } catch (err) {
       console.error('Copy failed:', err);
-      toast.error('Failed to copy link. Please select and copy manually.');
+      toast.error(getString('snap2SaveDialogCopyFailureToast', undefined, 'Failed to copy link. Please select and copy manually.'));
     }
   };
 
@@ -149,7 +150,9 @@ export const SaveSnap2Dialog: React.FC = () => {
       >
         <DialogHeader className="ov:space-y-1 ov:text-left">
           <DialogTitle className="ov:text-xl ov:font-semibold ov:text-(--ov25-text-color) ov:tracking-tight">
-            {shareDialogTrigger === 'modal-close' ? 'Save Your Configuration' : 'Share Configuration'}
+            {shareDialogTrigger === 'modal-close'
+              ? getString('snap2SaveDialogTitleClose', undefined, 'Save Your Configuration')
+              : getString('snap2SaveDialogTitleShare', undefined, 'Share Configuration')}
           </DialogTitle>
         </DialogHeader>
         <div className="ov:mt-6 ov:flex ov:flex-col ov:gap-6">
@@ -157,8 +160,8 @@ export const SaveSnap2Dialog: React.FC = () => {
             <>
               <p className="ov:text-base ov:font-normal ov:text-(--ov25-secondary-text-color) ov:leading-relaxed">
                 {shareDialogTrigger === 'modal-close'
-                  ? 'Do you want to save your progress? Without saving, your configuration will be lost.'
-                  : 'Do you want to save your configuration?'}
+                  ? getString('snap2SaveDialogConfirmClose', undefined, 'Do you want to save your progress? Without saving, your configuration will be lost.')
+                  : getString('snap2SaveDialogConfirmShare', undefined, 'Do you want to save your configuration?')}
               </p>
               <div className="ov:flex ov:flex-col ov:gap-3 ov:sm:flex-row ov:sm:justify-end">
                 <button
@@ -167,7 +170,7 @@ export const SaveSnap2Dialog: React.FC = () => {
                   onClick={handleNoSave}
                   className="ov:order-2 ov:sm:order-1 ov:flex-1 ov:sm:flex-none ov:inline-flex ov:min-h-11 ov:items-center ov:justify-center ov:rounded-(--ov25-cta-border-radius) ov:border ov:border-(--ov25-border-color) ov:bg-(--ov25-secondary-background-color) ov:px-6 ov:text-sm ov:font-medium ov:text-(--ov25-text-color) ov:transition-colors hover:ov:bg-(--ov25-hover-color) ov:sm:min-w-30"
                 >
-                  No
+                  {getString('snap2SaveDialogNo', undefined, 'No')}
                 </button>
                 <button
                   type="button"
@@ -175,7 +178,7 @@ export const SaveSnap2Dialog: React.FC = () => {
                   onClick={handleConfirmSave}
                   className="ov:order-1 ov:sm:order-2 ov:flex-1 ov:inline-flex ov:min-h-11 ov:items-center ov:justify-center ov:rounded-(--ov25-cta-border-radius) ov:bg-(--ov25-cta-color) ov:px-6 ov:text-sm ov:font-medium ov:text-(--ov25-cta-text-color) ov:transition-colors hover:ov:bg-(--ov25-cta-color-hover) hover:ov:text-(--ov25-cta-text-color-hover) ov:sm:min-w-30"
                 >
-                  Yes
+                  {getString('snap2SaveDialogYes', undefined, 'Yes')}
                 </button>
               </div>
             </>
@@ -183,15 +186,15 @@ export const SaveSnap2Dialog: React.FC = () => {
             <div className="ov:flex ov:flex-col ov:items-center ov:justify-center ov:gap-4 ov:py-10">
               <Loader2 className="ov:h-10 ov:w-10 ov:animate-spin ov:text-(--ov25-cta-color)" aria-hidden />
               <p className="ov:text-center ov:text-base ov:font-medium ov:text-(--ov25-secondary-text-color)">
-                Saving configuration…
+                {getString('snap2SaveDialogSaving', undefined, 'Saving configuration…')}
               </p>
             </div>
           ) : (
             <>
               <p className="ov:text-base ov:font-normal ov:text-(--ov25-secondary-text-color) ov:leading-relaxed">
                 {shareDialogTrigger === 'modal-close'
-                  ? 'Save this link to return to your configuration later. Without it, your progress will be lost:'
-                  : 'Copy this link to share with others or save your custom configuration for later:'}
+                  ? getString('snap2SaveDialogBodyClose', undefined, 'Save this link to return to your configuration later. Without it, your progress will be lost:')
+                  : getString('snap2SaveDialogBodyShare', undefined, 'Copy this link to share with others or save your custom configuration for later:')}
               </p>
               <div className="ov:flex ov:flex-col ov:gap-3">
                 <textarea
@@ -206,7 +209,7 @@ export const SaveSnap2Dialog: React.FC = () => {
                   onClick={copyToClipboard}
                   className="ov:inline-flex ov:min-h-11 ov:w-full ov:items-center ov:justify-center ov:rounded-(--ov25-cta-border-radius) ov:bg-(--ov25-cta-color) ov:px-6 ov:text-sm ov:font-medium ov:text-(--ov25-cta-text-color) ov:transition-colors hover:ov:bg-(--ov25-cta-color-hover) hover:ov:text-(--ov25-cta-text-color-hover)"
                 >
-                  Copy link
+                  {getString('snap2SaveDialogCopyLink', undefined, 'Copy link')}
                 </button>
               </div>
             </>

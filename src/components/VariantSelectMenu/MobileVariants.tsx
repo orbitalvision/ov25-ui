@@ -136,7 +136,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
           />
         )}
         {moduleTypeTabs && currentOption?.name.toLowerCase() === 'modules' && (
-          <div className="ov:w-full ov:flex-shrink-0">
+          <div className="ov:w-full ov:shrink-0">
             {moduleTypeTabs}
           </div>
         )}
@@ -213,7 +213,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
       return (
         <div id="ov25-mobile-filter-container" className="ov:relative ov:w-full ov:h-full ov:flex ov:flex-col">
           {moduleTypeTabs && currentOption?.name.toLowerCase() === 'modules' && (
-            <div className="ov:w-full ov:flex-shrink-0">
+            <div className="ov:w-full ov:shrink-0">
               {moduleTypeTabs}
             </div>
           )}
@@ -240,7 +240,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
             isGrouped={isGrouped && !shouldDestructureGroups}
           />}
           {moduleTypeTabs && currentOption?.name.toLowerCase() === 'modules' && (
-            <div className="ov:w-full ov:flex-shrink-0">
+            <div className="ov:w-full ov:shrink-0">
               {moduleTypeTabs}
             </div>
           )}

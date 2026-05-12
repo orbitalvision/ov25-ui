@@ -39,6 +39,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
     hideAr,
     uniqueId,
     cssString,
+    getString,
   } = useOV25UI();
 
   // Local state for dimensions
@@ -102,7 +103,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      toast.success('Share link copied to clipboard!', { duration: 3000 });
+      toast.success(getString('shareLinkCopiedToast', undefined, 'Share link copied to clipboard!'), { duration: 3000 });
     } catch (error) {
       // Fallback for older browsers
       const textArea = document.createElement('textarea');
@@ -111,15 +112,23 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
       textArea.select();
       document.execCommand('copy');
       document.body.removeChild(textArea);
-      toast.success('Share link copied to clipboard!');
+      toast.success(getString('shareLinkCopiedToast', undefined, 'Share link copied to clipboard!'));
     }
   };
 
   const handleShare = async () => {
     const currentUrl = window.location.href;
     const productName = currentProduct?.name || 'product';
-    const shareTitle = `Share this ${productName} configuration with your friends!`;
-    const shareText = `I just designed this ${productName} — take a look!`;
+    const shareTitle = getString(
+      'shareTitle',
+      { PRODUCT_NAME: productName },
+      `Share this ${productName} configuration with your friends!`
+    );
+    const shareText = getString(
+      'shareText',
+      { PRODUCT_NAME: productName },
+      `I just designed this ${productName} — take a look!`
+    );
     // Check if Web Share API is available (mobile devices)
     if (navigator.share && isMobile) {
       try {
@@ -176,7 +185,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
           )}>
             <Upload strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" color="var(--ov25-configurator-view-controls-text-color)"/>
             {!isMobile && (
-              <p className="ov25-controls-text ov:text-sm ov:text-(--ov25-text-color)">Share</p>
+              <p className="ov25-controls-text ov:text-sm ov:text-(--ov25-text-color)">{getString('controlsShareLabel', undefined, 'Share')}</p>
             )}
           </button>}
           {canAnimate && (
@@ -200,7 +209,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
             )}>
               <DimensionsIcon className="ov:w-[19px] ov:h-[19px] p-1" color="var(--ov25-configurator-view-controls-text-color)" />
               {!isMobile && (
-                <p className="ov25-controls-text ov:text-sm ov:text-(--ov25-text-color)">Dimensions</p>
+                <p className="ov25-controls-text ov:text-sm ov:text-(--ov25-text-color)">{getString('controlsDimensionsLabel', undefined, 'Dimensions')}</p>
               )}
             </button>
           )}
@@ -220,7 +229,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
                   >
                     <Camera strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" />
                     {!isMobile && (
-                      <p className="ov25-controls-text ov:text-sm ov:text-(--ov25-text-color)">Camera</p>
+                      <p className="ov25-controls-text ov:text-sm ov:text-(--ov25-text-color)">{getString('controlsCameraLabel', undefined, 'Camera')}</p>
                     )}
                   </button>
                 </PopoverTrigger>
@@ -241,7 +250,19 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
                             'ov:transition-colors ov:duration-200 ov:text-left ov:w-full ov:bg-transparent ov:border-none'
                           )}
                         >
-                          {camera.displayName && camera.displayName.trim() !== '' ? camera.displayName : `Camera ${index + 1}`}
+                          {getString(
+                            'cameraName',
+                            {
+                              CAMERA_NAME:
+                                camera.displayName && camera.displayName.trim() !== ''
+                                  ? camera.displayName
+                                  : getString('controlsCameraFallback', { CAMERA_INDEX: index + 1 }, `Camera ${index + 1}`),
+                              CAMERA_INDEX: index + 1,
+                            },
+                            camera.displayName && camera.displayName.trim() !== ''
+                              ? camera.displayName
+                              : getString('controlsCameraFallback', { CAMERA_INDEX: index + 1 }, `Camera ${index + 1}`)
+                          )}
                         </button>
                       ))}
                     </div>
@@ -266,7 +287,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
                   >
                     <Lightbulb strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" color="var(--ov25-configurator-view-controls-text-color)" />
                     {!isMobile && (
-                      <p className="ov25-controls-text ov:text-sm ov:text-(--ov25-text-color)">Lights</p>
+                      <p className="ov25-controls-text ov:text-sm ov:text-(--ov25-text-color)">{getString('controlsLightsLabel', undefined, 'Lights')}</p>
                     )}
                   </button>
                 </PopoverTrigger>
@@ -287,7 +308,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
                             'ov:transition-colors ov:duration-200 ov:text-left ov:w-full ov:bg-transparent ov:border-none'
                           )}
                         >
-                          {group.displayName && group.displayName.trim() !== '' ? group.displayName : `Group ${index + 1}`}
+                          {group.displayName && group.displayName.trim() !== '' ? group.displayName : getString('controlsLightFallback', { GROUP_INDEX: index + 1 }, `Group ${index + 1}`)}
                         </button>
                       ))}
                     </div>
@@ -305,7 +326,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
             )}>
               <ArIcon className="ov:w-[19px] ov:h-[19px] p-1" color="var(--ov25-configurator-view-controls-text-color)" />
               {!isMobile && (
-                <p className="ov25-controls-text ov:text-sm ov:text-(--ov25-text-color)">View in your room</p>
+                <p className="ov25-controls-text ov:text-sm ov:text-(--ov25-text-color)">{getString('controlsArLabel', undefined, 'View in your room')}</p>
               )}
             </button>
           )}

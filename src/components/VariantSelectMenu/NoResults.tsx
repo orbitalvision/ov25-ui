@@ -6,19 +6,19 @@ interface NoResultsProps {
 }
 
 export const NoResults = ({ message }: NoResultsProps) => {
-  const { allOptions, activeOptionId } = useOV25UI();
+  const { allOptions, activeOptionId, getString } = useOV25UI();
   
   // Calculate message based on current option if not provided
   const displayMessage = message || (() => {
     const currentOption = allOptions.find(opt => opt.id === activeOptionId);
     return currentOption?.name.toLowerCase() === 'modules' 
-      ? "Select an object to replace or attach to." 
-      : "No results found";
+      ? getString('noResultsModules', undefined, 'Select an object to replace or attach to.')
+      : getString('noResultsDefault', undefined, 'No results found');
   })();
 
   return (
     <div id="ov25-no-results" className="ov:w-full ov:h-full ov:p-4 ov:pt-16 ov:flex ov:justify-center">
-      <h3 className="ov:text-sm ov:text-[var(--ov25-secondary-text-color)]/60">{displayMessage}</h3>
+      <h3 className="ov:text-sm ov:text-(--ov25-secondary-text-color)/60">{displayMessage}</h3>
     </div>
   );
 };

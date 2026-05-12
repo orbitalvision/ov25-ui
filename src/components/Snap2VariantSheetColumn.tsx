@@ -31,6 +31,7 @@ export function Snap2VariantSheetColumn({ children }: { children: React.ReactNod
     setIsSnap2CheckoutSheetOpen,
     uniqueId,
     activeOptionId,
+    getString,
   } = useOV25UI();
 
   const hasCheckout =
@@ -86,7 +87,7 @@ export function Snap2VariantSheetColumn({ children }: { children: React.ReactNod
             onClick={handleCloseCheckout}
             className="ov:text-sm ov:font-medium ov:text-(--ov25-text-color) ov:underline ov:underline-offset-2 ov:hover:opacity-80"
           >
-            Back to builder
+            {getString('snap2CheckoutBackToBuilder', undefined, 'Back to builder')}
           </button>
         </div>
         <div className="ov25-snap2-checkout-sheet-body ov:flex-1 ov:min-h-0 ov:min-w-0 ov:overflow-y-auto ov:overflow-x-hidden">
@@ -103,7 +104,7 @@ export function Snap2VariantSheetColumn({ children }: { children: React.ReactNod
             onClick={() => setIsSnap2CheckoutSheetOpen(true)}
             className={cn(checkoutCommerceCtaButtonClasses, 'ov:font-medium ov:w-full ov:min-w-0 ov:max-w-full')}
           >
-            View Cart
+            {getString('snap2CheckoutViewCart', undefined, 'View Cart')}
           </button>
         </div>
       ) : null}

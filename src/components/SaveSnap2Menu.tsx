@@ -6,7 +6,7 @@ import { cn } from '../utils/cn.js';
 import { requestSnap2Save } from '../utils/configurator-utils.js';
 
 export const SaveSnap2Menu: React.FC = () => {
-  const { setShareDialogTrigger, skipNextShareClickRef } = useOV25UI();
+  const { setShareDialogTrigger, skipNextShareClickRef, getString } = useOV25UI();
 
   const handleSave = async () => {
     if (skipNextShareClickRef.current) {
@@ -18,7 +18,7 @@ export const SaveSnap2Menu: React.FC = () => {
       requestSnap2Save();
     } catch (error) {
       console.error('Save error:', error);
-      toast.error('Failed to save configuration');
+      toast.error(getString('snap2SaveFailedToast', undefined, 'Failed to save configuration'));
       setShareDialogTrigger('none');
     }
   };
@@ -27,8 +27,8 @@ export const SaveSnap2Menu: React.FC = () => {
     <button
       type="button"
       id="ov25-snap2-save-button"
-      aria-label="Save or share configuration"
-      title="Save or share configuration"
+      aria-label={getString('snap2SaveButtonTitle', undefined, 'Save or share configuration')}
+      title={getString('snap2SaveButtonTitle', undefined, 'Save or share configuration')}
       onClick={handleSave}
       className={cn(
         'ov:cursor-pointer ov:w-8 ov:h-8 ov:flex ov:items-center ov:justify-center',

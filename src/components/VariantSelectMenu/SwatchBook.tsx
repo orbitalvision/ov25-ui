@@ -24,6 +24,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
     isVariantsOpen,
     openConfigurator,
     currencySymbol,
+    getString,
   } = useOV25UI();
 
   const calculateEmptySquares = () => {
@@ -41,6 +42,18 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
   const [zoomedSwatch, setZoomedSwatch] = useState<Swatch | null>(null);
   const [maxSwatches, setMaxSwatches] = useState<number>(0);
   const emptySquares = calculateEmptySquares();
+  const configuratorLinkText = getString('swatchBookConfiguratorLinkText', undefined, '3D Configurator');
+  const emptyDescriptionTemplate = getString(
+    'swatchBookEmptyDescription',
+    { CONFIGURATOR_LINK_TEXT: configuratorLinkText },
+    'Use the ${CONFIGURATOR_LINK_TEXT} to view fabrics and select swatch samples',
+  );
+  const [emptyDescriptionPrefix, ...emptyDescriptionSuffixParts] =
+    emptyDescriptionTemplate.split(configuratorLinkText);
+  const emptyDescriptionSuffix = emptyDescriptionSuffixParts.join(configuratorLinkText);
+  const formattedSwatchTotalCost = `${currencySymbol}${(
+    swatchRulesData.pricePerSwatch * Math.max(selectedSwatches.length - swatchRulesData.freeSwatchLimit, 0)
+  ).toFixed(2)}`;
 
   useEffect(() => {
     setMaxSwatches(swatchRulesData.canExeedFreeLimit ? swatchRulesData.maxSwatches : swatchRulesData.freeSwatchLimit);
@@ -78,9 +91,9 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
         <div className="ov:flex ov:flex-col ov:min-h-0 ov:h-full">
           <div className='ov:relative ov:flex ov:flex-row ov:justify-between ov:w-full'>
             <div id="ov25-swatchbook-title" className="ov:shrink-0 ov:text-black ov:text-[1.5em] ov:font-normal">
-              <DialogTitle>Swatch Book</DialogTitle>
+              <DialogTitle>{getString('swatchBookTitle', undefined, 'Swatch Book')}</DialogTitle>
             </div>
-            <VariantsCloseButton onClick={() => setIsSwatchBookOpen(false)} ariaLabel="Close swatch book" className="ov:top-0 ov:right-0" />
+            <VariantsCloseButton onClick={() => setIsSwatchBookOpen(false)} ariaLabel={getString('swatchBookCloseLabel', undefined, 'Close swatch book')} className="ov:top-0 ov:right-0" />
           </div>     
           {/* Featured/zoomed swatch section */}
           {zoomedSwatch && zoomedSwatch.thumbnail && zoomedSwatch.thumbnail.miniThumbnails && (
@@ -89,15 +102,21 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
                 <div className="ov25-selected-swatch-image-container ov:relative ov:w-[200px] ov:h-[200px] ov:md:w-[250px] ov:md:h-[250px] group">
                   <SwatchImage
                     src={zoomedSwatch.thumbnail.miniThumbnails.large}
-                    alt={zoomedSwatch.name}
+                    alt={getString('swatchBookZoomedSwatchName', { SWATCH_NAME: zoomedSwatch.name }, zoomedSwatch.name)}
                     className='ov25-swatch-image ov:w-full ov:h-full ov:aspect-square'
                   />
                 </div>
                 <div className="ov:text-center">
                   <div className="ov:flex ov:items-center ov:justify-center ov:gap-2 ov:mb-2">
-                    <h3 className="ov25-selected-swatch-name ov:text-base ov:md:text-lg ov:font-medium ov:text-black">{zoomedSwatch.name}</h3>
-                    <p className="ov25-selected-swatch-option ov:text-gray-600 ov:text-xs ov:italic">- {zoomedSwatch.option}</p>
-                    <p className="ov25-selected-swatch-sku ov:text-gray-600 ov:text-xs ov:italic">- {zoomedSwatch.sku}</p>
+                    <h3 className="ov25-selected-swatch-name ov:text-base ov:md:text-lg ov:font-medium ov:text-black">
+                      {getString('swatchBookZoomedSwatchName', { SWATCH_NAME: zoomedSwatch.name }, zoomedSwatch.name)}
+                    </h3>
+                    <p className="ov25-selected-swatch-option ov:text-gray-600 ov:text-xs ov:italic">
+                      {getString('swatchBookZoomedSwatchOption', { SWATCH_OPTION: zoomedSwatch.option }, `- ${zoomedSwatch.option}`)}
+                    </p>
+                    <p className="ov25-selected-swatch-sku ov:text-gray-600 ov:text-xs ov:italic">
+                      {getString('swatchBookZoomedSwatchSku', { SWATCH_SKU: zoomedSwatch.sku }, `- ${zoomedSwatch.sku}`)}
+                    </p>
                   </div>
                   <p className="ov25-selected-swatch-description ov:text-black ov:text-sm ov:font-normal ov:leading-6 ov:line-clamp-5 ov:md:line-clamp-3 ov:md:min-h-18">{zoomedSwatch.description}</p>
                 </div>
@@ -113,8 +132,14 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
           >
             {selectedSwatches.length === 0 && (
               <div id="ov25-swatchbook-empty" className={cn(`ov:flex ov:flex-col ov:items-center ov:py-8 ov:px-4`, maxSwatches <= 4 ? 'ov:justify-center' : 'ov:justify-start')}>
-                <p className='ov25-swatchbook-empty-title ov:text-black ov:text-lg ov:font-medium ov:mb-2'>No swatches selected</p>
-                <p className='ov25-swatchbook-empty-description ov:text-gray-600 ov:text-sm text-center'>Use the <span onClick={handleOpen3DConfigurator} className="ov:underline ov:cursor-pointer">3D Configurator</span> to view fabrics and select swatch samples</p>
+                <p className='ov25-swatchbook-empty-title ov:text-black ov:text-lg ov:font-medium ov:mb-2'>{getString('swatchBookEmptyTitle', undefined, 'No swatches selected')}</p>
+                <p className='ov25-swatchbook-empty-description ov:text-gray-600 ov:text-sm text-center'>
+                  {emptyDescriptionPrefix}
+                  <span onClick={handleOpen3DConfigurator} className="ov:underline ov:cursor-pointer">
+                    {configuratorLinkText}
+                  </span>
+                  {emptyDescriptionSuffix}
+                </p>
               </div>  
             )}
             <div id="ov25-swatchbook-swatches-list" className={cn(`ov:overflow-y-hidden ov:flex ov:flex-wrap ov:gap-2 ov:md:gap-2 ov:w-full ov:px-4 ov:py-2`, maxSwatches <= 4 ? 'ov:justify-center' : 'ov:justify-start')}>
@@ -128,13 +153,13 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
                     />
                     <VariantsCloseButton
                       onClick={() => toggleSwatch(swatch)}
-                      ariaLabel="Remove swatch"
+                      ariaLabel={getString('swatchBookRemoveSwatchLabel', undefined, 'Remove swatch')}
                       className="ov:top-1! ov:right-1! ov:p-1! ov:w-6 ov:h-6 ov:z-10 ov:bg-white ov:rounded-full ov:md:opacity-0 ov:md:group-hover:opacity-100 ov:pointer-events-auto ov:md:pointer-events-none ov:md:group-hover:pointer-events-auto ov:transition-opacity"
                     />
                     <button
                       onClick={() => setZoomedSwatch(swatch)}
                       className='ov25-swatch-zoom-button ov:flex ov:items-center ov:justify-center ov:absolute ov:inset-0 ov:z-0 ov:cursor-pointer'
-                      title="Zoom image"
+                      title={getString('swatchBookZoomTitle', undefined, 'Zoom image')}
                     >
                       <div className='ov25-swatch-zoom-in-icon ov:flex ov:items-center ov:justify-center ov:w-8 ov:h-8 ov:md:w-10 ov:md:h-10 ov:bg-gray-100 ov:rounded-full ov:opacity-40 ov:md:opacity-0 ov:transition-opacity ov:group-hover:opacity-80'>
                         <ZoomIn className='ov25-swatch-icon ov:w-4 ov:h-4'/>
@@ -162,10 +187,12 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
           </div>
           <div id="ov25-swatchbook-controls" className="ov:flex ov:justify-between ov:items-center ov:shrink-0">
             <div className="ov25-swatchbook-total-cost">
-              <span className="ov:text-sm">Total cost: </span>
-              <span>
-                {currencySymbol}
-                {(swatchRulesData.pricePerSwatch * Math.max(selectedSwatches.length - swatchRulesData.freeSwatchLimit, 0)).toFixed(2)}
+              <span className="ov:text-sm">
+                {getString(
+                  'swatchBookTotalCost',
+                  { FORMATTED_TOTAL_COST: formattedSwatchTotalCost },
+                  `Total cost: ${formattedSwatchTotalCost}`
+                )}
               </span>
             </div>
             <div id="ov25-swatchbook-add-to-cart-button" className="ov:flex ov:gap-2">
@@ -176,7 +203,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
                 disabled={selectedSwatches.length < swatchRulesData.minSwatches}
                 onClick={() => handleAddSwatchesToCart()}
               >
-                Order Samples
+                {getString('swatchBookOrderSamples', undefined, 'Order Samples')}
               </Button>
             </div>
           </div>

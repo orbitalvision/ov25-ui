@@ -1,13 +1,15 @@
 import * as React from 'react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "./ui/dialog.js"
 import QRCode from "react-qr-code";
+import { useOV25UI } from '../contexts/ov25-ui-context.js';
 export const ArPreviewQRCodeDialog = ({ arPreviewLink, setArPreviewLink }: { arPreviewLink: string | null, setArPreviewLink: (link: string | null) => void }) => {
+    const { getString } = useOV25UI();
     return (
         <Dialog open={arPreviewLink !== null} onOpenChange={() => setArPreviewLink(null)}>
             <DialogContent id="ov25-ar-preview-qr-code-dialog" className='ov:z-2147483647 ov:bg-(--ov25-configurator-qr-code-popup-background-color) ov:border-(--ov25-configurator-qr-code-popup-border-color)'>
                 <DialogHeader>
-                    <DialogTitle className='ov:text-(--ov25-configurator-qr-code-popup-title-text-color)'>View in room</DialogTitle>
-                    <DialogDescription className='ov:text-(--ov25-configurator-qr-code-popup-description-text-color)'>Scan the QR code on your phones camera to view this item in your room</DialogDescription>
+                    <DialogTitle className='ov:text-(--ov25-configurator-qr-code-popup-title-text-color)'>{getString('arPreviewTitle', undefined, 'View in room')}</DialogTitle>
+                    <DialogDescription className='ov:text-(--ov25-configurator-qr-code-popup-description-text-color)'>{getString('arPreviewDescription', undefined, 'Scan the QR code on your phones camera to view this item in your room')}</DialogDescription>
                 </DialogHeader>
                 {arPreviewLink !== null && <QRCode id="ov25-qr-code" className="ov:w-full ov:h-full" value={arPreviewLink} />}
                 <DialogFooter>

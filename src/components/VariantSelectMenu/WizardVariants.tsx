@@ -44,6 +44,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
     isSnap2Mode,
     activeOptionId,
     setActiveOptionId,
+    getString,
   } = useOV25UI();
 
   const [currentStep, setCurrentStep] = useState(0);
@@ -275,7 +276,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
         className="ov:flex ov:items-center ov:gap-1 ov:px-3 ov:py-2 ov:text-sm ov:text-[var(--ov25-secondary-text-color)] ov:disabled:opacity-30 ov:disabled:cursor-not-allowed ov:hover:bg-[var(--ov25-hover-color)] ov:rounded ov:transition-colors"
       >
         <ChevronLeft size={18} />
-        Back
+        {getString('wizardBackButtonLabel', {}, 'Back')}
       </button>
       {isReviewStep && hasCheckoutActions ? (
         isSnap2Mode ? (
@@ -291,7 +292,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
           variant="configure"
           className="ov:flex-1 ov:flex ov:items-center ov:justify-center  ov:gap-1 ov:uppercase ov:disabled:cursor-not-allowed"
         >
-          Next
+          {getString('wizardNextButtonLabel', {}, 'Next')}
           <ChevronRight size={18} />
         </Button>
       ) : null}

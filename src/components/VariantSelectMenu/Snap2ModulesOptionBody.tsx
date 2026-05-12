@@ -41,6 +41,7 @@ export function Snap2ModulesOptionBody() {
     isMobile,
     selectedModuleType,
     setSelectedModuleType,
+    getString,
   } = useOV25UI();
 
   const hasSnap2Objects = (configuratorState?.snap2Objects?.length ?? 0) > 0;
@@ -91,7 +92,7 @@ export function Snap2ModulesOptionBody() {
         data-loading="true"
         data-ov25-snap2-modules-state="loading"
       >
-        <p className="ov:text-sm ov:text-(--ov25-secondary-text-color)">Loading...</p>
+        <p className="ov:text-sm ov:text-(--ov25-secondary-text-color)">{getString('snap2ModulesLoading', undefined, 'Loading...')}</p>
       </div>
     );
   }
@@ -104,7 +105,7 @@ export function Snap2ModulesOptionBody() {
         data-loading="true"
         data-ov25-snap2-modules-state="loading"
       >
-        <p className="ov:text-sm ov:text-(--ov25-secondary-text-color)">Loading...</p>
+        <p className="ov:text-sm ov:text-(--ov25-secondary-text-color)">{getString('snap2ModulesLoading', undefined, 'Loading...')}</p>
       </div>
     );
   }
@@ -179,7 +180,7 @@ export function Snap2ModulesOptionBody() {
               <h4
                 className={`ov25-group-header ov:sticky ov:z-9 ov:bg-(--ov25-background-color) ov:px-0 ov:text-sm ov:pt-4 ov:pb-3 ov:text-(--ov25-secondary-text-color) ov:font-medium ov:top-0`}
               >
-                {capitalizeWords(label)}
+                {capitalizeWords(getString('snap2ModulesGroupHeader', { GROUP_NAME: label }, label))}
               </h4>
             )}
             <div className="ov25-variant-group-content ov:bg-(--ov25-background-color) ov:pt-2">

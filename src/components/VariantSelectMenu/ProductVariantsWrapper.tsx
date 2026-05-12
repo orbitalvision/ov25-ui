@@ -56,6 +56,7 @@ export function ProductVariantsWrapper({
         hidePricing,
         configuratorDisplayModeMobile,
         isSnap2Mode,
+        getString,
       } = useOV25UI();
 
     const panelOpts = variantPanelOptions;
@@ -218,17 +219,28 @@ export function ProductVariantsWrapper({
     }, [variantShellOverlayStyle]);
 
     const getTabLabel = (id: string) =>
-      id === 'size'
-        ? 'Size'
-        : panelOpts.find((o) => o.id === id)?.name ??
-          allOptionsVariants.find((o) => o.optionId === id)?.optionName ??
-          id;
+      getString(
+        'variantOptionHeader',
+        {
+          OPTION_NAME:
+            id === 'size'
+              ? 'Size'
+              : panelOpts.find((o) => o.id === id)?.name ??
+                allOptionsVariants.find((o) => o.optionId === id)?.optionName ??
+                id,
+        },
+        id === 'size'
+          ? 'Size'
+          : panelOpts.find((o) => o.id === id)?.name ??
+            allOptionsVariants.find((o) => o.optionId === id)?.optionName ??
+            id
+      );
 
     const renderSizeSection = (showHeader = true, isMobileListSticky = false) => (
       <div className=" ov:pb-6">
         {showHeader && (
           <h3 className={`ov25-option-header ov:sticky ov:top-0  ov:px-4 ov:z-10 ov:bg-[var(--ov25-background-color)] ov:text-lg ov:pb-4 ov:text-[var(--ov25-secondary-text-color)] ${isMobileListSticky ? 'ov:pt-2' : 'ov:pt-0'}`}>
-            {capitalizeWords('Size')}
+            {capitalizeWords(getString('variantOptionHeader', { OPTION_NAME: 'Size' }, 'Size'))}
           </h3>
         )}
         <div className="ov:bg-[var(--ov25-background-color)] ov:pt-4">
@@ -258,7 +270,9 @@ export function ProductVariantsWrapper({
       <div key={optionId} className=" ov:pb-6">
         {showHeader && (
           <h3 className={`ov25-option-header ov:sticky ov:top-0  ov:px-4 ov:z-10 ov:bg-[var(--ov25-background-color)] ov:text-lg ov:pb-2 ov:md:pb-4 ov:text-[var(--ov25-secondary-text-color)] ${isMobileListSticky ? 'ov:pt-2' : 'ov:pt-0'}`}>
-            {capitalizeWords(optionName)}
+            {capitalizeWords(
+              getString('variantOptionHeader', { OPTION_NAME: optionName }, optionName)
+            )}
           </h3>
         )}
         {showFilter && renderFilterBlock(optionId)}
@@ -267,11 +281,13 @@ export function ProductVariantsWrapper({
             group.variants.length > 0 ? (
               <div key={group.groupName} className="ov:mb-4">
                 {variants.length > 1 && (
-                  <h4 className={`ov25-group-header ov:sticky ov:z-[9] ov:bg-[var(--ov25-background-color)] ov:px-4 ov:text-sm ov:pt-6 ov:pb-3 ov:text-[var(--ov25-secondary-text-color)] ov:font-medium ${showHeader ? 'ov:top-10' : 'ov:top-0'}`}>
-                    {capitalizeWords(group.groupName)}
+                  <h4 className={`ov25-group-header ov:sticky ov:z-9 ov:bg-(--ov25-background-color) ov:px-4 ov:text-sm ov:pt-6 ov:pb-3 ov:text-(--ov25-secondary-text-color) ov:font-medium ${showHeader ? 'ov:top-10' : 'ov:top-0'}`}>
+                    {capitalizeWords(
+                      getString('variantGroupHeader', { GROUP_NAME: group.groupName }, group.groupName)
+                    )}
                   </h4>
                 )}
-                <div className="ov25-variant-group-content ov:bg-[var(--ov25-background-color)] ov:pt-4">
+                <div className="ov25-variant-group-content ov:bg-(--ov25-background-color) ov:pt-4">
                   <div className={`ov:grid ${getGridColsClass(4)}`}>
                     <VariantsContent
                       variantsToRender={group.variants}
@@ -559,7 +575,6 @@ export function ProductVariantsWrapper({
               isOpen={isVariantsOpen}
               gridDivide={2}
               onClose={handleCloseVariants}
-              title="Size"
               variants={sizeVariants}
               VariantCard={SizeVariantCard}
               drawerSize={drawerSize}
@@ -579,7 +594,6 @@ export function ProductVariantsWrapper({
                 basis={isMobile ? 'ov:basis-[33%]' : undefined}
                 gridDivide={4}
                 onClose={handleCloseVariants}
-                title={optionName}
                 variants={variants}
                 VariantCard={undefined}
                 drawerSize={drawerSize}

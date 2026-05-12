@@ -32,6 +32,7 @@ const Snap2Controls: React.FC = () => {
     cssString,
     uniqueId,
     useInlineVariantControls,
+    getString,
   } = useOV25UI();
 
   const [canSeeDimensions, setCanSeeDimensions] = useState(false);
@@ -172,10 +173,10 @@ const Snap2Controls: React.FC = () => {
               id="ov25-snap2-floor-grid-button"
               type="button"
               onClick={handleToggleFloor}
-              title="Toggle floor grid"
-              aria-label="Toggle floor grid"
+              title={getString('snap2ControlsToggleFloorTitle', undefined, 'Toggle floor grid')}
+              aria-label={getString('snap2ControlsToggleFloorTitle', undefined, 'Toggle floor grid')}
               className={cn(
-                'ov:hidden ov:cursor-pointer ov:w-8 ov:h-8 ov:items-center ov:justify-center ov:transition-all ov:duration-200 ov:hover:opacity-80 ov:shadow-sm ov:rounded-full',
+                'ov:cursor-pointer ov:w-8 ov:h-8 ov:items-center ov:justify-center ov:transition-all ov:duration-200 ov:hover:opacity-80 ov:shadow-sm ov:rounded-full',
                 showFloor ? 'ov:ring-2 ov:ring-neutral-400' : '',
                 'ov:bg-(--ov25-overlay-button-color)'
               )}
@@ -183,30 +184,30 @@ const Snap2Controls: React.FC = () => {
               <Grid3x3 className="ov:w-[16px] ov:h-[16px] ov:text-(--ov25-configurator-view-controls-text-color)" />
             </button>
             <label className="ov:sr-only" htmlFor="ov25-snap2-view-select">
-              View
+              {getString('snap2ControlsViewLabel', undefined, 'View')}
             </label>
             <select
               id="ov25-snap2-view-select"
               value={String(viewGroupId)}
               onChange={handleViewGroupChange}
-              className="ov:hidden ov:h-8 ov:min-w-36 ov:max-w-44 ov:cursor-pointer ov:rounded-full ov:border-0 ov:bg-(--ov25-overlay-button-color) ov:px-2 ov:text-xs ov:font-medium ov:text-(--ov25-configurator-view-controls-text-color) ov:shadow-sm"
-              aria-label="Camera view"
+              className="ov:h-8 ov:min-w-36 ov:max-w-44 ov:cursor-pointer ov:rounded-full ov:border-0 ov:bg-(--ov25-overlay-button-color) ov:px-2 ov:text-xs ov:font-medium ov:text-(--ov25-configurator-view-controls-text-color) ov:shadow-sm"
+              aria-label={getString('snap2ControlsViewLabel', undefined, 'View')}
             >
               {Snap2ViewCameras.map((cam) => (
                 <option key={cam.cameraGroupId} value={String(cam.cameraGroupId)}>
-                  {cam.name}
+                  {getString('cameraName', { CAMERA_NAME: cam.name, CAMERA_INDEX: cam.cameraGroupId }, cam.name)}
                 </option>
               ))}
             </select>
             <button
               id="ov25-snap2-screenshots-button"
               type="button"
-              title="Capture screenshots"
-              aria-label="Capture screenshots"
+              title={getString('snap2ControlsCaptureTitle', undefined, 'Capture screenshots')}
+              aria-label={getString('snap2ControlsCaptureTitle', undefined, 'Capture screenshots')}
               disabled={isCapturingScreenshots}
               onClick={() => void handleCaptureScreenshots()}
               className={cn(
-                'ov:cursor-pointer ov:w-8 ov:h-8 ov:hidden ov:items-center ov:justify-center ov:transition-all ov:duration-200 ov:shadow-sm ov:rounded-full ov:bg-(--ov25-overlay-button-color)',
+                'ov:cursor-pointer ov:w-8 ov:h-8 ov:items-center ov:justify-center ov:transition-all ov:duration-200 ov:shadow-sm ov:rounded-full ov:bg-(--ov25-overlay-button-color)',
                 'ov:hover:opacity-80 ov:disabled:opacity-50 ov:disabled:cursor-not-allowed',
               )}
             >

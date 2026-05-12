@@ -39,6 +39,7 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
     isVariantsOpen,
     setActiveOptionId,
     expandToOptionIdOnOpen,
+    getString,
   } = useOV25UI();
 
   const [expandedAccordion, setExpandedAccordion] = useState<string | null>(null);
@@ -144,6 +145,12 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
     setActiveOptionId(next);
   }, [expandedAccordion, setActiveOptionId]);
 
+  const getOptionHeaderLabel = useCallback(
+    (optionName: string) =>
+      capitalizeWords(getString('variantOptionHeader', { OPTION_NAME: optionName }, optionName)),
+    [getString]
+  );
+
   return (
     <div
       data-ov25-accordion-variants-mode={mode}
@@ -152,7 +159,7 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
       {showSize && (
         <>
           <AccordionTrigger
-            label={capitalizeWords('Size')}
+            label={getOptionHeaderLabel('Size')}
             isExpanded={expandedAccordion === 'size'}
             onClick={() => handleAccordionClick('size')}
           />
@@ -178,7 +185,7 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
         return (
           <React.Fragment key={optionId}>
             <AccordionTrigger
-              label={capitalizeWords(optionName)}
+              label={getOptionHeaderLabel(optionName)}
               isExpanded={isExpanded}
               onClick={() => handleAccordionClick(optionId)}
             />

@@ -244,6 +244,13 @@ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
     buyNow: () => {},
     buySwatches: () => {},
   },
+  stringReplacements: {
+    variantOptionHeader: [
+      { trigger: { name: 'OPTION_NAME', value: 'upholstery fabrics' }, template: '▽upholstery fabrics▽' },
+      { trigger: { name: 'OPTION_NAME', value: 'trims' }, template: '▽trims▽' },
+      { template: '${OPTION_NAME}▽▽▽' },
+    ],
+  }
 });
 
 function App() {

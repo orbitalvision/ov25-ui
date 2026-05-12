@@ -42,7 +42,7 @@ export const ModulePositionTypeTabs: React.FC<ModulePositionTypeTabsProps> = ({
   className,
   embed = 'bottomPanel',
 }) => {
-  const { compatibleModules, selectedModuleType, setSelectedModuleType, snap2ModuleSheetPosition } =
+  const { compatibleModules, selectedModuleType, setSelectedModuleType, snap2ModuleSheetPosition, getString } =
     useOV25UI();
   const [useTabsDropdown, setUseTabsDropdown] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
@@ -100,6 +100,7 @@ export const ModulePositionTypeTabs: React.FC<ModulePositionTypeTabsProps> = ({
     >
       {availableTabTypes.map((tabType) => {
         const { icon: Icon, label } = tabConfig(tabType);
+        const tabLabel = getString('modulePositionTypeTabLabel', { TAB_LABEL: label, TAB_TYPE: tabType }, label);
         const isActive = selectedModuleType === tabType;
         return (
           <button
@@ -111,7 +112,7 @@ export const ModulePositionTypeTabs: React.FC<ModulePositionTypeTabsProps> = ({
             data-ov25-tab-active={isActive ? 'true' : undefined}
             className={cn(tabPillBase, isActive ? tabPillActive : tabPillInactive)}
           >
-            <span>{label}</span>
+            <span>{tabLabel}</span>
           </button>
         );
       })}
@@ -126,6 +127,7 @@ export const ModulePositionTypeTabs: React.FC<ModulePositionTypeTabsProps> = ({
     >
       {availableTabTypes.map((tabType) => {
         const { icon: Icon, label } = tabConfig(tabType);
+        const tabLabel = getString('modulePositionTypeTabLabel', { TAB_LABEL: label, TAB_TYPE: tabType }, label);
         return (
           <span
             key={tabType}
@@ -133,7 +135,7 @@ export const ModulePositionTypeTabs: React.FC<ModulePositionTypeTabsProps> = ({
             style={{ boxSizing: 'border-box' }}
           >
             <Icon className="ov:w-3.5 ov:h-3.5 ov:shrink-0" />
-            <span>{label}</span>
+            <span>{tabLabel}</span>
           </span>
         );
       })}
@@ -153,9 +155,10 @@ export const ModulePositionTypeTabs: React.FC<ModulePositionTypeTabsProps> = ({
           >
             {availableTabTypes.map((tabType) => {
               const { label } = tabConfig(tabType);
+              const tabLabel = getString('modulePositionTypeTabLabel', { TAB_LABEL: label, TAB_TYPE: tabType }, label);
               return (
                 <option key={tabType} value={tabType}>
-                  {label}
+                  {tabLabel}
                 </option>
               );
             })}

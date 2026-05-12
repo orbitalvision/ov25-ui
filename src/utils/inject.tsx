@@ -168,7 +168,15 @@ export type {
   CommerceLineItemPrice,
   CommerceLineItemSelection,
   OptionSkuMap,
+  StringReplacementRuleTrigger,
+  StringReplacementDefinitionKey,
+  StringReplacementRule,
+  StringReplacementsConfig,
+  StringReplacementDefinition,
+  StringInterpolationValueDefinition,
+  StringReplacements,
 } from '../types/inject-config.js';
+export { STRING_REPLACEMENT_DEFINITIONS } from '../lib/strings/string-keys.js';
 
 type InjectInternalOptions = {
   skipConfigureButton?: boolean;
@@ -232,6 +240,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     bedAllowNoneQueryValue,
     bedFilterSelectionsByCurrentSize,
     currencySymbol,
+    stringReplacements,
     snap2VariantSheetSideDesktop,
     snap2VariantSheetSideMobile,
     snap2ModulePanelPositionDesktop,
@@ -926,6 +935,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
         bedAllowNoneQueryValue={bedAllowNoneQueryValue}
         bedFilterSelectionsByCurrentSize={bedFilterSelectionsByCurrentSize}
         currencySymbol={currencySymbol}
+        stringReplacements={stringReplacements}
         snap2VariantSheetSideDesktop={snap2VariantSheetSideDesktop}
         snap2VariantSheetSideMobile={snap2VariantSheetSideMobile}
         snap2ModulePanelPositionDesktop={snap2ModulePanelPositionDesktop}

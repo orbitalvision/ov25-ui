@@ -93,7 +93,7 @@ function Snap2PiecesOptionsLayout({
   isInline = false,
   embeddedInVariantsOnlySheet = false,
 }: Snap2PiecesOptionsLayoutProps) {
-  const { activeOptionId, setActiveOptionId, variantPanelOptions, snap2ModulesEmbedInVariantSheet } =
+  const { activeOptionId, setActiveOptionId, variantPanelOptions, snap2ModulesEmbedInVariantSheet, getString } =
     useOV25UI();
   const [segment, setSegment] = useState<'pieces' | 'options'>('options');
   const tabsIndicatorRef = useRef<HTMLDivElement>(null);
@@ -197,7 +197,7 @@ function Snap2PiecesOptionsLayout({
           data-ov25-snap2-primary-segment-tab="pieces"
           data-selected={segment === 'pieces' ? 'true' : 'false'}
         >
-          Pieces
+          {getString('variantOptionHeader', { OPTION_NAME: 'Pieces' }, 'Pieces')}
         </button>
         <button
           ref={optionsTabRef}
@@ -209,7 +209,7 @@ function Snap2PiecesOptionsLayout({
           data-ov25-snap2-primary-segment-tab="options"
           data-selected={segment === 'options' ? 'true' : 'false'}
         >
-          Finish
+          {getString('variantOptionHeader', { OPTION_NAME: 'Finish' }, 'Finish')}
         </button>
         </div>
       </div>
