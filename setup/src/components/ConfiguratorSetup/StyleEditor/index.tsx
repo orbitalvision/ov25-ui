@@ -25,10 +25,10 @@ function CollapsibleGroup({ label, description, defaultOpen = true, children }: 
   return (
     <div className="min-w-0 space-y-2.5">
       <button type="button" onClick={() => setOpen(!open)} className="flex min-w-0 w-full items-center gap-1.5 text-left">
-        {open ? <ChevronDown className="h-3 w-3 shrink-0 text-muted-foreground" /> : <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground" />}
         <span className="min-w-0 flex-1">
           <SectionHeader description={description}>{label}</SectionHeader>
         </span>
+        {open ? <ChevronDown className="h-3 w-3 shrink-0 text-muted-foreground" /> : <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground" />}
       </button>
       {open && <div className="min-w-0 max-w-full space-y-2.5">{children}</div>}
     </div>

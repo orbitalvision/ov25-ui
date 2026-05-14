@@ -205,7 +205,7 @@ export function CSSPropertyRow({ property, value, onPropertyChange, onValueChang
   property: string; value: string; onPropertyChange: (property: string) => void; onValueChange: (value: string) => void; onRemove: () => void; availableProperties: readonly string[];
 }) {
   return (
-    <div className="space-y-1">
+    <div className="space-y-2 py-1">
       <div className="flex items-center gap-1.5">
         <Select value={property} onValueChange={onPropertyChange}>
           <SelectTrigger className="h-7 w-[120px] text-[11px] font-mono shrink-0"><SelectValue placeholder="property" /></SelectTrigger>
