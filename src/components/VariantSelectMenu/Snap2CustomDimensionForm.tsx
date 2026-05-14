@@ -98,7 +98,7 @@ export function Snap2CustomDimensionForm({
           <div key={axis} className="ov:mb-2">
             <label className="ov:mb-0.5 ov:block ov:text-[10px] ov:text-(--ov25-secondary-text-color)">
               {getString(
-                'dimensionsLabel',
+                'snap2CustomDimensionsLabel',
                 { DIMENSION_LABEL: AXIS_LABELS[axis], AXIS: axis.toUpperCase() },
                 AXIS_LABELS[axis]
               )}

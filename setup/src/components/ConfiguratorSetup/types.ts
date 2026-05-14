@@ -1,4 +1,5 @@
 import type { LayoutType } from '../../lib/config/preview-config';
+import type { StringReplacementsConfig } from 'ov25-ui';
 
 export type PreviewLayoutType = LayoutType;
 
@@ -56,6 +57,8 @@ export interface TypeSettings {
   };
   style: Record<string, string>;
   elementStyles: Record<string, Record<string, string>>;
+  /** Per-catalog-key replacement rules (order matters; optional triggers). */
+  stringReplacements: StringReplacementsConfig;
   snap2UseStartingConfig?: boolean;
   /**
    * Bed layout only: when checked, that part may use the “None” line on the OV25 bed iframe (`bedAllowNone` query).
@@ -106,6 +109,7 @@ const DEFAULT_STANDARD_SETTINGS: TypeSettings = {
   branding: { logoURL: '', mobileLogoURL: '', cssString: '', hideLogo: false },
   style: {},
   elementStyles: {},
+  stringReplacements: {},
 };
 
 const DEFAULT_SNAP2_SETTINGS: TypeSettings = {

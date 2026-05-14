@@ -197,7 +197,7 @@ function Snap2PiecesOptionsLayout({
           data-ov25-snap2-primary-segment-tab="pieces"
           data-selected={segment === 'pieces' ? 'true' : 'false'}
         >
-          {getString('variantOptionHeader', { OPTION_NAME: 'Pieces' }, 'Pieces')}
+          {getString('optionHeader', { OPTION_NAME: 'Pieces' }, 'Pieces')}
         </button>
         <button
           ref={optionsTabRef}
@@ -209,7 +209,7 @@ function Snap2PiecesOptionsLayout({
           data-ov25-snap2-primary-segment-tab="options"
           data-selected={segment === 'options' ? 'true' : 'false'}
         >
-          {getString('variantOptionHeader', { OPTION_NAME: 'Finish' }, 'Finish')}
+          {getString('optionHeader', { OPTION_NAME: 'Finish' }, 'Finish')}
         </button>
         </div>
       </div>

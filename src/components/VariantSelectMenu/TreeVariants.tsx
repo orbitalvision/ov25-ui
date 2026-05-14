@@ -159,7 +159,7 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
 
   const getOptionHeaderLabel = useCallback(
     (optionName: string) =>
-      capitalizeWords(getString('variantOptionHeader', { OPTION_NAME: optionName }, optionName)),
+      capitalizeWords(getString('optionHeader', { OPTION_NAME: optionName }, optionName)),
     [getString]
   );
 

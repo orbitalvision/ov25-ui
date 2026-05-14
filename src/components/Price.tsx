@@ -6,17 +6,33 @@ import { Ov25ShadowHost } from './Ov25ShadowHost.js';
 
 const Price: React.FC = () => {
   const { formattedPrice, formattedSubtotal, discount, getString } = useOV25UI();
+  const priceText = getString(
+    'priceValue',
+    {
+      PRICE: formattedPrice,
+      SUBTOTAL: formattedSubtotal,
+      DISCOUNT_AMOUNT: discount.formattedAmount,
+      DISCOUNT_PERCENTAGE: discount.percentage,
+    },
+    formattedPrice,
+  );
   const subtotalText = getString(
     'priceSubtotal',
     {
-      FORMATTED_SUBTOTAL: formattedSubtotal,
+      SUBTOTAL: formattedSubtotal,
+      PRICE: formattedPrice,
+      DISCOUNT_AMOUNT: discount.formattedAmount,
+      DISCOUNT_PERCENTAGE: discount.percentage,
     },
     formattedSubtotal,
   );
   const savingsAmountText = getString(
     'priceSavingsAmount',
     {
-      FORMATTED_DISCOUNT_AMOUNT: discount.formattedAmount,
+      DISCOUNT_AMOUNT: discount.formattedAmount,
+      PRICE: formattedPrice,
+      SUBTOTAL: formattedSubtotal,
+      DISCOUNT_PERCENTAGE: discount.percentage,
     },
     discount.formattedAmount,
   );
@@ -24,15 +40,11 @@ const Price: React.FC = () => {
     'priceSavingsPercentage',
     {
       DISCOUNT_PERCENTAGE: discount.percentage,
+      PRICE: formattedPrice,
+      SUBTOTAL: formattedSubtotal,
+      DISCOUNT_AMOUNT: discount.formattedAmount,
     },
     `${discount.percentage}%`,
-  );
-  const priceText = getString(
-    'priceValue',
-    {
-      FORMATTED_PRICE: formattedPrice,
-    },
-    formattedPrice,
   );
   return (
     <Ov25ShadowHost style={{ display: 'block', width: '100%' }}>

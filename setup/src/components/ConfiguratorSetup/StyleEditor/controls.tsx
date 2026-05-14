@@ -220,11 +220,11 @@ export function CSSPropertyRow({ property, value, onPropertyChange, onValueChang
   );
 }
 
-export function AddPropertyButton({ onClick }: { onClick: () => void }) {
+export function AddPropertyButton({ onClick, label = 'Add property' }: { onClick: () => void; label?: string }) {
   return (
     <button type="button" onClick={onClick} className="inline-flex items-center gap-1 text-[11px] text-muted-foreground hover:text-foreground transition-colors">
       <Plus className="h-3 w-3" />
-      Add property
+      {label}
     </button>
   );
 }

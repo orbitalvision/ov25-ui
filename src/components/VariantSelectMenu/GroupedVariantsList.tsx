@@ -51,7 +51,7 @@ export const GroupedVariantsList: React.FC<GroupedVariantsListProps> = ({
             {showGroupHeaders && (
               <h4 className={`${STICKY_GROUP_HEADER_CLASS} ${stickyTopClass}`}>
                 {capitalizeWords(
-                  getString('variantGroupHeader', { GROUP_NAME: group.groupName }, group.groupName)
+                  getString('groupHeader', { GROUP_NAME: group.groupName }, group.groupName)
                 )}
               </h4>
             )}

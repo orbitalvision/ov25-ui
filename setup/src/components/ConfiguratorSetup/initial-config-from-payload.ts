@@ -2,6 +2,7 @@ import type { LayoutType } from '../../lib/config/preview-config';
 import type { SerializableInjectConfig } from './preview-config-serializable';
 import type { ConfiguratorSetupFormState, SelectorFormState, TypeSettings } from './types';
 import { DEFAULT_FORM_STATE, DEFAULT_TYPE_SETTINGS } from './types';
+import { serializableToFormStringReplacements } from '../../lib/string-replacements-config';
 
 export type ConfiguratorSetupPayload = Record<
   LayoutType,
@@ -52,6 +53,7 @@ function mergeSerializableIntoTypeSettings(base: TypeSettings, saved: SavedLayou
     branding: { ...base.branding },
     style: { ...base.style },
     elementStyles: { ...base.elementStyles },
+    stringReplacements: { ...base.stringReplacements },
   };
 
   if (saved.selectors) {
@@ -103,6 +105,13 @@ function mergeSerializableIntoTypeSettings(base: TypeSettings, saved: SavedLayou
 
   if (saved.flags) {
     merged.flags = { ...merged.flags, ...saved.flags } as TypeSettings['flags'];
+  }
+
+  if (saved.stringReplacements && typeof saved.stringReplacements === 'object') {
+    merged.stringReplacements = {
+      ...merged.stringReplacements,
+      ...serializableToFormStringReplacements(saved.stringReplacements),
+    };
   }
 
   if (saved.branding) {

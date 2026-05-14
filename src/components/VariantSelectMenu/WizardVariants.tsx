@@ -188,12 +188,11 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
   const hasAddToBasket = typeof addToBasketFunction === 'function' && !disableAddToCart;
   const hasBuyNow = typeof buyNowFunction === 'function';
   const hasCheckoutActions = hasAddToBasket || hasBuyNow;
-  const reviewStepLabel = hasCheckoutActions ? 'Review' : 'Overview';
+  const reviewStepLabel = hasCheckoutActions
+    ? getString('wizardReview', undefined, 'Review')
+    : getString('wizardOverview', undefined, 'Overview');
   const getStepLabel = (idx: number) =>
     idx === totalSteps - 1 ? reviewStepLabel : variantPanelOptions[idx]?.name ?? '';
-  const currentStepLabel = getStepLabel(currentStep);
-  const prevStepLabel = !isFirstStep ? getStepLabel(currentStep - 1) : null;
-  const nextStepLabel = !isLastStep ? getStepLabel(currentStep + 1) : null;
   const stepContentClasses = mode === 'inline'
     ? 'ov:flex ov:flex-col ov:bg-[var(--ov25-background-color)]'
     : 'ov:flex ov:flex-col ov:bg-[var(--ov25-background-color)]';
@@ -209,43 +208,59 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
               setCurrentStep(step);
               setActiveOptionId(step < variantPanelOptions.length ? variantPanelOptions[step].id : null);
             }}
-            className="ov:w-full ov:appearance-none ov:bg-transparent ov:border ov:border-[var(--ov25-border-color)] ov:rounded-md ov:px-3 ov:py-2 ov:text-sm ov:pr-8 ov:cursor-pointer ov:focus:outline-none ov:focus:ring-1 ov:focus:ring-[var(--ov25-primary-color)]"
+            className="ov:w-full ov:appearance-none ov:bg-transparent ov:border ov:border-(--ov25-border-color) ov:rounded-md ov:px-3 ov:py-2 ov:text-sm ov:pr-8 ov:cursor-pointer ov:focus:outline-none ov:focus:ring-1 ov:focus:ring-(--ov25-primary-color)"
           >
             {variantPanelOptions.map((option, idx) => (
               <option key={option.id} value={idx}>{idx + 1}. {option.name}</option>
             ))}
             <option value={totalSteps - 1}>{totalSteps}. {reviewStepLabel}</option>
           </select>
-          <ChevronDown size={16} className="ov:absolute ov:right-2 ov:top-1/2 ov:-translate-y-1/2 ov:pointer-events-none ov:text-[var(--ov25-secondary-text-color)]" />
+          <ChevronDown size={16} className="ov:absolute ov:right-2 ov:top-1/2 ov:-translate-y-1/2 ov:pointer-events-none ov:text-(--ov25-secondary-text-color)" />
         </div>
       ) : (
         <div className="ov:grid ov:grid-cols-[1fr_auto_1fr] ov:items-center ov:gap-4 ov:min-h-[48px]">
           <div className="ov:flex ov:justify-start">
-            {prevStepLabel && (
+            {!isFirstStep && (
               <button
                 onClick={goBack}
-                className="ov:flex ov:items-center ov:gap-1 ov:text-sm ov:text-[var(--ov25-secondary-text-color)] ov:opacity-70 ov:hover:opacity-100 ov:transition-opacity ov:cursor-pointer"
+                className="ov:flex ov:items-center ov:gap-1 ov:text-sm ov:text-(--ov25-secondary-text-color) ov:opacity-70 ov:hover:opacity-100 ov:transition-opacity ov:cursor-pointer"
               >
                 <ChevronLeft size={14} />
-                {prevStepLabel}
+                {getString(
+                  'wizardPreviousStep',
+                  { STEP_LABEL: getStepLabel(currentStep - 1) },
+                  getStepLabel(currentStep - 1),
+                )}
               </button>
             )}
           </div>
           <div className="ov:flex ov:flex-col ov:items-center ov:justify-center ">
-            <p className=" ov:text-[var(--ov25-secondary-text-color)] ov:font-light ov:text-sm">
-              Step {currentStep + 1} of {totalSteps}
+            <p className=" ov:text-(--ov25-secondary-text-color) ov:font-light ov:text-sm">
+              {getString(
+                'wizardStepProgress',
+                { CURRENT_STEP: String(currentStep + 1), TOTAL_STEPS: String(totalSteps) },
+                `Step ${currentStep + 1} of ${totalSteps}`,
+              )}
             </p>
             <p className="ov:text-base ov:font-semibold ov:text-(--ov25-secondary-color)">
-              {currentStepLabel}
+              {getString(
+                'wizardCurrentStep',
+                { STEP_LABEL: getStepLabel(currentStep) },
+                getStepLabel(currentStep),
+              )}
             </p>
           </div>
           <div className="ov:flex ov:justify-end">
-            {nextStepLabel && (
+            {!isLastStep && (
               <button
                 onClick={goNext}
-                className="ov:flex ov:items-center ov:gap-1 ov:text-sm ov:text-[var(--ov25-secondary-text-color)] ov:opacity-70 ov:hover:opacity-100 ov:transition-opacity ov:cursor-pointer"
+                className="ov:flex ov:items-center ov:gap-1 ov:text-sm ov:text-(--ov25-secondary-text-color) ov:opacity-70 ov:hover:opacity-100 ov:transition-opacity ov:cursor-pointer"
               >
-                {nextStepLabel}
+                {getString(
+                  'wizardNextStep',
+                  { STEP_LABEL: getStepLabel(currentStep + 1) },
+                  getStepLabel(currentStep + 1),
+                )}
                 <ChevronRight size={14} />
               </button>
             )}
@@ -256,7 +271,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
   );
 
   const filterBlock = !isReviewStep && currentOption && currentOption.id !== 'size' && currentOption.id !== 'modules' && (
-    <div className="ov:shrink-0 ov:h-[var(--ov25-wizard-variants-filter-height)] ov:flex ov:items-center">
+    <div className="ov:shrink-0 ov:h-(--ov25-wizard-variants-filter-height) ov:flex ov:items-center">
       <div className="ov:w-full">
         <FilterControls
           isFilterOpen={isFilterOpenForOption}
@@ -273,7 +288,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
       <button
         onClick={goBack}
         disabled={isFirstStep}
-        className="ov:flex ov:items-center ov:gap-1 ov:px-3 ov:py-2 ov:text-sm ov:text-[var(--ov25-secondary-text-color)] ov:disabled:opacity-30 ov:disabled:cursor-not-allowed ov:hover:bg-[var(--ov25-hover-color)] ov:rounded ov:transition-colors"
+        className="ov:flex ov:items-center ov:gap-1 ov:px-3 ov:py-2 ov:text-sm ov:text-(--ov25-secondary-text-color) ov:disabled:opacity-30 ov:disabled:cursor-not-allowed ov:hover:bg-(--ov25-hover-color) ov:rounded ov:transition-colors"
       >
         <ChevronLeft size={18} />
         {getString('wizardBackButtonLabel', {}, 'Back')}
@@ -314,14 +329,17 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
               {variantPanelOptions.map((option, idx) => {
                 let value = '';
                 let imageUrl = '';
+                let reviewGroupName = '';
                 if (option.id === 'size') {
                   const sizeGroup = option.groups?.[0];
                   const sizeSelection = sizeGroup?.selections?.find((s: any) => s.id === currentProductId);
                   value = (range?.name ? range.name + ' ' : '') + (sizeSelection?.name || getSelectedValue(option));
                   imageUrl = sizeSelection?.thumbnail || '';
+                  reviewGroupName = String((sizeGroup as { groupName?: string; name?: string } | undefined)?.groupName ?? (sizeGroup as { name?: string } | undefined)?.name ?? '');
                 } else if (option.id === 'modules') {
                   value = '—';
                   imageUrl = '';
+                  reviewGroupName = '';
                 } else {
                   const sel = selectedSelections.find(s => s.optionId === option.id);
                   const group = option.groups?.find((g: any) => g.id === sel?.groupId);
@@ -330,7 +348,13 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
                   value =
                     selection?.name && bs ? `${selection.name} · ${bs}` : selection?.name || getSelectedValue(option);
                   imageUrl = (selection as any)?.miniThumbnails?.medium || selection?.thumbnail || '';
+                  reviewGroupName = String((group as { groupName?: string; name?: string } | undefined)?.groupName ?? (group as { name?: string } | undefined)?.name ?? '');
                 }
+                const reviewStepStringVars = {
+                  OPTION_NAME: option.name,
+                  GROUP_NAME: reviewGroupName,
+                  SELECTION_LABEL: value || '—',
+                };
                 return (
                   <div key={option.id} className="ov:flex ov:items-center ov:gap-3">
                     <button
@@ -339,14 +363,18 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
                         setCurrentStep(idx);
                         setActiveOptionId(variantPanelOptions[idx]?.id ?? null);
                       }}
-                      className="ov:flex ov:items-center ov:gap-3 ov:w-full ov:text-left ov:cursor-pointer ov:hover:bg-[var(--ov25-hover-color)] ov:rounded-md ov:p-2 ov:-m-2 ov:transition-colors"
+                      className="ov:flex ov:items-center ov:gap-3 ov:w-full ov:text-left ov:cursor-pointer ov:hover:bg-(--ov25-hover-color) ov:rounded-md ov:p-2 ov:-m-2 ov:transition-colors"
                     >
                       <div className="ov:shrink-0">
                         <VariantThumb imageUrl={imageUrl} size="lg" />
                       </div>
                       <div className="ov:flex ov:flex-1 ov:min-w-0 ov:justify-between ov:gap-4">
-                        <dt className="ov:text-[var(--ov25-secondary-text-color)] ov:capitalize ov:shrink-0">{option.name}</dt>
-                        <dd className="ov:text-[var(--ov25-secondary-text-color)] ov:font-normal ov:text-right ov:truncate">{value || '—'}</dd>
+                        <dt className="ov:text-(--ov25-secondary-text-color) ov:capitalize ov:shrink-0">
+                          {getString('wizardReviewStepOption', reviewStepStringVars, option.name)}
+                        </dt>
+                        <dd className="ov:text-(--ov25-secondary-text-color) ov:font-normal ov:text-right ov:truncate">
+                          {getString('wizardReviewStepSelection', reviewStepStringVars, value || '—')}
+                        </dd>
                       </div>
                     </button>
                   </div>
@@ -399,7 +427,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
             {isFilterOpenForOption && currentOption && currentOption.id !== 'modules' && (
               <div
                 data-open={isFilterOpenForOption}
-                className="ov:flex ov:justify-end ov:flex-wrap ov:overflow-y-auto ov:z-8 ov:absolute ov:inset-0 ov:h-full ov:p-2 ov:px-4 ov:bg-[var(--ov25-background-color)] ov:transition-transform ov:duration-500 ov:ease-in-out ov:translate-y-0"
+                className="ov:flex ov:justify-end ov:flex-wrap ov:overflow-y-auto ov:z-8 ov:absolute ov:inset-0 ov:h-full ov:p-2 ov:px-4 ov:bg-(--ov25-background-color) ov:transition-transform ov:duration-500 ov:ease-in-out ov:translate-y-0"
               >
                 <FilterContent optionId={currentOption.id} />
               </div>
@@ -414,7 +442,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
     <div
       ref={rootRef}
       data-ov25-wizard-variants-mode={mode}
-      className="ov:w-full ov:flex-1 ov:min-h-0 ov:flex ov:flex-col ov:bg-[var(--ov25-background-color)] ov:overflow-hidden"
+      className="ov:w-full ov:flex-1 ov:min-h-0 ov:flex ov:flex-col ov:bg-(--ov25-background-color) ov:overflow-hidden"
       style={mode === 'drawer' && availableHeight != null ? { '--ov25-wizard-variants-available-height': `${availableHeight}px` } as React.CSSProperties : undefined}
     >
       {stepIndicatorBlock}
@@ -430,7 +458,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
     const inlineNode = (
       <div
         data-ov25-list-variants-mode="inline"
-        className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:h-full ov:overflow-hidden ov:bg-[var(--ov25-background-color)]"
+        className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:h-full ov:overflow-hidden ov:bg-(--ov25-background-color)"
       >
         <div className="ov:shrink-0">
           {stepIndicatorBlock}

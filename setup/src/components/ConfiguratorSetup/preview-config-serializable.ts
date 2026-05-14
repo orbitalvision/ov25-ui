@@ -1,3 +1,5 @@
+import type { StringReplacementsConfig } from 'ov25-ui';
+
 /**
  * Serializable config for postMessage - no functions, only plain data.
  * The preview iframe reconstructs the full InjectConfiguratorOptions from this.
@@ -30,4 +32,5 @@ export interface SerializableInjectConfig {
   };
   images?: string[];
   uniqueId?: string;
+  stringReplacements?: StringReplacementsConfig;
 }

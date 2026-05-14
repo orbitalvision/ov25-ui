@@ -93,7 +93,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
             <div id="ov25-swatchbook-title" className="ov:shrink-0 ov:text-black ov:text-[1.5em] ov:font-normal">
               <DialogTitle>{getString('swatchBookTitle', undefined, 'Swatch Book')}</DialogTitle>
             </div>
-            <VariantsCloseButton onClick={() => setIsSwatchBookOpen(false)} ariaLabel={getString('swatchBookCloseLabel', undefined, 'Close swatch book')} className="ov:top-0 ov:right-0" />
+            <VariantsCloseButton onClick={() => setIsSwatchBookOpen(false)} ariaLabel={'Close Swatch Book'} className="ov:top-0 ov:right-0" />
           </div>     
           {/* Featured/zoomed swatch section */}
           {zoomedSwatch && zoomedSwatch.thumbnail && zoomedSwatch.thumbnail.miniThumbnails && (
@@ -153,7 +153,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
                     />
                     <VariantsCloseButton
                       onClick={() => toggleSwatch(swatch)}
-                      ariaLabel={getString('swatchBookRemoveSwatchLabel', undefined, 'Remove swatch')}
+                      ariaLabel={'Remove Swatch'}
                       className="ov:top-1! ov:right-1! ov:p-1! ov:w-6 ov:h-6 ov:z-10 ov:bg-white ov:rounded-full ov:md:opacity-0 ov:md:group-hover:opacity-100 ov:pointer-events-auto ov:md:pointer-events-none ov:md:group-hover:pointer-events-auto ov:transition-opacity"
                     />
                     <button
@@ -190,7 +190,12 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
               <span className="ov:text-sm">
                 {getString(
                   'swatchBookTotalCost',
-                  { FORMATTED_TOTAL_COST: formattedSwatchTotalCost },
+                  { 
+                    FORMATTED_TOTAL_COST: formattedSwatchTotalCost,
+                    CURRENCY_SYMBOL: currencySymbol,
+                    PRICE_PER_SWATCH: swatchRulesData.pricePerSwatch,
+                    SWATCH_COUNT: selectedSwatches.length
+                  },
                   `Total cost: ${formattedSwatchTotalCost}`
                 )}
               </span>
@@ -203,7 +208,11 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
                 disabled={selectedSwatches.length < swatchRulesData.minSwatches}
                 onClick={() => handleAddSwatchesToCart()}
               >
-                {getString('swatchBookOrderSamples', undefined, 'Order Samples')}
+                {getString('swatchBookOrderSamples', {
+                  SWATCH_COUNT: selectedSwatches.length,
+                  CURRENCY_SYMBOL: currencySymbol,
+                  PRICE_PER_SWATCH: swatchRulesData.pricePerSwatch
+                }, 'Order Samples')}
               </Button>
             </div>
           </div>

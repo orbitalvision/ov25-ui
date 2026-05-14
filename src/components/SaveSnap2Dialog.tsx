@@ -62,7 +62,7 @@ export const SaveSnap2Dialog: React.FC = () => {
       requestSnap2Save();
     } catch (error) {
       console.error('Save error:', error);
-      toast.error(getString('snap2SaveFailedToast', undefined, 'Failed to save configuration'));
+      toast.error(getString('snap2SaveFailedMessage', undefined, 'Failed to save configuration'));
       setShowShareDialog(false);
       setIsSaving(false);
       setShareDialogTrigger('none');
@@ -73,7 +73,7 @@ export const SaveSnap2Dialog: React.FC = () => {
     try {
       if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(shareUrl);
-        toast.success(getString('snap2SaveDialogCopySuccessToast', undefined, 'Link copied to clipboard!'));
+        toast.success(getString('snap2SaveDialogCopySuccess', undefined, 'Link copied to clipboard!'));
         return;
       }
       const textarea = document.querySelector('textarea[readonly]') as HTMLTextAreaElement;
@@ -82,7 +82,7 @@ export const SaveSnap2Dialog: React.FC = () => {
         textarea.select();
         if (textarea.setSelectionRange) textarea.setSelectionRange(0, shareUrl.length);
         if (document.execCommand('copy')) {
-          toast.success(getString('snap2SaveDialogCopySuccessToast', undefined, 'Link copied to clipboard!'));
+          toast.success(getString('snap2SaveDialogCopySuccess', undefined, 'Link copied to clipboard!'));
           return;
         }
       }
@@ -94,11 +94,11 @@ export const SaveSnap2Dialog: React.FC = () => {
       textArea.select();
       const ok = document.execCommand('copy');
       document.body.removeChild(textArea);
-      if (ok) toast.success(getString('snap2SaveDialogCopySuccessToast', undefined, 'Link copied to clipboard!'));
+      if (ok) toast.success(getString('snap2SaveDialogCopySuccess', undefined, 'Link copied to clipboard!'));
       else throw new Error('execCommand failed');
     } catch (err) {
       console.error('Copy failed:', err);
-      toast.error(getString('snap2SaveDialogCopyFailureToast', undefined, 'Failed to copy link. Please select and copy manually.'));
+      toast.error(getString('snap2SaveDialogCopyFailure', undefined, 'Failed to copy link. Please select and copy manually.'));
     }
   };
 
@@ -151,7 +151,7 @@ export const SaveSnap2Dialog: React.FC = () => {
         <DialogHeader className="ov:space-y-1 ov:text-left">
           <DialogTitle className="ov:text-xl ov:font-semibold ov:text-(--ov25-text-color) ov:tracking-tight">
             {shareDialogTrigger === 'modal-close'
-              ? getString('snap2SaveDialogTitleClose', undefined, 'Save Your Configuration')
+              ? getString('snap2SaveDialogTitleSave', undefined, 'Save Your Configuration')
               : getString('snap2SaveDialogTitleShare', undefined, 'Share Configuration')}
           </DialogTitle>
         </DialogHeader>

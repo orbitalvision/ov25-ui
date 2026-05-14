@@ -18,6 +18,10 @@ import {
   hasMeaningfulInitialConfig,
   type ConfiguratorSetupPayload,
 } from './initial-config-from-payload';
+import {
+  formStringReplacementsToSerializable,
+  normalizeStringReplacementsState,
+} from '../../lib/string-replacements-config';
 
 export type { ConfiguratorSetupPayload };
 
@@ -58,6 +62,10 @@ function mergeTypeSettings(defaults: TypeSettings, saved: Partial<TypeSettings> 
     branding: { ...defaults.branding, ...saved.branding },
     style: { ...defaults.style, ...saved.style },
     elementStyles: { ...defaults.elementStyles, ...saved.elementStyles },
+    stringReplacements: {
+      ...normalizeStringReplacementsState(defaults.stringReplacements),
+      ...normalizeStringReplacementsState(saved.stringReplacements),
+    },
     snap2UseStartingConfig: saved.snap2UseStartingConfig ?? defaults.snap2UseStartingConfig,
     bed:
       saved.bed !== undefined
@@ -196,6 +204,11 @@ export function buildSerializableConfig(
         ? { filterSelectionsByCurrentSize }
         : {}),
     };
+  }
+
+  const stringReplacementsSerializable = formStringReplacementsToSerializable(settings.stringReplacements);
+  if (stringReplacementsSerializable) {
+    config.stringReplacements = stringReplacementsSerializable;
   }
 
   return config;

@@ -10,10 +10,12 @@ const query = new URLSearchParams(window.location.search);
 const isSnap2Mode = query.get('mode') === 'snap2';
 
 const injectConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
-  apiKey: () => ARLO_APIKEY,
-  productLink: () => 'snap2/22',
-  // apiKey: () => (isSnap2Mode ? MAZE_APIKEY : DEMO_RETAILER_APIKEY),
-  // productLink: () => (isSnap2Mode ? 'snap2/445' : '1313'),
+  // apiKey: () => MAZE_APIKEY,
+  // productLink: () => 'snap2/445',
+  // apiKey: () => ARLO_APIKEY,
+  // productLink: () => 'snap2/22',
+  apiKey: () => (isSnap2Mode ? MAZE_APIKEY : DEMO_RETAILER_APIKEY),
+  productLink: () => (isSnap2Mode ? 'snap2/445' : '1313'),
   selectors: {
     gallery: { selector: '.configurator-container', replace: true },
     ...(isSnap2Mode ? { configureButton: { selector: '#ov25-fullscreen-button', replace: false } } : {}),
@@ -30,9 +32,9 @@ const injectConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
     variants: {
       displayMode: isSnap2Mode
         ? { desktop: 'list', mobile: 'list' }
-        : { desktop: 'list', mobile: 'list' },
+        : { desktop: 'wizard', mobile: 'list' },
     },
-    modules: { position: { desktop: 'BOTTOM', mobile: 'RIGHT' } }
+    modules: { position: { desktop: 'RIGHT', mobile: 'RIGHT' } }
   },
   callbacks: {
     addToBasket: () => {},
@@ -53,27 +55,30 @@ const injectConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
     ],
     productName: [{ template: '▽Product: ${PRODUCT_NAME}▽' }],
     configureButtonText: [{ template: '▽Open Configurator▽' }],
-    variantName: [{ template: ' ▽Option: ${OPTION_NAME} / ▽Group: ${GROUP_NAME} / Variant: ${VARIANT_NAME}▽'}],
+    variantName: [{ template: ' ▽Variant: ${VARIANT_NAME}▽'}],
     // price
-    priceValue: [{ template: 'Price ▽▽▽▽▽ ${FORMATTED_PRICE}' }],
-    priceSubtotal: [{ template: 'Subtotal ▽▽▽▽▽ ${FORMATTED_SUBTOTAL}' }],
-    priceSavingsAmount: [{ template: 'Saving amount ▽▽▽▽▽ ${FORMATTED_DISCOUNT_AMOUNT}' }],
+    priceValue: [{ template: 'Price ▽▽▽▽▽ ${PRICE}' }],
+    priceSubtotal: [{ template: 'Subtotal ▽▽▽▽▽ ${SUBTOTAL}' }],
+    priceSavingsAmount: [{ template: 'Saving amount ▽▽▽▽▽ ${DISCOUNT_AMOUNT}' }],
     priceSavingsPercentage: [{ template: 'Saving % ▽▽▽▽▽ ${DISCOUNT_PERCENTAGE}%' }],
     // checkout buttons
     checkoutAddToBasket: [{ template: '▽Add item▽' }],
-    checkoutBuyNow: [{ template: '▽Checkout now▽' }],
+    checkoutBuyNow: [
+      {
+        template: "${DISCOUNT_AMOUNT}${SUBTOTAL}",
+      }
+    ],
     // options
-    variantOptionHeader: [
+    optionHeader: [
       { trigger: { name: 'OPTION_NAME', value: 'upholstery fabrics' }, template: '▽upholstery fabrics▽' },
       { trigger: { name: 'OPTION_NAME', value: 'trims' }, template: '▽trims▽' },
       { template: '${OPTION_NAME}▽▽▽' },
     ],
     // groups
-    variantGroupHeader: [{ template: '▽Option: ${OPTION_NAME} / Group: ${GROUP_NAME}▽' }],
+    groupHeader: [{ template: '▽Option: ${OPTION_NAME} / Group: ${GROUP_NAME}▽' }],
     // filters
-    filtersLabel: [{ template: '▽Open filters▽' }],
+    filtersLabel: [{ template: '▽Open filters for ${OPTION_NAME}▽' }],
     filtersSearchPlaceholder: [{ template: '▽Search options▽' }],
-    filtersOpenSwatchBookLabel: [{ template: '▽Open sample book▽' }],
     filtersSelectedPill: [{ template: '▽Filter: ${FILTER_VALUE}▽' }],
     filtersNoFiltersAvailable: [{ template: '▽No filters are available▽' }],
     filtersOptionHeader: [{ template: '▽Option: ${OPTION_NAME}▽' }],
@@ -81,24 +86,38 @@ const injectConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
     filtersOptionValue: [{ template: '▽${FILTER_VALUE}▽' }],
     // swatch button & book
     swatchBookTitle: [{ template: '▽Sample Book▽' }],
-    swatchBookCloseLabel: [{ template: '▽Close sample book▽' }],
     swatchBookEmptyTitle: [{ template: '▽No samples selected▽' }],
     swatchBookEmptyDescription: [{ template: '▽Use ${CONFIGURATOR_LINK_TEXT} to browse fabrics and add samples▽' }],
     swatchBookConfiguratorLinkText: [{ template: '▽Configurator▽' }],
-    swatchBookRemoveSwatchLabel: [{ template: '▽Remove sample▽' }],
-    swatchBookZoomTitle: [{ template: '▽Zoom sample image▽' }],
     swatchBookTotalCost: [{ template: '▽Sample cost: ${FORMATTED_TOTAL_COST}▽' }],
     swatchBookOrderSamples: [{ template: '▽Order samples now▽' }],
+    swatchBookZoomedSwatchName: [{ template: '▽${SWATCH_NAME}▽' }],
+    swatchBookZoomedSwatchOption: [{ template: '▽Option: ${SWATCH_OPTION}▽' }],
+    swatchBookZoomedSwatchSku: [{ template: '▽SKU: ${SWATCH_SKU}▽' }],
+    swatchBookFirstFreeCount: [{ template: '▽First ${FREE_SWATCH_LIMIT} at no charge▽' }],
+    swatchBookOrderUpToFreeSwatches: [{ template: '▽+ Up to ${FREE_SWATCH_LIMIT} free samples▽' }],
+    swatchBookOrderMaxFreeSwatches: [{ template: '▽+ Choose ${MAX_SWATCHES} free samples▽' }],
+    swatchBookOrderUpToMaxSwatches: [{ template: '▽+ Up to ${MAX_SWATCHES} samples total▽' }],
     // controls
     controlsShareLabel: [{ template: '▽Share▽' }],
     controlsDimensionsLabel: [{ template: '▽Dimensions▽' }],
-    dimensionsLabel: [{ template: '▽${DIMENSION_LABEL} (${AXIS})▽' }],
     cameraName: [{ template: '▽Camera ${CAMERA_INDEX}: ${CAMERA_NAME}▽' }],
     controlsCameraLabel: [{ template: '▽Cameras▽' }],
     controlsLightsLabel: [{ template: '▽Lighting▽' }],
     controlsArLabel: [{ template: '▽View in room▽' }],
     controlsCameraFallback: [{ template: '▽Camera ${CAMERA_INDEX}▽' }],
     controlsLightFallback: [{ template: '▽Group ${GROUP_INDEX}▽' }],
+    // wizard
+    wizardBackButtonLabel: [{ template: '▽Back▽' }],
+    wizardNextButtonLabel: [{ template: '▽Next▽' }],
+    wizardStepProgress: [{ template: '▽Step ${CURRENT_STEP} / ${TOTAL_STEPS}▽' }],
+    wizardCurrentStep: [{ template: '▽${STEP_LABEL}▽' }],
+    wizardPreviousStep: [{ template: '▽← ${STEP_LABEL}▽' }],
+    wizardNextStep: [{ template: '▽${STEP_LABEL} →▽' }],
+    wizardReview: [{ template: '▽Review cart▽' }],
+    wizardOverview: [{ template: '▽Summary▽' }],
+    wizardReviewStepOption: [{ template: '▽${OPTION_NAME}▽' }],
+    wizardReviewStepSelection: [{ template: '▽${SELECTION_LABEL}▽' }],
     // AR preview
     arPreviewTitle: [{ template: '▽View in room▽' }],
     arPreviewDescription: [{ template: '▽Scan this QR code to preview in your room▽' }],
@@ -119,6 +138,7 @@ const injectConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
     snap2CheckoutSelectionName: [{ template: '▽Selection: ${SELECTION_NAME}▽' }],
     snap2CheckoutLineTotal: [{ template: '▽Line total: ${FORMATTED_PRICE}▽' }],
     snap2CheckoutFooterTotalLabel: [{ template: '▽Estimated total▽' }],
+    snap2Total: [{ template: '▽${FORMATTED_PRICE} (${DISCOUNT_PERCENTAGE}% off, save ${FORMATTED_DISCOUNT_AMOUNT})▽' }],
     snap2CheckoutBackToBuilder: [{ template: '▽Back to configurator▽' }],
     snap2CheckoutViewCart: [{ template: '▽Open Cart▽' }],
     // controls
@@ -127,8 +147,8 @@ const injectConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
     snap2ControlsCaptureTitle: [{ template: '▽Capture views▽' }],
     snap2SaveButtonTitle: [{ template: '▽Save or share this setup▽' }],
     // save dialog
-    snap2SaveFailedToast: [{ template: '▽Unable to save configuration▽' }],
-    snap2SaveDialogTitleClose: [{ template: '▽Save this setup?▽' }],
+    snap2SaveFailedMessage: [{ template: '▽Unable to save configuration▽' }],
+    snap2SaveDialogTitleSave: [{ template: '▽Save this setup?▽' }],
     snap2SaveDialogTitleShare: [{ template: '▽Share setup▽' }],
     snap2SaveDialogConfirmClose: [{ template: '▽Save progress before closing?▽' }],
     snap2SaveDialogConfirmShare: [{ template: '▽Save this configuration now?▽' }],
@@ -138,10 +158,10 @@ const injectConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
     snap2SaveDialogBodyClose: [{ template: '▽Keep this link to reopen your setup later:▽' }],
     snap2SaveDialogBodyShare: [{ template: '▽Copy this link to share your setup:▽' }],
     snap2SaveDialogCopyLink: [{ template: '▽Copy URL▽' }],
-    snap2SaveDialogCopySuccessToast: [{ template: '▽URL copied!▽' }],
-    snap2SaveDialogCopyFailureToast: [{ template: '▽Copy failed. Please copy manually.▽' }],
+    snap2SaveDialogCopySuccess: [{ template: '▽URL copied!▽' }],
+    snap2SaveDialogCopyFailure: [{ template: '▽Copy failed. Please copy manually.▽' }],
     // share dialog
-    shareLinkCopiedToast: [{ template: '▽Share URL copied!▽' }],
+    shareLinkCopied: [{ template: '▽Share URL copied!▽' }],
     shareTitle: [{ template: '▽Check out my ${PRODUCT_NAME} setup▽' }],
     shareText: [{ template: '▽I designed this ${PRODUCT_NAME}. Have a look!▽' }],
     // screenshots dialog
@@ -154,11 +174,10 @@ const injectConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
     moduleCardSeeMore: [{ template: '▽Read more...▽' }],
     moduleCardAddProduct: [{ template: '▽Add module▽' }],
     moduleCardNoImage: [{ template: '▽No image▽' }],
-    moduleCardCloseDetailsLabel: [{ template: '▽Close module details▽' }],
-    moduleCardSelectLabel: [{ template: '▽${PRODUCT_NAME}. Select module.▽' }],
-    moduleCardMobileLabel: [{ template: '▽${PRODUCT_NAME}. Tap to add module. Use details for more info.▽' }],
-    moduleCardDesktopLabel: [{ template: '▽${PRODUCT_NAME}. Click image to add, description for details.▽' }],
-    moduleCardDetailsLabel: [{ template: '▽${PRODUCT_NAME} — details▽' }],
+    moduleCardDescriptionShort: [{ template: '▽${PRODUCT_NAME} — ${DESCRIPTION}▽' }],
+    moduleDetailDescriptionShort: [{ template: '▽Short: ${DESCRIPTION}▽' }],
+    moduleDetailDescriptionLong: [{ template: '▽Long: ${DESCRIPTION}▽' }],
+    moduleDetailDimensions: [{ template: '▽${PRODUCT_NAME}: ${DIMENSIONS_LINE}▽' }],
     snap2ModulesEmptyState: [{ template: '▽Tap a module to replace, or tap + to add one.▽' }],
     snap2ModulesLoading: [{ template: '▽Loading modules...▽' }],
     snap2ModulesGroupHeader: [{ template: '▽${GROUP_NAME}▽' }],
@@ -168,14 +187,12 @@ const injectConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
       { trigger: {name: 'TAB_LABEL', value: 'Corner'}, template: '▽(corner) ${TAB_LABEL}▽', },
       { trigger: {name: 'TAB_LABEL', value: 'End'}, template: '▽(end) ${TAB_LABEL}▽', }
     ],
-    // variant select menu
-    moduleBottomPlaceMovableLabel: [{ template: '▽Place movable module▽' }],
-    moduleBottomCustomSizeLabel: [{ template: '▽Set custom size▽' }],
     // custom dimensions dialog
     snap2CustomDimensionsTitle: [{ template: '▽Custom dimensions (cm)▽' }],
     snap2CustomDimensionsRange: [{ template: '▽From ${MIN} to ${MAX} in steps of ${STEP}▽' }],
     snap2CustomDimensionsCancel: [{ template: '▽Cancel▽' }],
     snap2CustomDimensionsAdd: [{ template: '▽Add module▽' }],
+    snap2CustomDimensionsLabel: [{ template: '▽${DIMENSION_LABEL} (${AXIS})▽' }],
   },
 });
 

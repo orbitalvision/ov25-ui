@@ -52,7 +52,7 @@ export const FilterContent: React.FC<FilterContentProps> = ({ optionId, optionId
 
                 return (
                     <div key={targetOption.id} className="ov:mb-6">
-                        {isMobile || variantDisplayStyleOverlay === VariantDisplayStyleOverlay.List ? <h4 className="ov25-filter-option-header ov:text-sm ov:font-medium ov:text-[var(--ov25-secondary-text-color)] ov:mb-2 ov:capitalize">{getString('filtersOptionHeader', { OPTION_NAME: targetOption.name }, targetOption.name)}</h4> : null}
+                        {isMobile || variantDisplayStyleOverlay === VariantDisplayStyleOverlay.List ? <h4 className="ov25-filter-option-header ov:text-sm ov:font-medium ov:text-(--ov25-secondary-text-color) ov:mb-2 ov:capitalize">{getString('filtersOptionHeader', { OPTION_NAME: targetOption.name }, targetOption.name)}</h4> : null}
                         {Object.entries(activeFilters)
                             .filter(([filterKey]) => {
                                 if (filterKey !== 'Collections') return true;
@@ -73,7 +73,7 @@ export const FilterContent: React.FC<FilterContentProps> = ({ optionId, optionId
                                                 <button
                                                     key={option.value}
                                                     onClick={() => handleFilterChange(filterKey, option.value, !option.checked, targetOption.name)}
-                                                    className={`ov25-filter-pill ov:px-3 ov:py-1.5 ov:rounded-full ov:text-xs ov:border ov:text-(--ov25-secondary-text-color) ov:transition-all ov:cursor-pointer ov:hover:bg-gray-50 ${option.checked ? 'ov:border-[var(--ov25-highlight-color,#26E8FE)] ov:bg-[color-mix(in_srgb,var(--ov25-highlight-color,#26E8FE)_20%,transparent)]' : 'ov:border-[var(--ov25-border-color)]'}`}
+                                                    className={`ov25-filter-pill ov:px-3 ov:py-1.5 ov:rounded-full ov:text-xs ov:border ov:text-(--ov25-secondary-text-color) ov:transition-all ov:cursor-pointer ov:hover:bg-gray-50 ${option.checked ? 'ov:border-(--ov25-highlight-color,#26E8FE) ov:bg-[color-mix(in_srgb,var(--ov25-highlight-color,#26E8FE)_20%,transparent)]' : 'ov:border-[var(--ov25-border-color)]'}`}
                                                     data-checked={option.checked}
                                                 >
                                                     {getString('filtersOptionValue', { FILTER_VALUE: option.value }, option.value)}

@@ -112,8 +112,14 @@ export function Snap2CheckoutSheetBody() {
 
 /** Pinned totals + commerce actions for Snap2 checkout sheet. */
 export function Snap2CheckoutSheetFooter({ onRequestClose }: { onRequestClose: () => void }) {
-  const { commercePriceSnapshot, formattedPrice, getString } = useOV25UI();
-  const totalLabel = commercePriceSnapshot?.formattedPrice ?? formattedPrice;
+  const { commercePriceSnapshot, getString } = useOV25UI();
+  const snap = commercePriceSnapshot;
+  const snap2TotalVars = {
+    PRICE: snap?.totalPrice ?? 0,
+    FORMATTED_PRICE: snap?.formattedPrice ?? '',
+    FORMATTED_DISCOUNT_AMOUNT: snap?.discount?.formattedAmount ?? '',
+    DISCOUNT_PERCENTAGE: snap?.discount?.percentage ?? 0,
+  };
 
   return (
     <div
@@ -133,7 +139,7 @@ export function Snap2CheckoutSheetFooter({ onRequestClose }: { onRequestClose: (
             id="ov25-snap2-checkout-sheet-total-value"
             className="ov25-snap2-checkout-sheet-total-value ov:text-2xl ov:font-normal ov:text-neutral-900 ov:truncate ov:block ov:max-w-full"
           >
-            {totalLabel}
+            {getString('snap2Total', snap2TotalVars, snap2TotalVars.FORMATTED_PRICE || '')}
           </span>
         </div>
       </div>

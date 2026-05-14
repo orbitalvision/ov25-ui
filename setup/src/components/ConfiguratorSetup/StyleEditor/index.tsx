@@ -1,13 +1,16 @@
 import { useState, useCallback, useMemo } from 'react';
 import { ChevronDown, ChevronRight, RotateCcw } from 'lucide-react';
+import type { StringReplacementRule } from 'ov25-ui';
 import { ScrollArea } from '../../ui/scroll-area';
 import { CSSEditor } from '../../ui/css-editor';
 import { STYLE_GROUPS } from '../../../lib/config/configurator-style-variables';
 import { OV25_VARIANT_RING_MODE_SOLID, OV25_VARIANT_THUMB_RING_MODE_VAR } from '../../../lib/config/variant-selection-style';
+import { formStringReplacementsToSerializable } from '../../../lib/string-replacements-config';
 import type { TypeSettings } from '../types';
 import { SectionHeader, SectionDivider, SwitchRow } from '../shared-ui';
 import { StyleControl } from './controls';
 import { ElementRuleBuilder } from './ElementRuleBuilder';
+import { StringReplacementsEditor } from './StringReplacementsEditor';
 
 interface StylePanelProps {
   currentSettings: TypeSettings;
@@ -20,24 +23,31 @@ function CollapsibleGroup({ label, description, defaultOpen = true, children }: 
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="space-y-2.5">
-      <button type="button" onClick={() => setOpen(!open)} className="flex items-center gap-1.5 w-full text-left">
-        {open ? <ChevronDown className="h-3 w-3 text-muted-foreground" /> : <ChevronRight className="h-3 w-3 text-muted-foreground" />}
-        <SectionHeader description={description}>{label}</SectionHeader>
+    <div className="min-w-0 space-y-2.5">
+      <button type="button" onClick={() => setOpen(!open)} className="flex min-w-0 w-full items-center gap-1.5 text-left">
+        {open ? <ChevronDown className="h-3 w-3 shrink-0 text-muted-foreground" /> : <ChevronRight className="h-3 w-3 shrink-0 text-muted-foreground" />}
+        <span className="min-w-0 flex-1">
+          <SectionHeader description={description}>{label}</SectionHeader>
+        </span>
       </button>
-      {open && <div className="space-y-2.5">{children}</div>}
+      {open && <div className="min-w-0 max-w-full space-y-2.5">{children}</div>}
     </div>
   );
 }
 
 export function StylePanel({ currentSettings, updateSettings, updateNested }: StylePanelProps) {
   const hasOverrides = useMemo(() => {
-    return Object.keys(currentSettings.style).length > 0 || Object.keys(currentSettings.elementStyles).length > 0;
-  }, [currentSettings.style, currentSettings.elementStyles]);
+    return (
+      Object.keys(currentSettings.style).length > 0 ||
+      Object.keys(currentSettings.elementStyles).length > 0 ||
+      formStringReplacementsToSerializable(currentSettings.stringReplacements) != null
+    );
+  }, [currentSettings.style, currentSettings.elementStyles, currentSettings.stringReplacements]);
 
   const handleResetAll = useCallback(() => {
     updateSettings('style', {});
     updateSettings('elementStyles', {});
+    updateSettings('stringReplacements', {});
   }, [updateSettings]);
 
   const handleStyleChange = useCallback((variable: string, value: string) => {
@@ -60,9 +70,20 @@ export function StylePanel({ currentSettings, updateSettings, updateNested }: St
     }
   }, [currentSettings.elementStyles, updateSettings, updateNested]);
 
+  const handleStringReplacementsRulesChange = useCallback(
+    (key: string, rules: StringReplacementRule[]) => {
+      const next = { ...currentSettings.stringReplacements };
+      if (rules.length === 0) delete next[key];
+      else next[key] = rules;
+      updateSettings('stringReplacements', next);
+    },
+    [currentSettings.stringReplacements, updateSettings],
+  );
+
   return (
-    <ScrollArea className="h-full">
-      <div className="space-y-6 py-2 pr-4">
+    <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+      <ScrollArea className="min-h-0 flex-1 min-w-0">
+      <div className="min-w-0 max-w-full space-y-6 py-2 pr-4">
         {hasOverrides && (
           <div className="flex justify-end">
             <button
@@ -127,6 +148,11 @@ export function StylePanel({ currentSettings, updateSettings, updateNested }: St
         <SectionDivider />
         <ElementRuleBuilder elementStyles={currentSettings.elementStyles} onUpdate={handleElementStyleUpdate} />
         <SectionDivider />
+        <StringReplacementsEditor
+          stringReplacements={currentSettings.stringReplacements}
+          onRulesChange={handleStringReplacementsRulesChange}
+        />
+        <SectionDivider />
         <div className="space-y-2">
           <SectionHeader description="Raw CSS that overrides everything above">Custom CSS</SectionHeader>
           <CSSEditor
@@ -138,5 +164,6 @@ export function StylePanel({ currentSettings, updateSettings, updateNested }: St
         <div className="h-4" />
       </div>
     </ScrollArea>
+    </div>
   );
 }

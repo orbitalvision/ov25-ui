@@ -26,6 +26,20 @@ export function ModuleVariantDetailPanel({
     () => dimensionStringFromModule(module.dimensions),
     [module.dimensions]
   );
+  const dimensionLineResolved = useMemo(() => {
+    if (!dimensionString) return '';
+    return getString(
+      'moduleDetailDimensions',
+      {
+        DIMENSIONS_LINE: dimensionString,
+        PRODUCT_NAME: module.product.name,
+        WIDTH_CM: module.dimensions?.x ?? '',
+        HEIGHT_CM: module.dimensions?.y ?? '',
+        DEPTH_CM: module.dimensions?.z ?? '',
+      },
+      dimensionString,
+    );
+  }, [dimensionString, getString, module.dimensions?.x, module.dimensions?.y, module.dimensions?.z, module.product.name]);
 
   const previewImageUrls = useMemo(
     () => getModuleProductPreviewImageUrls(module.product),
@@ -57,7 +71,7 @@ export function ModuleVariantDetailPanel({
             className="ov25-module-variant-detail-panel__dimensions ov:block ov:w-full ov:text-xs ov:text-gray-500"
             data-ov25-module-variant-detail-part="dimensions"
           >
-            {dimensionString}
+            {dimensionLineResolved}
           </span>
         ) : null}
       </div>
@@ -109,26 +123,41 @@ export function ModuleVariantDetailPanel({
       {(() => {
         const shortD = (module.product.shortDescription ?? '').trim();
         const longD = (module.product.longDescription ?? '').trim();
-        if (!shortD && !longD) return null;
+        const name = module.product.name;
+        const shortResolved = shortD
+          ? getString(
+              'moduleDetailDescriptionShort',
+              { DESCRIPTION: shortD, PRODUCT_NAME: name },
+              shortD,
+            )
+          : '';
+        const longResolved = longD
+          ? getString(
+              'moduleDetailDescriptionLong',
+              { DESCRIPTION: longD, PRODUCT_NAME: name },
+              longD,
+            )
+          : '';
+        if (!shortResolved && !longResolved) return null;
         return (
           <div
             className="ov25-module-variant-detail-panel__descriptions ov:space-y-2"
             data-ov25-module-variant-detail-part="descriptions"
           >
-            {shortD ? (
+            {shortResolved ? (
               <p
                 className="ov25-module-variant-detail-panel__description ov25-module-variant-detail-panel__description-short ov:text-sm ov:text-gray-600 ov:whitespace-pre-wrap"
                 data-ov25-module-variant-detail-part="description-short"
               >
-                {shortD}
+                {shortResolved}
               </p>
             ) : null}
-            {longD ? (
+            {longResolved ? (
               <p
                 className="ov25-module-variant-detail-panel__description ov25-module-variant-detail-panel__description-long ov:text-sm ov:text-gray-600 ov:whitespace-pre-wrap"
                 data-ov25-module-variant-detail-part="description-long"
               >
-                {longD}
+                {longResolved}
               </p>
             ) : null}
           </div>

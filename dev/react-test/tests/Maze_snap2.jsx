@@ -245,7 +245,7 @@ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
     buySwatches: () => {},
   },
   stringReplacements: {
-    variantOptionHeader: [
+    optionHeader: [
       { trigger: { name: 'OPTION_NAME', value: 'upholstery fabrics' }, template: '▽upholstery fabrics▽' },
       { trigger: { name: 'OPTION_NAME', value: 'trims' }, template: '▽trims▽' },
       { template: '${OPTION_NAME}▽▽▽' },

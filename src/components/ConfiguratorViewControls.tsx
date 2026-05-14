@@ -103,7 +103,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
   const copyToClipboard = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      toast.success(getString('shareLinkCopiedToast', undefined, 'Share link copied to clipboard!'), { duration: 3000 });
+      toast.success(getString('shareLinkCopied', undefined, 'Share link copied to clipboard!'), { duration: 3000 });
     } catch (error) {
       // Fallback for older browsers
       const textArea = document.createElement('textarea');
@@ -112,7 +112,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
       textArea.select();
       document.execCommand('copy');
       document.body.removeChild(textArea);
-      toast.success(getString('shareLinkCopiedToast', undefined, 'Share link copied to clipboard!'));
+      toast.success(getString('shareLinkCopied', undefined, 'Share link copied to clipboard!'));
     }
   };
 
@@ -172,8 +172,8 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
     </div> */}
 
       <div className={cn(
-        "ov:pointer-events-none ov:absolute ov:w-full ov:h-full ov:inset-0 ov:gap-2 ov:p-4 ov:flex ov:justify-end ov:items-end ov:z-[101]",
-        "ov:text-[var(--ov25-configurator-view-controls-text-color)]",
+        "ov:pointer-events-none ov:absolute ov:w-full ov:h-full ov:inset-0 ov:gap-2 ov:p-4 ov:flex ov:justify-end ov:items-end ov:z-101",
+        "ov:text-(--ov25-configurator-view-controls-text-color)",
         "ov:transition-all ov:duration-200",
         shareDialogTrigger !== 'none' && "!ov:opacity-0 !ov:pointer-events-none"
       )}>
@@ -181,7 +181,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
           {!controlsHidden && !isSnap2Mode && <button id="ov25-share-button" onClick={handleShare} className={cn(
             'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:items-center ov:justify-center',
             'ov:border ov:rounded-(--ov25-configurator-view-controls-border-radius) ov:border-(--ov25-configurator-view-controls-border-color)',
-            'ov:shadow-sm ov:bg-[var(--ov25-overlay-button-color)]',
+            'ov:shadow-sm ov:bg-(--ov25-overlay-button-color)',
           )}>
             <Upload strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" color="var(--ov25-configurator-view-controls-text-color)"/>
             {!isMobile && (
@@ -345,7 +345,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
         </div>
       )}
       {!isVariantsOpen && !isMobile && !controlsHidden && !isSnap2Mode && !hasConfigureButton && (
-        <div className="ov:absolute ov:ov25-controls-hidden ov:size-full ov:md:flex ov:pointer-events-none ov:inset-0 ov:p-4 ov:justify-end ov:items-start ov:z-[101]">
+        <div className="ov:absolute ov:ov25-controls-hidden ov:size-full ov:md:flex ov:pointer-events-none ov:inset-0 ov:p-4 ov:justify-end ov:items-start ov:z-101">
           <button id="ov25-desktop-fullscreen-button" className={cn(
             'ov:cursor-pointer ov:aspect-square ov:p-2 ov:pointer-events-auto ov:flex ov:gap-2.5 ov:ml-auto ov:items-center ov:justify-center',
             'ov:border ov:rounded-(--ov25-configurator-view-controls-border-radius) ov:border-(--ov25-configurator-view-controls-border-color)',

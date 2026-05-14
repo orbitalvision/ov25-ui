@@ -18,7 +18,7 @@ export const SaveSnap2Menu: React.FC = () => {
       requestSnap2Save();
     } catch (error) {
       console.error('Save error:', error);
-      toast.error(getString('snap2SaveFailedToast', undefined, 'Failed to save configuration'));
+      toast.error(getString('snap2SaveFailedMessage', undefined, 'Failed to save configuration'));
       setShareDialogTrigger('none');
     }
   };

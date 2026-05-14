@@ -1432,12 +1432,13 @@ export const OV25UIProvider: React.FC<{
   },[setIsSwatchBookOpen])
 
   const getString = useCallback(
-    (key: string, vars?: StringInterpolationVars, fallback: string = '') =>
-      resolveStringReplacement({
+    (key: string, vars?: StringInterpolationVars, fallback: string = '') =>{
+      return resolveStringReplacement({
         rules: stringReplacements?.[key],
         vars,
         fallback,
-      }),
+      });
+    },
     [stringReplacements],
   );
 

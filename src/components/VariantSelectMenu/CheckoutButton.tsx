@@ -37,12 +37,13 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
     addToBasketFunction,
     setIsVariantsOpen,
     formattedPrice,
+    formattedSubtotal,
+    discount,
     disableAddToCart,
     getString,
   } = useOV25UI();
-  const addToBasketText = getString('checkoutAddToBasket', undefined, 'Add to basket');
-  const buyNowText = getString('checkoutBuyNow', undefined, 'Buy now');
-
+  const addToBasketText = getString('checkoutAddToBasket', { PRICE: formattedPrice, SUBTOTAL: formattedSubtotal, DISCOUNT_AMOUNT: discount.formattedAmount, DISCOUNT_PERCENTAGE: discount.percentage }, 'Add to basket');
+  const buyNowText = getString('checkoutBuyNow', { PRICE: formattedPrice, SUBTOTAL: formattedSubtotal, DISCOUNT_AMOUNT: discount.formattedAmount, DISCOUNT_PERCENTAGE: discount.percentage }, 'Buy now');
   const hasAddToBasket = typeof addToBasketFunction === 'function';
   const hasBuyNow = typeof buyNowFunction === 'function';
   const effectiveHasAddToBasket = hasAddToBasket && !disableAddToCart;

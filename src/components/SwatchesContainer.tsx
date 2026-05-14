@@ -43,7 +43,7 @@ export const SwatchesContainer: React.FC = () => {
             {swatchRulesData.freeSwatchLimit > 0 && swatchRulesData.maxSwatches !== swatchRulesData.freeSwatchLimit && (
               <span className="ov:text-sm ov:font-light ov:italic">
                 {getString(
-                  'swatchesContainerFirstFreeCount',
+                  'swatchBookFirstFreeCount',
                   { FREE_SWATCH_LIMIT: swatchRulesData.freeSwatchLimit },
                   `First ${swatchRulesData.freeSwatchLimit} are free`,
                 )}

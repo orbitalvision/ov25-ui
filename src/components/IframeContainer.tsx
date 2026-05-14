@@ -86,7 +86,7 @@ export const IframeContainer = () => {
         const root = document.documentElement;
         const cssValue = getComputedStyle(root).getPropertyValue('--ov25-configurator-iframe-background-color').trim();
 
-        if (!cssValue) return null;
+        if (!cssValue) return '#f6f6f6'; // default matching --ov25-secondary-background-color in globals.css
 
         // If already hex format, return it
         if (cssValue.startsWith('#')) {
@@ -162,7 +162,7 @@ export const IframeContainer = () => {
                         id={`ov-25-configurator-product-image-${galleryIndex}`}
                         src={src}
                         alt={`Product image ${galleryIndex}`}
-                        className="ov:object-cover ov:min-h-full ov:min-w-full ov:z-5 ov:absolute ov:inset-0 ov:bg-[var(--ov25-configurator-iframe-background-color)]"
+                        className="ov:object-cover ov:min-h-full ov:min-w-full ov:z-5 ov:absolute ov:inset-0 ov:bg-(--ov25-configurator-iframe-background-color)"
                     />
                 ) : null;
             })()}

@@ -131,7 +131,7 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
   }, [getExportString]);
 
   return (
-    <Tabs defaultValue="settings" className="h-full flex flex-col">
+    <Tabs defaultValue="settings" className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
       <div className="shrink-0">
         <TabsList className="w-full h-9 p-1 bg-muted rounded-full grid grid-cols-2">
           <TabsTrigger
@@ -151,9 +151,9 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
         </TabsList>
       </div>
 
-      <TabsContent value="settings" className="flex-1 min-h-0 mt-0">
-        <ScrollArea className="h-full">
-          <div className="space-y-6 py-2 pr-4">
+      <TabsContent value="settings" className="mt-0 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        <ScrollArea className="h-full min-h-0 min-w-0">
+          <div className="min-w-0 max-w-full space-y-6 py-2 pr-4">
 
             {/* --- Product Type --- */}
             <div className="space-y-3">
@@ -369,7 +369,7 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
         </ScrollArea>
       </TabsContent>
 
-      <TabsContent value="style" className="flex-1 min-h-0 mt-0">
+      <TabsContent value="style" className="mt-0 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <StylePanel currentSettings={currentSettings} updateSettings={updateSettings} updateNested={updateNested} />
       </TabsContent>
 

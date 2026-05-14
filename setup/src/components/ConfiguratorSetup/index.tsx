@@ -43,13 +43,13 @@ export default function ConfiguratorSetup(props: ConfiguratorSetupProps) {
   } = useConfiguratorSetup(overrides);
 
   return (
-    <div className={props.className || 'h-screen flex'}>
+    <div className={props.className || 'flex h-screen min-w-0 overflow-hidden'}>
       {!props.hidePreview && (
-        <main className="flex-1 min-h-0 p-4">
+        <main className="min-h-0 min-w-0 flex-1 overflow-hidden p-4">
           <PreviewArea serializableConfig={serializableConfig} previewBaseUrl={props.previewBaseUrl} useLocalPreview={props.useLocalPreview} />
         </main>
       )}
-      <aside className={props.hidePreview ? 'w-full h-full flex flex-col' : 'w-[370px] shrink-0 border-l bg-white px-4 pt-4 pb-4 h-full flex flex-col overflow-hidden'}>
+      <aside className={props.hidePreview ? 'flex h-full w-full min-w-0 flex-col overflow-hidden' : 'flex h-full w-[370px] shrink-0 flex-col overflow-hidden border-l bg-white px-4 pt-4 pb-4 min-w-0'}>
         <ConfigPanel
           formState={formState}
           currentSettings={currentSettings}

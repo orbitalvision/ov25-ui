@@ -220,7 +220,7 @@ export function ProductVariantsWrapper({
 
     const getTabLabel = (id: string) =>
       getString(
-        'variantOptionHeader',
+        'optionHeader',
         {
           OPTION_NAME:
             id === 'size'
@@ -240,7 +240,7 @@ export function ProductVariantsWrapper({
       <div className=" ov:pb-6">
         {showHeader && (
           <h3 className={`ov25-option-header ov:sticky ov:top-0  ov:px-4 ov:z-10 ov:bg-[var(--ov25-background-color)] ov:text-lg ov:pb-4 ov:text-[var(--ov25-secondary-text-color)] ${isMobileListSticky ? 'ov:pt-2' : 'ov:pt-0'}`}>
-            {capitalizeWords(getString('variantOptionHeader', { OPTION_NAME: 'Size' }, 'Size'))}
+            {capitalizeWords(getString('optionHeader', { OPTION_NAME: 'Size' }, 'Size'))}
           </h3>
         )}
         <div className="ov:bg-[var(--ov25-background-color)] ov:pt-4">
@@ -271,7 +271,7 @@ export function ProductVariantsWrapper({
         {showHeader && (
           <h3 className={`ov25-option-header ov:sticky ov:top-0  ov:px-4 ov:z-10 ov:bg-[var(--ov25-background-color)] ov:text-lg ov:pb-2 ov:md:pb-4 ov:text-[var(--ov25-secondary-text-color)] ${isMobileListSticky ? 'ov:pt-2' : 'ov:pt-0'}`}>
             {capitalizeWords(
-              getString('variantOptionHeader', { OPTION_NAME: optionName }, optionName)
+              getString('optionHeader', { OPTION_NAME: optionName }, optionName)
             )}
           </h3>
         )}
@@ -283,7 +283,7 @@ export function ProductVariantsWrapper({
                 {variants.length > 1 && (
                   <h4 className={`ov25-group-header ov:sticky ov:z-9 ov:bg-(--ov25-background-color) ov:px-4 ov:text-sm ov:pt-6 ov:pb-3 ov:text-(--ov25-secondary-text-color) ov:font-medium ${showHeader ? 'ov:top-10' : 'ov:top-0'}`}>
                     {capitalizeWords(
-                      getString('variantGroupHeader', { GROUP_NAME: group.groupName }, group.groupName)
+                      getString('groupHeader', { GROUP_NAME: group.groupName }, group.groupName)
                     )}
                   </h4>
                 )}

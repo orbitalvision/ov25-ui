@@ -172,7 +172,7 @@ export const FilterControls: React.FC<FilterControlsProps> = ({
                     data-ov25-swatch-flash={swatchBookFlash ?? undefined}
                     className="ov:flex ov:items-center ov:justify-center ov:rounded-full ov:border ov:border-transparent ov:cursor-pointer"
                     onClick={handleSwatchButtonClick}
-                    aria-label={getString('filtersOpenSwatchBookLabel', undefined, 'Open swatch book')}
+                    aria-label={'Open Swatch Book'}
                 >
                     <div className="ov:relative">
                         <SwatchIconSvg

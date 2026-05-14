@@ -355,7 +355,7 @@ export const ModuleBottomPanel: React.FC<{ portalTarget: Element }> = ({ portalT
                         {isMovable && (
                           <button
                             type="button"
-                            aria-label={getString('moduleBottomPlaceMovableLabel', undefined, 'Place movable')}
+                            aria-label="Place Movable"
                             onClick={(e) => handlePlaceMovable(e, module)}
                             className={cn(
                               'ov:absolute ov:top-1 ov:z-30 ov:flex ov:h-7 ov:w-7 ov:items-center ov:justify-center ov:rounded-lg ov:border-0 ov:bg-white ov:shadow-md ov:cursor-pointer',
@@ -368,7 +368,7 @@ export const ModuleBottomPanel: React.FC<{ portalTarget: Element }> = ({ portalT
                         {hasVariableDims && (
                           <button
                             type="button"
-                            aria-label={getString('moduleBottomCustomSizeLabel', undefined, 'Custom size')}
+                            aria-label="Custom Size"
                             onClick={(e) => {
                               e.stopPropagation();
                               setCustomDimsProductId((prev) =>

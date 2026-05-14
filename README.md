@@ -119,6 +119,35 @@ SKU and price data from the iframe are **normalized** before callbacks run:
 
 See [CHANGELOG.md](./CHANGELOG.md) for version notes.
 
+## String replacements
+
+Use `stringReplacements` in `injectConfigurator` to customize built-in UI copy.
+
+```javascript
+import {
+  injectConfigurator,
+  STRING_REPLACEMENT_DEFINITIONS,
+} from 'ov25-ui';
+
+injectConfigurator({
+  // ...existing config
+  stringReplacements: {
+    productTitle: [
+      { template: 'Range: ${RANGE_NAME} / Product: ${PRODUCT_NAME}' },
+    ],
+    optionHeader: [
+      { trigger: { name: 'OPTION_NAME', value: 'leg' }, template: 'Leg Type' },
+      { template: '${OPTION_NAME}' },
+    ],
+  },
+});
+```
+
+- `STRING_REPLACEMENT_DEFINITIONS` exposes all supported keys and interpolation vars for setup UIs.
+- Rules are evaluated case-insensitively for triggers (`trim().toLowerCase()`).
+- Triggered rules are checked first in array order; if none match, the first catch-all rule is used.
+- If no rule resolves, the component fallback string is shown.
+
 ## Testing locally
 
 - There is a minimal react project in dev/react-test which build a simple webpage. 
