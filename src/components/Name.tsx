@@ -13,7 +13,7 @@ const Name: React.FC = () => {
   }, fallbackName ?? '');
   
   return (
-    <Ov25ShadowHost style={{ display: 'block', width: '100%' }}>
+    <Ov25ShadowHost id="ov25-configurator-name-container" style={{ display: 'block', width: '100%' }}>
       <div id="ov25-configurator-name" className={cn("ov:flex ov:flex-col ov:gap-2 ")}>
         <h1 className="ov:text-3xl ov:text-(--ov25-configurator-title-text-color)">{name}</h1>
       </div>
