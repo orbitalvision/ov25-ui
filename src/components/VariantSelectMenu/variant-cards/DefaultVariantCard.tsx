@@ -49,7 +49,7 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
             onClick={() => onSelect(variant)}
             className="ov:cursor-pointer ov:max-w-full"
         >
-            <span className={`ov25-variant-name ov:text-xs ov:text-center ov:text-black ov:line-clamp-3 ${isGrouped && isMobile ? '' : 'ov:pt-2'}`}>
+            <span className={`ov25-variant-name ov:text-xs ov:text-center ov:text-(--ov25-text-color) ov:line-clamp-3 ${isGrouped && isMobile ? '' : 'ov:pt-2'}`}>
                 {getString('variantName', { VARIANT_NAME: variant.name }, variant.name)}
             </span>
             
@@ -68,4 +68,3 @@ export const DefaultVariantCard = React.memo(({ variant, onSelect, index, isMobi
       prevProps.isMobile === nextProps.isMobile
     );
   });
-  
