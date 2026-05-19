@@ -13,6 +13,15 @@ interface ColorInputProps {
   emptyDisplayBackground?: string;
 }
 
+function normalizeHexInput(input: string): string {
+  return input
+    .trim()
+    .replace(/^#+/, '')
+    .replace(/\s/g, '')
+    .replace(/[^0-9A-Fa-f]/g, '')
+    .slice(0, 6);
+}
+
 export function ColorInput({ value, onChange, className, debounceMs = 200, emptyDisplayBackground }: ColorInputProps) {
   const [localColor, setLocalColor] = useState(value);
   const [open, setOpen] = useState(false);
@@ -32,8 +41,9 @@ export function ColorInput({ value, onChange, className, debounceMs = 200, empty
   }, [localColor, value, onChange, debounceMs, emptyDisplayBackground]);
 
   const handleHexChange = (hex: string) => {
-    if (/^#[0-9A-Fa-f]{0,6}$/.test(hex) || hex === '') {
-      setLocalColor(hex || '#000000');
+    const normalizedHex = normalizeHexInput(hex);
+    if (/^[0-9A-Fa-f]{0,6}$/.test(normalizedHex)) {
+      setLocalColor(`#${normalizedHex}`);
     }
   };
 
@@ -71,8 +81,7 @@ export function ColorInput({ value, onChange, className, debounceMs = 200, empty
             <Input
               className="flex-1 font-mono text-sm"
               value={localColor.replace('#', '')}
-              onChange={(e) => handleHexChange(`#${e.target.value}`)}
-              maxLength={6}
+              onChange={(e) => handleHexChange(e.target.value)}
               placeholder="000000"
             />
           </div>
