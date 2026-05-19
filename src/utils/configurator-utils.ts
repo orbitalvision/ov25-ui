@@ -1,7 +1,10 @@
 import { Selection } from '../contexts/ov25-ui-context.js';
 import { BED_IFRAME_ALLOW_NONE_QUERY_KEY } from '../lib/config/bed-embed-query.js';
 import { findIframeWithUniqueId } from './configurator-dom-queries.js';
+import { getConfiguratorBaseUrl } from './configurator-origin.js';
 import type { ModuleProductImageUrls } from './module-product-image-srcset.js';
+
+export const DINING_IFRAME_SHOW_ATTACHMENT_POINTS_QUERY_KEY = 'showAttachmentPoints';
 
 /**
  * Configuration option type
@@ -420,10 +423,9 @@ export const getIframeSrc = (
   configurationUuid?: string | null,
   hexBgColor?: string | null,
   bedAllowNone?: string | null,
+  diningShowAttachmentPoints?: boolean | null,
 ): string => {
-  const useLocal =
-    import.meta.env.USE_LOCAL_DEV === 'true' || import.meta.env.USE_LOCAL_DEV === '1';
-  const baseUrl = 'https://configurator.orbital.vision';
+  const baseUrl = getConfiguratorBaseUrl();
 
   if (!apiKey) {
     apiKey = '';
@@ -457,6 +459,10 @@ export const getIframeSrc = (
 
   if (bedAllowNone != null && bedAllowNone !== '') {
     merged.set(BED_IFRAME_ALLOW_NONE_QUERY_KEY, bedAllowNone);
+  }
+
+  if (diningShowAttachmentPoints === false) {
+    merged.set(DINING_IFRAME_SHOW_ATTACHMENT_POINTS_QUERY_KEY, 'false');
   }
 
   const queryString = merged.toString();

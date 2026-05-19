@@ -17,6 +17,7 @@ import { Toaster } from 'sonner';
 import { getSharedStylesheet, createuserCustomCssStylesheet } from './shadow-styles.js';
 import { findIframeWithUniqueId } from './configurator-dom-queries.js';
 import { computeIsMobileViewport } from './viewport-mobile.js';
+import { injectDiningConfigurator } from './inject-dining.js';
 
 // Import sonner CSS as string
 import sonnerCssText from 'sonner/dist/styles.css?inline';
@@ -196,6 +197,50 @@ export function injectConfigurator(opts: InjectConfiguratorInput | InjectConfigu
 function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions?: InjectInternalOptions) {
   const skipConfigureButton = internalOptions?.skipConfigureButton ?? false;
   const n = normalizeInjectConfig(opts);
+  const resolvedProductLinkForDining =
+    typeof n.productLink === 'function' ? n.productLink() : n.productLink;
+  const diningMatch = String(resolvedProductLinkForDining ?? '').match(/^dining-configurator\/([^/?#]+)/);
+
+  if (diningMatch) {
+    injectDiningConfigurator({
+      apiKey: n.apiKey,
+      diningConfiguratorId: diningMatch[1],
+      selectors: {
+        root: n.rootSelector,
+        gallery: n.gallerySelector,
+        sidebar: n.variantsSelector ?? n.initialiseMenuSelector,
+        price: n.priceSelector,
+        name: n.nameSelector,
+      },
+      callbacks: {
+        addToBasket: n.addToBasketFunction as any,
+        onChange: n.onChangeFunction as any,
+      },
+      branding: {
+        logoURL: n.logoURL,
+        mobileLogoURL: n.mobileLogoURL,
+        styleImages: n.diningStyleImages,
+        cssString: n.cssString,
+        hideLogo: n.hideLogo,
+      },
+      flags: {
+        hidePricing: n.hidePricing,
+        disableAddToCart: n.disableAddToCart,
+        hideAr: n.hideAr,
+        forceMobile: n.forceMobile,
+        currencySymbol: n.currencySymbol,
+      },
+      displayMode: {
+        desktop: n.diningDisplayModeDesktop,
+        mobile: n.diningDisplayModeMobile,
+      },
+      displayOptions: {
+        showAttachmentPoints: n.diningShowAttachmentPoints,
+      },
+      uniqueId: n.uniqueId,
+    });
+    return;
+  }
   ensureOv25WindowStyleSheets();
   const {
     apiKey,
@@ -238,6 +283,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     autoOpen = false,
     uniqueId,
     bedAllowNoneQueryValue,
+    diningShowAttachmentPoints,
     bedFilterSelectionsByCurrentSize,
     currencySymbol,
     stringReplacements,
@@ -933,6 +979,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
         }}
         cssString={cssString}
         bedAllowNoneQueryValue={bedAllowNoneQueryValue}
+        diningShowAttachmentPoints={diningShowAttachmentPoints}
         bedFilterSelectionsByCurrentSize={bedFilterSelectionsByCurrentSize}
         currencySymbol={currencySymbol}
         stringReplacements={stringReplacements}

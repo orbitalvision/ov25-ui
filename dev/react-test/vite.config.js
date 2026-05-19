@@ -16,6 +16,7 @@ const testPages = [
   'single-with-discounts',
   'single-with-groups',
   'single-inline-variants',
+  'animation-test',
   'hidden-logo',
   'inline-variants-disable-add-to-cart',
   'single-custom-button',
@@ -29,6 +30,9 @@ const testPages = [
   'snap2-inline',
   'snap2-uuid',
   'bed-configurator',
+  'dining-configurator',
+  'dining-configurator-full-page',
+  'dining-configurator-no-attachment-points',
   'product-with-swatches',
   'multiple-configurators',
   'multiple-standard-configurators',
@@ -100,6 +104,7 @@ function watchLinkedPackagesReload() {
 }
 
 export default defineConfig({
+  envDir: path.resolve(__dirname, '../..'),
   plugins: [tailwindcss(), react(), watchLinkedPackagesReload()],
   resolve: {
     alias: {

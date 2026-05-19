@@ -77,6 +77,8 @@ export type VariantsConfig = {
 };
 
 export type SelectorsConfig = {
+  /** Root target for full-page display modes that own their own shell. */
+  root?: ElementSelector;
   gallery?: ElementSelector;
   price?: ElementSelector;
   name?: ElementSelector;
@@ -264,6 +266,25 @@ export type BedEmbedConfig = {
   filterSelectionsByCurrentSize?: BedPartSizeFilterFlags;
 };
 
+export type DiningDisplayOptions = {
+  /** Show in-scene dining attachment point buttons. Default true. */
+  showAttachmentPoints?: boolean;
+};
+
+export type DiningStyleImagesConfig = {
+  /** Image for the fixed/full-range style choice. */
+  fullRange?: string;
+  /** Image for the mix-and-match style choice. */
+  mixAndMatch?: string;
+};
+
+export type DiningEmbedConfig = {
+  displayMode?: ResponsiveValue<'split' | 'full-page'>;
+  displayOptions?: DiningDisplayOptions;
+  /** Optional hero images for the initial full-page style-choice screen. */
+  styleImages?: DiningStyleImagesConfig;
+};
+
 /** Primary inject config: grouped structure. */
 export interface InjectConfiguratorOptions {
   apiKey: StringOrFunction;
@@ -281,6 +302,7 @@ export interface InjectConfiguratorOptions {
   flags?: FlagsConfig;
   bed?: BedEmbedConfig;
   stringReplacements?: StringReplacementsConfig;
+  dining?: DiningEmbedConfig;
 }
 
 /** Legacy flat config. Supported for backward compatibility. */
@@ -293,6 +315,8 @@ export interface LegacyInjectConfiguratorOptions {
   stringReplacements?: StringReplacementsConfig;
 
   gallerySelector?: ElementSelector;
+  rootSelector?: ElementSelector;
+  rootId?: ElementSelector;
   priceSelector?: ElementSelector;
   nameSelector?: ElementSelector;
   variantsSelector?: ElementSelector;
@@ -336,6 +360,16 @@ export interface LegacyInjectConfiguratorOptions {
   bedAllowNone?: BedAllowNonePartsInput;
   /** @see {@link BedEmbedConfig.filterSelectionsByCurrentSize} */
   bedFilterSelectionsByCurrentSize?: BedPartSizeFilterFlags;
+  /** @see {@link DiningDisplayOptions.showAttachmentPoints} */
+  showDiningAttachmentPoints?: boolean;
+  /** @see {@link DiningEmbedConfig.displayMode} */
+  diningDisplayMode?: 'split' | 'full-page';
+  /** @see {@link DiningEmbedConfig.displayMode} */
+  diningDisplayModeMobile?: 'split' | 'full-page';
+  /** @see {@link DiningEmbedConfig.styleImages} */
+  diningFullRangeImageURL?: string;
+  /** @see {@link DiningEmbedConfig.styleImages} */
+  diningMixAndMatchImageURL?: string;
 
   galleryId?: ElementSelector;
   priceId?: ElementSelector;
@@ -362,6 +396,7 @@ export interface NormalizedInjectConfig {
   stringReplacements?: StringReplacementsConfig;
 
   gallerySelector?: ElementSelector;
+  rootSelector?: ElementSelector;
   priceSelector?: ElementSelector;
   nameSelector?: ElementSelector;
   variantsSelector?: ElementSelector;
@@ -405,6 +440,13 @@ export interface NormalizedInjectConfig {
 
   /** Serialized `bedAllowNone` query value; omit when unset (OV25 default: all parts may use None). */
   bedAllowNoneQueryValue?: string;
+  /** When false, adds `showAttachmentPoints=false` to dining iframe URLs. */
+  diningShowAttachmentPoints?: boolean;
+  /** Dining UI shell display mode. */
+  diningDisplayModeDesktop: 'split' | 'full-page';
+  diningDisplayModeMobile: 'split' | 'full-page';
+  /** Dining full-page style choice hero images. */
+  diningStyleImages?: DiningStyleImagesConfig;
   /** Bed variant UI: hide non-matching `metadata.bedSize` per line when enabled. */
   bedFilterSelectionsByCurrentSize: BedPartSizeFilterFlags;
   /** Display symbol for iframe price strings; see {@link FlagsConfig.currencySymbol}. */
@@ -445,8 +487,10 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
   const flags = isGrouped ? pick(c, 'flags') : undefined;
   const bedGrouped = isGrouped ? pick(c, 'bed') : undefined;
   const stringReplacements = c.stringReplacements;
+  const diningGrouped = isGrouped ? pick(c, 'dining') : undefined;
 
   const gallerySelector = selectors?.gallery ?? c.gallerySelector ?? c.galleryId;
+  const rootSelector = selectors?.root ?? c.rootSelector ?? c.rootId;
   const priceSelector = selectors?.price ?? c.priceSelector ?? c.priceId;
   const nameSelector = selectors?.name ?? c.nameSelector ?? c.nameId;
   const variantsSelector = selectors?.variants ?? c.variantsSelector ?? c.variantsId;
@@ -535,6 +579,20 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
     bedAllowNoneParts !== undefined
       ? serializeBedAllowNoneQueryValue(bedAllowNoneParts)
       : undefined;
+  const diningShowAttachmentPoints =
+    diningGrouped?.displayOptions?.showAttachmentPoints ?? c.showDiningAttachmentPoints;
+  const diningDisplayModeDesktop =
+    diningGrouped?.displayMode?.desktop ?? c.diningDisplayMode ?? 'split';
+  const diningDisplayModeMobile =
+    diningGrouped?.displayMode?.mobile ?? c.diningDisplayModeMobile ?? diningDisplayModeDesktop;
+  const diningStyleImages =
+    diningGrouped?.styleImages ??
+    ((c.diningFullRangeImageURL || c.diningMixAndMatchImageURL)
+      ? {
+          fullRange: c.diningFullRangeImageURL,
+          mixAndMatch: c.diningMixAndMatchImageURL,
+        }
+      : undefined);
 
   const bedFilterRaw: BedPartSizeFilterFlags | undefined =
     bedGrouped?.filterSelectionsByCurrentSize ?? c.bedFilterSelectionsByCurrentSize;
@@ -552,6 +610,7 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
     uniqueId: opts.uniqueId,
     stringReplacements,
     gallerySelector,
+    rootSelector,
     priceSelector,
     nameSelector,
     variantsSelector,
@@ -586,6 +645,10 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
     forceMobile,
     autoOpen,
     bedAllowNoneQueryValue,
+    diningShowAttachmentPoints,
+    diningDisplayModeDesktop,
+    diningDisplayModeMobile,
+    diningStyleImages,
     bedFilterSelectionsByCurrentSize,
     currencySymbol,
     snap2VariantSheetSideDesktop,

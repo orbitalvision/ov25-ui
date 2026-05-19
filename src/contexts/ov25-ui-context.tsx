@@ -270,6 +270,8 @@ interface OV25UIContextType {
   stringReplacements?: StringReplacementsConfig;
   /** OV25 bed iframe: `bedAllowNone` query segment (omit when all parts may use None). */
   bedAllowNoneQueryValue?: string;
+  /** Dining iframe display option. Omitted unless explicitly false. */
+  diningShowAttachmentPoints?: boolean;
   /** Bed iframe: latest size from `CURRENT_BED_SIZE` postMessage (`null` until first message or non-bed). */
   currentBedSize: string | null;
   /** When true for a part, selections in that option hide if `metadata.bedSize` ≠ {@link currentBedSize}. */
@@ -449,6 +451,7 @@ export const OV25UIProvider: React.FC<{
   configurationUuid: string,
   stringReplacements?: StringReplacementsConfig,
   bedAllowNoneQueryValue?: string,
+  diningShowAttachmentPoints?: boolean,
   bedFilterSelectionsByCurrentSize?: BedPartSizeFilterFlags,
   buyNowFunction: (payload?: OnChangePayload) => void,
   addToBasketFunction: (payload?: OnChangePayload) => void,
@@ -513,6 +516,7 @@ export const OV25UIProvider: React.FC<{
   configurationUuid,
   stringReplacements,
   bedAllowNoneQueryValue,
+  diningShowAttachmentPoints,
   bedFilterSelectionsByCurrentSize: bedFilterSelectionsByCurrentSizeProp,
   buyNowFunction,
   addToBasketFunction,
@@ -1972,6 +1976,7 @@ export const OV25UIProvider: React.FC<{
     configurationUuid,
     stringReplacements,
     bedAllowNoneQueryValue,
+    diningShowAttachmentPoints,
     currentBedSize,
     bedFilterSelectionsByCurrentSize,
     currencySymbol: effectiveCurrencySymbol,

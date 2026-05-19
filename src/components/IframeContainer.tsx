@@ -17,6 +17,7 @@ export const IframeContainer = () => {
         apiKey,
         configurationUuid,
         bedAllowNoneQueryValue,
+        diningShowAttachmentPoints,
         galleryIndexToUse,
         images: passedImages,
         isProductGalleryStacked: isStacked,
@@ -113,8 +114,8 @@ export const IframeContainer = () => {
 
     // Use the utility function to get the iframe src
     const iframeSrc = useMemo(() =>
-        getIframeSrc(apiKey, productLink, configurationUuid, hexBgColor, bedAllowNoneQueryValue),
-        [productLink, apiKey, configurationUuid, hexBgColor, bedAllowNoneQueryValue]);
+        getIframeSrc(apiKey, productLink, configurationUuid, hexBgColor, bedAllowNoneQueryValue, diningShowAttachmentPoints),
+        [productLink, apiKey, configurationUuid, hexBgColor, bedAllowNoneQueryValue, diningShowAttachmentPoints]);
 
     const isStackedStyles = cn(
         snap2DesktopModalStackedFill
