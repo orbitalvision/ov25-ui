@@ -16,7 +16,7 @@ const BASE_CONFIG = {
     price: { selector: '#price', replace: true },
     name: { selector: '#name', replace: true },
   },
-  carousel: { desktop: 'carousel', mobile: 'carousel', maxImages: { desktop: 12, mobile: 6 } },
+  carousel: { desktop: 'carousel', mobile: 'carousel', maxImages: { desktop: 16, mobile: 10 } },
   configurator: {
     displayMode: { desktop: 'sheet', mobile: 'drawer' },
     triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
@@ -27,7 +27,7 @@ const BASE_CONFIG = {
 };
 
 function App() {
-  const [imageCount, setImageCount] = useState(5);
+  const [imageCount, setImageCount] = useState(16);
   const config = useMemo(() => /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
     ...BASE_CONFIG,
     images: Array.from({ length: imageCount }, (_, i) => `https://picsum.photos/600/600?random=${i + 1}`),
@@ -35,7 +35,7 @@ function App() {
   return (
     <TestPageLayout
       title="Gallery - Carousel Horizontal"
-      description="Carousel thumbnails horizontal on desktop and mobile."
+      description="Scrollable carousel thumbnails horizontal on desktop and mobile."
       injectConfig={config}
       showProductTabs
       topContent={<ImageCountControl count={imageCount} onChange={setImageCount} />}

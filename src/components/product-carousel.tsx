@@ -8,6 +8,8 @@ function isThreeDPlaceholder(item: unknown): item is { is3D: true } {
   return typeof item === 'object' && item !== null && 'is3D' in item && (item as { is3D: boolean }).is3D === true
 }
 
+const DRAG_THRESHOLD_PX = 5
+
 export function ProductCarousel() {
   const {
     currentProduct,
@@ -64,8 +66,10 @@ export function ProductCarousel() {
     if (useStackedLayout) return;
     const onMove = (e: MouseEvent) => {
       if (!dragRef.current.isDragging || !scrollRef.current) return;
+      const deltaX = dragRef.current.startX - e.clientX;
+      if (!dragRef.current.didDrag && Math.abs(deltaX) <= DRAG_THRESHOLD_PX) return;
       dragRef.current.didDrag = true;
-      scrollRef.current.scrollLeft = dragRef.current.startScrollLeft + dragRef.current.startX - e.clientX;
+      scrollRef.current.scrollLeft = dragRef.current.startScrollLeft + deltaX;
     };
     const onUp = () => { dragRef.current.isDragging = false; };
     document.addEventListener('mousemove', onMove);
