@@ -267,6 +267,7 @@ export function ModuleVariantCard({
           'ov:inset-0 ov:z-2147483647 ov:pointer-events-auto',
           isMobile || variantSheetPortalEl == null ? 'ov:fixed' : 'ov:absolute'
         )}
+        style={{ zIndex: 2147483647 }}
       >
         <div
           role="dialog"
