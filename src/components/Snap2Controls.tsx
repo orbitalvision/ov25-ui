@@ -176,7 +176,7 @@ const Snap2Controls: React.FC = () => {
               title={getString('snap2ControlsToggleFloorTitle', undefined, 'Toggle floor grid')}
               aria-label={getString('snap2ControlsToggleFloorTitle', undefined, 'Toggle floor grid')}
               className={cn(
-                'ov:cursor-pointer ov:w-8 ov:h-8 ov:items-center ov:justify-center ov:transition-all ov:duration-200 ov:hover:opacity-80 ov:shadow-sm ov:rounded-full',
+                'ov:cursor-pointer ov:w-8 ov:h-8 ov:flex ov:items-center ov:justify-center ov:transition-all ov:duration-200 ov:hover:opacity-80 ov:shadow-sm ov:rounded-full',
                 showFloor ? 'ov:ring-2 ov:ring-neutral-400' : '',
                 'ov:bg-(--ov25-overlay-button-color)'
               )}
@@ -207,7 +207,7 @@ const Snap2Controls: React.FC = () => {
               disabled={isCapturingScreenshots}
               onClick={() => void handleCaptureScreenshots()}
               className={cn(
-                'ov:cursor-pointer ov:w-8 ov:h-8 ov:items-center ov:justify-center ov:transition-all ov:duration-200 ov:shadow-sm ov:rounded-full ov:bg-(--ov25-overlay-button-color)',
+                'ov:cursor-pointer ov:w-8 ov:h-8 ov:flex ov:items-center ov:justify-center ov:transition-all ov:duration-200 ov:shadow-sm ov:rounded-full ov:bg-(--ov25-overlay-button-color)',
                 'ov:hover:opacity-80 ov:disabled:opacity-50 ov:disabled:cursor-not-allowed',
               )}
             >
