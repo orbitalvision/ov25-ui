@@ -5,9 +5,10 @@ const DEFAULT_LOGO_URL = 'https://ov25.orbital.vision/OV.png';
 export interface OVOrBrandLogoProps {
   imageUrl?: string;
   className?: string;
+  style?: React.CSSProperties;
 }
 
-export const OVOrBrandLogo: React.FC<OVOrBrandLogoProps> = ({ imageUrl, className = '' }) => {
+export const OVOrBrandLogo: React.FC<OVOrBrandLogoProps> = ({ imageUrl, className = '', style }) => {
   const effectiveUrl = imageUrl ?? DEFAULT_LOGO_URL;
   const isDefault = !imageUrl;
 
@@ -26,13 +27,14 @@ export const OVOrBrandLogo: React.FC<OVOrBrandLogoProps> = ({ imageUrl, classNam
           maskSize: 'contain',
           maskRepeat: 'no-repeat',
           maskPosition: 'center',
+          ...style,
         }}
       />
     );
   }
 
   return (
-    <div className={`ov:flex ov:flex-col ov:items-center ov:justify-center ${className}`}>
+    <div className={`ov:flex ov:flex-col ov:items-center ov:justify-center ${className}`} style={style}>
       <img className="ov:h-full ov:w-auto ov:object-contain" src={effectiveUrl} alt="" />
     </div>
   );

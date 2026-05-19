@@ -8,6 +8,7 @@ declare module '*.png' {
 interface ImportMetaEnv {
   readonly VITE_MAZE_APIKEY?: string;
   readonly VITE_DEMO_RETAILER_APIKEY?: string;
+  readonly VITE_COUCH_AND_CO_APIKEY?: string;
   readonly VITE_DEV_RETAILER_APIKEY?: string;
   readonly VITE_DIAMOND_APIKEY?: string;
   readonly VITE_ARLO_APIKEY?: string;

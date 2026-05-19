@@ -156,9 +156,12 @@ injectConfigurator({
 - To run, go to root directory of ov25-ui. run `npm run dev`. This will build the project and then spin up the react project
 - Go to http://localhost:3000
 
+### Local OV25 configurator dev
+
+Set `OV25_CONFIGURATOR_DEV=true` when building/running `ov25-ui` to point iframe URLs at the local OV25 app via `http://<current-host>:3000/configurator/...`. This keeps LAN devices such as iOS Safari away from `configurator.localhost`. `USE_LOCAL_DEV=true` still works as a legacy alias.
+
 ## Running tests locally
 
 - `npm run test:unit` for unit tests
 - `npm run test:e2e` for full end-to-end tests (page navigation network requests, all browser features, SLOW)
 - `npm run test:browser` for simpler frontend tests (component testing but with real browser APIs)
-

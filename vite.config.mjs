@@ -8,11 +8,19 @@ const __dirname = fileURLToPath(new URL('.', import.meta.url))
 export default defineConfig(({ mode }) => {
   // process.env does not include .env until loadEnv runs (config is evaluated first).
   const env = loadEnv(mode, process.cwd(), '')
+  const ov25ConfiguratorDev =
+    env.OV25_CONFIGURATOR_DEV ??
+    env.VITE_OV25_CONFIGURATOR_DEV ??
+    env['ov25-configurator-dev'] ??
+    env.USE_LOCAL_DEV ??
+    '';
   return {
   plugins: [
     tailwindcss(),
   ],
   define: {
+    'import.meta.env.OV25_CONFIGURATOR_DEV': JSON.stringify(ov25ConfiguratorDev),
+    'import.meta.env.VITE_OV25_CONFIGURATOR_DEV': JSON.stringify(env.VITE_OV25_CONFIGURATOR_DEV ?? ''),
     'import.meta.env.USE_LOCAL_DEV': JSON.stringify(env.USE_LOCAL_DEV ?? ''),
   },
   build: {
