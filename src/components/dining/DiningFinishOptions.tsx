@@ -151,7 +151,7 @@ export const DiningFinishOptions: React.FC<DiningFinishOptionsProps> = ({
           </span>
           {option.groups.map(group => {
             const optionTitle = stripProductNamePrefix(option.name, product.name);
-            const showGroupName = shouldShowGroupName(group.name, optionTitle, option.groups.length);
+            const showGroupName = option.groups.length > 1 && shouldShowGroupName(group.name, optionTitle, option.groups.length);
 
             return (
               <div
