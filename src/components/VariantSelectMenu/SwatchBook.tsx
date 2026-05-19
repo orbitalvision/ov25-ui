@@ -46,7 +46,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
   const emptyDescriptionTemplate = getString(
     'swatchBookEmptyDescription',
     { CONFIGURATOR_LINK_TEXT: configuratorLinkText },
-    'Use the ${CONFIGURATOR_LINK_TEXT} to view fabrics and select swatch samples',
+    'Use the configurator to view fabrics and select swatch samples. ',
   );
   const [emptyDescriptionPrefix, ...emptyDescriptionSuffixParts] =
     emptyDescriptionTemplate.split(configuratorLinkText);
