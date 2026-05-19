@@ -183,7 +183,7 @@ export function ProductCarousel() {
           isSelected && "ov:ring-2 ov:ring-[var(--ov25-primary-color)]"
         )}
       >
-          <div className="ov:w-full ov:h-full ov:absolute ov:inset-0 ov:bg-black"></div>
+          {/* <div className="ov:w-full ov:h-full ov:absolute ov:inset-0 ov:bg-black"></div> */}
         <img
           src={resolveImageUrl(item as any, 'carousel') || "/placeholder.svg"}
           alt={`Product thumbnail ${index}`}
