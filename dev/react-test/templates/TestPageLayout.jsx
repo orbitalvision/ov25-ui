@@ -62,6 +62,8 @@ function ProductTabs() {
  * @param {boolean} [props.dynamicConfig] - When true, re-initializes when injectConfig changes
  * @param {boolean} [props.showTestBackButton] - When false, hides the fixed “Back to list” control (e.g. embedded in another test page)
  * @param {boolean} [props.fullWidthGallery] - When true, gallery column is full width and aside stacks below (single column layout)
+ * @param {boolean} [props.wideConfigurator] - When true, removes the app max-width and gives the gallery a fixed-height, full-width slot
+ * @param {boolean} [props.configuratorTall] - When true, uses a taller viewport-capped configurator slot
  */
 export function TestPageLayout({
   title,
@@ -76,6 +78,8 @@ export function TestPageLayout({
   dynamicConfig = false,
   showTestBackButton = true,
   fullWidthGallery = false,
+  wideConfigurator = false,
+  configuratorTall = false,
 }) {
   useEffect(() => {
     if (!dynamicConfig && configuratorInitialized) return;
@@ -92,29 +96,38 @@ export function TestPageLayout({
     configuratorInitialized = true;
   }, dynamicConfig ? [injectConfig] : []);
 
+  const useFullWidthLayout = fullWidthGallery || wideConfigurator;
+  const appStyle = wideConfigurator ? { maxWidth: 'none', width: '100%' } : undefined;
+  const configuratorHeightClassName = configuratorTall
+    ? 'ov:h-[calc(100svh-180px)] ov:max-h-[760px]'
+    : 'ov:h-[560px] ov:max-h-[560px]';
+  const galleryContainerClassName = wideConfigurator || configuratorTall
+    ? `configurator-container ov:w-full ${wideConfigurator ? 'ov:max-w-none' : ''} ${configuratorHeightClassName} ov:overflow-hidden`
+    : 'configurator-container ov:w-full';
+
   return (
     <ViewportWrapper>
-      <div className="app">
+      <div className="app" style={appStyle}>
         {showTestBackButton ? <TestBackButton /> : null}
         <h1>{title}</h1>
         <p className="ov:mb-4 ov:text-[#525252]">{description}</p>
         {topContent}
         <div
           className={
-            fullWidthGallery
+            useFullWidthLayout
               ? 'ov:flex ov:flex-col ov:items-stretch ov:gap-4'
               : 'ov:flex ov:flex-col ov:md:flex-row ov:md:items-start'
           }
         >
-          <div className={fullWidthGallery ? 'ov:w-full' : 'ov:w-full ov:md:w-[55%]'}>
-            <div className="configurator-container ov:w-full">
+          <div className={useFullWidthLayout ? 'ov:w-full' : 'ov:w-full ov:md:w-[55%]'}>
+            <div className={galleryContainerClassName}>
               <img src={sofaImage} alt="Product" />
             </div>
           </div>
           <div
             id="ov25-aside-menu"
             className={
-              fullWidthGallery
+              useFullWidthLayout
                 ? 'ov:w-full ov:h-full'
                 : 'ov:w-full ov:md:w-[35%] ov:h-full ov:md:mt-0 ov:md:ml-4'
             }

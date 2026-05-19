@@ -1,0 +1,4 @@
+interface:
+  display_name: "OV25 String Replacements"
+  short_description: "Protect customer-facing OV25 UI copy"
+  default_prompt: "Use $ov25-string-replacements to make all customer-facing ov25-ui strings configurable via stringReplacements."

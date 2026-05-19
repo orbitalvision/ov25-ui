@@ -159,7 +159,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
                     <button
                       onClick={() => setZoomedSwatch(swatch)}
                       className='ov25-swatch-zoom-button ov:flex ov:items-center ov:justify-center ov:absolute ov:inset-0 ov:z-0 ov:cursor-pointer'
-                      title={getString('swatchBookZoomTitle', undefined, 'Zoom image')}
+                      title="Zoom image"
                     >
                       <div className='ov25-swatch-zoom-in-icon ov:flex ov:items-center ov:justify-center ov:w-8 ov:h-8 ov:md:w-10 ov:md:h-10 ov:bg-gray-100 ov:rounded-full ov:opacity-40 ov:md:opacity-0 ov:transition-opacity ov:group-hover:opacity-80'>
                         <ZoomIn className='ov25-swatch-icon ov:w-4 ov:h-4'/>
@@ -220,4 +220,4 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
       </DialogContent>
     </Dialog>
   );
-}; 
+};
