@@ -24,6 +24,12 @@ export const Snap2ConfigureUI: React.FC = () => {
   const showModuleSelect = activeOptionId === 'modules' && !hasSnap2Objects;
   const snap2MobileInline =
     isSnap2Mode && isMobile && configuratorDisplayModeMobile === 'inline';
+  // IframeContainer owns Snap2 controls except mobile drawer/sheet, where it suppresses them.
+  const snap2MobileExternalControls =
+    isSnap2Mode &&
+    isMobile &&
+    configuratorDisplayModeMobile !== 'inline' &&
+    configuratorDisplayModeMobile !== 'modal';
 
   useEffect(() => {
     if (isMobile && !hasInitializedMobileRef.current) {
@@ -115,7 +121,7 @@ export const Snap2ConfigureUI: React.FC = () => {
                   : `${typeof window !== 'undefined' ? window.innerHeight * DRAWER_HEIGHT_RATIO : 0}px`
               }}
             >
-              <ConfiguratorViewControls />
+              {snap2MobileExternalControls && <ConfiguratorViewControls />}
             </div>
           </>
         </Ov25ShadowHost>,
@@ -166,7 +172,6 @@ export const Snap2ConfigureUI: React.FC = () => {
           )}>
             <div className="ov:relative ov:flex-1 ov:min-h-0 ov:flex ov:flex-col">
               <ProductGallery key={`gallery-${iframeResetKey}`} isInModal={isModalOpen} isPreloading={preloading} />
-              <ConfiguratorViewControls />
             </div>
           </div>
         </Snap2ConfiguratorModal>
@@ -189,4 +194,3 @@ export const Snap2ConfigureButton: React.FC = () => {
     </div>
   );
 };
-
