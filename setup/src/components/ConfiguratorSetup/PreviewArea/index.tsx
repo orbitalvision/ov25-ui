@@ -13,7 +13,7 @@ const OV25_PREVIEW_READY = 'OV25_PREVIEW_READY';
 function previewIframeSrc(previewBaseUrl: string | undefined, useLocalPreview: boolean | undefined) {
   if (previewBaseUrl) return previewBaseUrl;
   if (typeof window === 'undefined') return CONFIGURATOR_PREVIEW_PRODUCTION_BASE_URL;
-  if (useLocalPreview === false) return CONFIGURATOR_PREVIEW_PRODUCTION_BASE_URL;
+  if (!useLocalPreview) return CONFIGURATOR_PREVIEW_PRODUCTION_BASE_URL;
   const h = window.location.hostname;
   if (h === 'localhost' || h === '127.0.0.1') return CONFIGURATOR_PREVIEW_LOCAL_BASE_URL;
   return CONFIGURATOR_PREVIEW_PRODUCTION_BASE_URL;

@@ -1,6 +1,6 @@
 {
   "name": "ov25-setup",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "OV25 Configurator Setup visual editor component",
   "type": "module",
   "main": "dist/index.js",
