@@ -20,6 +20,10 @@ jobs:
           node-version: 22
           registry-url: https://registry.npmjs.org
 
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
       - name: Publish ov25-setup
         run: node scripts/release/publish-ci.js --package ov25-setup --tag "$GITHUB_REF_NAME"
 

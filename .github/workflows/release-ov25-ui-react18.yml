@@ -20,6 +20,10 @@ jobs:
           node-version: 22
           registry-url: https://registry.npmjs.org
 
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
       - run: npm ci --legacy-peer-deps
 
       - name: Publish ov25-ui-react18
