@@ -1,6 +1,6 @@
 ---
 name: ov25-compatibility-guard
-description: Prevent breaking changes across OV25 packages and storefront integrations. Use when editing, reviewing, planning, or releasing ov25-ui, ov25-ui-react18, ov25-setup, shopify-plugin, ov25-woo-extension, or OV25 changes, especially when changes may affect automatic plugin/client updates, public APIs, payloads, CSS selectors, metafields, cart/checkout behavior, Shopify runtime behavior, or release compatibility.
+description: Prevent breaking changes across OV25 packages and storefront integrations. Use when editing, reviewing, planning, or releasing ov25-ui, ov25-ui-react18, ov25-setup, shopify-plugin, ov25-woo-extension, or OV25 changes, especially when changes may affect automatic plugin/client updates, public APIs, frontend DOM structure, payloads, CSS selectors, metafields, cart/checkout behavior, Shopify plugin behavior, or release compatibility.
 ---
 
 # OV25 Compatibility Guard
@@ -22,7 +22,7 @@ The goal is that patch/minor updates can be rolled out automatically without bre
 
 Do not introduce breaking changes unless the user explicitly requests a breaking release and the change includes a migration plan, compatibility shim, release notes, and manual rollout path.
 
-When in doubt, preserve old behavior and add new behavior behind an additive option, feature flag, runtime version, or fallback path.
+When in doubt, preserve old behavior and add new behavior behind an additive option, feature flag, or separate path.
 
 ## Compatibility Contract
 
@@ -54,24 +54,34 @@ Not allowed without explicit breaking-release approval:
 
 ### DOM, CSS, And Selector Contracts
 
+Client styling is part of the public contract. Clients may style `ov25-ui` through Shopify/WooCommerce theme CSS or by passing `cssString` into `injectConfigurator`. Any DOM, HTML, id/class, data attribute, shadow-root, or nesting change can break those selectors even when TypeScript APIs are unchanged.
+
 Preserve:
 
+- Existing frontend DOM/HTML structure when a selector may reasonably target it.
 - Existing ids and class names that client CSS or Shopify/WooCommerce adapters may target.
+- Existing element types for styled controls where practical (`button`, `input`, `h1`, `p`, etc.).
+- Existing parent/child nesting for common styling hooks where practical.
 - Shadow-root ids such as price/name/selectors unless a compatibility wrapper remains.
 - Existing `data-*` attributes used by fixtures, themes, or integrations.
 - CSS variable names and meanings.
+- Existing `cssString` behavior and where it is injected/applied.
 
 Allowed:
 
-- Add wrapper elements if existing selectors still resolve.
+- Add wrapper elements only if existing selectors still resolve and existing custom CSS keeps applying.
 - Add new stable selector ids/classes.
 - Add CSS variables with defaults.
+- Add duplicate compatibility hooks when moving markup is necessary.
 
 Not allowed without explicit breaking-release approval:
 
 - Moving existing ids out of their shadow/root context.
 - Removing ids/classes used by themes.
+- Renaming or restructuring HTML that likely invalidates existing descendant/child selectors.
+- Changing element types when clients may target the tag name or browser default behavior.
 - Renaming CSS variables.
+- Changing `cssString` scoping, injection order, or shadow-host behavior.
 - Changing selector defaults in Shopify/WooCommerce adapters.
 
 ### Shopify Compatibility
@@ -81,7 +91,7 @@ The Shopify app/plugin must stay safe for live client sites.
 Preserve:
 
 - Existing metafield names and fallback handling.
-- Existing `window.*` globals until the stable shell/runtime migration is complete.
+- Existing `window.*` globals and Liquid-provided browser state.
 - Existing cart item property names, especially `_ov25_*`.
 - Existing checkout/invoice request payload shapes.
 - Existing Snap2 and bed-configurator handling.
@@ -90,7 +100,7 @@ Allowed:
 
 - Pass through new raw metafields as inert data.
 - Add new theme settings with safe defaults.
-- Add versioned runtime behavior gated by `stable`, `next`, or `pinned`.
+- Add new behavior behind explicit, safe opt-in settings.
 - Add new optional cart properties while preserving old ones.
 
 Not allowed without explicit breaking-release approval:
@@ -98,8 +108,7 @@ Not allowed without explicit breaking-release approval:
 - Changing checkout interception behavior globally.
 - Removing old metafield fallbacks.
 - Changing `_ov25_*` property semantics.
-- Bundling risky new runtime logic directly into the stable Shopify shell.
-- Making a Shopify app version update immediately activate behavior that should be client-tested on staging.
+- Making a Shopify app/plugin update immediately activate risky behavior on live client sites.
 
 ### WooCommerce Compatibility
 
@@ -152,6 +161,8 @@ Not allowed without explicit breaking-release approval:
 Before finishing any change, answer these questions:
 
 - Does this remove or rename any public export, type, option, callback, field, selector, CSS variable, metafield, or cart property?
+- Does this alter frontend DOM/HTML structure that a theme stylesheet or `injectConfigurator({ cssString })` selector may target?
+- Do existing ids/classes/data attributes still exist in the same shadow/root context?
 - Does this change default behavior for existing clients?
 - Does this require Shopify or WooCommerce clients to update theme/app/plugin code immediately?
 - Does this change checkout, cart, price, SKU, or invoice behavior?
@@ -192,6 +203,7 @@ For compatibility-sensitive changes, add or run tests that cover:
 - Missing optional fields.
 - Unknown extra fields.
 - Existing selectors/classes/ids still present.
+- Existing DOM structure or compatibility hooks still allow old theme CSS and `cssString` selectors to apply.
 - Existing commerce payloads still parse.
 - Shopify standard, Snap2, and bed-configurator fixtures where relevant.
 - WooCommerce cart/property mapping where relevant.
@@ -206,4 +218,3 @@ When using this skill, include a concise compatibility note:
 - `Compatibility: preserved` when the change is additive/backwards-compatible.
 - `Compatibility risk: ...` when behavior may affect clients.
 - `Breaking-change approval needed: ...` when the change should not ship automatically.
-
