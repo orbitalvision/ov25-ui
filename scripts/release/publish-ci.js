@@ -205,6 +205,7 @@ function main() {
 
   if (packageName === 'ov25-setup') {
     waitForPackage('ov25-ui', version, logPath);
+    runLogged(logPath, 'npm', ['install', '--package-lock-only', '--ignore-scripts', '--legacy-peer-deps'], { cwd: config.cwd });
     runLogged(logPath, 'npm', ['ci', '--legacy-peer-deps'], { cwd: config.cwd });
   }
 
