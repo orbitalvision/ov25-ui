@@ -24,6 +24,11 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Use npm 11 for Trusted Publishing
+        run: |
+          npm install -g npm@^11.5.1
+          npm --version
+
       - run: npm ci --legacy-peer-deps
 
       - name: Publish ov25-ui-react18

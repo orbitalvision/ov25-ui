@@ -1,0 +1,22 @@
+1fc5ba6 (HEAD -> main, origin/main, origin/HEAD) release automation. release review/compile script. test script. release script. github workflows. move scripts to bun. fix and re-enable playwright tests. prevent local publish of packages.
+4f357c2 always use prod if useLocalPreview value is undefined. ov25-ui v0.7.1
+07342a9 ov25-ui v0.7.0 ov25-setup v0.7.0
+72e2620 removed black background on carousel images
+2748282 fix test when no replacement
+f722b0e Merge remote-tracking branch 'origin/main'
+2ff7eec add z-index to module detail sheet so it appears on mobile
+5c22a27 hide group name when there is only one on dining config
+b6016ce hide screenshots button on mobile, shorten view control on mobile
+0b649ae Merge remote-tracking branch 'origin/main'
+51ac9ec missing test file
+0b5dfed added a new full page dining configurator ui
+c8b444e remove duplicate snap2 controls (a dupe was hiding in the DOM sometimes, not visible)
+a5b22fe add missing flex to new buttons so svgs are centered
+486b3a1 alllow pasting hexcodes into configurator setup (with or without leading #)
+90c5f4c 5px threshold for carousel scrolling (allows clicking images with minor mouse movement)
+63256a6 minor string-replacement additions. configurator-sizing test suite.
+a594844 add bonus container ids outside shadow root for name and price
+efbc93b variant name should not be hardcoded to black - it should pull from --vars.
+250dd35 (origin/string-interpolation-replacement, string-interpolation-replacement, bug7-variant-thumb-padding, bug6-snap2-single-controls, bug5-setup-color-paste, bug4-carousel-drag-threshold, bug3-defer3d-first-selection, bug2-name-host-selector, bug11-snap2-initialise-tooltips, bug-auto-open-configurator) mild ov25-setup right panel style
+30417cf stringReplacements. full replacement of all strings in ov25-ui. UI for ov25-setup to define and pass stringReplacements.
+67c7377 add stringReplacements to inject config. replace all strings in project with call to getString(...). export getOv25String and STRING_REPLACEMENT_DEFINITIONS so consumers can also get strings. remove unused title prop from ProductVariants

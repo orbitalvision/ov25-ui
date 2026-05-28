@@ -24,6 +24,11 @@ jobs:
         with:
           bun-version: latest
 
+      - name: Use npm 11 for Trusted Publishing
+        run: |
+          npm install -g npm@^11.5.1
+          npm --version
+
       - name: Publish ov25-setup
         run: node scripts/release/publish-ci.js --package ov25-setup --tag "$GITHUB_REF_NAME"
 

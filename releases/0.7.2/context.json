@@ -1,0 +1,39 @@
+{
+  "generatedAt": "2026-05-28T10:59:16.181Z",
+  "package": "ov25-ui",
+  "bump": "patch",
+  "currentVersion": "0.7.1",
+  "nextVersion": "0.7.2",
+  "baseRef": "3942d5f711317d941e7291da8c0afc5b9e224fc5",
+  "baseSha": "3942d5f711317d941e7291da8c0afc5b9e224fc5",
+  "headRef": "HEAD",
+  "headSha": "1fc5ba6e656d52a45bc26fe437317affdf66b6a4",
+  "range": "3942d5f711317d941e7291da8c0afc5b9e224fc5..HEAD",
+  "branch": "main",
+  "npmPackageSafety": {
+    "ov25UiFiles": [
+      "dist"
+    ],
+    "ov25SetupFiles": [
+      "dist"
+    ],
+    "ov25UiExcludesReleaseArtifacts": true,
+    "ov25SetupExcludesReleaseArtifacts": true
+  },
+  "commands": {
+    "committedLog": "git log --oneline --decorate=short 3942d5f711317d941e7291da8c0afc5b9e224fc5..HEAD",
+    "committedDiffStat": "git diff --stat 3942d5f711317d941e7291da8c0afc5b9e224fc5..HEAD",
+    "committedChangedFiles": "git diff --name-only 3942d5f711317d941e7291da8c0afc5b9e224fc5..HEAD",
+    "committedDiff": "git diff 3942d5f711317d941e7291da8c0afc5b9e224fc5..HEAD",
+    "status": "git status --short"
+  },
+  "artifacts": {
+    "releaseDir": "releases/0.7.2",
+    "contextJson": "releases/0.7.2/context.json",
+    "contextMarkdown": "releases/0.7.2/context.md",
+    "commits": "releases/0.7.2/commits.txt",
+    "changedFiles": "releases/0.7.2/changed-files.txt",
+    "diffStat": "releases/0.7.2/diff-stat.txt",
+    "diffPatch": "releases/0.7.2/diff.patch"
+  }
+}

@@ -1,15 +1,4 @@
-# Changelog
-
-## 0.7.2
-
-# Patch Notes Draft: ov25-ui 0.7.2
-
-Status: Draft, not approved
-Bump requested: patch
-Base: `3942d5f711317d941e7291da8c0afc5b9e224fc5`
-Head: `1fc5ba6e656d7558be09e18924f6fe252192b516`
-
-These notes were refreshed after release test artifacts were generated. The selected range still includes the `0.7.0` and `0.7.1` version commits plus the new release automation commit, so confirm this is the intended `0.7.2` scope before publishing.
+# ov25-ui 0.7.2
 
 ## Customer-Facing Changes
 
@@ -48,7 +37,6 @@ These notes were refreshed after release test artifacts were generated. The sele
   - related replacement rule/definition types
 - New dining types are exported for callbacks, display options, selectors, branding, flags, and payloads.
 - Configurator iframe URL handling now supports `OV25_CONFIGURATOR_DEV` / `VITE_OV25_CONFIGURATOR_DEV` in addition to the existing local dev flag.
-- Release automation has been added for review/test/deploy phases, tag-triggered GitHub Actions publishing, and local publish refusal.
 
 ## Shopify Notes
 
@@ -64,23 +52,3 @@ These notes were refreshed after release test artifacts were generated. The sele
 - WooCommerce frontend config now selects the saved `bedConfigurator` setup bucket for bed configurator product links.
 - WooCommerce local types now include `stringReplacements`, `bed`, `hideLogo`, and `bedConfigurator` setup layout support.
 - WooCommerce package versions still need to move from `^0.7.1` to final `0.7.2` packages after `ov25-ui`, `ov25-ui-react18`, and `ov25-setup` are published.
-
-## Known Review Items
-
-- Requested release type is `patch`, but the range contains large additive APIs, a new dining configurator flow, setup UI additions, and release automation. Confirm patch vs minor before publishing.
-- `releases/0.7.2/test-summary.md` reports the user-run release test passed.
-- GitHub publish workflows now set up Bun before package build/publish steps.
-- Trusted Publishing still needs npm-side setup for all three packages before tags are pushed.
-
-## 0.5.95
-
-### Commerce payloads (minor, additive for runtime; TypeScript callback types updated)
-
-- **`onChange`, `addToBasket`, `buyNow`** now receive **normalized** SKU and price objects:
-  - **`payload.skus`**: discriminated union — `mode: 'single'` includes legacy `skuString` / `skuMap` plus `lines` (one row); `mode: 'multi'` (Snap2) has **`lines` only** (no top-level `skuString`).
-  - **`payload.price`**: includes `mode`, order-level totals, **`lines`** (per-product breakdown), and optional passthrough of raw **`priceBreakdown`** (single) or **`productBreakdowns`** (Snap2).
-- New exported types: `UnifiedSkuPayload`, `UnifiedPricePayload`, `UnifiedOnChangePayload`, `CommerceLineItemSku`, `CommerceLineItemPrice`, `CommerceLineItemSelection`.
-- New helpers for raw `postMessage` users: `normalizeSkuPayload`, `normalizePricePayload`, `parseIframeJsonPayload`.
-- **TypeScript**: `OnChangeSkuPayload` / `OnChangePricePayload` are aliases of the unified types; narrow with `payload.skus.mode === 'single'` when you require `skuString` on SKU.
-
-Integrators should prefer **`payload.skus.lines`** and **`payload.price.lines`** for new multi-line cart logic.
