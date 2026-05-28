@@ -2,6 +2,10 @@
   "name": "ov25-setup",
   "version": "0.7.1",
   "description": "OV25 Configurator Setup visual editor component",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/orbitalvision/ov25-ui.git"
+  },
   "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.js",
