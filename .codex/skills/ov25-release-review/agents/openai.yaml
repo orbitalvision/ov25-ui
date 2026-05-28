@@ -1,0 +1,4 @@
+interface:
+  display_name: "OV25 Release Review"
+  short_description: "Generate OV25 release review artifacts"
+  default_prompt: "Use $ov25-release-review to run the safe release context collector and generate patch notes, a developer summary, and client email draft."

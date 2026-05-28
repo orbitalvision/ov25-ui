@@ -1,0 +1,47 @@
+name: Release ov25-ui-react18
+
+on:
+  push:
+    tags:
+      - 'ov25-ui-react18@*'
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - run: npm ci --legacy-peer-deps
+
+      - name: Publish ov25-ui-react18
+        run: node scripts/release/publish-ci.js --package ov25-ui-react18 --tag "$GITHUB_REF_NAME"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ov25-ui-react18-${{ github.ref_name }}
+          path: release-artifacts/ov25-ui-react18-*/**
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          VERSION="${TAG#ov25-ui-react18@}"
+          NOTES="releases/${VERSION}/patch-notes.md"
+          if [ ! -f "$NOTES" ]; then
+            NOTES="CHANGELOG.md"
+          fi
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" release-artifacts/ov25-ui-react18-*/* --clobber
+          else
+            gh release create "$TAG" release-artifacts/ov25-ui-react18-*/* --title "$TAG" --notes-file "$NOTES"
+          fi

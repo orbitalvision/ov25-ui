@@ -21,8 +21,8 @@
     "build": "vite build && tsc --emitDeclarationOnly --outDir dist && node ../scripts/strip-layers.js dist/index.css",
     "build:react18": "node scripts/build-react18.js",
     "clean": "rimraf dist",
-    "release": "npm run type-check && npm run build && npm publish --ignore-scripts",
-    "publish:canary": "npm run type-check && npm run build && npm publish --tag canary --ignore-scripts"
+    "release": "node ../scripts/release/refuse-local-publish.js ov25-setup release",
+    "publish:canary": "node ../scripts/release/refuse-local-publish.js ov25-setup publish:canary"
   },
   "peerDependencies": {
     "react": "^19.0.0",

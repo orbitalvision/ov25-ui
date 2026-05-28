@@ -1,0 +1,45 @@
+name: Release ov25-setup
+
+on:
+  push:
+    tags:
+      - 'ov25-setup@*'
+
+permissions:
+  contents: write
+  id-token: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - name: Publish ov25-setup
+        run: node scripts/release/publish-ci.js --package ov25-setup --tag "$GITHUB_REF_NAME"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ov25-setup-${{ github.ref_name }}
+          path: release-artifacts/ov25-setup-*/**
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          VERSION="${TAG#ov25-setup@}"
+          NOTES="releases/${VERSION}/patch-notes.md"
+          if [ ! -f "$NOTES" ]; then
+            NOTES="CHANGELOG.md"
+          fi
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" release-artifacts/ov25-setup-*/* --clobber
+          else
+            gh release create "$TAG" release-artifacts/ov25-setup-*/* --title "$TAG" --notes-file "$NOTES"
+          fi
