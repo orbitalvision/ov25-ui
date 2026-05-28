@@ -35,7 +35,7 @@ function statusPath(line) {
 }
 
 function assertWorkingTreeAllowed(version) {
-  const status = gitOrEmpty(['status', '--short']);
+  const status = gitOrEmpty(['status', '--short', '--untracked-files=all']);
   const disallowed = status
     .split('\n')
     .map((line) => line.trimEnd())
@@ -92,9 +92,17 @@ function updatePackageVersions(version) {
   writeJson('setup/package.json', setupPackageJson);
 }
 
-function refreshLockfiles() {
+function refreshLockfiles(version) {
   run('npm', ['install', '--package-lock-only', '--ignore-scripts']);
-  run('npm', ['install', '--package-lock-only', '--ignore-scripts'], { cwd: path.join(rootDir, 'setup') });
+
+  const setupLockfile = readJson('setup/package-lock.json');
+  setupLockfile.version = version;
+  setupLockfile.packages[''].version = version;
+  setupLockfile.packages[''].dependencies = {
+    ...setupLockfile.packages[''].dependencies,
+    'ov25-ui': version,
+  };
+  writeJson('setup/package-lock.json', setupLockfile);
 }
 
 function ensureTagsDoNotExist(tags) {
@@ -160,7 +168,7 @@ function main() {
   ensureTagsDoNotExist(tags);
   updateChangelog(version);
   updatePackageVersions(version);
-  refreshLockfiles();
+  refreshLockfiles(version);
   commitRelease(version);
   createTags(version, tags);
 
