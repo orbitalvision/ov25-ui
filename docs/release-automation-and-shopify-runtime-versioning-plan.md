@@ -28,7 +28,7 @@ From a perspective of when the user needs to give input, here is the rough flow:
 - User does manual testing
 - User decides whether release is ready to go
 - if yes, user runs `npm run release:deploy`
-- `release:deploy` updates package metadata, commits the release candidate, creates tags, and pushes the release trigger tags
+- `release:deploy` updates package metadata, commits the release candidate, creates tags, pushes the release trigger tags, and dispatches the OV25 dependency update workflow when `--push` is used
 
 ## Release Automation Flow
 
@@ -398,9 +398,10 @@ done
 Recommended Phase 2 trigger model:
 
 - Keep the OV25 workflow manually runnable with `workflow_dispatch` and a required released version.
-- After Phase 2 is proven safe, decide whether `release:deploy` should dispatch it automatically or whether it should remain an explicit user-run downstream step.
+- When `release:deploy --push` is used, dispatch the OV25 workflow automatically after pushing the package tags.
+- Allow `--skip-ov25-dispatch` for emergency/package-only releases.
 - The OV25 workflow polls npm until `ov25-ui`, `ov25-ui-react18`, and `ov25-setup` all exist at the exact version.
-- Keep the npm polling even if a future automatic trigger is added; it handles registry propagation delay and partial publish failures.
+- Keep the npm polling; it handles registry propagation delay and partial publish failures.
 
 ## GitHub Actions Release Design
 
@@ -787,11 +788,11 @@ Explicitly out of scope for Phase 1:
 - Deploying Shopify apps.
 - Releasing WooCommerce plugin builds.
 
-### Phase 2: `OV25`
+### Phase 2: `OV25` and WooCommerce
 
-Goal: make OV25 consume the newly released npm packages safely, after all three package releases are available on npm.
+Goal: make downstream production consumers use the newly released npm packages safely, after all three package releases are available on npm.
 
-Scope:
+`OV25` scope:
 
 - Add downstream update preparation for `OV25`.
 - Add an `OV25` workflow or script that accepts a released version.
@@ -803,8 +804,9 @@ Scope:
 - Refresh the OV25 lockfile with the repo's package manager.
 - Run OV25 checks/builds.
 - Commit and push the OV25 dependency update after the checks pass.
-- Keep manual `workflow_dispatch` available as the initial trigger path, with a released `version` input.
-- Consider an automatic `release:deploy` dispatch only after the manual Phase 2 workflow has proved safe.
+- The pushed OV25 dependency commit is the Vercel production rebuild trigger. Do not separately trigger a Vercel deploy from the release script.
+- Keep manual `workflow_dispatch` available as a rerun/fallback path, with a released `version` input.
+- Dispatch this workflow from `release:deploy --push` after pushing the package tags, unless `--skip-ov25-dispatch` is set.
 - If runtime manifest/version hosting lives in OV25 infrastructure, add the hosting endpoints here:
   - low-cache manifest response;
   - immutable versioned runtime files;
@@ -813,22 +815,40 @@ Scope:
   - blocked-version and last-known-good fallback behavior.
 - Keep release notification sending manual or dry-run only at first.
 
+`ov25-woo-extension` scope:
+
+- Add a manual WooCommerce workflow, `.github/workflows/update-ui-packages-and-release.yml`.
+- Update dependencies to the released package versions:
+  - `ov25-ui@x.y.z`
+  - `ov25-ui-react18@x.y.z`
+  - `ov25-setup@x.y.z`
+- Refresh the WooCommerce package lockfile.
+- Run WooCommerce build/type checks.
+- Prepare a new WooCommerce plugin version using the existing WooCommerce release script after the exact package versions are committed.
+- Do not use the current `npm run update-ui-pack` as the automated path: it installs `latest`, commits, pushes, and runs release in one step. Replace or wrap it with a prepare-only command that installs the exact approved version and stops before push/release.
+- Keep the final WooCommerce release command user-run and user-approved. Agents must not run it.
+- Commit the WooCommerce version/dependency/release artifact changes after the user has reviewed them.
+
 Exit criteria:
 
 - OV25 can update to a newly released package version after npm availability is confirmed.
 - OV25 checks/builds pass against the released packages.
 - OV25 has a committed dependency update for the release version.
+- OV25 commit push has triggered the normal Vercel rebuild path.
+- WooCommerce package dependencies reference the released package versions.
+- WooCommerce build/type checks pass against the released package versions.
+- WooCommerce release artifacts are ready for the user to publish through the existing manual release script.
 - Any OV25-hosted runtime manifest endpoint is available but does not force client storefronts onto the new runtime.
 
 Explicitly out of scope for Phase 2:
 
 - Shopify theme/app deployment.
-- WooCommerce release execution.
+- Agent-run WooCommerce release execution.
 - Automatic broad client notification sending.
 
-### Phase 3: `shopify-plugin` and `ov25-woo-extension`
+### Phase 3: `shopify-plugin`
 
-Goal: update the storefront integrations after the package and OV25 foundations are stable.
+Goal: update Shopify storefront integration after the package, OV25, and WooCommerce foundations are stable.
 
 `shopify-plugin` scope:
 
@@ -853,21 +873,12 @@ Goal: update the storefront integrations after the package and OV25 foundations 
 - Add Shopify runtime tests for standard, Snap2, bed configurator, old/new metafield shapes, missing data, unknown fields, `latest`, pinned versions, manifest fallback, and blocked-version fallback.
 - Move clients to the Shopify shell/runtime loader only after staging-theme validation.
 
-`ov25-woo-extension` scope:
-
-- Update dependencies to the released `ov25-ui`, `ov25-ui-react18`, and `ov25-setup` versions where applicable.
-- Run WooCommerce build/type checks.
-- Prepare WooCommerce release artifacts.
-- Keep WooCommerce release execution manual and user-approved.
-- Document rollback and compatibility notes in the release artifacts.
-
 Exit criteria:
 
 - Shopify staging themes can test a specific new OV25 runtime without changing the live theme.
 - Live Shopify themes can remain pinned to a known-good runtime.
 - `latest` is opt-in and can be rolled back through the manifest.
-- WooCommerce artifacts are prepared from the released package versions.
-- No automation deploys Shopify apps or pushes WooCommerce releases without explicit user action.
+- No automation deploys Shopify apps without explicit user action.
 
 ## Non-Goals
 
