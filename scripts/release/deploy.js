@@ -24,10 +24,12 @@ function usage() {
 Options:
   --release <x.y.z>        Required release version.
   --push                   Push release commit and package tags.
+  --skip-ov25-dispatch     Do not trigger the downstream OV25 package update workflow after pushing.
   --help                   Show this message.
 
 This script never publishes npm packages and never deploys Shopify. Package publishing is
-handled by tag-triggered GitHub Actions.`;
+handled by tag-triggered GitHub Actions. When --push is used, the script also
+dispatches the OV25 dependency update workflow unless --skip-ov25-dispatch is set.`;
 }
 
 function statusPath(line) {
@@ -132,12 +134,28 @@ function commitRelease(version) {
   git(['commit', '-m', `chore: release ov25-ui ${version}`]);
 }
 
-function printPushInstructions(tags) {
+function ov25DispatchCommand(version) {
+  return [
+    'gh',
+    'workflow',
+    'run',
+    'update-ov25-ui-packages.yml',
+    '--repo',
+    'orbitalvision/OV25',
+    '--ref',
+    'main',
+    '-f',
+    `version=${version}`,
+  ];
+}
+
+function printPushInstructions(version, tags) {
   console.log('\nRelease commit and tags were created locally.');
   console.log('Push was not requested. Review locally, then run:');
   console.log('');
   console.log('  git push origin main');
   console.log(`  git push origin ${tags.join(' ')}`);
+  console.log(`  ${ov25DispatchCommand(version).join(' ')}`);
   console.log('');
   console.log('Or rerun release:deploy with --push if you intentionally want the script to push the release commit and package tags.');
 }
@@ -150,6 +168,24 @@ function pushRelease(tags) {
 
   run('git', ['push', 'origin', branch]);
   run('git', ['push', 'origin', ...tags]);
+}
+
+function dispatchOv25Update(version) {
+  const command = ov25DispatchCommand(version);
+  try {
+    run(command[0], command.slice(1));
+  } catch (error) {
+    throw new Error(
+      [
+        'Package tags were pushed, but dispatching the OV25 dependency update workflow failed.',
+        'Run this manually after confirming the OV25 workflow exists on main:',
+        '',
+        `  ${command.join(' ')}`,
+        '',
+        error.message,
+      ].join('\n'),
+    );
+  }
 }
 
 function main() {
@@ -174,8 +210,11 @@ function main() {
 
   if (args.push) {
     pushRelease(tags);
+    if (!args['skip-ov25-dispatch']) {
+      dispatchOv25Update(version);
+    }
   } else {
-    printPushInstructions(tags);
+    printPushInstructions(version, tags);
   }
 }
 
