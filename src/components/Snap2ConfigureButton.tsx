@@ -3,7 +3,7 @@ import { cn } from '../lib/utils.js';
 import { Snap2ConfiguratorModal } from './Snap2ConfiguratorModal.js';
 import { Snap2InlineSheetDesktopShell } from './Snap2InlineSheetDesktopShell.js';
 import { ProductGallery } from './product-gallery.js';
-import ConfiguratorViewControls from './ConfiguratorViewControls.js';
+import Snap2ViewControls from './Snap2ViewControls.js';
 import { useOV25UI } from '../contexts/ov25-ui-context.js';
 import { Snap2Wrapper } from './VariantSelectMenu/Snap2Wrapper.js';
 import { MobileDrawer } from './ui/mobile-drawer.js';
@@ -121,7 +121,7 @@ export const Snap2ConfigureUI: React.FC = () => {
                   : `${typeof window !== 'undefined' ? window.innerHeight * DRAWER_HEIGHT_RATIO : 0}px`
               }}
             >
-              {snap2MobileExternalControls && <ConfiguratorViewControls />}
+              {snap2MobileExternalControls && <Snap2ViewControls />}
             </div>
           </>
         </Ov25ShadowHost>,

@@ -4,6 +4,7 @@ import { getIframeSrc } from '../utils/configurator-utils.js'
 import { useOV25UI } from "../contexts/ov25-ui-context.js"
 import { cn, getProductGalleryImages, resolveImageUrl } from "../lib/utils.js"
 import ConfiguratorViewControls from './ConfiguratorViewControls.js'
+import Snap2ViewControls from './Snap2ViewControls.js'
 import { Ov25ShadowHost } from './Ov25ShadowHost.js'
 
 
@@ -175,7 +176,7 @@ export const IframeContainer = () => {
                     id={uniqueId ? `true-configurator-view-controls-container-${uniqueId}` : "true-configurator-view-controls-container"}
                     className="ov:absolute ov:inset-0 ov:z-101 ov:w-full ov:h-full ov:pointer-events-none"
                 >
-                    <ConfiguratorViewControls />
+                    {isSnap2Mode ? <Snap2ViewControls /> : <ConfiguratorViewControls />}
                 </Ov25ShadowHost>
             )}
 

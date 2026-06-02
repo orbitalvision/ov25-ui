@@ -8,7 +8,6 @@ import { useOV25UI } from '../contexts/ov25-ui-context.js'
 import { cn } from '../lib/utils.js'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover.js'
 import { toast } from 'sonner'
-import Snap2Controls from './Snap2Controls.js'
 import { VariantsCloseButton } from './VariantSelectMenu/VariantsCloseButton.js'
 
 interface ConfiguratorViewControlsProps {
@@ -29,7 +28,6 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
     availableLights,
     selectLightGroup,
     isSnap2Mode,
-    configuratorDisplayModeMobile,
     controlsHidden,
     shareDialogTrigger,
     setShareDialogTrigger,
@@ -150,9 +148,6 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
 
   return (
     <>
-      {/* Snap2 Controls - shown only in snap2 mode */}
-      {isSnap2Mode && <Snap2Controls />}
-
       {/* <div className={cn(
         "ov:absolute ov:w-full ov:pointer-events-none ov:h-full ov:inset-0 ov:gap-2 ov:p-4 ov:flex ov:justify-end ov:items-end ov:z-[101]",
         "ov:text-[var(--ov25-configurator-view-controls-text-color)]"
@@ -335,7 +330,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
       </div>
       {isVariantsOpen &&
         isMobile &&
-        !(isSnap2Mode && configuratorDisplayModeMobile === 'inline') && (
+        !isSnap2Mode && (
         <div className={cn(
           "ov:absolute ov:w-full ov:pointer-events-none ov:h-full ov:inset-0 ov:z-101",
           "ov:transition-opacity ov:duration-200",
@@ -360,4 +355,4 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
   )
 }
 
-export default ConfiguratorViewControls 
+export default ConfiguratorViewControls
