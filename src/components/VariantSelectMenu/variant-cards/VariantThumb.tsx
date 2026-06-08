@@ -93,7 +93,7 @@ export const VariantThumb = React.memo(({
     <div
       ref={wrapperRef}
       className={cn(
-        'ov25-variant-thumb-wrapper ov:relative ov:p-1',
+        'ov25-variant-thumb-wrapper ov:relative ov:p-[4px]',
         !selected && 'ov:bg-transparent',
         selected &&
           !useSolidThumbRing &&
