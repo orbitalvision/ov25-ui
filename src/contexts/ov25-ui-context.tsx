@@ -255,7 +255,6 @@ interface OV25UIContextType {
   animationState: AnimationState;
   iframeRef: React.RefObject<HTMLIFrameElement>;
   isMobile: boolean;
-  hasSwitchedAfterDefer: boolean;
   deferThreeD: boolean;
   /** True when gallery mounts in the hidden preload container (no page slot): modal open should not wait on iframe ImageBitmap. */
   configuratorGalleryIsDeferred: boolean;
@@ -383,7 +382,6 @@ interface OV25UIContextType {
   setError: React.Dispatch<React.SetStateAction<Error | null>>;
   setCanAnimate: React.Dispatch<React.SetStateAction<boolean>>;
   setAnimationState: React.Dispatch<React.SetStateAction<AnimationState>>;
-  setHasSwitchedAfterDefer: React.Dispatch<React.SetStateAction<boolean>>;
   setAvailableProductFilters: React.Dispatch<React.SetStateAction<ProductFilters>>;
   setSearchQuery: (optionId: string, query: string) => void;
   setSelectedSwatches: React.Dispatch<React.SetStateAction<Swatch[]>>;
@@ -666,7 +664,6 @@ export const OV25UIProvider: React.FC<{
       isSnap2: isSnap2ProductLink,
     })
   );
-  const [hasSwitchedAfterDefer, setHasSwitchedAfterDefer] = useState(false)
   const [pendingProductId, setPendingProductId] = useState<string | null>(null);
   const [availableProductFilters, setAvailableProductFilters] = useState<ProductFilters>({});
   const [showFilters, setShowFilters] = useState<boolean>(false);
@@ -796,7 +793,6 @@ export const OV25UIProvider: React.FC<{
     setError(null);
     setArPreviewLink(null);
     setPreloading(false);
-    setHasSwitchedAfterDefer(false);
     setGalleryCarouselFullscreenImage(null);
   }, [
     releaseConfiguratorTransitionProxy,
@@ -817,7 +813,6 @@ export const OV25UIProvider: React.FC<{
     setError,
     setArPreviewLink,
     setPreloading,
-    setHasSwitchedAfterDefer,
     setGalleryCarouselFullscreenImage,
   ]);
 
@@ -1875,10 +1870,23 @@ export const OV25UIProvider: React.FC<{
   const [galleryIndex, setGalleryIndex] = useState(0);
 
   const galleryIndexToUse = deferThreeD && allImages.length > 0 ? 1 : 0;
+  const shouldRestoreInlineGalleryToIframe =
+    allImages.length > 0 &&
+    (isMobile
+      ? effectiveConfiguratorDisplayModeMobile === 'inline'
+      : configuratorDisplayMode === 'inline');
+
+  const restoreInlineGalleryToIframe = useCallback(() => {
+    if (!shouldRestoreInlineGalleryToIframe) return;
+    if (galleryIndex !== galleryIndexToUse) {
+      setGalleryIndex(galleryIndexToUse);
+    }
+  }, [galleryIndex, galleryIndexToUse, shouldRestoreInlineGalleryToIframe]);
 
   const handleSelectionSelectImpl = useCallback((selection: Selection, optionId?: string) => {
     const currentOptionId = optionId || activeOptionId;
     if (currentOptionId === 'size') {
+      restoreInlineGalleryToIframe();
       if (currentProductId !== selection.id) {
         if (isSelectingProduct.current) return;
         isSelectingProduct.current = true;
@@ -1901,20 +1909,9 @@ export const OV25UIProvider: React.FC<{
       groupId: selection.groupId,
       selectionId: selection.id
     }, uniqueId);
-    if (!hasSwitchedAfterDefer && galleryIndex === 1 && deferThreeD) {
-      setHasSwitchedAfterDefer(true);
-      setGalleryIndex(galleryIndexToUse);
-    }
-  }, [activeOptionId, currentProductId, galleryIndex, galleryIndexToUse, deferThreeD, hasSwitchedAfterDefer, uniqueId]);
+    restoreInlineGalleryToIframe();
+  }, [activeOptionId, currentProductId, restoreInlineGalleryToIframe, uniqueId]);
   handleSelectionSelectRef.current = handleSelectionSelectImpl;
-
-  // Iframe visibility follows `galleryIndex === galleryIndexToUse` (see IframeContainer). ProductCarousel
-  // also jumped to the 3D slot when variants opened, but deferred / no-carousel / hidden preload UIs never
-  // mount ProductCarousel, so galleryIndex stayed on a static image index while defer moved 3D to slot 1.
-  useEffect(() => {
-    if (!isVariantsOpen) return;
-    setGalleryIndex(galleryIndexToUse);
-  }, [isVariantsOpen, galleryIndexToUse, setGalleryIndex]);
 
   const contextValue: OV25UIContextType = {
     // Shadow DOM references
@@ -1962,7 +1959,6 @@ export const OV25UIProvider: React.FC<{
   carouselMaxImagesDesktop,
   carouselMaxImagesMobile,
   showCarousel,
-    hasSwitchedAfterDefer,
     deferThreeD,
     configuratorGalleryIsDeferred,
     showOptional,
@@ -2063,7 +2059,6 @@ export const OV25UIProvider: React.FC<{
     setError,
     setCanAnimate,
     setAnimationState,
-    setHasSwitchedAfterDefer,
     setAvailableProductFilters,
     setSearchQuery,
     setSelectedSwatches,
