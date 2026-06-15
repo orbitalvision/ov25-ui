@@ -1,0 +1,39 @@
+{
+  "generatedAt": "2026-06-15T14:48:19.087Z",
+  "package": "ov25-ui",
+  "bump": "patch",
+  "currentVersion": "0.7.2",
+  "nextVersion": "0.7.3",
+  "baseRef": "ov25-ui@0.7.2",
+  "baseSha": "f6d7ad00b26b5fd1644a7e9fc00f2e25e3c32e76",
+  "headRef": "HEAD",
+  "headSha": "0ec62328cc59607c00566cd8130d735dbb99ebe2",
+  "range": "ov25-ui@0.7.2..HEAD",
+  "branch": "main",
+  "npmPackageSafety": {
+    "ov25UiFiles": [
+      "dist"
+    ],
+    "ov25SetupFiles": [
+      "dist"
+    ],
+    "ov25UiExcludesReleaseArtifacts": true,
+    "ov25SetupExcludesReleaseArtifacts": true
+  },
+  "commands": {
+    "committedLog": "git log --oneline --decorate=short ov25-ui@0.7.2..HEAD",
+    "committedDiffStat": "git diff --stat ov25-ui@0.7.2..HEAD",
+    "committedChangedFiles": "git diff --name-only ov25-ui@0.7.2..HEAD",
+    "committedDiff": "git diff ov25-ui@0.7.2..HEAD",
+    "status": "git status --short"
+  },
+  "artifacts": {
+    "releaseDir": "releases/0.7.3",
+    "contextJson": "releases/0.7.3/context.json",
+    "contextMarkdown": "releases/0.7.3/context.md",
+    "commits": "releases/0.7.3/commits.txt",
+    "changedFiles": "releases/0.7.3/changed-files.txt",
+    "diffStat": "releases/0.7.3/diff-stat.txt",
+    "diffPatch": "releases/0.7.3/diff.patch"
+  }
+}
