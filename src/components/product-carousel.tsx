@@ -35,19 +35,26 @@ export function ProductCarousel() {
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const dragRef = React.useRef({ isDragging: false, startX: 0, startScrollLeft: 0, didDrag: false });
 
-  const handleWheel = React.useCallback((e: React.WheelEvent) => {
+  React.useEffect(() => {
     const el = scrollRef.current;
     if (!el || useStackedLayout) return;
-    const { scrollLeft, scrollWidth, clientWidth } = el;
-    const canScrollLeft = scrollLeft > 0;
-    const canScrollRight = scrollLeft < scrollWidth - clientWidth - 1;
-    if (!canScrollLeft && !canScrollRight) return;
-    const scrollingDown = e.deltaY > 0;
-    const scrollingUp = e.deltaY < 0;
-    if ((scrollingDown && canScrollRight) || (scrollingUp && canScrollLeft)) {
-      e.preventDefault();
-      el.scrollLeft += e.deltaY;
-    }
+
+    const handleWheel = (e: WheelEvent) => {
+      const { scrollLeft, scrollWidth, clientWidth } = el;
+      const canScrollLeft = scrollLeft > 0;
+      const canScrollRight = scrollLeft < scrollWidth - clientWidth - 1;
+      if (!canScrollLeft && !canScrollRight) return;
+
+      const scrollingDown = e.deltaY > 0;
+      const scrollingUp = e.deltaY < 0;
+      if ((scrollingDown && canScrollRight) || (scrollingUp && canScrollLeft)) {
+        e.preventDefault();
+        el.scrollLeft += e.deltaY;
+      }
+    };
+
+    el.addEventListener('wheel', handleWheel, { passive: false });
+    return () => el.removeEventListener('wheel', handleWheel);
   }, [useStackedLayout]);
 
   const handleMouseDown = React.useCallback((e: React.MouseEvent) => {
@@ -250,7 +257,7 @@ export function ProductCarousel() {
     <div id="ov25-product-carousel" className="ov:w-full ov:relative">
       <div id="ov25-product-carousel-controls" className={`ov:relative ov:w-full `}>
         {!useStackedLayout && (
-          <div ref={scrollRef} onWheel={handleWheel} onMouseDown={handleMouseDown} onClickCapture={handleClickCapture} className="ov25-thumbnail-scroll ov:overflow-x-auto ov:overflow-y-hidden ov:w-full ov:scroll-smooth ov:[container-type:inline-size] ov:p-1 ov:cursor-grab ov:select-none">
+          <div ref={scrollRef} onMouseDown={handleMouseDown} onClickCapture={handleClickCapture} className="ov25-thumbnail-scroll ov:overflow-x-auto ov:overflow-y-hidden ov:w-full ov:scroll-smooth ov:[container-type:inline-size] ov:p-1 ov:cursor-grab ov:select-none">
             <div className="ov:flex ov:flex-nowrap ov:gap-2">
               {carouselItems.map((item: any, index: number) => (
                 <div key={index} className="ov:flex-1 ov:min-w-[calc((100cqw-2.5rem)/6)] ov:md:min-w-[calc((100cqw-2.5rem)/8)] ov:lg:min-w-[calc((100cqw-2.5rem)/12)]">
@@ -283,4 +290,4 @@ export function ProductCarousel() {
       )}
     </div>
   )
-} 
+}
