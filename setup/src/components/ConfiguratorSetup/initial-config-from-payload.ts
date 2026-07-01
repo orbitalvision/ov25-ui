@@ -24,21 +24,35 @@ function deserializeSelector(val: string | { selector: string; replace: boolean 
   };
 }
 
-/** Pulls `:root { --ov25-* }` declarations into a flat map and removes those blocks so they are not duplicated when re-exporting. */
+/** Pulls `:host` / `:root` `--ov25-*` declarations into a flat map so they are not duplicated when re-exporting. */
 export function pullRootVariablesFromCss(css: string | undefined): { style: Record<string, string>; rest: string } {
   const style: Record<string, string> = {};
   if (!css?.trim()) {
     return { style, rest: '' };
   }
   let rest = css;
-  const rootBlock = /:root\s*\{([^}]*)\}/g;
-  rest = rest.replace(rootBlock, (_, body: string) => {
-    const decl = /(--ov25-[a-zA-Z0-9-]+)\s*:\s*([^;]+);/g;
-    let m: RegExpExecArray | null;
-    while ((m = decl.exec(body)) !== null) {
-      style[m[1].trim()] = m[2].trim();
+  const rootOrHostBlock = /:(host|root)\s*\{([^}]*)\}/g;
+  rest = rest.replace(rootOrHostBlock, (_, selectorName: string, body: string) => {
+    const remainingDeclarations: string[] = [];
+
+    for (const rawDeclaration of body.split(';')) {
+      const declaration = rawDeclaration.trim();
+      if (!declaration) continue;
+
+      const variable = /^(--ov25-[a-zA-Z0-9-]+)\s*:\s*(.+)$/.exec(declaration);
+      if (variable) {
+        style[variable[1].trim()] = variable[2].trim();
+        continue;
+      }
+
+      remainingDeclarations.push(declaration);
     }
-    return '';
+
+    if (remainingDeclarations.length === 0) {
+      return '';
+    }
+
+    return `:${selectorName} {\n${remainingDeclarations.map((declaration) => `  ${declaration};`).join('\n')}\n}`;
   });
   return { style, rest: rest.replace(/\n{3,}/g, '\n\n').trim() };
 }
