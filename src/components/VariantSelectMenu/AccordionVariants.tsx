@@ -168,7 +168,7 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
               className={`ov:min-h-0 ov:max-h-full ov:overflow-y-auto  ov:pt-4 ov:pb-4 ${mode === 'drawer' && isMobile ? 'ov:pb-20' : ''}`}
               {...(mode === 'inline' ? { 'data-ov25-list-variants-content': true as const } : {})}
             >
-              <div className={`ov:grid ${getGridColsClass(2)}`}>
+              <div className={`ov25-size-variant-card-grid ov:grid ${getGridColsClass(2)}`}>
                 <VariantsContent
                   variantsToRender={sizeVariants}
                   VariantCard={SizeVariantCard}

@@ -29,20 +29,20 @@ export const SizeVariantCard = React.memo(
         <div className="ov:flex ov:flex-1 ov:flex-col ov:items-center ov:justify-between">
           {showImage && <img src={imgSrc} alt={variant.name} className="ov:w-full ov:h-full ov:object-cover ov:rounded-lg" />}
           <div className="ov:flex ov:flex-col ov:justify-center ov:items-center">
-            <h3 className="ov:font-[350] ov:text-base ov:text-center ov:leading-[2em] ov:text-[var(--ov25-secondary-text-color)]">{variant.name}</h3>
+            <h3 className="ov25-size-variant-card-name ov:font-[350] ov:text-base ov:text-center ov:leading-[2em] ov:text-[var(--ov25-secondary-text-color)]">{variant.name}</h3>
           </div>
         </div>
         {showDimensions && (
-          <div className="ov:flex ov:items-center ov:justify-between ov:w-full ov:-mt-4">
-            <div className="ov:flex ov:items-center ov:gap-2 ov:w-full">
+          <div className="ov25-size-variant-card-dimensions ov:flex ov:items-center ov:justify-between ov:w-full ov:-mt-4">
+            <div className="ov25-size-variant-card-dimension-row ov:flex ov:items-center ov:gap-2 ov:w-full">
               <div className="ov:flex ov:items-center ov:flex-1">
-                <div className="ov:w-[2px] ov:h-3 ov:bg-[#E5E5E5]"></div>
-                <div className="ov:h-[2px] ov:flex-1 ov:bg-[#E5E5E5]"></div>
+                <div className="ov25-size-variant-card-dimension-marker ov:w-[2px] ov:h-3 ov:bg-[#E5E5E5]"></div>
+                <div className="ov25-size-variant-card-dimension-line ov:h-[2px] ov:flex-1 ov:bg-[#E5E5E5]"></div>
               </div>
-              <span className="ov:text-[12px] ov:font-[350] ov:whitespace-nowrap ov:text-[var(--ov25-secondary-text-color)]">{variant?.data?.dimensionX}cm</span>
+              <span className="ov25-size-variant-card-dimension-value ov:text-[12px] ov:font-[350] ov:whitespace-nowrap ov:text-[var(--ov25-secondary-text-color)]">{variant?.data?.dimensionX}cm</span>
               <div className="ov:flex ov:items-center ov:flex-1">
-                <div className="ov:h-[2px] ov:flex-1 ov:bg-[#E5E5E5]"></div>
-                <div className="ov:w-[2px] ov:h-3 ov:bg-[#E5E5E5]"></div>
+                <div className="ov25-size-variant-card-dimension-line ov:h-[2px] ov:flex-1 ov:bg-[#E5E5E5]"></div>
+                <div className="ov25-size-variant-card-dimension-marker ov:w-[2px] ov:h-3 ov:bg-[#E5E5E5]"></div>
               </div>
             </div>
           </div>

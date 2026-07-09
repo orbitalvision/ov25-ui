@@ -197,7 +197,7 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
         className={`ov:min-h-0 ov:flex-1 ov:overflow-y-auto ov:px-4 ov:pt-4 ov:pb-4 ${scrollContentClass}`}
         {...(mode === 'inline' ? { 'data-ov25-list-variants-content': true as const } : {})}
       >
-        <div className={`ov:grid ${getGridColsClass(2)}`}>
+        <div className={`ov25-size-variant-card-grid ov:grid ${getGridColsClass(2)}`}>
           <VariantsContent
             variantsToRender={sizeVariants}
             VariantCard={SizeVariantCard}

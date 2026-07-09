@@ -49,6 +49,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
   } = useOV25UI();
 
   const currentOption = variantPanelOptions.find(opt => opt.id === activeOptionId)
+  const isSizeOption = activeOptionId === 'size' || currentOption?.name.toLowerCase() === 'size';
 
   const shouldShowFilters = ((isGrouped && !shouldDestructureGroups) && (variantsToRender as VariantGroup[]).some(group => group.variants.length > 0)) || showFilters;
 
@@ -134,7 +135,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
               <NoResults />
             )}
             {((shouldDestructureGroups || !isGrouped) ? (
-              <div id="ov25-desktop-variants-content-ungrouped" className={`ov:grid ov:h-full ov:pb-8 ov:content-start ${getGridColsClass(gridDivide)} ${isFilterOpen ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}>
+              <div id="ov25-desktop-variants-content-ungrouped" className={`ov:grid ov:h-full ov:pb-8 ov:content-start ${isSizeOption ? 'ov25-size-variant-card-grid' : ''} ${getGridColsClass(gridDivide)} ${isFilterOpen ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}>
                 <VariantsContent variantsToRender={isGrouped ? (variantsToRender as VariantGroup[])[0].variants : variantsToRender as Variant[]} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
               </div>
             ) : (

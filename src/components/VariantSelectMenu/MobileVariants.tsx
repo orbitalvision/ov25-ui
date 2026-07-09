@@ -122,6 +122,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
   const shouldShowFilters = ((isGrouped && !shouldDestructureGroups) && variants.length > 0 && (variants as VariantGroup[]).some(group => group.variants.length > 0)) || showFilters;
 
   const currentOption = allOptions.find(opt => opt.id === activeOptionId);
+  const isSizeOption = activeOptionId === 'size' || currentOption?.name.toLowerCase() === 'size';
 
   if (isGrouped && !shouldDestructureGroups) {
     // Render all groups but hide inactive ones with display: none
@@ -249,7 +250,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
             <NoResults />
             )}
             <div id="ov25-mobile-variants-content" className={`ov:h-full ${isFilterOpen ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}>
-              <div style={{ display: 'grid' }} className={`ov:px-0 ov:pb-63 ov:gap-2 ${getGridColsClass(gridDivide)}`}>
+              <div style={{ display: 'grid' }} className={`ov:px-0 ov:pb-63 ov:gap-2 ${isSizeOption ? 'ov25-size-variant-card-grid' : ''} ${getGridColsClass(gridDivide)}`}>
                 <VariantsContent variantsToRender={variantsToRender} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
               </div>
             </div>
