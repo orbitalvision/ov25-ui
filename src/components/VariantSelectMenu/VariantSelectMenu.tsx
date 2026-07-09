@@ -78,6 +78,8 @@ export const VariantSelectMenu: React.FC = () => {
   const useTriggerArea = useSimpleVariantsSelector && (!useInlineVariantControls || (!isInlineWizard && !isInlineListLike));
 
   const hasSnap2Objects = (configuratorState?.snap2Objects?.length ?? 0) > 0;
+  const snap2MobileModal =
+    isSnap2Mode && isMobile && configuratorDisplayModeMobile === 'modal';
   const snap2InlineGalleryShowingInitialise =
     isSnap2Mode &&
     !isMobile &&
@@ -127,6 +129,7 @@ export const VariantSelectMenu: React.FC = () => {
       return <ProductOptionsGroup {...productOptionsGroupProps} />;
     }
     if (configuratorDisplayModeMobile === 'variants-only-sheet') return <VariantsOnlySheet />;
+    if (snap2MobileModal) return null;
     if (configuratorDisplayModeMobile === 'modal') return <ModalConfiguratorDesktop />;
     if (isSnap2Mode) return null;
     return (

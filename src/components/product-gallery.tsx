@@ -299,8 +299,17 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
       isDrawerOrDialogOpen &&
       !isModalMode &&
       configuratorDisplayModeMobile !== 'inline';
-    const iframeSlotBorderRadiusClass = snap2MobileDrawerOpen || (isSnap2Mode && configuratorDisplayMode === 'inline')
+    const snap2MobileDialogOpen =
+      isSnap2Mode &&
+      isMobile &&
+      isModalMode &&
+      isModalOpen;
+    const iframeSlotBorderRadiusClass = snap2MobileDrawerOpen
       ? 'ov:rounded-none'
+      : isSnap2Mode && configuratorDisplayMode === 'inline'
+      ? 'ov:rounded-none'
+      : snap2MobileDialogOpen
+      ? 'ov:rounded-t-[var(--ov25-configurator-iframe-border-radius)] ov:rounded-b-none'
       : 'ov:rounded-[var(--ov25-configurator-iframe-border-radius)]';
     const closingExit: ClosingProxyExit = isModalMode
       ? 'modal-fade'

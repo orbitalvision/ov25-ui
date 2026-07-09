@@ -24,6 +24,8 @@ export const Snap2ConfigureUI: React.FC = () => {
   const showModuleSelect = activeOptionId === 'modules' && !hasSnap2Objects;
   const snap2MobileInline =
     isSnap2Mode && isMobile && configuratorDisplayModeMobile === 'inline';
+  const snap2MobileModal =
+    isSnap2Mode && isMobile && configuratorDisplayModeMobile === 'modal';
   // IframeContainer owns Snap2 controls except mobile drawer/sheet, where it suppresses them.
   const snap2MobileExternalControls =
     isSnap2Mode &&
@@ -92,7 +94,7 @@ export const Snap2ConfigureUI: React.FC = () => {
 
   return (
     <>
-      {isMobile && shouldRenderIframe && !snap2MobileInline && createPortal(
+      {isMobile && shouldRenderIframe && !snap2MobileInline && !snap2MobileModal && createPortal(
         <Ov25ShadowHost
           style={{
             position: 'fixed',
@@ -128,7 +130,7 @@ export const Snap2ConfigureUI: React.FC = () => {
         document.body
       )}
 
-      {isMobile && isVariantsOpen && showModuleSelect && !snap2MobileInline && !initialiseMenuUsesExternalSelector && createPortal(
+      {isMobile && isVariantsOpen && showModuleSelect && !snap2MobileInline && !snap2MobileModal && !initialiseMenuUsesExternalSelector && createPortal(
         <Ov25ShadowHost
           style={{
             position: 'fixed',
@@ -149,7 +151,7 @@ export const Snap2ConfigureUI: React.FC = () => {
         document.body
       )}
 
-      {isMobile && hasSnap2Objects && !snap2MobileInline && (
+      {isMobile && hasSnap2Objects && !snap2MobileInline && !snap2MobileModal && (
         <MobileDrawer
           isOpen={isVariantsOpen}
           onOpenChange={handleMobileDrawerClose}
@@ -164,7 +166,7 @@ export const Snap2ConfigureUI: React.FC = () => {
 
       {!isMobile && configuratorDisplayMode === 'inline-sheet' && <Snap2InlineSheetDesktopShell />}
 
-      {!isMobile && configuratorDisplayMode !== 'inline-sheet' && (
+      {((!isMobile && configuratorDisplayMode !== 'inline-sheet') || snap2MobileModal) && (
         <Snap2ConfiguratorModal isOpen={isModalOpen} onClose={handleCloseModal}>
           <div className={cn(
             "ov:relative ov:w-full ov:h-full ov:min-h-0 ov:flex",

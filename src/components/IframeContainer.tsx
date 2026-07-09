@@ -48,8 +48,15 @@ export const IframeContainer = () => {
         isDrawerOrDialogOpen &&
         !isModalMode &&
         configuratorDisplayModeMobile !== 'inline';
+    const snap2MobileDialogOpen =
+        isSnap2Mode &&
+        isMobile &&
+        isModalMode &&
+        isModalOpen;
     const iframeRadiusClass = snap2MobileDrawerOpen
         ? 'ov:rounded-none'
+        : snap2MobileDialogOpen
+        ? 'ov:rounded-t-[var(--ov25-configurator-iframe-border-radius)] ov:rounded-b-none'
         : 'ov:rounded-[var(--ov25-configurator-iframe-border-radius)]';
 
     const controlsContainerRef = useRef<HTMLDivElement>(null);

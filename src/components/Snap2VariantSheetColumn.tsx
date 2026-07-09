@@ -23,6 +23,7 @@ export function Snap2VariantSheetColumn({ children }: { children: React.ReactNod
   const {
     isSnap2Mode,
     isMobile,
+    configuratorDisplayModeMobile,
     hidePricing,
     disableAddToCart,
     addToBasketFunction,
@@ -48,6 +49,9 @@ export function Snap2VariantSheetColumn({ children }: { children: React.ReactNod
   const sheetDomId = getSnap2CheckoutSheetDomId(uniqueId);
   const handleCloseCheckout = () => setIsSnap2CheckoutSheetOpen(false);
   const [columnEl, setColumnEl] = useState<HTMLDivElement | null>(null);
+  const isMobileContainedPanelMode =
+    isMobile &&
+    (configuratorDisplayModeMobile === 'modal' || configuratorDisplayModeMobile === 'drawer');
 
   return (
     <div
@@ -74,7 +78,9 @@ export function Snap2VariantSheetColumn({ children }: { children: React.ReactNod
         data-open={isSnap2CheckoutSheetOpen ? 'true' : 'false'}
         className={cn(
           'ov:flex ov:min-h-0 ov:min-w-0 ov:flex-col ov:overflow-hidden ov:bg-(--ov25-background-color)',
-          isMobile
+          isMobileContainedPanelMode
+            ? 'ov:absolute ov:inset-0 ov:z-50 ov:pointer-events-auto ov:h-full ov:max-h-full ov:w-full ov:max-w-full ov:box-border'
+            : isMobile
             ? 'ov:fixed ov:inset-0 ov:z-50 ov:pointer-events-auto ov:h-dvh ov:w-screen'
             : 'ov:flex-1',
           !isSnap2CheckoutSheetOpen && 'ov:hidden'

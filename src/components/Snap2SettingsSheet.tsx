@@ -20,6 +20,8 @@ export type Snap2SettingsSheetProps = {
   footer?: React.ReactNode;
   /** Modal column z-index; checkout should stack above variants (e.g. z-[110] vs z-102). */
   sheetZClass?: string;
+  /** Omit the side data attribute when a modal sheet is laid out as a bottom/lower panel. */
+  emitSideAttribute?: boolean;
   stackWithinConfigurator?: boolean;
   withBackdrop?: boolean;
   showCloseButton?: boolean;
@@ -42,6 +44,7 @@ export const Snap2SettingsSheet: React.FC<Snap2SettingsSheetProps> = ({
   children,
   footer,
   sheetZClass = 'ov:z-102',
+  emitSideAttribute = true,
   stackWithinConfigurator = false,
   withBackdrop = false,
   showCloseButton = true,
@@ -73,7 +76,7 @@ export const Snap2SettingsSheet: React.FC<Snap2SettingsSheetProps> = ({
   const panel = (
     <div
       data-ov25-snap2-settings-sheet
-      data-ov25-snap2-settings-sheet-side={mode === 'modal' ? sheetSide : undefined}
+      data-ov25-snap2-settings-sheet-side={mode === 'modal' && emitSideAttribute ? sheetSide : undefined}
       data-open={dataOpen}
       id={id}
       role={role}

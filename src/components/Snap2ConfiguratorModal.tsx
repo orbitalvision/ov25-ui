@@ -156,7 +156,8 @@ export const Snap2ConfiguratorModal: React.FC<Snap2ConfiguratorModalProps> = ({ 
       <div
         id="ov25-snap2-modal-backdrop"
         className={cn(
-          'ov:flex ov:flex-row ov:items-start ov:justify-center ov:p-4',
+          'ov:flex ov:items-start ov:justify-center',
+          isMobile ? 'ov:p-2' : 'ov:p-4',
           'ov:w-full ov:h-full ov:min-h-0 ov:box-border ov:bg-black/50'
         )}
         onClick={handleBackdropClick}
@@ -164,13 +165,20 @@ export const Snap2ConfiguratorModal: React.FC<Snap2ConfiguratorModalProps> = ({ 
         <div
           className={cn(
             'ov:relative ov:bg-transparent ov:rounded-3xl ov:shadow-xl',
-            'ov:w-auto ov:h-full ov:max-w-[1980px] ov:max-h-none'
+            isMobile
+              ? 'ov:w-full ov:h-full ov:max-w-none'
+              : 'ov:w-auto ov:h-full ov:max-w-[1980px] ov:max-h-none'
           )}
         >
           <div
             id="ov25-snap2-modal-frame"
             ref={setPortalTargetEl}
-            className="ov:relative ov:w-[min(90vw,1980px)] ov:h-full ov:flex ov:rounded-3xl"
+            className={cn(
+              'ov:relative ov:h-full ov:flex ov:rounded-3xl',
+              isMobile
+                ? 'ov:w-full ov:flex-col'
+                : 'ov:w-[min(90vw,1980px)]'
+            )}
             style={{ clipPath: 'inset(0 round var(--ov25-rounded-3xl))' }}
             data-ov25-snap2-shell="modal"
           >
@@ -180,7 +188,14 @@ export const Snap2ConfiguratorModal: React.FC<Snap2ConfiguratorModalProps> = ({ 
               className={cn('ov:z-101', isShareDialogOpen && 'ov:opacity-0 ov:pointer-events-none')}
             />
 
-            <div className="ov:relative ov:flex ov:items-stretch ov:justify-stretch ov:flex-1 ov:h-full ov:min-h-0 ov:min-w-0 ov:w-full">
+            <div
+              className={cn(
+                'ov:relative ov:flex ov:items-stretch ov:justify-stretch ov:min-h-0 ov:min-w-0 ov:w-full',
+                isMobile
+                  ? 'ov:h-[40vh] ov:shrink-0'
+                  : 'ov:flex-1 ov:h-full'
+              )}
+            >
               <div className="ov:w-full ov:h-full ov:min-h-0 ov:min-w-0">{children}</div>
             </div>
 
@@ -190,7 +205,13 @@ export const Snap2ConfiguratorModal: React.FC<Snap2ConfiguratorModalProps> = ({ 
               open={Boolean(overlayOpaque && isVariantsOpen)}
               onOpenChange={setIsVariantsOpen}
               sheetZClass="ov:z-102"
+              emitSideAttribute={!isMobile}
               showCloseButton={false}
+              className={isMobile ? cn(
+                'ov:relative ov:top-auto ov:right-auto ov:left-auto ov:bottom-auto',
+                'ov:w-full ov:h-auto ov:flex-1 ov:min-h-0 ov:max-h-none',
+                'ov:border-l-0 ov:border-r-0 ov:border-t ov:border-gray-200'
+              ) : undefined}
             >
               {effectiveOverlayStyle === 'wizard' ? (
                 <div className="ov:flex ov:flex-col ov:h-full ov:bg-(--ov25-background-color)">
