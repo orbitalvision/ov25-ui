@@ -54,6 +54,7 @@ const testPages = [
   'gallery-inline-accordion',
   'gallery-inline-tree',
   'gallery-inline-list',
+  'gallery-inline-list-no-variant-thumbs',
   'gallery-inline-wizard',
   'gallery-carousel-horizontal',
   'gallery-carousel-stacked',
