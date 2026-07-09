@@ -1,3 +1,8 @@
+export {
+  BODY_TRANSITION_PROXY_CLOSE_Z_INDEX as TRANSITION_PROXY_CLOSE_Z_INDEX,
+  BODY_TRANSITION_PROXY_CLOSE_OVER_MOBILE_DRAWER_Z_INDEX as TRANSITION_PROXY_CLOSE_Z_INDEX_MOBILE_DRAWER,
+} from './layers.js'
+
 /** Parent → iframe: request one ImageBitmap before repositioning the configurator shell. */
 export const IFRAME_MSG_REQUEST_TRANSITION_SNAPSHOT = 'REQUEST_TRANSITION_SNAPSHOT' as const
 
@@ -27,12 +32,6 @@ export const TRANSITION_PROXY_CLOSE_MODAL_FADE_MS = 220
 export const TRANSITION_MODAL_OVERLAY_IN_MS = 280
 
 export const TRANSITION_MODAL_OVERLAY_OUT_MS = 240
-
-/** Same stacking as the sheet iframe so the bitmap sits above the variant shell during close. */
-export const TRANSITION_PROXY_CLOSE_Z_INDEX = 2147483645
-
-/** Mobile drawer host uses 2147483646; proxy must sit above it during the height collapse. */
-export const TRANSITION_PROXY_CLOSE_Z_INDEX_MOBILE_DRAWER = 2147483647
 
 /** ProductGallery iframe slot background layer; used to resolve the transition proxy fill color. */
 export const CONFIGURATOR_IFRAME_BACKGROUND_PROBE_ID = 'ov25-configurator-background-color' as const

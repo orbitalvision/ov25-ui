@@ -18,6 +18,15 @@ import { getSharedStylesheet, createuserCustomCssStylesheet } from './shadow-sty
 import { findIframeWithUniqueId } from './configurator-dom-queries.js';
 import { computeIsMobileViewport } from './viewport-mobile.js';
 import { injectDiningConfigurator } from './inject-dining.js';
+import {
+  BODY_MOBILE_DRAWER_PORTAL_Z_INDEX,
+  BODY_MODAL_PORTAL_Z_INDEX,
+  BODY_POPOVER_PORTAL_Z_INDEX,
+  BODY_SNAP2_CHECKOUT_SHEET_PORTAL_Z_INDEX,
+  BODY_SWATCHBOOK_PORTAL_Z_INDEX,
+  BODY_TOASTER_PORTAL_Z_INDEX,
+  BODY_TOASTER_SURFACE_Z_INDEX,
+} from '../lib/config/layers.js';
 
 // Import sonner CSS as string
 import sonnerCssText from 'sonner/dist/styles.css?inline';
@@ -436,7 +445,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     mobileDrawerContainer.style.width = '100%';
     mobileDrawerContainer.style.height = '100%';
     mobileDrawerContainer.style.pointerEvents = 'none';
-    mobileDrawerContainer.style.zIndex = '2147483646'; // max - 1
+    mobileDrawerContainer.style.zIndex = String(BODY_MOBILE_DRAWER_PORTAL_Z_INDEX);
     document.body.appendChild(mobileDrawerContainer);
 
     // add an empty <span> inside the mobile drawer container to stop shopify themes with empty div rules from hiding the div
@@ -463,7 +472,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     snap2CheckoutSheetContainer.style.width = '100%';
     snap2CheckoutSheetContainer.style.height = '100%';
     snap2CheckoutSheetContainer.style.pointerEvents = 'none';
-    snap2CheckoutSheetContainer.style.zIndex = '2147483647';
+    snap2CheckoutSheetContainer.style.zIndex = String(BODY_SNAP2_CHECKOUT_SHEET_PORTAL_Z_INDEX);
     document.body.appendChild(snap2CheckoutSheetContainer);
 
     const snap2CheckoutSheetEmptySpan = document.createElement('span');
@@ -511,7 +520,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     popoverPortalContainer.style.width = '100%';
     popoverPortalContainer.style.height = '100%';
     popoverPortalContainer.style.pointerEvents = 'none';
-    popoverPortalContainer.style.zIndex = '2147483646'; // max -1
+    popoverPortalContainer.style.zIndex = String(BODY_POPOVER_PORTAL_Z_INDEX);
     document.body.appendChild(popoverPortalContainer);
 
     // add an empty <span> inside the popover portal container to stop shopify themes with empty div rules from hiding the div
@@ -537,7 +546,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     toasterContainer.style.width = '100%';
     toasterContainer.style.height = '100%';
     toasterContainer.style.pointerEvents = 'none';
-    toasterContainer.style.zIndex = '2147483647'; // max
+    toasterContainer.style.zIndex = String(BODY_TOASTER_PORTAL_Z_INDEX);
     document.body.appendChild(toasterContainer);
 
     // add an empty <span> inside the toaster portal container to stop shopify themes with empty div rules from hiding the div
@@ -563,7 +572,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     swatchbookPortalContainer.style.width = '100%';
     swatchbookPortalContainer.style.height = '100%';
     swatchbookPortalContainer.style.pointerEvents = 'none';
-    swatchbookPortalContainer.style.zIndex = '2147483647';
+    swatchbookPortalContainer.style.zIndex = String(BODY_SWATCHBOOK_PORTAL_Z_INDEX);
     document.body.appendChild(swatchbookPortalContainer);
 
     // add an empty <span> inside the swatchbook portal container to stop shopify themes with empty div rules from hiding the div
@@ -594,7 +603,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
       modalPortalContainer.style.width = '100%';
       modalPortalContainer.style.height = '100%';
       modalPortalContainer.style.pointerEvents = 'none';
-      modalPortalContainer.style.zIndex = '2147483646'; // max - 1
+      modalPortalContainer.style.zIndex = String(BODY_MODAL_PORTAL_Z_INDEX);
       document.body.appendChild(modalPortalContainer);
 
       const modalPortalEmptySpan = document.createElement('span');
@@ -606,6 +615,9 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
       modalPortalShadowRoot = modalPortalContainer.attachShadow({ mode: 'open' });
       modalPortalShadowRoot.adoptedStyleSheets = getBaseShadowStylesheets();
     }
+
+    // Keep toaster last among static body portals; moving the host preserves its ShadowRoot.
+    document.body.appendChild(toasterContainer);
 
     const hasGallerySelector = !!getSelector(effectiveGallerySelector);
     const useDeferredGallery =
@@ -880,8 +892,8 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     portals.push(createPortal(<SwatchBook isMobile={false} />, swatchbookPortalShadowRoot));
 
     // Special handling for toaster - use body-level container for all modes to ensure visibility in fullscreen
-    // Use body-level toaster container at max z-index to ensure it appears above fullscreen iframe
-    portals.push(createPortal(<Toaster position="top-center" richColors style={{ zIndex: 2147483647 }} />, toasterPortalShadowRoot));
+    // Use the body-level toaster container to ensure it appears above fullscreen iframe
+    portals.push(createPortal(<Toaster position="top-center" richColors style={{ zIndex: BODY_TOASTER_SURFACE_Z_INDEX }} />, toasterPortalShadowRoot));
 
     // If no portals were created we can bail early
     if (portals.length === 0) {

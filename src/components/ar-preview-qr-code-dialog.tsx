@@ -6,7 +6,7 @@ export const ArPreviewQRCodeDialog = ({ arPreviewLink, setArPreviewLink }: { arP
     const { getString } = useOV25UI();
     return (
         <Dialog open={arPreviewLink !== null} onOpenChange={() => setArPreviewLink(null)}>
-            <DialogContent id="ov25-ar-preview-qr-code-dialog" className='ov:z-2147483647 ov:bg-(--ov25-configurator-qr-code-popup-background-color) ov:border-(--ov25-configurator-qr-code-popup-border-color)'>
+            <DialogContent id="ov25-ar-preview-qr-code-dialog" className='ov:bg-(--ov25-configurator-qr-code-popup-background-color) ov:border-(--ov25-configurator-qr-code-popup-border-color)'>
                 <DialogHeader>
                     <DialogTitle className='ov:text-(--ov25-configurator-qr-code-popup-title-text-color)'>{getString('arPreviewTitle', undefined, 'View in room')}</DialogTitle>
                     <DialogDescription className='ov:text-(--ov25-configurator-qr-code-popup-description-text-color)'>{getString('arPreviewDescription', undefined, 'Scan the QR code on your phones camera to view this item in your room')}</DialogDescription>
