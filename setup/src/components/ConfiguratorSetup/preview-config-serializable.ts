@@ -18,9 +18,13 @@ export interface SerializableInjectConfig {
     triggerStyle?: { desktop: string; mobile: string };
     variants?: {
       displayMode: { desktop: string; mobile: string };
+      position?: { desktop: string; mobile: string };
       useSimpleVariantsSelector?: boolean;
       /** Option ids/names omitted from variant UI (ov25-ui `hideOptions`). */
       hideOptions?: string[];
+    };
+    modules?: {
+      position: { desktop: string; mobile: string };
     };
   };
   flags?: Record<string, boolean>;

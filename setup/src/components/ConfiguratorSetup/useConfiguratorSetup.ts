@@ -1,43 +1,30 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import {
-  PREVIEW_PRODUCT_LINKS,
-  DEFAULT_PREVIEW_API_KEY,
-  SNAP2_PREVIEW_STARTING_CONFIG_UUID,
-} from '../../lib/config/preview-config';
 import type {
   ConfiguratorSetupFormState,
   TypeSettings,
-  SelectorFormState,
   PreviewLayoutType,
 } from './types';
 import { DEFAULT_FORM_STATE, DEFAULT_TYPE_SETTINGS } from './types';
-import type { SerializableInjectConfig } from './preview-config-serializable';
-import { generateVariableCSS, generateElementCSS } from '../../lib/config/configurator-style-variables';
 import {
   buildFormStateFromInitialPayload,
   hasMeaningfulInitialConfig,
   type ConfiguratorSetupPayload,
 } from './initial-config-from-payload';
 import {
-  formStringReplacementsToSerializable,
   normalizeStringReplacementsState,
 } from '../../lib/string-replacements-config';
+import {
+  buildConfiguratorSetupPayload,
+  buildSerializableConfig,
+} from './serialize-config';
+import type { ConfiguratorSetupSerializableOverrides } from './serialize-config';
 
 export type { ConfiguratorSetupPayload };
 
-function parseVariantHideOptionsCsv(csv: string): string[] {
-  if (!csv?.trim()) return [];
-  return csv.split(',').map((s) => s.trim()).filter((s) => s.length > 0);
-}
-
 const STORAGE_KEY = 'ov25-configurator-setup';
 const EXPORT_MESSAGE_TYPE = 'OV25_CONFIGURATOR_SETTINGS';
-const DEMO_IMAGE_COUNT = 9;
-const DEMO_IMAGES = Array.from({ length: DEMO_IMAGE_COUNT }, (_, i) => `https://picsum.photos/800/800?random=${i + 1}`);
 
-export interface ConfiguratorSetupOverrides {
-  apiKey?: string;
-  productLink?: string;
+export interface ConfiguratorSetupOverrides extends ConfiguratorSetupSerializableOverrides {
   previewBaseUrl?: string;
   initialConfig?: ConfiguratorSetupPayload;
   onSave?: (payload: ConfiguratorSetupPayload) => void;
@@ -55,6 +42,7 @@ function mergeTypeSettings(defaults: TypeSettings, saved: Partial<TypeSettings> 
       variants: { ...defaults.selectors.variants, ...saved.selectors?.variants },
       swatches: { ...defaults.selectors.swatches, ...saved.selectors?.swatches },
       configureButton: { ...defaults.selectors.configureButton, ...saved.selectors?.configureButton },
+      initialiseMenu: { ...defaults.selectors.initialiseMenu, ...saved.selectors?.initialiseMenu },
     },
     carousel: { ...defaults.carousel, ...saved.carousel },
     configurator: { ...defaults.configurator, ...saved.configurator },
@@ -104,127 +92,6 @@ function loadSavedState(): ConfiguratorSetupFormState {
   } catch {
     return DEFAULT_FORM_STATE;
   }
-}
-
-function toElementSelector(s: SelectorFormState): string | { selector: string; replace: boolean } | undefined {
-  if (!s.enabled || !s.selector.trim()) return undefined;
-  return s.replace ? { selector: s.selector.trim(), replace: true } : s.selector.trim();
-}
-
-export function buildSerializableConfig(
-  layout: PreviewLayoutType,
-  settings: TypeSettings,
-  overrides?: { apiKey?: string; productLink?: string },
-): SerializableInjectConfig {
-  let productLink = overrides?.productLink || PREVIEW_PRODUCT_LINKS[layout];
-  if (layout === 'snap2' && settings.snap2UseStartingConfig) {
-    const sep = productLink.includes('?') ? '&' : '?';
-    productLink = `${productLink}${sep}configuration_uuid=${encodeURIComponent(SNAP2_PREVIEW_STARTING_CONFIG_UUID)}`;
-  }
-  const apiKey = overrides?.apiKey || DEFAULT_PREVIEW_API_KEY;
-  const parsedHideOptions = parseVariantHideOptionsCsv(settings.configurator.variantHideOptionsCsv);
-
-  const selectors: Record<string, string | { selector: string; replace: boolean }> = {};
-  const selectorEntries = Object.entries(settings.selectors) as [keyof TypeSettings['selectors'], SelectorFormState][];
-  for (const [key, state] of selectorEntries) {
-    const val = toElementSelector(state);
-    if (val) selectors[key] = val;
-  }
-
-  const config: SerializableInjectConfig = {
-    apiKey,
-    productLink,
-    selectors,
-    carousel: {
-      desktop: settings.carousel.desktop,
-      mobile: settings.carousel.mobile,
-      maxImages:
-        settings.carousel.maxImagesDesktop !== settings.carousel.maxImagesMobile
-          ? { desktop: settings.carousel.maxImagesDesktop, mobile: settings.carousel.maxImagesMobile }
-          : settings.carousel.maxImagesDesktop,
-    },
-    configurator: {
-      displayMode: { desktop: settings.configurator.displayModeDesktop, mobile: settings.configurator.displayModeMobile },
-      triggerStyle: { desktop: settings.configurator.triggerStyleDesktop, mobile: settings.configurator.triggerStyleMobile },
-      variants: {
-        displayMode: { desktop: settings.configurator.variantDisplayDesktop, mobile: settings.configurator.variantDisplayMobile },
-        useSimpleVariantsSelector: settings.configurator.useSimpleVariantsSelector,
-        ...(parsedHideOptions.length > 0 ? { hideOptions: parsedHideOptions } : {}),
-      },
-    },
-    flags: {
-      hidePricing: settings.flags.hidePricing,
-      disableAddToCart: settings.flags.disableAddToCart,
-      hideAr: settings.flags.hideAr,
-      deferThreeD: settings.flags.deferThreeD,
-      showOptional: settings.flags.showOptional,
-      forceMobile: settings.flags.forceMobile,
-      autoOpen: settings.flags.autoOpen,
-    },
-    images: DEMO_IMAGES,
-  };
-
-  const variableCSS = generateVariableCSS(settings.style);
-  const elementCSS = generateElementCSS(settings.elementStyles);
-  const manualCSS = settings.branding.cssString;
-  const combinedCSS = [variableCSS, elementCSS, manualCSS].filter(Boolean).join('\n\n');
-
-  if (
-    combinedCSS ||
-    settings.branding.logoURL ||
-    settings.branding.mobileLogoURL ||
-    settings.branding.hideLogo
-  ) {
-    config.branding = {};
-    if (settings.branding.logoURL) config.branding.logoURL = settings.branding.logoURL;
-    if (settings.branding.mobileLogoURL) config.branding.mobileLogoURL = settings.branding.mobileLogoURL;
-    if (combinedCSS) config.branding.cssString = combinedCSS;
-    if (settings.branding.hideLogo) config.branding.hideLogo = true;
-  }
-
-  if (settings.flags.hidePricing && config.selectors) {
-    delete config.selectors.price;
-  }
-
-  if (layout === 'bedConfigurator' && settings.bed) {
-    const filterSelectionsByCurrentSize = {
-      headboard: settings.bed.filterMatchingSizeHeadboard,
-      base: settings.bed.filterMatchingSizeBase,
-      mattress: settings.bed.filterMatchingSizeMattress,
-    };
-    config.bed = {
-      allowNone: {
-        headboard: settings.bed.allowNoneHeadboard,
-        base: settings.bed.allowNoneBase,
-        mattress: settings.bed.allowNoneMattress,
-      },
-      ...(filterSelectionsByCurrentSize.headboard ||
-      filterSelectionsByCurrentSize.base ||
-      filterSelectionsByCurrentSize.mattress
-        ? { filterSelectionsByCurrentSize }
-        : {}),
-    };
-  }
-
-  const stringReplacementsSerializable = formStringReplacementsToSerializable(settings.stringReplacements);
-  if (stringReplacementsSerializable) {
-    config.stringReplacements = stringReplacementsSerializable;
-  }
-
-  return config;
-}
-
-function buildExportJson(
-  state: ConfiguratorSetupFormState,
-  overrides?: { apiKey?: string; productLink?: string },
-): ConfiguratorSetupPayload {
-  const result = {} as ConfiguratorSetupPayload;
-  for (const type of Object.keys(state.typeSettings) as PreviewLayoutType[]) {
-    const cfg = buildSerializableConfig(type, state.typeSettings[type], overrides);
-    const { apiKey: _a, productLink: _p, images: _i, ...rest } = cfg;
-    (result as Record<string, unknown>)[type] = rest;
-  }
-  return result;
 }
 
 function postToParent(data: unknown) {
@@ -311,13 +178,13 @@ export function useConfiguratorSetup(overrides?: ConfiguratorSetupOverrides) {
         const { apiKey: _a, productLink: _p, images: _i, ...rest } = cfg;
         return rest;
       }
-      return buildExportJson(formState, overrides);
+      return buildConfiguratorSetupPayload(formState, overrides);
     },
     [formState, currentSettings, overrides],
   );
 
   const exportSettings = useCallback(async () => {
-    const json = buildExportJson(formState, overrides);
+    const json = buildConfiguratorSetupPayload(formState, overrides);
     if (overrides?.onSave) {
       overrides.onSave(json);
     } else {

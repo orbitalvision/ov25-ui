@@ -7,6 +7,8 @@ export type FormCarouselDisplayMode = 'none' | 'carousel' | 'stacked';
 export type FormConfiguratorDisplayMode = 'inline' | 'sheet' | 'modal' | 'variants-only-sheet';
 export type FormConfiguratorDisplayModeMobile = 'inline' | 'drawer' | 'modal' | 'variants-only-sheet';
 export type FormVariantDisplayMode = 'wizard' | 'list' | 'tabs' | 'accordion' | 'tree';
+export type FormSnap2VariantPosition = 'left' | 'right';
+export type FormSnap2ModulePosition = 'left' | 'right' | 'bottom';
 
 export interface SelectorFormState {
   enabled: boolean;
@@ -22,6 +24,7 @@ export interface TypeSettings {
     variants: SelectorFormState;
     swatches: SelectorFormState;
     configureButton: SelectorFormState;
+    initialiseMenu: SelectorFormState;
   };
   carousel: {
     desktop: FormCarouselDisplayMode;
@@ -36,6 +39,10 @@ export interface TypeSettings {
     triggerStyleMobile: 'single-button' | 'split-buttons';
     variantDisplayDesktop: FormVariantDisplayMode;
     variantDisplayMobile: FormVariantDisplayMode;
+    snap2VariantPositionDesktop: FormSnap2VariantPosition;
+    snap2VariantPositionMobile: FormSnap2VariantPosition;
+    snap2ModulePositionDesktop: FormSnap2ModulePosition;
+    snap2ModulePositionMobile: FormSnap2ModulePosition;
     useSimpleVariantsSelector: boolean;
     /** Comma-separated option ids/names → saved as `variants.hideOptions` in JSON. */
     variantHideOptionsCsv: string;
@@ -93,6 +100,7 @@ const DEFAULT_STANDARD_SETTINGS: TypeSettings = {
     variants: { enabled: true, selector: '#ov25-controls', replace: false },
     swatches: { enabled: true, selector: '#ov25-swatches', replace: false },
     configureButton: { enabled: false, selector: '[data-ov25-configure-button]', replace: false },
+    initialiseMenu: { enabled: false, selector: '#ov25-initialise-menu', replace: true },
   },
   carousel: { desktop: 'stacked', mobile: 'carousel', maxImagesDesktop: 4, maxImagesMobile: 6 },
   configurator: {
@@ -102,6 +110,10 @@ const DEFAULT_STANDARD_SETTINGS: TypeSettings = {
     triggerStyleMobile: 'single-button',
     variantDisplayDesktop: 'tree',
     variantDisplayMobile: 'list',
+    snap2VariantPositionDesktop: 'right',
+    snap2VariantPositionMobile: 'right',
+    snap2ModulePositionDesktop: 'right',
+    snap2ModulePositionMobile: 'right',
     useSimpleVariantsSelector: true,
     variantHideOptionsCsv: '',
   },
@@ -118,6 +130,11 @@ const DEFAULT_SNAP2_SETTINGS: TypeSettings = {
     ...DEFAULT_STANDARD_SETTINGS.selectors,
     gallery: { enabled: false, selector: '.configurator-container', replace: true },
     configureButton: { enabled: true, selector: '[data-ov25-configure-button]', replace: false },
+  },
+  configurator: {
+    ...DEFAULT_STANDARD_SETTINGS.configurator,
+    displayModeDesktop: 'modal',
+    displayModeMobile: 'modal',
   },
 };
 

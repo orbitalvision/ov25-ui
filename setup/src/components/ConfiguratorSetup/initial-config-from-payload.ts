@@ -24,6 +24,42 @@ function deserializeSelector(val: string | { selector: string; replace: boolean 
   };
 }
 
+const SNAP2_VARIANT_POSITIONS = ['left', 'right'] as const;
+const SNAP2_MODULE_POSITIONS = ['left', 'right', 'bottom'] as const;
+const DESKTOP_DISPLAY_MODES = ['inline', 'sheet', 'modal', 'variants-only-sheet'] as const;
+
+function normalizePosition<T extends string>(value: unknown, allowed: readonly T[], fallback: T): T {
+  const normalized = typeof value === 'string' ? value.trim().toLowerCase() : '';
+  return allowed.includes(normalized as T) ? (normalized as T) : fallback;
+}
+
+function normalizeDesktopDisplayMode(
+  layout: LayoutType,
+  value: unknown,
+  fallback: TypeSettings['configurator']['displayModeDesktop'],
+): TypeSettings['configurator']['displayModeDesktop'] {
+  const normalized = typeof value === 'string' ? value.trim().toLowerCase() : '';
+  if (layout === 'snap2') {
+    return normalized === 'inline' ? 'inline' : 'modal';
+  }
+  return DESKTOP_DISPLAY_MODES.includes(normalized as (typeof DESKTOP_DISPLAY_MODES)[number])
+    ? (normalized as TypeSettings['configurator']['displayModeDesktop'])
+    : fallback;
+}
+
+function normalizeMobileDisplayMode(
+  layout: LayoutType,
+  value: unknown,
+): TypeSettings['configurator']['displayModeMobile'] {
+  const normalized = typeof value === 'string' ? value.trim().toLowerCase() : '';
+  if (layout === 'snap2') {
+    return normalized === 'inline' || normalized === 'drawer'
+      ? normalized
+      : 'modal';
+  }
+  return value as TypeSettings['configurator']['displayModeMobile'];
+}
+
 /** Pulls `:host` / `:root` `--ov25-*` declarations into a flat map so they are not duplicated when re-exporting. */
 export function pullRootVariablesFromCss(css: string | undefined): { style: Record<string, string>; rest: string } {
   const style: Record<string, string> = {};
@@ -57,7 +93,7 @@ export function pullRootVariablesFromCss(css: string | undefined): { style: Reco
   return { style, rest: rest.replace(/\n{3,}/g, '\n\n').trim() };
 }
 
-function mergeSerializableIntoTypeSettings(base: TypeSettings, saved: SavedLayout): TypeSettings {
+function mergeSerializableIntoTypeSettings(base: TypeSettings, saved: SavedLayout, layout: LayoutType): TypeSettings {
   const merged: TypeSettings = {
     ...base,
     selectors: { ...base.selectors },
@@ -96,8 +132,15 @@ function mergeSerializableIntoTypeSettings(base: TypeSettings, saved: SavedLayou
   if (saved.configurator) {
     const cf = saved.configurator;
     if (cf.displayMode) {
-      merged.configurator.displayModeDesktop = cf.displayMode.desktop as TypeSettings['configurator']['displayModeDesktop'];
-      merged.configurator.displayModeMobile = cf.displayMode.mobile as TypeSettings['configurator']['displayModeMobile'];
+      merged.configurator.displayModeDesktop = normalizeDesktopDisplayMode(
+        layout,
+        cf.displayMode.desktop,
+        merged.configurator.displayModeDesktop,
+      );
+      merged.configurator.displayModeMobile = normalizeMobileDisplayMode(
+        layout,
+        cf.displayMode.mobile,
+      );
     }
     if (cf.triggerStyle) {
       merged.configurator.triggerStyleDesktop = cf.triggerStyle.desktop as TypeSettings['configurator']['triggerStyleDesktop'];
@@ -106,6 +149,32 @@ function mergeSerializableIntoTypeSettings(base: TypeSettings, saved: SavedLayou
     if (cf.variants?.displayMode) {
       merged.configurator.variantDisplayDesktop = cf.variants.displayMode.desktop as TypeSettings['configurator']['variantDisplayDesktop'];
       merged.configurator.variantDisplayMobile = cf.variants.displayMode.mobile as TypeSettings['configurator']['variantDisplayMobile'];
+    }
+    if (cf.variants?.position) {
+      const desktop = normalizePosition(
+        cf.variants.position.desktop,
+        SNAP2_VARIANT_POSITIONS,
+        merged.configurator.snap2VariantPositionDesktop,
+      );
+      merged.configurator.snap2VariantPositionDesktop = desktop;
+      merged.configurator.snap2VariantPositionMobile = normalizePosition(
+        cf.variants.position.mobile ?? cf.variants.position.desktop,
+        SNAP2_VARIANT_POSITIONS,
+        merged.configurator.snap2VariantPositionMobile,
+      );
+    }
+    if (cf.modules?.position) {
+      const desktop = normalizePosition(
+        cf.modules.position.desktop,
+        SNAP2_MODULE_POSITIONS,
+        merged.configurator.snap2ModulePositionDesktop,
+      );
+      merged.configurator.snap2ModulePositionDesktop = desktop;
+      merged.configurator.snap2ModulePositionMobile = normalizePosition(
+        cf.modules.position.mobile ?? cf.modules.position.desktop,
+        SNAP2_MODULE_POSITIONS,
+        merged.configurator.snap2ModulePositionMobile,
+      );
     }
     if (cf.variants?.useSimpleVariantsSelector !== undefined) {
       merged.configurator.useSimpleVariantsSelector = cf.variants.useSimpleVariantsSelector;
@@ -180,6 +249,7 @@ export function buildFormStateFromInitialPayload(initial: Partial<ConfiguratorSe
     state.typeSettings[layout] = mergeSerializableIntoTypeSettings(
       DEFAULT_TYPE_SETTINGS[layout],
       raw as SavedLayout,
+      layout,
     );
   }
   return state;

@@ -9,5 +9,9 @@ export type { LayoutType } from './lib/config/preview-config';
 export type { SerializableInjectConfig } from './components/ConfiguratorSetup/preview-config-serializable';
 export type { TypeSettings, ConfiguratorSetupFormState, SelectorFormState } from './components/ConfiguratorSetup/types';
 
-export { buildSerializableConfig } from './components/ConfiguratorSetup/useConfiguratorSetup';
+export {
+  buildSerializableConfig,
+  buildConfiguratorSetupPayload,
+  buildDefaultConfiguratorSetupPayload,
+} from './components/ConfiguratorSetup/serialize-config';
 export { STYLE_GROUPS, generateVariableCSS, generateElementCSS } from './lib/config/configurator-style-variables';

@@ -10,8 +10,9 @@ import type {
   ConfiguratorSetupFormState, TypeSettings,
   FormCarouselDisplayMode, FormConfiguratorDisplayMode,
   FormConfiguratorDisplayModeMobile, FormVariantDisplayMode,
+  FormSnap2VariantPosition, FormSnap2ModulePosition,
 } from '../types';
-import { SectionHeader, SwitchRow, DesktopMobileRow, SectionDivider } from '../shared-ui';
+import { SectionHeader, SwitchRow, DesktopMobileRow, SectionDivider, CompactSelect } from '../shared-ui';
 import { StylePanel } from '../StyleEditor';
 import type { ConfiguratorSetupPayload } from '../useConfiguratorSetup';
 
@@ -55,11 +56,22 @@ const DISPLAY_DESKTOP_OPTIONS = [
   { value: 'variants-only-sheet' as FormConfiguratorDisplayMode, label: 'Variants sheet', desc: 'Sheet with variants only' },
 ];
 
+const SNAP2_DISPLAY_DESKTOP_OPTIONS = [
+  { value: 'modal' as FormConfiguratorDisplayMode, label: 'Dialog', desc: 'Centered overlay dialog' },
+  { value: 'inline' as FormConfiguratorDisplayMode, label: 'Inline', desc: 'Embedded beside the gallery' },
+];
+
 const DISPLAY_MOBILE_OPTIONS = [
   { value: 'inline' as FormConfiguratorDisplayModeMobile, label: 'Inline', desc: 'Embedded below gallery' },
   { value: 'drawer' as FormConfiguratorDisplayModeMobile, label: 'Drawer', desc: 'Slides up from bottom' },
   { value: 'modal' as FormConfiguratorDisplayModeMobile, label: 'Modal', desc: 'Centered overlay dialog' },
   { value: 'variants-only-sheet' as FormConfiguratorDisplayModeMobile, label: 'Variants sheet', desc: 'Sheet with variants only' },
+];
+
+const SNAP2_DISPLAY_MOBILE_OPTIONS = [
+  { value: 'modal' as FormConfiguratorDisplayModeMobile, label: 'Dialog', desc: 'Centered overlay dialog' },
+  { value: 'drawer' as FormConfiguratorDisplayModeMobile, label: 'Drawer', desc: 'Slides up from bottom' },
+  { value: 'inline' as FormConfiguratorDisplayModeMobile, label: 'Inline', desc: 'Embedded below gallery' },
 ];
 
 const TRIGGER_OPTIONS = [
@@ -73,6 +85,17 @@ const VARIANT_OPTIONS = [
   { value: 'tabs' as FormVariantDisplayMode, label: 'Tabs', desc: 'Tabbed groups' },
   { value: 'accordion' as FormVariantDisplayMode, label: 'Accordion', desc: 'Collapsible groups' },
   { value: 'wizard' as FormVariantDisplayMode, label: 'Wizard', desc: 'Step by step' },
+];
+
+const SNAP2_VARIANT_POSITION_OPTIONS = [
+  { value: 'left' as FormSnap2VariantPosition, label: 'Left' },
+  { value: 'right' as FormSnap2VariantPosition, label: 'Right' },
+];
+
+const SNAP2_MODULE_POSITION_OPTIONS = [
+  { value: 'left' as FormSnap2ModulePosition, label: 'Left' },
+  { value: 'right' as FormSnap2ModulePosition, label: 'Right' },
+  { value: 'bottom' as FormSnap2ModulePosition, label: 'Bottom' },
 ];
 
 const ELEMENT_TOGGLES: { key: keyof TypeSettings['selectors']; label: string }[] = [
@@ -94,6 +117,48 @@ const FLAG_TOGGLES: { key: keyof TypeSettings['flags']; label: string }[] = [
   { key: 'autoOpen', label: 'Auto-open configurator' },
 ];
 
+function Snap2PositionRow({
+  label,
+  showDesktop,
+  showMobile,
+  desktopValue,
+  mobileValue,
+  onDesktopChange,
+  onMobileChange,
+  options,
+}: {
+  label: string;
+  showDesktop: boolean;
+  showMobile: boolean;
+  desktopValue: string;
+  mobileValue: string;
+  onDesktopChange: (v: string) => void;
+  onMobileChange: (v: string) => void;
+  options: { value: string; label: string }[];
+}) {
+  if (!showDesktop && !showMobile) return null;
+
+  return (
+    <div className="space-y-1.5">
+      <span className="text-sm text-foreground">{label}</span>
+      <div className={`grid gap-2 ${showDesktop && showMobile ? 'grid-cols-2' : 'grid-cols-1'}`}>
+        {showDesktop && (
+          <div>
+            <Label className="text-[10px] text-muted-foreground mb-0.5">Desktop</Label>
+            <CompactSelect value={desktopValue} onValueChange={onDesktopChange} options={options} />
+          </div>
+        )}
+        {showMobile && (
+          <div>
+            <Label className="text-[10px] text-muted-foreground mb-0.5">Mobile</Label>
+            <CompactSelect value={mobileValue} onValueChange={onMobileChange} options={options} />
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 type ExportMode = 'current' | 'all';
 
 export function ConfigPanel({ formState, currentSettings, setLayout, updateSettings, updateNested, getExportJson, onSave, hideSaveButton }: ConfigPanelProps) {
@@ -102,6 +167,8 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
   const [modalCopied, setModalCopied] = useState(false);
   const isSnap2 = formState.layout === 'snap2';
   const isBed = formState.layout === 'bedConfigurator';
+  const showSnap2DesktopPositionControls = isSnap2 && currentSettings.configurator.displayModeDesktop === 'modal';
+  const showSnap2PositionControls = showSnap2DesktopPositionControls;
 
   const handleSelectorToggle = (key: keyof TypeSettings['selectors'], enabled: boolean) => {
     updateNested('selectors', key, { ...currentSettings.selectors[key], enabled });
@@ -252,8 +319,8 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
                 mobileValue={currentSettings.configurator.displayModeMobile}
                 onDesktopChange={(v) => updateNested('configurator', 'displayModeDesktop', v)}
                 onMobileChange={(v) => updateNested('configurator', 'displayModeMobile', v)}
-                options={DISPLAY_DESKTOP_OPTIONS}
-                mobileOptions={DISPLAY_MOBILE_OPTIONS}
+                options={isSnap2 ? SNAP2_DISPLAY_DESKTOP_OPTIONS : DISPLAY_DESKTOP_OPTIONS}
+                mobileOptions={isSnap2 ? SNAP2_DISPLAY_MOBILE_OPTIONS : DISPLAY_MOBILE_OPTIONS}
               />
               <DesktopMobileRow
                 label="Trigger style"
@@ -271,6 +338,30 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
                 onMobileChange={(v) => updateNested('configurator', 'variantDisplayMobile', v)}
                 options={VARIANT_OPTIONS}
               />
+              {showSnap2PositionControls && (
+                <>
+                  <Snap2PositionRow
+                    label="Variant position"
+                    showDesktop={showSnap2DesktopPositionControls}
+                    showMobile={false}
+                    desktopValue={currentSettings.configurator.snap2VariantPositionDesktop}
+                    mobileValue={currentSettings.configurator.snap2VariantPositionMobile}
+                    onDesktopChange={(v) => updateNested('configurator', 'snap2VariantPositionDesktop', v)}
+                    onMobileChange={(v) => updateNested('configurator', 'snap2VariantPositionMobile', v)}
+                    options={SNAP2_VARIANT_POSITION_OPTIONS}
+                  />
+                  <Snap2PositionRow
+                    label="Module position"
+                    showDesktop={showSnap2DesktopPositionControls}
+                    showMobile={false}
+                    desktopValue={currentSettings.configurator.snap2ModulePositionDesktop}
+                    mobileValue={currentSettings.configurator.snap2ModulePositionMobile}
+                    onDesktopChange={(v) => updateNested('configurator', 'snap2ModulePositionDesktop', v)}
+                    onMobileChange={(v) => updateNested('configurator', 'snap2ModulePositionMobile', v)}
+                    options={SNAP2_MODULE_POSITION_OPTIONS}
+                  />
+                </>
+              )}
               <div>
                 <Label className="text-[10px] text-muted-foreground">Hide variant options (comma-separated)</Label>
                 <p className="text-[10px] text-muted-foreground/80 mt-0.5 mb-1">

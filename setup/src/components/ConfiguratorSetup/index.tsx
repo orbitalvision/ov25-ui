@@ -4,8 +4,8 @@ import { ConfigPanel } from './ConfigPanel';
 import { PreviewArea } from './PreviewArea';
 
 export interface ConfiguratorSetupProps {
-  apiKey?: string;
-  productLink?: string;
+  apiKey?: ConfiguratorSetupOverrides['apiKey'];
+  productLink?: ConfiguratorSetupOverrides['productLink'];
   previewBaseUrl?: string;
   /**
    * `false`: always `https://app.ov25.ai/configurator-preview`.
