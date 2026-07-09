@@ -8,3 +8,6 @@ dist
 playwright-report
 test/browser/__screenshots__/
 test-results/
+artifacts/
+review-diffs/
+review-screenshots/
