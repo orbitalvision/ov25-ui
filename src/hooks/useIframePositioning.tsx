@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useLayoutEffect, useRef } from 'react';
 import { useOV25UI } from '../contexts/ov25-ui-context.js';
 import { IFRAME_HEIGHT_RATIO } from '../utils/configurator-utils.js';
 import { MODAL_GALLERY_SLOT_ID } from '../components/ConfiguratorModal.js';
@@ -9,6 +9,23 @@ import {
 
 /** Variant sheet UI (e.g. VariantContentDesktop) uses z-index 2147483644; iframe + deferThreeD poster must stack above it. */
 const DESKTOP_SHEET_IFRAME_Z_INDEX = '2147483645';
+const useBrowserLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
+
+type DesktopSheetScrollbarCompensation = {
+  bodyPaddingRight: string;
+  htmlScrollbarGutter: string;
+};
+
+const restoreDesktopSheetScrollbarCompensation = (
+  scrollbarCompensation: { current: DesktopSheetScrollbarCompensation | null },
+) => {
+  const styles = scrollbarCompensation.current;
+  if (!styles || typeof document === 'undefined') return;
+
+  document.body.style.paddingRight = styles.bodyPaddingRight;
+  document.documentElement.style.setProperty('scrollbar-gutter', styles.htmlScrollbarGutter);
+  scrollbarCompensation.current = null;
+};
 
 /**
  * Hook to position the iframe and its container at the top of the screen when drawer is open
@@ -23,11 +40,13 @@ export const useIframePositioning = () => {
     uniqueId,
     configuratorDisplayMode,
     configuratorDisplayModeMobile,
+    isVariantsOpen,
     useInstantIframeCloseRestore,
     setUseInstantIframeCloseRestore,
     stackedGalleryCloseSyncImmediateRef,
   } = useOV25UI();
   const isModalMode = isMobile ? configuratorDisplayModeMobile === 'modal' : configuratorDisplayMode === 'modal';
+  const desktopSheetScrollbarCompensation = useRef<DesktopSheetScrollbarCompensation | null>(null);
   const originalStyles = useRef<{
     container: {
       position: string;
@@ -65,12 +84,50 @@ export const useIframePositioning = () => {
     };
   } | null>(null);
 
+  useBrowserLayoutEffect(() => {
+    if (typeof window === 'undefined') return;
+    if (!isVariantsOpen || isMobile || configuratorDisplayMode !== 'sheet') return;
+    if (desktopSheetScrollbarCompensation.current) return;
+
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    if (scrollbarWidth <= 0) return;
+
+    desktopSheetScrollbarCompensation.current = {
+      bodyPaddingRight: document.body.style.paddingRight,
+      htmlScrollbarGutter: document.documentElement.style.getPropertyValue('scrollbar-gutter'),
+    };
+
+    if (typeof CSS !== 'undefined' && CSS.supports?.('scrollbar-gutter: stable')) {
+      document.documentElement.style.setProperty('scrollbar-gutter', 'stable');
+    } else {
+      const currentPaddingRight = parseFloat(window.getComputedStyle(document.body).paddingRight) || 0;
+      document.body.style.paddingRight = `${currentPaddingRight + scrollbarWidth}px`;
+    }
+  }, [configuratorDisplayMode, isMobile, isVariantsOpen]);
+
+  useEffect(() => {
+    if (!isVariantsOpen && !isDrawerOrDialogOpen) {
+      restoreDesktopSheetScrollbarCompensation(desktopSheetScrollbarCompensation);
+    }
+  }, [isDrawerOrDialogOpen, isVariantsOpen]);
+
+  useEffect(() => {
+    return () => {
+      restoreDesktopSheetScrollbarCompensation(desktopSheetScrollbarCompensation);
+    };
+  }, []);
+
   // This useEffect handles drawer opening and closing - saving and restoring original styles
   useEffect(() => {
     const iframe = findIframeWithUniqueId(uniqueId);
     const containerId = uniqueId ? `ov25-configurator-iframe-container-${uniqueId}` : 'ov25-configurator-iframe-container';
-    const container = findElementByIdInShadowOrRegularDOM(isProductGalleryStacked ? 'true-ov25-configurator-iframe-container' : containerId);
-    const parent = container?.parentElement;
+    const slotContainer = findElementByIdInShadowOrRegularDOM(containerId);
+    const container = findElementByIdInShadowOrRegularDOM(
+      isProductGalleryStacked ? 'true-ov25-configurator-iframe-container' : containerId,
+    );
+    const parent =
+      (isProductGalleryStacked ? slotContainer?.parentElement : container?.parentElement) ??
+      container?.parentElement;
 
     if (!iframe || !container || !parent) return;
 
@@ -107,6 +164,7 @@ export const useIframePositioning = () => {
         Object.assign(parent.style, styles.parent);
         setUseInstantIframeCloseRestore(false);
         stackedGalleryCloseSyncImmediateRef.current = true;
+        restoreDesktopSheetScrollbarCompensation(desktopSheetScrollbarCompensation);
         return;
       }
 
@@ -135,6 +193,7 @@ export const useIframePositioning = () => {
           Object.assign(container.style, styles.container);
           Object.assign(iframe.style, styles.iframe);
           Object.assign(parent.style, styles.parent);
+          restoreDesktopSheetScrollbarCompensation(desktopSheetScrollbarCompensation);
         }, 500);
       }
     };
@@ -183,10 +242,12 @@ export const useIframePositioning = () => {
       // Sheet/drawer: lock gallery row size so the slide animation has a stable box. Modal uses a fixed
       // shell over the slot — locking the parent breaks mobile (wrong preload size, overflow fights).
       if (!isModalMode) {
-        const containerOriginalHeight = container.offsetHeight;
-        const containerOriginalWidth = container.offsetWidth;
-        parent.style.height = `${containerOriginalHeight}px`;
-        parent.style.width = `${containerOriginalWidth}px`;
+        const reservationSource = isProductGalleryStacked ? slotContainer : container;
+        const reservationRect = reservationSource?.getBoundingClientRect();
+        if (reservationRect && reservationRect.width > 0 && reservationRect.height > 0) {
+          parent.style.height = `${reservationRect.height}px`;
+          parent.style.width = `${reservationRect.width}px`;
+        }
         parent.style.overflow = 'hidden';
       }
 
@@ -376,6 +437,7 @@ export const useIframePositioning = () => {
   }, [
     isDrawerOrDialogOpen,
     isMobile,
+    isProductGalleryStacked,
     isSnap2Mode,
     uniqueId,
     isModalMode,

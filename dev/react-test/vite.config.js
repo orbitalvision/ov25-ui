@@ -12,6 +12,7 @@ const testPages = [
   'string-replacement',
   'single-no-variants',
   'single-no-pricing',
+  'sheet-reflow-debug',
   'single-no-groups',
   'single-with-discounts',
   'single-with-groups',
