@@ -136,6 +136,7 @@ export const InitialiseMenu: React.FC = () => {
                 isMobile={compact}
                 isLoading={isModuleSelectionLoading}
                 pickOnActivate
+                hideVisibleName
                 className="ov:mb-0 ov:h-[185px] ov:px-4"
                 thumbDualClassName="ov:p-[0.5rem]"
               />

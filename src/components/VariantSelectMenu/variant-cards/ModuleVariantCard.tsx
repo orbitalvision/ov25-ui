@@ -160,6 +160,8 @@ export interface ModuleVariantCardProps extends VariantCardProps {
   isLoading?: boolean;
   /** When true, activating the card selects immediately (e.g. initialise menu); no detail sheet. */
   pickOnActivate?: boolean;
+  /** Use the mounted name on mobile and the mounted hover/focus tooltip on desktop. */
+  hideVisibleName?: boolean;
   className?: string;
   /** Extra classes on the `ov25-module-variant-card__thumb-dual` node (e.g. padding in InitialiseMenu). */
   thumbDualClassName?: string;
@@ -171,6 +173,7 @@ export function ModuleVariantCard({
   isMobile,
   isLoading = false,
   pickOnActivate = false,
+  hideVisibleName = false,
   className,
   thumbDualClassName,
 }: ModuleVariantCardProps) {
@@ -183,6 +186,9 @@ export function ModuleVariantCard({
   const noImageLabel = getString('moduleCardNoImage', undefined, 'No Image');
   const [detailOpen, setDetailOpen] = useState(false);
   const detailTitleId = useId();
+  const tooltipId = useId();
+  const [tooltipVisible, setTooltipVisible] = useState(false);
+  const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
   const handleAddFromSheet = () => {
     if (isLoading) return;
@@ -224,6 +230,8 @@ export function ModuleVariantCard({
     Boolean(longLine && shortLine && longLine !== shortLine);
   const showDescriptions = !pickOnActivate && !isMobile && Boolean(footerSource);
   const isDualThumbLayout = previewUrls.length >= 2;
+  const shouldHideVisibleName = hideVisibleName && !isMobile;
+  const nameTooltipActive = shouldHideVisibleName && tooltipVisible;
 
   const handleThumbAdd = () => {
     if (isLoading) return;
@@ -316,6 +324,21 @@ export function ModuleVariantCard({
     }
   };
 
+  const showNameTooltip = (event: React.MouseEvent<HTMLElement> | React.FocusEvent<HTMLElement>) => {
+    if (!shouldHideVisibleName) return;
+
+    const rect = event.currentTarget.getBoundingClientRect();
+    setTooltipPosition({
+      x: rect.left + rect.width / 2,
+      y: rect.top - 10,
+    });
+    setTooltipVisible(true);
+  };
+
+  const hideNameTooltip = () => {
+    setTooltipVisible(false);
+  };
+
   return (
     <div
       data-ov25-module-variant-card
@@ -324,6 +347,7 @@ export function ModuleVariantCard({
       role={pickOnActivate ? 'button' : 'group'}
       tabIndex={isLoading ? -1 : 0}
       aria-expanded={pickOnActivate ? undefined : detailOpen}
+      aria-describedby={nameTooltipActive ? tooltipId : undefined}
       aria-label={
         pickOnActivate
           ? `${module.product.name}. Select this product.`
@@ -351,6 +375,10 @@ export function ModuleVariantCard({
             }
           : undefined
       }
+      onMouseEnter={showNameTooltip}
+      onMouseLeave={hideNameTooltip}
+      onFocus={showNameTooltip}
+      onBlur={hideNameTooltip}
       className={cn(
         'ov25-module-variant-card ov:relative ov:flex ov:flex-col ov:w-full ov:max-w-full ov:shrink-0 ov:rounded-lg ov:mb-3 ov:px-2 ov:overflow-visible ov:text-left ov:bg-(--ov25-background-color)',
         isLoading
@@ -363,11 +391,30 @@ export function ModuleVariantCard({
         className
       )}
     >
+      <div
+        id={tooltipId}
+        role="tooltip"
+        className={cn(
+          'ov25-module-variant-card__tooltip ov:fixed ov:px-3 ov:py-2 ov:bg-gray-900 ov:text-white ov:text-sm ov:rounded-lg ov:shadow-lg ov:z-2147483646 ov:pointer-events-none ov:whitespace-nowrap',
+          nameTooltipActive ? 'ov:block' : 'ov:hidden'
+        )}
+        style={{
+          left: `${tooltipPosition.x}px`,
+          top: `${tooltipPosition.y}px`,
+          transform: 'translateX(-50%)',
+        }}
+        data-ov25-module-variant-card-part="tooltip"
+        data-ov25-module-variant-card-tooltip-active={nameTooltipActive ? 'true' : 'false'}
+      >
+        {moduleProductName}
+      </div>
+
       <div className="ov:flex ov:items-center ov:justify-between ov:gap-1 ov:px-2">
         <p
           className={cn(
             'ov25-module-variant-card__name ov:min-w-0 ov:shrink ov:px-1 ov:md:px-0 ov:pt-1 ov:pb-0.5 ov:text-start ov:text-sm ov:font-medium ov:leading-tight ov:text-(--ov25-text-color) ov:line-clamp-2',
-            !pickOnActivate && 'ov:cursor-pointer'
+            !pickOnActivate && 'ov:cursor-pointer',
+            shouldHideVisibleName && 'ov:hidden'
           )}
           data-ov25-module-variant-card-part="name"
           onClick={
