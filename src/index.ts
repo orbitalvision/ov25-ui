@@ -64,6 +64,7 @@ export type {
 
 export { normalizeSkuPayload, normalizePricePayload, parseIframeJsonPayload } from './commerce/normalize-iframe-commerce.js';
 export type { Swatch, SwatchRulesData } from './contexts/ov25-ui-context.js';
+export type { ProductImageInput } from './lib/utils.js';
 export { useOv25String } from './lib/strings/use-ov25-string.js';
 
 // Default export object containing all exports

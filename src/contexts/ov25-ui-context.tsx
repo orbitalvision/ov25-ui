@@ -17,7 +17,7 @@ import {
 } from '../types/config-enums.js';
 import { stringSimilarity } from 'string-similarity-js';
 import { launchARWithGLBBlob } from '../utils/launchARWithGLBBlob.js';
-import { getProductGalleryImages, resolveImageUrl } from '../lib/utils.js';
+import { getProductGalleryImages, resolveImageUrl, type ProductImageInput } from '../lib/utils.js';
 import type {
   BedPartSizeFilterFlags,
   OnChangePayload,
@@ -280,7 +280,7 @@ interface OV25UIContextType {
   buyNowFunction: (payload?: OnChangePayload) => void;
   addToBasketFunction: (payload?: OnChangePayload) => void;
   buySwatches: () => void;
-  images?: string[];
+  images?: ProductImageInput[];
   logoURL?: string;
   hideLogo: boolean;
   isProductGalleryStacked: boolean;
@@ -455,7 +455,7 @@ export const OV25UIProvider: React.FC<{
   addToBasketFunction: (payload?: OnChangePayload) => void,
   buySwatchesFunction: (swatches: Swatch[], swatchRulesData: SwatchRulesData) => void,
   onChange?: (payload: OnChangePayload) => void,
-  images?: string[],
+  images?: ProductImageInput[],
   deferThreeD?: boolean,
   showOptional?: boolean,
   hidePricing?: boolean,

@@ -2,6 +2,7 @@ import type { Swatch, SwatchRulesData } from '../contexts/ov25-ui-context.js';
 import type { BedAllowNonePartsInput } from '../lib/config/bed-embed-query.js';
 import { serializeBedAllowNoneQueryValue } from '../lib/config/bed-embed-query.js';
 import { DEFAULT_CURRENCY_SYMBOL } from '../lib/config/currency-display.js';
+import type { ProductImageInput } from '../lib/utils.js';
 import type { StringReplacementsConfig } from './string-replacements.js';
 export type {
   StringReplacementRuleTrigger,
@@ -290,7 +291,7 @@ export interface InjectConfiguratorOptions {
   apiKey: StringOrFunction;
   productLink: StringOrFunction;
   configurationUuid?: StringOrFunction;
-  images?: string[];
+  images?: ProductImageInput[];
   uniqueId?: string;
 
   selectors: SelectorsConfig;
@@ -310,7 +311,7 @@ export interface LegacyInjectConfiguratorOptions {
   apiKey: StringOrFunction;
   productLink: StringOrFunction;
   configurationUuid?: StringOrFunction;
-  images?: string[];
+  images?: ProductImageInput[];
   uniqueId?: string;
   stringReplacements?: StringReplacementsConfig;
 
@@ -391,7 +392,7 @@ export interface NormalizedInjectConfig {
   apiKey: StringOrFunction;
   productLink: StringOrFunction;
   configurationUuid?: StringOrFunction;
-  images?: string[];
+  images?: ProductImageInput[];
   uniqueId?: string;
   stringReplacements?: StringReplacementsConfig;
 
