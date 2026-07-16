@@ -72,11 +72,23 @@ function mergeTypeSettings(defaults: TypeSettings, saved: Partial<TypeSettings> 
   };
 }
 
-function loadSavedState(): ConfiguratorSetupFormState {
-  if (typeof window === 'undefined') return DEFAULT_FORM_STATE;
+function hashString(value: string): string {
+  let hash = 5381;
+  for (let i = 0; i < value.length; i += 1) {
+    hash = (hash * 33) ^ value.charCodeAt(i);
+  }
+  return (hash >>> 0).toString(36);
+}
+
+function draftStorageKey(initialConfigKey: string, hasServerConfig: boolean): string {
+  return hasServerConfig ? `${STORAGE_KEY}:draft:${hashString(initialConfigKey)}` : STORAGE_KEY;
+}
+
+function readSavedState(storageKey: string): ConfiguratorSetupFormState | null {
+  if (typeof window === 'undefined') return null;
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return DEFAULT_FORM_STATE;
+    const raw = localStorage.getItem(storageKey);
+    if (!raw) return null;
     const parsed = JSON.parse(raw);
     return {
       layout: parsed.layout ?? DEFAULT_FORM_STATE.layout,
@@ -90,7 +102,7 @@ function loadSavedState(): ConfiguratorSetupFormState {
       },
     };
   } catch {
-    return DEFAULT_FORM_STATE;
+    return null;
   }
 }
 
@@ -115,24 +127,31 @@ export function useConfiguratorSetup(overrides?: ConfiguratorSetupOverrides) {
       return false;
     }
   }, [initialConfigKey]);
+  const storageKey = useMemo(
+    () => draftStorageKey(initialConfigKey, serverWins),
+    [initialConfigKey, serverWins],
+  );
   const [formState, setFormState] = useState<ConfiguratorSetupFormState>(DEFAULT_FORM_STATE);
   const [hasHydrated, setHasHydrated] = useState(false);
+  const [hydratedStorageKey, setHydratedStorageKey] = useState<string | null>(null);
 
   useEffect(() => {
     const parsed: Partial<ConfiguratorSetupPayload> | undefined =
       initialConfigKey === 'null' ? undefined : (JSON.parse(initialConfigKey) as Partial<ConfiguratorSetupPayload>);
+    const savedDraft = readSavedState(storageKey);
     if (hasMeaningfulInitialConfig(parsed)) {
-      setFormState(buildFormStateFromInitialPayload(parsed));
+      setFormState(savedDraft ?? buildFormStateFromInitialPayload(parsed));
     } else {
-      setFormState(loadSavedState());
+      setFormState(savedDraft ?? DEFAULT_FORM_STATE);
     }
+    setHydratedStorageKey(storageKey);
     setHasHydrated(true);
-  }, [initialConfigKey]);
+  }, [initialConfigKey, storageKey]);
 
   useEffect(() => {
-    if (!hasHydrated || serverWins) return;
-    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(formState)); } catch { /* quota exceeded */ }
-  }, [formState, hasHydrated, serverWins]);
+    if (!hasHydrated || hydratedStorageKey !== storageKey) return;
+    try { localStorage.setItem(storageKey, JSON.stringify(formState)); } catch { /* quota exceeded */ }
+  }, [formState, hasHydrated, hydratedStorageKey, storageKey]);
 
   const currentSettings = formState.typeSettings[formState.layout];
 
