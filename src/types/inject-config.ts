@@ -240,6 +240,7 @@ export type BrandingConfig = {
 export type FlagsConfig = {
   hidePricing?: boolean;
   disableAddToCart?: boolean;
+  disableBuyNow?: boolean;
   hideAr?: boolean;
   deferThreeD?: boolean;
   showOptional?: boolean;
@@ -349,6 +350,7 @@ export interface LegacyInjectConfiguratorOptions {
 
   hidePricing?: boolean;
   disableAddToCart?: boolean;
+  disableBuyNow?: boolean;
   hideAr?: boolean;
   deferThreeD?: boolean;
   showOptional?: boolean;
@@ -433,6 +435,7 @@ export interface NormalizedInjectConfig {
 
   hidePricing?: boolean;
   disableAddToCart?: boolean;
+  disableBuyNow?: boolean;
   hideAr?: boolean;
   deferThreeD?: boolean;
   showOptional?: boolean;
@@ -562,6 +565,7 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
 
   const hidePricing = flags?.hidePricing ?? c.hidePricing;
   const disableAddToCart = flags?.disableAddToCart ?? c.disableAddToCart ?? false;
+  const disableBuyNow = flags?.disableBuyNow ?? c.disableBuyNow ?? false;
   const hideAr = flags?.hideAr ?? c.hideAr;
   const deferThreeD = flags?.deferThreeD ?? c.deferThreeD;
   const showOptional = flags?.showOptional ?? c.showOptional;
@@ -640,6 +644,7 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
     hideLogo,
     hidePricing,
     disableAddToCart,
+    disableBuyNow,
     hideAr,
     deferThreeD,
     showOptional,

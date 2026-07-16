@@ -50,6 +50,7 @@ export interface TypeSettings {
   flags: {
     hidePricing: boolean;
     disableAddToCart: boolean;
+    disableBuyNow: boolean;
     hideAr: boolean;
     deferThreeD: boolean;
     showOptional: boolean;
@@ -117,7 +118,7 @@ const DEFAULT_STANDARD_SETTINGS: TypeSettings = {
     useSimpleVariantsSelector: true,
     variantHideOptionsCsv: '',
   },
-  flags: { hidePricing: false, disableAddToCart: false, hideAr: false, deferThreeD: false, showOptional: false, forceMobile: false, autoOpen: false },
+  flags: { hidePricing: false, disableAddToCart: false, disableBuyNow: false, hideAr: false, deferThreeD: false, showOptional: false, forceMobile: false, autoOpen: false },
   branding: { logoURL: '', mobileLogoURL: '', cssString: '', hideLogo: false },
   style: {},
   elementStyles: {},

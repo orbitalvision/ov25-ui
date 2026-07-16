@@ -40,6 +40,7 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
     formattedSubtotal,
     discount,
     disableAddToCart,
+    disableBuyNow,
     getString,
   } = useOV25UI();
   const addToBasketText = getString('checkoutAddToBasket', { PRICE: formattedPrice, SUBTOTAL: formattedSubtotal, DISCOUNT_AMOUNT: discount.formattedAmount, DISCOUNT_PERCENTAGE: discount.percentage }, 'Add to basket');
@@ -47,8 +48,9 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
   const hasAddToBasket = typeof addToBasketFunction === 'function';
   const hasBuyNow = typeof buyNowFunction === 'function';
   const effectiveHasAddToBasket = hasAddToBasket && !disableAddToCart;
+  const effectiveHasBuyNow = hasBuyNow && !disableBuyNow;
 
-  if (!effectiveHasAddToBasket && !hasBuyNow) {
+  if (!effectiveHasAddToBasket && !effectiveHasBuyNow) {
     return null;
   }
 
@@ -56,7 +58,7 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
     ? 'ov25-checkout-button-wrapper ov25-checkout-button-wrapper--embedded ov:shrink-0 ov:w-full ov:min-w-0 ov:max-w-full'
     : 'ov25-checkout-button-wrapper ov:shrink-0 ov:px-4 ov:pb-2 ov:pt-2';
 
-  if (effectiveHasAddToBasket && !hasBuyNow) {
+  if (effectiveHasAddToBasket && !effectiveHasBuyNow) {
     return (
       <div className={wrapperClass}>
       <button
@@ -77,7 +79,7 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
     );
   }
 
-  if (hasBuyNow && !effectiveHasAddToBasket) {
+  if (effectiveHasBuyNow && !effectiveHasAddToBasket) {
     return (
       <div className={wrapperClass}>
       <button

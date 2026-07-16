@@ -6,6 +6,12 @@ async function expectNoAddToBasketChrome(page: import('@playwright/test').Page) 
   await expect(page.getByRole('button', { name: 'Add to basket' })).toHaveCount(0);
 }
 
+async function expectNoBuyNowChrome(page: import('@playwright/test').Page) {
+  await expect(page.locator('#ov25-checkout-button')).toHaveCount(0);
+  await expect(page.locator('.ov25-checkout-combo-button')).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Buy now' })).toHaveCount(0);
+}
+
 /**
  * Snap2 with useSimpleVariantsSelector (default): inject mounts VariantSelectMenu on the configure
  * selector (#ov25-fullscreen-button) in a shadow host — not under #ov25-controls. The inner
@@ -35,5 +41,25 @@ test.describe('Inline variants — disable add to cart', () => {
     await expect(wrapper).toHaveScreenshot('inline-variants-disable-add-to-cart-checkout.png', {
       maxDiffPixelRatio: 0.04,
     });
+  });
+
+  test('add to basket only: inline, no combo / buy-now', async ({ page }) => {
+    await page.goto('/tests/inline-variants-disable-add-to-cart.html?disableAddToCart=0&disableBuyNow=1');
+
+    const addToBasket = page.locator('#ov25-add-to-basket-button');
+    await expect(addToBasket).toBeVisible({ timeout: 15000 });
+
+    await expectNoBuyNowChrome(page);
+  });
+
+  test('no checkout chrome when both checkout actions are disabled', async ({ page }) => {
+    await page.goto('/tests/inline-variants-disable-add-to-cart.html?disableAddToCart=1&disableBuyNow=1');
+
+    const price = page.locator('.ov25-configurator-price');
+    await expect(price).toBeVisible({ timeout: 15000 });
+
+    await expectNoAddToBasketChrome(page);
+    await expectNoBuyNowChrome(page);
+    await expect(page.locator('.ov25-checkout-button-wrapper')).toHaveCount(0);
   });
 });

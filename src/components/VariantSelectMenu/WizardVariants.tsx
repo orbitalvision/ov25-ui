@@ -41,6 +41,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
     buyNowFunction,
     addToBasketFunction,
     disableAddToCart,
+    disableBuyNow,
     isSnap2Mode,
     activeOptionId,
     setActiveOptionId,
@@ -186,7 +187,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
 
   const useDropdown = totalSteps > DROPDOWN_STEP_THRESHOLD;
   const hasAddToBasket = typeof addToBasketFunction === 'function' && !disableAddToCart;
-  const hasBuyNow = typeof buyNowFunction === 'function';
+  const hasBuyNow = typeof buyNowFunction === 'function' && !disableBuyNow;
   const hasCheckoutActions = hasAddToBasket || hasBuyNow;
   const reviewStepLabel = hasCheckoutActions
     ? getString('wizardReview', undefined, 'Review')

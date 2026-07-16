@@ -3,10 +3,10 @@ import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 import { CheckoutButton } from './CheckoutButton.js';
 
 export const MobileCheckoutButton = () => {
-  const { hidePricing, disableAddToCart, addToBasketFunction, buyNowFunction } = useOV25UI();
+  const { hidePricing, disableAddToCart, disableBuyNow, addToBasketFunction, buyNowFunction } = useOV25UI();
 
   const hasAddToBasket = typeof addToBasketFunction === 'function' && !disableAddToCart;
-  const hasBuyNow = typeof buyNowFunction === 'function';
+  const hasBuyNow = typeof buyNowFunction === 'function' && !disableBuyNow;
   const hasCheckout = hasAddToBasket || hasBuyNow;
   if (hidePricing || !hasCheckout) return null;
 

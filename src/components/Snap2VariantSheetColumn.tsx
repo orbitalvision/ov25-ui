@@ -26,6 +26,7 @@ export function Snap2VariantSheetColumn({ children }: { children: React.ReactNod
     configuratorDisplayModeMobile,
     hidePricing,
     disableAddToCart,
+    disableBuyNow,
     addToBasketFunction,
     buyNowFunction,
     isSnap2CheckoutSheetOpen,
@@ -36,7 +37,8 @@ export function Snap2VariantSheetColumn({ children }: { children: React.ReactNod
   } = useOV25UI();
 
   const hasCheckout =
-    (typeof addToBasketFunction === 'function' && !disableAddToCart) || typeof buyNowFunction === 'function';
+    (typeof addToBasketFunction === 'function' && !disableAddToCart) ||
+    (typeof buyNowFunction === 'function' && !disableBuyNow);
 
   if (!isSnap2Mode) {
     return (

@@ -13,13 +13,12 @@ const callbacks = {
   buySwatches: () => alert('Add swatches to cart'),
 };
 
-const flags = { hidePricing: false, disableAddToCart: true };
-
 /**
  * @param {'standard' | 'snap2'} profile
+ * @param {{ hidePricing: boolean; disableAddToCart: boolean; disableBuyNow: boolean }} flags
  * @returns {import('ov25-ui').InjectConfiguratorInput}
  */
-function buildInjectConfig(profile) {
+function buildInjectConfig(profile, flags) {
   if (profile === 'snap2') {
     // Same as snap2-uuid.jsx: UUID skips InitialiseMenu (no in-test furniture pick).
     return {
@@ -67,12 +66,19 @@ function buildInjectConfig(profile) {
 
 function App() {
   const [profile, setProfile] = useState(/** @type {'standard' | 'snap2'} */ ('standard'));
-  const injectConfig = useMemo(() => buildInjectConfig(profile), [profile]);
+  const qs = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
+  const disableBuyNow = qs.get('disableBuyNow') === '1';
+  const disableAddToCart = qs.has('disableAddToCart') ? qs.get('disableAddToCart') === '1' : !disableBuyNow;
+  const flags = useMemo(
+    () => ({ hidePricing: false, disableAddToCart, disableBuyNow }),
+    [disableAddToCart, disableBuyNow]
+  );
+  const injectConfig = useMemo(() => buildInjectConfig(profile, flags), [profile, flags]);
 
   return (
     <TestPageLayout
       title="Inline variants — disable add to cart"
-      description="Buy now only on standard inline and Snap2 (snap2/126 + saved UUID, like snap2-uuid). Switch product; open Snap2 via Configure in the variant menu."
+      description="Checkout action toggles for standard inline and Snap2. Query params: disableAddToCart=1, disableBuyNow=1."
       injectConfig={injectConfig}
       dynamicConfig
       topContent={
