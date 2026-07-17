@@ -184,7 +184,7 @@ html {
     --ov25-inline-list-aside-min-height-mobile: 100px;
     --ov25-inline-list-aside-max-height-mobile: 600px;
 
-    --ov25-variant-thumb-border-radius: var(--ov25-rounded-full);
+    --ov25-variant-thumb-border-radius: 0px;
 
     --ov25-360-font-family: 'IBM Plex Sans', sans-serif;
     --ov25-font-family: var(--ov25-360-font-family);

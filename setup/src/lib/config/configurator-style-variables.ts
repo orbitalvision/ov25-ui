@@ -73,7 +73,7 @@ export const STYLE_GROUPS: StyleGroup[] = [
     description: 'Variant thumbnails, collection buttons, highlight styles, and panel sizing',
     variables: [
       { variable: '--ov25-highlight-color', label: 'Outline color', defaultValue: '#00fbff', control: 'color' },
-      { variable: '--ov25-variant-thumb-border-radius', label: 'Variant shape', defaultValue: '9999px', control: 'corner' },
+      { variable: '--ov25-variant-thumb-border-radius', label: 'Variant shape', defaultValue: '0px', control: 'corner' },
       { variable: '--ov25-primary-color', label: 'Collection button color', defaultValue: '#ffffff', control: 'color' },
       { variable: '--ov25-button-border-radius', label: 'Collection button corners', defaultValue: '0px', control: 'corner' },
       { variable: '--ov25-button-border-width', label: 'Collection button border', defaultValue: '1px', control: 'slider', sliderMin: 0, sliderMax: 4, sliderStep: 0.5, sliderUnit: 'px', sliderLabels: ['None', 'Thick'] },
