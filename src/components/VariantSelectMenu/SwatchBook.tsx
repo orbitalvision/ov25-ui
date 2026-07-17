@@ -6,10 +6,25 @@ import { VariantsCloseButton } from "./VariantsCloseButton.js";
 import { SwatchImage } from "../SwatchImage.js";
 import { Swatch, useOV25UI } from "../../contexts/ov25-ui-context.js";
 import { cn } from '../../lib/utils.js';
+import { SWATCH_PATH } from '../../lib/svgs/SwatchIconSvg.js';
 
 interface SwatchBookProps {
   isMobile: boolean;
 }
+
+const EmptySwatchShape = () => (
+  <svg
+    viewBox="-1 -1 34 34"
+    shapeRendering="geometricPrecision"
+    className="ov:block ov:w-full ov:h-full ov:scale-120"
+    aria-hidden="true"
+  >
+    <path d={SWATCH_PATH} fill="#f9fafb" stroke="#d1d5db" strokeWidth="0.75" />
+  </svg>
+);
+
+const swatchItemClassName = 'ov25-swatch-item ov:flex ov:w-full ov:min-h-[85px] ov:flex-col ov:items-center ov:gap-2 ov:text-center';
+const swatchImageContainerClassName = 'ov25-swatch-image-container ov:relative ov:w-4/5 ov:max-w-[120px] ov:aspect-square ov:sm:w-[85px] ov:sm:h-[85px] ov:sm:max-w-none ov:md:w-[105px] ov:md:h-[105px]';
 
 export const SwatchBook: React.FC<SwatchBookProps> = ({
   isMobile,
@@ -142,10 +157,10 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
                 </p>
               </div>  
             )}
-            <div id="ov25-swatchbook-swatches-list" className={cn(`ov:overflow-y-hidden ov:flex ov:flex-wrap ov:gap-2 ov:md:gap-2 ov:w-full ov:px-4 ov:py-2`, maxSwatches <= 4 ? 'ov:justify-center' : 'ov:justify-start')}>
+            <div id="ov25-swatchbook-swatches-list" className="ov:grid ov:w-full ov:grid-cols-2 ov:gap-2 ov:overflow-y-hidden ov:px-4 ov:py-2 ov:sm:grid-cols-3 ov:md:grid-cols-4">
               {selectedSwatches.map((swatch) => (
-                <div key={`${swatch.manufacturerId}-${swatch.name}-${swatch.option}`} className='ov25-swatch-item ov:flex ov:flex-col ov:gap-2 ov:items-center ov:text-center ov:sm:w-[calc(33.333%-5.33px)] ov:md:w-[calc(25%-6px)] ov:min-h-[85px]'>
-                  <div className='ov25-swatch-image-container ov:group ov:relative ov:w-[85px] ov:h-[85px] ov:md:w-[105px] ov:md:h-[105px]'>
+                <div key={`${swatch.manufacturerId}-${swatch.name}-${swatch.option}`} className={swatchItemClassName}>
+                  <div className={cn(swatchImageContainerClassName, 'ov:group')}>
                     <SwatchImage
                       src={swatch.thumbnail && swatch.thumbnail.miniThumbnails ? swatch.thumbnail.miniThumbnails.medium : '/placeholder.svg?height=200&width=200'}
                       alt={swatch.name}
@@ -170,16 +185,23 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
               ))}
               {emptySquares.map((emptySquare, i) => (
                 i === 0 ? (
-                  <div key={emptySquare.id} className='ov25-swatch-item ov:flex ov:flex-col ov:gap-2 ov:items-center ov:text-center ov:sm:w-[calc(33.333%-5.33px)] ov:md:w-[calc(25%-6px)] ov:min-h-[85px]'>
-                    <div className='ov25-swatch-image-container ov:relative ov:w-[80px] ov:h-[80px] ov:md:w-[105px] ov:md:h-[105px] ov:border-2 ov:border-dashed ov:border-gray-300 ov:rounded-lg ov:flex ov:items-center ov:justify-center ov:bg-gray-50'>
-                      <div onClick={handleOpen3DConfigurator} className='ov25-empty-swatch-square ov:w-[90%] ov:h-[90%] ov:flex ov:flex-col ov:items-center ov:justify-center ov:gap-2 ov:cursor-pointer'>
-                        <Plus className='ov:w-full ov:h-full ov:text-gray-300 ov:stroke-[0.5px]'/>
-                      </div>
+                  <div key={emptySquare.id} className={swatchItemClassName}>
+                    <div className={swatchImageContainerClassName}>
+                      <button
+                        type="button"
+                        onClick={handleOpen3DConfigurator}
+                        className='ov25-empty-swatch-square ov:relative ov:w-full ov:h-full ov:flex ov:items-center ov:justify-center ov:cursor-pointer ov:bg-transparent ov:border-0 ov:p-0'
+                        aria-label="Open 3D Configurator"
+                      >
+                        <EmptySwatchShape />
+                        <Plus className='ov:absolute ov:w-[80%] ov:h-[80%] ov:text-gray-300 ov:stroke-[0.5px]'/>
+                      </button>
                     </div>
                   </div>
                 ) : (
-                <div key={emptySquare.id} className='ov25-swatch-item ov:flex ov:flex-col ov:gap-2 ov:items-center ov:text-center ov:w-[calc(50%-4px)] ov:sm:w-[calc(33.333%-5.33px)] ov:md:w-[calc(25%-6px)] ov:min-h-[85px]'>
-                  <div className='ov25-swatch-image-container ov:relative ov:w-[80px] ov:h-[80px] ov:md:w-[105px] ov:md:h-[105px] ov:border-2 ov:border-dashed ov:border-gray-300 ov:rounded-lg ov:flex ov:items-center ov:justify-center ov:bg-gray-50'>
+                <div key={emptySquare.id} className={swatchItemClassName}>
+                  <div className={swatchImageContainerClassName}>
+                    <EmptySwatchShape />
                   </div>
                 </div>
               )))}
