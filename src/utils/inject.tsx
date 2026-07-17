@@ -236,6 +236,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
         hidePricing: n.hidePricing,
         disableAddToCart: n.disableAddToCart,
         hideAr: n.hideAr,
+        hideGestureHint: n.hideGestureHint,
         forceMobile: n.forceMobile,
         currencySymbol: n.currencySymbol,
       },
@@ -291,6 +292,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     hideAr,
     forceMobile,
     autoOpen = false,
+    hideGestureHint,
     uniqueId,
     bedAllowNoneQueryValue,
     diningShowAttachmentPoints,
@@ -965,6 +967,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
         disableAddToCart={disableAddToCart}
         disableBuyNow={disableBuyNow}
         forceMobile={forceMobile}
+        hideGestureHint={hideGestureHint}
         isProductGalleryStacked={isProductGalleryStacked}
         carouselDisplayMode={carouselDisplayMode}
         carouselDisplayModeMobile={carouselDisplayModeMobile}

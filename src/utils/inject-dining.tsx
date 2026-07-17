@@ -17,7 +17,10 @@ import { DiningSidebar } from '../components/dining/DiningSidebar.js';
 import { DiningFullPageShell } from '../components/dining/DiningFullPageShell.js';
 import type { DiningDisplayMode, InjectDiningConfiguratorOptions } from '../types/dining-inject-config.js';
 import type { ElementSelector, StringOrFunction } from '../types/inject-config.js';
-import { DINING_IFRAME_SHOW_ATTACHMENT_POINTS_QUERY_KEY } from './configurator-utils.js';
+import {
+  DINING_IFRAME_SHOW_ATTACHMENT_POINTS_QUERY_KEY,
+  OV25_IFRAME_HIDE_GESTURE_HINT_QUERY_KEY,
+} from './configurator-utils.js';
 import { getConfiguratorBaseUrl } from './configurator-origin.js';
 import { computeIsMobileViewport } from './viewport-mobile.js';
 
@@ -135,6 +138,7 @@ export function getDiningIframeSrc(
   diningConfiguratorId: string,
   hexBgColor?: string | null,
   showAttachmentPoints?: boolean | null,
+  hideGestureHint?: boolean | null,
 ): string {
   const baseUrl = getConfiguratorBaseUrl();
   const path = `dining-configurator/${diningConfiguratorId}`;
@@ -153,6 +157,12 @@ export function getDiningIframeSrc(
 
   if (showAttachmentPoints === false) {
     params.set(DINING_IFRAME_SHOW_ATTACHMENT_POINTS_QUERY_KEY, 'false');
+  }
+
+  if (hideGestureHint === true) {
+    params.set(OV25_IFRAME_HIDE_GESTURE_HINT_QUERY_KEY, 'true');
+  } else {
+    params.delete(OV25_IFRAME_HIDE_GESTURE_HINT_QUERY_KEY);
   }
 
   const qs = params.toString();
@@ -214,6 +224,7 @@ export function injectDiningConfigurator(opts: InjectDiningConfiguratorOptions):
     resolvedDiningId,
     undefined,
     resolvedDisplayMode === 'full-page' ? false : displayOptions?.showAttachmentPoints,
+    flags?.hideGestureHint,
   );
 
   // ---- Build portals ----

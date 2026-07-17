@@ -5,6 +5,7 @@ import { getConfiguratorBaseUrl } from './configurator-origin.js';
 import type { ModuleProductImageUrls } from './module-product-image-srcset.js';
 
 export const DINING_IFRAME_SHOW_ATTACHMENT_POINTS_QUERY_KEY = 'showAttachmentPoints';
+export const OV25_IFRAME_HIDE_GESTURE_HINT_QUERY_KEY = 'hideGestureHint';
 
 /**
  * Configuration option type
@@ -424,6 +425,7 @@ export const getIframeSrc = (
   hexBgColor?: string | null,
   bedAllowNone?: string | null,
   diningShowAttachmentPoints?: boolean | null,
+  hideGestureHint?: boolean | null,
 ): string => {
   const baseUrl = getConfiguratorBaseUrl();
 
@@ -463,6 +465,12 @@ export const getIframeSrc = (
 
   if (diningShowAttachmentPoints === false) {
     merged.set(DINING_IFRAME_SHOW_ATTACHMENT_POINTS_QUERY_KEY, 'false');
+  }
+
+  if (hideGestureHint === true) {
+    merged.set(OV25_IFRAME_HIDE_GESTURE_HINT_QUERY_KEY, 'true');
+  } else {
+    merged.delete(OV25_IFRAME_HIDE_GESTURE_HINT_QUERY_KEY);
   }
 
   const queryString = merged.toString();

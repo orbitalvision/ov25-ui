@@ -155,6 +155,7 @@ export function buildSerializableConfig(
       disableAddToCart: settings.flags.disableAddToCart,
       disableBuyNow: settings.flags.disableBuyNow,
       hideAr: settings.flags.hideAr,
+      hideGestureHint: settings.flags.hideGestureHint,
       deferThreeD: settings.flags.deferThreeD,
       showOptional: settings.flags.showOptional,
       forceMobile: settings.flags.forceMobile,

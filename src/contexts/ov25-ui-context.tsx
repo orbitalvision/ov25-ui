@@ -263,6 +263,7 @@ interface OV25UIContextType {
   disableAddToCart: boolean;
   disableBuyNow: boolean;
   hideAr: boolean;
+  hideGestureHint: boolean;
   // Coming from injectConfigurator options
   productLink: string | null;
   apiKey: string;
@@ -463,6 +464,7 @@ export const OV25UIProvider: React.FC<{
   disableAddToCart?: boolean,
   disableBuyNow?: boolean,
   hideAr?: boolean,
+  hideGestureHint?: boolean,
   forceMobile?: boolean,
   logoURL?: string,
   hideLogo?: boolean,
@@ -530,6 +532,7 @@ export const OV25UIProvider: React.FC<{
   disableAddToCart = false,
   disableBuyNow = false,
   hideAr = false,
+  hideGestureHint = false,
   forceMobile = false,
   logoURL,
   hideLogo = false,
@@ -1969,6 +1972,7 @@ export const OV25UIProvider: React.FC<{
     disableAddToCart,
     disableBuyNow,
     hideAr,
+    hideGestureHint,
     galleryIndexToUse,
     // Coming from injectConfigurator options
     productLink,

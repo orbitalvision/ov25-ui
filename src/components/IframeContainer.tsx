@@ -31,6 +31,7 @@ export const IframeContainer = () => {
         configuratorDisplayModeMobile,
         isSnap2Mode,
         isModalOpen,
+        hideGestureHint,
     } = useOV25UI();
 
     const isModalMode =
@@ -122,8 +123,8 @@ export const IframeContainer = () => {
 
     // Use the utility function to get the iframe src
     const iframeSrc = useMemo(() =>
-        getIframeSrc(apiKey, productLink, configurationUuid, hexBgColor, bedAllowNoneQueryValue, diningShowAttachmentPoints),
-        [productLink, apiKey, configurationUuid, hexBgColor, bedAllowNoneQueryValue, diningShowAttachmentPoints]);
+        getIframeSrc(apiKey, productLink, configurationUuid, hexBgColor, bedAllowNoneQueryValue, diningShowAttachmentPoints, hideGestureHint),
+        [productLink, apiKey, configurationUuid, hexBgColor, bedAllowNoneQueryValue, diningShowAttachmentPoints, hideGestureHint]);
 
     const isStackedStyles = cn(
         snap2DesktopModalStackedFill

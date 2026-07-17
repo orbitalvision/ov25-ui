@@ -112,6 +112,7 @@ const FLAG_TOGGLES: { key: keyof TypeSettings['flags']; label: string }[] = [
   { key: 'disableAddToCart', label: 'Disable Add to Cart button' },
   { key: 'disableBuyNow', label: 'Disable Buy Now button' },
   { key: 'hideAr', label: 'Hide AR button' },
+  { key: 'hideGestureHint', label: 'Hide 3D Drag Indicator' },
   { key: 'deferThreeD', label: 'Defer 3D loading' },
   { key: 'showOptional', label: 'Show optional variants' },
   { key: 'forceMobile', label: 'Force mobile layout' },

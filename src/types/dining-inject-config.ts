@@ -52,6 +52,8 @@ export interface DiningFlagsConfig {
   disableAddToCart?: boolean;
   /** Hide AR/view-in-room controls */
   hideAr?: boolean;
+  /** Hide the animated 3D drag indicator in the OV25 iframe. Default false. */
+  hideGestureHint?: boolean;
   /** Force mobile layout for testing */
   forceMobile?: boolean;
   /** Display currency symbol — default £ */

@@ -242,6 +242,8 @@ export type FlagsConfig = {
   disableAddToCart?: boolean;
   disableBuyNow?: boolean;
   hideAr?: boolean;
+  /** Hide the animated 3D drag indicator in the OV25 iframe. Default false. */
+  hideGestureHint?: boolean;
   deferThreeD?: boolean;
   showOptional?: boolean;
   /** Force mobile layout for testing (e.g. in device frame). */
@@ -441,6 +443,7 @@ export interface NormalizedInjectConfig {
   showOptional?: boolean;
   forceMobile?: boolean;
   autoOpen?: boolean;
+  hideGestureHint: boolean;
 
   /** Serialized `bedAllowNone` query value; omit when unset (OV25 default: all parts may use None). */
   bedAllowNoneQueryValue?: string;
@@ -571,6 +574,7 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
   const showOptional = flags?.showOptional ?? c.showOptional;
   const forceMobile = flags?.forceMobile ?? c.forceMobile;
   const autoOpen = flags?.autoOpen ?? c.autoOpen ?? false;
+  const hideGestureHint = flags?.hideGestureHint ?? false;
 
   const rawCurrencySymbol = flags?.currencySymbol ?? c.currencySymbol;
   const trimmedCurrency =
@@ -650,6 +654,7 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
     showOptional,
     forceMobile,
     autoOpen,
+    hideGestureHint,
     bedAllowNoneQueryValue,
     diningShowAttachmentPoints,
     diningDisplayModeDesktop,
