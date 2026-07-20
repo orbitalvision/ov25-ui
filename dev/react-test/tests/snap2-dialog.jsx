@@ -34,7 +34,7 @@ function App() {
         },
         carousel: { desktop: 'stacked', mobile: 'carousel' },
         configurator: {
-          displayMode: { desktop: 'modal', mobile: 'drawer' },
+          displayMode: { desktop: 'modal', mobile: 'modal' },
           triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
           variants: {
             displayMode: { desktop: 'tabs', mobile: 'list' },
