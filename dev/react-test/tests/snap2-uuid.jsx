@@ -4,10 +4,14 @@ import { TestPageLayout } from '../templates/TestPageLayout.jsx';
 import '../src/index.css';
 
 const MAZE_APIKEY = import.meta.env.VITE_MAZE_APIKEY;
+const WHITEMEADOW_APIKEY = import.meta.env.VITE_WHITEMEADOW_APIKEY;
 const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
-  apiKey: () => MAZE_APIKEY,
-  productLink: () => 'snap2/445',
-  configurationUuid: () => '141544de-e5d1-491e-b9aa-3b9c9e51f7f8',
+  // apiKey: () => MAZE_APIKEY,
+  // productLink: () => 'snap2/445',
+  
+  apiKey: () => WHITEMEADOW_APIKEY,
+  productLink: () => 'snap2/119',
+  configurationUuid: () => '8be3bd4c-e9f9-4ed1-9e59-5cad79435ace',
   selectors: {
     gallery: { selector: '.configurator-container', replace: true },
     configureButton: { selector: '#ov25-fullscreen-button', replace: false },
