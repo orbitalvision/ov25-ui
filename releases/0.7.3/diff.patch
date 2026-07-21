@@ -1,0 +1,515 @@
+diff --git a/docs/release-automation-and-shopify-runtime-versioning-plan.md b/docs/release-automation-and-shopify-runtime-versioning-plan.md
+index 67f9dc1..fd63420 100644
+--- a/docs/release-automation-and-shopify-runtime-versioning-plan.md
++++ b/docs/release-automation-and-shopify-runtime-versioning-plan.md
+@@ -28,7 +28,7 @@ From a perspective of when the user needs to give input, here is the rough flow:
+ - User does manual testing
+ - User decides whether release is ready to go
+ - if yes, user runs `npm run release:deploy`
+-- `release:deploy` updates package metadata, commits the release candidate, creates tags, and pushes the release trigger tags
++- `release:deploy` updates package metadata, commits the release candidate, creates tags, pushes the release trigger tags, and dispatches the OV25 dependency update workflow when `--push` is used
+ 
+ ## Release Automation Flow
+ 
+@@ -398,9 +398,10 @@ done
+ Recommended Phase 2 trigger model:
+ 
+ - Keep the OV25 workflow manually runnable with `workflow_dispatch` and a required released version.
+-- After Phase 2 is proven safe, decide whether `release:deploy` should dispatch it automatically or whether it should remain an explicit user-run downstream step.
++- When `release:deploy --push` is used, dispatch the OV25 workflow automatically after pushing the package tags.
++- Allow `--skip-ov25-dispatch` for emergency/package-only releases.
+ - The OV25 workflow polls npm until `ov25-ui`, `ov25-ui-react18`, and `ov25-setup` all exist at the exact version.
+-- Keep the npm polling even if a future automatic trigger is added; it handles registry propagation delay and partial publish failures.
++- Keep the npm polling; it handles registry propagation delay and partial publish failures.
+ 
+ ## GitHub Actions Release Design
+ 
+@@ -787,11 +788,11 @@ Explicitly out of scope for Phase 1:
+ - Deploying Shopify apps.
+ - Releasing WooCommerce plugin builds.
+ 
+-### Phase 2: `OV25`
++### Phase 2: `OV25` and WooCommerce
+ 
+-Goal: make OV25 consume the newly released npm packages safely, after all three package releases are available on npm.
++Goal: make downstream production consumers use the newly released npm packages safely, after all three package releases are available on npm.
+ 
+-Scope:
++`OV25` scope:
+ 
+ - Add downstream update preparation for `OV25`.
+ - Add an `OV25` workflow or script that accepts a released version.
+@@ -803,8 +804,9 @@ Scope:
+ - Refresh the OV25 lockfile with the repo's package manager.
+ - Run OV25 checks/builds.
+ - Commit and push the OV25 dependency update after the checks pass.
+-- Keep manual `workflow_dispatch` available as the initial trigger path, with a released `version` input.
+-- Consider an automatic `release:deploy` dispatch only after the manual Phase 2 workflow has proved safe.
++- The pushed OV25 dependency commit is the Vercel production rebuild trigger. Do not separately trigger a Vercel deploy from the release script.
++- Keep manual `workflow_dispatch` available as a rerun/fallback path, with a released `version` input.
++- Dispatch this workflow from `release:deploy --push` after pushing the package tags, unless `--skip-ov25-dispatch` is set.
+ - If runtime manifest/version hosting lives in OV25 infrastructure, add the hosting endpoints here:
+   - low-cache manifest response;
+   - immutable versioned runtime files;
+@@ -813,22 +815,40 @@ Scope:
+   - blocked-version and last-known-good fallback behavior.
+ - Keep release notification sending manual or dry-run only at first.
+ 
++`ov25-woo-extension` scope:
++
++- Add a manual WooCommerce workflow, `.github/workflows/update-ui-packages-and-release.yml`.
++- Update dependencies to the released package versions:
++  - `ov25-ui@x.y.z`
++  - `ov25-ui-react18@x.y.z`
++  - `ov25-setup@x.y.z`
++- Refresh the WooCommerce package lockfile.
++- Run WooCommerce build/type checks.
++- Prepare a new WooCommerce plugin version using the existing WooCommerce release script after the exact package versions are committed.
++- Do not use the current `npm run update-ui-pack` as the automated path: it installs `latest`, commits, pushes, and runs release in one step. Replace or wrap it with a prepare-only command that installs the exact approved version and stops before push/release.
++- Keep the final WooCommerce release command user-run and user-approved. Agents must not run it.
++- Commit the WooCommerce version/dependency/release artifact changes after the user has reviewed them.
++
+ Exit criteria:
+ 
+ - OV25 can update to a newly released package version after npm availability is confirmed.
+ - OV25 checks/builds pass against the released packages.
+ - OV25 has a committed dependency update for the release version.
++- OV25 commit push has triggered the normal Vercel rebuild path.
++- WooCommerce package dependencies reference the released package versions.
++- WooCommerce build/type checks pass against the released package versions.
++- WooCommerce release artifacts are ready for the user to publish through the existing manual release script.
+ - Any OV25-hosted runtime manifest endpoint is available but does not force client storefronts onto the new runtime.
+ 
+ Explicitly out of scope for Phase 2:
+ 
+ - Shopify theme/app deployment.
+-- WooCommerce release execution.
++- Agent-run WooCommerce release execution.
+ - Automatic broad client notification sending.
+ 
+-### Phase 3: `shopify-plugin` and `ov25-woo-extension`
++### Phase 3: `shopify-plugin`
+ 
+-Goal: update the storefront integrations after the package and OV25 foundations are stable.
++Goal: update Shopify storefront integration after the package, OV25, and WooCommerce foundations are stable.
+ 
+ `shopify-plugin` scope:
+ 
+@@ -853,21 +873,12 @@ Goal: update the storefront integrations after the package and OV25 foundations
+ - Add Shopify runtime tests for standard, Snap2, bed configurator, old/new metafield shapes, missing data, unknown fields, `latest`, pinned versions, manifest fallback, and blocked-version fallback.
+ - Move clients to the Shopify shell/runtime loader only after staging-theme validation.
+ 
+-`ov25-woo-extension` scope:
+-
+-- Update dependencies to the released `ov25-ui`, `ov25-ui-react18`, and `ov25-setup` versions where applicable.
+-- Run WooCommerce build/type checks.
+-- Prepare WooCommerce release artifacts.
+-- Keep WooCommerce release execution manual and user-approved.
+-- Document rollback and compatibility notes in the release artifacts.
+-
+ Exit criteria:
+ 
+ - Shopify staging themes can test a specific new OV25 runtime without changing the live theme.
+ - Live Shopify themes can remain pinned to a known-good runtime.
+ - `latest` is opt-in and can be rolled back through the manifest.
+-- WooCommerce artifacts are prepared from the released package versions.
+-- No automation deploys Shopify apps or pushes WooCommerce releases without explicit user action.
++- No automation deploys Shopify apps without explicit user action.
+ 
+ ## Non-Goals
+ 
+diff --git a/scripts/release/deploy.js b/scripts/release/deploy.js
+index 410846f..31de106 100644
+--- a/scripts/release/deploy.js
++++ b/scripts/release/deploy.js
+@@ -24,10 +24,12 @@ function usage() {
+ Options:
+   --release <x.y.z>        Required release version.
+   --push                   Push release commit and package tags.
++  --skip-ov25-dispatch     Do not trigger the downstream OV25 package update workflow after pushing.
+   --help                   Show this message.
+ 
+ This script never publishes npm packages and never deploys Shopify. Package publishing is
+-handled by tag-triggered GitHub Actions.`;
++handled by tag-triggered GitHub Actions. When --push is used, the script also
++dispatches the OV25 dependency update workflow unless --skip-ov25-dispatch is set.`;
+ }
+ 
+ function statusPath(line) {
+@@ -132,12 +134,28 @@ function commitRelease(version) {
+   git(['commit', '-m', `chore: release ov25-ui ${version}`]);
+ }
+ 
+-function printPushInstructions(tags) {
++function ov25DispatchCommand(version) {
++  return [
++    'gh',
++    'workflow',
++    'run',
++    'update-ov25-ui-packages.yml',
++    '--repo',
++    'orbitalvision/OV25',
++    '--ref',
++    'main',
++    '-f',
++    `version=${version}`,
++  ];
++}
++
++function printPushInstructions(version, tags) {
+   console.log('\nRelease commit and tags were created locally.');
+   console.log('Push was not requested. Review locally, then run:');
+   console.log('');
+   console.log('  git push origin main');
+   console.log(`  git push origin ${tags.join(' ')}`);
++  console.log(`  ${ov25DispatchCommand(version).join(' ')}`);
+   console.log('');
+   console.log('Or rerun release:deploy with --push if you intentionally want the script to push the release commit and package tags.');
+ }
+@@ -152,6 +170,24 @@ function pushRelease(tags) {
+   run('git', ['push', 'origin', ...tags]);
+ }
+ 
++function dispatchOv25Update(version) {
++  const command = ov25DispatchCommand(version);
++  try {
++    run(command[0], command.slice(1));
++  } catch (error) {
++    throw new Error(
++      [
++        'Package tags were pushed, but dispatching the OV25 dependency update workflow failed.',
++        'Run this manually after confirming the OV25 workflow exists on main:',
++        '',
++        `  ${command.join(' ')}`,
++        '',
++        error.message,
++      ].join('\n'),
++    );
++  }
++}
++
+ function main() {
+   const args = parseArgs(process.argv.slice(2));
+   if (args.help) {
+@@ -174,8 +210,11 @@ function main() {
+ 
+   if (args.push) {
+     pushRelease(tags);
++    if (!args['skip-ov25-dispatch']) {
++      dispatchOv25Update(version);
++    }
+   } else {
+-    printPushInstructions(tags);
++    printPushInstructions(version, tags);
+   }
+ }
+ 
+diff --git a/scripts/release/publish-ci.js b/scripts/release/publish-ci.js
+index cafc0ff..5dae20f 100644
+--- a/scripts/release/publish-ci.js
++++ b/scripts/release/publish-ci.js
+@@ -205,6 +205,7 @@ function main() {
+ 
+   if (packageName === 'ov25-setup') {
+     waitForPackage('ov25-ui', version, logPath);
++    runLogged(logPath, 'npm', ['install', '--package-lock-only', '--ignore-scripts', '--legacy-peer-deps'], { cwd: config.cwd });
+     runLogged(logPath, 'npm', ['ci', '--legacy-peer-deps'], { cwd: config.cwd });
+   }
+ 
+diff --git a/setup/package-lock.json b/setup/package-lock.json
+index c06dd3c..44dd4e4 100644
+--- a/setup/package-lock.json
++++ b/setup/package-lock.json
+@@ -3052,9 +3052,9 @@
+       }
+     },
+     "node_modules/ov25-ui": {
+-      "version": "0.7.0",
+-      "resolved": "https://registry.npmjs.org/ov25-ui/-/ov25-ui-0.7.0.tgz",
+-      "integrity": "sha512-JNfqNC4MChuCnuhNievADmKvz39LqeQ+DaQtnUSUERQuTHLpe1iOly+Hd0AVBjZHuRfpKpwjwsKPItu60fJ0EQ==",
++      "version": "0.7.2",
++      "resolved": "https://registry.npmjs.org/ov25-ui/-/ov25-ui-0.7.2.tgz",
++      "integrity": "sha512-RBJAEe85gN0oBH59sEjDN4a5rOWA34fLEFE65Zoct//NSzUOb/9qiLYpchWgH4nSJ6ZItlfVpAQ3wzedZ/YQPQ==",
+       "license": "MIT",
+       "dependencies": {
+         "@radix-ui/react-dialog": "^1.1.10",
+diff --git a/src/components/ConfiguratorViewControls.tsx b/src/components/ConfiguratorViewControls.tsx
+index ed42a88..dd8300c 100644
+--- a/src/components/ConfiguratorViewControls.tsx
++++ b/src/components/ConfiguratorViewControls.tsx
+@@ -8,7 +8,6 @@ import { useOV25UI } from '../contexts/ov25-ui-context.js'
+ import { cn } from '../lib/utils.js'
+ import { Popover, PopoverContent, PopoverTrigger } from './ui/popover.js'
+ import { toast } from 'sonner'
+-import Snap2Controls from './Snap2Controls.js'
+ import { VariantsCloseButton } from './VariantSelectMenu/VariantsCloseButton.js'
+ 
+ interface ConfiguratorViewControlsProps {
+@@ -29,7 +28,6 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () =>
+     availableLights,
+     selectLightGroup,
+     isSnap2Mode,
+-    configuratorDisplayModeMobile,
+     controlsHidden,
+     shareDialogTrigger,
+     setShareDialogTrigger,
+@@ -150,9 +148,6 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () =>
+ 
+   return (
+     <>
+-      {/* Snap2 Controls - shown only in snap2 mode */}
+-      {isSnap2Mode && <Snap2Controls />}
+-
+       {/* <div className={cn(
+         "ov:absolute ov:w-full ov:pointer-events-none ov:h-full ov:inset-0 ov:gap-2 ov:p-4 ov:flex ov:justify-end ov:items-end ov:z-[101]",
+         "ov:text-[var(--ov25-configurator-view-controls-text-color)]"
+@@ -335,7 +330,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () =>
+       </div>
+       {isVariantsOpen &&
+         isMobile &&
+-        !(isSnap2Mode && configuratorDisplayModeMobile === 'inline') && (
++        !isSnap2Mode && (
+         <div className={cn(
+           "ov:absolute ov:w-full ov:pointer-events-none ov:h-full ov:inset-0 ov:z-101",
+           "ov:transition-opacity ov:duration-200",
+@@ -360,4 +355,4 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () =>
+   )
+ }
+ 
+-export default ConfiguratorViewControls 
+\ No newline at end of file
++export default ConfiguratorViewControls
+diff --git a/src/components/IframeContainer.tsx b/src/components/IframeContainer.tsx
+index 0d57309..f045c45 100644
+--- a/src/components/IframeContainer.tsx
++++ b/src/components/IframeContainer.tsx
+@@ -4,6 +4,7 @@ import { getIframeSrc } from '../utils/configurator-utils.js'
+ import { useOV25UI } from "../contexts/ov25-ui-context.js"
+ import { cn, getProductGalleryImages, resolveImageUrl } from "../lib/utils.js"
+ import ConfiguratorViewControls from './ConfiguratorViewControls.js'
++import Snap2ViewControls from './Snap2ViewControls.js'
+ import { Ov25ShadowHost } from './Ov25ShadowHost.js'
+ 
+ 
+@@ -175,7 +176,7 @@ export const IframeContainer = () => {
+                     id={uniqueId ? `true-configurator-view-controls-container-${uniqueId}` : "true-configurator-view-controls-container"}
+                     className="ov:absolute ov:inset-0 ov:z-101 ov:w-full ov:h-full ov:pointer-events-none"
+                 >
+-                    <ConfiguratorViewControls />
++                    {isSnap2Mode ? <Snap2ViewControls /> : <ConfiguratorViewControls />}
+                 </Ov25ShadowHost>
+             )}
+ 
+diff --git a/src/components/Snap2ConfigureButton.tsx b/src/components/Snap2ConfigureButton.tsx
+index a9471b1..f47e9c7 100644
+--- a/src/components/Snap2ConfigureButton.tsx
++++ b/src/components/Snap2ConfigureButton.tsx
+@@ -3,7 +3,7 @@ import { cn } from '../lib/utils.js';
+ import { Snap2ConfiguratorModal } from './Snap2ConfiguratorModal.js';
+ import { Snap2InlineSheetDesktopShell } from './Snap2InlineSheetDesktopShell.js';
+ import { ProductGallery } from './product-gallery.js';
+-import ConfiguratorViewControls from './ConfiguratorViewControls.js';
++import Snap2ViewControls from './Snap2ViewControls.js';
+ import { useOV25UI } from '../contexts/ov25-ui-context.js';
+ import { Snap2Wrapper } from './VariantSelectMenu/Snap2Wrapper.js';
+ import { MobileDrawer } from './ui/mobile-drawer.js';
+@@ -121,7 +121,7 @@ export const Snap2ConfigureUI: React.FC = () => {
+                   : `${typeof window !== 'undefined' ? window.innerHeight * DRAWER_HEIGHT_RATIO : 0}px`
+               }}
+             >
+-              {snap2MobileExternalControls && <ConfiguratorViewControls />}
++              {snap2MobileExternalControls && <Snap2ViewControls />}
+             </div>
+           </>
+         </Ov25ShadowHost>,
+diff --git a/src/components/Snap2ViewControls.tsx b/src/components/Snap2ViewControls.tsx
+new file mode 100644
+index 0000000..d832ba9
+--- /dev/null
++++ b/src/components/Snap2ViewControls.tsx
+@@ -0,0 +1,34 @@
++import React from 'react';
++import Snap2Controls from './Snap2Controls.js';
++import { VariantsCloseButton } from './VariantSelectMenu/VariantsCloseButton.js';
++import { useOV25UI } from '../contexts/ov25-ui-context.js';
++import { cn } from '../lib/utils.js';
++
++const Snap2ViewControls: React.FC = () => {
++  const {
++    isVariantsOpen,
++    isMobile,
++    configuratorDisplayModeMobile,
++    shareDialogTrigger,
++  } = useOV25UI();
++
++  const closeButtonClass =
++    configuratorDisplayModeMobile === 'drawer' ? 'ov:top-0! ov:right-0!' : undefined;
++
++  return (
++    <>
++      <Snap2Controls />
++      {isVariantsOpen && isMobile && configuratorDisplayModeMobile !== 'inline' && (
++        <div className={cn(
++          "ov:absolute ov:w-full ov:pointer-events-none ov:h-full ov:inset-0 ov:z-103",
++          "ov:transition-opacity ov:duration-200",
++          shareDialogTrigger !== 'none' && "ov:opacity-0"
++        )}>
++          <VariantsCloseButton className={closeButtonClass} />
++        </div>
++      )}
++    </>
++  );
++};
++
++export default Snap2ViewControls;
+diff --git a/src/components/VariantSelectMenu/variant-cards/VariantThumb.tsx b/src/components/VariantSelectMenu/variant-cards/VariantThumb.tsx
+index 8de1ab4..4f5154e 100644
+--- a/src/components/VariantSelectMenu/variant-cards/VariantThumb.tsx
++++ b/src/components/VariantSelectMenu/variant-cards/VariantThumb.tsx
+@@ -93,7 +93,7 @@ export const VariantThumb = React.memo(({
+     <div
+       ref={wrapperRef}
+       className={cn(
+-        'ov25-variant-thumb-wrapper ov:relative ov:p-1',
++        'ov25-variant-thumb-wrapper ov:relative ov:p-[4px]',
+         !selected && 'ov:bg-transparent',
+         selected &&
+           !useSolidThumbRing &&
+diff --git a/src/components/dining/DiningFullPageShell.tsx b/src/components/dining/DiningFullPageShell.tsx
+index 1441433..5081a62 100644
+--- a/src/components/dining/DiningFullPageShell.tsx
++++ b/src/components/dining/DiningFullPageShell.tsx
+@@ -248,7 +248,11 @@ export const DiningFullPageShell: React.FC = () => {
+       <header
+         data-ov25-dining-full-page-header
+         style={{
+-          visibility: isReady ? 'visible' : 'hidden',
++          // Keep mounted and visible so the configurator iframe can initialise
++          // and send its bootstrap messages (catalog/scene/configurator state).
++          // `isReady` depends on those messages, so gating visibility on it would
++          // deadlock — the loading overlay below already hides the content until ready.
++          visibility: 'visible',
+           pointerEvents: isReady ? 'auto' : 'none',
+           minHeight: isMobile ? 142 : 92,
+           display: 'grid',
+@@ -330,7 +334,11 @@ export const DiningFullPageShell: React.FC = () => {
+         data-ov25-dining-desktop-table-selection-sheet={isDesktopTableSelectionEmpty ? 'true' : 'false'}
+         style={{
+           position: 'relative',
+-          visibility: isReady ? 'visible' : 'hidden',
++          // Keep mounted and visible so the configurator iframe can initialise
++          // and send its bootstrap messages (catalog/scene/configurator state).
++          // `isReady` depends on those messages, so gating visibility on it would
++          // deadlock — the loading overlay below already hides the content until ready.
++          visibility: 'visible',
+           pointerEvents: isReady ? 'auto' : 'none',
+           flex: 1,
+           minHeight: 0,
+diff --git a/src/contexts/ov25-ui-context.tsx b/src/contexts/ov25-ui-context.tsx
+index c66236d..db69900 100644
+--- a/src/contexts/ov25-ui-context.tsx
++++ b/src/contexts/ov25-ui-context.tsx
+@@ -255,7 +255,6 @@ interface OV25UIContextType {
+   animationState: AnimationState;
+   iframeRef: React.RefObject<HTMLIFrameElement>;
+   isMobile: boolean;
+-  hasSwitchedAfterDefer: boolean;
+   deferThreeD: boolean;
+   /** True when gallery mounts in the hidden preload container (no page slot): modal open should not wait on iframe ImageBitmap. */
+   configuratorGalleryIsDeferred: boolean;
+@@ -383,7 +382,6 @@ interface OV25UIContextType {
+   setError: React.Dispatch<React.SetStateAction<Error | null>>;
+   setCanAnimate: React.Dispatch<React.SetStateAction<boolean>>;
+   setAnimationState: React.Dispatch<React.SetStateAction<AnimationState>>;
+-  setHasSwitchedAfterDefer: React.Dispatch<React.SetStateAction<boolean>>;
+   setAvailableProductFilters: React.Dispatch<React.SetStateAction<ProductFilters>>;
+   setSearchQuery: (optionId: string, query: string) => void;
+   setSelectedSwatches: React.Dispatch<React.SetStateAction<Swatch[]>>;
+@@ -666,7 +664,6 @@ export const OV25UIProvider: React.FC<{
+       isSnap2: isSnap2ProductLink,
+     })
+   );
+-  const [hasSwitchedAfterDefer, setHasSwitchedAfterDefer] = useState(false)
+   const [pendingProductId, setPendingProductId] = useState<string | null>(null);
+   const [availableProductFilters, setAvailableProductFilters] = useState<ProductFilters>({});
+   const [showFilters, setShowFilters] = useState<boolean>(false);
+@@ -796,7 +793,6 @@ export const OV25UIProvider: React.FC<{
+     setError(null);
+     setArPreviewLink(null);
+     setPreloading(false);
+-    setHasSwitchedAfterDefer(false);
+     setGalleryCarouselFullscreenImage(null);
+   }, [
+     releaseConfiguratorTransitionProxy,
+@@ -817,7 +813,6 @@ export const OV25UIProvider: React.FC<{
+     setError,
+     setArPreviewLink,
+     setPreloading,
+-    setHasSwitchedAfterDefer,
+     setGalleryCarouselFullscreenImage,
+   ]);
+ 
+@@ -1875,10 +1870,23 @@ export const OV25UIProvider: React.FC<{
+   const [galleryIndex, setGalleryIndex] = useState(0);
+ 
+   const galleryIndexToUse = deferThreeD && allImages.length > 0 ? 1 : 0;
++  const shouldRestoreInlineGalleryToIframe =
++    allImages.length > 0 &&
++    (isMobile
++      ? effectiveConfiguratorDisplayModeMobile === 'inline'
++      : configuratorDisplayMode === 'inline');
++
++  const restoreInlineGalleryToIframe = useCallback(() => {
++    if (!shouldRestoreInlineGalleryToIframe) return;
++    if (galleryIndex !== galleryIndexToUse) {
++      setGalleryIndex(galleryIndexToUse);
++    }
++  }, [galleryIndex, galleryIndexToUse, shouldRestoreInlineGalleryToIframe]);
+ 
+   const handleSelectionSelectImpl = useCallback((selection: Selection, optionId?: string) => {
+     const currentOptionId = optionId || activeOptionId;
+     if (currentOptionId === 'size') {
++      restoreInlineGalleryToIframe();
+       if (currentProductId !== selection.id) {
+         if (isSelectingProduct.current) return;
+         isSelectingProduct.current = true;
+@@ -1901,21 +1909,10 @@ export const OV25UIProvider: React.FC<{
+       groupId: selection.groupId,
+       selectionId: selection.id
+     }, uniqueId);
+-    if (!hasSwitchedAfterDefer && galleryIndex === 1 && deferThreeD) {
+-      setHasSwitchedAfterDefer(true);
+-      setGalleryIndex(galleryIndexToUse);
+-    }
+-  }, [activeOptionId, currentProductId, galleryIndex, galleryIndexToUse, deferThreeD, hasSwitchedAfterDefer, uniqueId]);
++    restoreInlineGalleryToIframe();
++  }, [activeOptionId, currentProductId, restoreInlineGalleryToIframe, uniqueId]);
+   handleSelectionSelectRef.current = handleSelectionSelectImpl;
+ 
+-  // Iframe visibility follows `galleryIndex === galleryIndexToUse` (see IframeContainer). ProductCarousel
+-  // also jumped to the 3D slot when variants opened, but deferred / no-carousel / hidden preload UIs never
+-  // mount ProductCarousel, so galleryIndex stayed on a static image index while defer moved 3D to slot 1.
+-  useEffect(() => {
+-    if (!isVariantsOpen) return;
+-    setGalleryIndex(galleryIndexToUse);
+-  }, [isVariantsOpen, galleryIndexToUse, setGalleryIndex]);
+-
+   const contextValue: OV25UIContextType = {
+     // Shadow DOM references
+     shadowDOMs,
+@@ -1962,7 +1959,6 @@ export const OV25UIProvider: React.FC<{
+   carouselMaxImagesDesktop,
+   carouselMaxImagesMobile,
+   showCarousel,
+-    hasSwitchedAfterDefer,
+     deferThreeD,
+     configuratorGalleryIsDeferred,
+     showOptional,
+@@ -2063,7 +2059,6 @@ export const OV25UIProvider: React.FC<{
+     setError,
+     setCanAnimate,
+     setAnimationState,
+-    setHasSwitchedAfterDefer,
+     setAvailableProductFilters,
+     setSearchQuery,
+     setSelectedSwatches,

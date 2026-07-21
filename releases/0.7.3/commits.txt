@@ -1,0 +1,7 @@
+0ec6232 (HEAD -> main) fix(dining): keep full-page shell content visible so the iframe can bootstrap
+bb56186 (origin/main, origin/HEAD) make it always switch back to configurator when ANY selection is made. remove unused hasSwitchedAfterDefer
+9a82c1a make thumb border always 4px (i think it was causing safari problem
+4220f42 stop snap2controls overlapping snap2 close button on mobile. refactor so we don't have ConfiguratorViewControls conditionally rendering Snap2Controls.
+e775332 plan update
+16ac111 update deploy script to include triggering the OV25 workflow which updates its package.json to point to new versions
+b774f69 (tag: ov25-setup@0.7.2) fix: refresh setup lock before publish

@@ -1,0 +1,11 @@
+docs/release-automation-and-shopify-runtime-versioning-plan.md
+scripts/release/deploy.js
+scripts/release/publish-ci.js
+setup/package-lock.json
+src/components/ConfiguratorViewControls.tsx
+src/components/IframeContainer.tsx
+src/components/Snap2ConfigureButton.tsx
+src/components/Snap2ViewControls.tsx
+src/components/VariantSelectMenu/variant-cards/VariantThumb.tsx
+src/components/dining/DiningFullPageShell.tsx
+src/contexts/ov25-ui-context.tsx

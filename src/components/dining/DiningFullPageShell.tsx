@@ -248,7 +248,11 @@ export const DiningFullPageShell: React.FC = () => {
       <header
         data-ov25-dining-full-page-header
         style={{
-          visibility: isReady ? 'visible' : 'hidden',
+          // Keep mounted and visible so the configurator iframe can initialise
+          // and send its bootstrap messages (catalog/scene/configurator state).
+          // `isReady` depends on those messages, so gating visibility on it would
+          // deadlock — the loading overlay below already hides the content until ready.
+          visibility: 'visible',
           pointerEvents: isReady ? 'auto' : 'none',
           minHeight: isMobile ? 142 : 92,
           display: 'grid',
@@ -330,7 +334,11 @@ export const DiningFullPageShell: React.FC = () => {
         data-ov25-dining-desktop-table-selection-sheet={isDesktopTableSelectionEmpty ? 'true' : 'false'}
         style={{
           position: 'relative',
-          visibility: isReady ? 'visible' : 'hidden',
+          // Keep mounted and visible so the configurator iframe can initialise
+          // and send its bootstrap messages (catalog/scene/configurator state).
+          // `isReady` depends on those messages, so gating visibility on it would
+          // deadlock — the loading overlay below already hides the content until ready.
+          visibility: 'visible',
           pointerEvents: isReady ? 'auto' : 'none',
           flex: 1,
           minHeight: 0,
