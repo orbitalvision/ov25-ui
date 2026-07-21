@@ -67,3 +67,11 @@ describe('ProductCarousel selected state', () => {
     fireEvent.click(thumbnails[0]);
     expect(setGalleryIndex).toHaveBeenLastCalledWith(0);
     rerender(<ProductCarousel />);
+
+    expect(getThumbnailButtons(container).map((thumbnail) => thumbnail.dataset.selected)).toEqual([
+      'true',
+      'false',
+      'false',
+    ]);
+  });
+});
