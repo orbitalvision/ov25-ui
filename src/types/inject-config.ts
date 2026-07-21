@@ -532,7 +532,7 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
 
   const variantDesktop = variants?.displayMode?.desktop ?? c.variantDisplayMode ?? c.variantDisplayStyle ?? 'tree';
   const variantMobileRaw = variants?.displayMode?.mobile ?? c.variantDisplayModeMobile ?? c.variantDisplayStyleMobile ?? 'tree';
-  const variantMobile = variantMobileRaw === 'accordion' ? 'tree' : variantMobileRaw;
+  const variantMobile = variantMobileRaw;
 
   const useSimpleVariantsSelector = variants?.useSimpleVariantsSelector ?? c.useSimpleVariantsSelector ?? true;
   const hideVariantOptions = normalizeHideVariantOptions(variants?.hideOptions ?? c.hideOptions);

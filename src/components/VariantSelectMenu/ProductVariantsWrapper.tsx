@@ -161,7 +161,7 @@ export function ProductVariantsWrapper({
       VariantDisplayStyleOverlay.Accordion,
       VariantDisplayStyleOverlay.Tree,
     ];
-    const drawerMobileStyle: VariantDisplayStyleOverlay = ['list', 'tabs', 'tree'].includes(variantDisplayStyleMobile)
+    const drawerMobileStyle: VariantDisplayStyleOverlay = ['list', 'tabs', 'accordion', 'tree'].includes(variantDisplayStyleMobile)
       ? (variantDisplayStyleMobile as VariantDisplayStyleOverlay)
       : VariantDisplayStyleOverlay.List;
     const effectiveVariantDisplayStyleOverlay = isMobile && !isInline
@@ -430,7 +430,7 @@ export function ProductVariantsWrapper({
     );
 
     const useTree = variantShellOverlayStyle === VariantDisplayStyleOverlay.Tree;
-    const useAccordion = variantShellOverlayStyle === VariantDisplayStyleOverlay.Accordion && !isMobile;
+    const useAccordion = variantShellOverlayStyle === VariantDisplayStyleOverlay.Accordion;
     const isTabs = variantShellOverlayStyle === VariantDisplayStyleOverlay.Tabs;
 
     const tabsScrollAreaClassName = `ov:flex-1 ov:min-h-0 ov:pt-0 ${needsBottomMarginForButton ? 'ov:pb-20' : 'ov:pb-2'} ${activeTab !== 'size' && isFilterOpen[activeTab] ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`;
