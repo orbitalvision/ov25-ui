@@ -11,3 +11,4 @@ test-results/
 artifacts/
 review-diffs/
 review-screenshots/
+.pnpm-store
