@@ -416,7 +416,7 @@ export const getAnimationButtonText = (
 
 /**
  * Generate the iframe source URL based on productLink and apiKey.
- * Merges query strings: params on `productLink`, then parent page (missing keys only), then uuid / hex / bedAllowNone.
+ * Merges query strings: params on `productLink`, then parent page (missing keys only), then host-controlled params.
  */
 export const getIframeSrc = (
   apiKey: string | null,
