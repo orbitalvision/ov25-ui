@@ -15,6 +15,10 @@
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
     },
+    "./defaults": {
+      "import": "./dist/defaults.js",
+      "types": "./dist/defaults.d.ts"
+    },
     "./index.css": "./dist/index.css"
   },
   "files": [
@@ -22,7 +26,7 @@
   ],
   "scripts": {
     "type-check": "tsc --noEmit",
-    "build": "vite build && tsc --emitDeclarationOnly --outDir dist && node ../scripts/strip-layers.js dist/index.css",
+    "build": "vite build && node ../scripts/ensure-setup-css-output.js && tsc --emitDeclarationOnly --outDir dist && node ../scripts/strip-layers.js dist/index.css",
     "build:react18": "node scripts/build-react18.js",
     "clean": "rimraf dist",
     "release": "node ../scripts/release/refuse-local-publish.js ov25-setup release",

@@ -5,17 +5,22 @@ export default defineConfig({
   plugins: [tailwindcss()],
   build: {
     lib: {
-      entry: 'src/index.ts',
+      entry: {
+        index: 'src/index.ts',
+        defaults: 'src/defaults.ts',
+      },
       name: 'OV25Setup',
       formats: ['es'],
-      fileName: 'index',
+      fileName: (_format, entryName) => `${entryName}.js`,
     },
     sourcemap: true,
     rollupOptions: {
       external: (id) => /^react(-dom)?(\/|$)/.test(id),
       output: {
         assetFileNames: (assetInfo) => {
-          if (assetInfo.name === 'style.css') return 'index.css';
+          if ([assetInfo.name, ...assetInfo.names].some((name) => name?.endsWith('.css'))) {
+            return 'index.css';
+          }
           return assetInfo.name!;
         },
         inlineDynamicImports: false,
