@@ -7,24 +7,12 @@ import '../src/index.css';
 
 const MAZE_APIKEY = import.meta.env.VITE_MAZE_APIKEY;
 
-/** Undo globals.css `.ov25-inline-gallery-sticky` (sticky + z-index:1) on the gallery host so flex `min-h-0` can cap height. */
 const SNAP2_INLINE_PAGE_CSS = `
 html.snap2-inline-root,
 body.snap2-inline-root {
   overflow: hidden;
   height: 100%;
   max-height: 100%;
-}
-.snap2-inline-page .ov25-inline-gallery-sticky {
-  position: relative !important;
-  top: auto !important;
-  align-self: stretch !important;
-  display: flex !important;
-  flex: 1 1 auto !important;
-  width: 100% !important;
-  height: 100% !important;
-  min-height: 0 !important;
-  z-index: auto !important;
 }
 `;
 

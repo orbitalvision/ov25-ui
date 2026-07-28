@@ -59,8 +59,12 @@ const testPages = [
   'gallery-inline-list',
   'gallery-inline-list-no-variant-thumbs',
   'gallery-inline-wizard',
+  'inline-sticky-desktop-no-header',
+  'inline-sticky-desktop-fixed-header',
+  'inline-sticky-desktop-collapsing-header',
   'gallery-carousel-horizontal',
   'gallery-carousel-stacked',
+  'carousel-relocation',
   'gallery-no-carousel',
   'configurator-setup',
 ];

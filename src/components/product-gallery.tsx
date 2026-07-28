@@ -22,6 +22,10 @@ import {
 } from "../utils/configurator-dom-queries.js"
 import { createPortal } from "react-dom"
 import { getSharedStylesheet, createuserCustomCssStylesheet } from "../utils/shadow-styles.js"
+import {
+  EXTERNAL_CAROUSEL_HOST_ATTRIBUTE,
+  isHTMLElementInOwnerDocument,
+} from "../lib/carousel-target-controller.js"
 import { IframeContainer } from "./IframeContainer.js"
 import { ProductCarousel } from "./product-carousel.js"
 import { ArPreviewQRCodeDialog } from "./ar-preview-qr-code-dialog.js"
@@ -243,10 +247,10 @@ function ConfiguratorOpeningTransitionProxyCanvas({
     <canvas
       ref={canvasRef}
       className={cn(
-        'ov:pointer-events-none ov:absolute ov:left-0 ov:top-0 ov:z-[4]',
+        'ov:pointer-events-none ov:absolute ov:left-0 ov:top-0 ov:z-4',
         squareSlotCorners
           ? 'ov:rounded-none'
-          : 'ov:rounded-[var(--ov25-configurator-iframe-border-radius)]'
+          : 'ov:rounded-(--ov25-configurator-iframe-border-radius)'
       )}
       style={{
         width: slotCssSize.w > 0 ? `${slotCssSize.w}px` : undefined,
@@ -290,9 +294,12 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
         isModalOpen,
         configuratorState,
         initialiseMenuUsesExternalSelector,
+        stickyLayoutActive,
+        carouselTarget,
     } = useOV25UI();
 
     const isModalMode = isMobile ? configuratorDisplayModeMobile === 'modal' : configuratorDisplayMode === 'modal';
+    const stickyMobileGallery = stickyLayoutActive && isMobile;
     const snap2MobileDrawerOpen =
       isSnap2Mode &&
       isMobile &&
@@ -304,7 +311,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
       isMobile &&
       isModalMode &&
       isModalOpen;
-    const iframeSlotBorderRadiusClass = snap2MobileDrawerOpen
+    const iframeSlotBorderRadiusClass = stickyMobileGallery || snap2MobileDrawerOpen
       ? 'ov:rounded-none'
       : isSnap2Mode && configuratorDisplayMode === 'inline'
       ? 'ov:rounded-none'
@@ -337,10 +344,63 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
     const carouselHostRef = useRef<HTMLDivElement>(null);
     const galleryHostRef = useRef<HTMLDivElement>(null);
     const [carouselShadowRoot, setCarouselShadowRoot] = useState<ShadowRoot | null>(null);
+    const [externalCarouselShadowRoot, setExternalCarouselShadowRoot] = useState<ShadowRoot | null>(null);
     const [galleryShadowRoot, setGalleryShadowRoot] = useState<ShadowRoot | null>(null);
+    const externalCarouselTarget = isSnap2Mode ? null : carouselTarget;
+
+    // Checks the carousel selector target is valid
+    // creates shadow DOM and injects it into the target
+    // <ProductCarousel /> is rendered into that shadow DOM later
+    useLayoutEffect(() => {
+        if (
+          !showCarousel ||
+          hideEmbeddedCarousel ||
+          !isHTMLElementInOwnerDocument(externalCarouselTarget)
+        ) {
+          setExternalCarouselShadowRoot(null);
+          return;
+        }
+
+        const existingHost = Array.from(externalCarouselTarget.children).find((child) =>
+          child.getAttribute(EXTERNAL_CAROUSEL_HOST_ATTRIBUTE) === 'true'
+        );
+        if (existingHost) {
+          setExternalCarouselShadowRoot(null);
+          console.warn('[OV25-UI] Carousel target is already owned by another configurator; using the embedded carousel.');
+          return;
+        }
+
+        const host = externalCarouselTarget.ownerDocument.createElement('div');
+        host.className = 'ov25-external-carousel-host';
+        host.setAttribute(EXTERNAL_CAROUSEL_HOST_ATTRIBUTE, 'true');
+        host.setAttribute('data-clarity-mask', 'true');
+        host.appendChild(externalCarouselTarget.ownerDocument.createElement('span'));
+
+        try {
+          externalCarouselTarget.appendChild(host);
+          const shadow = host.attachShadow({ mode: 'open' });
+          const stylesheets: CSSStyleSheet[] = [getSharedStylesheet()];
+          if (cssString) stylesheets.push(createuserCustomCssStylesheet(cssString));
+          shadow.adoptedStyleSheets = stylesheets;
+          setExternalCarouselShadowRoot(shadow);
+        } catch (error) {
+          host.remove();
+          setExternalCarouselShadowRoot(null);
+          console.warn('[OV25-UI] Carousel target cannot host content; using the embedded carousel.', error);
+        }
+
+        return () => {
+          host.remove();
+        };
+    }, [
+      showCarousel,
+      hideEmbeddedCarousel,
+      externalCarouselTarget,
+      cssString,
+    ]);
 
     useLayoutEffect(() => {
-        if (!showCarousel || hideEmbeddedCarousel) {
+        if (!showCarousel || hideEmbeddedCarousel || externalCarouselShadowRoot) {
             setCarouselShadowRoot(null);
             return;
         }
@@ -357,7 +417,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
         }
         shadow.adoptedStyleSheets = stylesheets;
         setCarouselShadowRoot(shadow);
-    }, [showCarousel, hideEmbeddedCarousel, cssString, galleryShadowRoot]);
+    }, [showCarousel, hideEmbeddedCarousel, externalCarouselShadowRoot, cssString, galleryShadowRoot]);
 
     useLayoutEffect(() => {
         const host = galleryHostRef.current;
@@ -481,7 +541,8 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
         configuratorTransitionProxyMode === 'opening' && configuratorTransitionProxyBitmap;
 
     const hasSnap2Objects = (configuratorState?.snap2Objects?.length ?? 0) > 0;
-    /** Modal always fills the column; non-modal full-height flex is Snap2-only (classic desktop `inline` stays h-auto / max-h-full). */
+    const stickyDesktopGallery = stickyLayoutActive && !isMobile;
+    /** Modal always fills the column; non-modal full-height flex is Snap2-only (normal inline and inline-sticky retain natural gallery sizing). */
     const galleryUsesColumnFlexFill =
       isInModal ||
       (isSnap2Mode &&
@@ -513,11 +574,11 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
             </div>
         ) : null}
         <div className={cn(
-            "ov:relative ov:flex ov:flex-col ov:font-[family-name:var(--ov25-font-family)] ov:gap-[var(--ov25-gallery-gap)]",
+            "ov25-inline-sticky-gallery-content ov:relative ov:flex ov:flex-col ov:font-(family-name:--ov25-font-family) ov:gap-(--ov25-gallery-gap)",
             galleryUsesColumnFlexFill
               ? "ov:h-full ov:min-h-0 ov:overflow-hidden"
               : "ov:h-auto ov:max-h-full",
-            modalStackBoost ? "ov:z-[2147483647]" : "ov:z-[2] ov:isolate",
+            modalStackBoost || carouselFullscreenOpen ? "ov:z-2147483647" : "ov:z-2 ov:isolate",
             isPreloading && "ov:hidden"
         )}>
             {showClosingProxy && configuratorClosingProxyRect ? (
@@ -545,16 +606,17 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
                 ref={iframeSlotMeasureRef}
                 className={cn(
                   "ov:relative ov:w-full",
+                  stickyLayoutActive && "ov25-inline-sticky-iframe-slot",
                   galleryUsesColumnFlexFill
                     ? "ov:flex-1 ov:min-h-0 ov:flex ov:flex-col"
                     : "ov:aspect-square"
                 )}
             >
                 <div id="ov25-configurator-background-color" className={cn(
-                    "ov:pointer-events-none ov:absolute ov:inset-0 ov:z-[2] ov:w-full",
+                    "ov:pointer-events-none ov:absolute ov:inset-0 ov:z-2 ov:w-full",
                     modalStackBoost ? "ov:hidden!" : "ov:block!",
                     iframeSlotBorderRadiusClass,
-                    "ov:bg-[var(--ov25-configurator-iframe-background-color)]",
+                    "ov:bg-(--ov25-configurator-iframe-background-color)",
                 )}></div>
                 <div id={uniqueId ? `ov25-configurator-iframe-container-${uniqueId}` : "ov25-configurator-iframe-container"}
                     data-fullscreen={isVariantsOpen}
@@ -562,27 +624,30 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
                     data-clarity-mask="true"
                     ref={containerRef}
                     className={cn(
-                        "ov:h-full ov:w-full ov:relative ov:overflow-hidden ov:z-[3]",
+                        "ov:h-full ov:w-full ov:relative ov:overflow-hidden ov:z-3",
                         iframeSlotBorderRadiusClass,
-                        "ov:bg-[var(--ov25-configurator-iframe-background-color)]",
+                        "ov:bg-(--ov25-configurator-iframe-background-color)",
                     )}>
 
                     {!isProductGalleryStacked && <IframeContainer />}
 
                 </div>
             </div>
-            {showCarousel && !hideEmbeddedCarousel && (
+            {showCarousel && !hideEmbeddedCarousel && !externalCarouselShadowRoot && (
               <div
                 ref={carouselHostRef}
                 id="true-carousel"
                 className={cn(
-                  "ov:shrink-0"                )}
+                  "ov25-inline-sticky-carousel-host ov:shrink-0"
+                )}
               >
                 <span />
               </div>
             )}
-            {carouselShadowRoot &&
+            {carouselShadowRoot && !externalCarouselShadowRoot &&
               createPortal(<ProductCarousel />, carouselShadowRoot)}
+            {externalCarouselShadowRoot &&
+              createPortal(<ProductCarousel />, externalCarouselShadowRoot)}
         </div>
         {isProductGalleryStacked && galleryShadowRoot && createPortal(
            <IframeContainer  />,
@@ -599,6 +664,9 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
         id="ov-25-configurator-gallery-container"
         className={cn(
           "ov25-configurator-gallery",
+          stickyLayoutActive && "ov25-inline-sticky-gallery-root",
+          stickyDesktopGallery && "ov25-inline-sticky-gallery-root-desktop",
+          stickyMobileGallery && "ov25-inline-sticky-gallery-root-mobile",
           galleryUsesColumnFlexFill &&
             "ov:flex ov:flex-1 ov:flex-col ov:min-h-0 ov:h-full ov:max-h-full ov:overflow-hidden",
         )}
@@ -626,7 +694,7 @@ export function DeferredGalleryContainer() {
     const pointerEvents = isDrawerOrDialogOpen ? 'auto' : 'none';
     return (
         <div
-            className="ov25-configurator-gallery ov:font-[family-name:var(--ov25-font-family)]"
+            className="ov25-configurator-gallery ov:font-(family-name:--ov25-font-family)"
             style={{
                 position: 'fixed',
                 top: 0,

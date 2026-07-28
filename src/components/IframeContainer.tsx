@@ -6,6 +6,52 @@ import { cn, getProductGalleryImages, resolveImageUrl } from "../lib/utils.js"
 import ConfiguratorViewControls from './ConfiguratorViewControls.js'
 import Snap2ViewControls from './Snap2ViewControls.js'
 import { Ov25ShadowHost } from './Ov25ShadowHost.js'
+import { CONFIGURATOR_IFRAME_BACKGROUND_CSS_VAR } from '../lib/config/iframe-transition-snapshot.js'
+import { getResolvedConfiguratorIframeBackgroundColor } from '../utils/configurator-dom-queries.js'
+
+function cssColorToHex(value: string | null | undefined): string | null {
+    const raw = value?.trim();
+    if (!raw) return null;
+    if (raw === 'transparent') return null;
+
+    if (/^#[0-9a-f]{3,8}$/i.test(raw)) {
+        if (raw.length === 4) {
+            return `#${raw[1]}${raw[1]}${raw[2]}${raw[2]}${raw[3]}${raw[3]}`.toLowerCase();
+        }
+        return raw.slice(0, 7).toLowerCase();
+    }
+
+    if (typeof document === 'undefined' || !document.body) return null;
+
+    const tempDiv = document.createElement('div');
+    tempDiv.style.backgroundColor = raw;
+    document.body.appendChild(tempDiv);
+    const rgb = getComputedStyle(tempDiv).backgroundColor;
+    document.body.removeChild(tempDiv);
+    if (!rgb || rgb === 'transparent' || rgb === 'rgba(0, 0, 0, 0)') return null;
+
+    const match = rgb.match(/\d+/g);
+    if (match && match.length >= 3) {
+        return `#${[match[0], match[1], match[2]].map(x => {
+            const h = parseInt(x, 10).toString(16);
+            return h.length === 1 ? '0' + h : h;
+        }).join('')}`;
+    }
+
+    return null;
+}
+
+function getIframeBackgroundColorFromCssString(cssString: string | undefined): string | null {
+    if (!cssString) return null;
+    const escapedVar = CONFIGURATOR_IFRAME_BACKGROUND_CSS_VAR.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const match = new RegExp(`${escapedVar}\\s*:\\s*([^;}\\n]+)`, 'i').exec(cssString);
+    return cssColorToHex(match?.[1]);
+}
+
+function getIframeBackgroundColorFromDom(): string | null {
+    const resolved = getResolvedConfiguratorIframeBackgroundColor();
+    return cssColorToHex(resolved);
+}
 
 
 export const IframeContainer = () => {
@@ -31,11 +77,14 @@ export const IframeContainer = () => {
         configuratorDisplayModeMobile,
         isSnap2Mode,
         isModalOpen,
+        stickyLayoutActive,
+        cssString,
         hideGestureHint,
     } = useOV25UI();
 
     const isModalMode =
         isMobile ? configuratorDisplayModeMobile === 'modal' : configuratorDisplayMode === 'modal';
+    const stickyMobileGallery = stickyLayoutActive && isMobile;
     const snap2DesktopInlineSheet =
         isSnap2Mode && !isMobile && configuratorDisplayMode === 'inline-sheet';
     const snap2DesktopModalStackedFill =
@@ -54,7 +103,7 @@ export const IframeContainer = () => {
         isMobile &&
         isModalMode &&
         isModalOpen;
-    const iframeRadiusClass = snap2MobileDrawerOpen
+    const iframeRadiusClass = stickyMobileGallery || snap2MobileDrawerOpen
         ? 'ov:rounded-none'
         : snap2MobileDialogOpen
         ? 'ov:rounded-t-[var(--ov25-configurator-iframe-border-radius)] ov:rounded-b-none'
@@ -91,35 +140,16 @@ export const IframeContainer = () => {
         (currentProduct as any)?.dimensionY &&
         (currentProduct as any)?.dimensionZ);
 
-    // Get background color from CSS variable and ensure it's hex
-    const hexBgColor = useMemo(() => {
-        const root = document.documentElement;
-        const cssValue = getComputedStyle(root).getPropertyValue('--ov25-configurator-iframe-background-color').trim();
+    const initialHexBgColor = useMemo(
+        () => getIframeBackgroundColorFromCssString(cssString) ?? getIframeBackgroundColorFromDom(),
+        [cssString],
+    );
+    const [hexBgColor, setHexBgColor] = useState<string | null>(initialHexBgColor);
 
-        if (!cssValue) return '#f6f6f6'; // default matching --ov25-secondary-background-color in globals.css
-
-        // If already hex format, return it
-        if (cssValue.startsWith('#')) {
-            return cssValue;
-        }
-
-        // Convert to hex using computed style
-        const tempDiv = document.createElement('div');
-        tempDiv.style.backgroundColor = cssValue;
-        document.body.appendChild(tempDiv);
-        const rgb = getComputedStyle(tempDiv).backgroundColor;
-        document.body.removeChild(tempDiv);
-
-        const match = rgb.match(/\d+/g);
-        if (match && match.length >= 3) {
-            return `#${[match[0], match[1], match[2]].map(x => {
-                const h = parseInt(x).toString(16);
-                return h.length === 1 ? '0' + h : h;
-            }).join('')}`;
-        }
-
-        return null;
-    }, []);
+    useLayoutEffect(() => {
+        const next = getIframeBackgroundColorFromCssString(cssString) ?? getIframeBackgroundColorFromDom();
+        setHexBgColor((current) => current === next ? current : next);
+    }, [cssString]);
 
     // Use the utility function to get the iframe src
     const iframeSrc = useMemo(() =>

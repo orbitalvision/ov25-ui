@@ -29,15 +29,26 @@ export function ProductCarousel() {
   } = useOV25UI();
 
   const effectiveCarouselLayout = isMobile ? carouselLayoutMobile : carouselLayout;
-  if (effectiveCarouselLayout === CarouselDisplayMode.None) return null;
+  const carouselDisabled = effectiveCarouselLayout === CarouselDisplayMode.None;
   const useStackedLayout = effectiveCarouselLayout === 'stacked';
   const fullscreenScrollYRef = React.useRef(0);
   const scrollRef = React.useRef<HTMLDivElement>(null);
+  const fullscreenOverlayRef = React.useRef<HTMLDivElement>(null);
+  const [fullscreenPopoverFailed, setFullscreenPopoverFailed] = React.useState(false);
   const dragRef = React.useRef({ isDragging: false, startX: 0, startScrollLeft: 0, didDrag: false });
+  const fullscreenPopoverSupported =
+    typeof HTMLElement !== 'undefined' &&
+    typeof HTMLElement.prototype.showPopover === 'function' &&
+    typeof HTMLElement.prototype.hidePopover === 'function';
+  const useFullscreenPopover =
+    !carouselDisabled &&
+    galleryCarouselFullscreenImage != null &&
+    fullscreenPopoverSupported &&
+    !fullscreenPopoverFailed;
 
   React.useEffect(() => {
     const el = scrollRef.current;
-    if (!el || useStackedLayout) return;
+    if (carouselDisabled || !el || useStackedLayout) return;
 
     const handleWheel = (e: WheelEvent) => {
       const { scrollLeft, scrollWidth, clientWidth } = el;
@@ -55,7 +66,7 @@ export function ProductCarousel() {
 
     el.addEventListener('wheel', handleWheel, { passive: false });
     return () => el.removeEventListener('wheel', handleWheel);
-  }, [useStackedLayout]);
+  }, [carouselDisabled, useStackedLayout]);
 
   const handleMouseDown = React.useCallback((e: React.MouseEvent) => {
     if (useStackedLayout || !scrollRef.current) return;
@@ -70,7 +81,7 @@ export function ProductCarousel() {
   }, []);
 
   React.useEffect(() => {
-    if (useStackedLayout) return;
+    if (carouselDisabled || useStackedLayout) return;
     const onMove = (e: MouseEvent) => {
       if (!dragRef.current.isDragging || !scrollRef.current) return;
       const deltaX = dragRef.current.startX - e.clientX;
@@ -82,21 +93,22 @@ export function ProductCarousel() {
     document.addEventListener('mousemove', onMove);
     document.addEventListener('mouseup', onUp);
     return () => {
+      dragRef.current.isDragging = false;
       document.removeEventListener('mousemove', onMove);
       document.removeEventListener('mouseup', onUp);
     };
-  }, [useStackedLayout]);
+  }, [carouselDisabled, useStackedLayout]);
 
   React.useEffect(() => {
-    if (!galleryCarouselFullscreenImage) return;
+    if (carouselDisabled || !galleryCarouselFullscreenImage) return;
     const onKey = (e: KeyboardEvent) =>
       e.key === 'Escape' && setGalleryCarouselFullscreenImage(null);
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
-  }, [galleryCarouselFullscreenImage, setGalleryCarouselFullscreenImage]);
+  }, [carouselDisabled, galleryCarouselFullscreenImage, setGalleryCarouselFullscreenImage]);
 
   React.useLayoutEffect(() => {
-    if (!galleryCarouselFullscreenImage) return;
+    if (carouselDisabled || !galleryCarouselFullscreenImage) return;
 
     const y =
       window.scrollY ||
@@ -133,7 +145,30 @@ export function ProductCarousel() {
       document.documentElement.style.overflow = htmlOverflow;
       window.scrollTo(0, fullscreenScrollYRef.current);
     };
-  }, [galleryCarouselFullscreenImage]);
+  }, [carouselDisabled, galleryCarouselFullscreenImage]);
+
+  React.useLayoutEffect(() => {
+    if (!useFullscreenPopover) return;
+    const overlay = fullscreenOverlayRef.current;
+    if (!overlay) return;
+
+    try {
+      overlay.showPopover();
+    } catch {
+      setFullscreenPopoverFailed(true);
+      return;
+    }
+
+    return () => {
+      try {
+        overlay.hidePopover();
+      } catch {
+        // The overlay may already be closed while React is unmounting it.
+      }
+    };
+  }, [useFullscreenPopover, galleryCarouselFullscreenImage]);
+
+  if (carouselDisabled) return null;
 
   const hasCutout = !!(currentProduct?.metadata as any)?.cutoutImage
   const cutoutFirst = hasCutout && (isMobile || !deferThreeD)
@@ -170,8 +205,8 @@ export function ProductCarousel() {
           onClick={() => setGalleryIndex(galleryIndexToUse)}
           data-selected={isSelected ? "true" : "false"}
           className={cn(
-            "ov:cursor-pointer ov:relative ov:pl-1 ov:aspect-square ov:w-full ov:flex ov:justify-center ov:items-center ov:overflow-hidden ov:rounded-[var(--ov25-configurator-iframe-border-radius)] ov:bg-white ov:ring-2",
-            isSelected ? "ov:ring-[var(--ov25-primary-color)]" : "ov:ring-[var(--ov25-configurator-view-controls-border-color)]"
+            "ov:cursor-pointer ov:relative ov:pl-1 ov:aspect-square ov:w-full ov:flex ov:justify-center ov:items-center ov:overflow-hidden ov:rounded-(--ov25-configurator-iframe-border-radius) ov:bg-white ov:ring-2",
+            isSelected ? "ov:ring-(--ov25-primary-color)" : "ov:ring-(--ov25-configurator-view-controls-border-color)"
           )}
         >
           <span className="ov25-360-label ov:py-0.5 ov:rounded-full ov:bg-transparent ov:text-neutral-500  ov:text-xs ov:font-[250]  ">
@@ -188,8 +223,8 @@ export function ProductCarousel() {
         onClick={() => setGalleryIndex(isCutout ? galleryIndexToUse : (cutoutIndexCombined === 0 ? index + 1 : index))}
         data-selected={isSelected ? "true" : "false"}
         className={cn(
-          "ov25-gallery-image-button ov:relative ov:aspect-square ov:w-full ov:overflow-hidden ov:rounded-[var(--ov25-configurator-iframe-border-radius)] ov:bg-muted ov:cursor-pointer",
-          isSelected && "ov:ring-2 ov:ring-[var(--ov25-primary-color)]"
+          "ov25-gallery-image-button ov:relative ov:aspect-square ov:w-full ov:overflow-hidden ov:rounded-(--ov25-configurator-iframe-border-radius) ov:bg-muted ov:cursor-pointer",
+          isSelected && "ov:ring-2 ov:ring-(--ov25-primary-color)"
         )}
       >
           {/* <div className="ov:w-full ov:h-full ov:absolute ov:inset-0 ov:bg-black"></div> */}
@@ -225,8 +260,8 @@ export function ProductCarousel() {
           type="button"
           onClick={() => setGalleryIndex(galleryIndexToUse)}
           className={cn(
-            'ov:cursor-pointer ov:relative ov:aspect-[3/2] ov:w-full ov:flex ov:justify-center ov:items-center ov:overflow-hidden ov:rounded-[var(--ov25-configurator-iframe-border-radius)] ov:bg-white ov:ring-2',
-            isSelected ? 'ov:ring-[var(--ov25-primary-color)]' : 'ov:ring-[var(--ov25-configurator-view-controls-border-color)]'
+            'ov:cursor-pointer ov:relative ov:aspect-3/2 ov:w-full ov:flex ov:justify-center ov:items-center ov:overflow-hidden ov:rounded-(--ov25-configurator-iframe-border-radius) ov:bg-white ov:ring-2',
+            isSelected ? 'ov:ring-(--ov25-primary-color)' : 'ov:ring-(--ov25-configurator-view-controls-border-color)'
           )}
         >
           <span className="ov25-360-label ov:py-0.5 ov:rounded-full ov:bg-transparent ov:text-neutral-500 ov:text-xs ov:font-[250]">
@@ -242,7 +277,7 @@ export function ProductCarousel() {
         key={index}
         type="button"
         onClick={() => setGalleryCarouselFullscreenImage(fullscreenSrc)}
-        className="ov25-gallery-image-button ov:relative ov:aspect-[3/2] ov:w-full ov:overflow-hidden ov:rounded-[var(--ov25-configurator-iframe-border-radius)] ov:bg-muted ov:cursor-pointer"
+        className="ov25-gallery-image-button ov:relative ov:aspect-3/2 ov:w-full ov:overflow-hidden ov:rounded-(--ov25-configurator-iframe-border-radius) ov:bg-muted ov:cursor-pointer"
       >
         <img
           src={src}
@@ -259,7 +294,7 @@ export function ProductCarousel() {
     <div id="ov25-product-carousel" className="ov:w-full ov:relative">
       <div id="ov25-product-carousel-controls" className={`ov:relative ov:w-full `}>
         {!useStackedLayout && (
-          <div ref={scrollRef} onMouseDown={handleMouseDown} onClickCapture={handleClickCapture} className="ov25-thumbnail-scroll ov:overflow-x-auto ov:overflow-y-hidden ov:w-full ov:scroll-smooth ov:[container-type:inline-size] ov:p-1 ov:cursor-grab ov:select-none">
+          <div ref={scrollRef} onMouseDown={handleMouseDown} onClickCapture={handleClickCapture} className="ov25-thumbnail-scroll ov:overflow-x-auto ov:overflow-y-hidden ov:w-full ov:scroll-smooth ov:@container ov:p-1 ov:cursor-grab ov:select-none">
             <div className="ov:flex ov:flex-nowrap ov:gap-2">
               {carouselItems.map((item: any, index: number) => (
                 <div key={index} className="ov:flex-1 ov:min-w-[calc((100cqw-2.5rem)/6)] ov:md:min-w-[calc((100cqw-2.5rem)/8)] ov:lg:min-w-[calc((100cqw-2.5rem)/12)]">
@@ -270,14 +305,27 @@ export function ProductCarousel() {
           </div>
         )}
         {useStackedLayout && (
-          <div className="ov:grid ov:grid-cols-2 ov:gap-[var(--ov25-gallery-gap)] ov:w-full">
+          <div className="ov:grid ov:grid-cols-2 ov:gap-(--ov25-gallery-gap) ov:w-full">
             {carouselItems.map((item, index) => renderStackedThumbnail(item, index))}
           </div>
         )}
       </div>
       {galleryCarouselFullscreenImage && (
         <div
-          className="ov:fixed ov:inset-0 ov:z-[2147483647] ov:bg-black/90 ov:flex ov:items-center ov:justify-center ov:cursor-pointer"
+          ref={fullscreenOverlayRef}
+          popover={useFullscreenPopover ? 'manual' : undefined}
+          className="ov:fixed ov:inset-0 ov:z-2147483647 ov:bg-black/90 ov:flex ov:items-center ov:justify-center ov:cursor-pointer"
+          style={{
+            boxSizing: 'border-box',
+            width: '100%',
+            height: '100%',
+            maxWidth: 'none',
+            maxHeight: 'none',
+            margin: 0,
+            border: 0,
+            padding: 0,
+            background: 'rgba(0, 0, 0, 0.9)',
+          }}
           onClick={() => setGalleryCarouselFullscreenImage(null)}
         >
           <img

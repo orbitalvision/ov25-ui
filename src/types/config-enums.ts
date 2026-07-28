@@ -1,6 +1,7 @@
-/** How the configurator UI is presented. Desktop: inline | sheet | modal. Mobile: inline | drawer. */
+/** How the configurator UI is presented. `inline-sticky` is available for standard products only. */
 export const ConfiguratorDisplayMode = {
   Inline: 'inline',
+  InlineSticky: 'inline-sticky',
   Sheet: 'sheet',
   Drawer: 'drawer',
   Modal: 'modal',

@@ -29,7 +29,15 @@ function parseVariantHideOptionsCsv(csv: string): string[] {
   return csv.split(',').map((s) => s.trim()).filter((s) => s.length > 0);
 }
 
-function toElementSelector(s: SelectorFormState): string | { selector: string; replace: boolean } | undefined {
+const INTEGRATION_OWNED_SELECTOR_KEYS = new Set([
+  'header',
+  'desktopCarousel',
+  'mobileCarousel',
+]);
+
+function toElementSelector(
+  s: SelectorFormState,
+): string | { selector: string; replace: boolean } | undefined {
   if (!s.enabled || !s.selector.trim()) return undefined;
   return s.replace ? { selector: s.selector.trim(), replace: true } : s.selector.trim();
 }
@@ -90,8 +98,9 @@ export function buildSerializableConfig(
     displayModeMobile === 'inline';
 
   const selectors: Record<string, string | { selector: string; replace: boolean }> = {};
-  const selectorEntries = Object.entries(settings.selectors) as [keyof TypeSettings['selectors'], SelectorFormState][];
+  const selectorEntries = Object.entries(settings.selectors) as [string, SelectorFormState][];
   for (const [key, state] of selectorEntries) {
+    if (INTEGRATION_OWNED_SELECTOR_KEYS.has(key)) continue;
     if (shouldOmitSnap2ConfigureButton && key === 'configureButton') continue;
     if (isSnap2 && key === 'initialiseMenu' && !hasSnap2PureInlineDisplayMode) continue;
     const val = toElementSelector(state);

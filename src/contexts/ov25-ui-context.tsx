@@ -1,9 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { createContext, useContext, useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback } from 'react';
 import {
   sendMessageToIframe,
   toggleAR,
   CompatibleModule,
   compatibleModuleListsEqual,
+  configuratorDisplayModeUsesInlineVariants,
   detectUserAgent,
   orderConfiguratorSelectionsWithNoneFirst,
 } from '../utils/configurator-utils.js';
@@ -23,6 +24,7 @@ import type {
   OnChangePayload,
   UnifiedPricePayload,
   UnifiedSkuPayload,
+  ElementSelector,
 } from '../types/inject-config.js';
 import type { StringReplacementsConfig } from '../types/string-replacements.js';
 import { normalizePricePayload, normalizeSkuPayload } from '../commerce/normalize-iframe-commerce.js';
@@ -37,6 +39,21 @@ import {
 import { findIframeWithUniqueId, type ConfiguratorIframeScreenRect } from '../utils/configurator-dom-queries.js';
 import { computeIsMobileViewport } from '../utils/viewport-mobile.js';
 import { resolveStringReplacement, type StringInterpolationVars } from '../lib/strings/resolve-string-replacement.js';
+import {
+  createStickyLayoutController,
+  DEFAULT_STICKY_GAP,
+  type StickyLayoutController,
+  type StickyLayoutSnapshot,
+} from '../lib/sticky-layout-controller.js';
+import {
+  createCarouselTargetController,
+  resolveCarouselTargetSelectorForViewport,
+  type CarouselTargetController,
+} from '../lib/carousel-target-controller.js';
+import {
+  useStickyHostRelocation,
+  type StickyHostRelocationMode,
+} from '../hooks/useStickyHostRelocation.js';
 
 function throttle<T extends (...args: any[]) => void>(
   fn: T,
@@ -86,6 +103,20 @@ function useLocalStorage<T>(key: string, initialValue: T): [T, React.Dispatch<Re
 export type DrawerSizes = 'closed' | 'small' | 'large';
 export type AnimationState = 'unavailable' | 'open' | 'close' | 'loop' | 'stop';
 export type TransitionProxyMode = 'opening' | 'closing' | null;
+export type DesktopConfiguratorDisplayMode =
+  | 'inline'
+  | 'inline-sticky'
+  | 'sheet'
+  | 'drawer'
+  | 'variants-only-sheet'
+  | 'modal'
+  | 'inline-sheet';
+export type MobileConfiguratorDisplayMode =
+  | 'inline'
+  | 'inline-sticky'
+  | 'drawer'
+  | 'modal'
+  | 'variants-only-sheet';
 
 export interface ProductFilters {
   [optionName: string]: {
@@ -333,8 +364,12 @@ interface OV25UIContextType {
   controlsHidden: boolean;
   hasConfigureButton: boolean;
   useInlineVariantControls: boolean;
-  configuratorDisplayMode: 'inline' | 'sheet' | 'drawer' | 'variants-only-sheet' | 'modal' | 'inline-sheet';
-  configuratorDisplayModeMobile: 'inline' | 'drawer' | 'modal' | 'variants-only-sheet';
+  configuratorDisplayMode: DesktopConfiguratorDisplayMode;
+  configuratorDisplayModeMobile: MobileConfiguratorDisplayMode;
+  stickyLayoutActive: boolean;
+  stickyLayoutSnapshot: StickyLayoutSnapshot | null;
+  carouselTarget: HTMLElement | null;
+  setStickyOptionHeader: (element: HTMLElement | null) => void;
   useSimpleVariantsSelector: boolean;
   /** Drawer trigger: single Configure button or per-option buttons (ProductOptionsGroup). */
   configuratorTriggerStyle: 'single-button' | 'split-buttons';
@@ -481,8 +516,8 @@ export const OV25UIProvider: React.FC<{
   uniqueId?: string,
   useInlineVariantControls?: boolean,
   useInlineVariantControlsMobile?: boolean,
-  configuratorDisplayMode?: 'inline' | 'sheet' | 'drawer' | 'modal' | 'variants-only-sheet' | 'inline-sheet',
-  configuratorDisplayModeMobile?: 'inline' | 'drawer' | 'modal' | 'variants-only-sheet',
+  configuratorDisplayMode?: DesktopConfiguratorDisplayMode,
+  configuratorDisplayModeMobile?: MobileConfiguratorDisplayMode,
   useSimpleVariantsSelector?: boolean,
   configuratorTriggerStyle?: 'single-button' | 'split-buttons',
   configuratorTriggerStyleMobile?: 'single-button' | 'split-buttons',
@@ -511,6 +546,11 @@ export const OV25UIProvider: React.FC<{
   snap2ModulePanelPositionDesktop?: 'left' | 'right' | 'bottom',
   snap2ModulePanelPositionMobile?: 'left' | 'right' | 'bottom',
   initialiseMenuUsesExternalSelector?: boolean,
+  galleryHost?: HTMLElement | null,
+  variantsHost?: HTMLElement | null,
+  headerSelector?: string,
+  desktopCarouselTargetSelector?: ElementSelector,
+  mobileCarouselTargetSelector?: ElementSelector,
 }> = ({ 
   children,
   productLink,
@@ -568,6 +608,11 @@ export const OV25UIProvider: React.FC<{
   snap2ModulePanelPositionDesktop: snap2ModulePanelPositionDesktopProp = 'bottom',
   snap2ModulePanelPositionMobile: snap2ModulePanelPositionMobileProp,
   initialiseMenuUsesExternalSelector = false,
+  galleryHost = null,
+  variantsHost = null,
+  headerSelector,
+  desktopCarouselTargetSelector,
+  mobileCarouselTargetSelector,
 }) => {
   const effectiveCurrencySymbol =
     String(currencySymbol).trim() || DEFAULT_CURRENCY_SYMBOL;
@@ -670,6 +715,14 @@ export const OV25UIProvider: React.FC<{
       isSnap2: isSnap2ProductLink,
     })
   );
+  const showCarouselForViewport =
+    showCarousel &&
+    (isMobile ? carouselLayoutMobile : carouselLayout) !== CarouselDisplayMode.None;
+  useLayoutEffect(() => {
+    if (!showCarouselForViewport && galleryCarouselFullscreenImage != null) {
+      setGalleryCarouselFullscreenImage(null);
+    }
+  }, [showCarouselForViewport, galleryCarouselFullscreenImage]);
   const [pendingProductId, setPendingProductId] = useState<string | null>(null);
   const [availableProductFilters, setAvailableProductFilters] = useState<ProductFilters>({});
   const [showFilters, setShowFilters] = useState<boolean>(false);
@@ -714,17 +767,272 @@ export const OV25UIProvider: React.FC<{
     })
   );
   const [iframeResetKey, setIframeResetKey] = useState(0);
+  const stickyLayoutControllerRef = useRef<StickyLayoutController | null>(null);
+  const carouselTargetControllerRef = useRef<CarouselTargetController | null>(null);
+  const stickyOptionHeaderRef = useRef<HTMLElement | null>(null);
+  const stickyHostRelocatedRef = useRef(false);
+  const restoreStickyHostStylesRef = useRef<(() => void) | null>(null);
+  const [stickyLayoutSnapshot, setStickyLayoutSnapshot] = useState<StickyLayoutSnapshot | null>(null);
+  const [carouselTarget, setCarouselTarget] = useState<HTMLElement | null>(null);
 
-  const effectiveConfiguratorDisplayModeMobile = useMemo(
-    () =>
-      configuratorDisplayModeMobileProp ??
-      (configuratorDisplayMode === 'inline'
-        ? 'inline'
-        : configuratorDisplayMode === 'modal'
-          ? 'modal'
-          : 'drawer'),
-    [configuratorDisplayModeMobileProp, configuratorDisplayMode]
-  );
+  const mobileDisplayModeFallback =
+    configuratorDisplayMode === 'inline' ||
+    configuratorDisplayMode === 'inline-sticky' ||
+    configuratorDisplayMode === 'modal'
+      ? configuratorDisplayMode
+      : 'drawer';
+  const effectiveConfiguratorDisplayModeMobile =
+    configuratorDisplayModeMobileProp ?? mobileDisplayModeFallback;
+  const effectiveUseInlineVariantControls = isMobile
+    ? (useInlineVariantControlsMobileProp ??
+      configuratorDisplayModeUsesInlineVariants(effectiveConfiguratorDisplayModeMobile))
+    : (useInlineVariantControls || configuratorDisplayModeUsesInlineVariants(configuratorDisplayMode));
+  const currentConfiguratorDisplayMode = isMobile
+    ? effectiveConfiguratorDisplayModeMobile
+    : configuratorDisplayMode;
+  const stickyLayoutActive =
+    currentConfiguratorDisplayMode === 'inline-sticky' && !isSnap2ProductLink;
+  const carouselTargetSelector = resolveCarouselTargetSelectorForViewport({
+    desktopSelector: desktopCarouselTargetSelector,
+    mobileSelector: mobileCarouselTargetSelector,
+    isMobile,
+    mobileInlineSticky: stickyLayoutActive && isMobile,
+    isSnap2: isSnap2ProductLink,
+  });
+
+  // Carousel placement has its own scoped observer so target lifecycle follows the rendered
+  // non-Snap2 carousel across every display mode, independently of sticky controller teardown.
+  useLayoutEffect(() => {
+    if (isSnap2ProductLink || !showCarouselForViewport || !carouselTargetSelector) {
+      setCarouselTarget(null);
+      return;
+    }
+
+    const documentObject = galleryHost?.ownerDocument ?? variantsHost?.ownerDocument ?? document;
+    const controller = createCarouselTargetController({
+      document: documentObject,
+      selector: carouselTargetSelector,
+      galleryHost,
+      variantsHost,
+      onChange: ({ target }) => setCarouselTarget(target),
+      onDiagnostic: (message, error) => {
+        if (error) console.warn(message, error);
+        else console.warn(message);
+      },
+    });
+    carouselTargetControllerRef.current = controller;
+    setCarouselTarget(null);
+    controller.start();
+
+    return () => {
+      controller.destroy();
+      if (carouselTargetControllerRef.current === controller) {
+        carouselTargetControllerRef.current = null;
+      }
+      setCarouselTarget(null);
+    };
+  }, [
+    isSnap2ProductLink,
+    showCarouselForViewport,
+    carouselTargetSelector,
+    galleryHost,
+    variantsHost,
+  ]);
+
+  const setStickyOptionHeader = useCallback((element: HTMLElement | null) => {
+    if (stickyOptionHeaderRef.current === element) return;
+    stickyOptionHeaderRef.current = element;
+    stickyLayoutControllerRef.current?.setElements({ optionHeader: element });
+  }, []);
+
+  // Keep one controller per active host/configuration so responsive changes remeasure current targets;
+  // destroy releases observers/listeners and restores controller-owned CSS properties.
+  useLayoutEffect(() => {
+    if (!stickyLayoutActive) {
+      setStickyLayoutSnapshot(null);
+      return;
+    }
+
+    const documentObject =
+      galleryHost?.ownerDocument ?? variantsHost?.ownerDocument ?? document;
+    const controller = createStickyLayoutController({
+      document: documentObject,
+      galleryHost,
+      variantsHost,
+      optionHeader: stickyOptionHeaderRef.current,
+      headerSelector,
+      ...(isMobile ? { topGapOverride: 0, bottomGapOverride: 0 } : {}),
+      onChange: (nextSnapshot) => {
+        setStickyLayoutSnapshot((previousSnapshot) => {
+          if (
+            stickyHostRelocatedRef.current &&
+            previousSnapshot?.requiresBodyFallback &&
+            !nextSnapshot.requiresBodyFallback
+          ) {
+            return {
+              ...nextSnapshot,
+              requiresBodyFallback: true,
+              fallbackBoundary: previousSnapshot.fallbackBoundary,
+              ancestorBlockers: previousSnapshot.ancestorBlockers,
+            };
+          }
+          return nextSnapshot;
+        });
+      },
+    });
+    stickyLayoutControllerRef.current = controller;
+    setStickyLayoutSnapshot(null);
+    controller.start();
+
+    return () => {
+      controller.destroy();
+      if (stickyLayoutControllerRef.current === controller) {
+        stickyLayoutControllerRef.current = null;
+      }
+    };
+  }, [
+    stickyLayoutActive,
+    galleryHost,
+    variantsHost,
+    headerSelector,
+    isMobile,
+  ]);
+
+  // Temporarily own the host's sticky geometry, class, and mode markers; snapshot restoration keeps
+  // merchant inline styles intact across mobile/desktop transitions, host replacement, and teardown.
+  useLayoutEffect(() => {
+    if (!stickyLayoutActive || !galleryHost) return;
+    const hadClass = galleryHost.classList.contains('ov25-inline-sticky-gallery-host');
+    const previousActive = galleryHost.getAttribute('data-ov25-inline-sticky-active');
+    const previousMobile = galleryHost.getAttribute('data-ov25-inline-sticky-mobile');
+    const stickyStyles: Array<readonly [string, string]> = [
+      ['position', 'sticky'],
+      ['top', 'var(--ov25-sticky-top)'],
+      ['align-self', 'flex-start'],
+      ['display', 'flex'],
+      ['flex-direction', 'column'],
+      ['width', isMobile ? 'var(--ov25-sticky-viewport-width, 100dvw)' : '100%'],
+      ['box-sizing', 'border-box'],
+      ['min-height', '0'],
+      ['max-height', 'var(--ov25-sticky-available-height)'],
+      ['height', 'auto'],
+      ['overflow', 'visible'],
+      ['z-index', '1'],
+    ];
+    if (isMobile) {
+      // Mobile sticky owns the viewport edge, so merchant insets cannot expose scrolling content.
+      stickyStyles.push(
+        ['max-width', 'none'],
+        [
+          'margin-inline',
+          'calc((100% - var(--ov25-sticky-viewport-width, 100dvw)) / 2)',
+        ],
+        ['border-top-width', '0'],
+        ['border-right-width', '0'],
+        ['border-bottom-width', '0'],
+        ['border-left-width', '0'],
+        ['padding-top', '0'],
+        ['padding-right', '0'],
+        ['padding-bottom', '0'],
+        ['padding-left', '0'],
+      );
+    }
+    const previousStyles = stickyStyles.map(([property]) => ({
+      property,
+      value: galleryHost.style.getPropertyValue(property),
+      priority: galleryHost.style.getPropertyPriority(property),
+    }));
+    const restoreStyles = () => {
+      previousStyles.forEach(({ property, value, priority }) => {
+        if (value) galleryHost.style.setProperty(property, value, priority);
+        else galleryHost.style.removeProperty(property);
+      });
+    };
+    restoreStickyHostStylesRef.current = restoreStyles;
+
+    galleryHost.classList.add('ov25-inline-sticky-gallery-host');
+    stickyStyles.forEach(([property, value]) => {
+      galleryHost.style.setProperty(property, value, 'important');
+    });
+    galleryHost.setAttribute('data-ov25-inline-sticky-active', 'true');
+    galleryHost.setAttribute('data-ov25-inline-sticky-mobile', isMobile ? 'true' : 'false');
+    stickyLayoutControllerRef.current?.scheduleMeasure({ afterCurrentFrame: true });
+
+    return () => {
+      if (!hadClass) galleryHost.classList.remove('ov25-inline-sticky-gallery-host');
+      if (previousActive === null) galleryHost.removeAttribute('data-ov25-inline-sticky-active');
+      else galleryHost.setAttribute('data-ov25-inline-sticky-active', previousActive);
+      if (previousMobile === null) galleryHost.removeAttribute('data-ov25-inline-sticky-mobile');
+      else galleryHost.setAttribute('data-ov25-inline-sticky-mobile', previousMobile);
+      restoreStyles();
+    };
+  }, [stickyLayoutActive, galleryHost, isMobile]);
+
+  // Expose fullscreen state to sticky CSS and lift only an in-place host; relocated hosts own their
+  // top-layer z-index separately, and cleanup restores the previous marker and inline z-index.
+  useLayoutEffect(() => {
+    if (!stickyLayoutActive || !galleryHost) return;
+    const previousFullscreen = galleryHost.getAttribute('data-ov25-inline-sticky-fullscreen');
+    const fullscreen = galleryCarouselFullscreenImage != null;
+    const shouldSetZIndex = fullscreen && !stickyHostRelocatedRef.current;
+    const previousZIndex = shouldSetZIndex
+      ? {
+          value: galleryHost.style.getPropertyValue('z-index'),
+          priority: galleryHost.style.getPropertyPriority('z-index'),
+        }
+      : null;
+
+    galleryHost.setAttribute(
+      'data-ov25-inline-sticky-fullscreen',
+      fullscreen ? 'true' : 'false',
+    );
+    if (shouldSetZIndex) {
+      galleryHost.style.setProperty('z-index', '2147483646', 'important');
+    }
+
+    return () => {
+      if (previousFullscreen === null) galleryHost.removeAttribute('data-ov25-inline-sticky-fullscreen');
+      else galleryHost.setAttribute('data-ov25-inline-sticky-fullscreen', previousFullscreen);
+      if (previousZIndex) {
+        if (previousZIndex.value) {
+          galleryHost.style.setProperty(
+            'z-index',
+            previousZIndex.value,
+            previousZIndex.priority,
+          );
+        } else {
+          galleryHost.style.removeProperty('z-index');
+        }
+      }
+    };
+  }, [stickyLayoutActive, galleryHost, galleryCarouselFullscreenImage]);
+
+  const stickyTopGap = stickyLayoutSnapshot?.topGap ?? DEFAULT_STICKY_GAP;
+  const onStickyRelocationModeChange = useCallback((mode: StickyHostRelocationMode) => {
+    stickyHostRelocatedRef.current = mode !== 'normal';
+  }, []);
+
+  useStickyHostRelocation({
+    host: galleryHost,
+    active: stickyLayoutActive,
+    requiresBodyFallback: stickyLayoutSnapshot?.requiresBodyFallback ?? false,
+    stickyTop: (stickyLayoutSnapshot?.headerOffset ?? 0) + stickyTopGap,
+    occlusionTop: stickyLayoutSnapshot?.headerOffset ?? 0,
+    boundary: stickyLayoutSnapshot?.fallbackBoundary ?? null,
+    overlayOpen: isDrawerOrDialogOpen || isModalOpen,
+    fullscreenOpen: galleryCarouselFullscreenImage != null,
+    layerKey: uniqueId ?? 'default',
+    fullViewportWidth: isMobile,
+    resetKey: isMobile,
+    onModeChange: onStickyRelocationModeChange,
+  });
+
+  // Final idempotent guard reapplies the captured host snapshot on disable or host unmount, covering
+  // cleanup paths beyond the primary ownership effect.
+  useLayoutEffect(() => {
+    if (!stickyLayoutActive) restoreStickyHostStylesRef.current?.();
+    return () => restoreStickyHostStylesRef.current?.();
+  }, [stickyLayoutActive, galleryHost]);
 
   // Module selection state
   const [compatibleModules, setCompatibleModules] = useState<CompatibleModule[] | null>(null);
@@ -1317,7 +1625,7 @@ export const OV25UIProvider: React.FC<{
       setIsModulePanelOpen(true);
       return;
     }
-    if (!useInlineVariantControls) {
+    if (!effectiveUseInlineVariantControls) {
       setIsVariantsOpen(true);
     }
   };
@@ -1512,7 +1820,7 @@ export const OV25UIProvider: React.FC<{
         if (!type) {
           return;
         }
-        
+
         // For standard configurators with uniqueId, filter messages by iframe source
         if (uniqueId) {
           const iframe = findIframeWithUniqueId(uniqueId) as HTMLIFrameElement | null;
@@ -1723,11 +2031,8 @@ export const OV25UIProvider: React.FC<{
             if (modulesList.length > 0) {
               setIsModuleSelectionLoading(false);
               setIsSnap2CheckoutSheetOpen(false);
-              const effectiveInlineVariants = isMobile
-                ? (useInlineVariantControlsMobileProp ?? useInlineVariantControls)
-                : useInlineVariantControls;
               const openModulesInVariantSheet =
-                effectiveInlineVariants || snap2ModulesEmbedInVariantSheet;
+                effectiveUseInlineVariantControls || snap2ModulesEmbedInVariantSheet;
               if (isMobile) {
                 setExpandToOptionIdOnOpen(openModulesInVariantSheet ? 'modules' : null);
                 setActiveOptionId('modules');
@@ -1862,8 +2167,7 @@ export const OV25UIProvider: React.FC<{
     handleARGLBData,
     effectiveCurrencySymbol,
     isMobile,
-    useInlineVariantControls,
-    useInlineVariantControlsMobileProp,
+    effectiveUseInlineVariantControls,
     hasConfigureButtonState,
     snap2ModulesEmbedInVariantSheet,
   ]);
@@ -1878,9 +2182,9 @@ export const OV25UIProvider: React.FC<{
   const galleryIndexToUse = deferThreeD && allImages.length > 0 ? 1 : 0;
   const shouldRestoreInlineGalleryToIframe =
     allImages.length > 0 &&
-    (isMobile
-      ? effectiveConfiguratorDisplayModeMobile === 'inline'
-      : configuratorDisplayMode === 'inline');
+    configuratorDisplayModeUsesInlineVariants(
+      isMobile ? effectiveConfiguratorDisplayModeMobile : configuratorDisplayMode,
+    );
 
   const restoreInlineGalleryToIframe = useCallback(() => {
     if (!shouldRestoreInlineGalleryToIframe) return;
@@ -1964,7 +2268,7 @@ export const OV25UIProvider: React.FC<{
   carouselLayoutMobile,
   carouselMaxImagesDesktop,
   carouselMaxImagesMobile,
-  showCarousel,
+  showCarousel: showCarouselForViewport,
     deferThreeD,
     configuratorGalleryIsDeferred,
     showOptional,
@@ -2020,9 +2324,13 @@ export const OV25UIProvider: React.FC<{
     isModalOpen,
     controlsHidden,
     hasConfigureButton: hasConfigureButtonState,
-    useInlineVariantControls: isMobile ? (useInlineVariantControlsMobileProp ?? useInlineVariantControls) : useInlineVariantControls,
+    useInlineVariantControls: effectiveUseInlineVariantControls,
     configuratorDisplayMode,
     configuratorDisplayModeMobile: effectiveConfiguratorDisplayModeMobile,
+    stickyLayoutActive,
+    stickyLayoutSnapshot,
+    carouselTarget,
+    setStickyOptionHeader,
     useSimpleVariantsSelector,
     configuratorTriggerStyle: isMobile ? (configuratorTriggerStyleMobileProp ?? configuratorTriggerStyle) : configuratorTriggerStyle,
     variantDisplayStyleMobile,

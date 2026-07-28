@@ -32,7 +32,10 @@ export interface ConfiguratorSetupOverrides extends ConfiguratorSetupSerializabl
   hideSaveButton?: boolean;
 }
 
-function mergeTypeSettings(defaults: TypeSettings, saved: Partial<TypeSettings> | undefined): TypeSettings {
+export function mergeStoredTypeSettings(
+  defaults: TypeSettings,
+  saved: Partial<TypeSettings> | undefined,
+): TypeSettings {
   if (!saved) return defaults;
   return {
     selectors: {
@@ -93,9 +96,9 @@ function readSavedState(storageKey: string): ConfiguratorSetupFormState | null {
     return {
       layout: parsed.layout ?? DEFAULT_FORM_STATE.layout,
       typeSettings: {
-        standard: mergeTypeSettings(DEFAULT_TYPE_SETTINGS.standard, parsed.typeSettings?.standard),
-        snap2: mergeTypeSettings(DEFAULT_TYPE_SETTINGS.snap2, parsed.typeSettings?.snap2),
-        bedConfigurator: mergeTypeSettings(
+        standard: mergeStoredTypeSettings(DEFAULT_TYPE_SETTINGS.standard, parsed.typeSettings?.standard),
+        snap2: mergeStoredTypeSettings(DEFAULT_TYPE_SETTINGS.snap2, parsed.typeSettings?.snap2),
+        bedConfigurator: mergeStoredTypeSettings(
           DEFAULT_TYPE_SETTINGS.bedConfigurator,
           parsed.typeSettings?.bedConfigurator,
         ),

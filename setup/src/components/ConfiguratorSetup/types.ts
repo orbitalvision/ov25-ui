@@ -4,8 +4,8 @@ import type { StringReplacementsConfig } from 'ov25-ui';
 export type PreviewLayoutType = LayoutType;
 
 export type FormCarouselDisplayMode = 'none' | 'carousel' | 'stacked';
-export type FormConfiguratorDisplayMode = 'inline' | 'sheet' | 'modal' | 'variants-only-sheet';
-export type FormConfiguratorDisplayModeMobile = 'inline' | 'drawer' | 'modal' | 'variants-only-sheet';
+export type FormConfiguratorDisplayMode = 'inline' | 'inline-sticky' | 'sheet' | 'modal' | 'variants-only-sheet';
+export type FormConfiguratorDisplayModeMobile = 'inline' | 'inline-sticky' | 'drawer' | 'modal' | 'variants-only-sheet';
 export type FormVariantDisplayMode = 'wizard' | 'list' | 'tabs' | 'accordion' | 'tree';
 export type FormSnap2VariantPosition = 'left' | 'right';
 export type FormSnap2ModulePosition = 'left' | 'right' | 'bottom';

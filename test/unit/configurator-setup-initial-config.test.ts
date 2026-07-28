@@ -4,6 +4,173 @@ import {
   type ConfiguratorSetupPayload,
 } from '../../setup/src/components/ConfiguratorSetup/initial-config-from-payload';
 import { buildSerializableConfig } from '../../setup/src/components/ConfiguratorSetup/serialize-config';
+import { mergeStoredTypeSettings } from '../../setup/src/components/ConfiguratorSetup/useConfiguratorSetup';
+import {
+  DEFAULT_TYPE_SETTINGS,
+  type TypeSettings,
+} from '../../setup/src/components/ConfiguratorSetup/types';
+
+describe('ConfiguratorSetup inline-sticky display mode', () => {
+  it('drops integration-owned selectors from fresh and legacy localStorage form state', () => {
+    const legacySettings = {
+      selectors: {
+        ...DEFAULT_TYPE_SETTINGS.standard.selectors,
+        header: {
+          enabled: true,
+          selector: '#saved-header',
+          replace: false,
+        },
+        desktopCarousel: {
+          enabled: true,
+          selector: '#saved-desktop-carousel',
+          replace: false,
+        },
+        mobileCarousel: {
+          enabled: true,
+          selector: '#saved-mobile-carousel',
+          replace: false,
+        },
+      },
+    } as unknown as Partial<TypeSettings>;
+
+    const fresh = mergeStoredTypeSettings(DEFAULT_TYPE_SETTINGS.standard, undefined);
+    const merged = mergeStoredTypeSettings(DEFAULT_TYPE_SETTINGS.standard, legacySettings);
+
+    expect(fresh.selectors).not.toHaveProperty('header');
+    expect(fresh.selectors).not.toHaveProperty('desktopCarousel');
+    expect(fresh.selectors).not.toHaveProperty('mobileCarousel');
+    expect(merged.selectors).not.toHaveProperty('header');
+    expect(merged.selectors).not.toHaveProperty('desktopCarousel');
+    expect(merged.selectors).not.toHaveProperty('mobileCarousel');
+  });
+
+  it('derives mobile inline-sticky when saved mobile mode is omitted', () => {
+    const state = buildFormStateFromInitialPayload({
+      standard: {
+        configurator: {
+          displayMode: { desktop: 'inline-sticky' },
+        },
+      },
+    } as Partial<ConfiguratorSetupPayload>);
+
+    expect(state.typeSettings.standard.configurator.displayModeDesktop).toBe('inline-sticky');
+    expect(state.typeSettings.standard.configurator.displayModeMobile).toBe('inline-sticky');
+  });
+
+  it.each([
+    ['sheet', 'sheet', 'drawer'],
+    ['inline-sheet', 'sheet', 'drawer'],
+    ['modal', 'modal', 'modal'],
+    ['inline', 'inline', 'inline'],
+  ] as const)(
+    'derives mobile mode from saved desktop %s when mobile is omitted',
+    (savedDesktop, expectedDesktop, expectedMobile) => {
+      const state = buildFormStateFromInitialPayload({
+        standard: {
+          configurator: {
+            displayMode: { desktop: savedDesktop },
+          },
+        },
+      } as Partial<ConfiguratorSetupPayload>);
+
+      expect(state.typeSettings.standard.configurator.displayModeDesktop).toBe(expectedDesktop);
+      expect(state.typeSettings.standard.configurator.displayModeMobile).toBe(expectedMobile);
+    },
+  );
+
+  it('preserves an explicit saved mobile mode', () => {
+    const state = buildFormStateFromInitialPayload({
+      standard: {
+        configurator: {
+          displayMode: { desktop: 'inline-sticky', mobile: 'drawer' },
+        },
+      },
+    } as Partial<ConfiguratorSetupPayload>);
+
+    expect(state.typeSettings.standard.configurator.displayModeDesktop).toBe('inline-sticky');
+    expect(state.typeSettings.standard.configurator.displayModeMobile).toBe('drawer');
+  });
+
+  it('omits integration-owned selectors from setup defaults', () => {
+    const state = buildFormStateFromInitialPayload({});
+    const settings = state.typeSettings.standard;
+
+    expect(settings.selectors).not.toHaveProperty('header');
+    expect(settings.selectors).not.toHaveProperty('desktopCarousel');
+    expect(settings.selectors).not.toHaveProperty('mobileCarousel');
+
+    const config = buildSerializableConfig('standard', settings);
+
+    expect(config.configurator?.displayMode).toEqual({ desktop: 'sheet', mobile: 'drawer' });
+    expect(config.configurator).not.toHaveProperty('sticky');
+    expect(config.selectors).not.toHaveProperty('header');
+    expect(config.selectors).not.toHaveProperty('desktopCarousel');
+    expect(config.selectors).not.toHaveProperty('mobileCarousel');
+  });
+
+  it('ignores saved integration-owned selectors', () => {
+    const state = buildFormStateFromInitialPayload({
+      standard: {
+        selectors: {
+          header: '#saved-header',
+          desktopCarousel: '#saved-desktop-carousel',
+          mobileCarousel: '#saved-mobile-carousel',
+        },
+        configurator: {
+          displayMode: { desktop: 'inline-sticky', mobile: 'inline-sticky' },
+        },
+      },
+    } as Partial<ConfiguratorSetupPayload>);
+    const settings = state.typeSettings.standard;
+    const config = buildSerializableConfig('standard', settings);
+
+    expect(settings.selectors).not.toHaveProperty('header');
+    expect(settings.selectors).not.toHaveProperty('desktopCarousel');
+    expect(settings.selectors).not.toHaveProperty('mobileCarousel');
+    expect(config.selectors).not.toHaveProperty('header');
+    expect(config.selectors).not.toHaveProperty('desktopCarousel');
+    expect(config.selectors).not.toHaveProperty('mobileCarousel');
+  });
+
+  it('round-trips sticky modes for the Bed standard shell', () => {
+    const state = buildFormStateFromInitialPayload({
+      bedConfigurator: {
+        configurator: {
+          displayMode: { desktop: 'inline-sticky', mobile: 'inline-sticky' },
+        },
+      },
+    } as Partial<ConfiguratorSetupPayload>);
+    const config = buildSerializableConfig('bedConfigurator', state.typeSettings.bedConfigurator);
+
+    expect(state.typeSettings.bedConfigurator.configurator.displayModeDesktop).toBe('inline-sticky');
+    expect(state.typeSettings.bedConfigurator.configurator.displayModeMobile).toBe('inline-sticky');
+    expect(config.configurator?.displayMode).toEqual({ desktop: 'inline-sticky', mobile: 'inline-sticky' });
+  });
+
+  it.each(['standard', 'bedConfigurator', 'snap2'] as const)(
+    'never exports saved integration-owned selectors for %s setup',
+    (layout) => {
+      const state = buildFormStateFromInitialPayload({
+        [layout]: {
+          selectors: {
+            header: '#saved-header',
+            desktopCarousel: '#saved-desktop-carousel',
+            mobileCarousel: '#saved-mobile-carousel',
+          },
+        },
+      } as Partial<ConfiguratorSetupPayload>);
+      const settings = state.typeSettings[layout];
+      const config = buildSerializableConfig(layout, settings);
+
+      expect(settings.selectors).not.toHaveProperty('header');
+      expect(settings.selectors).not.toHaveProperty('desktopCarousel');
+      expect(settings.selectors).not.toHaveProperty('mobileCarousel');
+      expect(config.selectors).not.toHaveProperty('header');
+      expect(config.selectors).not.toHaveProperty('desktopCarousel');
+      expect(config.selectors).not.toHaveProperty('mobileCarousel');
+    },
+  );
+});
 
 describe('ConfiguratorSetup preview overrides', () => {
   it('resolves apiKey and productLink overrides per preview layout', () => {
@@ -74,6 +241,7 @@ describe('ConfiguratorSetup Snap2 export', () => {
       { desktop: 'sheet', mobile: 'sheet' },
       { desktop: 'inline-sheet', mobile: 'variants-only-sheet' },
       { desktop: 'variants-only-sheet', mobile: 'inline-sheet' },
+      { desktop: 'inline-sticky', mobile: 'inline-sticky' },
     ];
 
     for (const displayMode of unsupportedModes) {

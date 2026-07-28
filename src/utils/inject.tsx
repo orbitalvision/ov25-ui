@@ -16,8 +16,10 @@ import { createPortal } from 'react-dom';
 import { Toaster } from 'sonner';
 import { getSharedStylesheet, createuserCustomCssStylesheet } from './shadow-styles.js';
 import { findIframeWithUniqueId } from './configurator-dom-queries.js';
+import { configuratorDisplayModeUsesInlineVariants } from './configurator-utils.js';
 import { computeIsMobileViewport } from './viewport-mobile.js';
 import { injectDiningConfigurator } from './inject-dining.js';
+import { OV25_INJECTOR_OWNED_ATTRIBUTE } from '../lib/sticky-layout-controller.js';
 import {
   BODY_MOBILE_DRAWER_PORTAL_Z_INDEX,
   BODY_MODAL_PORTAL_Z_INDEX,
@@ -257,6 +259,9 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     productLink,
     configurationUuid,
     gallerySelector,
+    headerSelector,
+    desktopCarouselTargetSelector,
+    mobileCarouselTargetSelector,
     priceSelector,
     nameSelector,
     variantsSelector,
@@ -305,12 +310,14 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     snap2ModulePanelPositionMobile,
   } = n;
 
-  const showCarousel = carouselDisplayMode !== CarouselDisplayMode.None;
+  const showCarousel =
+    carouselDisplayMode !== CarouselDisplayMode.None ||
+    carouselDisplayModeMobile !== CarouselDisplayMode.None;
   const useInlineVariantControls =
-    configuratorDisplayMode === ConfiguratorDisplayMode.Inline ||
-    configuratorDisplayMode === ConfiguratorDisplayMode.InlineSheet ||
+    configuratorDisplayModeUsesInlineVariants(configuratorDisplayMode) ||
     (opts as any).useInlineVariantControls === true;
-  const useInlineVariantControlsMobile = configuratorDisplayModeMobile === ConfiguratorDisplayMode.Inline;
+  const useInlineVariantControlsMobile =
+    configuratorDisplayModeUsesInlineVariants(configuratorDisplayModeMobile);
   const variantDisplayStyle = variantDisplayMode;
   const variantDisplayStyleMobile = variantDisplayModeMobile;
 
@@ -425,14 +432,15 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
   };
 
   // Elements like button, input, form don't support attachShadow - wrap in div
-  const getOrCreateShadowHost = (target: Element): Element => {
+  const getOrCreateShadowHost = (target: Element): HTMLElement => {
     const SHADOW_HOST_TAGS = new Set(['article', 'aside', 'blockquote', 'body', 'div', 'footer', 'header', 'main', 'nav', 'p', 'section', 'span', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6']);
     const tag = target.tagName.toLowerCase();
-    if (SHADOW_HOST_TAGS.has(tag) || tag.includes('-')) {
+    if (target instanceof HTMLElement && (SHADOW_HOST_TAGS.has(tag) || tag.includes('-'))) {
       return target;
     }
     const wrapper = document.createElement('div');
     wrapper.className = target.className;
+    wrapper.setAttribute(OV25_INJECTOR_OWNED_ATTRIBUTE, 'true');
     target.parentNode?.replaceChild(wrapper, target);
     return wrapper;
   };
@@ -640,8 +648,14 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
 
     // Make sure the portal targets are in the DOM *now*
     const portals: ReactNode[] = [];
+    let galleryHost: HTMLElement | null = null;
+    let variantsHost: HTMLElement | null = null;
 
-    const pushPortal = (selector: string | undefined, el: ReactNode, createShadow: boolean = false) => {
+    const pushPortal = (
+      selector: string | undefined,
+      el: ReactNode,
+      createShadow: boolean = false,
+    ): HTMLElement | null => {
       if (createShadow && selector) {
         const target = document.querySelector(selector);
         if (target) {
@@ -651,6 +665,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
             injectCSSIntoShadowDOM(shadowRoot);
           }
           portals.push(createPortal(el, host.shadowRoot!));
+          return host;
         } else {
           console.warn(`[OV25-UI] Element not found for selector "${selector}"`);
         }
@@ -658,20 +673,28 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
         const target = document.querySelector(selector);
         if (target) {
           portals.push(createPortal(el, target));
+          return target instanceof HTMLElement ? target : null;
         } else {
           console.warn(`[OV25-UI] Element not found for selector "${selector}"`);
         }
       }
+      return null;
     };
 
     // New function to completely remove target element and portal into its parent
-    const portalReplaceElement = (selector: string | undefined, el: ReactNode, componentName: string, createShadow: boolean = false) => {
+    const portalReplaceElement = (
+      selector: string | undefined,
+      el: ReactNode,
+      componentName: string,
+      createShadow: boolean = false,
+    ): HTMLElement | null => {
       if (createShadow && selector) {
         const target = document.querySelector(selector);
         if (target && target.parentNode) {
           // Create an empty div to replace the target
           const emptyDiv = document.createElement('div');
           emptyDiv.setAttribute('data-clarity-mask', 'true');
+          emptyDiv.setAttribute(OV25_INJECTOR_OWNED_ATTRIBUTE, 'true');
           // Preserve original classes and add our class
           emptyDiv.className = `${target.className} ov25-configurator-${componentName}`.trim();
 
@@ -686,6 +709,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
           target.parentNode.replaceChild(emptyDiv, target);
           // Create portal into the Shadow DOM root
           portals.push(createPortal(el, emptyDiv.shadowRoot!));
+          return emptyDiv;
         } else {
           console.warn(`[OV25-UI] Element or parent not found for selector "${selector}"`);
         }
@@ -694,11 +718,8 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
         if (target && target.parentNode) {
           const emptyDiv = document.createElement('div');
           emptyDiv.setAttribute('data-clarity-mask', 'true');
-          const stickyGallery =
-            useInlineVariantControls && !injectInitialIsMobile && componentName === 'gallery'
-              ? ' ov25-inline-gallery-sticky'
-              : '';
-          emptyDiv.className = `${target.className} ov25-configurator-${componentName}${stickyGallery}`.trim();
+          emptyDiv.setAttribute(OV25_INJECTOR_OWNED_ATTRIBUTE, 'true');
+          emptyDiv.className = `${target.className} ov25-configurator-${componentName}`.trim();
           if (target.id) emptyDiv.id = target.id;
 
           target.parentNode.replaceChild(emptyDiv, target);
@@ -721,22 +742,27 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
             // Create portal into the empty div
             portals.push(createPortal(el, emptyDiv));
           }
+          return emptyDiv;
         } else {
           console.warn(`[OV25-UI] Element or parent not found for selector "${selector}"`);
         }
       }
+      return null;
     };
 
     // Process each element with appropriate method based on replace flag
-    const processElement = (elementSelector: ElementSelector | undefined, component: ReactNode, componentName: string) => {
+    const processElement = (
+      elementSelector: ElementSelector | undefined,
+      component: ReactNode,
+      componentName: string,
+    ): HTMLElement | null => {
       const selector = getSelector(elementSelector);
       const useShadowDOM = shouldCreateShadowDOM(componentName);
 
       if (shouldReplace(elementSelector)) {
-        portalReplaceElement(selector, component, componentName, useShadowDOM);
-      } else {
-        pushPortal(selector, component, useShadowDOM);
+        return portalReplaceElement(selector, component, componentName, useShadowDOM);
       }
+      return pushPortal(selector, component, useShadowDOM);
     };
 
     // Function to check if gallery or its parents have z-index set
@@ -771,7 +797,6 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     const configureSelector = configureButtonSelector ? getSelector(configureButtonSelector) : undefined;
     const variantsTarget = variantsSelectorStr ? document.querySelector(variantsSelectorStr) : null;
     const configureTarget = configureSelector ? document.querySelector(configureSelector) : null;
-
     /** Desktop Snap2 `inline-sheet` renders variants in {@link Snap2InlineSheetDesktopShell} over the gallery; skip the inject variants slot only then. */
     const mountVariantSelectMenuInVariantsSlot =
       !(
@@ -786,22 +811,19 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     if (getSelector(effectiveGallerySelector)) {
       const gallerySel = getSelector(effectiveGallerySelector)!;
       if (shouldReplace(effectiveGallerySelector)) {
-        processElement(effectiveGallerySelector, <ProductGallery />, 'gallery');
+        galleryHost = processElement(effectiveGallerySelector, <ProductGallery />, 'gallery');
       } else {
         const target = document.querySelector(gallerySel);
         if (target) {
           const column = document.createElement('div');
-          column.className = [
-            'ov25-configurator-inject-column',
-            useInlineVariantControls && !injectInitialIsMobile ? 'ov25-inline-gallery-sticky' : '',
-          ]
-            .filter(Boolean)
-            .join(' ');
+          column.className = 'ov25-configurator-inject-column';
           column.setAttribute('data-clarity-mask', 'true');
+          column.setAttribute(OV25_INJECTOR_OWNED_ATTRIBUTE, 'true');
           column.style.display = 'flex';
           column.style.flexDirection = 'column';
           column.style.width = '100%';
           target.appendChild(column);
+          galleryHost = column;
           const useSnap2InlineSheetStage =
             isSnap2Product && configuratorDisplayMode === ConfiguratorDisplayMode.InlineSheet;
           let galleryMountParent: HTMLElement = column;
@@ -827,14 +849,25 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     // Portal for configurator UI (skip when multiple Snap2 - handlers added by runMultipleConfiguratorLogic)
     if (!skipConfigureButton) {
       if (useSimpleVariantsSelector) {
-        if (configureTarget && configureButtonSelector) {
-          processElement(configureButtonSelector, <VariantSelectMenu />, 'configure-button');
-        } else if (variantsTarget && mountVariantSelectMenuInVariantsSlot) {
-          processElement(variantsSelector, <VariantSelectMenu />, 'variants');
+        const shouldMountVariantsSlot = Boolean(variantsTarget && mountVariantSelectMenuInVariantsSlot);
+        const hasConfigureTarget = Boolean(configureTarget && configureButtonSelector);
+        if (shouldMountVariantsSlot) {
+          variantsHost = processElement(
+            variantsSelector,
+            <VariantSelectMenu portalRole="variants" hasConfigureTarget={hasConfigureTarget} />,
+            'variants',
+          );
+        }
+        if (hasConfigureTarget) {
+          processElement(
+            configureButtonSelector,
+            <VariantSelectMenu portalRole="configure" hasConfigureTarget />,
+            'configure-button',
+          );
         }
       } else {
         if (variantsTarget && mountVariantSelectMenuInVariantsSlot) {
-          processElement(variantsSelector, <VariantSelectMenu />, 'variants');
+          variantsHost = processElement(variantsSelector, <VariantSelectMenu />, 'variants');
         } else if (configureTarget && configureButtonSelector) {
           processElement(configureButtonSelector, <Snap2ConfigureButton />, 'configure-button');
         }
@@ -1005,6 +1038,11 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
         snap2ModulePanelPositionDesktop={snap2ModulePanelPositionDesktop}
         snap2ModulePanelPositionMobile={snap2ModulePanelPositionMobile}
         initialiseMenuUsesExternalSelector={initialiseMenuUsesExternalSelector}
+        galleryHost={galleryHost}
+        variantsHost={variantsHost}
+        headerSelector={headerSelector}
+        desktopCarouselTargetSelector={desktopCarouselTargetSelector}
+        mobileCarouselTargetSelector={mobileCarouselTargetSelector}
       >
         {portals}
       </OV25UIProvider>
@@ -1012,7 +1050,9 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
   };
 
   // Check if we should auto-open (before ensureLoaded consumes the query param)
-  const usesSheetOrDrawer = configuratorDisplayMode !== ConfiguratorDisplayMode.Inline || configuratorDisplayModeMobile !== ConfiguratorDisplayMode.Inline;
+  const usesSheetOrDrawer =
+    !configuratorDisplayModeUsesInlineVariants(configuratorDisplayMode) ||
+    !configuratorDisplayModeUsesInlineVariants(configuratorDisplayModeMobile);
   const canAutoOpenFromConfig = autoOpen && usesSheetOrDrawer && (configureButtonSelector || variantsSelector);
 
   let shouldAutoOpen = false;
@@ -1191,7 +1231,9 @@ function runMultipleConfiguratorLogic(configs: InjectConfiguratorInput[]) {
     activeConfiguratorIndex = configuratorIndexToInitialize;
 
     const initNorm = normalizeInjectConfig(configuratorToInitialize);
-    const usesSheetOrDrawer = initNorm.configuratorDisplayMode !== 'inline' || initNorm.configuratorDisplayModeMobile !== 'inline';
+    const usesSheetOrDrawer =
+      !configuratorDisplayModeUsesInlineVariants(initNorm.configuratorDisplayMode) ||
+      !configuratorDisplayModeUsesInlineVariants(initNorm.configuratorDisplayModeMobile);
     const shouldAutoOpenMulti = queryConfigUuid || (initNorm.autoOpen && usesSheetOrDrawer);
 
     if (shouldAutoOpenMulti) {

@@ -41,7 +41,7 @@ export type CarouselConfig = ResponsiveValue<CarouselDisplayMode> & {
   maxImages?: number | ResponsiveValue<number>;
 };
 
-export type ConfiguratorDisplayMode = 'inline' | 'sheet' | 'drawer' | 'modal' | 'inline-sheet';
+export type ConfiguratorDisplayMode = 'inline' | 'inline-sticky' | 'sheet' | 'drawer' | 'modal' | 'inline-sheet';
 
 export type ConfiguratorConfig = {
   displayMode: ResponsiveValue<ConfiguratorDisplayMode>;
@@ -81,6 +81,12 @@ export type SelectorsConfig = {
   /** Root target for full-page display modes that own their own shell. */
   root?: ElementSelector;
   gallery?: ElementSelector;
+  /** Optional comma-separated sticky header override; blank/omitted enables theme auto-detection. */
+  header?: string;
+  /** Optional desktop external portal target for the non-Snap2 product carousel. */
+  desktopCarousel?: ElementSelector;
+  /** Optional mobile external portal target for the non-Snap2 product carousel. */
+  mobileCarousel?: ElementSelector;
   price?: ElementSelector;
   name?: ElementSelector;
   variants?: ElementSelector;
@@ -331,8 +337,8 @@ export interface LegacyInjectConfiguratorOptions {
   carouselDisplayMode?: CarouselDisplayMode;
   carouselDisplayModeMobile?: CarouselDisplayMode;
 
-  configuratorDisplayMode?: 'inline' | 'sheet' | 'modal' | 'inline-sheet';
-  configuratorDisplayModeMobile?: 'inline' | 'drawer' | 'modal';
+  configuratorDisplayMode?: 'inline' | 'inline-sticky' | 'sheet' | 'modal' | 'inline-sheet';
+  configuratorDisplayModeMobile?: 'inline' | 'inline-sticky' | 'drawer' | 'modal';
   configuratorTriggerStyle?: 'single-button' | 'split-buttons';
   configuratorTriggerStyleMobile?: 'single-button' | 'split-buttons';
 
@@ -401,6 +407,9 @@ export interface NormalizedInjectConfig {
   stringReplacements?: StringReplacementsConfig;
 
   gallerySelector?: ElementSelector;
+  headerSelector?: string;
+  desktopCarouselTargetSelector?: ElementSelector;
+  mobileCarouselTargetSelector?: ElementSelector;
   rootSelector?: ElementSelector;
   priceSelector?: ElementSelector;
   nameSelector?: ElementSelector;
@@ -414,8 +423,8 @@ export interface NormalizedInjectConfig {
   carouselMaxImagesDesktop?: number;
   carouselMaxImagesMobile?: number;
 
-  configuratorDisplayMode: 'inline' | 'sheet' | 'modal' | 'inline-sheet';
-  configuratorDisplayModeMobile: 'inline' | 'drawer' | 'modal';
+  configuratorDisplayMode: 'inline' | 'inline-sticky' | 'sheet' | 'modal' | 'inline-sheet';
+  configuratorDisplayModeMobile: 'inline' | 'inline-sticky' | 'drawer' | 'modal';
   configuratorTriggerStyle: 'single-button' | 'split-buttons';
   configuratorTriggerStyleMobile: 'single-button' | 'split-buttons';
 
@@ -497,6 +506,9 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
   const diningGrouped = isGrouped ? pick(c, 'dining') : undefined;
 
   const gallerySelector = selectors?.gallery ?? c.gallerySelector ?? c.galleryId;
+  const headerSelector = selectors?.header;
+  const requestedDesktopCarouselTargetSelector = selectors?.desktopCarousel;
+  const requestedMobileCarouselTargetSelector = selectors?.mobileCarousel;
   const rootSelector = selectors?.root ?? c.rootSelector ?? c.rootId;
   const priceSelector = selectors?.price ?? c.priceSelector ?? c.priceId;
   const nameSelector = selectors?.name ?? c.nameSelector ?? c.nameId;
@@ -511,22 +523,43 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
   // Snap2 (`productLink` snap2/…) does not use the image carousel; ignore inject carousel settings.
   const resolvedProductLinkForSnap2 =
     typeof opts.productLink === 'function' ? opts.productLink() : opts.productLink;
-  const isSnap2Inject = String(resolvedProductLinkForSnap2 ?? '').startsWith('snap2/');
+  const isSnap2Inject = String(resolvedProductLinkForSnap2 ?? '')
+    .trim()
+    .replace(/^\/+/, '')
+    .startsWith('snap2/');
+  const desktopCarouselTargetSelector = isSnap2Inject
+    ? undefined
+    : requestedDesktopCarouselTargetSelector;
+  const mobileCarouselTargetSelector = isSnap2Inject
+    ? undefined
+    : requestedMobileCarouselTargetSelector;
   const carouselDisplayModeResolved: CarouselDisplayMode = isSnap2Inject ? 'none' : carouselDesktop;
   const carouselDisplayModeMobileResolved: CarouselDisplayMode = isSnap2Inject ? 'none' : carouselMobile;
   const maxImagesRaw = carousel?.maxImages;
   const carouselMaxImagesDesktop = typeof maxImagesRaw === 'number' ? maxImagesRaw : (typeof maxImagesRaw === 'object' && maxImagesRaw ? maxImagesRaw.desktop : undefined);
   const carouselMaxImagesMobile = typeof maxImagesRaw === 'number' ? maxImagesRaw : (typeof maxImagesRaw === 'object' && maxImagesRaw ? maxImagesRaw.mobile ?? maxImagesRaw.desktop : undefined);
 
-  const configDesktop = configurator?.displayMode?.desktop ?? c.configuratorDisplayMode ?? 'sheet';
-  const configMobile =
+  const requestedConfigDesktop = configurator?.displayMode?.desktop ?? c.configuratorDisplayMode ?? 'sheet';
+  const requestedConfigMobile =
     configurator?.displayMode?.mobile ??
     c.configuratorDisplayModeMobile ??
-    (configDesktop === 'sheet' || configDesktop === 'inline-sheet'
+    (requestedConfigDesktop === 'sheet' || requestedConfigDesktop === 'inline-sheet'
       ? 'drawer'
-      : configDesktop === 'modal'
+      : requestedConfigDesktop === 'modal'
         ? 'modal'
-        : 'inline');
+        : requestedConfigDesktop === 'inline-sticky'
+          ? 'inline-sticky'
+          : 'inline');
+  const snap2RequestedInlineSticky =
+    isSnap2Inject &&
+    (requestedConfigDesktop === 'inline-sticky' || requestedConfigMobile === 'inline-sticky');
+  if (snap2RequestedInlineSticky) {
+    console.warn('[OV25-UI] Inline sticky display mode is not supported for Snap2; falling back to modal.');
+  }
+  const configDesktop =
+    isSnap2Inject && requestedConfigDesktop === 'inline-sticky' ? 'modal' : requestedConfigDesktop;
+  const configMobile =
+    isSnap2Inject && requestedConfigMobile === 'inline-sticky' ? 'modal' : requestedConfigMobile;
   const triggerDesktop = configurator?.triggerStyle?.desktop ?? c.configuratorTriggerStyle ?? 'single-button';
   const triggerMobile = configurator?.triggerStyle?.mobile ?? c.configuratorTriggerStyleMobile ?? triggerDesktop;
 
@@ -619,6 +652,9 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
     uniqueId: opts.uniqueId,
     stringReplacements,
     gallerySelector,
+    headerSelector,
+    desktopCarouselTargetSelector,
+    mobileCarouselTargetSelector,
     rootSelector,
     priceSelector,
     nameSelector,

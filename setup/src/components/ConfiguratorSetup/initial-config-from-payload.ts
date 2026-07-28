@@ -13,7 +13,9 @@ type SavedLayout = Partial<Omit<SerializableInjectConfig, 'apiKey' | 'productLin
 
 const LAYOUTS: LayoutType[] = ['standard', 'snap2', 'bedConfigurator'];
 
-function deserializeSelector(val: string | { selector: string; replace: boolean }): SelectorFormState {
+function deserializeSelector(
+  val: string | { selector: string; replace: boolean },
+): SelectorFormState {
   if (typeof val === 'string') {
     return { enabled: true, selector: val, replace: false };
   }
@@ -26,7 +28,8 @@ function deserializeSelector(val: string | { selector: string; replace: boolean 
 
 const SNAP2_VARIANT_POSITIONS = ['left', 'right'] as const;
 const SNAP2_MODULE_POSITIONS = ['left', 'right', 'bottom'] as const;
-const DESKTOP_DISPLAY_MODES = ['inline', 'sheet', 'modal', 'variants-only-sheet'] as const;
+const DESKTOP_DISPLAY_MODES = ['inline', 'inline-sticky', 'sheet', 'modal', 'variants-only-sheet'] as const;
+const MOBILE_DISPLAY_MODES = ['inline', 'inline-sticky', 'drawer', 'modal', 'variants-only-sheet'] as const;
 
 function normalizePosition<T extends string>(value: unknown, allowed: readonly T[], fallback: T): T {
   const normalized = typeof value === 'string' ? value.trim().toLowerCase() : '';
@@ -47,9 +50,22 @@ function normalizeDesktopDisplayMode(
     : fallback;
 }
 
+function mobileDisplayModeFallbackFromDesktop(
+  desktop: unknown,
+  fallback: TypeSettings['configurator']['displayModeMobile'],
+): TypeSettings['configurator']['displayModeMobile'] {
+  const normalized = typeof desktop === 'string' ? desktop.trim().toLowerCase() : '';
+  if (normalized === 'sheet' || normalized === 'inline-sheet') return 'drawer';
+  if (normalized === 'modal') return 'modal';
+  if (normalized === 'inline-sticky') return 'inline-sticky';
+  if (normalized === 'inline') return 'inline';
+  return fallback;
+}
+
 function normalizeMobileDisplayMode(
   layout: LayoutType,
   value: unknown,
+  fallback: TypeSettings['configurator']['displayModeMobile'],
 ): TypeSettings['configurator']['displayModeMobile'] {
   const normalized = typeof value === 'string' ? value.trim().toLowerCase() : '';
   if (layout === 'snap2') {
@@ -57,7 +73,9 @@ function normalizeMobileDisplayMode(
       ? normalized
       : 'modal';
   }
-  return value as TypeSettings['configurator']['displayModeMobile'];
+  return MOBILE_DISPLAY_MODES.includes(normalized as (typeof MOBILE_DISPLAY_MODES)[number])
+    ? (normalized as TypeSettings['configurator']['displayModeMobile'])
+    : fallback;
 }
 
 /** Pulls `:host` / `:root` `--ov25-*` declarations into a flat map so they are not duplicated when re-exporting. */
@@ -107,10 +125,14 @@ function mergeSerializableIntoTypeSettings(base: TypeSettings, saved: SavedLayou
   };
 
   if (saved.selectors) {
-    for (const key of Object.keys(saved.selectors) as (keyof TypeSettings['selectors'])[]) {
-      const val = saved.selectors[key as string];
+    for (const rawKey of Object.keys(saved.selectors)) {
+      if (!Object.prototype.hasOwnProperty.call(base.selectors, rawKey)) continue;
+      const key = rawKey as keyof TypeSettings['selectors'];
+      const val = saved.selectors[rawKey];
       if (val === undefined) continue;
-      merged.selectors[key] = deserializeSelector(val as string | { selector: string; replace: boolean });
+      merged.selectors[key] = deserializeSelector(
+        val as string | { selector: string; replace: boolean },
+      );
     }
   }
 
@@ -137,9 +159,17 @@ function mergeSerializableIntoTypeSettings(base: TypeSettings, saved: SavedLayou
         cf.displayMode.desktop,
         merged.configurator.displayModeDesktop,
       );
+      const savedMobileDisplayMode =
+        cf.displayMode.mobile === undefined
+          ? mobileDisplayModeFallbackFromDesktop(
+              cf.displayMode.desktop,
+              merged.configurator.displayModeMobile,
+            )
+          : cf.displayMode.mobile;
       merged.configurator.displayModeMobile = normalizeMobileDisplayMode(
         layout,
-        cf.displayMode.mobile,
+        savedMobileDisplayMode,
+        merged.configurator.displayModeMobile,
       );
     }
     if (cf.triggerStyle) {

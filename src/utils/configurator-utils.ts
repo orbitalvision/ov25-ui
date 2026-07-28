@@ -7,6 +7,13 @@ import type { ModuleProductImageUrls } from './module-product-image-srcset.js';
 export const DINING_IFRAME_SHOW_ATTACHMENT_POINTS_QUERY_KEY = 'showAttachmentPoints';
 export const OV25_IFRAME_HIDE_GESTURE_HINT_QUERY_KEY = 'hideGestureHint';
 
+/** Display modes that render variant controls in the page rather than an overlay shell. */
+export function configuratorDisplayModeUsesInlineVariants(
+  displayMode: string | null | undefined,
+): boolean {
+  return displayMode === 'inline' || displayMode === 'inline-sheet' || displayMode === 'inline-sticky';
+}
+
 /**
  * Configuration option type
  */

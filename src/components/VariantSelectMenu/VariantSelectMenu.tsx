@@ -17,9 +17,33 @@ import { ConfigureButton } from '../ConfigureButton.js';
 // Types
 export type DrawerSizes = 'closed' | 'small' | 'large';
 
+export type VariantSelectMenuPortalRole = 'combined' | 'variants' | 'configure';
+
+interface VariantSelectMenuProps {
+  portalRole?: VariantSelectMenuPortalRole;
+  hasConfigureTarget?: boolean;
+}
+
+export function resolveVariantSelectMenuVisibility(options: {
+  activeInlineMode: boolean;
+  portalRole?: VariantSelectMenuPortalRole;
+  hasConfigureTarget?: boolean;
+}): { renderInline: boolean; renderOverlay: boolean } {
+  const role = options.portalRole ?? 'combined';
+  return {
+    renderInline: options.activeInlineMode && role !== 'configure',
+    renderOverlay:
+      !options.activeInlineMode &&
+      (role !== 'variants' || !options.hasConfigureTarget),
+  };
+}
+
 /* Renders either the trigger area (configure button or options) or inline wizard/list/options when there's no configure button. */
 /* also renders the mobile drawer or desktop sheet/fullscreen content when the modal is closed. */
-export const VariantSelectMenu: React.FC = () => {
+export const VariantSelectMenu: React.FC<VariantSelectMenuProps> = ({
+  portalRole = 'combined',
+  hasConfigureTarget = false,
+}) => {
   
   const {
     isVariantsOpen,
@@ -46,14 +70,22 @@ export const VariantSelectMenu: React.FC = () => {
     openConfiguratorOrSnap2,
     configuratorState,
     getString,
+    stickyLayoutActive,
   } = useOV25UI();
 
+  const visibility = resolveVariantSelectMenuVisibility({
+    activeInlineMode: useInlineVariantControls,
+    portalRole,
+    hasConfigureTarget,
+  });
+  const inlineVariantsEnabled = visibility.renderInline;
+  const overlayEnabled = visibility.renderOverlay;
 
   useEffect(() => {
-    if (useInlineVariantControls && isSnap2Mode) {
+    if (inlineVariantsEnabled && isSnap2Mode) {
       setIsVariantsOpen(true);
     }
-  }, [useInlineVariantControls, isSnap2Mode, setIsVariantsOpen]);
+  }, [inlineVariantsEnabled, isSnap2Mode, setIsVariantsOpen]);
 
   const handleMobileDrawerClose = (open: boolean) => {
     if (!open && hasConfigureButton && isMobile && isSnap2Mode) {
@@ -72,10 +104,13 @@ export const VariantSelectMenu: React.FC = () => {
     VariantDisplayStyleOverlay.Tree,
   ];
   const effectiveVariantDisplayStyleInline = isMobile ? variantDisplayStyleInlineMobile : variantDisplayStyleInline;
-  const isInlineListLike = useInlineVariantControls && listLikeInline.includes(effectiveVariantDisplayStyleInline);
-  const isInlineWizard = useInlineVariantControls && effectiveVariantDisplayStyleInline === 'wizard';
+  const isInlineListLike = inlineVariantsEnabled && listLikeInline.includes(effectiveVariantDisplayStyleInline);
+  const isInlineWizard = inlineVariantsEnabled && effectiveVariantDisplayStyleInline === 'wizard';
   const isInlineTall = isInlineListLike || isInlineWizard;
-  const useTriggerArea = useSimpleVariantsSelector && (!useInlineVariantControls || (!isInlineWizard && !isInlineListLike));
+  const usePageScrollStickyList =
+    stickyLayoutActive &&
+    inlineVariantsEnabled &&
+    effectiveVariantDisplayStyleInline === VariantDisplayStyleOverlay.List;
 
   const hasSnap2Objects = (configuratorState?.snap2Objects?.length ?? 0) > 0;
   const snap2MobileModal =
@@ -87,47 +122,46 @@ export const VariantSelectMenu: React.FC = () => {
     !isModalOpen &&
     !hasSnap2Objects;
   const holdVariantsPanelForSnap2Initialise =
-    useInlineVariantControls && snap2InlineGalleryShowingInitialise;
+    inlineVariantsEnabled && snap2InlineGalleryShowingInitialise;
 
   useEffect(() => {
+    if (!isInlineTall) return;
     const aside = containerRef.current?.getRootNode() instanceof ShadowRoot
       ? (containerRef.current.getRootNode() as ShadowRoot).host.closest('#ov25-aside-menu')
       : containerRef.current?.closest('#ov25-aside-menu');
-    if (aside) {
-      if (isInlineTall) {
-        aside.setAttribute('data-ov25-inline-list', 'true');
-      } else {
-        aside.removeAttribute('data-ov25-inline-list');
-      }
-    }
+    aside?.setAttribute('data-ov25-inline-list', 'true');
     return () => aside?.removeAttribute('data-ov25-inline-list');
   }, [isInlineTall]);
 
   const inlineTallWrapperClass = 'ov:flex-1 ov:min-h-0 ov:h-full ov:flex ov:flex-col ov:overflow-hidden';
   const productOptionsGroupProps = { allOptions, handleOptionClick, range, getSelectedValue };
 
-  /** Trigger area (configure button or options) when useTriggerArea; otherwise inline wizard/list/options when there's no configure button. */
+  /** Render the page controls for the role active in the current responsive mode. */
   const renderTriggerOrInlineVariants = () => {
-    if (useTriggerArea) {
+    if (inlineVariantsEnabled) {
+      if (isInlineWizard) return <div className={inlineTallWrapperClass}><WizardVariants mode="inline" /></div>;
+      if (isInlineListLike) {
+        return (
+          <div
+            className={inlineTallWrapperClass}
+            data-ov25-inline-sticky-list-wrapper={usePageScrollStickyList ? 'true' : undefined}
+          >
+            {isSnap2Mode ? <Snap2Wrapper isInline /> : <ProductVariantsWrapper isInline />}
+          </div>
+        );
+      }
+      return <ProductOptionsGroup {...productOptionsGroupProps} />;
+    }
+    if (overlayEnabled && useSimpleVariantsSelector) {
       return configuratorTriggerStyle === 'single-button'
         ? <ConfigureButton onClick={openConfiguratorOrSnap2} />
         : <ProductOptionsGroup {...productOptionsGroupProps} />;
-    }
-    if (!hasConfigureButton) {
-      if (isInlineWizard) return <div className={inlineTallWrapperClass}><WizardVariants mode="inline" /></div>;
-      if (isInlineListLike) return <div className={inlineTallWrapperClass}>{isSnap2Mode ? <Snap2Wrapper isInline /> : <ProductVariantsWrapper isInline />}</div>;
-      return <ProductOptionsGroup {...productOptionsGroupProps} />;
     }
     return null;
   };
 
   const renderMobile = () => {
-    if (useInlineVariantControls) {
-      if (!hasConfigureButton) return null;
-      if (isInlineWizard) return <div className={inlineTallWrapperClass}><WizardVariants mode="inline" /></div>;
-      if (isInlineListLike) return <div className={inlineTallWrapperClass}>{isSnap2Mode ? <Snap2Wrapper isInline /> : <ProductVariantsWrapper isInline />}</div>;
-      return <ProductOptionsGroup {...productOptionsGroupProps} />;
-    }
+    if (!overlayEnabled) return null;
     if (configuratorDisplayModeMobile === 'variants-only-sheet') return <VariantsOnlySheet />;
     if (snap2MobileModal) return null;
     if (configuratorDisplayModeMobile === 'modal') return <ModalConfiguratorDesktop />;
@@ -161,6 +195,7 @@ export const VariantSelectMenu: React.FC = () => {
   };
 
   const renderDesktop = () => {
+    if (!overlayEnabled) return null;
     if (configuratorDisplayMode === 'inline-sheet') return null;
     if (configuratorDisplayMode === 'variants-only-sheet') return <VariantsOnlySheet />;
     if (configuratorDisplayMode === 'modal') return <ModalConfiguratorDesktop />;
@@ -168,9 +203,16 @@ export const VariantSelectMenu: React.FC = () => {
     return null;
   };
 
+  if (!inlineVariantsEnabled && !overlayEnabled) return null;
+
   return (
     <>
-      <div ref={containerRef} id="ov25-configurator-variant-menu-container" className="ov:relative ov:h-full ov:flex ov:flex-col ov:font-(family-name:--ov25-font-family)">
+      <div
+        ref={containerRef}
+        id="ov25-configurator-variant-menu-container"
+        data-ov25-inline-sticky-list-container={usePageScrollStickyList ? 'true' : undefined}
+        className="ov:relative ov:h-full ov:flex ov:flex-col ov:font-(family-name:--ov25-font-family)"
+      >
         {holdVariantsPanelForSnap2Initialise ? (
           <div className="ov:flex-1 ov:min-h-0 ov:flex ov:flex-col ov:items-center ov:justify-center ov:px-4 ov:py-8 ov:text-center">
             <p className="ov:text-base ov:text-(--ov25-text-color) ov:shrink-0">{getString('initialiseMenuIntro', undefined, 'Select a product to get started')}</p>
@@ -192,4 +234,4 @@ export const VariantSelectMenu: React.FC = () => {
 }
   
 
-export default VariantSelectMenu; 
+export default VariantSelectMenu;

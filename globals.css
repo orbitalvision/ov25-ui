@@ -55,17 +55,9 @@
 }
 
 html {
-  /* Desktop inline layout: distance from viewport top while gallery is sticky */
-  --ov25-inline-gallery-sticky-top: 1rem;
-}
-
-@media (min-width: 768px) {
-  .ov25-inline-gallery-sticky {
-    position: sticky;
-    top: var(--ov25-inline-gallery-sticky-top);
-    align-self: flex-start;
-    z-index: 1;
-  }
+  --ov25-sticky-top-gap: 16px;
+  --ov25-sticky-bottom-gap: 16px;
+  --ov25-sticky-carousel-height: 120px;
 }
 
 :host {
@@ -157,6 +149,9 @@ html {
     --ov25-configurator-iframe-background-color: var(--ov25-secondary-background-color);
     --ov25-configurator-iframe-border-radius: 1rem;
     --ov25-gallery-gap: 0.5rem;
+    --ov25-sticky-top-gap: 16px;
+    --ov25-sticky-bottom-gap: 16px;
+    --ov25-sticky-carousel-height: 120px;
 
     /* view controls that are overlayed onto the iframe, such as the dimensions button */
     --ov25-configurator-view-controls-text-color: var(--ov25-text-color);
@@ -226,6 +221,176 @@ html {
 [data-ov25-list-variants-mode="inline"] [data-ov25-list-variants-content] {
   height: var(--ov25-wizard-variants-content-height);
   max-height: var(--ov25-wizard-variants-content-height);
+}
+
+/* ProductGallery adopts this stylesheet into its own shadow root. */
+:host(.ov25-inline-sticky-gallery-root-desktop) {
+  display: flex;
+  flex: 0 1 auto;
+  flex-direction: column;
+  width: 100%;
+  min-height: 0;
+  height: auto;
+  max-height: var(--ov25-sticky-available-height);
+  overflow: hidden;
+}
+
+:host(.ov25-inline-sticky-gallery-root-desktop) .ov25-inline-sticky-gallery-content {
+  flex: 0 1 auto;
+  min-height: 0;
+  height: auto;
+  max-height: var(--ov25-sticky-available-height);
+  overflow: hidden;
+}
+
+:host(.ov25-inline-sticky-gallery-root-desktop) .ov25-inline-sticky-iframe-slot {
+  flex: 0 1 auto;
+  min-height: 0;
+}
+
+:where(
+  :host(.ov25-inline-sticky-gallery-root-desktop)
+    .ov25-inline-sticky-iframe-slot
+) {
+  width: min(100%, var(--ov25-sticky-available-height));
+  max-width: var(--ov25-sticky-available-height);
+  max-height: var(--ov25-sticky-available-height);
+  align-self: center;
+}
+
+:where(
+  :host(.ov25-inline-sticky-gallery-root-desktop)
+    .ov25-inline-sticky-gallery-content:has(> .ov25-inline-sticky-carousel-host)
+    .ov25-inline-sticky-iframe-slot
+) {
+  width: min(
+    100%,
+    max(
+      0px,
+      calc(
+        var(--ov25-sticky-available-height) - var(--ov25-sticky-carousel-height) -
+          var(--ov25-gallery-gap)
+      )
+    )
+  );
+  max-width: max(
+    0px,
+    calc(
+      var(--ov25-sticky-available-height) - var(--ov25-sticky-carousel-height) -
+        var(--ov25-gallery-gap)
+    )
+  );
+  max-height: max(
+    0px,
+    calc(
+      var(--ov25-sticky-available-height) - var(--ov25-sticky-carousel-height) -
+        var(--ov25-gallery-gap)
+    )
+  );
+  align-self: center;
+}
+
+:host(.ov25-inline-sticky-gallery-root-desktop) .ov25-inline-sticky-carousel-host,
+:host(.ov25-inline-sticky-gallery-root-mobile) .ov25-inline-sticky-carousel-host {
+  flex: 0 0 auto;
+  max-height: var(--ov25-sticky-carousel-height);
+  overflow: auto;
+}
+
+:host(.ov25-inline-sticky-gallery-root-mobile) {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-height: var(--ov25-sticky-available-height);
+  overflow: hidden;
+}
+
+:host(.ov25-inline-sticky-gallery-root-mobile) .ov25-inline-sticky-gallery-content {
+  container-type: inline-size;
+  max-height: var(--ov25-sticky-available-height);
+  overflow: hidden;
+}
+
+:host(.ov25-inline-sticky-gallery-root-mobile) .ov25-inline-sticky-iframe-slot {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  height: min(100cqw, var(--ov25-sticky-available-height));
+  max-height: var(--ov25-sticky-available-height);
+  aspect-ratio: auto;
+}
+
+:host(.ov25-external-carousel-host) {
+  display: block;
+  width: 100%;
+  max-height: var(--ov25-sticky-carousel-height);
+  overflow: auto;
+}
+
+[data-ov25-inline-sticky-list-container='true'],
+[data-ov25-inline-sticky-list-wrapper='true'] {
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.ov25-inline-sticky-list [data-ov25-list-variants-content],
+.ov25-inline-sticky-list-mobile [data-ov25-list-variants-content] {
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+
+.ov25-inline-sticky-list-mobile {
+  isolation: isolate;
+}
+
+.ov25-inline-sticky-list .ov25-option-header,
+.ov25-inline-sticky-list .ov25-group-header,
+.ov25-inline-sticky-list-mobile .ov25-option-header,
+.ov25-inline-sticky-list-mobile .ov25-group-header {
+  padding-inline: var(--ov25-sticky-list-header-inline-inset, 14px) !important;
+}
+
+.ov25-inline-sticky-list .ov25-group-header,
+.ov25-inline-sticky-list-mobile .ov25-group-header {
+  padding-block-start: var(
+    --ov25-sticky-list-group-header-block-start,
+    0px
+  ) !important;
+}
+
+.ov25-inline-sticky-list .ov25-option-header {
+  top: var(--ov25-sticky-top) !important;
+}
+
+.ov25-inline-sticky-list .ov25-option-header::before {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: 100%;
+  height: var(--ov25-sticky-resolved-top-gap, 16px);
+  background: var(--ov25-background-color, #fff);
+  pointer-events: none;
+}
+
+.ov25-inline-sticky-list .ov25-group-header {
+  top: calc(var(--ov25-sticky-top) + var(--ov25-sticky-option-header-height)) !important;
+}
+
+.ov25-inline-sticky-list-mobile .ov25-option-header {
+  position: sticky !important;
+  top: var(--ov25-sticky-gallery-bottom, var(--ov25-sticky-top)) !important;
+}
+
+.ov25-inline-sticky-list-mobile .ov25-group-header {
+  position: sticky !important;
+  top: calc(
+    var(--ov25-sticky-gallery-bottom, var(--ov25-sticky-top)) +
+      var(--ov25-sticky-option-header-height)
+  ) !important;
 }
 
 /* Selection thumbnail: fabric icons, review images, etc. Edit globally to change appearance.
