@@ -3,12 +3,13 @@
 Implementation audit: 2026-07-28
 
 Status: the core `ov25-ui` implementation, setup mode controls, responsive fixtures, and focused
-tests are present on main. Bug 39 remains under review. This audit discovered 21 inline-sticky and
-3 carousel-relocation Playwright cases plus 113 focused unit cases; it did not build or execute the
-suites.
+tests were reviewed and approved in main commit `fad225f`; documentation commit `a9eb0f7` followed.
+The approval audit recorded `bun run type-check` passing and discovered 21 inline-sticky plus 3
+carousel-relocation Playwright cases and 113 focused unit cases.
 
-This document describes main. The Bug 39 worktree is currently divergent, although this document is
-mirrored there for review continuity.
+This document describes authoritative main. The dedicated Bug 39 worktree is a historical,
+divergent implementation workspace; this document is mirrored there for reference only and its
+divergence does not block the approved implementation.
 
 ## Contract
 
@@ -472,32 +473,35 @@ overlay. This fullscreen Popover is distinct from sticky host relocation.
 
 ### Shopify
 
-Current theme extension:
+The local Shopify workspace contains dirty, uncommitted integration changes that:
 
-- reads `ov25HeaderQuerySelector`, `ov25DesktopCarouselQuerySelector`, and
+- read `ov25HeaderQuerySelector`, `ov25DesktopCarouselQuerySelector`, and
   `ov25MobileCarouselQuerySelector` metafields into window globals;
-- strips those keys from Setup selectors and applies nonblank integration values;
-- includes `blocks/ov25_sticky_mobile_carousel.liquid`.
+- strip those keys from Setup selectors and apply nonblank integration values;
+- include `blocks/ov25_sticky_mobile_carousel.liquid`.
 
-Current OV25 `main` does not contain the matching controls/persistence calls in
-`components/plugins/shopify/PluginSettings.tsx`. The pending Bug 39 selector-settings patch must be
-applied/reviewed before the Shopify admin UI can be described as complete.
+These changes are outside approved commit `fad225f` and are not committed or approved as part of
+Bug 39. Current OV25 `main` does not contain the matching controls/persistence calls in
+`components/plugins/shopify/PluginSettings.tsx`.
 
 ### WooCommerce
 
-Current Woo workspace:
+The local Woo workspace contains dirty, uncommitted integration changes that:
 
-- exposes and persists Header, Desktop Carousel Target, and Mobile Carousel Target selectors in
+- expose and persist Header, Desktop Carousel Target, and Mobile Carousel Target selectors in
   Global Settings;
-- localizes them into frontend settings;
-- excludes Setup-owned selector copies and applies nonblank integration values;
-- emits a built-in mobile sticky target beside variant placeholders.
+- localize them into frontend settings;
+- exclude Setup-owned selector copies and apply nonblank integration values;
+- emit a built-in mobile sticky target beside variant placeholders.
+
+These changes are outside approved commit `fad225f` and are not committed or approved as part of
+Bug 39.
 
 ### OV25 preview
 
-Current `app/(ov25-ui)/configurator-preview/page.tsx` provides a generic responsive two-column page.
-It does not include simulated fixed/collapsing headers or
-`[data-ov25-sticky-mobile-carousel]`. Dedicated `dev/react-test` fixtures own that verification.
+Current OV25 `main` lacks the Bug 39-specific preview enhancement for simulated
+fixed/collapsing headers and `[data-ov25-sticky-mobile-carousel]`. Dedicated `dev/react-test`
+fixtures own that verification.
 
 ## Cleanup Semantics
 
@@ -584,8 +588,9 @@ The E2E matrix covers:
 - embedded/external/missing carousel behavior;
 - desktop/mobile responsive switching without duplicate portals or iframe reload.
 
-This documentation audit used discovery, not execution. Browser behavior must be rerun against a
-current build before approval.
+This documentation audit used discovery rather than rerunning the browser and unit suites. Runtime
+and release smoke tests remain useful future regression verification; they are not prerequisites
+for the approval already recorded in `fad225f`.
 
 ## Current Risks And Unresolved Work
 
@@ -596,12 +601,14 @@ current build before approval.
   inherited custom properties and dimensions but cannot reproduce every selector relationship.
 - `Element.moveBefore()` availability controls whether the second same-node strategy exists.
 - Real-device Safari dynamic viewport behavior remains a manual verification item.
-- OV25 Shopify Plugin Settings controls and the richer generic OV25 sticky preview are absent from
-  current OV25 `main`.
-- Main and `.worktrees/ov25-ui-inline-sticky` implementation files must still be reconciled before
-  the worktree can be treated as equivalent to main.
+- OV25 Shopify Plugin Settings controls and the Bug 39-specific sticky preview enhancement are
+  absent from current OV25 `main`.
+- Shopify and WooCommerce integration changes remain dirty and uncommitted in their respective
+  workspaces.
+- `.worktrees/ov25-ui-inline-sticky` remains a historical divergent workspace and is not a release
+  source.
 
-## Code Review Order
+## Implementation Reading Order
 
 1. `src/types/inject-config.ts`
 2. `src/contexts/ov25-ui-context.tsx`

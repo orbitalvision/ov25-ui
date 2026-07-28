@@ -4,7 +4,7 @@ Concise archive of approved, committed, and otherwise closed bugs. Active review
 
 Commit hashes below identify the primary implementation commit. Cross-repository fixes list each relevant repository.
 
-Last reconciled against `ov25-ui` and OV25 branch ancestry: 2026-07-28.
+Last reconciled against `ov25-ui` and OV25 branch ancestry: 2026-07-28. Local `ov25-ui/main` is at documentation commit `a9eb0f7`, immediately after approved Bug 39 commit `fad225f`.
 
 ## Committed / merged
 
@@ -33,6 +33,7 @@ Last reconciled against `ov25-ui` and OV25 branch ancestry: 2026-07-28.
 - **Bug 32** - `459fac3` (`ov25-ui`) - Added the approved setup-side data-selector/style-variable catalog entries.
 - **Bug 37** - `ca27d58` (`ov25-ui`) - Setup drafts survive tab leave/remount and remain scoped to the incoming saved configuration.
 - **Bug 38** - `1c784b5` (`ov25-ui`) - Carousel thumbnails expose their selection state through `data-selected`.
+- **Bug 39** - `fad225f` (`ov25-ui`) - Added the approved normal-product `inline-sticky` mode with header auto-detection/override, natural responsive viewer sizing, page-scroll variant headers, viewport-specific carousel relocation, and reversible native, Popover, and body-layer strategies. The `ov25-ui` core is complete; uncommitted OV25, Shopify, and WooCommerce integration remains a separate release follow-up.
 - **Bug 40** - `bd5ebbd9` (`OV25`, merged into current `main`) - Saved Snap2 configurations can load `.zcpb` model assets through the shared loader.
 - **Bug 44** - `6731b81b` (`OV25`) - Embedded Snap2 validation toasts are offset below the Snap2 controls.
 - **Bug 46** - `73ac99b` (`ov25-ui`) - Public product-image types accept the image tiers already supported by runtime.

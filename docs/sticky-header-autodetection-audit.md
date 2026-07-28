@@ -4,6 +4,10 @@ Evidence gathered: 2026-07-10
 
 Implementation rechecked: 2026-07-28
 
+The implementation was reviewed and approved in `ov25-ui` main commit `fad225f`; documentation
+commit `a9eb0f7` followed. Main is authoritative. The dedicated Bug 39 worktree is a historical,
+divergent implementation workspace whose mirrored documentation is retained for reference only.
+
 Purpose: define automatic header discovery for `inline-sticky` from downloaded theme evidence and
 record the exact current implementation. A nonblank `selectors.header` remains the authoritative
 override.
@@ -211,6 +215,10 @@ The current cases cover:
 
 Browser coverage is in `test/e2e/inline-sticky.test.ts` using the fixed and collapsing header
 fixtures, including `?header=explicit`.
+
+The approval audit recorded `bun run type-check` passing and discovered 21 inline-sticky plus 3
+carousel-relocation Playwright cases and 113 focused unit cases across the Bug 39 test inventory.
+Runtime and release smoke tests remain future regression verification, not an approval prerequisite.
 
 ## Limits
 

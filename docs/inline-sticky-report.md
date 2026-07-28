@@ -2,10 +2,11 @@
 
 Implementation audit: 2026-07-28
 
-This report describes the current `ov25-ui` main workspace. The dedicated
-`.worktrees/ov25-ui-inline-sticky` implementation is not treated as authoritative because it
-currently differs from main; this document is mirrored there only so both Bug 39 documentation
-copies stay synchronized.
+This report describes the reviewed Bug 39 implementation committed to `ov25-ui` main as
+`fad225f`, followed by documentation commit `a9eb0f7`. Main is authoritative. The dedicated
+`.worktrees/ov25-ui-inline-sticky` directory is a historical, divergent implementation workspace;
+its documentation copies are mirrored for reference only and do not block the approved main
+implementation.
 
 ## Purpose And Scope
 
@@ -475,8 +476,10 @@ Focused unit discovery:
 - `test/unit/variant-select-menu-role.test.ts`: 2 cases.
 - Total: 113 cases.
 
-This 2026-07-28 audit ran test discovery only, not the browser or unit suites. A current rebuild and
-runtime run remain necessary before Bug 39 approval.
+The approval audit recorded `bun run type-check` passing. This 2026-07-28 documentation audit
+confirmed test discovery but did not rerun the browser or unit suites. Runtime and release smoke
+tests remain useful future regression verification; they are not prerequisites for the approval
+already recorded in `fad225f`.
 
 ## Setup And Integration Ownership
 
@@ -489,26 +492,24 @@ Configurator Setup:
 
 Shopify repository state:
 
-- the theme extension reads header/desktop/mobile carousel values from shop metafields into window
-  globals;
-- the storefront adapter strips the three keys from saved Setup selectors and applies only nonblank
-  integration values;
-- `blocks/ov25_sticky_mobile_carousel.liquid` supplies the built-in mobile target;
-- current OV25 `main` does not expose the three new fields in
-  `components/plugins/shopify/PluginSettings.tsx`; that pending selector-settings patch must be
-  reconciled before claiming the Shopify admin UI owns them.
+- the local Shopify workspace has dirty, uncommitted changes that read header/desktop/mobile
+  carousel values from shop metafields, apply nonblank integration values, and add
+  `blocks/ov25_sticky_mobile_carousel.liquid`;
+- those changes are outside the reviewed `ov25-ui` commit and are not approved or committed as part
+  of Bug 39;
+- current OV25 `main` does not expose the three fields in
+  `components/plugins/shopify/PluginSettings.tsx`.
 
 WooCommerce repository state:
 
-- Global Settings exposes/persists/localizes `headerSelector`,
-  `desktopCarouselSelector`, and `mobileCarouselSelector`;
-- the frontend builds grouped selectors from Setup-owned fields, then applies nonblank integration
-  values;
-- the variants hook supplies the built-in mobile target.
+- the local WooCommerce workspace has dirty, uncommitted changes that expose, persist, and localize
+  `headerSelector`, `desktopCarouselSelector`, and `mobileCarouselSelector`, apply nonblank
+  integration values, and add the built-in mobile target;
+- those changes are outside the reviewed `ov25-ui` commit and are not approved or committed as part
+  of Bug 39.
 
-The generic OV25 configurator preview currently provides a two-column product page but does not
-simulate sticky headers or the built-in mobile carousel target. Dedicated `dev/react-test` fixtures
-provide that matrix.
+Current OV25 `main` also lacks the Bug 39-specific configurator-preview enhancement. Dedicated
+`dev/react-test` fixtures provide the sticky header and carousel-target matrix.
 
 ## Remaining Risks
 
@@ -519,5 +520,7 @@ provide that matrix.
   values and measured geometry are preserved, but arbitrary ancestry selectors cannot be.
 - `Element.moveBefore()` support is required for the non-Popover same-node fallback.
 - Dynamic mobile Safari viewport behavior still warrants real-device testing.
-- Current OV25 Shopify admin selector controls and the generic preview enhancement are not present
-  on OV25 `main`.
+- OV25 Shopify admin selector controls and the Bug 39-specific preview enhancement are absent from
+  current OV25 `main`.
+- Shopify and WooCommerce integration changes remain dirty and uncommitted in their respective
+  workspaces.
