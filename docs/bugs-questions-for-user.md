@@ -1,8 +1,8 @@
 # Bug clarification questions
 
-Last updated: 2026-07-16
+Last updated: 2026-07-28
 
-Use this file as the short decision queue for bug work that cannot be safely implemented from the current repo state alone. Answering any item here can unblock a focused bug packet or subagent assignment. The fuller source notes remain in `ov25_bugs_and_todo.md`.
+Use this file as the short decision queue for bug work that cannot be safely implemented from the current repo state alone. Answering any item here can unblock a focused bug packet or subagent assignment. The fuller source notes remain in `docs/ov25_bugs_and_todo.md`.
 
 Implementation-candidate audit: subagent `Parfit` checked the non-ready backlog on 2026-06-08 after excluding fixed/staged and ready-for-review items. It found no remaining non-ready item that is safe to implement without one of the decisions, repro details, design specs, or architecture choices below.
 
@@ -19,7 +19,7 @@ Implementation-candidate audit: subagent `Parfit` checked the non-ready backlog 
 
 1. Mobile woods 403: send the affected product/page and at least one failing image URL.
 2. Ziggy hidden variants: if Bug 13 does not resolve it, send the exported setup JSON/current config.
-3. Buy Now over fullscreen gallery: first review Bug 16 with Buy Now visible; send the exact page/layout only if the separate Snap2 checkout-sheet case still fails.
+3. Buy Now over fullscreen gallery: Bug 16 was closed because the valid stacked-gallery baseline already keeps fullscreen above controls. Send the exact page/layout only if a separate Snap2 checkout-sheet or client-theme case still fails.
 4. Gallery scrolling page behind: Bug 22 fixed horizontal mouse-wheel leakage. Send an exact touch, stacked, fullscreen, or theme-specific repro if scrolling still reaches the page.
 5. Mobile wizard Next button: send the exact fixture, device, and browser where the button cannot be clicked.
 6. Defer3D modal/sheet follow-ups: send the exact failing fixture/page if the modal/sheet iframe visibility issue still happens.
@@ -30,11 +30,11 @@ Implementation-candidate audit: subagent `Parfit` checked the non-ready backlog 
 1. Snap2 ghost box: re-enable the old rough selected-attachment preview, build an exact hovered/selected candidate-module preview, or limit the behavior to movable drag placement?
 2. Snap2 Arlo ModuleBottomPanel start position: does the problem mean the panel docks in the wrong place, or that the bottom-panel carousel starts centered instead of aligned to the first/active module?
 3. Mouse settings/disable pan: should ov25-ui/setup expose a runtime override for pan/zoom/rotate, or should this continue to rely on existing OV25 per-camera admin settings?
-4. Unified menu/select side: Bug 34 already covers setup/export of variant-sheet and module-panel positions. Did the request also mean an interactive attachment-side selector inside the Snap2 module picker?
+4. Unified menu/select side: approved Bug 24 already covers setup/export of variant-sheet and module-panel positions; the overlapping Bug 34 proposal is parked. Did the request also mean an interactive attachment-side selector inside the Snap2 module picker?
 
 ## Product/design specs needed
 
-1. Data selectors/string interpolation/custom icons: after Bugs 32/33 are reviewed, continue exhaustive remaining selector coverage, or first define public string-interpolation and custom-icon replacement contracts?
+1. Data selectors/string interpolation/custom icons: Bug 32's setup catalog is committed and Bug 33's first runtime selector slice is parked. After Bug 33 resumes, continue exhaustive selector coverage, or first define public string-interpolation and custom-icon replacement contracts?
 2. Filter display redesign: define display modes, defaults, setup controls, mobile behavior, and whether trigger-based filters remain as a compatibility option.
 3. Accordion styles like Tamarisk: decide which parts to implement: plus/minus icons, animation, spacing/borders, filter placement, setup controls, and default vs opt-in behavior.
 4. Sorting/categories/price deltas: define sort keys, category metadata source, setup exposure, and whether OV25 should provide per-selection price deltas or batch quote data.

@@ -4,6 +4,8 @@ Concise archive of approved, committed, and otherwise closed bugs. Active review
 
 Commit hashes below identify the primary implementation commit. Cross-repository fixes list each relevant repository.
 
+Last reconciled against `ov25-ui` and OV25 branch ancestry: 2026-07-28.
+
 ## Committed / merged
 
 - **Bug 1** - `efbc93b` (`ov25-ui`) - Variant names now use the configured theme text colour instead of hard-coded black.
@@ -23,6 +25,7 @@ Commit hashes below identify the primary implementation commit. Cross-repository
 - **Bug 18** - `f45914f` (`ov25-ui`) - Normal variant thumbnails default to square while explicit radius overrides remain supported.
 - **Bug 19** - `bf9e635` (`ov25-ui`) - Fixed the mobile SwatchBook grid and made empty swatches match filled swatch size and shape.
 - **Bug 22** - `0bcfc73` (`ov25-ui`) - Horizontal gallery wheel input scrolls the carousel before the page.
+- **Bug 23** - `eaa808d` (`ov25-ui`) - Standardised body-level z-index layers so toasts remain above Snap2/share dialogs while preserving modal, drawer, popover, checkout, and transition ordering.
 - **Bug 24** - `06eb331` (`ov25-ui`) - Setup now preserves and exports the Snap2 selectors and module/variant positions required by runtime.
 - **Bug 25** - `43acd5f` (`ov25-ui`) - Setup hydrates saved `:host` colour variables while retaining legacy `:root` support.
 - **Bug 26** - `d262314` (`ov25-ui`) - Fixed Snap2 mobile modal/drawer rendering, checkout scrolling, sizing, and joined-panel corner treatment.
@@ -30,7 +33,7 @@ Commit hashes below identify the primary implementation commit. Cross-repository
 - **Bug 32** - `459fac3` (`ov25-ui`) - Added the approved setup-side data-selector/style-variable catalog entries.
 - **Bug 37** - `ca27d58` (`ov25-ui`) - Setup drafts survive tab leave/remount and remain scoped to the incoming saved configuration.
 - **Bug 38** - `1c784b5` (`ov25-ui`) - Carousel thumbnails expose their selection state through `data-selected`.
-- **Bug 40** - `bd5ebbd9` (`OV25`) - Saved Snap2 configurations can load `.zcpb` model assets through the shared loader.
+- **Bug 40** - `bd5ebbd9` (`OV25`, merged into current `main`) - Saved Snap2 configurations can load `.zcpb` model assets through the shared loader.
 - **Bug 44** - `6731b81b` (`OV25`) - Embedded Snap2 validation toasts are offset below the Snap2 controls.
 - **Bug 46** - `73ac99b` (`ov25-ui`) - Public product-image types accept the image tiers already supported by runtime.
 - **Bug 47** - `b748b6e` (`ov25-ui`) and `c41770ae` (`OV25`) - Added the setup/runtime option to hide the initial 3D drag indicator.

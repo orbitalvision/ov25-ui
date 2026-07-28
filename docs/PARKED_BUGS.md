@@ -4,12 +4,11 @@ These bugs are excluded from the upcoming release. Their implementation artifact
 
 Before any parked bug can be approved or staged, move its entire packet back to [bugs-ready-for-review.md](bugs-ready-for-review.md), refresh any stale build and test evidence, and complete review there.
 
-Queue audit 2026-07-16: 12 bugs are parked for post-release work: Bugs 12, 15, 23, 28, 33, 34, 35, 36, 41, 42, 43, and 45.
+Queue audit 2026-07-28: 11 bugs are parked for post-release work: Bugs 12, 15, 28, 33, 34, 35, 36, 41, 42, 43, and 45. All named retained worktrees below still exist and contain their proposal changes, except Bugs 12 and 15, which are retained through review artifacts only.
 
 Current release-cleanup state:
 
-- Bugs 12, 15, 33, 42, 43 (`ov25-ui` side), and 45 were removed from dirty main.
-- Bug 23 has a completed semantic inverse in main; the inverse is unstaged and the original `eaa808d` history is unchanged.
+- Bugs 12, 15, 33, 42, 43 (`ov25-ui` side), and 45 are absent from current `ov25-ui` main.
 - Bugs 28, 35, 36, 41, and the OV25 side of Bug 43 were never applied to current OV25 main; they remain only in retained worktrees/artifacts.
 - The distinct Bug 34 proposal was not applied to current main; the approved, committed Bug 24 equivalent remains.
 
@@ -17,9 +16,9 @@ Current release-cleanup state:
 
 ### 12. Auto-open configurator in setup does not work
 
-- Status: **PARKED FOR POST-RELEASE**. Bug 12 code was removed from dirty main during the completed release cleanup. The retained proposal exists only in review artifacts and any dedicated worktree; it is not fixed or approved.
+- Status: **PARKED FOR POST-RELEASE**. Bug 12 code was removed from main during the completed release cleanup. The retained proposal exists only in review artifacts; there is no active worktree containing additional Bug 12 changes. It is not fixed or approved.
 - Source item: `"auto open configurator" in ov25-setup does not work?`
-- Current location: no Bug 12 implementation is present in dirty main; the retained review diff, screenshots, and historical verification record remain available.
+- Current location: no Bug 12 implementation is present in current main; the retained review diff, screenshots, and historical verification record remain available.
 
 Historical implementation summary:
 
@@ -31,18 +30,18 @@ Manual fixture:
 
 - [gallery-sheet-list-auto-open fixture](http://localhost:3008/tests/gallery-sheet-list-auto-open.html)
 - Setup preview check: [configurator-setup fixture](http://localhost:3008/tests/configurator-setup.html)
-- Before/current-HEAD baseline: [gallery-sheet-list-auto-open fixture on 3009](http://127.0.0.1:3009/tests/gallery-sheet-list-auto-open.html)
-- Before/current-HEAD baseline: [configurator-setup fixture on 3009](http://127.0.0.1:3009/tests/configurator-setup.html)
+- Historical `bb56186` baseline: [gallery-sheet-list-auto-open fixture on 3009](http://127.0.0.1:3009/tests/gallery-sheet-list-auto-open.html)
+- Historical `bb56186` baseline: [configurator-setup fixture on 3009](http://127.0.0.1:3009/tests/configurator-setup.html)
 
 Before/after screenshots:
 
-- Before: [open screenshot](review-screenshots/bug-12-auto-open-configurator-before.png)
-- After: [open screenshot](review-screenshots/bug-12-auto-open-configurator-after.png)
-- Setup after: [open screenshot](review-screenshots/bug-12-configurator-setup-after.png)
+- Before: [open screenshot](../review-screenshots/bug-12-auto-open-configurator-before.png)
+- After: [open screenshot](../review-screenshots/bug-12-auto-open-configurator-after.png)
+- Setup after: [open screenshot](../review-screenshots/bug-12-configurator-setup-after.png)
 
 Manual verification on resumption:
 
-Current-state prerequisite: use the retained worktree or reapply the retained implementation diff before running these steps; the relevant current main workspace does not contain this parked proposal.
+Current-state prerequisite: reapply the retained implementation diff before running these steps; there is no active Bug 12 worktree, and current main does not contain this parked proposal.
 
 1. Open the fixture above.
 2. Expected: the desktop sheet opens automatically after load without clicking Configure.
@@ -66,7 +65,7 @@ Historical changed-file scope:
 
 Retained implementation diff:
 
-- [review-diffs/bug-auto-open-configurator.diff](review-diffs/bug-auto-open-configurator.diff)
+- [review-diffs/bug-auto-open-configurator.diff](../review-diffs/bug-auto-open-configurator.diff)
 
 Native diff in Cursor:
 
@@ -105,7 +104,7 @@ Automated test candidates:
 Residual risk:
 
 - Multiple configurator pages still share the existing global handler ref behavior; this fix keeps that architecture and only aligns the registered handler with real Configure clicks.
-- `src/contexts/ov25-ui-context.tsx` also contains pending Buy Now flag work in the same worktree, and `dev/react-test/vite.config.js` has unrelated pending fixture entries. If Bug 12 is later resumed and approved, it must be staged with scoped hunks only.
+- The retained diff was produced while shared files also contained unrelated work. If Bug 12 is resumed, reapply and review it against current main rather than assuming the old whole-file state is safe.
 - `scripts/check-local-fixture.mjs` has separate workflow-tooling changes used for verification. It is intentionally not part of the Bug 12 implementation diff/staging set unless you separately approve the helper script work.
 
 Resumption instruction:
@@ -114,7 +113,7 @@ Resumption instruction:
 
 ### 15. Variant thumbnails should expose responsive `srcset` tiers
 
-- Status: **PARKED FOR POST-RELEASE**. Manual inspection on 2026-07-16 found invalid `srcset` width descriptors: `?w=50` was advertised as `120w`, `?w=150` as `240w`, and `?w=250` as `480w`. The changes were removed from dirty main and need redesign before review resumes. Retained artifacts and historical evidence are not approved for release or staging.
+- Status: **PARKED FOR POST-RELEASE**. Manual inspection on 2026-07-16 found invalid `srcset` width descriptors: `?w=50` was advertised as `120w`, `?w=150` as `240w`, and `?w=250` as `480w`. The changes are absent from current main and need redesign before review resumes. Retained artifacts and historical evidence are not approved for release or staging.
 - Source item: `make thumbnails pass srcset to img so that all small, medium, large and .thumbnail are available on each selection`
 - Historical location: previously implemented inline in main; the Bug 15 changes have now been removed. Retained review diffs describe the rejected proposal only.
 
@@ -132,10 +131,10 @@ Historical manual fixtures:
 - [gallery-inline-tree fixture](http://localhost:3008/tests/gallery-inline-tree.html)
 - [gallery-inline-accordion fixture](http://localhost:3008/tests/gallery-inline-accordion.html)
 - [gallery-inline-wizard fixture](http://localhost:3008/tests/gallery-inline-wizard.html)
-- Before/current-HEAD baseline: [gallery-inline-list fixture on 3009](http://127.0.0.1:3009/tests/gallery-inline-list.html)
-- Before/current-HEAD baseline: [gallery-inline-tree fixture on 3009](http://127.0.0.1:3009/tests/gallery-inline-tree.html)
-- Before/current-HEAD baseline: [gallery-inline-accordion fixture on 3009](http://127.0.0.1:3009/tests/gallery-inline-accordion.html)
-- Before/current-HEAD baseline: [gallery-inline-wizard fixture on 3009](http://127.0.0.1:3009/tests/gallery-inline-wizard.html)
+- Historical `bb56186` baseline: [gallery-inline-list fixture on 3009](http://127.0.0.1:3009/tests/gallery-inline-list.html)
+- Historical `bb56186` baseline: [gallery-inline-tree fixture on 3009](http://127.0.0.1:3009/tests/gallery-inline-tree.html)
+- Historical `bb56186` baseline: [gallery-inline-accordion fixture on 3009](http://127.0.0.1:3009/tests/gallery-inline-accordion.html)
+- Historical `bb56186` baseline: [gallery-inline-wizard fixture on 3009](http://127.0.0.1:3009/tests/gallery-inline-wizard.html)
 
 Before/after screenshots:
 
@@ -195,8 +194,8 @@ Historical changed files:
 
 Retained implementation diffs:
 
-- [review-diffs/bug-thumbnail-srcset.diff](review-diffs/bug-thumbnail-srcset.diff)
-- [review-diffs/bug-thumbnail-srcset-follow-up.diff](review-diffs/bug-thumbnail-srcset-follow-up.diff)
+- [review-diffs/bug-thumbnail-srcset.diff](../review-diffs/bug-thumbnail-srcset.diff)
+- [review-diffs/bug-thumbnail-srcset-follow-up.diff](../review-diffs/bug-thumbnail-srcset-follow-up.diff)
 
 Historical native diff in Cursor:
 
@@ -247,16 +246,6 @@ Resumption instruction:
 
 - Redesign the width-candidate contract first. Then move this entire packet back to [bugs-ready-for-review.md](bugs-ready-for-review.md), refresh implementation diffs and automated/browser evidence, and complete manual review before requesting approval or staging. Do not stage or approve the retained rejected proposal.
 
-### 23. Standardise body-level z-index layers
-
-- Status: **PARKED FOR POST-RELEASE**. The original change was approved and committed as `eaa808d`; its semantic inverse is now complete and unstaged in main, without rewriting history. Bug 23 is excluded from the upcoming release and is not considered approved or fixed for that release.
-- Source item: z-index reasonableness.
-- Retained artifact: [Bug 23 z-index layer constants diff](review-diffs/bug-23-z-index-layer-constants.diff).
-- Summary: the retained patch extracts named body-level layer constants, assigns deliberate ordering to drawer/modal/popover, swatch-book/toaster/Snap2 checkout, transition proxy, and Snap2/AR dialog layers, and removes the AR dialog content raw maximum z-index.
-- Changed source represented by the diff: `src/components/ar-preview-qr-code-dialog.tsx`, `src/components/ui/dialog.tsx`, `src/lib/config/iframe-transition-snapshot.ts`, new `src/lib/config/layers.ts`, and `src/utils/inject.tsx`.
-- Rationale: injected body portals need a documented near-maximum stacking contract with toasts above Snap2/share dialog overlays while preserving distinct overlay dependencies.
-- Resumption instruction: after the release, reconcile the retained original patch with the completed unstaged semantic inverse and then-current main state, then move this entry to [bugs-ready-for-review.md](bugs-ready-for-review.md) and refresh verification before requesting approval or staging. Do not rewrite the original commit history.
-
 ### 28. Snap2 movable objects rotate with mouse wheel
 
 - Status: **PARKED FOR POST-RELEASE**. The Bug 28 proposal was never applied to current OV25 main; it remains only in the named OV25 worktree and retained review artifact. It is not fixed or approved.
@@ -300,7 +289,7 @@ Historical changed-file scope:
 
 Retained implementation diff:
 
-- [review-diffs/bug-snap2-movable-wheel-rotate.diff](review-diffs/bug-snap2-movable-wheel-rotate.diff)
+- [review-diffs/bug-snap2-movable-wheel-rotate.diff](../review-diffs/bug-snap2-movable-wheel-rotate.diff)
 
 Native diff in Cursor:
 
@@ -341,7 +330,7 @@ Archived committed and resolved review packets: [bugs-resolved.md](bugs-resolved
 
 ### 33. Runtime name selectors first slice
 
-- Status: **PARKED FOR POST-RELEASE**. Bug 33 code was removed from dirty main during the completed release cleanup; the proposal remains only in the named worktree and retained review artifact. It is not fixed or approved.
+- Status: **PARKED FOR POST-RELEASE**. Bug 33 code is absent from current main; the proposal remains only in the named worktree and retained review artifact. It is not fixed or approved.
 - Source item: `Data selectors for names` / `For everywhere we show text... data selectors on all of them`.
 - Branch/worktree: `codex/runtime-name-selectors` at `/Users/orbital/Documents/CODE/ORBITAL VISION/ov25-ui/.worktrees/ov25-ui-runtime-name-selectors`.
 - Patch owner: subagent `Dalton`.
@@ -360,7 +349,7 @@ Manual fixtures:
 - [gallery inline wizard fixture](http://localhost:3008/tests/gallery-inline-wizard.html)
 - [Snap2 dialog fixture](http://localhost:3008/tests/snap2-dialog.html)
 - [configurator setup fixture](http://localhost:3008/tests/configurator-setup.html)
-- Before/current-HEAD baseline: [configurator setup fixture on 3009](http://127.0.0.1:3009/tests/configurator-setup.html)
+- Historical `bb56186` baseline: [configurator setup fixture on 3009](http://127.0.0.1:3009/tests/configurator-setup.html)
 
 Before/after screenshots:
 
@@ -398,7 +387,7 @@ Historical changed-file scope:
 
 Retained implementation diff:
 
-- [review-diffs/bug-runtime-name-selectors.diff](review-diffs/bug-runtime-name-selectors.diff)
+- [review-diffs/bug-runtime-name-selectors.diff](../review-diffs/bug-runtime-name-selectors.diff)
 
 Native diff in Cursor:
 
@@ -456,6 +445,7 @@ Resumption instruction:
 
 Historical implementation summary:
 
+- Current main already contains the approved Bug 24 setup/export controls. Do not reapply this older overlapping proposal without first identifying a behavior that Bug 24 does not cover.
 - Runtime already supports Snap2 `configurator.variants.position` and `configurator.modules.position`.
 - Dev fixtures expose those values through query params, but ov25-setup had no controls for variant sheet side or module panel position.
 - Setup exports therefore could not configure desktop/mobile Snap2 side placement from the UI.
@@ -463,7 +453,7 @@ Historical implementation summary:
 Manual fixture:
 
 - [configurator setup fixture](http://localhost:3008/tests/configurator-setup.html)
-- Before/current-HEAD baseline: [configurator setup fixture on 3009](http://127.0.0.1:3009/tests/configurator-setup.html)
+- Historical `bb56186` baseline: [configurator setup fixture on 3009](http://127.0.0.1:3009/tests/configurator-setup.html)
 
 Before/after screenshots:
 
@@ -493,7 +483,7 @@ Historical changed-file scope:
 
 Retained implementation diff:
 
-- [review-diffs/bug-setup-snap2-position-controls.diff](review-diffs/bug-setup-snap2-position-controls.diff)
+- [review-diffs/bug-setup-snap2-position-controls.diff](../review-diffs/bug-setup-snap2-position-controls.diff)
 
 Native diff in Cursor:
 
@@ -584,7 +574,7 @@ Historical changed-file scope:
 
 Retained implementation diff:
 
-- [review-diffs/bug-setup-style-variable-drift.diff](review-diffs/bug-setup-style-variable-drift.diff)
+- [review-diffs/bug-setup-style-variable-drift.diff](../review-diffs/bug-setup-style-variable-drift.diff)
 
 Native diff in Cursor:
 
@@ -666,7 +656,7 @@ Historical changed-file scope:
 
 Retained implementation diff:
 
-- [review-diffs/bug-permissions-500-vercel.diff](review-diffs/bug-permissions-500-vercel.diff)
+- [review-diffs/bug-permissions-500-vercel.diff](../review-diffs/bug-permissions-500-vercel.diff)
 
 Native diff in Cursor:
 
@@ -731,7 +721,7 @@ Manual fixture:
 
 Before/after screenshots:
 
-- [Before: blank Snap2 name area](review-screenshots/bug-41-snap2-name-before.jpg)
+- [Before: blank Snap2 name area](../review-screenshots/bug-41-snap2-name-before.jpg)
 - After screenshot deferred: the fixture must open its full-screen Snap2 chooser to load the range, which then obscures the host-page heading. Live browser inspection confirmed the heading changes from blank to `Otto` after the iframe sends `RANGE`.
 - The clean 3009 `ov25-ui` baseline is no longer a valid before comparison because it uses the same local OV25 iframe.
 
@@ -748,14 +738,14 @@ Current-state prerequisite: use the retained worktree or reapply the retained im
 
 Historical changed-file scope:
 
-- [OV25 useIframeMessaging.ts](/Users/orbital/Documents/CODE/ORBITAL%20VISION/OV25/hooks/iframe-configurator/useIframeMessaging.ts)
-- [OV25 range-message.ts](/Users/orbital/Documents/CODE/ORBITAL%20VISION/OV25/hooks/iframe-configurator/range-message.ts)
-- [OV25 range-message.test.ts](/Users/orbital/Documents/CODE/ORBITAL%20VISION/OV25/hooks/iframe-configurator/range-message.test.ts)
-- [name.test.tsx](/Users/orbital/Documents/CODE/ORBITAL%20VISION/ov25-ui/test/unit/name.test.tsx)
+- [OV25 useIframeMessaging.ts](/Users/orbital/Documents/CODE/ORBITAL%20VISION/ov25-ui/.worktrees/OV25-bug-41-range-message/hooks/iframe-configurator/useIframeMessaging.ts)
+- [OV25 range-message.ts](/Users/orbital/Documents/CODE/ORBITAL%20VISION/ov25-ui/.worktrees/OV25-bug-41-range-message/hooks/iframe-configurator/range-message.ts)
+- [OV25 range-message.test.ts](/Users/orbital/Documents/CODE/ORBITAL%20VISION/ov25-ui/.worktrees/OV25-bug-41-range-message/hooks/iframe-configurator/range-message.test.ts)
+- `test/unit/name.test.tsx` (historical regression file is no longer present in main or a retained worktree)
 
 Retained implementation diff:
 
-- [Bug 41 OV25 canonical sender diff](review-diffs/bug-41-ov25-range-sender.diff)
+- [Bug 41 OV25 canonical sender diff](../review-diffs/bug-41-ov25-range-sender.diff)
 
 Retained diff summary:
 
@@ -794,7 +784,7 @@ Resumption instruction:
 
 ### 42. Snap2 compatible-module cards expose dimension and movable actions
 
-- Status: **PARKED FOR POST-RELEASE**. Bug 42 code was removed from dirty main during the completed release cleanup; only the retained review artifact and historical evidence remain. It is not fixed or approved.
+- Status: **PARKED FOR POST-RELEASE**. Bug 42 code is absent from current main; the retained worktree, review artifact, and historical evidence remain. It is not fixed or approved.
 - Source item: compatible modules in left/right side sheets lack the `Edit dimensions` and `Place movable object` controls available in `ModuleBottomPanel`.
 - Patch owners: subagents `Ptolemy`, `Hume`, and `Nietzsche`; final independent review by `Aristotle` is clean.
 
@@ -841,18 +831,18 @@ Current-state prerequisite: use the retained worktree or reapply the retained im
 
 Historical changed-file scope:
 
-- [CompatibleModuleActions.tsx](/Users/orbital/Documents/CODE/ORBITAL%20VISION/ov25-ui/src/components/VariantSelectMenu/CompatibleModuleActions.tsx)
-- [ModuleBottomPanel.tsx](/Users/orbital/Documents/CODE/ORBITAL%20VISION/ov25-ui/src/components/VariantSelectMenu/ModuleBottomPanel.tsx)
-- [Snap2ModulesOptionBody.tsx](/Users/orbital/Documents/CODE/ORBITAL%20VISION/ov25-ui/src/components/VariantSelectMenu/Snap2ModulesOptionBody.tsx)
-- [ModuleVariantCard.tsx](/Users/orbital/Documents/CODE/ORBITAL%20VISION/ov25-ui/src/components/VariantSelectMenu/variant-cards/ModuleVariantCard.tsx)
-- [string-keys.ts](/Users/orbital/Documents/CODE/ORBITAL%20VISION/ov25-ui/src/lib/strings/string-keys.ts)
-- [configurator-utils.ts](/Users/orbital/Documents/CODE/ORBITAL%20VISION/ov25-ui/src/utils/configurator-utils.ts)
-- [compatible-modules-provider-refresh.test.tsx](/Users/orbital/Documents/CODE/ORBITAL%20VISION/ov25-ui/test/unit/compatible-modules-provider-refresh.test.tsx)
-- [snap2-compatible-module-actions.test.tsx](/Users/orbital/Documents/CODE/ORBITAL%20VISION/ov25-ui/test/unit/snap2-compatible-module-actions.test.tsx)
+- [CompatibleModuleActions.tsx](/Users/orbital/Documents/CODE/ORBITAL%20VISION/ov25-ui/.worktrees/ov25-ui-bug-42-module-actions/src/components/VariantSelectMenu/CompatibleModuleActions.tsx)
+- [ModuleBottomPanel.tsx](/Users/orbital/Documents/CODE/ORBITAL%20VISION/ov25-ui/.worktrees/ov25-ui-bug-42-module-actions/src/components/VariantSelectMenu/ModuleBottomPanel.tsx)
+- [Snap2ModulesOptionBody.tsx](/Users/orbital/Documents/CODE/ORBITAL%20VISION/ov25-ui/.worktrees/ov25-ui-bug-42-module-actions/src/components/VariantSelectMenu/Snap2ModulesOptionBody.tsx)
+- [ModuleVariantCard.tsx](/Users/orbital/Documents/CODE/ORBITAL%20VISION/ov25-ui/.worktrees/ov25-ui-bug-42-module-actions/src/components/VariantSelectMenu/variant-cards/ModuleVariantCard.tsx)
+- [string-keys.ts](/Users/orbital/Documents/CODE/ORBITAL%20VISION/ov25-ui/.worktrees/ov25-ui-bug-42-module-actions/src/lib/strings/string-keys.ts)
+- [configurator-utils.ts](/Users/orbital/Documents/CODE/ORBITAL%20VISION/ov25-ui/.worktrees/ov25-ui-bug-42-module-actions/src/utils/configurator-utils.ts)
+- [compatible-modules-provider-refresh.test.tsx](/Users/orbital/Documents/CODE/ORBITAL%20VISION/ov25-ui/.worktrees/ov25-ui-bug-42-module-actions/test/unit/compatible-modules-provider-refresh.test.tsx)
+- [snap2-compatible-module-actions.test.tsx](/Users/orbital/Documents/CODE/ORBITAL%20VISION/ov25-ui/.worktrees/ov25-ui-bug-42-module-actions/test/unit/snap2-compatible-module-actions.test.tsx)
 
 Retained implementation diff:
 
-- [Bug 42 isolated diff](review-diffs/bug-42-snap2-compatible-module-actions.diff) - 4,398 lines across eight Bug 42 files; Bug 43 pricing/name changes are excluded.
+- [Bug 42 isolated diff](../review-diffs/bug-42-snap2-compatible-module-actions.diff) - 4,398 lines across eight Bug 42 files; Bug 43 pricing/name changes are excluded.
 
 Retained diff summary:
 
@@ -898,7 +888,7 @@ Historical automated coverage:
 Residual risk:
 
 - Real module capabilities and resulting 3D placement depend on fixture product data, so final scene behavior still needs manual testing after rebuild.
-- Historical overlap note: dirty main also contained Bug 43 name/discounted-price work during review, and focused overlap tests passed. Both parked implementations are now absent from dirty main, so the combined narrow-width layout must be retested after both artifacts are reapplied.
+- Historical overlap note: dirty main also contained Bug 43 name/discounted-price work during review, and focused overlap tests passed. Both parked implementations are now absent from current main, so the combined narrow-width layout must be retested after both artifacts are reapplied.
 - This patch intentionally does not close embedded module lists after movable dispatch.
 
 Resumption instruction:
@@ -907,7 +897,7 @@ Resumption instruction:
 
 ### 43. Show Snap2 module name and configured price
 
-- Status: **PARKED FOR POST-RELEASE**. Bug 43 `ov25-ui` code was removed from dirty main during the completed release cleanup, and the OV25 side was never applied to current OV25 main. Both sides remain only in retained artifacts/worktrees; the bug is not fixed or approved.
+- Status: **PARKED FOR POST-RELEASE**. Bug 43 `ov25-ui` code is absent from current main, and the OV25 side was never applied to current OV25 main. Both sides remain only in retained artifacts/worktrees; the bug is not fixed or approved.
 - Source item: Snap2 module cards and detail titles omit configured module pricing, while bottom-panel cards omit both name and price.
 - Patch owners: cross-repo implementation by subagents; final independent review by `Hilbert` found no P0-P3 issues.
 
@@ -953,8 +943,8 @@ Historical changed-file scope:
 
 Retained implementation diffs:
 
-- [Bug 43 ov25-ui diff](review-diffs/bug-43-ov25-ui-module-prices.diff) - 20 files.
-- [Bug 43 OV25 diff](review-diffs/bug-43-ov25-module-prices.diff) - 11 files.
+- [Bug 43 ov25-ui diff](../review-diffs/bug-43-ov25-ui-module-prices.diff) - 20 files.
+- [Bug 43 OV25 diff](../review-diffs/bug-43-ov25-module-prices.diff) - 11 files.
 
 Retained diff summary:
 
@@ -988,7 +978,7 @@ Resumption instruction:
 
 ### 45. Preserve product images on normalized commerce lines
 
-- Status: **PARKED FOR POST-RELEASE**. Bug 45 code was removed from dirty main during the completed release cleanup; only the retained isolated diff and historical evidence remain. It is not fixed or approved.
+- Status: **PARKED FOR POST-RELEASE**. Bug 45 code is absent from current main; the retained worktree, isolated diff, and historical evidence remain. It is not fixed or approved.
 - Source item: `productBreakdowns[].image` survives in the raw Snap2 price payload but is dropped from normalized `price.lines[]`.
 - Patch owner: subagent `Raman`; independent review by `Copernicus` found no P0-P2 issues, and its P3 exact-preservation test gap was fixed.
 
@@ -1020,13 +1010,13 @@ Current-state prerequisite: use the retained worktree or reapply the retained im
 
 Historical changed-file scope:
 
-- [normalize-iframe-commerce.ts](/Users/orbital/Documents/CODE/ORBITAL%20VISION/ov25-ui/src/commerce/normalize-iframe-commerce.ts)
-- [inject-config.ts](/Users/orbital/Documents/CODE/ORBITAL%20VISION/ov25-ui/src/types/inject-config.ts)
-- [normalize-iframe-commerce.test.ts](/Users/orbital/Documents/CODE/ORBITAL%20VISION/ov25-ui/test/unit/normalize-iframe-commerce.test.ts)
+- [normalize-iframe-commerce.ts](/Users/orbital/Documents/CODE/ORBITAL%20VISION/ov25-ui/.worktrees/ov25-ui-bug-45-commerce-line-images/src/commerce/normalize-iframe-commerce.ts)
+- [inject-config.ts](/Users/orbital/Documents/CODE/ORBITAL%20VISION/ov25-ui/.worktrees/ov25-ui-bug-45-commerce-line-images/src/types/inject-config.ts)
+- [normalize-iframe-commerce.test.ts](/Users/orbital/Documents/CODE/ORBITAL%20VISION/ov25-ui/.worktrees/ov25-ui-bug-45-commerce-line-images/test/unit/normalize-iframe-commerce.test.ts)
 
 Retained implementation diff:
 
-- [Bug 45 isolated diff](review-diffs/bug-45-normalized-commerce-line-images.diff) - 137 lines across three files.
+- [Bug 45 isolated diff](../review-diffs/bug-45-normalized-commerce-line-images.diff) - 137 lines across three files.
 
 Retained diff summary:
 
@@ -1042,8 +1032,8 @@ Historical verification run:
 - Focused Vitest: 7/7 passed.
 - Root TypeScript check passed in the historical integrated review workspace.
 - Scoped `git diff --check` passed.
-- Main normalizer and test match the isolated worktree byte-for-byte; shared `inject-config.ts` retains unrelated main changes outside the two-line Bug 45 field.
-- Isolated artifact applies cleanly to the clean index.
+- At review time, the main normalizer/test matched the isolated worktree byte-for-byte, while shared `inject-config.ts` retained unrelated changes outside the two-line Bug 45 field.
+- At review time, the isolated artifact applied cleanly to the then-current clean index; re-check against current main before resumption.
 - No build was run, per workflow.
 
 Residual risk:
