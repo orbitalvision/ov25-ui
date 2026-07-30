@@ -8,7 +8,6 @@ import { useOV25UI } from '../contexts/ov25-ui-context.js'
 import { cn } from '../lib/utils.js'
 import { Popover, PopoverContent, PopoverTrigger } from './ui/popover.js'
 import { toast } from 'sonner'
-import { VariantsCloseButton } from './VariantSelectMenu/VariantsCloseButton.js'
 
 interface ConfiguratorViewControlsProps {
   // All props now come from context, so no props needed
@@ -18,7 +17,6 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
 
   const {
     isVariantsOpen,
-    setIsVariantsOpen,
     isMobile,
     canAnimate,
     animationState,
@@ -328,17 +326,6 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
 
         </div>
       </div>
-      {isVariantsOpen &&
-        isMobile &&
-        !isSnap2Mode && (
-        <div className={cn(
-          "ov:absolute ov:w-full ov:pointer-events-none ov:h-full ov:inset-0 ov:z-101",
-          "ov:transition-opacity ov:duration-200",
-          shareDialogTrigger !== 'none' && "ov:opacity-0"
-        )}>
-          <VariantsCloseButton />
-        </div>
-      )}
       {!isVariantsOpen && !isMobile && !controlsHidden && !isSnap2Mode && !hasConfigureButton && (
         <div className="ov:absolute ov:ov25-controls-hidden ov:size-full ov:md:flex ov:pointer-events-none ov:inset-0 ov:p-4 ov:justify-end ov:items-start ov:z-101">
           <button id="ov25-desktop-fullscreen-button" className={cn(

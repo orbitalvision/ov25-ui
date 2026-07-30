@@ -6,6 +6,7 @@ import { cn, getProductGalleryImages, resolveImageUrl } from "../lib/utils.js"
 import ConfiguratorViewControls from './ConfiguratorViewControls.js'
 import Snap2ViewControls from './Snap2ViewControls.js'
 import { Ov25ShadowHost } from './Ov25ShadowHost.js'
+import { VariantsCloseButton } from './VariantSelectMenu/VariantsCloseButton.js'
 import { CONFIGURATOR_IFRAME_BACKGROUND_CSS_VAR } from '../lib/config/iframe-transition-snapshot.js'
 import { getResolvedConfiguratorIframeBackgroundColor } from '../utils/configurator-dom-queries.js'
 
@@ -80,6 +81,7 @@ export const IframeContainer = () => {
         stickyLayoutActive,
         cssString,
         hideGestureHint,
+        shareDialogTrigger,
     } = useOV25UI();
 
     const isModalMode =
@@ -103,6 +105,20 @@ export const IframeContainer = () => {
         isMobile &&
         isModalMode &&
         isModalOpen;
+    const showNormalMobileDrawerClose =
+        !isSnap2Mode &&
+        isMobile &&
+        isVariantsOpen &&
+        configuratorDisplayModeMobile === 'drawer';
+    const normalSheetOrDrawerOpen =
+        !isSnap2Mode &&
+        isDrawerOrDialogOpen &&
+        (isMobile
+            ? configuratorDisplayModeMobile === 'drawer'
+            : configuratorDisplayMode === 'sheet');
+    const showViewerControls =
+        (galleryIndex === galleryIndexToUse || normalSheetOrDrawerOpen) &&
+        !(isSnap2Mode && isMobile && !isModalMode && configuratorDisplayModeMobile !== 'inline');
     const iframeRadiusClass = stickyMobileGallery || snap2MobileDrawerOpen
         ? 'ov:rounded-none'
         : snap2MobileDialogOpen
@@ -207,14 +223,24 @@ export const IframeContainer = () => {
                 ) : null;
             })()}
 
-            {galleryIndex === galleryIndexToUse &&
-                !(isSnap2Mode && isMobile && !isModalMode && configuratorDisplayModeMobile !== 'inline') && (
+            {(showViewerControls || showNormalMobileDrawerClose) && (
                 <Ov25ShadowHost
                     ref={controlsContainerRef}
                     id={uniqueId ? `true-configurator-view-controls-container-${uniqueId}` : "true-configurator-view-controls-container"}
                     className="ov:absolute ov:inset-0 ov:z-101 ov:w-full ov:h-full ov:pointer-events-none"
                 >
-                    {isSnap2Mode ? <Snap2ViewControls /> : <ConfiguratorViewControls />}
+                    {showViewerControls && (
+                        isSnap2Mode ? <Snap2ViewControls /> : <ConfiguratorViewControls />
+                    )}
+                    {showNormalMobileDrawerClose && (
+                        <div className={cn(
+                            "ov:absolute ov:w-full ov:pointer-events-none ov:h-full ov:inset-0 ov:z-101",
+                            "ov:transition-opacity ov:duration-200",
+                            shareDialogTrigger !== 'none' && "ov:opacity-0",
+                        )}>
+                            <VariantsCloseButton />
+                        </div>
+                    )}
                 </Ov25ShadowHost>
             )}
 
