@@ -13,7 +13,6 @@ const testPages = [
   'single-no-variants',
   'single-no-pricing',
   'sheet-reflow-debug',
-  'single-no-groups',
   'single-with-discounts',
   'single-with-groups',
   'single-inline-variants',

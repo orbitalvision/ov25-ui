@@ -4,10 +4,11 @@ import { TestPageLayout } from '../templates/TestPageLayout.jsx';
 import '../src/index.css';
 
 const COUCH_AND_CO_APIKEY = import.meta.env.VITE_COUCH_AND_CO_APIKEY;
+const DEMO_RETAILER_APIKEY = import.meta.env.VITE_DEMO_RETAILER_APIKEY;
 
 const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
-  apiKey: () => COUCH_AND_CO_APIKEY,
-  productLink: () => '3117',
+  apiKey: () => DEMO_RETAILER_APIKEY,
+  productLink: () => '3251',
   selectors: {
     gallery: { selector: '.configurator-container', replace: true },
     variants: '#ov25-controls',

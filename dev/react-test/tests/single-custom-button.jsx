@@ -71,7 +71,17 @@ function App() {
               );
             })}
           </div>
-          <div className="ov:flex ov:flex-wrap ov:gap-2 ov:mb-4">
+          <div
+            className="ov:flex ov:flex-wrap ov:justify-end ov:gap-2 ov:p-2 ov:bg-white ov:rounded-md ov:shadow-lg"
+            style={{
+              position: 'fixed',
+              top: '0.5rem',
+              right: '0.5rem',
+              zIndex: 2147483647,
+              pointerEvents: 'auto',
+              maxWidth: 'calc(100vw - 1rem)',
+            }}
+          >
           <button
             type="button"
             onClick={() => window.ov25OpenConfigurator?.()}

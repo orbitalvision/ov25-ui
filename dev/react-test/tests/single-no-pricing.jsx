@@ -11,7 +11,6 @@ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
   selectors: {
     gallery: { selector: '.configurator-container', replace: true },
     variants: '#ov25-controls',
-    swatches: '#ov25-swatches',
     name: { selector: '#name', replace: true },
   },
   carousel: { desktop: 'stacked', mobile: 'carousel' },
