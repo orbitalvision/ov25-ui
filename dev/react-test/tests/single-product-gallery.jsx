@@ -19,7 +19,6 @@ const baseConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
   selectors: {
     gallery: { selector: '.configurator-container', replace: true },
     variants: '#ov25-controls',
-    swatches: '#ov25-swatches',
     price: { selector: '#price', replace: true },
     name: { selector: '#name', replace: true },
   },

@@ -16,7 +16,7 @@ const BASE_CONFIG = {
     price: { selector: '#price', replace: true },
     name: { selector: '#name', replace: true },
   },
-  carousel: { desktop: 'stacked', mobile: 'stacked', maxImages: { desktop: 4, mobile: 6 } },
+  carousel: { desktop: 'stacked', mobile: 'stacked' },
   configurator: {
     displayMode: { desktop: 'sheet', mobile: 'drawer' },
     triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
