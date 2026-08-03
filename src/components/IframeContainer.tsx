@@ -54,12 +54,78 @@ function getIframeBackgroundColorFromDom(): string | null {
     return cssColorToHex(resolved);
 }
 
+type ConfiguratorTitleProduct = {
+    name?: string | null;
+};
+
+type ConfiguratorTitleRange = {
+    name?: string | null;
+    rangeData?: {
+        name?: string | null;
+    } | null;
+};
+
+type ConfiguratorIframeTitleOptions = {
+    productLink?: string | null;
+    isSnap2Mode: boolean;
+    products?: ConfiguratorTitleProduct[];
+    currentProduct?: ConfiguratorTitleProduct | null;
+    range?: ConfiguratorTitleRange | null;
+};
+
+function getTrimmedName(name: string | null | undefined): string | null {
+    const trimmed = name?.trim();
+    return trimmed || null;
+}
+
+export function getConfiguratorIframeTitle({
+    productLink,
+    isSnap2Mode,
+    products = [],
+    currentProduct,
+    range,
+}: ConfiguratorIframeTitleOptions): string {
+    const normalizedPath = (productLink ?? '')
+        .trim()
+        .replace(/^\/+/, '')
+        .split(/[?#]/)[0];
+
+    if (isSnap2Mode) {
+        const rangeName = getTrimmedName(range?.name) ?? getTrimmedName(range?.rangeData?.name);
+        return rangeName
+            ? `Modular 3D configurator for ${rangeName} range.`
+            : 'Modular 3D configurator.';
+    }
+
+    const isRangeMode = normalizedPath.startsWith('range/') || products.length > 1;
+    if (isRangeMode) {
+        const rangeName = getTrimmedName(range?.name);
+        return rangeName
+            ? `3D configurator for ${rangeName} range.`
+            : '3D range configurator.';
+    }
+
+    const productName =
+        getTrimmedName(currentProduct?.name) ??
+        (products.length === 1 ? getTrimmedName(products[0]?.name) : null);
+    const rangeName = getTrimmedName(range?.name);
+    if (rangeName && productName) {
+        return `3D configurator for ${rangeName} ${productName}.`;
+    }
+
+    return productName
+        ? `3D configurator for ${productName}.`
+        : '3D product configurator.';
+}
+
 
 export const IframeContainer = () => {
     // Get all required data from context
     const {
         iframeRef,
+        products,
         currentProduct,
+        range,
         galleryIndex,
         productLink,
         apiKey,
@@ -171,6 +237,13 @@ export const IframeContainer = () => {
     const iframeSrc = useMemo(() =>
         getIframeSrc(apiKey, productLink, configurationUuid, hexBgColor, bedAllowNoneQueryValue, diningShowAttachmentPoints, hideGestureHint),
         [productLink, apiKey, configurationUuid, hexBgColor, bedAllowNoneQueryValue, diningShowAttachmentPoints, hideGestureHint]);
+    const iframeTitle = getConfiguratorIframeTitle({
+        productLink,
+        isSnap2Mode,
+        products,
+        currentProduct,
+        range,
+    });
 
     const isStackedStyles = cn(
         snap2DesktopModalStackedFill
@@ -191,12 +264,20 @@ export const IframeContainer = () => {
         <div id="true-ov25-configurator-iframe-container"
             data-clarity-mask="true"
             className={cn(isStacked ? isStackedStyles : isInlineStyles)}>
-            <iframe ref={dummyIframeRef} id="ov25-dummy-iframe" allow="camera; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; xr-spatial-tracking; fullscreen" hidden></iframe> {/* Used as bait to stop Trustpilot from hijacking our iframe. it looks for first iframe in the DOM */}
+            <iframe
+                ref={dummyIframeRef}
+                id="ov25-dummy-iframe"
+                title="Compatibility frame"
+                aria-hidden="true"
+                allow="camera; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; xr-spatial-tracking; fullscreen"
+                hidden
+            ></iframe> {/* Used as bait to stop Trustpilot from hijacking our iframe. it looks for first iframe in the DOM */}
             <iframe
                 data-fullscreen={isVariantsOpen}
                 data-clarity-mask="true"
                 ref={iframeRef}
                 id={uniqueId ? `ov25-configurator-iframe-${uniqueId}` : "ov25-configurator-iframe"}
+                title={iframeTitle}
                 src={iframeSrc}
                 className={`ov:w-full ov:bg-transparent ov:h-full ${iframeRadiusClass} ov:transform-gpu ov:backface-hidden ${galleryIndex === galleryIndexToUse ? 'ov:block' : 'ov:ov25-controls-hidden'}`}
                 allow="camera; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; xr-spatial-tracking; fullscreen"
