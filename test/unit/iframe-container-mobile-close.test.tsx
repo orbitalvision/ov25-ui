@@ -97,7 +97,6 @@ describe('IframeContainer mobile drawer close button', () => {
   it.each([
     ['the drawer is closed', { isVariantsOpen: false, isDrawerOrDialogOpen: false }],
     ['the viewport is desktop', { isMobile: false }],
-    ['mobile modal mode is active', { configuratorDisplayModeMobile: 'modal', isModalOpen: true }],
     ['mobile inline mode is active', { configuratorDisplayModeMobile: 'inline' }],
     ['variants-only mode is active', { configuratorDisplayModeMobile: 'variants-only-sheet' }],
     ['the product is Snap2', { isSnap2Mode: true }],
@@ -106,6 +105,52 @@ describe('IframeContainer mobile drawer close button', () => {
     const { container } = render(<IframeContainer />);
 
     expect(getCloseButtons(container)).toHaveLength(0);
+  });
+});
+
+describe('IframeContainer mobile modal close button', () => {
+  beforeEach(() => {
+    setIsVariantsOpen.mockClear();
+    iframeContext = createContext({
+      configuratorDisplayModeMobile: 'modal',
+      isModalOpen: false,
+    });
+  });
+
+  it.each([
+    ['a product image', 0],
+    ['the 360 viewer', 1],
+  ])('renders exactly one visible Close modal button for %s and closes the modal', (_label, galleryIndex) => {
+    iframeContext.galleryIndex = galleryIndex;
+    const { container } = render(<IframeContainer />);
+
+    const closeButtons = getCloseButtons(container);
+    expect(closeButtons).toHaveLength(1);
+    expect(closeButtons[0]).toBeVisible();
+    expect(closeButtons[0]).toHaveAccessibleName('Close modal');
+
+    fireEvent.click(closeButtons[0]);
+    expect(setIsVariantsOpen).toHaveBeenCalledOnce();
+    expect(setIsVariantsOpen).toHaveBeenCalledWith(false);
+  });
+
+  it.each([
+    ['the modal is closed', { isVariantsOpen: false, isDrawerOrDialogOpen: false }],
+    ['the viewport is desktop', { isMobile: false, configuratorDisplayMode: 'modal' }],
+    ['mobile drawer mode is active', { configuratorDisplayModeMobile: 'drawer' }],
+    ['mobile inline mode is active', { configuratorDisplayModeMobile: 'inline' }],
+    ['variants-only mode is active', { configuratorDisplayModeMobile: 'variants-only-sheet' }],
+    ['the product is Snap2', { isSnap2Mode: true }],
+  ])('does not render the modal close overlay when %s', (_label, overrides) => {
+    iframeContext = createContext({
+      configuratorDisplayModeMobile: 'modal',
+      ...overrides,
+    });
+    const { container } = render(<IframeContainer />);
+
+    const modalCloseButtons = getCloseButtons(container)
+      .filter((button) => button.getAttribute('aria-label') === 'Close modal');
+    expect(modalCloseButtons).toHaveLength(0);
   });
 });
 

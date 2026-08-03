@@ -176,6 +176,13 @@ export const IframeContainer = () => {
         isMobile &&
         isVariantsOpen &&
         configuratorDisplayModeMobile === 'drawer';
+    const showNormalMobileModalClose =
+        !isSnap2Mode &&
+        isMobile &&
+        isVariantsOpen &&
+        configuratorDisplayModeMobile === 'modal';
+    const showNormalMobileOverlayClose =
+        showNormalMobileDrawerClose || showNormalMobileModalClose;
     const normalSheetOrDrawerOpen =
         !isSnap2Mode &&
         isDrawerOrDialogOpen &&
@@ -304,7 +311,7 @@ export const IframeContainer = () => {
                 ) : null;
             })()}
 
-            {(showViewerControls || showNormalMobileDrawerClose) && (
+            {(showViewerControls || showNormalMobileOverlayClose) && (
                 <Ov25ShadowHost
                     ref={controlsContainerRef}
                     id={uniqueId ? `true-configurator-view-controls-container-${uniqueId}` : "true-configurator-view-controls-container"}
@@ -313,13 +320,15 @@ export const IframeContainer = () => {
                     {showViewerControls && (
                         isSnap2Mode ? <Snap2ViewControls /> : <ConfiguratorViewControls />
                     )}
-                    {showNormalMobileDrawerClose && (
+                    {showNormalMobileOverlayClose && (
                         <div className={cn(
                             "ov:absolute ov:w-full ov:pointer-events-none ov:h-full ov:inset-0 ov:z-101",
                             "ov:transition-opacity ov:duration-200",
                             shareDialogTrigger !== 'none' && "ov:opacity-0",
                         )}>
-                            <VariantsCloseButton />
+                            <VariantsCloseButton
+                                ariaLabel={showNormalMobileModalClose ? 'Close modal' : undefined}
+                            />
                         </div>
                     )}
                 </Ov25ShadowHost>

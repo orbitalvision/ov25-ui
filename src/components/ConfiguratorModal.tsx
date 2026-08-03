@@ -210,11 +210,13 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({
           )}
           style={{ clipPath: 'inset(0 round 1.5rem)' }}
         >
-          <VariantsCloseButton
-            onClick={onClose}
-            ariaLabel="Close modal"
-            className={cn('ov:z-101', isShareDialogOpen && 'ov:opacity-0 ov:pointer-events-none')}
-          />
+          {!isMobile && (
+            <VariantsCloseButton
+              onClick={onClose}
+              ariaLabel="Close modal"
+              className={cn('ov:z-101', isShareDialogOpen && 'ov:opacity-0 ov:pointer-events-none')}
+            />
+          )}
 
           <div
             className={cn(
