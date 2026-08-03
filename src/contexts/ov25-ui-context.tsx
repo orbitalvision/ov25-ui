@@ -1763,10 +1763,10 @@ export const OV25UIProvider: React.FC<{
     }
   }, [isSnap2Mode, handleConfigureClick, openConfigurator]);
 
-  configureHandlerRef.current = handleConfigureClick;
+  configureHandlerRef.current = openConfiguratorOrSnap2;
   const configureHandlerWindowRef = (window as any).ov25ConfigureHandlerRef;
   if (configureHandlerWindowRef) {
-    configureHandlerWindowRef.current = handleConfigureClick;
+    configureHandlerWindowRef.current = openConfiguratorOrSnap2;
   }
 
   const openRef = (window as any).ov25OpenConfiguratorRef;
