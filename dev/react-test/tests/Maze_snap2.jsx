@@ -304,7 +304,7 @@ function App() {
         id="ov25-initialise-menu"
         className="ov:fixed ov:inset-0 ov:z-[2147483000] ov:pointer-events-auto"
       />
-      <div className="ov:flex ov:h-full ov:w-[calc(100dvw-32px)] ov:flex-col">
+      <div className="ov:flex ov:h-full ov:w-[calc(100dvw)] ov:flex-col">
         <main className={`ov:flex ov:min-h-0 ov:flex-1 ov:flex-col ov:overflow-hidden ${useMobileLayout ? '' : 'ov:md:flex-row'}`}>
           {/* Gallery */}
           <div className="configurator-container ov:flex ov:h-full ov:w-full ov:flex-1 ov:flex-col ov:overflow-hidden" />
