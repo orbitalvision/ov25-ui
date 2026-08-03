@@ -7,6 +7,7 @@ import { SwatchImage } from "../SwatchImage.js";
 import { Swatch, useOV25UI } from "../../contexts/ov25-ui-context.js";
 import { cn } from '../../lib/utils.js';
 import { SWATCH_PATH } from '../../lib/svgs/SwatchIconSvg.js';
+import { PLACEHOLDER_IMAGE_URL } from '../../lib/placeholder-image.js';
 
 interface SwatchBookProps {
   isMobile: boolean;
@@ -162,7 +163,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
                 <div key={`${swatch.manufacturerId}-${swatch.name}-${swatch.option}`} className={swatchItemClassName}>
                   <div className={cn(swatchImageContainerClassName, 'ov:group')}>
                     <SwatchImage
-                      src={swatch.thumbnail && swatch.thumbnail.miniThumbnails ? swatch.thumbnail.miniThumbnails.medium : '/placeholder.svg?height=200&width=200'}
+                      src={swatch.thumbnail?.miniThumbnails?.medium || PLACEHOLDER_IMAGE_URL}
                       alt={swatch.name}
                       className='ov25-swatch-image ov:w-full ov:h-full ov:scale-120'
                     />

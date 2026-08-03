@@ -2,6 +2,7 @@ import { BanIcon } from 'lucide-react';
 import * as React from 'react';
 import { useOV25UI } from '../../../contexts/ov25-ui-context.js';
 import { OV25_VARIANT_RING_MODE_SOLID, OV25_VARIANT_THUMB_RING_MODE_VAR } from '../../../lib/config/variant-selection-style.js';
+import { PLACEHOLDER_IMAGE_URL } from '../../../lib/placeholder-image.js';
 import { cn } from '../../../lib/utils.js';
 
 type VariantThumbSize = 'sm' | 'md' | 'lg';
@@ -60,12 +61,12 @@ export const VariantThumb = React.memo(({
     <div className="ov:w-full ov:h-full ov:flex ov:items-center ov:justify-center ov:bg-white" data-none="true">
       <BanIcon className="ov:w-10 ov:h-10 ov:text-red-400" />
     </div>
-  ) : imageUrl ? (
-    <img src={imageUrl} alt={alt ?? name} className="ov:w-full ov:h-full ov:object-cover" />
   ) : (
-    <div className="ov:w-full ov:h-full ov:flex ov:items-center ov:justify-center ov:bg-[var(--ov25-border-color)]">
-      <span className="ov:text-[var(--ov25-secondary-text-color)] ov:text-sm">—</span>
-    </div>
+    <img
+      src={imageUrl || PLACEHOLDER_IMAGE_URL}
+      alt={alt ?? name}
+      className="ov:w-full ov:h-full ov:object-cover"
+    />
   );
 
   const thumbAndOverlays = (

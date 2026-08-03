@@ -24,7 +24,7 @@ function modulesToVariants(modules: CompatibleModule[], snap2Objects: unknown[] 
         id: `${module.productId}-${module.model.modelId}`,
         name: module.product.name,
         price: 0,
-        image: module.product.hasImage ? module.product.imageUrl : '/placeholder.svg?height=200&width=200',
+        image: module.product.imageUrl || '',
         blurHash: '',
         data: module,
         isSelected: snap2SceneContainsModule(snap2Objects, module.productId, module.model.modelId),

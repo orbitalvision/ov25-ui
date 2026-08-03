@@ -312,7 +312,7 @@ export const ModuleBottomPanel: React.FC<{ portalTarget: Element }> = ({ portalT
                     id: `${module.productId}-${module.model.modelId}`,
                     name: module.product.name,
                     price: 0,
-                    image: module.product.hasImage ? module.product.imageUrl : '/placeholder.svg?height=200&width=200',
+                    image: module.product.imageUrl || '',
                     blurHash: '',
                     data: module,
                     isSelected: false

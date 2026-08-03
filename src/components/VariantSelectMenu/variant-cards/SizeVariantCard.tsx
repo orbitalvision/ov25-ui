@@ -1,4 +1,5 @@
 import React from 'react';
+import { PLACEHOLDER_IMAGE_URL } from '../../../lib/placeholder-image.js';
 
 interface VariantCardProps {
   variant: any;
@@ -13,7 +14,7 @@ interface VariantCardProps {
 export const SizeVariantCard = React.memo(
   ({ variant, onSelect, index, isMobile, showImage = false, showDimensions = true }: VariantCardProps) => {
     // Generate a stable image src that will be used for both rendering and as a key
-    const imgSrc = variant.image || "/placeholder.svg";
+    const imgSrc = variant.image || PLACEHOLDER_IMAGE_URL;
     
     return (
       <div
@@ -60,4 +61,4 @@ export const SizeVariantCard = React.memo(
       prevProps.isMobile === nextProps.isMobile
     );
   }
-); 
+);

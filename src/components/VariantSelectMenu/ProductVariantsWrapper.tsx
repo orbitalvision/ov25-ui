@@ -113,7 +113,7 @@ export function ProductVariantsWrapper({
         name: selection?.name,
         bedSize: selectionBedSizeFromMetadata(selection as { metadata?: ConfiguratorSelectionBedMetadata }),
         price: selection?.price,
-        image: selection?.thumbnail || '/placeholder.svg?height=200&width=200',
+        image: selection?.thumbnail || '',
         blurHash: (selection as any)?.blurHash,
         data: products?.find(p => p?.id === selection?.id),
         isSelected: selection.id === currentProductId || selectedSelections.some(
@@ -143,7 +143,7 @@ export function ProductVariantsWrapper({
                   name: selection?.name,
                   bedSize: selectionBedSizeFromMetadata(selection as { metadata?: ConfiguratorSelectionBedMetadata }),
                   price: selection?.price,
-                  image: (selection as any)?.miniThumbnails?.medium || '/placeholder.svg?height=200&width=200',
+                  image: (selection as any)?.miniThumbnails?.medium || '',
                   blurHash: (selection as any).blurHash,
                   isSelected: selectedSelections.some(
                     sel => sel.optionId === option.id &&

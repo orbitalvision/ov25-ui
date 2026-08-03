@@ -3,6 +3,7 @@ import { useOV25UI } from "../contexts/ov25-ui-context.js"
 import { CarouselDisplayMode } from "../types/config-enums.js"
 import { cn } from "../lib/utils.js"
 import { getProductGalleryImages, getCutoutIndex, resolveImageUrl } from "../lib/utils.js"
+import { PLACEHOLDER_IMAGE_URL } from "../lib/placeholder-image.js"
 
 function isThreeDPlaceholder(item: unknown): item is { is3D: true } {
   return typeof item === 'object' && item !== null && 'is3D' in item && (item as { is3D: boolean }).is3D === true
@@ -229,7 +230,7 @@ export function ProductCarousel() {
       >
           {/* <div className="ov:w-full ov:h-full ov:absolute ov:inset-0 ov:bg-black"></div> */}
         <img
-          src={resolveImageUrl(item as any, 'carousel') || "/placeholder.svg"}
+          src={resolveImageUrl(item as any, 'carousel') || PLACEHOLDER_IMAGE_URL}
           alt={`Product thumbnail ${index}`}
           draggable={false}
           onDragStart={(e) => e.preventDefault()}
@@ -270,7 +271,7 @@ export function ProductCarousel() {
         </button>
       )
     }
-    const src = resolveImageUrl(item as any, 'stacked') || '/placeholder.svg'
+    const src = resolveImageUrl(item as any, 'stacked') || PLACEHOLDER_IMAGE_URL
     const fullscreenSrc = resolveImageUrl(item as any, 'fullscreen') || src
     return (
       <button

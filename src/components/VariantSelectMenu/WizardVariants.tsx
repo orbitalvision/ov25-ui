@@ -163,8 +163,8 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
       bedSize: selectionBedSizeFromMetadata(selection as { metadata?: ConfiguratorSelectionBedMetadata }),
       price: selection.price,
       image: currentOption!.id === 'size'
-        ? (selection.thumbnail || '/placeholder.svg?height=200&width=200')
-        : (selection.miniThumbnails?.medium || '/placeholder.svg?height=200&width=200'),
+        ? (selection.thumbnail || '')
+        : (selection.miniThumbnails?.medium || ''),
       blurHash: selection.blurHash,
       data: currentOption!.id === 'size' ? products?.find(p => p?.id === selection?.id) : selection.data,
       isSelected: currentOption!.id === 'size'
