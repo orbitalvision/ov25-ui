@@ -67,7 +67,7 @@ describe('placeholder image leaf fallbacks', () => {
     expect(container.querySelector('[data-none="true"]')).not.toBeNull();
   });
 
-  it('uses the bundled placeholder in SizeVariantCard only when its image is missing', () => {
+  it('omits a missing SizeVariantCard image and preserves a real image', () => {
     const variant = {
       id: 'size-1',
       name: 'Small',
@@ -84,10 +84,8 @@ describe('placeholder image leaf fallbacks', () => {
       />,
     );
 
-    expect(container.querySelector('img')).toHaveAttribute(
-      'src',
-      PLACEHOLDER_IMAGE_URL,
-    );
+    expect(container.querySelector('img')).toBeNull();
+    expect(container.innerHTML).not.toContain(PLACEHOLDER_IMAGE_URL);
 
     rerender(
       <SizeVariantCard
@@ -99,9 +97,20 @@ describe('placeholder image leaf fallbacks', () => {
       />,
     );
     expect(container.querySelector('img')).toHaveAttribute('src', '/size.jpg');
+
+    rerender(
+      <SizeVariantCard
+        variant={{ ...variant, id: 'size-3', image: '/hidden-size.jpg' }}
+        onSelect={vi.fn()}
+        index={0}
+        isMobile={false}
+        showImage={false}
+      />,
+    );
+    expect(container.querySelector('img')).toBeNull();
   });
 
-  it('renders the bundled placeholder inside a missing-image module card', () => {
+  it('renders the text fallback inside a missing-image module card', () => {
     const variant = moduleVariant({
       id: 1,
       name: 'Missing module image',
@@ -120,9 +129,10 @@ describe('placeholder image leaf fallbacks', () => {
     const placeholder = container.querySelector(
       '[data-ov25-module-variant-card-part="thumb-placeholder"]',
     );
-    expect(placeholder).toBeInstanceOf(HTMLImageElement);
-    expect(placeholder).toHaveAttribute('src', PLACEHOLDER_IMAGE_URL);
-    expect(container).not.toHaveTextContent('No Image');
+    expect(placeholder).toBeInstanceOf(HTMLDivElement);
+    expect(container.querySelector('img')).toBeNull();
+    expect(placeholder).toHaveTextContent('No Image');
+    expect(container.innerHTML).not.toContain(PLACEHOLDER_IMAGE_URL);
   });
 
   it('preserves responsive attributes for a real module image', () => {

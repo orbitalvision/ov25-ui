@@ -17,7 +17,6 @@ import { checkoutCommerceCtaButtonClasses } from '../CheckoutButton.js';
 import { VariantsCloseButton } from '../VariantsCloseButton.js';
 import { useSnap2VariantSheetMainRoot } from '../../Snap2VariantSheetColumn.js';
 import { useOV25UI } from '../../../contexts/ov25-ui-context.js';
-import { PLACEHOLDER_IMAGE_URL } from '../../../lib/placeholder-image.js';
 
 const DESC_FOOTER_P_CLASS =
   'ov:text-xs ov:leading-snug ov:wrap-break-word ov:text-(--ov25-secondary-text-color) ov:px-1 ov:md:px-0';
@@ -184,6 +183,7 @@ export function ModuleVariantCard({
   const variantSheetPortalEl = useSnap2VariantSheetMainRoot();
   const seeMoreLabel = getString('moduleCardSeeMore', undefined, 'See more...');
   const addProductLabel = getString('moduleCardAddProduct', undefined, 'Add Product');
+  const noImageLabel = getString('moduleCardNoImage', undefined, 'No Image');
   const [detailOpen, setDetailOpen] = useState(false);
   const detailTitleId = useId();
   const tooltipId = useId();
@@ -549,12 +549,12 @@ export function ModuleVariantCard({
             className="ov25-module-variant-card__thumb-img ov:h-full ov:w-full ov:max-h-full ov:max-w-full ov:object-contain"
           />
         ) : (
-          <img
-            src={PLACEHOLDER_IMAGE_URL}
-            alt=""
-            className="ov25-module-variant-card__thumb-img ov25-module-variant-card__thumb-placeholder ov:h-full ov:w-full ov:max-h-full ov:max-w-full ov:object-contain"
+          <div
+            className="ov25-module-variant-card__thumb-placeholder ov:absolute ov:inset-0 ov:flex ov:items-center ov:justify-center ov:bg-transparent"
             data-ov25-module-variant-card-part="thumb-placeholder"
-          />
+          >
+            <span className="ov:p-2 ov:text-center ov:text-gray-400 ov:text-xs">{noImageLabel}</span>
+          </div>
         )}
       </div>
 

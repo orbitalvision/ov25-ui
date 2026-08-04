@@ -3,7 +3,6 @@ import { useOV25UI } from "../contexts/ov25-ui-context.js"
 import { CarouselDisplayMode } from "../types/config-enums.js"
 import { cn } from "../lib/utils.js"
 import { getProductGalleryImages, getCutoutIndex, resolveImageUrl } from "../lib/utils.js"
-import { PLACEHOLDER_IMAGE_URL } from "../lib/placeholder-image.js"
 
 function isThreeDPlaceholder(item: unknown): item is { is3D: true } {
   return typeof item === 'object' && item !== null && 'is3D' in item && (item as { is3D: boolean }).is3D === true
@@ -218,6 +217,18 @@ export function ProductCarousel() {
     }
     const galleryIndexForSlot = isCutout ? galleryIndexToUse : (cutoutIndexCombined === 0 ? index + 1 : index)
     const isSelected = galleryIndex === galleryIndexForSlot
+    const src = resolveImageUrl(item as any, 'carousel')
+    if (!src) {
+      return (
+        <div
+          key={index}
+          className="ov25-gallery-image-empty-slot ov:relative ov:aspect-square ov:w-full ov:overflow-hidden ov:rounded-(--ov25-configurator-iframe-border-radius) ov:bg-muted"
+          data-ov25-gallery-image-empty-slot="true"
+          data-ov25-gallery-item-index={index}
+          aria-hidden="true"
+        />
+      )
+    }
     return (
       <button
         key={index}
@@ -230,7 +241,7 @@ export function ProductCarousel() {
       >
           {/* <div className="ov:w-full ov:h-full ov:absolute ov:inset-0 ov:bg-black"></div> */}
         <img
-          src={resolveImageUrl(item as any, 'carousel') || PLACEHOLDER_IMAGE_URL}
+          src={src}
           alt={`Product thumbnail ${index}`}
           draggable={false}
           onDragStart={(e) => e.preventDefault()}
@@ -271,8 +282,19 @@ export function ProductCarousel() {
         </button>
       )
     }
-    const src = resolveImageUrl(item as any, 'stacked') || PLACEHOLDER_IMAGE_URL
+    const src = resolveImageUrl(item as any, 'stacked')
     const fullscreenSrc = resolveImageUrl(item as any, 'fullscreen') || src
+    if (!src) {
+      return (
+        <div
+          key={index}
+          className="ov25-gallery-image-empty-slot ov:relative ov:aspect-3/2 ov:w-full ov:overflow-hidden ov:rounded-(--ov25-configurator-iframe-border-radius) ov:bg-muted"
+          data-ov25-gallery-image-empty-slot="true"
+          data-ov25-gallery-item-index={index}
+          aria-hidden="true"
+        />
+      )
+    }
     return (
       <button
         key={index}

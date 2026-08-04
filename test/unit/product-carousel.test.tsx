@@ -2,6 +2,7 @@ import * as React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ProductCarousel } from '../../src/components/product-carousel';
+import { PLACEHOLDER_IMAGE_URL } from '../../src/lib/placeholder-image';
 
 const setGalleryIndex = vi.fn((index: number) => {
   carouselContext.galleryIndex = index;
@@ -43,6 +44,7 @@ describe('ProductCarousel', () => {
     carouselContext.carouselLayout = 'carousel';
     carouselContext.carouselLayoutMobile = 'carousel';
     carouselContext.isMobile = false;
+    carouselContext.images = ['/first.jpg', '/second.jpg'];
     carouselContext.galleryCarouselFullscreenImage = null;
     setGalleryIndex.mockClear();
     carouselContext.setGalleryCarouselFullscreenImage.mockClear();
@@ -95,6 +97,61 @@ describe('ProductCarousel', () => {
       'false',
       'false',
     ]);
+  });
+
+  it('preserves horizontal slots while omitting missing images', () => {
+    carouselContext.images = ['', '/real.jpg'];
+
+    const { container } = render(<ProductCarousel />);
+    const thumbnails = getThumbnailButtons(container);
+    const slots = container.querySelectorAll('.ov25-thumbnail-scroll > div > div');
+    const emptySlot = container.querySelector<HTMLElement>(
+      '[data-ov25-gallery-image-empty-slot="true"]',
+    );
+    const galleryButtons = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('.ov25-gallery-image-button'),
+    );
+
+    expect(slots).toHaveLength(3);
+    expect(thumbnails).toHaveLength(2);
+    expect(emptySlot?.tagName).toBe('DIV');
+    expect(emptySlot).toHaveClass('ov25-gallery-image-empty-slot');
+    expect(emptySlot).toHaveAttribute('aria-hidden', 'true');
+    expect(emptySlot).toHaveAttribute('data-ov25-gallery-item-index', '1');
+    expect(emptySlot?.querySelector('button')).toBeNull();
+    expect(galleryButtons).toHaveLength(1);
+    expect(galleryButtons[0].querySelector('img')).toHaveAttribute('src', '/real.jpg');
+    expect(container.innerHTML).not.toContain(PLACEHOLDER_IMAGE_URL);
+
+    fireEvent.click(galleryButtons[0]);
+    expect(setGalleryIndex).toHaveBeenLastCalledWith(2);
+  });
+
+  it('preserves stacked slots and real-image fullscreen behavior without a missing-image placeholder', () => {
+    carouselContext.images = ['', '/real.jpg'];
+    carouselContext.carouselLayout = 'stacked';
+
+    const { container } = render(<ProductCarousel />);
+    const emptySlot = container.querySelector<HTMLElement>(
+      '[data-ov25-gallery-image-empty-slot="true"]',
+    );
+    const galleryButtons = Array.from(
+      container.querySelectorAll<HTMLButtonElement>('.ov25-gallery-image-button'),
+    );
+
+    expect(emptySlot?.parentElement?.children).toHaveLength(3);
+    expect(emptySlot?.parentElement?.children[1]).toBe(emptySlot);
+    expect(emptySlot?.tagName).toBe('DIV');
+    expect(emptySlot).toHaveClass('ov25-gallery-image-empty-slot');
+    expect(emptySlot).toHaveAttribute('aria-hidden', 'true');
+    expect(emptySlot).toHaveAttribute('data-ov25-gallery-item-index', '1');
+    expect(emptySlot?.querySelector('button')).toBeNull();
+    expect(galleryButtons).toHaveLength(1);
+    expect(galleryButtons[0].querySelector('img')).toHaveAttribute('src', '/real.jpg');
+    expect(container.innerHTML).not.toContain(PLACEHOLDER_IMAGE_URL);
+
+    fireEvent.click(galleryButtons[0]);
+    expect(carouselContext.setGalleryCarouselFullscreenImage).toHaveBeenLastCalledWith('/real.jpg');
   });
 
   it('shows the fullscreen overlay as a manual popover without reparenting it', () => {

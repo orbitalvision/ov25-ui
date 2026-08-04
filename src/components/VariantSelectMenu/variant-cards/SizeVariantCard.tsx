@@ -1,5 +1,4 @@
 import React from 'react';
-import { PLACEHOLDER_IMAGE_URL } from '../../../lib/placeholder-image.js';
 
 interface VariantCardProps {
   variant: any;
@@ -13,9 +12,6 @@ interface VariantCardProps {
 // Use React.memo to prevent unnecessary re-renders
 export const SizeVariantCard = React.memo(
   ({ variant, onSelect, index, isMobile, showImage = false, showDimensions = true }: VariantCardProps) => {
-    // Generate a stable image src that will be used for both rendering and as a key
-    const imgSrc = variant.image || PLACEHOLDER_IMAGE_URL;
-    
     return (
       <div
         onClick={(e) => {
@@ -28,7 +24,9 @@ export const SizeVariantCard = React.memo(
         title={variant.name}
       >
         <div className="ov:flex ov:flex-1 ov:flex-col ov:items-center ov:justify-between">
-          {showImage && <img src={imgSrc} alt={variant.name} className="ov:w-full ov:h-full ov:object-cover ov:rounded-lg" />}
+          {showImage && variant.image ? (
+            <img src={variant.image} alt={variant.name} className="ov:w-full ov:h-full ov:object-cover ov:rounded-lg" />
+          ) : null}
           <div className="ov:flex ov:flex-col ov:justify-center ov:items-center">
             <h3 className="ov25-size-variant-card-name ov:font-[350] ov:text-base ov:text-center ov:leading-[2em] ov:text-[var(--ov25-secondary-text-color)]">{variant.name}</h3>
           </div>
@@ -57,8 +55,10 @@ export const SizeVariantCard = React.memo(
     return (
       prevProps.variant.id === nextProps.variant.id &&
       prevProps.variant.isSelected === nextProps.variant.isSelected &&
+      prevProps.variant.image === nextProps.variant.image &&
       prevProps.index === nextProps.index &&
-      prevProps.isMobile === nextProps.isMobile
+      prevProps.isMobile === nextProps.isMobile &&
+      prevProps.showImage === nextProps.showImage
     );
   }
 );
