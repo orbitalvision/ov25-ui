@@ -14,6 +14,23 @@ export function configuratorDisplayModeUsesInlineVariants(
   return displayMode === 'inline' || displayMode === 'inline-sheet' || displayMode === 'inline-sticky';
 }
 
+/** Whether injection must provide the lower body portal used by a modal configurator shell. */
+export function shouldCreateModalPortal({
+  isSnap2,
+  desktopDisplayMode,
+  mobileDisplayMode,
+}: {
+  isSnap2: boolean;
+  desktopDisplayMode: string | null | undefined;
+  mobileDisplayMode: string | null | undefined;
+}): boolean {
+  if (desktopDisplayMode === 'modal' || mobileDisplayMode === 'modal') {
+    return true;
+  }
+
+  return isSnap2 && desktopDisplayMode !== 'inline-sheet';
+}
+
 /**
  * Configuration option type
  */

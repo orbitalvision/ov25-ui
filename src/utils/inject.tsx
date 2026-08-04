@@ -16,7 +16,10 @@ import { createPortal } from 'react-dom';
 import { Toaster } from 'sonner';
 import { getSharedStylesheet, createuserCustomCssStylesheet } from './shadow-styles.js';
 import { findIframeWithUniqueId } from './configurator-dom-queries.js';
-import { configuratorDisplayModeUsesInlineVariants } from './configurator-utils.js';
+import {
+  configuratorDisplayModeUsesInlineVariants,
+  shouldCreateModalPortal,
+} from './configurator-utils.js';
 import { computeIsMobileViewport } from './viewport-mobile.js';
 import { injectDiningConfigurator } from './inject-dining.js';
 import { OV25_INJECTOR_OWNED_ATTRIBUTE } from '../lib/sticky-layout-controller.js';
@@ -599,9 +602,11 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     const swatchbookPortalShadowRoot = swatchbookPortalContainer.attachShadow({ mode: 'open' });
     swatchbookPortalShadowRoot.adoptedStyleSheets = getBaseShadowStylesheets();
 
-    const isAnyModalMode =
-      configuratorDisplayMode === ConfiguratorDisplayMode.Modal ||
-      configuratorDisplayModeMobile === ConfiguratorDisplayMode.Modal;
+    const isAnyModalMode = shouldCreateModalPortal({
+      isSnap2: isSnap2Product,
+      desktopDisplayMode: configuratorDisplayMode,
+      mobileDisplayMode: configuratorDisplayModeMobile,
+    });
 
     let modalPortalShadowRoot: ShadowRoot | undefined;
     if (isAnyModalMode) {
