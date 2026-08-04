@@ -50,7 +50,7 @@ export type ConfiguratorConfig = {
   modules?: ModulesConfig;
 };
 
-/** Variant UI style: wizard | list | tabs | accordion | tree. Accordion not available on mobile. */
+/** Variant UI style: wizard | list | tabs | accordion | tree. */
 export type VariantDisplayMode = 'wizard' | 'list' | 'tabs' | 'accordion' | 'tree';
 
 /** Snap2 / inline-sheet: which horizontal edge the variant settings sheet attaches to. */
