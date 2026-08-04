@@ -313,6 +313,8 @@ describe('sticky layout controller lifecycle', () => {
     columnHeight?: string;
     columnMaxHeight?: string;
     containerBlocker?: boolean;
+    galleryColumnHeight?: number;
+    variantsHeight?: number;
   } = {}) {
     const display = options.display ?? 'grid';
     const flexDirection = options.flexDirection ?? 'row';
@@ -369,6 +371,7 @@ describe('sticky layout controller lifecycle', () => {
       stretchResolves: options.stretchResolves !== false,
       containerTop: 240,
       containerHeight: 1200,
+      variantsHeight: options.variantsHeight ?? 1200,
     };
     setRect(product, 180, 1500);
     vi.spyOn(container, 'getBoundingClientRect').mockImplementation(() =>
@@ -379,12 +382,12 @@ describe('sticky layout controller lifecycle', () => {
         galleryColumn.style.getPropertyValue('align-self') === 'stretch';
       const height = stretchApplied && state.stretchResolves
         ? state.containerHeight
-        : 320;
+        : (options.galleryColumnHeight ?? 320);
       return domRect(240, height, 560);
     });
     setRect(gallery, 240, 300, 560);
     vi.spyOn(variants, 'getBoundingClientRect').mockImplementation(() =>
-      domRect(240, state.containerHeight, 480, 640),
+      domRect(240, state.variantsHeight, 480, 640),
     );
     return {
       state,
@@ -396,6 +399,62 @@ describe('sticky layout controller lifecycle', () => {
       setProperty,
     };
   }
+
+  it('falls back when the gallery parent reaches sticky top but ends before variants', () => {
+    const layout = installStretchRepairLayout({
+      display: 'block',
+      galleryColumnHeight: 600,
+    });
+    const controller = createStickyLayoutController({
+      document,
+      galleryHost: layout.gallery,
+      variantsHost: layout.variants,
+      onDiagnostic: () => {},
+    });
+
+    controller.start();
+    flushFrame();
+
+    expect(controller.getSnapshot().requiresBodyFallback).toBe(true);
+    expect(
+      controller
+        .getSnapshot()
+        .ancestorBlockers.some(
+          (blocker) =>
+            blocker.element === layout.galleryColumn &&
+            blocker.reasons.includes('insufficient-sticky-travel'),
+        ),
+    ).toBe(true);
+    controller.destroy();
+  });
+
+  it('keeps native sticky when stretching the gallery parent through the variants', () => {
+    const layout = installStretchRepairLayout({
+      galleryColumnHeight: 600,
+      alignSelf: 'self-start',
+      alignSelfPriority: 'important',
+    });
+    const controller = createStickyLayoutController({
+      document,
+      galleryHost: layout.gallery,
+      variantsHost: layout.variants,
+      onDiagnostic: () => {},
+    });
+
+    controller.start();
+    flushFrame();
+
+    expect(controller.getSnapshot().requiresBodyFallback).toBe(false);
+    expect(layout.galleryColumn.style.getPropertyValue('align-self')).toBe('stretch');
+    expect(
+      controller
+        .getSnapshot()
+        .ancestorBlockers.some((blocker) =>
+          blocker.reasons.includes('insufficient-sticky-travel'),
+        ),
+    ).toBe(false);
+    controller.destroy();
+  });
 
   it('queues a follow-up measurement when sizing changes after the current frame is queued', () => {
     const layout = installLayout();
@@ -423,7 +482,7 @@ describe('sticky layout controller lifecycle', () => {
     layout.ownedWrapper.style.overflowY = 'visible';
     const parentRect = vi
       .spyOn(galleryParent, 'getBoundingClientRect')
-      .mockReturnValue(domRect(100, 600));
+      .mockReturnValue(domRect(100, 800));
     const controller = createStickyLayoutController({
       document,
       galleryHost: layout.gallery,
@@ -519,7 +578,7 @@ describe('sticky layout controller lifecycle', () => {
     controller.destroy();
   });
 
-  it('restores an unsuccessful stretch and does not retry unchanged geometry', () => {
+  it('caches an unsuccessful stretch until variants geometry changes', () => {
     const layout = installStretchRepairLayout({
       stretchResolves: false,
       alignSelf: 'center',
@@ -557,6 +616,17 @@ describe('sticky layout controller lifecycle', () => {
     ).toHaveLength(1);
     expect(layout.galleryColumn.style.getPropertyValue('align-self')).toBe('center');
     expect(layout.galleryColumn.style.getPropertyPriority('align-self')).toBe('important');
+
+    layout.state.variantsHeight = 1400;
+    ResizeObserverMock.instances[0].trigger();
+    flushFrame();
+
+    expect(controller.getSnapshot().requiresBodyFallback).toBe(true);
+    expect(
+      layout.setProperty.mock.calls.filter(
+        ([property, value]) => property === 'align-self' && value === 'stretch',
+      ),
+    ).toHaveLength(2);
     controller.destroy();
   });
 

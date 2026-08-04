@@ -750,6 +750,7 @@ function galleryColumnStretchFailureSignature(
     normalizePixelValue((containerRect?.top ?? 0) + scrollY),
     normalizePixelValue((containerRect?.bottom ?? 0) + scrollY),
     normalizePixelValue(options.naturalDocumentTop ?? hostRect.top + scrollY),
+    normalizePixelValue(options.requiredBoundaryDocumentBottom ?? 0),
     normalizePixelValue(stickyTop),
     boundary.style.getPropertyValue('align-self'),
     boundary.style.getPropertyPriority('align-self'),
@@ -916,10 +917,11 @@ export interface StickyTravelMetrics {
 
 interface StickyTravelMeasurementOptions {
   naturalDocumentTop?: number;
+  requiredBoundaryDocumentBottom?: number;
   scrollY?: number;
 }
 
-/** Measures whether a containing boundary lets the host reach its requested viewport top. */
+/** Measures whether a boundary lets the host reach its sticky top and cover required content. */
 export function measureStickyTravel(
   host: HTMLElement,
   boundary: HTMLElement,
@@ -938,6 +940,9 @@ export function measureStickyTravel(
   const availableTravel = normalizePixelValue(
     Math.max(0, boundaryBottom - naturalHostTop - hostRect.height),
   );
+  const endsBeforeRequiredContent =
+    options.requiredBoundaryDocumentBottom !== undefined &&
+    options.requiredBoundaryDocumentBottom > boundaryBottom + 1;
 
   return {
     requiredTravel,
@@ -945,7 +950,7 @@ export function measureStickyTravel(
     insufficient:
       hostRect.height > 0 &&
       boundaryRect.height > 0 &&
-      requiredTravel > availableTravel + 1,
+      (requiredTravel > availableTravel + 1 || endsBeforeRequiredContent),
   };
 }
 
@@ -1749,8 +1754,14 @@ export function createStickyLayoutController(
       galleryFlowAnchor,
       windowObject,
     );
+    const variantsRect = variantsHost?.isConnected
+      ? variantsHost.getBoundingClientRect()
+      : null;
     const travelMeasurementOptions: StickyTravelMeasurementOptions = {
       naturalDocumentTop: galleryNaturalDocumentTop ?? undefined,
+      requiredBoundaryDocumentBottom: variantsRect
+        ? variantsRect.bottom + scrollY
+        : undefined,
       scrollY,
     };
     const galleryBlockerState = captureGalleryBlockerState(
