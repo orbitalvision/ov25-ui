@@ -12,3 +12,4 @@ artifacts/
 review-diffs/
 review-screenshots/
 .pnpm-store
+/.worktrees/
