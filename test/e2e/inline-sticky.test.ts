@@ -1535,6 +1535,58 @@ test.describe('Standard product inline-sticky display mode', () => {
     ).toBe(true);
   });
 
+  test('falls back when hidden root overflow makes body a non-scrolling sticky ancestor', async ({ page }) => {
+    const consoleWarnings: string[] = [];
+    page.on('console', (message) => {
+      if (message.type() === 'warning') consoleWarnings.push(message.text());
+    });
+
+    await page.goto('/tests/inline-sticky-desktop-no-header.html?rootOverflow=hidden');
+
+    await expect(page.locator('.inline-sticky-fixture')).toHaveAttribute(
+      'data-root-overflow',
+      'hidden',
+    );
+    await expect(page.locator('body')).toHaveCSS('overflow-x', 'hidden');
+    expect(
+      await page.evaluate(() => document.scrollingElement === document.documentElement),
+    ).toBe(true);
+
+    const host = await waitForStickyGallery(page);
+    const iframe = page.locator('#ov25-configurator-iframe');
+    await iframe.evaluate((element) => {
+      (window as Window & { __ov25RootOverflowIframe?: Element })
+        .__ov25RootOverflowIframe = element;
+    });
+
+    await expect
+      .poll(
+        () =>
+          consoleWarnings.some(
+            (message) =>
+              message.includes('vertical-scroll-container') &&
+              message.includes('body-host fallback is required'),
+          ),
+        { timeout: 10000 },
+      )
+      .toBe(true);
+
+    await page.evaluate(() => window.scrollTo(0, 600));
+    await expect(page.locator('[data-ov25-sticky-placeholder]')).toHaveCount(1, {
+      timeout: 10000,
+    });
+    await expect(host).toHaveCSS('position', 'fixed');
+    await expectPinnedTop(host, STICKY_GAP);
+    expect(
+      await iframe.evaluate(
+        (element) =>
+          element ===
+          (window as Window & { __ov25RootOverflowIframe?: Element })
+            .__ov25RootOverflowIframe,
+      ),
+    ).toBe(true);
+  });
+
   test('keeps native Popover available while only the gallery probe fails', async ({
     page,
     browserName,

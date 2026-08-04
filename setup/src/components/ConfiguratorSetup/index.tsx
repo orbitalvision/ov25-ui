@@ -8,8 +8,9 @@ export interface ConfiguratorSetupProps {
   productLink?: ConfiguratorSetupOverrides['productLink'];
   previewBaseUrl?: string;
   /**
-   * `false`: always `https://app.ov25.ai/configurator-preview`.
-   * Otherwise: if setup is on `localhost` / `127.0.0.1`, `http://localhost:3000/configurator-preview`; else hosted preview.
+   * `true`: use `http://app.localhost:3000/configurator-preview` when setup runs locally.
+   * `false` or omitted: use `https://app.ov25.ai/configurator-preview`.
+   * `previewBaseUrl` takes priority over this option.
    */
   useLocalPreview?: boolean;
   initialConfig?: ConfiguratorSetupPayload;

@@ -10,12 +10,18 @@ import type { SerializableInjectConfig } from '../preview-config-serializable';
 const OV25_CONFIG_MESSAGE = 'OV25_CONFIG';
 const OV25_PREVIEW_READY = 'OV25_PREVIEW_READY';
 
-function previewIframeSrc(previewBaseUrl: string | undefined, useLocalPreview: boolean | undefined) {
+export function resolvePreviewIframeSrc(
+  previewBaseUrl: string | undefined,
+  useLocalPreview: boolean | undefined,
+  hostname: string | undefined,
+) {
   if (previewBaseUrl) return previewBaseUrl;
-  if (typeof window === 'undefined') return CONFIGURATOR_PREVIEW_PRODUCTION_BASE_URL;
-  if (!useLocalPreview) return CONFIGURATOR_PREVIEW_PRODUCTION_BASE_URL;
-  const h = window.location.hostname;
-  if (h === 'localhost' || h === '127.0.0.1') return CONFIGURATOR_PREVIEW_LOCAL_BASE_URL;
+  if (
+    useLocalPreview === true &&
+    (hostname === 'localhost' || hostname === '127.0.0.1')
+  ) {
+    return CONFIGURATOR_PREVIEW_LOCAL_BASE_URL;
+  }
   return CONFIGURATOR_PREVIEW_PRODUCTION_BASE_URL;
 }
 
@@ -45,7 +51,11 @@ export function PreviewArea({ serializableConfig, previewBaseUrl, useLocalPrevie
 
   configRef.current = serializableConfig;
 
-  const src = previewIframeSrc(previewBaseUrl, useLocalPreview);
+  const src = resolvePreviewIframeSrc(
+    previewBaseUrl,
+    useLocalPreview,
+    typeof window === 'undefined' ? undefined : window.location.hostname,
+  );
 
   const sendConfig = useCallback(() => {
     postConfig(iframeRef.current, configRef.current);

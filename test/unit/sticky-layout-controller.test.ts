@@ -1,6 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
+  classifyStickyAncestor,
   createStickyLayoutController,
+  findCommonStickyBoundary,
+  findSufficientStickyBoundary,
   getStickyHostNaturalDocumentTop,
   observeStickyHostNaturalDocumentTop,
   OV25_INJECTOR_OWNED_ATTRIBUTE,
@@ -112,6 +115,9 @@ describe('sticky layout controller lifecycle', () => {
     delete (window as Window & { visualViewport?: unknown }).visualViewport;
     delete (window as Window & { requestAnimationFrame?: unknown }).requestAnimationFrame;
     delete (window as Window & { cancelAnimationFrame?: unknown }).cancelAnimationFrame;
+    document.body.style.removeProperty('overflow-y');
+    document.documentElement.style.removeProperty('overflow-x');
+    document.documentElement.style.removeProperty('overflow-y');
     document.body.innerHTML = '';
   });
 
@@ -156,6 +162,91 @@ describe('sticky layout controller lifecycle', () => {
       optionHeader,
     };
   }
+
+  it('falls back for body overflow when HTML overflow is non-visible', () => {
+    document.body.innerHTML = `
+      <section id="product">
+        <div id="gallery"></div>
+        <div id="variants"></div>
+      </section>
+      <div id="outside"></div>
+    `;
+    document.body.style.overflowY = 'hidden';
+    document.documentElement.style.overflowX = 'hidden';
+    const product = document.getElementById('product')!;
+    const gallery = document.getElementById('gallery')!;
+    const variants = document.getElementById('variants')!;
+    const outside = document.getElementById('outside')!;
+    const previousDescriptor = Object.getOwnPropertyDescriptor(document, 'scrollingElement');
+    Object.defineProperty(document, 'scrollingElement', {
+      configurable: true,
+      value: document.documentElement,
+    });
+    setRect(document.body, 0, 1600);
+    setRect(product, 100, 1200);
+    setRect(gallery, 100, 400);
+
+    try {
+      expect(classifyStickyAncestor(document.body)).toMatchObject({
+        element: document.body,
+        reasons: ['vertical-overflow-clipping'],
+        ownedByOv25: false,
+      });
+      expect(classifyStickyAncestor(document.documentElement)).toBeNull();
+      expect(findCommonStickyBoundary([gallery, variants])).toBe(product);
+      expect(findCommonStickyBoundary([gallery, outside])).toBeNull();
+      expect(findSufficientStickyBoundary(document.body, gallery, 16)).toBeNull();
+      expect(findSufficientStickyBoundary(document.documentElement, gallery, 16)).toBeNull();
+
+      const controller = createStickyLayoutController({
+        document,
+        galleryHost: gallery,
+        variantsHost: variants,
+        onDiagnostic: () => {},
+      });
+      controller.start();
+      flushFrame();
+      expect(controller.getSnapshot()).toMatchObject({
+        requiresBodyFallback: true,
+        fallbackBoundary: product,
+      });
+      expect(
+        controller
+          .getSnapshot()
+          .ancestorBlockers.some((blocker) => blocker.element === document.body),
+      ).toBe(true);
+      controller.destroy();
+    } finally {
+      if (previousDescriptor) {
+        Object.defineProperty(document, 'scrollingElement', previousDescriptor);
+      } else {
+        delete (document as Document & { scrollingElement?: Element }).scrollingElement;
+      }
+      document.body.style.removeProperty('overflow-y');
+      document.documentElement.style.removeProperty('overflow-x');
+    }
+  });
+
+  it('exempts body from blocker classification when body is the actual scrolling element', () => {
+    document.body.style.overflowY = 'hidden';
+    const previousDescriptor = Object.getOwnPropertyDescriptor(document, 'scrollingElement');
+    Object.defineProperty(document, 'scrollingElement', {
+      configurable: true,
+      value: document.body,
+    });
+
+    try {
+      expect(classifyStickyAncestor(document.body)).toBeNull();
+      expect(classifyStickyAncestor(document.documentElement)).toBeNull();
+    } finally {
+      if (previousDescriptor) {
+        Object.defineProperty(document, 'scrollingElement', previousDescriptor);
+      } else {
+        delete (document as Document & { scrollingElement?: Element }).scrollingElement;
+      }
+      document.body.style.removeProperty('overflow-y');
+    }
+  });
 
   function installFlowAnchorLayout(options: {
     scrollY?: number;

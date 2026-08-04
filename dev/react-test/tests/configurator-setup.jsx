@@ -65,6 +65,7 @@ const SAVED_CONFIG = {
 function App() {
   return (
     <ConfiguratorSetup
+      useLocalPreview
       apiKey={{
         standard: DEMO_RETAILER_APIKEY,
         snap2: WHITEMEADOW_APIKEY,

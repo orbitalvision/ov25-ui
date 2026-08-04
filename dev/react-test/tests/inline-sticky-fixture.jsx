@@ -34,6 +34,7 @@ const useStackedGalleryPath = params.get('stackedGallery') === '1';
 const useCompactViewer = params.get('viewer') === 'compact';
 const useContentBoxGalleryTarget = params.get('hostBox') === 'content-box';
 const forceBodyLayerFallback = params.get('fallback') === 'body-layer';
+const useHiddenRootOverflow = params.get('rootOverflow') === 'hidden';
 const requestedDesktopDisplayMode = params.get('desktopMode');
 const desktopDisplayMode =
   requestedDesktopDisplayMode === 'inline' || requestedDesktopDisplayMode === 'inline-sheet'
@@ -279,6 +280,7 @@ function App() {
       data-gallery-host-box={useContentBoxGalleryTarget ? 'content-box' : undefined}
       data-fallback-strategy={forceBodyLayerFallback ? 'body-layer' : undefined}
       data-popover-fixture={forceBodyLayerFallback ? fixturePopoverMode : undefined}
+      data-root-overflow={useHiddenRootOverflow ? 'hidden' : undefined}
     >
       <ThemeHeader />
       {forceBodyLayerFallback ? (
@@ -340,8 +342,14 @@ function App() {
 
       <style>{`
         * { box-sizing: border-box; }
-        html { scroll-behavior: auto; }
-        body { background: #f3f1ed; }
+        html {
+          scroll-behavior: auto;
+          ${useHiddenRootOverflow ? 'overflow-x: hidden;' : ''}
+        }
+        body {
+          background: #f3f1ed;
+          ${useHiddenRootOverflow ? 'overflow-x: hidden;' : ''}
+        }
         #root { min-height: 100%; }
         a { color: inherit; }
 

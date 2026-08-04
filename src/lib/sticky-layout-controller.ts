@@ -388,10 +388,19 @@ function effectiveOverflowY(style: CSSStyleDeclaration): string {
   return (style.overflowY || style.overflow || 'visible').trim().toLowerCase();
 }
 
+function effectiveOverflowX(style: CSSStyleDeclaration): string {
+  return (style.overflowX || style.overflow || 'visible').trim().toLowerCase();
+}
+
 /** Detects explicit max-height or clipped overflowing content that can shorten sticky travel. */
-function isConstrainedHeight(element: HTMLElement, style: CSSStyleDeclaration): boolean {
+function isConstrainedHeight(
+  element: HTMLElement,
+  style: CSSStyleDeclaration,
+  ignoreOverflowConstraint = false,
+): boolean {
   const maxHeight = (style.maxHeight || cssProperty(style, 'max-height')).trim().toLowerCase();
   if (maxHeight !== '' && maxHeight !== 'none' && maxHeight !== 'max-content') return true;
+  if (ignoreOverflowConstraint) return false;
   return (
     element.clientHeight > 0 &&
     element.scrollHeight > element.clientHeight + 1 &&
@@ -444,8 +453,32 @@ function isFlexGridStretch(element: HTMLElement, readStyle: StickyStyleReader): 
   return alignItems === '' || alignItems === 'normal' || alignItems === 'stretch';
 }
 
-/** The page's normal scrolling root is expected and must never be classified as a blocker. */
-function isDocumentScrollingRoot(element: HTMLElement): boolean {
+/** The actual page scroller and HTML root are expected and must not be classified as blockers. */
+function isStickyBlockerExemptDocumentRoot(element: HTMLElement): boolean {
+  const documentObject = element.ownerDocument;
+  return (
+    element === documentObject.documentElement ||
+    element === documentObject.scrollingElement
+  );
+}
+
+/** BODY overflow is viewport overflow while both overflow axes on HTML remain visible. */
+function isBodyOverflowPropagatedToViewport(
+  element: HTMLElement,
+  readStyle: StickyStyleReader,
+): boolean {
+  const documentObject = element.ownerDocument;
+  if (element !== documentObject.body) return false;
+  const rootStyle = readStyle(documentObject.documentElement);
+  return (
+    rootStyle !== null &&
+    effectiveOverflowX(rootStyle) === 'visible' &&
+    effectiveOverflowY(rootStyle) === 'visible'
+  );
+}
+
+/** Body/HTML are never valid product-scoped boundaries, even when body is not the page scroller. */
+function isDocumentFallbackBoundary(element: HTMLElement): boolean {
   const documentObject = element.ownerDocument;
   return (
     element === documentObject.body ||
@@ -459,17 +492,22 @@ export function classifyStickyAncestor(
   element: HTMLElement,
   readStyle: StickyStyleReader = defaultStyleReader,
 ): StickyBlockingAncestor | null {
-  if (isDocumentScrollingRoot(element)) return null;
+  if (isStickyBlockerExemptDocumentRoot(element)) return null;
   const style = readStyle(element);
   if (!style) return null;
   const reasons: StickyBlockingReason[] = [];
   const overflowY = effectiveOverflowY(style);
-  if (['auto', 'scroll', 'overlay'].includes(overflowY)) {
-    reasons.push('vertical-scroll-container');
-  } else if (overflowY === 'hidden' || overflowY === 'clip') {
-    reasons.push('vertical-overflow-clipping');
+  const bodyOverflowIsPropagated = isBodyOverflowPropagatedToViewport(element, readStyle);
+  if (!bodyOverflowIsPropagated) {
+    if (['auto', 'scroll', 'overlay'].includes(overflowY)) {
+      reasons.push('vertical-scroll-container');
+    } else if (overflowY === 'hidden' || overflowY === 'clip') {
+      reasons.push('vertical-overflow-clipping');
+    }
   }
-  if (isConstrainedHeight(element, style)) reasons.push('constrained-height');
+  if (isConstrainedHeight(element, style, bodyOverflowIsPropagated)) {
+    reasons.push('constrained-height');
+  }
   reasons.push(...containReasons(style));
   if (createsTransformContainingBlock(style)) reasons.push('transform-containing-block');
   if (isFlexGridStretch(element, readStyle)) reasons.push('flex-grid-stretch');
@@ -864,7 +902,7 @@ export function findCommonStickyBoundary(
     boundary = boundary.parentElement;
   }
 
-  if (!boundary || isDocumentScrollingRoot(boundary)) {
+  if (!boundary || isDocumentFallbackBoundary(boundary)) {
     return null;
   }
   return boundary;
@@ -923,7 +961,7 @@ export function findSufficientStickyBoundary(
   measurementOptions: StickyTravelMeasurementOptions = {},
 ): HTMLElement | null {
   let boundary = initialBoundary;
-  while (boundary && !isDocumentScrollingRoot(boundary) && !isBroadPageBoundary(boundary)) {
+  while (boundary && !isDocumentFallbackBoundary(boundary) && !isBroadPageBoundary(boundary)) {
     if (!measureStickyTravel(
       galleryHost,
       boundary,
@@ -1794,7 +1832,7 @@ export function createStickyLayoutController(
     if (
       galleryHost &&
       galleryTravelBoundary &&
-      !isDocumentScrollingRoot(galleryTravelBoundary) &&
+      !isDocumentFallbackBoundary(galleryTravelBoundary) &&
       galleryTravel?.insufficient &&
       !galleryColumnStretchRepair &&
       !hasExternalGalleryBlocker &&
@@ -1849,7 +1887,7 @@ export function createStickyLayoutController(
     if (
       galleryHost &&
       galleryTravelBoundary &&
-      !isDocumentScrollingRoot(galleryTravelBoundary) &&
+      !isDocumentFallbackBoundary(galleryTravelBoundary) &&
       galleryTravel?.insufficient
     ) {
       galleryBlockerElements.add(galleryTravelBoundary);

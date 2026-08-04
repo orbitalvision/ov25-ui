@@ -288,31 +288,40 @@ describe('sticky ancestor recovery and body fallback data', () => {
     expect(isOv25OwnedElement(descendant)).toBe(false);
   });
 
-  it('excludes body, documentElement, and the document scrolling root from blockers', () => {
+  it('exempts body overflow propagated through visible HTML and rejects document boundaries', () => {
     document.body.innerHTML = `
-      <div id="scroll-root" style="overflow-y: hidden">
-        <div id="host"></div>
-      </div>
+      <div id="host"></div>
+      <div id="outside"></div>
     `;
-    const scrollingRoot = document.getElementById('scroll-root')!;
     const host = document.getElementById('host')!;
+    const outside = document.getElementById('outside')!;
     const originalScrollingElement = Object.getOwnPropertyDescriptor(document, 'scrollingElement');
     document.body.style.overflowY = 'hidden';
-    document.documentElement.style.overflowY = 'hidden';
+    document.documentElement.style.overflowX = 'visible';
+    document.documentElement.style.overflowY = 'visible';
+    const clientHeight = vi.spyOn(document.body, 'clientHeight', 'get').mockReturnValue(800);
+    const scrollHeight = vi.spyOn(document.body, 'scrollHeight', 'get').mockReturnValue(1600);
     Object.defineProperty(document, 'scrollingElement', {
       configurable: true,
-      value: scrollingRoot,
+      value: document.documentElement,
     });
 
     try {
       expect(classifyStickyAncestor(document.body)).toBeNull();
       expect(classifyStickyAncestor(document.documentElement)).toBeNull();
-      expect(classifyStickyAncestor(scrollingRoot)).toBeNull();
-      expect(inspectStickyAncestors(host).blockers).toEqual([]);
+      const inspection = inspectStickyAncestors(host);
+      expect(inspection.blockers).toEqual([]);
+      expect(inspection.requiresBodyFallback).toBe(false);
       expect(findCommonStickyBoundary([host])).toBeNull();
+      expect(findCommonStickyBoundary([host, outside])).toBeNull();
+      expect(findSufficientStickyBoundary(document.body, host, 16)).toBeNull();
+      expect(findSufficientStickyBoundary(document.documentElement, host, 16)).toBeNull();
     } finally {
       document.body.style.removeProperty('overflow-y');
+      document.documentElement.style.removeProperty('overflow-x');
       document.documentElement.style.removeProperty('overflow-y');
+      clientHeight.mockRestore();
+      scrollHeight.mockRestore();
       if (originalScrollingElement) {
         Object.defineProperty(document, 'scrollingElement', originalScrollingElement);
       } else {
