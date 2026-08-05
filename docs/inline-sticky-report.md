@@ -229,17 +229,18 @@ The controller inspects the gallery and variants ancestor chains for:
 - layout/paint containment;
 - transform/filter/perspective containing blocks;
 - flex/grid stretch;
-- insufficient travel to reach the sticky top before the product boundary ends.
+- insufficient travel to reach the sticky top before the product boundary ends;
+- a gallery boundary that ends before the variants host, even when it reaches the sticky top.
 
 Repair policy:
 
 1. Wrappers explicitly marked `data-ov25-injector-owned` may receive reversible property repairs.
 2. A narrow client-owned repair is allowed for the direct gallery column: `align-self: stretch
    !important` when its parent is grid or row/row-reverse flex in horizontal writing mode.
-3. The stretch is retained only if immediate remeasurement proves it supplies enough travel and no
-   other gallery blocker remains.
-4. Failed stretch attempts are cached by geometry, constraints, styles, sticky top, and blocker
-   state; meaningful changes allow another attempt.
+3. The stretch is retained only if immediate remeasurement proves it supplies enough travel,
+   extends through the variants host, and no other gallery blocker remains.
+4. Failed stretch attempts are cached by geometry, variants-bottom position, constraints, styles,
+   sticky top, and blocker state; meaningful changes allow another attempt.
 5. Other unresolved gallery blockers use host relocation. Variants-only blockers are diagnosed but
    do not relocate the gallery.
 

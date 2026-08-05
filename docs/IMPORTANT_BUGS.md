@@ -2,25 +2,30 @@
 
 Items that currently need user action. Remove an item after it has been handled.
 
-Last reconciled against local repositories: 2026-07-28.
+Last reconciled against local repositories: 2026-08-04.
+
+## 0.8.0 review follow-ups
+
+- Review and commit the five updated `ov25-docs` pages and three new setup screenshots. The public docs now cover all new `0.8.0` configuration options identified by the release review.
+- Run the final release test/build/tarball and cross-integration staging pass only after the pending source work is committed and package versions can be synchronized.
 
 ## Bug 39 integration and release follow-up
 
-The core `ov25-ui` implementation is manually approved and committed as `fad225f`. The follow-up documentation commit is `a9eb0f7`, which is the current local `main` head. Local `main` is two commits ahead of `origin/main`; `fad225f` is authoritative for the implementation. The dedicated worktree and old consolidated diff are historical references, not review or release blockers.
+The core `ov25-ui` implementation is manually approved and committed as `fad225f`; current
+`ov25-ui` `main` and `origin/main` are at `50fd555`. The dedicated sticky worktree and old
+consolidated diff are historical references, not review or release blockers.
 
 Cross-repository integration is not complete:
 
-- Current OV25 `main` still lacks the configurator-preview changes and Shopify PluginSettings fields for `header`, `desktopCarousel`, and `mobileCarousel`.
-- Shopify and WooCommerce retain dirty unstaged integration changes.
-- The Shopify sticky mobile-carousel app block remains untracked.
-- No cross-repository integration change should be described as approved or committed until it is separately reviewed.
+- OV25 `main` is two commits ahead of `origin/main`. Seven integration files are staged for the setup preview, Shopify Plugin Settings/metafields, canonical setup defaults, and approved Bug 56 cleanup. Pre-commit remains blocked until installed `ov25-setup@0.7.2` is replaced by `0.8.0`, which exports `ov25-setup/defaults`. Approved Snap2 drag-bounds commit `3541b736` still needs integrating into current OV25 `main`.
+- Shopify source is clean locally and three commits ahead of `origin/main`: `626c165` (host layout selectors and shared carousel block), `ec950cd` (saved flags/Snap2 settings), and `7f55479` (localized cart forms). Its exact `ov25-ui-react18@0.8.0` package update and generated bundle rebuild wait until publication.
+- WooCommerce source is clean locally and one commit ahead of `origin/main`: `c7b690a` adds the matching `0.8` settings/defaults. Its exact package synchronization, ZIP build, and release workflow wait until publication and after this commit reaches remote `main`.
 
 Action:
 
-1. Recreate/rebase the OV25 preview changes on current OV25 `main`.
-2. Apply and review the OV25 PluginSettings selector changes.
-3. Review and commit the Shopify and WooCommerce adapter/settings changes, including the Shopify app block.
-4. Update consuming package versions and rebuild generated integration bundles when the release version is available.
+1. Integrate OV25 commit `3541b736`, and commit the seven pending OV25 integration files once the local `ov25-setup/defaults` dependency can resolve. Do not permanently add a compatibility fallback.
+2. Push the existing Shopify and WooCommerce source commits before release automation consumes their remote main branches.
+3. Publish the three `0.8.0` packages, then let OV25/Woo automation synchronize exact versions and manually update/rebuild the Shopify runtime bundle.
 
 ## Choose the next blocked fix
 

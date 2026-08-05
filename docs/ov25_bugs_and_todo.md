@@ -2,21 +2,29 @@
 
 Status summary:
 
-- **✅ COMMITTED TO `ov25-ui` MAIN**: Bugs 1, 2/2a, 3, 4, 5, 6, 7, 7a, 7b, 11, 14, 17, 18, 19, 22, 23, 24, 25, 26, Bug 29 correction, 32, 37, 38, 39, 46, and 47, plus the no-thumbnail repro fixture.
+- **✅ COMMITTED TO `ov25-ui` MAIN**: Bugs 1, 2/2a, 3, 4, 5, 6, 7, 7a, 7b, 11, 12, 14, 17, 18, 19, 22, 23, 24, 25, 26, Bug 29 correction, 32, 37, 38, 39, 46, 47, 49, and 50, plus the no-thumbnail repro fixture.
 - **✅ COMMITTED / MERGED TO OV25 MAIN**: Bugs 9, 10, 40, 44, and the OV25 receiver for Bug 47, plus the Shopify embedded store-mismatch logout prompt.
 - **✅ APPROVED / COMMITTED / AWAITING OV25 MERGE**: Bug 27 on branch `snap2-draggable-objects-bounds`.
 - **🚫 WONT FIX**: Bug 21 selection postMessage readiness/queue.
 - **⚪ ALREADY FIXED UPSTREAM / NOT REPRODUCIBLE**: Bugs 16, 20, 30, and 31, plus Safari selection thumbnail offset.
-- **PARKED FOR POST-RELEASE**: Bugs 12, 15, 28, 33, 34, 35, 36, 41, 42, 43, and 45. See [PARKED_BUGS.md](PARKED_BUGS.md); none is fixed or approved for the upcoming release.
-- **BUG 39 INTEGRATION FOLLOW-UP**: The approved core is committed as `fad225f`, but current OV25 `main` still lacks its preview and PluginSettings selector patches. Shopify/Woo integration changes remain unstaged and the Shopify app block is untracked.
+- **PARKED FOR POST-RELEASE**: Bugs 15, 28, 33, 34, 35, 36, 41, 42, 43, and 45. See [PARKED_BUGS.md](PARKED_BUGS.md); none is fixed or approved for the upcoming release.
+- **POST-0.8.0 TODO / NOT STARTED**: Bug 48. Do not investigate or implement it before the 0.8.0 release unless the user explicitly resumes it.
+- **✅ APPROVED / COMMITTED FOR 0.8.0**: Bug 50 (`0df85c3`); its material-only placeholder-scope correction is approved and staged.
+- **✅ APPROVED / COMMITTED FOR 0.8.0**: Feature 51 (`429b4f9`).
+- **✅ APPROVED / COMMITTED FOR 0.8.0**: Bug 52 (`b5e26a7`).
+- **✅ APPROVED / COMMITTED FOR 0.8.0**: Bug 53 (`4dc3c24`).
+- **✅ APPROVED / STAGED FOR 0.8.0**: Bug 55 mobile Inline (sticky) boundary correction; the approved core is committed and the two-file follow-up is staged.
+- **✅ APPROVED / STAGED FOR 0.8.0**: Bug 57 release-test stabilization and Inline Sticky initialization recovery.
+- **✅ APPROVED / STAGED IN OV25**: Bug 56 removes the redundant static thumbnail strip from the OV25 configurator preview, leaving the real carousel as the only thumbnail UI.
+- **BUG 39 INTEGRATION FOLLOW-UP**: The approved core is committed as `fad225f`. OV25 preview/PluginSettings work is staged but blocked on the unreleased `ov25-setup/defaults` export; Shopify and Woo integration source is committed locally but not pushed. Exact package synchronization remains release work.
 
-Release-cleanup state: Bugs 12, 15, 33, 42, 43 (`ov25-ui`), and 45 are absent from current `ov25-ui` main; Bugs 28, 35, 36, 41, and the OV25 side of Bug 43 were never applied to current OV25 main; and the distinct Bug 34 proposal was not applied to main while the approved committed Bug 24 equivalent remains. Bug 23 is approved and committed as `eaa808d`.
+Release-cleanup state: Bug 12 was resumed on 2026-07-30, manually approved, and committed as `4d038ec` on 2026-08-03. Bug 50 is approved and committed as `0df85c3`; its material-only placeholder-scope correction is approved and staged. Bugs 15, 33, 42, 43 (`ov25-ui`), and 45 are absent from current `ov25-ui` main; Bugs 28, 35, 36, 41, and the OV25 side of Bug 43 were never applied to current OV25 main; and the distinct Bug 34 proposal was not applied to main while the approved committed Bug 24 equivalent remains. Bug 23 is approved and committed as `eaa808d`.
 
-Current repo note (2026-07-28): local `ov25-ui/main` is at `a9eb0f7`, immediately after approved Bug 39 implementation commit `fad225f`, and is two commits ahead of `origin/main`. This workflow-documentation update remains unstaged; unrelated worktrees and release artifacts also remain untracked.
+Current repo note (2026-08-04): local `main` and `origin/main` are at `50fd555`. The approved Bug 55 setup-preview core is committed as `d7c2de7`, with the device-switch remount correction committed as `50fd555`. A two-file mobile boundary follow-up is ready for manual review and remains unstaged. Workflow-documentation updates remain unstaged; unrelated worktrees and release artifacts also remain untracked.
 
 Bug 39 historical implementation checkpoints are preserved in its completed item below and in [inline-sticky-report.md](inline-sticky-report.md), [sticky-display-mode-architecture.md](sticky-display-mode-architecture.md), and [sticky-header-autodetection-audit.md](sticky-header-autodetection-audit.md). Committed behavior includes ordinary `inline`/`inline-sheet` isolation, viewport-specific carousel targets, responsive no/fixed/collapsing-header fixtures, mobile full-bleed/page-scroll behavior, sticky list-header alignment, natural viewer sizing, native stretch repair, and reversible Popover/body-layer fallbacks.
 
-Review queue audit 2026-07-28: [bugs-ready-for-review.md](bugs-ready-for-review.md) is empty. Bug 39 is archived in [bugs-resolved.md](bugs-resolved.md). Eleven bugs remain parked in [PARKED_BUGS.md](PARKED_BUGS.md). Bug 27 remains approved and committed only on `snap2-draggable-objects-bounds`; Bug 40 is merged into current OV25 `main`.
+Review queue audit 2026-08-04: [bugs-ready-for-review.md](bugs-ready-for-review.md) contains the Bug 55 mobile boundary follow-up. The originally approved Bug 55 packet remains archived in [bugs-resolved.md](bugs-resolved.md), and its core changes are committed. Bug 53 is approved and committed as `4dc3c24`. Feature 51 and Bugs 12, 49, 50, and 52 are committed. Ten bugs remain parked in [PARKED_BUGS.md](PARKED_BUGS.md). Bug 27 remains approved and committed only on `snap2-draggable-objects-bounds`; Bug 40 is merged into current OV25 `main`.
 
 Clarification queue: see [`docs/bugs-questions-for-user.md`](bugs-questions-for-user.md) for the current short list of decisions, missing repro details, and product questions blocking unclear bugs.
 
@@ -423,11 +431,159 @@ configurator: {
 - OV25 commit: `c41770ae` (`feat(configurator): add gesture hint opt-out to iframe queryParams`).
 - Risk/blast radius: low and additive. Existing configs default to visible gesture hints, and false values do not alter iframe URLs.
 
-- Default variant image / no thumbnails: repro fixture approved and committed as `4600b46` on 2026-07-09 as `gallery-inline-list-no-variant-thumbs.html`. Production fallback is blocked until parked Bug 15 is redesigned and resumed. Placeholder URLs are injected before cards render in list/tabs, accordion, tree, wizard, and size-card paths, which masks all-missing-image groups. A redesigned real-thumbnail signal can then support `hasRealImage` or equivalent on `Variant` and compact image-free/text cards at group/render level when every variant in that option/group lacks real image URLs. Avoid a generic placeholder because it keeps the current repeated-placeholder UX.
+### 48. Snap2 custom CSS misses some UI surfaces
+
+- Status: **POST-0.8.0 TODO / NOT STARTED**. This bug is outside the 0.8.0 release scope and must not be investigated or implemented unless the user explicitly resumes it.
+- Fixture: [single-custom-css-snap2.html](http://localhost:3008/tests/single-custom-css-snap2.html) (`dev/react-test/tests/single-custom-css-snap2.jsx`).
+- Confirmed symptoms: the grid, perspective, and screenshot buttons do not use the configured custom CSS colours. Initialise-menu cards also do not use them.
+- Audit scope: the user has not yet checked every Snap2 surface. When resumed, audit the complete Snap2 flow for other missing custom CSS colouring, including initialise, viewer controls, variant/module panels, dialogs, checkout, and transient UI.
+- Expected: Snap2 customer-facing surfaces consistently honour the relevant `customCss` colour variables while retaining stable selectors for direct client overrides.
+- Repro after release: load the fixture, compare the configured branding colours with the computed styles of the three viewer buttons and initialise-menu cards, then continue through the full Snap2 flow and record every mismatch.
+- Rough investigation: identify whether each mismatch comes from a hard-coded colour, a missing shared CSS variable/class, a shadow-root boundary, or a portal surface that does not receive the generated custom CSS. Agree the complete affected-surface list before implementing.
+- Manual test: verify all confirmed and newly discovered surfaces in the fixture across desktop and mobile, including hover, focus, selected, disabled, and open states where applicable.
+- Automated test candidates: component assertions that affected controls consume shared style variables; Playwright computed-style checks and before/after screenshots covering initialise and configured Snap2 states.
+- Risk/blast radius: medium. A broad colour-token cleanup can alter default styling and client overrides, so the eventual fix should preserve existing selectors and limit changes to missing custom CSS propagation.
+
+### 49. Mobile drawer and sheet controls disappear after selecting a gallery image
+
+- Status: **APPROVED / COMMITTED** as `89d4d98` on 2026-07-30.
+- Summary: a normal product configured with mobile `drawer`, gallery images, and `deferThreeD=true` can open its variants drawer without any visible close button. The user is then unable to close the drawer through the expected top-right control.
+- Reproduction: use mobile viewport on [single-product-gallery.html](http://localhost:3008/tests/single-product-gallery.html), leave `defer3D: On`, and press `Configure`. The drawer opens while product image index `0` is selected and the 360 viewer is index `1`; no top-right close button is rendered.
+- Working comparison: [single-product-gallery.html?defer3d=0](http://localhost:3008/tests/single-product-gallery.html?defer3d=0) renders the close button because the 360 viewer and initial gallery selection are both index `0`. Earlier fixtures such as [single-with-groups.html](http://localhost:3008/tests/single-with-groups.html) also omit `deferThreeD`, so they follow this working path.
+- Confirmed root cause: `IframeContainer` mounted `ConfiguratorViewControls` only when `galleryIndex === galleryIndexToUse`. The mobile floating `VariantsCloseButton` lived inside those controls, while mobile `VariantsHeader` deliberately returns only an empty spacer. The first fix separated the close button, but left the full viewer controls hidden whenever a static gallery image had been selected before opening a sheet or drawer.
+- Expected: every open normal-product mobile drawer has one visible, clickable top-right `.ov25-close-button`, regardless of the selected gallery item or `deferThreeD`. The full `ConfiguratorViewControls` must also appear over the lifted configurator whenever a normal desktop sheet or mobile drawer is open. Static gallery images must continue suppressing those controls while the configurator is closed.
+- Implementation: `IframeContainer` owns the normal mobile drawer close overlay independently of gallery selection. It now also treats an actually open normal desktop `sheet` or mobile `drawer` as a reason to mount `ConfiguratorViewControls`, while retaining gallery-index suppression when those surfaces are closed. Snap2, modal, inline, and variants-only behavior is unchanged.
+- Manual test after implementation:
+  1. Run the normal `ov25-ui` rebuild, then reload the fixture at a mobile viewport such as `390x844`.
+  2. On mobile, select any non-360 gallery image and press `Configure`. Verify the full viewer controls and exactly one close button appear over the open drawer; close it successfully.
+  3. On desktop, select any non-360 gallery image and press `Configure`. Verify the full viewer controls appear over the open sheet.
+  4. Close each surface while the static image remains selected. Verify the controls disappear from the static gallery image.
+  5. Select the 360 item and verify the controls remain visible in their normal closed-gallery state.
+  6. Repeat the mobile close-button check with `?defer3d=0` and `single-with-groups.html`; confirm no duplicate close button.
+- Automated tests: `test/unit/iframe-container-mobile-close.test.tsx` covers deferred-image and 360 close-button states, exact-one rendering, click-to-close, exclusions for other modes, open desktop-sheet and mobile-drawer viewer controls over static images, closed-surface suppression, and normal 360 controls.
+- Before evidence: [mobile drawer without a close button](../review-screenshots/bug-49-mobile-drawer-close-before.png), captured at `390x844`; the DOM contained zero `.ov25-close-button` elements.
+- After evidence: pending the user's normal rebuild because `dist/index.js` predates the source change. The manual review must confirm the real Shadow DOM placement; unit tests intentionally mock `Ov25ShadowHost`.
+- Changed files: [IframeContainer.tsx](../src/components/IframeContainer.tsx), [ConfiguratorViewControls.tsx](../src/components/ConfiguratorViewControls.tsx), and [iframe-container-mobile-close.test.tsx](../test/unit/iframe-container-mobile-close.test.tsx).
+- Scoped implementation diff: [bug-49-mobile-drawer-close-button.diff](../review-diffs/bug-49-mobile-drawer-close-button.diff).
+- Verification: focused Vitest passes 18/18; `bun run type-check` passes. No build was run, per workflow.
+- Independent review: no issues after adding explicit regression coverage for modal, inline, variants-only, and Snap2 exclusions.
+- Manual review: the close-button-only implementation was initially approved, Bug 49 was reopened after the missing desktop/mobile sheet/drawer controls were identified, and the complete combined fix was approved on 2026-07-30.
+- Risk/blast radius: medium-low. The close button and viewer controls are shared, layering-sensitive UI, but the override is limited to an already-open normal-product desktop sheet or mobile drawer. The main regression risks are duplicate close buttons, controls leaking onto closed static gallery images, or changing excluded modes.
+- Suggested branch: `fix/mobile-drawer-gallery-close-button`.
+
+### 50. Missing-image placeholder is requested from the client site
+
+- Status: **APPROVED / COMMITTED** as `0df85c3` on 2026-08-03.
+- Summary: the no-thumbnail fixture displays broken image slots because runtime fallback URLs point to `/placeholder.svg` on the consuming website rather than to an asset owned by `ov25-ui`.
+- Reproduction: load [gallery-inline-list-no-variant-thumbs.html](http://localhost:3008/tests/gallery-inline-list-no-variant-thumbs.html). Before the fix, the fixture strips thumbnail fields, each fallback `<img>` requests `/placeholder.svg?height=200&width=200`, the dev server returns HTML, and each image has `naturalWidth: 0`.
+- Expected: missing material-selection/Wizard thumbnails and Swatch Book images use the bundled placeholder without requiring an asset on the client site. Missing size images are omitted, missing product-gallery entries use inert neutral slots, and missing Snap2 module images retain the existing targetable “No Image” text state because the woven material placeholder is not appropriate for sizes, products, or modules.
+- Implementation: added the selected option 11 artwork as a coarse fabric surface in `src/placeholder.svg`, using five cream vertical threads and five grey horizontal threads. Each thread is `150px` wide in the `1200px` view box, with equal `75px` internal and outer gaps and alternating over/under crossings. `PLACEHOLDER_IMAGE_URL` uses a static `new URL('../placeholder.svg', import.meta.url)` asset reference, and Vite's library build inlines it. Fallback is applied only by `VariantThumb` and Swatch Book. `SizeVariantCard` omits missing images; product carousel preserves non-interactive empty slots; `ModuleVariantCard` retains `moduleCardNoImage`; Accordion, ProductVariantsWrapper, Tree, Wizard, InitialiseMenu, ModuleBottomPanel, and Snap2ModulesOptionBody preserve raw image URLs or `''` in their variant data.
+- Manual test: rebuild normally, open the fixture on desktop and mobile, verify all missing thumbnails render the new artwork, inspect an image for nonzero `naturalWidth` and a non-root-relative `src`, then smoke-check another variant layout and a missing-image `ModuleVariantCard`.
+- Automated verification: the focused placeholder and product-carousel suites pass 11/11 after the scope correction; prior `bun run type-check`, XML, and scoped diff validation passed. No hard-coded runtime placeholder paths remain; the seven parent/data-producing views, `SizeVariantCard`, `ModuleVariantCard`, and product carousel do not import the placeholder constant.
+- Before evidence: [broken missing-image slots](../review-screenshots/bug-50-no-thumbnail-placeholder-before.png).
+- Manual review: approved on 2026-08-03 after checking the rebuilt no-thumbnail fixture.
+- Changed files: [placeholder.svg](../src/placeholder.svg), [placeholder-image.ts](../src/lib/placeholder-image.ts), `VariantThumb`, Swatch Book, raw-image pass-through updates in seven parent views, the corrected size/module/card carousel empty states, [placeholder-image-fallback.test.tsx](../test/unit/placeholder-image-fallback.test.tsx), and `product-carousel.test.tsx`.
+- Scoped implementation diff: [bug-50-bundled-placeholder.diff](../review-diffs/bug-50-bundled-placeholder.diff).
+- Risk/blast radius: medium-low. The asset resolution fix is shared across several missing-image surfaces; normal and size card structure is unchanged, while missing-image `ModuleVariantCard` content changes from text to an image. The separate compact `ModuleBottomPanel` missing-image tile remains text-only.
+- Suggested branch: `fix/bundled-placeholder-image`.
+
+### 51. Add accessible titles to configurator iframes
+
+- Status: **APPROVED / COMMITTED** as `429b4f9` on 2026-08-03.
+- Summary: the real iframe that loads the 3D configurator has no `title` attribute, so assistive technology cannot identify its purpose or distinguish it from other embedded frames.
+- Reproduction: load a normal product, product range, or Snap2 fixture and inspect `#ov25-configurator-iframe`. It has a `src` and permissions but no accessible title.
+- Expected:
+  - Single product: `3D configurator for ${rangeName} ${productName}.`
+  - Product range: `3D configurator for ${rangeName} range.`
+  - Snap2: `Modular 3D configurator for ${rangeName} range.`
+- Implementation: `IframeContainer` derives a non-empty title from the resolved product link, products, current product, and standard/Snap2 range payload. Single products combine the standard range name before the product name without separator punctuation, while retaining the product-only title until range data arrives. Explicit `range/...` links and legacy numeric links containing multiple products count as ranges and append the word `range` after the resolved name. Mode-specific fallback titles are present until iframe messages provide the name, then React updates the attribute. The hidden Trustpilot compatibility iframe has its own title and remains `aria-hidden`.
+- Manual test: inspect the real iframe in [single-no-pricing.html](http://localhost:3008/tests/single-no-pricing.html), [range-with-groups.html](http://localhost:3008/tests/range-with-groups.html), and [snap2-dialog.html](http://localhost:3008/tests/snap2-dialog.html). Verify each title uses the correct product/range name and exact sentence format.
+- Automated tests: 14 focused cases cover loaded single product with range/product naming, explicit range route, legacy multi-product numeric range, flat and nested Snap2 range payloads, all loading fallbacks, sole-product fallback, late-arriving single-product range data, product/range/Snap2 rerender updates, and separation from the hidden compatibility iframe. The focused suite passes 14/14 and `bun run type-check` passes.
+- Independent review: no findings after adding dynamic update coverage for single-product, standard-range, and Snap2 payloads.
+- Manual review: approved on 2026-08-03 after checking standard single-product, normal-range, and Snap2 iframe titles.
+- Changed files: [IframeContainer.tsx](../src/components/IframeContainer.tsx) and [iframe-container-title.test.tsx](../test/unit/iframe-container-title.test.tsx).
+- Scoped implementation diff: [bug-51-configurator-iframe-title.diff](../review-diffs/bug-51-configurator-iframe-title.diff).
+- Risk/blast radius: low. This adds metadata to iframe elements without changing iframe URLs, permissions, rendering, or messaging.
+- Suggested branch: `fix/configurator-iframe-titles`.
+
+### 52. Mobile modal close button is hidden behind the lifted gallery
+
+- Status: **APPROVED / COMMITTED** as `b5e26a7` on 2026-08-03.
+- Summary: on a normal-product mobile modal, the close button is mounted but the lifted gallery paints and hit-tests above it, leaving no visible close control.
+- Reproduction: use a mobile viewport on [configure-button-modal.html](http://localhost:3008/tests/configure-button-modal.html), press Configure, and inspect the top-right corner. The `Close modal` button exists at `z-index: 101` inside `#ov25-modal-portal-container`, but the lifted `.ov25-configurator-gallery` host sits at body-level `z-index: 2147483647` above the modal portal's `2147483645`.
+- Expected: one visible and clickable close button at the top right of an open normal-product mobile modal, with either `defer3d` setting and regardless of the selected gallery item. Desktop modal, mobile drawer, sheet, inline, variants-only, and Snap2 behavior must remain unchanged.
+- Implementation: the normal mobile-modal close control now renders inside `IframeContainer`'s lifted gallery/controls layer, and the obscured modal-shell copy is suppressed on mobile to avoid duplicate accessibility controls. Desktop retains the shell close button. The entire modal portal is deliberately not raised because its backdrop would then paint over the gallery.
+- Manual test: rebuild normally; test `configure-button-modal.html` at mobile size with `?defer3d=0` and `?defer3d=1`; verify exactly one visible close button, click it successfully, then verify desktop modal and mobile drawer regressions.
+- Automated verification: focused `IframeContainer` and `ConfiguratorModal` tests pass 27/27; `bun run type-check` and scoped diff validation pass.
+- Before evidence: [mobile modal with no visible close button](../review-screenshots/bug-52-mobile-modal-close-before.png).
+- After evidence: manually verified by the user on 2026-08-03; no separate after screenshot was retained.
+- Changed files: [ConfiguratorModal.tsx](../src/components/ConfiguratorModal.tsx), [IframeContainer.tsx](../src/components/IframeContainer.tsx), [iframe-container-mobile-close.test.tsx](../test/unit/iframe-container-mobile-close.test.tsx), and [configurator-modal-close.test.tsx](../test/unit/configurator-modal-close.test.tsx).
+- Scoped implementation diff: [bug-52-mobile-modal-close-layer.diff](../review-diffs/bug-52-mobile-modal-close-layer.diff).
+- Independent review: no findings; browser-level stacking remains the manual-review residual risk.
+- Manual review: approved on 2026-08-03 after checking the mobile modal close control.
+- Risk/blast radius: low-medium. The change affects close-control ownership between two stacking contexts; the main risks are duplicate controls or removing the desktop shell close button.
+- Suggested branch: `fix/mobile-modal-close-layer`.
+
+### 53. Snap2 UUID desktop close confirmation appears behind the configurator dialog
+
+- Status: **MANUALLY APPROVED / COMMITTED** as `4dc3c24` on 2026-08-04.
+- Summary: after a saved Snap2 configuration loads in the desktop UUID fixture, closing the Snap2 dialog opens the save-confirmation dialog behind the configurator, making the confirmation impossible to use.
+- Reproduction: open [snap2-uuid.html](http://localhost:3008/tests/snap2-uuid.html) at desktop width, wait for the saved configuration to load, open the configurator if necessary, then press the top-right close button. The save-confirmation state opens but remains behind the Snap2 shell. The equivalent mobile path and other Snap2 dialog fixtures layer it correctly.
+- Root cause: the UUID fixture requests desktop `sheet`, while desktop Snap2 renders every non-`inline-sheet` overlay through `Snap2ConfiguratorModal`. Injection creates `#ov25-modal-portal-container` only for an explicitly requested `modal`, so this Snap2 `sheet` shell falls back directly to `document.body` at the same body-level z-index as `SaveSnap2Dialog`; the later-mounted Snap2 shell wins the stacking tie. Explicit Snap2 `modal` and mobile drawer paths already have a lower containing layer.
+- Implementation: modal-portal creation now follows the effective Snap2 desktop shell. Every desktop Snap2 mode except `inline-sheet` receives the lower body modal portal; standard products retain the previous explicit desktop/mobile `modal` rule. This keeps the Snap2 shell beneath `SaveSnap2Dialog` without raising generic dialog z-indexes.
+- Manual test: verify the desktop UUID fixture shows one visible, clickable save confirmation above the Snap2 dialog and that choosing not to save closes the configurator. Regress desktop [snap2-dialog.html](http://localhost:3008/tests/snap2-dialog.html), mobile UUID drawer, and Snap2 inline.
+- Automated verification: 14/14 focused helper/injection tests pass, all 213 unit tests passed in the worker worktree, `bun run type-check` passes, and independent re-review found no issues. The tests assert Snap2 `sheet` creates `#ov25-modal-portal-container` at `BODY_MODAL_PORTAL_Z_INDEX`, while standard `sheet` and Snap2 `inline-sheet` do not.
+- Changed files: [configurator-utils.ts](../src/utils/configurator-utils.ts), [inject.tsx](../src/utils/inject.tsx), and [modal-portal.test.ts](../test/unit/modal-portal.test.ts).
+- Scoped implementation diff: [bug-53-snap2-uuid-confirmation-layer.diff](../review-diffs/bug-53-snap2-uuid-confirmation-layer.diff).
+- Manual review: approved by the user on 2026-08-04 after completing the desktop close-confirmation flow.
+- Commit: `4dc3c24` (`ov25-ui`).
+- Risk/blast radius: low-medium. Portal selection is shared injection infrastructure, but the proposed behavior change is limited to the desktop Snap2 shell that already renders as a modal.
+
+### 54. Bed configurator cold page render takes several minutes
+
+- Status: **IGNORED FOR 0.8.0 / NON-BLOCKING** by user decision on 2026-08-04. No fix is included in this release.
+- Summary: a cold request for the public bed-configurator page can remain pending for several minutes even though fetching, pricing, and preparing its data completes in roughly five seconds.
+- Reproduction: start OV25 locally and open `bed-configurator/18` through the public configurator route. The data pipeline logs complete, but the document request remains pending; historical traces show the same behavior for bed configurator 16.
+- Root cause: OV25 commit `512b71e3` moved the complete bed payload from the existing compressed browser API request into `initialData` on the React Server Component page. Serializing and caching that large prop consumed about 389 seconds and 3.5 GB RSS in the captured local trace.
+- Production evidence: the working production page was a Vercel page-cache hit more than two days old, while the compressed bed API returned an 847 KB payload from a cache miss in roughly two seconds. The warm page cache can therefore hide the cold-render failure.
+- Proposed fix: restore the existing compressed `/api/configurator/bed` browser-fetch path instead of passing the complete payload through the server component. Confirm on a cold preview deployment before changing production cache state.
+- Temporary diagnostics: the investigation-only OV25 timing logs have been removed from the workspace.
+- Risk: do not invalidate or save an active client bed solely to reproduce this, because that can expose the cold path to customers.
+
+### 55. Setup preview does not demonstrate Standard inline-sticky
+
+- Status: **CORE APPROVED / COMMITTED; MOBILE BOUNDARY FOLLOW-UP APPROVED / STAGED** on 2026-08-04.
+- Summary: selecting Standard and `Inline (sticky)` in the local setup fixture showed a **Configure** button that opened sheet mode instead of rendering the sticky inline layout.
+- Reproduction: open [the local Configurator Setup fixture](http://localhost:3008/tests/configurator-setup.html), select Standard, choose desktop `Inline (sticky)` and list variants, then inspect and scroll the preview frame.
+- Root cause: the local fixture omitted the explicit `useLocalPreview` opt-in, so it correctly loaded the hosted production preview and released runtime. The local OV25 fake product page also introduced a non-scrolling `overflow-auto` ancestor, capped variants and swatches at `500px`, and used a non-stretched desktop gallery column. OV25's `overflow-x: hidden` on both HTML and body then made body a non-scrolling sticky container while HTML remained the actual scroller. Runtime fallback rescued the gallery, but option/group headers remained trapped below body and scrolled away. Global `overscroll-none` also prevented wheel input from chaining to HTML.
+- Implementation: omitted or false `useLocalPreview` continues to use production, while the react-test fixture now passes `useLocalPreview={true}`. The preview document owns normal page scrolling, uses a stretched two-column product grid on desktop, retains one column on mobile, and leaves variants/swatches unconstrained. Runtime blocker classification ignores body overflow propagated through a visible HTML root, but catches the OV25 HTML-plus-body overflow combination without allowing body/HTML to become fallback boundaries. The OV25 preview route owns `overflow-x: clip` and `overscroll-behavior-y: auto` on body while mounted, restoring each exact previous inline value/priority on cleanup.
+- Manual test: verify the iframe targets `http://app.localhost:3000/configurator-preview`, has no **Configure** button in `Inline (sticky)`, and computes body overflow as `clip/visible` while HTML remains `document.scrollingElement`. After Page Down, gallery and active option/group headers must remain pinned. Wheel/trackpad scrolling over variants and camera zoom over the nested viewer must both remain functional. Then smoke-test desktop/mobile and ordinary `Inline`, sheet, modal, and Snap2 preview modes.
+- Verification: the three focused Bug 55 unit suites pass (59/59), both ov25-ui and OV25 `bun run type-check` commands pass, scoped whitespace checks are clean, and the combined review artifact reverse-checks against both current workspaces. Live nested-preview inspection confirmed body `clip/visible`, HTML scrolling ownership, and, at `scrollY=2816`, the active option header at `y=16`, active group header at `y=62`, and gallery at `y=16`. The new E2E remains unexecuted because this review intentionally did not rebuild ov25-ui.
+- Changed files: [setup component](../setup/src/components/ConfiguratorSetup/index.tsx), [setup PreviewArea](../setup/src/components/ConfiguratorSetup/PreviewArea/index.tsx), [local setup fixture](../dev/react-test/tests/configurator-setup.jsx), [preview URL tests](../test/unit/configurator-setup-preview-url.test.ts), [sticky controller](../src/lib/sticky-layout-controller.ts), focused unit/E2E coverage, and [OV25 configurator preview page](</Users/orbital/Documents/CODE/ORBITAL VISION/OV25/app/(ov25-ui)/configurator-preview/page.tsx:16>).
+- Review image: [after screenshot with option/group headers pinned](../review-screenshots/bug-55-inline-sticky-preview-headers-after.png).
+- Scoped implementation diff: [bug-55-setup-inline-sticky-preview.diff](../review-diffs/bug-55-setup-inline-sticky-preview.diff).
+- Manual review: approved by the user on 2026-08-04 after completing the desktop/mobile sticky-preview checks.
+- Core commits: `d7c2de7` fixes the Standard Inline (sticky) preview layout and `50fd555` remounts the preview when switching device mode.
+- Mobile follow-up: the gallery's immediate one-column boundary can end before the variants list. The controller now considers the variants bottom when validating sticky travel, retries after dynamic variants-height changes, and falls back to a broader product boundary when stretching cannot span the content. The user manually approved this behavior on 2026-08-04; the [scoped diff](../review-diffs/bug-55-mobile-inline-sticky-boundary-follow-up.diff) remains available for reference.
+- Follow-up staging: only `src/lib/sticky-layout-controller.ts` and `test/unit/sticky-layout-controller.test.ts` are staged. Tracker and review files remain unstaged.
+- Risk/blast radius: low-medium. Preview defaults and saved setup serialization are unchanged; runtime changes are limited to document-root blocker classification for `inline-sticky`, and both body style overrides exist only while the OV25 preview route is mounted. A nested preview browser assertion is documented for future automation because OV25 has no low-cost route-effect test pattern.
+
+### 56. Configurator preview duplicates the real carousel with fake thumbnails
+
+- Status: **MANUALLY APPROVED / STAGED IN OV25** on 2026-08-04.
+- Summary: the OV25 setup preview still rendered its original decorative `.preview-thumbnails` strip after the real OV25 carousel was added, producing two thumbnail rows on desktop.
+- Reproduction: open [Configurator Setup](http://localhost:3008/tests/configurator-setup.html), select Standard, switch the preview to Desktop, and inspect the gallery/carousel area.
+- Fix: remove the fake thumbnail JSX and its dedicated CSS from `OV25/app/(ov25-ui)/configurator-preview/page.tsx`. Carousel targeting and real OV25 gallery behavior are unchanged.
+- Verification: file-scoped ESLint and `git diff --check` pass; live DOM inspection found no fake strip, and the scoped diff does not alter real carousel injection or targeting.
+- Manual review: approved by the user on 2026-08-04; the packet is archived in [bugs-resolved.md](bugs-resolved.md#56-configurator-preview-duplicates-the-real-carousel-with-fake-thumbnails).
+- Scoped diff: [bug-56-configurator-preview-remove-fake-thumbnails.diff](../review-diffs/bug-56-configurator-preview-remove-fake-thumbnails.diff).
+- Staging: the deletion is staged in the same OV25 preview file as the pending integration changes. Tracker and review files remain unstaged.
+
+- Default variant image / no thumbnails: repro fixture approved and committed as `4600b46` on 2026-07-09 as `gallery-inline-list-no-variant-thumbs.html`. Bug 50 supplies the user-selected woven placeholder through a package-owned asset URL. Any future compact image-free card treatment is a separate UX change, not part of the missing-asset fix.
 - Hide Buy Now button too: approved and committed as Bug 17 (`a08acd3`). Adds `flags.disableBuyNow` as the sole key, plus the setup Behaviour toggle/export and runtime checkout filtering for standard, mobile, Snap2, and wizard review flows.
 - Bug 15, thumbnail `srcset`: **PARKED FOR POST-RELEASE** in [PARKED_BUGS.md](PARKED_BUGS.md). Manual inspection found invalid width descriptors (`?w=50` advertised as `120w`, `?w=150` as `240w`, and `?w=250` as `480w`), so the changes were removed from main and require redesign before review resumes.
 - Inline variants appear when Configure button is selected and Variant Controls off: Bug 13 is **NEEDS BEHAVIOR DECISION** after browser/source review on 2026-07-16. `?inline=1` suppresses inline controls but leaves the replaced Configure target empty; `?inline=1&variants=1` renders one inline variants panel and no Configure button. The old visible-button acceptance criterion is invalid without defining click behavior because pure inline desktop mode mounts no overlay. Decide whether setup/runtime should reject or omit Configure-without-Variant-Controls in inline mode (recommended), or support a new hybrid where Configure opens variants in a sheet/drawer while the viewer stays inline.
-- Bug 12, auto-open configurator in setup: **PARKED FOR POST-RELEASE** in [PARKED_BUGS.md](PARKED_BUGS.md). Its code was removed from dirty main; the retained proposal uses the same open path as a real Configure click. The temporary local `configurator-setup-preview.html` duplicate has been removed; setup preview testing should use OV25's `/configurator-preview` while the OV25 dev server is running.
+- Bug 12, auto-open configurator: **APPROVED / COMMITTED** as `4d038ec` on 2026-08-03. Both configure-handler refs use `openConfiguratorOrSnap2`, so normal desktop products use the sheet path while Snap2 retains its existing handler. The focused Playwright regression covers desktop auto-open, close/reopen through Configure, and mobile drawer auto-open. The old setup-preview proposal was not reapplied.
 - Variants square by default: approved and committed as Bug 18 (`f45914f`). Runtime CSS and setup `Variant shape` default use `0px`, while explicit setup/custom CSS overrides still win.
 - Swatch-book empty-slot shape/mobile wrap: **approved and committed as Bug 19 (`bf9e635`)**. Empty slots render the shared solid jagged `SWATCH_PATH`; selected and empty entries share two equal responsive mobile columns, while tablet/desktop sizing and plus/remove/zoom behavior remain unchanged.
 - Bed checkout line item `£` props: **already fixed upstream / not reproducible with current OV25**. OV25 commit `b9cf4049` disables standard single-product pricing for bed mode and emits `productBreakdowns`, which clean `ov25-ui` already remaps.
@@ -491,7 +647,7 @@ configurator: {
 - [ ]  need a nice default variant image - detect when there aren’t any variant thumbs and display a list option instead - repro fixture approved/committed; production fallback is blocked until parked Bug 15 is redesigned and resumed. Then add an explicit real-image signal and render compact image-free/text cards at group level when all variants lack real images.
 
 - [x]  need simple button to hide buy now button too - approved and committed as Bug 17 (`a08acd3`); `flags.disableBuyNow` is the sole supported key and is covered by setup export plus runtime/e2e checkout behavior.
-- [x]  Bug 39, normal-product `inline-sticky` display mode - approved and committed as `fad225f`; documentation followed in `a9eb0f7`. OV25 preview/PluginSettings and Shopify/Woo adapter work remains a separate uncommitted integration/release follow-up.
+- [x]  Bug 39, normal-product `inline-sticky` display mode - approved and committed as `fad225f`; documentation followed in `a9eb0f7`. OV25 preview/PluginSettings work is staged, while Shopify/Woo adapter source is committed locally and awaits push/package synchronization.
 - [x]  recline online power options not showing pricing - new pricing grade feature responsible? (snug range)
 - [x]  dont show ‘product’ on shopify snap2 cart (its already in the title)
 - [ ]  remove the permissions 500 error from vercel - Bug 36 is **PARKED FOR POST-RELEASE** in [PARKED_BUGS.md](PARKED_BUGS.md); it was never applied to current OV25 main, and OV25 worktree `codex/permissions-500-vercel` is retained, the page-level permission gate looked correct in code review, and the CRLF-sensitive diff artifact was regenerated so it applies cleanly in a fresh OV25 context.
@@ -515,9 +671,9 @@ configurator: {
 - [x]  variants square by default - Bug 18 manually approved and committed as `f45914f`; runtime and ov25-setup defaults are `0px`, while explicit radius overrides remain supported.
 - [x]  Swatch looking variants ? jaggy outlines - Bug 29 correction approved and committed as `b934bc4`. Original commit `b8038ed` incorrectly applied jagged geometry to all image-backed normal variants; the correction keeps jagged geometry SwatchBook-only, restores ov25-setup `Variant Shape` / `--ov25-variant-thumb-border-radius` for normal variants, and adds no jagged setup option.
 - [ ]  when ‘inli*ne’ variant controls, the inline variants are still shown if you have ‘Config*ure button” selected (even if “Variant Controls” is turned off) - Bug 13 **NEEDS BEHAVIOR DECISION**; pure inline Configure-without-Variant-Controls must either be rejected/omitted or become a supported hybrid that opens variants in a sheet/drawer. See the investigation summary at line 401.
-- [ ]  “auto open configurator” in ov25-setup does not work? - Bug 12 is **PARKED FOR POST-RELEASE** in [PARKED_BUGS.md](PARKED_BUGS.md); its code was removed from dirty main, and the retained setup-preview proposal uses the same open path as a real Configure click and should be tested through OV25's `/configurator-preview` route when review resumes.
+- [x]  “auto open configurator” in ov25-setup does not work? - Bug 12 was manually approved and committed as `4d038ec` on 2026-08-03. Auto-open and external Configure clicks use the same product-aware handler as the visible trigger; desktop auto-open, close/reopen, mobile drawer behavior, and Snap2 regression behavior passed manual review.
 - [x]  ov25-variant-name still has ov:text-black
-- [ ]  Better default variant image - same scope as all-missing thumbnail fallback; the repro fixture is approved/committed, but production fallback is blocked until parked Bug 15 is redesigned and resumed and compact image-free/text cards are confirmed as the desired fallback.
+- [x]  Better default variant image - Bug 50 was manually approved and committed as `0df85c3` on 2026-08-03. Missing image leaves use the bundled woven placeholder while parent selection data preserves raw URLs. Any future compact image-free/text-card behavior remains a separate UX change.
 - [x]  ov25-snap2-controls is in the DOM twice for snap2. one is redundant. - fixed as Bug 6.
 - [x]  £ signs showing in line item properties in checkout bedconfig - Bug 20 was already fixed upstream / not reproducible with current OV25. OV25 commit `b9cf4049` (2026-04-01) disables standard single-product pricing for bed mode and emits `productBreakdowns`; clean `ov25-ui` already remaps `productBreakdowns`. The port 3009 baseline shares current OV25, so it confirmed current cross-repo behavior rather than isolating the older OV25 path.
 - [x]  remove duplicate “product type” from ov25-setup
@@ -622,3 +778,15 @@ Historical screenshot from 2026-04-20 is no longer available from its original I
 - [x]  our gallery is not allowing scroll (its scrolling page behind) - fixed as Bug 22 for horizontal carousel mouse wheel and committed as `0bcfc73`. Touch/fullscreen/stacked/theme-specific cases still need exact repros if separate.
 - [ ]  multi line item support: paramater to hide options - inspected 2026-06-03. `ov25-ui` normalizes multi-line SKU/price callback payloads in `src/commerce/normalize-iframe-commerce.ts`, but does not own Shopify/Woo line-item-property generation. Existing `variants.hideOptions` is UI-only and keeps iframe `CURRENT_SKU`/`CURRENT_PRICE` payloads intact. Needs decision: filter cart properties in Shopify/Woo/host callbacks, add a new opt-in ov25-ui payload filter, or intentionally make `variants.hideOptions` alter public callback payloads as a compatibility-sensitive change.
 - [ ]  identify whats missing in ov25-docs and update it (big task) - read-only audit complete in `docs/ov25-docs-gap-audit.md`; actual docs updates remain open. Highest-priority gaps: refresh `ui-package-integration.mdx`, document setup export contract, update Shopify/Woo plugin docs, add variant display modes guide, add Snap2/bed/dining integration pages, document image-source/srcset behavior, and add versioning/compatibility guidance.
+
+### 57. Release-test stabilization and Inline Sticky initialization recovery
+
+- [x] **APPROVED / STAGED on 2026-08-05.** The `0.8.0` release run exposed stale/racy Playwright assumptions and
+  an Inline Sticky initialization race that could retain Popover fallback after async variants
+  made native sticky valid. The fix preserves body-layer retention, allows Popover recovery,
+  keeps permanent blocker diagnostics, and preserves target inline host-box styles only for
+  `inline-sticky`. Headless Playwright stabilization includes a non-opening HTML reporter,
+  headless scrollbar-aware snapshots, and a dedicated SwiftShader 3D visual worker. The final
+  release test passed 226 unit tests, 4 browser/component tests, 33 headless Playwright tests,
+  and all builds. Implementation and tests are staged; documentation remains unstaged. Archived
+  details: [bugs-resolved.md](bugs-resolved.md#57-release-test-stabilization-and-inline-sticky-initialization-recovery).

@@ -278,13 +278,15 @@ Eligibility requires the original gallery parent to be a direct child of:
 
 with horizontal writing mode.
 
-The repair is retained only when it supplies sufficient native sticky travel and no other gallery
-blocker remains. If another blocker requires fallback, the stretch is released before relocation.
+The repair is retained only when it supplies sufficient native sticky travel, its boundary extends
+through the variants host, and no other gallery blocker remains. A boundary that lets the viewer
+reach its sticky top but ends before a longer variants column is still insufficient. If another
+blocker requires fallback, the stretch is released before relocation.
 External overwrite/removal relinquishes ownership instead of restoring stale merchant state.
 
-Failed attempts are cached by relevant host/boundary/container geometry, natural origin, sticky
-top, inline/computed sizing, layout styles, and blocker state. Meaningful changes invalidate the
-signature.
+Failed attempts are cached by relevant host/boundary/container geometry, the variants document
+bottom, natural origin, sticky top, inline/computed sizing, layout styles, and blocker state.
+Meaningful changes, including a changing variants-list height, invalidate the signature.
 
 ## Fallback Boundary
 
@@ -294,7 +296,8 @@ Fallback needs a product-scoped boundary.
 2. Walk out of OV25-owned wrappers.
 3. Reject body/document scrolling roots.
 4. If no useful common boundary exists, try the original gallery target parent.
-5. If the nearest boundary is too short, walk outward until enough travel exists.
+5. If the nearest boundary is too short or ends before the variants host, walk outward until a
+   boundary provides the complete required travel.
 6. Stop before broad `main`, footer, or document roots.
 
 Without a useful boundary, `requiresBodyFallback` remains false and the gallery is left on its
@@ -436,14 +439,17 @@ Selector choice:
 Snap2 -> no target
 desktop -> selectors.desktopCarousel if nonblank
 mobile -> selectors.mobileCarousel if nonblank
-mobile inline-sticky with no explicit value
-  -> [data-ov25-sticky-mobile-carousel]
+otherwise -> shared Shopify app-block target [data-ov25-carousel-target]
+mobile inline-sticky also recognizes the retained
+  [data-ov25-sticky-mobile-carousel] attribute
 otherwise -> embedded carousel
 ```
 
 Resolution requires exactly one valid `HTMLElement` in the authoritative common gallery/variants
 scope. A meaningful local scope never falls through to a document-wide sibling match. If both hosts
-do not establish such a scope, document lookup is used.
+do not establish such a scope, document lookup is used. Explicit per-viewport selectors take
+precedence over the shared Shopify target. If the app block is absent or its target is ambiguous,
+the carousel remains embedded.
 
 The controller observes the owner document and a relevant shared ShadowRoot. It ignores mutations
 caused only by OV25's external host so selectors such as `#target:empty` remain stable, while
@@ -478,7 +484,11 @@ The local Shopify workspace contains dirty, uncommitted integration changes that
 - read `ov25HeaderQuerySelector`, `ov25DesktopCarouselQuerySelector`, and
   `ov25MobileCarouselQuerySelector` metafields into window globals;
 - strip those keys from Setup selectors and apply nonblank integration values;
-- include `blocks/ov25_sticky_mobile_carousel.liquid`.
+- include the shared desktop/mobile app block `blocks/ov25_carousel.liquid`, whose generic
+  `[data-ov25-carousel-target]` target is the fallback when an explicit per-viewport selector is
+  absent;
+- retain `[data-ov25-sticky-mobile-carousel]` on that block for the `ov25-ui` mobile
+  `inline-sticky` fallback.
 
 These changes are outside approved commit `fad225f` and are not committed or approved as part of
 Bug 39. Current OV25 `main` does not contain the matching controls/persistence calls in
@@ -500,8 +510,8 @@ Bug 39.
 ### OV25 preview
 
 Current OV25 `main` lacks the Bug 39-specific preview enhancement for simulated
-fixed/collapsing headers and `[data-ov25-sticky-mobile-carousel]`. Dedicated `dev/react-test`
-fixtures own that verification.
+fixed/collapsing headers and carousel relocation targets. Dedicated `dev/react-test` fixtures own
+that verification.
 
 ## Cleanup Semantics
 
@@ -540,7 +550,7 @@ Queries supported by `inline-sticky-fixture.jsx`:
 | Query | Current behavior |
 | --- | --- |
 | `header=explicit` | Uses `[data-fixture-header]`; otherwise auto-detects. |
-| `target=missing` | Omits built-in mobile carousel destination. |
+| `target=missing` | Omits the shared carousel destination; the carousel remains embedded. |
 | `carousel=stacked` | Uses stacked carousel. |
 | `stackedGallery=1` | Uses the established stacked iframe path. |
 | `viewer=compact` | Sticky-only `72%`, `4 / 3` viewer custom CSS. |

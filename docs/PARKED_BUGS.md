@@ -4,112 +4,15 @@ These bugs are excluded from the upcoming release. Their implementation artifact
 
 Before any parked bug can be approved or staged, move its entire packet back to [bugs-ready-for-review.md](bugs-ready-for-review.md), refresh any stale build and test evidence, and complete review there.
 
-Queue audit 2026-07-28: 11 bugs are parked for post-release work: Bugs 12, 15, 28, 33, 34, 35, 36, 41, 42, 43, and 45. All named retained worktrees below still exist and contain their proposal changes, except Bugs 12 and 15, which are retained through review artifacts only.
+Queue audit 2026-08-03: 10 bugs are parked for post-release work: Bugs 15, 28, 33, 34, 35, 36, 41, 42, 43, and 45. Bug 12 was resumed on 2026-07-30, manually approved on 2026-08-03, and is no longer part of this queue. All named retained worktrees below still exist and contain their proposal changes, except Bug 15, which is retained through review artifacts only.
 
 Current release-cleanup state:
 
-- Bugs 12, 15, 33, 42, 43 (`ov25-ui` side), and 45 are absent from current `ov25-ui` main.
+- Bugs 15, 33, 42, 43 (`ov25-ui` side), and 45 are absent from current `ov25-ui` main.
 - Bugs 28, 35, 36, 41, and the OV25 side of Bug 43 were never applied to current OV25 main; they remain only in retained worktrees/artifacts.
 - The distinct Bug 34 proposal was not applied to current main; the approved, committed Bug 24 equivalent remains.
 
 ## Parked
-
-### 12. Auto-open configurator in setup does not work
-
-- Status: **PARKED FOR POST-RELEASE**. Bug 12 code was removed from main during the completed release cleanup. The retained proposal exists only in review artifacts; there is no active worktree containing additional Bug 12 changes. It is not fixed or approved.
-- Source item: `"auto open configurator" in ov25-setup does not work?`
-- Current location: no Bug 12 implementation is present in current main; the retained review diff, screenshots, and historical verification record remain available.
-
-Historical implementation summary:
-
-- `autoOpen` relied on `window.ov25ConfigureHandlerRef`, but the provider registered that ref to `handleConfigureClick`. Real standard Configure clicks use `openConfiguratorOrSnap2`, which opens the standard sheet/drawer path. The fix registers the same handler used by the visible Configure trigger.
-- The setup dev fixture previously depended on a temporary duplicate local `configurator-setup-preview.html` iframe. That duplicate has been removed; setup preview testing should now use OV25's `/configurator-preview` route while the OV25 dev server is running.
-- The OV25 setup preview has a representative product layout and empty target containers for configure buttons, including `#ov25-fullscreen-button`, so it no longer displays a static unwired `Configure` placeholder.
-
-Manual fixture:
-
-- [gallery-sheet-list-auto-open fixture](http://localhost:3008/tests/gallery-sheet-list-auto-open.html)
-- Setup preview check: [configurator-setup fixture](http://localhost:3008/tests/configurator-setup.html)
-- Historical `bb56186` baseline: [gallery-sheet-list-auto-open fixture on 3009](http://127.0.0.1:3009/tests/gallery-sheet-list-auto-open.html)
-- Historical `bb56186` baseline: [configurator-setup fixture on 3009](http://127.0.0.1:3009/tests/configurator-setup.html)
-
-Before/after screenshots:
-
-- Before: [open screenshot](../review-screenshots/bug-12-auto-open-configurator-before.png)
-- After: [open screenshot](../review-screenshots/bug-12-auto-open-configurator-after.png)
-- Setup after: [open screenshot](../review-screenshots/bug-12-configurator-setup-after.png)
-
-Manual verification on resumption:
-
-Current-state prerequisite: reapply the retained implementation diff before running these steps; there is no active Bug 12 worktree, and current main does not contain this parked proposal.
-
-1. Open the fixture above.
-2. Expected: the desktop sheet opens automatically after load without clicking Configure.
-3. Close the sheet, refresh, and confirm it opens again.
-4. Optional mobile check: open the same URL in a narrow/mobile viewport.
-5. Expected: the mobile drawer opens automatically after load.
-6. For setup, open the setup preview fixture above.
-7. Expected: the preview iframe URL points at the local OV25 app preview (`http://app.localhost:3000/configurator-preview` or the equivalent OV25 origin), not production `app.ov25.ai` or `chrome-error://chromewebdata/`.
-8. In the setup UI, enable `Auto-open configurator`, then verify the preview opens the sheet/drawer automatically.
-9. If you also enable `Configure button`, the visible injected Configure button should open the same sheet/drawer manually.
-10. On post-release resumption, rebuild `ov25-ui` before final manual review so the handler change is in `dist`. A setup rebuild is only needed if you are testing the package's default local-preview URL behavior rather than the explicit dev fixture `previewBaseUrl`.
-11. The preview still creates a `https://configurator.orbital.vision/.../3397` iframe inside the local preview frame. That is expected: it is the product configurator iframe, not the OV25 app preview host.
-
-Historical changed-file scope:
-
-- `src/contexts/ov25-ui-context.tsx`
-- `setup/src/components/ConfiguratorSetup/PreviewArea/index.tsx`
-- `dev/react-test/tests/configurator-setup.jsx`
-- `dev/react-test/vite.config.js`
-- `OV25/app/(ov25-ui)/configurator-preview/page.tsx`
-
-Retained implementation diff:
-
-- [review-diffs/bug-auto-open-configurator.diff](../review-diffs/bug-auto-open-configurator.diff)
-
-Native diff in Cursor:
-
-- Open Source Control and click the changed files above, or open each file and run `Git: Open Changes`.
-
-Retained diff summary:
-
-```diff
-- configureHandlerRef.current = handleConfigureClick;
-+ configureHandlerRef.current = openConfiguratorOrSnap2;
-+ ConfiguratorSetup uses the normal local OV25 preview route in dev
-+ OV25 /configurator-preview owns the representative product preview shell
-+ useLocalPreview === false is the only forced-production setup preview case
-```
-
-Historical verification run:
-
-- `git diff --check -- dev/react-test/tests/configurator-setup.jsx dev/react-test/vite.config.js setup/src/components/ConfiguratorSetup/PreviewArea/index.tsx src/contexts/ov25-ui-context.tsx` passed.
-- `node -c dev/react-test/tests/configurator-setup-preview.js` passed.
-- `npm run type-check` passed.
-- `node node_modules/typescript/bin/tsc --noEmit -p setup/tsconfig.json` passed.
-- `node scripts/check-local-fixture.mjs gallery-sheet-list-auto-open.html --selector '.ov25-close-button' --selector '#ov25-checkout-button' --selector '#ov25-add-to-basket-button' --wait-ms 5000` passed on `localhost:3008`: close, Buy now, and Add to basket controls were visible without clicking Configure. At the time, this proved the then-served `dist` was auto-opening; repeat the manual check after rebuilding on resumption.
-- `node scripts/check-local-fixture.mjs configurator-setup.html --wait-ms 3000 --click-row-text 'Auto-open configurator' --frames --frame-selector '#ov25-configurator-variant-menu-container' --frame-selector '.ov25-close-button'` passed: the setup preview iframe was local and the desktop sheet/close button were visible after toggling Auto-open.
-- `node scripts/check-local-fixture.mjs configurator-setup.html --wait-ms 3000 --click-row-text 'Configure button' --frame-click-text 'CONFIGURE' --frames --frame-selector '#ov25-configurator-variant-menu-container' --frame-selector '.ov25-close-button'` passed: after enabling Configure button and clicking the injected `CONFIGURE` trigger inside the preview frame, the desktop sheet/close button were visible.
-- `node scripts/check-local-fixture.mjs configurator-setup.html --wait-ms 3000 --click-row-text 'Auto-open configurator' --screenshot review-screenshots/bug-12-configurator-setup-after.png --full-page --frames --frame-selector '#ov25-configurator-variant-menu-container' --frame-selector '.ov25-close-button'` passed and refreshed the setup after screenshot.
-- 2026-06-08 code review by subagent `Archimedes`: no blocking findings. Review confirmed the auto-open path is gated by `autoOpen`, non-inline sheet/drawer mode, and an available configure/variants selector; it attempts once after handler readiness and should not continuously reopen or lock the UI.
-- Staging check: `git apply --check --cached review-diffs/bug-auto-open-configurator.diff` passes from the clean index.
-
-Automated test candidates:
-
-- Playwright test loading `gallery-sheet-list-auto-open.html` and asserting the sheet/drawer appears without clicking.
-- Playwright test loading `configurator-setup.html`, toggling `Auto-open configurator`, and asserting the local preview frame opens the sheet/drawer.
-- Playwright test enabling `Configure button` in setup and asserting the injected Configure button opens the same panel manually.
-- Similar Snap2 auto-open fixture if Snap2 should be covered by this flag too.
-
-Residual risk:
-
-- Multiple configurator pages still share the existing global handler ref behavior; this fix keeps that architecture and only aligns the registered handler with real Configure clicks.
-- The retained diff was produced while shared files also contained unrelated work. If Bug 12 is resumed, reapply and review it against current main rather than assuming the old whole-file state is safe.
-- `scripts/check-local-fixture.mjs` has separate workflow-tooling changes used for verification. It is intentionally not part of the Bug 12 implementation diff/staging set unless you separately approve the helper script work.
-
-Resumption instruction:
-
-- To resume Bug 12 after the release, move this entire packet back to [bugs-ready-for-review.md](bugs-ready-for-review.md), refresh any stale build/test evidence, and complete manual review there before requesting approval or staging. Do not mark the bug fixed while parked.
 
 ### 15. Variant thumbnails should expose responsive `srcset` tiers
 
