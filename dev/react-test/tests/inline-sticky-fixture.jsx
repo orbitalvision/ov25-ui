@@ -33,8 +33,10 @@ const useStackedCarousel = params.get('carousel') === 'stacked';
 const useStackedGalleryPath = params.get('stackedGallery') === '1';
 const useCompactViewer = params.get('viewer') === 'compact';
 const useContentBoxGalleryTarget = params.get('hostBox') === 'content-box';
+const useReplacementStyleHazard = params.get('replacementStyle') === 'hazardous';
 const forceBodyLayerFallback = params.get('fallback') === 'body-layer';
-const useHiddenRootOverflow = params.get('rootOverflow') === 'hidden';
+const useFixtureRootOverflowBlocker =
+  params.get('overflowBlocker') === 'fixture-root';
 const requestedDesktopDisplayMode = params.get('desktopMode');
 const desktopDisplayMode =
   requestedDesktopDisplayMode === 'inline' || requestedDesktopDisplayMode === 'inline-sheet'
@@ -199,11 +201,20 @@ function GalleryTarget() {
       id="ov25-sticky-gallery"
       className="configurator-container fixture-gallery-target"
       style={
-        useStackedGalleryPath || useContentBoxGalleryTarget
+        useStackedGalleryPath || useContentBoxGalleryTarget || useReplacementStyleHazard
           ? {
               ...(useStackedGalleryPath ? { zIndex: 1 } : {}),
               ...(useContentBoxGalleryTarget
                 ? {
+                    boxSizing: 'content-box',
+                    padding: '12px',
+                    border: '4px solid #7b7468',
+                  }
+                : {}),
+              ...(useReplacementStyleHazard
+                ? {
+                    display: 'none',
+                    transform: 'translateX(7px)',
                     boxSizing: 'content-box',
                     padding: '12px',
                     border: '4px solid #7b7468',
@@ -280,7 +291,9 @@ function App() {
       data-gallery-host-box={useContentBoxGalleryTarget ? 'content-box' : undefined}
       data-fallback-strategy={forceBodyLayerFallback ? 'body-layer' : undefined}
       data-popover-fixture={forceBodyLayerFallback ? fixturePopoverMode : undefined}
-      data-root-overflow={useHiddenRootOverflow ? 'hidden' : undefined}
+      data-overflow-blocker={
+        useFixtureRootOverflowBlocker ? 'fixture-root' : undefined
+      }
     >
       <ThemeHeader />
       {forceBodyLayerFallback ? (
@@ -344,11 +357,9 @@ function App() {
         * { box-sizing: border-box; }
         html {
           scroll-behavior: auto;
-          ${useHiddenRootOverflow ? 'overflow-x: hidden;' : ''}
         }
         body {
           background: #f3f1ed;
-          ${useHiddenRootOverflow ? 'overflow-x: hidden;' : ''}
         }
         #root { min-height: 100%; }
         a { color: inherit; }
@@ -358,6 +369,7 @@ function App() {
           background: #f8f7f4;
           color: #181818;
           --ov25-sticky-carousel-height: 112px;
+          ${useFixtureRootOverflowBlocker ? 'overflow-x: hidden;' : ''}
         }
 
         .fixture-main { min-height: 100%; }

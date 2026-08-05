@@ -864,8 +864,10 @@ export const OV25UIProvider: React.FC<{
       ...(isMobile ? { topGapOverride: 0, bottomGapOverride: 0 } : {}),
       onChange: (nextSnapshot) => {
         setStickyLayoutSnapshot((previousSnapshot) => {
+          // Body-layer relocation hides the original ancestor chain from later measurements.
+          // Popover keeps that chain intact, so it can recover when async layout gains native travel.
           if (
-            stickyHostRelocatedRef.current &&
+            galleryHost?.parentElement?.hasAttribute('data-ov25-sticky-body-layer') &&
             previousSnapshot?.requiresBodyFallback &&
             !nextSnapshot.requiresBodyFallback
           ) {

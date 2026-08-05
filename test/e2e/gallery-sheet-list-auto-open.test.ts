@@ -30,7 +30,7 @@ async function expectSheetOutsideRightOfViewport(sheet: Locator) {
     .poll(
       () => sheet.evaluate((element) => {
         const rect = element.getBoundingClientRect();
-        return { outsideRight: rect.left >= window.innerWidth };
+        return { outsideRight: rect.left >= document.documentElement.clientWidth };
       }),
       { timeout: RUNTIME_TIMEOUT },
     )

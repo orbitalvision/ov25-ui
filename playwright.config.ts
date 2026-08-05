@@ -8,15 +8,15 @@ export default defineConfig({
   /* Run tests in files in parallel */
   fullyParallel: false,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
+  reporter: [['html', { open: 'never' }]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
     baseURL: 'http://localhost:3008',
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
-    /* Run tests in headed mode (browser visible) */
-    headless: false,
+    /* Run tests headlessly by default (no browser windows) */
+    headless: true,
   },
   // 45 seconds max wait
   timeout: 45000,

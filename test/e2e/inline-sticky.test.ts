@@ -15,6 +15,9 @@ const STICKY_HOST_LIFECYCLE_STYLE_PROPERTIES: readonly string[] = [
   'max-height',
   'height',
   'overflow',
+  'overflow-x',
+  'overflow-y',
+  'box-sizing',
   'z-index',
   'max-width',
   'margin-inline',
@@ -624,7 +627,43 @@ async function expectNativeStickyGallery(page: Page, host: Locator): Promise<voi
     });
 }
 
+async function waitForFixtureVariantLayout(page: Page): Promise<void> {
+  let previousSignature: string | null = null;
+  let stableSamples = 0;
+
+  await expect
+    .poll(
+      async () => {
+        const state = await page.locator('#ov25-sticky-controls').evaluate((element) => {
+          const grid = document.querySelector<HTMLElement>('.fixture-product-grid');
+          const variantsRect = element.getBoundingClientRect();
+          const gridRect = grid?.getBoundingClientRect();
+          return {
+            fontsLoaded: document.fonts.status === 'loaded',
+            variantCount:
+              element.shadowRoot?.querySelectorAll('.ov25-default-variant-card').length ?? 0,
+            variantsHeight: Math.round(variantsRect.height * 100) / 100,
+            gridHeight: gridRect ? Math.round(gridRect.height * 100) / 100 : 0,
+          };
+        });
+        if (!state.fontsLoaded || state.variantCount === 0 || state.gridHeight <= 0) {
+          previousSignature = null;
+          stableSamples = 0;
+          return stableSamples;
+        }
+
+        const signature = JSON.stringify(state);
+        stableSamples = signature === previousSignature ? stableSamples + 1 : 0;
+        previousSignature = signature;
+        return stableSamples;
+      },
+      { timeout: RUNTIME_TIMEOUT, intervals: [100, 150, 250, 500] },
+    )
+    .toBeGreaterThanOrEqual(2);
+}
+
 async function expectGalleryColumnStretch(page: Page, host: Locator): Promise<void> {
+  await waitForFixtureVariantLayout(page);
   const column = page.locator('.fixture-gallery-column');
   await expect(host).toHaveCount(1);
   await expect(column).toHaveCount(1);
@@ -645,6 +684,21 @@ async function expectGalleryColumnStretch(page: Page, host: Locator): Promise<vo
                 htmlElement.getBoundingClientRect().height -
                   grid.getBoundingClientRect().height,
               ) <= 1,
+            hasStickyTravel: (() => {
+              if (!hostElement) return false;
+              const hostRect = hostElement.getBoundingClientRect();
+              const columnRect = htmlElement.getBoundingClientRect();
+              const stickyTop = Number.parseFloat(getComputedStyle(hostElement).top);
+              const naturalDocumentTop = hostRect.top + window.scrollY;
+              const requiredTravel = Math.max(0, naturalDocumentTop - stickyTop);
+              const availableTravel = Math.max(
+                0,
+                columnRect.bottom + window.scrollY -
+                  naturalDocumentTop -
+                  hostRect.height,
+              );
+              return availableTravel + 1 >= requiredTravel;
+            })(),
             hostIsDirectChild: hostElement?.parentElement === htmlElement,
           };
         }),
@@ -655,8 +709,55 @@ async function expectGalleryColumnStretch(page: Page, host: Locator): Promise<vo
       inlineAlignSelf: 'stretch',
       inlinePriority: 'important',
       fillsGrid: true,
+      hasStickyTravel: true,
       hostIsDirectChild: true,
     });
+}
+
+async function readBodyLayerTrackPlan(host: Locator) {
+  return host.evaluate((element) => {
+    const boundary = document.querySelector<HTMLElement>('.fixture-product-grid');
+    if (!boundary) throw new Error('Body-layer fixture boundary is missing');
+    const hostRect = element.getBoundingClientRect();
+    const boundaryRect = boundary.getBoundingClientRect();
+    const stickyTop = Number.parseFloat(getComputedStyle(element).top);
+    const naturalDocumentTop = hostRect.top + window.scrollY;
+    const boundaryDocumentBottom = boundaryRect.bottom + window.scrollY;
+    const boundaryEndScrollY =
+      boundaryDocumentBottom - hostRect.height - stickyTop;
+    return {
+      stickyTop,
+      hostWidth: hostRect.width,
+      hostHeight: hostRect.height,
+      naturalDocumentTop,
+      boundaryDocumentBottom,
+      activationScrollY: naturalDocumentTop - stickyTop,
+      boundaryEndScrollY,
+      maxScrollY: Math.max(
+        0,
+        document.documentElement.scrollHeight - window.innerHeight,
+      ),
+    };
+  });
+}
+
+async function waitForBodyLayerTrackPlan(page: Page, host: Locator) {
+  await waitForFixtureVariantLayout(page);
+  await expect
+    .poll(
+      async () => {
+        const plan = await readBodyLayerTrackPlan(host);
+        const firstFixedScrollY = Math.ceil(plan.activationScrollY + 64);
+        const lastFixedScrollY = Math.floor(
+          Math.min(plan.boundaryEndScrollY - 64, plan.maxScrollY - 128),
+        );
+        return lastFixedScrollY > firstFixedScrollY + 128;
+      },
+      { timeout: RUNTIME_TIMEOUT },
+    )
+    .toBe(true);
+
+  return readBodyLayerTrackPlan(host);
 }
 
 async function expectNativeStickyBoundaryExit(
@@ -1071,15 +1172,27 @@ async function readBodyLayerHostStyleSnapshot(
         htmlElement.style.setProperty('outline-offset', '3px');
       }
 
-      const serialize = (target: HTMLElement) => ({
-        styleAttribute: target.getAttribute('style'),
-        cssText: target.style.cssText,
-        declarations: Array.from(target.style).map((property) => ({
+      const serialize = (target: HTMLElement) => {
+        const declarations = Array.from(target.style)
+          .map((property) => ({
           property,
           value: target.style.getPropertyValue(property),
           priority: target.style.getPropertyPriority(property),
-        })),
-      });
+          }))
+          .sort((left, right) => left.property.localeCompare(right.property));
+        const cssText = declarations
+          .map(
+            ({ property, value, priority }) =>
+              `${property}: ${value}${priority ? ` !${priority}` : ''};`,
+          )
+          .join(' ');
+
+        return {
+          styleAttribute: target.getAttribute('style') === null ? null : cssText,
+          cssText,
+          declarations,
+        };
+      };
       const current = serialize(htmlElement);
       const expectedAfterStickyCleanup = document.createElement('div');
       if (current.styleAttribute !== null) {
@@ -1322,7 +1435,7 @@ test.describe('Standard product inline-sticky display mode', () => {
   test('keeps ordinary inline modes outside the sticky layout lifecycle', async ({ page }) => {
     for (const mode of ['inline', 'inline-sheet'] as const) {
       await page.goto(
-        `/tests/inline-sticky-desktop-no-header.html?desktopMode=${mode}&mobileMode=inline`,
+        `/tests/inline-sticky-desktop-no-header.html?desktopMode=${mode}&mobileMode=inline&replacementStyle=hazardous`,
       );
 
       const host = page.locator('#ov25-sticky-gallery');
@@ -1336,6 +1449,21 @@ test.describe('Standard product inline-sticky display mode', () => {
       await expect(page.locator('[data-ov25-sticky-placeholder]')).toHaveCount(0);
       await expect(page.locator('[data-ov25-sticky-body-layer]')).toHaveCount(0);
       await expect(page.locator('#ov25-sticky-controls')).toBeVisible();
+      expect(
+        await host.evaluate((element) => ({
+          display: element.style.display,
+          transform: element.style.transform,
+          boxSizing: element.style.boxSizing,
+          padding: element.style.padding,
+          border: element.style.border,
+        })),
+      ).toEqual({
+        display: '',
+        transform: '',
+        boxSizing: '',
+        padding: '',
+        border: '',
+      });
     }
   });
 
@@ -1535,19 +1663,24 @@ test.describe('Standard product inline-sticky display mode', () => {
     ).toBe(true);
   });
 
-  test('falls back when hidden root overflow makes body a non-scrolling sticky ancestor', async ({ page }) => {
+  test('falls back when hidden fixture-root overflow makes a non-scrolling sticky ancestor', async ({ page }) => {
     const consoleWarnings: string[] = [];
     page.on('console', (message) => {
       if (message.type() === 'warning') consoleWarnings.push(message.text());
     });
 
-    await page.goto('/tests/inline-sticky-desktop-no-header.html?rootOverflow=hidden');
+    await page.goto(
+      '/tests/inline-sticky-desktop-no-header.html?overflowBlocker=fixture-root',
+    );
 
     await expect(page.locator('.inline-sticky-fixture')).toHaveAttribute(
-      'data-root-overflow',
+      'data-overflow-blocker',
+      'fixture-root',
+    );
+    await expect(page.locator('.inline-sticky-fixture')).toHaveCSS(
+      'overflow-x',
       'hidden',
     );
-    await expect(page.locator('body')).toHaveCSS('overflow-x', 'hidden');
     expect(
       await page.evaluate(() => document.scrollingElement === document.documentElement),
     ).toBe(true);
@@ -1763,10 +1896,11 @@ test.describe('Standard product inline-sticky display mode', () => {
           documentHeight: document.documentElement.scrollHeight,
         };
       });
-    const baselineLayout = await readClientLayout();
+    let baselineLayout: Awaited<ReturnType<typeof readClientLayout>> | null = null;
     const expectClientLayoutStable = (
       current: Awaited<ReturnType<typeof readClientLayout>>,
     ) => {
+      if (!baselineLayout) throw new Error('Body-layer fixture baseline is missing');
       expect(Math.abs(current.gridWidth - baselineLayout.gridWidth)).toBeLessThanOrEqual(1);
       expect(Math.abs(current.gridHeight - baselineLayout.gridHeight)).toBeLessThanOrEqual(2);
       expect(
@@ -1794,30 +1928,8 @@ test.describe('Standard product inline-sticky display mode', () => {
       ).toBeLessThanOrEqual(2);
     };
 
-    const plan = await host.evaluate((element) => {
-      const boundary = document.querySelector<HTMLElement>('.fixture-product-grid');
-      if (!boundary) throw new Error('Body-layer fixture boundary is missing');
-      const hostRect = element.getBoundingClientRect();
-      const boundaryRect = boundary.getBoundingClientRect();
-      const stickyTop = Number.parseFloat(getComputedStyle(element).top);
-      const naturalDocumentTop = hostRect.top + window.scrollY;
-      const boundaryDocumentBottom = boundaryRect.bottom + window.scrollY;
-      const boundaryEndScrollY =
-        boundaryDocumentBottom - hostRect.height - stickyTop;
-      return {
-        stickyTop,
-        hostWidth: hostRect.width,
-        hostHeight: hostRect.height,
-        naturalDocumentTop,
-        boundaryDocumentBottom,
-        activationScrollY: naturalDocumentTop - stickyTop,
-        boundaryEndScrollY,
-        maxScrollY: Math.max(
-          0,
-          document.documentElement.scrollHeight - window.innerHeight,
-        ),
-      };
-    });
+    const plan = await waitForBodyLayerTrackPlan(page, host);
+    baselineLayout = await readClientLayout();
     expect(Math.round(plan.stickyTop)).toBe(106 + STICKY_GAP);
 
     const firstFixedScrollY = Math.ceil(plan.activationScrollY + 64);
@@ -2127,16 +2239,18 @@ test.describe('Standard product inline-sticky display mode', () => {
     expect(immediateReverseGeometry.layerStyle).toBe(bodyLayerStyleBeforeReverse);
 
     await page.setViewportSize(MOBILE_VIEWPORT);
-    await expect(host).not.toHaveClass(/ov25-inline-sticky-gallery-host/, {
+    const mobileHost = page.locator('#ov25-sticky-gallery');
+    await expect(mobileHost).toHaveCount(1, { timeout: RUNTIME_TIMEOUT });
+    await expect(mobileHost).not.toHaveClass(/ov25-inline-sticky-gallery-host/, {
       timeout: RUNTIME_TIMEOUT,
     });
-    await expect(host).not.toHaveAttribute('data-ov25-inline-sticky-active');
+    await expect(mobileHost).not.toHaveAttribute('data-ov25-inline-sticky-active');
     await expect(bodyLayer).toHaveCount(0);
     await expect(placeholder).toHaveCount(0);
-    await expect(host).toHaveCSS('position', 'static');
+    await expect(mobileHost).toHaveCSS('position', 'static');
     await expect
       .poll(() =>
-        host.evaluate((element) => ({
+        mobileHost.evaluate((element) => ({
           directChildOfBlocker: element.parentElement?.hasAttribute(
             'data-fixture-gallery-blocker',
           ),
@@ -2156,7 +2270,7 @@ test.describe('Standard product inline-sticky display mode', () => {
       });
     await expect
       .poll(
-        async () => (await readBodyLayerHostStyleSnapshot(host)).current,
+        async () => (await readBodyLayerHostStyleSnapshot(mobileHost)).current,
         { timeout: RUNTIME_TIMEOUT },
       )
       .toEqual(preRelocationHostStyles.expectedAfterStickyCleanup);
@@ -2477,6 +2591,7 @@ test.describe('Standard product inline-sticky display mode', () => {
       });
 
     const compactViewerHeights = await readDesktopViewerHeights(page, host);
+    await expectGalleryColumnStretch(page, host);
     await page.evaluate(() => window.scrollTo(0, 600));
     await expectNativeStickyGallery(page, host);
     await expectPinnedTop(host, 106 + STICKY_GAP);
@@ -2692,6 +2807,7 @@ test.describe('Standard product inline-sticky display mode', () => {
 
     const host = await waitForStickyGallery(page);
     const iframe = page.locator('#ov25-configurator-iframe');
+    await expectGalleryColumnStretch(page, host);
     await expectStickyContentBoxHostWithinCaps(host);
     expect(await readIframeSlotGeometry(page)).toMatchObject({
       hasStickyClass: true,

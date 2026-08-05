@@ -726,6 +726,13 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
           emptyDiv.setAttribute(OV25_INJECTOR_OWNED_ATTRIBUTE, 'true');
           emptyDiv.className = `${target.className} ov25-configurator-${componentName}`.trim();
           if (target.id) emptyDiv.id = target.id;
+          if (
+            componentName === 'gallery' &&
+            target instanceof HTMLElement &&
+            configuratorDisplayMode === ConfiguratorDisplayMode.InlineSticky
+          ) {
+            emptyDiv.style.cssText = target.style.cssText;
+          }
 
           target.parentNode.replaceChild(emptyDiv, target);
           if (

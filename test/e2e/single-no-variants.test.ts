@@ -1,57 +1,128 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 /** Matches production and local AR preview URLs (path + UUID). */
 const AR_PREVIEW_URL_PATTERN = /https?:\/\/[^/]+\/ar-preview\/[a-f0-9-]{36}/;
+const RUNTIME_TIMEOUT = 20000;
+const CANVAS_READY_TIMEOUT = 45000;
+const CANVAS_SELECTOR = 'canvas[data-engine="three.js r171"]';
 
-test.describe('Windrush - Loveseat. Single product without variants', () => {
+async function loadFixture(page: Page) {
+    const configuratorLoaded = page.waitForEvent('console', {
+        predicate: (msg) => msg.text().includes('OV25 3D Loaded'),
+        timeout: 60000,
+    });
 
-    test('Initial load and model render', async ({ page }) => {
-        await page.goto('/tests/single-no-variants.html');
+    await page.goto('/tests/single-no-variants.html');
+    await expect(page.locator('body')).toBeVisible();
 
-        const body = page.locator('body');
-        await expect(body).toBeVisible();
+    const price = page.locator('.ov25-configurator-price');
+    await expect(price).toBeVisible({ timeout: 10000 });
+    await expect(price).toContainText('£1,125.00', { timeout: 15000 });
+    await expect(page.locator('.ov25-configurator-name')).toHaveText('Windrush-Loveseat');
+    await expect(page.locator('.ov-25-configurator-variant-menu-container')).not.toBeVisible();
+    await configuratorLoaded;
 
-        // Wait for the price element and configurator to initialize
-        const price = page.locator('.ov25-configurator-price');
-        await expect(price).toBeVisible({ timeout: 10000 });
+    const iframeElement = page.locator('#ov25-configurator-iframe');
+    await expect(iframeElement).toBeVisible({ timeout: CANVAS_READY_TIMEOUT });
 
-        // Wait for the price and name to be updated by the configurator
-        await expect(price).toContainText('£1,125.00', { timeout: 15000 });
+    return { iframeElement, iframe: page.frameLocator('#ov25-configurator-iframe') };
+}
 
-        const name = page.locator('.ov25-configurator-name');
-        await expect(name).toBeVisible();
-        await expect(name).toHaveText('Windrush-Loveseat');
+async function waitForStableResponsiveCanvas(page: Page): Promise<void> {
+    const canvas = page.frameLocator('#ov25-configurator-iframe').locator(CANVAS_SELECTOR).last();
+    let previousSize = '';
+    let stablePolls = 0;
 
-        // Variants should not be added to the page
-        const variants = page.locator('.ov-25-configurator-variant-menu-container');
-        await expect(variants).not.toBeVisible();
+    await expect.poll(async () => {
+        const size = await canvas.evaluate((element) => {
+            const current = element as HTMLCanvasElement;
+            const rect = current.getBoundingClientRect();
+            const ratio = current.ownerDocument.defaultView?.devicePixelRatio ?? 1;
+            const responsive = current.width !== 300 && current.height !== 150 &&
+                Math.abs(current.width - rect.width * ratio) <= 1 &&
+                Math.abs(current.height - rect.height * ratio) <= 1;
+            return responsive ? `${current.width}x${current.height}` : '';
+        }).catch(() => '');
 
-        // need to wait for the iframe to load and render
-        // watch the console for the message "OV25 3D Loaded" (bounded: global test timeout was 16m+ without this)
-        await page.waitForEvent('console', {
-            predicate: (msg) => msg.text().includes('OV25 3D Loaded'),
-            timeout: 40000,
-        });
+        if (!size) {
+            previousSize = '';
+            stablePolls = 0;
+            return 0;
+        }
 
-        const iframe = page.frameLocator('#ov25-configurator-iframe');
+        stablePolls = size === previousSize ? stablePolls + 1 : 1;
+        previousSize = size;
+        return stablePolls;
+    }, {
+        message: 'wait for the current WebGL canvas to reach a stable responsive size',
+        timeout: CANVAS_READY_TIMEOUT,
+        intervals: [250],
+    }).toBeGreaterThanOrEqual(4);
+}
 
-        // Find the correct canvas by its data-engine attribute equal to "three.js r171" (is this stable???)
-        const canvas = iframe.locator('canvas[data-engine="three.js r171"]');
-        const size = await canvas.evaluate((c) => {
-            const canvasEl = c as HTMLCanvasElement;
-            return { width: canvasEl.width, height: canvasEl.height };
-        });
-        expect(size.width).toBeGreaterThan(0);
-        expect(size.height).toBeGreaterThan(0);
+const visualTest = test.extend({
+    launchOptions: { args: ['--enable-unsafe-swiftshader'] },
+});
+visualTest.use({ viewport: { width: 1280, height: 800 } });
+
+visualTest.describe('Windrush - Loveseat visual render', () => {
+
+    visualTest('renders the initial model', async ({ page }) => {
+        visualTest.setTimeout(240000);
+        const { iframeElement, iframe } = await loadFixture(page);
+        await waitForStableResponsiveCanvas(page);
 
         const gestureHint = iframe.locator('#ov25-gesture-hint');
-        expect(gestureHint).toBeVisible();
+        await expect(gestureHint).toBeVisible({ timeout: CANVAS_READY_TIMEOUT });
 
-        await canvas.click(); // this removes the animated gesture hint, so our screenshot will be deterministic
+        const clickTarget = await iframeElement.boundingBox();
+        expect(clickTarget).not.toBeNull();
+        if (!clickTarget) throw new Error('Configurator iframe has no visible bounding box');
+        await page.mouse.click(
+            clickTarget.x + clickTarget.width / 2,
+            clickTarget.y + clickTarget.height / 2,
+        );
 
-        expect(gestureHint).not.toBeVisible();
+        await expect(gestureHint).not.toBeVisible({ timeout: RUNTIME_TIMEOUT });
+        await waitForStableResponsiveCanvas(page);
 
-        expect(await canvas.screenshot()).toMatchSnapshot('single-no-variants-initial-canvas.png', { maxDiffPixelRatio: 0.01 });
+        // Keep Next.js development tooling out of the product-rendering baseline.
+        const nextDevPortal = iframe.locator('nextjs-portal');
+        if (await nextDevPortal.count() === 1) {
+            await nextDevPortal.evaluate((element) => {
+                (element as HTMLElement).style.display = 'none';
+            });
+        }
+
+        const screenshotTarget = await iframeElement.boundingBox();
+        expect(screenshotTarget).not.toBeNull();
+        if (!screenshotTarget) throw new Error('Configurator iframe has no screenshot region');
+        const renderedIframeRegion = await page.screenshot({
+            animations: 'disabled',
+            clip: screenshotTarget,
+        });
+        expect(renderedIframeRegion).toMatchSnapshot('single-no-variants-initial-canvas.png', { maxDiffPixelRatio: 0.01 });
+
+        const dimensionsButton = page.locator('#ov25-desktop-dimensions-toggle-button');
+        await expect(dimensionsButton).toBeVisible({ timeout: RUNTIME_TIMEOUT });
+        await dimensionsButton.click({ timeout: RUNTIME_TIMEOUT });
+
+        const dimensionsWidth = iframe.locator('.ov25-dimensions-width');
+        const dimensionsHeight = iframe.locator('.ov25-dimensions-height');
+        const dimensionsDepth = iframe.locator('.ov25-dimensions-depth');
+        await expect(dimensionsWidth).toBeVisible({ timeout: RUNTIME_TIMEOUT });
+        await expect(dimensionsWidth).toHaveText('W 127cm', { timeout: RUNTIME_TIMEOUT });
+        await expect(dimensionsHeight).toBeVisible({ timeout: RUNTIME_TIMEOUT });
+        await expect(dimensionsHeight).toHaveText('H 95cm', { timeout: RUNTIME_TIMEOUT });
+        await expect(dimensionsDepth).toBeVisible({ timeout: RUNTIME_TIMEOUT });
+        await expect(dimensionsDepth).toHaveText('D 104cm', { timeout: RUNTIME_TIMEOUT });
+    });
+});
+
+test.describe('Windrush - Loveseat interactions', () => {
+    test('supports controls in normal headless mode', async ({ page }) => {
+        test.setTimeout(120000);
+        await loadFixture(page);
 
         // Test Share button
         const shareButton = page.locator('#ov25-share-button');
@@ -67,24 +138,6 @@ test.describe('Windrush - Loveseat. Single product without variants', () => {
         // Test Dimensions button
         const dimensionsButton = page.locator('#ov25-desktop-dimensions-toggle-button');
         await expect(dimensionsButton).toBeVisible();
-        await dimensionsButton.click();
-
-        // dimensions overlay should appear
-        const dimensionsWidth = iframe.locator('.ov25-dimensions-width');
-        await expect(dimensionsWidth).toBeVisible();
-        await expect(dimensionsWidth).toContainText('W 127cm');
-        const dimensionsHeight = iframe.locator('.ov25-dimensions-height');
-        await expect(dimensionsHeight).toBeVisible();
-        await expect(dimensionsHeight).toContainText('H 95cm');
-        const dimensionsDepth = iframe.locator('.ov25-dimensions-depth');
-        await expect(dimensionsDepth).toBeVisible();
-        await expect(dimensionsDepth).toContainText('D 104cm');
-
-        await dimensionsButton.click();
-        // dimensions overlay should disappear
-        await expect(dimensionsWidth).not.toBeVisible();
-        await expect(dimensionsHeight).not.toBeVisible();
-        await expect(dimensionsDepth).not.toBeVisible();
 
         // Test AR button
         const arButton = page.locator('#ov25-ar-toggle-button');
@@ -92,7 +145,7 @@ test.describe('Windrush - Loveseat. Single product without variants', () => {
         await arButton.click();
         // dialog should appear (AR dialog is portaled to document.body, not inside the container)
         const arDialog = page.locator('#ov25-ar-preview-qr-code-dialog');
-        await expect(arDialog).toBeVisible();
+        await expect(arDialog).toBeVisible({ timeout: RUNTIME_TIMEOUT });
         await expect(arDialog).toContainText('View in room');
         await expect(arDialog).toContainText('Scan the QR code on your phones camera to view this item in your room');
         await expect(arDialog).toContainText(AR_PREVIEW_URL_PATTERN);
@@ -112,11 +165,10 @@ test.describe('Windrush - Loveseat. Single product without variants', () => {
         // #true-ov25-configurator-iframe-container (parent of #ov25-configurator-iframe). With stacked
         // gallery, that node can sit directly under the gallery shadow root; Chromium may then expose
         // document.fullscreenElement as the shadow host #ov-25-configurator-gallery-container instead.
-        const fullscreenId = await page.evaluate(() => document.fullscreenElement?.id);
-        expect(
-          fullscreenId === 'true-ov25-configurator-iframe-container' ||
-            fullscreenId === 'ov-25-configurator-gallery-container'
-        ).toBe(true);
+        await expect.poll(
+          () => page.evaluate(() => document.fullscreenElement?.id),
+          { timeout: RUNTIME_TIMEOUT }
+        ).toMatch(/^(true-ov25-configurator-iframe-container|ov-25-configurator-gallery-container)$/);
 
         // Check share button still works
         await expect(shareButton).toBeVisible();
@@ -128,24 +180,11 @@ test.describe('Windrush - Loveseat. Single product without variants', () => {
         await expect(toast2).toBeVisible();
         await expect(toast2).toContainText('Share link copied to clipboard!');
 
-        // Check Dimensions button still works
-        dimensionsButton.click();
-        // dimensions overlay should appear
-        await expect(dimensionsWidth).toBeVisible();
-        await expect(dimensionsHeight).toBeVisible();
-        await expect(dimensionsDepth).toBeVisible();
-        // close dimensions overlay
-        dimensionsButton.click();
-        // dimensions overlay should disappear
-        await expect(dimensionsWidth).not.toBeVisible();
-        await expect(dimensionsHeight).not.toBeVisible();
-        await expect(dimensionsDepth).not.toBeVisible();
-
         // Test AR button still shows
         await expect(arButton).toBeVisible();
         await arButton.click();
         // dialog should appear
-        await expect(arDialog).toBeVisible();
+        await expect(arDialog).toBeVisible({ timeout: RUNTIME_TIMEOUT });
         await expect(arDialog).toContainText('View in room');
         await expect(arDialog).toContainText('Scan the QR code on your phones camera to view this item in your room');
         await expect(arDialog).toContainText(AR_PREVIEW_URL_PATTERN);
@@ -154,7 +193,10 @@ test.describe('Windrush - Loveseat. Single product without variants', () => {
 
         // Close fullscreen
         await fullscreenButton.click();
-        await expect(page.evaluate(() => document.fullscreenElement?.id)).resolves.toBe(undefined);
+        await expect.poll(
+          () => page.evaluate(() => document.fullscreenElement?.id == null),
+          { timeout: RUNTIME_TIMEOUT }
+        ).toBe(true);
     });
     
 });

@@ -1749,11 +1749,18 @@ export function createStickyLayoutController(
     // Native sticky also needs enough vertical travel inside the gallery's original parent. Use
     // the retained flow anchor because the live host may already be inside the body fallback.
     const galleryTravelBoundary = originalGalleryTargetParent;
+    const galleryTravelBoundarySupportsStretch = Boolean(
+      galleryTravelBoundary &&
+      isGalleryColumnStretchEligible(galleryTravelBoundary, readStyle),
+    );
     const scrollY = normalizePixelValue(windowObject.scrollY);
     const galleryNaturalDocumentTop = naturalDocumentTopFromAnchor(
       galleryFlowAnchor,
       windowObject,
     );
+    const beforeGalleryStickyActivation =
+      galleryNaturalDocumentTop !== null &&
+      scrollY + 1 < galleryNaturalDocumentTop - stickyTop;
     const variantsRect = variantsHost?.isConnected
       ? variantsHost.getBoundingClientRect()
       : null;
@@ -1998,7 +2005,15 @@ export function createStickyLayoutController(
       unresolved.push(unresolvedBlocker);
       const affectsGallery = galleryBlockerElements.has(unresolvedBlocker.element);
       if (affectsGallery) galleryNeedsFallback = true;
-      if (!unresolvedBlocker.ownedByOv25) {
+      const transientPreActivationTravelBlocker =
+        beforeGalleryStickyActivation &&
+        galleryTravelBoundarySupportsStretch &&
+        galleryColumnStretchFailure?.element === galleryTravelBoundary &&
+        unresolvedBlocker.element === galleryTravelBoundary &&
+        unresolvedBlocker.reasons.every(
+          (reason) => reason === 'insufficient-sticky-travel',
+        );
+      if (!unresolvedBlocker.ownedByOv25 && !transientPreActivationTravelBlocker) {
         reportDiagnostic({
           code: 'sticky-blocking-ancestor',
           message: affectsGallery
@@ -2037,6 +2052,18 @@ export function createStickyLayoutController(
       });
     }
     const initialBoundary = boundary;
+    const galleryFallbackIsOnlyPreActivationTravel =
+      beforeGalleryStickyActivation &&
+      galleryTravelBoundarySupportsStretch &&
+      galleryColumnStretchFailure?.element === galleryTravelBoundary &&
+      unresolved
+        .filter((blocker) => galleryBlockerElements.has(blocker.element))
+        .every((blocker) =>
+          blocker.element === galleryTravelBoundary &&
+          blocker.reasons.every(
+            (reason) => reason === 'insufficient-sticky-travel',
+          ),
+        );
     // Walk outward when the nearest product boundary is too short to provide the required travel.
     if (needsFallback && boundary && galleryHost) {
       boundary = findSufficientStickyBoundary(
@@ -2045,7 +2072,7 @@ export function createStickyLayoutController(
         stickyTop,
         travelMeasurementOptions,
       );
-      if (boundary !== initialBoundary) {
+      if (boundary !== initialBoundary && !galleryFallbackIsOnlyPreActivationTravel) {
         reportDiagnostic({
           code: 'sticky-boundary-insufficient-travel',
           message: boundary
