@@ -10,6 +10,15 @@ function isThreeDPlaceholder(item: unknown): item is { is3D: true } {
 
 const DRAG_THRESHOLD_PX = 5
 
+type PopoverDivProps = React.ComponentPropsWithoutRef<'div'> & {
+  popover?: 'auto' | 'manual'
+}
+
+const PopoverDiv = React.forwardRef<HTMLDivElement, PopoverDivProps>((props, ref) => (
+  <div ref={ref} {...props} />
+))
+PopoverDiv.displayName = 'PopoverDiv'
+
 export function ProductCarousel() {
   const {
     currentProduct,
@@ -334,7 +343,7 @@ export function ProductCarousel() {
         )}
       </div>
       {galleryCarouselFullscreenImage && (
-        <div
+        <PopoverDiv
           ref={fullscreenOverlayRef}
           popover={useFullscreenPopover ? 'manual' : undefined}
           className="ov:fixed ov:inset-0 ov:z-2147483647 ov:bg-black/90 ov:flex ov:items-center ov:justify-center ov:cursor-pointer"
@@ -359,7 +368,7 @@ export function ProductCarousel() {
             className="ov:max-w-full ov:max-h-full ov:object-contain ov:pointer-events-none"
             onClick={(e) => e.stopPropagation()}
           />
-        </div>
+        </PopoverDiv>
       )}
     </div>
   )
