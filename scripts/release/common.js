@@ -67,7 +67,7 @@ export function capture(command, args = [], options = {}) {
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', options.allowFailure ? 'pipe' : 'inherit'],
     maxBuffer: 80 * 1024 * 1024,
-  }).trim();
+  }).trimEnd();
 }
 
 export function captureOrEmpty(command, args = [], options = {}) {
