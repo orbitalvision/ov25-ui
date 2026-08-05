@@ -1,6 +1,6 @@
 # OV25 UI 0.8.0 Developer Summary
 
-Status: **Draft, not approved**
+Status: **Approved on 2026-08-05**
 
 ## Review Identity
 
@@ -10,6 +10,7 @@ Status: **Draft, not approved**
 | Bump | `minor` |
 | Collector base | `ov25-ui@0.7.3` (`b56f817949116ffbe6605f2c0f187cc5b971faaf`) |
 | Collector head | `HEAD` (`521ef22c71b2c79b9e9c6ba819c0028360084a3d`) |
+| Artifact commit | `c202f1f` (follows the reviewed source context) |
 | Branch | `main` |
 | Context generated | `2026-08-05T08:26:05.424Z` |
 
@@ -19,12 +20,12 @@ No version was bumped, and no tag, push, package publication, Shopify deploy, Wo
 
 ## Release Verdict
 
-**The core source has passed final release validation, but the coordinated `0.8.0` rollout is not complete.** Local `ov25-ui` `main` is at `521ef22`, matches `origin/main`, and includes the approved Bug 57 Inline (sticky) recovery and gallery-style preservation fixes. The final commit changes nine internal Markdown files only, so it does not affect runtime, package, or test behavior. The working tree contains only the untracked release artifacts permitted by `release:deploy`. Remaining work is to review and commit these artifacts, publish the packages, push the adapter commits, then complete OV25 against the published `0.8.0` packages. Public documentation is already committed locally and will be pushed after the releases.
+**The `0.8.0` release artifacts were approved on 2026-08-05 and the core source has passed final release validation, but the coordinated rollout is not complete.** The reviewed source context remains `521ef22`, which includes the approved Bug 57 Inline (sticky) recovery and gallery-style preservation fixes. Artifact commit `c202f1f` follows that context, is present on local and remote `main`, and does not change the reviewed runtime or passing release-test result. The `ov25-ui` working tree is clean. Remaining work begins with pushing the adapter source commits, then preparing and publishing the packages before completing OV25 against the published `0.8.0` packages. Public documentation is already committed locally and will be pushed after the releases.
 
 ## Release Blockers
 
-1. **The release artifacts still require review and commit.** `releases/0.8.0/` is the only untracked workspace content and is permitted by `release:deploy`, but these artifacts remain draft until approved and committed.
-2. **Shopify and WooCommerce adapter commits have not reached remote `main`.** Shopify is three commits ahead and WooCommerce is one commit ahead. Their source changes must be pushed before their package-sync/build/deploy workflows consume those repositories.
+1. **Shopify and WooCommerce adapter commits have not reached remote `main`.** Shopify is three commits ahead and WooCommerce is one commit ahead. Their source changes must be pushed before their package-sync/build/deploy workflows consume those repositories.
+2. **Package preparation and publication have not run.** Prepare and publish `ov25-ui`, `ov25-ui-react18`, and `ov25-setup` at exact version `0.8.0` without dispatching OV25 prematurely.
 3. **OV25 must be completed after package publication.** Its staged integration imports `ov25-setup/defaults`, which is unavailable from installed `ov25-setup@0.7.2`. Publish `0.8.0`, synchronize OV25 to the exact package versions, then validate and commit the seven staged integration files, including approved Bug 56.
 4. **Snap2 drag bounds still require OV25 integration.** Approved commit `3541b736` remains on `ov25-ui-v0.8.0`/`snap2-draggable-objects-bounds` and is not contained by current OV25 `main`; integrate it when completing OV25 after package publication.
 5. **Downstream rollout remains local.** OV25 is two commits ahead of `origin/main` before its pending integration commit. Public docs are clean and one commit ahead at `1e23604`; per the release plan, they will be pushed after the package releases.
@@ -37,7 +38,7 @@ The square thumbnail default and current Snap2 setup normalization were manually
 
 | Repository | Current state | Release implication |
 | --- | --- | --- |
-| `ov25-ui` | Local `main` is at `521ef22` and matches `origin/main`; only `releases/0.8.0/` is untracked. `.worktrees/` is ignored. | Final `release:test` passed. Review and commit the draft artifacts; the release directory itself is allowed by `release:deploy`. |
+| `ov25-ui` | Local and remote `main` include approved artifact commit `c202f1f`, which follows reviewed source context `521ef22`; the working tree is clean. `.worktrees/` is ignored. | Final `release:test` passed. Push adapter source next, then prepare and publish the packages. |
 | `OV25` | `main` at `5d3c9002`, two commits ahead of `origin/main`; seven integration files, including approved Bug 56, are staged, and two unrelated SQL dumps are untracked. | Wait for published `0.8.0` packages, synchronize exact dependencies, integrate `3541b736`, then commit, validate, and push. |
 | `shopify-plugin` | Clean local `main`, three commits ahead of `origin/main`: `626c165`, `ec950cd`, and `7f55479`. | Push source; update the exact package and regenerate the bundle after npm publication. |
 | `ov25-woo-extension` | Clean local `main`, one commit (`c7b690a`) ahead of `origin/main`. | Push source before dispatching its exact-package release workflow. |
@@ -168,13 +169,12 @@ Remaining required verification:
 
 ## Required Release Order
 
-1. Review and commit the draft `releases/0.8.0/` artifacts. The workspace otherwise matches `origin/main`, and the untracked release directory is permitted by `release:deploy`. Bug 54 is explicitly ignored for this release and does not block it.
-2. Push the existing Shopify and WooCommerce adapter source commits to their remote `main` branches before downstream package workflows run.
-3. Publish the three `0.8.0` packages through the approved release process. Use `--skip-ov25-dispatch` when pushing through `release:deploy`, or push manually, so OV25 is not updated before package publication and integration preparation are complete.
-4. After publication, synchronize OV25 to exact `0.8.0` dependencies, integrate `3541b736`, then commit, validate, and push its seven staged integration files plus drag bounds. Do not add a permanent fallback for the pre-`0.8.0` `ov25-setup/defaults` import.
-5. Update Shopify to exact `ov25-ui-react18@0.8.0`, rebuild its bundle, and test/deploy the extension on staging before live rollout.
-6. Dispatch WooCommerce's exact-package release workflow after its adapter commit is on `main`, then validate the generated ZIP on staging.
-7. Push the committed public docs (`1e23604`) after the releases, as planned.
+1. Push the existing Shopify and WooCommerce adapter source commits to their remote `main` branches before downstream package workflows run. Bug 54 is explicitly ignored for this release and does not block it.
+2. Prepare and publish the three `0.8.0` packages through the approved release process. Use `--skip-ov25-dispatch` when pushing through `release:deploy`, or push manually, so OV25 is not updated before package publication and integration preparation are complete.
+3. After publication, synchronize OV25 to exact `0.8.0` dependencies, integrate `3541b736`, then commit, validate, and push its seven staged integration files plus drag bounds. Do not add a permanent fallback for the pre-`0.8.0` `ov25-setup/defaults` import.
+4. Update Shopify to exact `ov25-ui-react18@0.8.0`, rebuild its bundle, and test/deploy the extension on staging before live rollout.
+5. Dispatch WooCommerce's exact-package release workflow after its adapter commit is on `main`, then validate the generated ZIP on staging.
+6. Push the committed public docs (`1e23604`) after the releases, as planned.
 
 ## Non-Blocking Follow-Ups
 
@@ -186,4 +186,4 @@ Remaining required verification:
 
 ## Next Step
 
-Review and commit the draft release artifacts. Package publication comes next; OV25 integration and the public-docs push follow publication.
+Push the Shopify and WooCommerce adapter source commits, then prepare and publish the three `0.8.0` packages. OV25 integration and the public-docs push follow publication.

@@ -1,6 +1,6 @@
 # OV25 UI 0.8.0
 
-Status: **Draft, not approved**
+Status: **Approved on 2026-08-05**
 
 Release type: **Minor**
 
@@ -80,6 +80,6 @@ Both behavior changes were manually reviewed during development, but existing cl
 
 ## Release Status
 
-This release remains **Draft, not approved**. The core `ov25-ui` source is committed on `main` at `521ef22`, matches `origin/main`, and final core validation has passed. The untracked `releases/0.8.0/` artifacts are awaiting review and commit; `release:deploy` permits this release directory. Package publication has not run. Shopify and WooCommerce adapter commits still need pushing; after package publication, OV25 still needs exact dependency synchronization, its staged integration and preview cleanup committed, and the approved Snap2 drag-bounds branch integrated. Public documentation is committed locally and will be pushed after the releases.
+The release artifacts were **approved on 2026-08-05**. Their reviewed source context remains `521ef22`; artifact commit `c202f1f` follows that context and is present on both local and remote `main`. The working tree is clean and final core validation has passed. Package preparation and publication have not run. Shopify and WooCommerce adapter commits still need pushing first; after package publication, OV25 still needs exact dependency synchronization, its staged integration and preview cleanup committed, and the approved Snap2 drag-bounds branch integrated. Public documentation is committed locally and will be pushed after the releases.
 
 No version, tag, push, package publication, or deploy action was performed while refreshing these notes.

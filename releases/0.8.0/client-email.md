@@ -1,10 +1,10 @@
 # Draft Client Email: OV25 UI 0.8.0
 
-Status: **Draft only - do not send before release approval**
+Status: **Draft only - release approved; do not send before downstream staging is ready**
 
 Internal review evidence: [context](context.md), [JSON context](context.json), [commits](commits.txt), [changed files](changed-files.txt), [diff stat](diff-stat.txt), and [committed diff](diff.patch).
 
-Core release validation has passed. No version, tag, push, package publication, or deploy action was performed while refreshing this draft.
+The `0.8.0` release artifacts were approved on 2026-08-05 and core release validation has passed. No version, tag, push, package publication, or deploy action was performed while refreshing this draft.
 
 **To:** [Client / recipient names]
 
