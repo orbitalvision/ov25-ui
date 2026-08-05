@@ -1,0 +1,59 @@
+521ef22 (HEAD -> main, origin/main, origin/HEAD) update(docs) various docs and .md files for inline-sticky and bug fixing leading up to 0.8.0
+8a7c85a fix(tests) run playwright headless, fix tests
+dbc0bc9 fix(images): limit weave fallback to materials
+35a14c7 fix(setup) bun lockfile was failing tests
+ee7bf4f chore(git): ignore local worktrees
+f8da121 fix(ov25-ui) comment update
+ad400f6 fix(sticky): detect short gallery boundaries (fix for setup inline-sticky preview)
+50fd555 fix(setup): remount preview on device change
+239fa6a feat(test) update test fixture
+d7c2de7 fix(setup) fix configurator-preview not previewing inline-sticky correctly
+4dc3c24 fix(snap2) fix case where share/save dialog for snap2 desktop would appear behind main snap2 dialog is configuration uuid was provided to snap2.
+3fcc699 (codex/bug-53-snap2-confirm-layer) fix(tests) various test reorder
+b5e26a7 fix(mobile): keep modal close button visible (with deferThreeD it would be hidden if configurator is not selected before opening)
+e3b6c89 fix(tests) maze snap2 mobile full width in fixture
+429b4f9 feat(ov25-ui) add accessible iframe title for SEO
+0df85c3 feat(ov25-ui) placeholder image for when selection is missing image
+8f25bbb fix(tests) consolidate test
+4d038ec fix: restore desktop configurator auto-open
+89d4d98 fix(mobile) configuratorViewControls were not appearing  in drawer/sheet when defer3D was on.
+2695ce4 fix(tests) various test suite optimise
+3db1114 feat(docs) docs and skills updates
+a9eb0f7 docs(ov25-ui) various docs and records for bug fixing, inline-sticky implementation
+fad225f feat(ov25-ui) inline-sticky and moveable header
+f512d69 Merge remote-tracking branch 'origin/main'
+7588490 feat(bugs) various ledgers and markdown files for tracking fixed/parked/todo bugs.
+51c9269 fix(gitignore) add .pnpm-store to gitignore
+067c385 (feat) script for ai to check and debug local fixtures with playwright
+86bfa86 fix(test) forgotted test update
+f4d1242 fix(gitignore) remove .DS_Store (its in gitignore but was tracked)
+8ddf84d docs(configurator): clarify iframe query merge
+715a959 feat(variants): support accordion on mobile
+8e68f5d fix(snap2) minor spacing so "View Cart" button is in same place as "Buy Now/Add To Cart"
+e31a9bd feat(setup) export default configurator settings for use by OV25 when settings initial shopify metafield values. ensure .css files have correct filename
+248cee1 fix(test fixture) snap2-uuid update with new configuratorUuid
+85ce00c fix(test fixture) snap2 dialog mobile
+b748b6e feat(configurator): add gesture hint opt-out to injectConfigurator and setup
+bf9e635 fix(swatchbook) fix broken/wonky swatchbook layout on mobile
+f45914f fix(variants): default thumbnails to square
+b934bc4 fix(variant image) revert accidental change that applied swatch outline to variants
+a08acd3 feat(checkout): add disableBuyNow flag (inject, setup, etc)
+ca27d58 fix(setup) fix bug where leaving the tab would cause setup UI to refresh and reset to defaults.
+459fac3 fix(setup) add missing configurator-style-variables
+73ac99b fix(types): accept tiered product images
+06321d5 (codex/bug-46-product-image-input, codex/bug-45-commerce-line-images, codex/bug-44-host-toast-ui, codex/bug-43-snap2-module-prices-ui, codex/bug-42-module-actions) fix(snap2) show tooltips instead of inline titles for snap2 initialise menu. mobile cant show tooltip. both available in dom for css hide/show.
+1c784b5 (codex/inline-sticky) fix(carousel) add data-selected to carousel thumbnails
+b8038ed fix(swatches) make empty swatch outline the same as the jagged filled swatch outline
+27cadb7 feat(dev)  new tests
+967dc47 feat(react-test) 3 new test fixtures.
+76f4031 fix(sheet) stop page-level reflows when useIframePositioning relocates the iframe and opens sheets (retains size of gallery, and accounts for scrollbar width). add reflow debug test fixture
+4e20397 fix(size-variant-card) add proper targetable classes to all SizeVariantCard parts.
+3a9faad fix(ov25-ui) update gitignore
+4600b46 feat(react-test) add test fixture for variants with missing thumbs
+d262314 fix(snap2) stop rendering mobile drawer when we are supposed to render snap2 mobile dialog. fix scroll on snap2 mobile dialog checkout sheet. fix rounded borders on snap2 mobile dialog. fix view cart padding to match checkout buttons.
+fb96197 delete useless .md
+eaa808d refactor(z-index) extract and standardise z-index on body-level portals (layers.ts)
+06eb331 fix(setup): preserve Snap2 export config
+0248b9a feat(react-test) upgrade responsize configurator test fixture
+43acd5f fix (setup): hydrate host CSS color variables (we switched from :root to :host and didnt update loader). handle legacy
+0bcfc73 make scrolling scroll the carousel before it scrolls the main page
