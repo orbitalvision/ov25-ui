@@ -1,6 +1,6 @@
 # OV25 UI 0.8.1 Developer Summary
 
-Status: **Draft, not approved**
+Status: **Approved on 2026-08-06**
 
 ## Review Identity
 
@@ -22,24 +22,21 @@ WooCommerce release, or OV25 deploy was performed by this review refresh.
 
 ## Release Verdict
 
-**Suitable for patch release after artifact approval and workspace cleanup.** The runtime change
+**Approved and suitable for patch release.** The runtime change
 fixes a Shopify theme interoperability failure without changing public configuration, payloads, or
 defaults. Bug 58 was manually approved. Complete `release:test` validation passed on 2026-08-06.
 
 ## Remaining Release Blockers
 
-1. Review and approve the refreshed `0.8.1` artifacts.
-2. Commit the approved release artifacts.
-3. Commit, stash, or otherwise handle the four modified tracker/notes files outside
-   `releases/0.8.1`; they will block `release:deploy` while dirty.
-
-Downstream dependency updates happen after the packages publish and do not block package release.
+No pre-deploy blockers remain once this approval-status update is committed. Runtime and test
+changes, review artifacts, and tracker notes are otherwise committed. Downstream dependency
+updates happen after the packages publish and do not block package release.
 
 ## Workspace Status
 
 | Repository | Review state | Release implication |
 | --- | --- | --- |
-| `ov25-ui` | `main` and `origin/main` are at `a60ecb6`. Four Markdown tracker/notes files are modified; `releases/0.8.1` is untracked. | Runtime and test changes are committed. Review artifacts need approval/commit; unrelated dirty docs must be handled before deploy. |
+| `ov25-ui` | Runtime, tests, tracker notes, and review artifacts are committed; no source changes remain. | Commit this approval-status update, then proceed to the manual deploy step. |
 | `OV25` | Tracked files are clean at `1334b07c`; `moy-cart-footer.liquid` and two SQL dumps are untracked. Exact package dependencies are `0.8.0`. | Dependency-only `0.8.1` synchronization after publication. Avoid unrelated untracked files. |
 | `shopify-plugin` | Clean at `235ff60`; configurator extension uses exact `ov25-ui-react18@0.8.0`. | Dependency-only update, bundle rebuild, staging check, and Shopify app-version release after publication. |
 | `ov25-woo-extension` | Clean at `a39f860`; `package.json` and `package-lock.json` use exact `0.8.0` packages. | Dependency-only update and normal plugin workflow after publication. Its older `bun.lock` entries remain pre-existing version-hygiene debt. |
@@ -135,12 +132,10 @@ saved setup configurations remain valid.
 
 ## Required Release Order
 
-1. Review and approve these refreshed artifacts.
-2. Commit release artifacts and handle modified tracker/notes files.
-3. Run normal `ov25-ui` deploy/publish process for exact `0.8.1` packages.
-4. Synchronize and validate OV25 after packages exist.
-5. Update/rebuild Shopify, test new app version on staging, then promote it.
-6. Run WooCommerce exact-package release workflow and validate generated plugin build.
+1. Run the normal `ov25-ui` deploy/publish process for exact `0.8.1` packages.
+2. Synchronize and validate OV25 after packages exist.
+3. Update/rebuild Shopify, test the new app version on staging, then promote it.
+4. Run the WooCommerce exact-package release workflow and validate the generated plugin build.
 
 ## Non-Blocking Follow-Ups
 
@@ -149,5 +144,5 @@ saved setup configurations remain valid.
 
 ## Next Step
 
-User reviews refreshed artifacts. After approval and workspace cleanup, manually run
-`npm run release:deploy -- --release 0.8.1` when ready. Release review did not deploy anything.
+Manually run `npm run release:deploy -- --release 0.8.1` when ready. Release review did not deploy
+anything.

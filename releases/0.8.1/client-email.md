@@ -1,6 +1,6 @@
 # Draft Client Email: OV25 UI 0.8.1
 
-Status: **Draft only - do not send before staging approval**
+Status: **Draft only - release approved; do not send before downstream staging is ready**
 
 Internal review evidence: [context](context.md), [JSON context](context.json),
 [commits](commits.txt), [changed files](changed-files.txt), [diff stat](diff-stat.txt),

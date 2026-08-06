@@ -1,6 +1,6 @@
 # OV25 UI 0.8.1
 
-Status: **Draft, not approved**
+Status: **Approved on 2026-08-06**
 
 Release type: **Patch**
 
