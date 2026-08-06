@@ -673,6 +673,13 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
         style={galleryHostStackStyle}
         data-clarity-mask="true"
       >
+        {/* Shadow-root content does not prevent Shopify's `:empty` theme rules from matching this host. */}
+        <span
+          data-ov25-portal-host-placeholder
+          hidden
+          inert
+          aria-hidden="true"
+        />
         {galleryShadowRoot && createPortal(galleryContent, galleryShadowRoot)}
       </div>
     )

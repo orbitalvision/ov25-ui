@@ -1467,6 +1467,48 @@ test.describe('Standard product inline-sticky display mode', () => {
     }
   });
 
+  test('stays visible when a Dawn-style empty div rule targets the gallery root', async ({ page }) => {
+    await page.goto('/tests/inline-sticky-desktop-no-header.html');
+    await page.addStyleTag({
+      content: `
+        #ov-25-configurator-gallery-container:empty {
+          display: none !important;
+        }
+      `,
+    });
+
+    const host = await waitForStickyGallery(page);
+    const galleryRoot = host.locator('#ov-25-configurator-gallery-container');
+    const placeholder = galleryRoot.locator(
+      ':scope > [data-ov25-portal-host-placeholder]',
+    );
+    const iframe = page.locator('#ov25-configurator-iframe');
+
+    await expect(placeholder).toHaveCount(1);
+    await expect(placeholder).toHaveAttribute('hidden', '');
+    await expect(placeholder).toHaveAttribute('inert', '');
+    await expect(placeholder).toHaveAttribute('aria-hidden', 'true');
+    await expect(galleryRoot).toBeVisible();
+    await expect(galleryRoot).not.toHaveCSS('display', 'none');
+    expect(await galleryRoot.evaluate((element) => element.matches(':empty'))).toBe(false);
+    await expect
+      .poll(async () => {
+        const [galleryBox, iframeBox] = await Promise.all([
+          galleryRoot.boundingBox(),
+          iframe.boundingBox(),
+        ]);
+        return Boolean(
+          galleryBox &&
+            galleryBox.width > 1 &&
+            galleryBox.height > 1 &&
+            iframeBox &&
+            iframeBox.width > 1 &&
+            iframeBox.height > 1,
+        );
+      })
+      .toBe(true);
+  });
+
   test('keeps the no-header desktop gallery pinned and sized to the viewport', async ({ page }) => {
     const consoleWarnings: string[] = [];
     page.on('console', (message) => {
