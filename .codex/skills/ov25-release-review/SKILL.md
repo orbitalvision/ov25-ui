@@ -14,6 +14,10 @@ Generate the pre-release review artifacts in `releases/<version>/`:
 - `developer-summary.md`;
 - `client-email.md`.
 
+Before starting, read `docs/release-runbook.md`. It is the canonical operational workflow and
+contains the current cross-repository release order, React 18 preflight, and partial-publish
+recovery procedure.
+
 This is the only AI-controlled release step. After this, the user reviews the artifacts and manually runs test/deploy scripts.
 
 ## Hard Rules
@@ -116,6 +120,10 @@ Also check the current working tree directly with `git status --short`. The cont
   - Dining configurator changes should have a dining fixture/route.
   - Carousel interaction changes should have a fixture/e2e test that exercises product image carousel behavior.
   - Snap2 or bed-configurator changes should have matching fixtures for those product types.
+
+Also identify React 18 typing/build risks. `release:test` currently validates the React 19 build
+but not the exact `ov25-ui-react18` dependency set. The developer summary must require the isolated
+React 18 build documented in `docs/release-runbook.md` before tags are created.
 
 9. Write these artifacts:
 

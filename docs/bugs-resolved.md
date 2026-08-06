@@ -4,7 +4,9 @@ Concise archive of approved, committed, and otherwise closed bugs. Active review
 
 Commit hashes below identify the primary implementation commit. Cross-repository fixes list each relevant repository.
 
-Last reconciled against `ov25-ui` and OV25 branch ancestry: 2026-08-04. Local `ov25-ui` `main` and `origin/main` are at `50fd555`.
+Release reconciliation note (2026-08-06): `0.8.0` and `0.8.1` are published. Some detailed status
+text below records the point at which work was reviewed or staged; use live Git state and the
+[release runbook](release-runbook.md) for future releases.
 
 ## Committed core with active follow-up
 
@@ -45,11 +47,12 @@ Last reconciled against `ov25-ui` and OV25 branch ancestry: 2026-08-04. Local `o
 
 **Mobile boundary follow-up:** Manually approved on 2026-08-04. The controller now rejects a gallery boundary that ends before the variants host, retries failed stretch repairs when the variants height changes, and uses the bounded common-product fallback when needed. The focused sticky controller and metrics suites pass 55/55 and `bun run type-check` passes. `src/lib/sticky-layout-controller.ts` and `test/unit/sticky-layout-controller.test.ts` are staged; tracker and review files remain unstaged.
 
-## Approved / staged (awaiting commit)
+## Approved release work
 
 ### 58. Shopify Dawn hides the injected inline-sticky gallery as an empty div
 
-**Status:** Manually approved and staged on 2026-08-06.
+**Status:** Released in `0.8.1` on 2026-08-06. Runtime commit `ff077c1`; React 18 JSX typing
+follow-up `12aab1d`.
 
 **Summary:** Dawn's generic `div:empty { display: none; }` rule hid the injected Product Gallery
 host because its visible content lives in a shadow root. That collapsed the media column and

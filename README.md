@@ -73,31 +73,18 @@ async function captureThumbnail() {
 
 The function returns a Promise that resolves with the uploaded screenshot URL from S3. Screenshots are automatically uploaded and the returned URL can be used immediately.
 
-## Publishing
+## Releasing
 
 This package is published in two versions to support both React 18 and React 19:
 
 - **`ov25-ui`** - For React 19 consumers (default)
 - **`ov25-ui-react18`** - For React 18 consumers (Shopify, WooCommerce, etc.)
 
-### Publishing both versions
-
-1. Update the version number in `package.json`
-2. Run `npm run publish:all` to build and publish both packages
-
-### Canary releases
-
-For pre-release testing without affecting the `latest` tag:
-
-1. Bump to a prerelease version: `npm version prerelease --preid=canary` (e.g. `0.5.73` → `0.5.74-canary.0`)
-2. Run `npm run publish:canary` to build and publish both packages under the `canary` tag
-
-Consumers install with `npm install ov25-ui@canary` or `npm install ov25-ui-react18@canary`. Regular `npm install ov25-ui` continues to resolve to `latest`.
-
-### Publishing individual versions (don't do this usually)
-
-- React 18: `npm run publish:react18`
-- React 19: `npm run publish:react19`
+Production packages are published only by package-specific, tag-triggered GitHub Actions. Do not
+manually edit package versions or run local publish commands. Follow the
+[OV25 Release Runbook](./docs/release-runbook.md): review, user-run release tests, the isolated
+React 18 build, release commit/tag creation, package workflow verification, then OV25, Shopify, and
+WooCommerce synchronization.
 
 ### Building without publishing
 

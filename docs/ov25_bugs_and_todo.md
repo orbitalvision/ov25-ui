@@ -1,5 +1,11 @@
 # Triage pass - 2026-05-15
 
+> Post-release note (2026-08-06): `0.8.0` and the Shopify compatibility patch `0.8.1` have been
+> released. The dated status summary below preserves the implementation/review history and is not a
+> live release dashboard. Start future release work from live Git/npm state and
+> [release-runbook.md](release-runbook.md); use [bugs-ready-for-review.md](bugs-ready-for-review.md)
+> for active review and [PARKED_BUGS.md](PARKED_BUGS.md) for deferred work.
+
 Status summary:
 
 - **✅ COMMITTED TO `ov25-ui` MAIN**: Bugs 1, 2/2a, 3, 4, 5, 6, 7, 7a, 7b, 11, 12, 14, 17, 18, 19, 22, 23, 24, 25, 26, Bug 29 correction, 32, 37, 38, 39, 46, 47, 49, and 50, plus the no-thumbnail repro fixture.
@@ -15,7 +21,7 @@ Status summary:
 - **✅ APPROVED / COMMITTED FOR 0.8.0**: Bug 53 (`4dc3c24`).
 - **✅ APPROVED / STAGED FOR 0.8.0**: Bug 55 mobile Inline (sticky) boundary correction; the approved core is committed and the two-file follow-up is staged.
 - **✅ APPROVED / STAGED FOR 0.8.0**: Bug 57 release-test stabilization and Inline Sticky initialization recovery.
-- **✅ APPROVED / STAGED**: Bug 58 prevents Shopify/Dawn `div:empty` rules from hiding the injected gallery shadow host; approved and staged on 2026-08-06.
+- **✅ RELEASED IN 0.8.1**: Bug 58 prevents Shopify/Dawn `div:empty` rules from hiding the injected gallery shadow host; the runtime fix shipped in `ov25-ui@0.8.1` and the React 18-compatible build shipped in `ov25-ui-react18@0.8.1`.
 - **✅ APPROVED / STAGED IN OV25**: Bug 56 removes the redundant static thumbnail strip from the OV25 configurator preview, leaving the real carousel as the only thumbnail UI.
 - **BUG 39 INTEGRATION FOLLOW-UP**: The approved core is committed as `fad225f`. OV25 preview/PluginSettings work is staged but blocked on the unreleased `ov25-setup/defaults` export; Shopify and Woo integration source is committed locally but not pushed. Exact package synchronization remains release work.
 
@@ -582,7 +588,7 @@ configurator: {
 
 ### 58. Shopify Dawn hides the injected inline-sticky gallery as an empty div
 
-- Status: **MANUALLY APPROVED / STAGED** on 2026-08-06.
+- Status: **RELEASED IN 0.8.1** on 2026-08-06. Runtime commit `ff077c1`; React 18 JSX typing follow-up `12aab1d`.
 - Summary: on the `ov25-demo-2` Shopify preview, standard `inline-sticky` successfully injects the configurator into `.product__media-wrapper`, but the injected `#ov-25-configurator-gallery-container` computes to `display: none` and collapses the entire media column to zero height.
 - Reproduction: load the protected [Shopify product preview](https://9idjphpb6756guiy-98059256106.shopifypreview.com/products_preview?preview_key=4fe2ca207d485598d0fb16d66c655877). The shared local fixture remains unchanged; the focused Playwright test injects the Dawn rule directly.
 - Root cause: Dawn applies `a:empty, ... div:empty { display: none; }`. The Product Gallery root renders its visible content into a shadow root via a React portal, and shadow content does not stop the host matching `:empty`.

@@ -1,5 +1,9 @@
 # OV25 Release Automation and Shopify Runtime Versioning Plan
 
+> Historical design document. Use [OV25 Release Runbook](release-runbook.md) for the current
+> operational procedure. Some phased behavior below predates tag-triggered publication and the
+> automatic OV25 dependency workflow.
+
 ## Goals
 
 Build a safer release process for `ov25-ui`, `ov25-ui-react18`, `ov25-setup`, OV25, WooCommerce, and Shopify integrations.
