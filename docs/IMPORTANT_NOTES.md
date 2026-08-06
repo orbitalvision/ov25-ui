@@ -2,14 +2,36 @@
 
 Current queue and release-review state was reconciled against local repositories on 2026-08-05. Use [IMPORTANT_BUGS.md](IMPORTANT_BUGS.md) for required user actions, [bugs-ready-for-review.md](bugs-ready-for-review.md) for the active manual queue, and [bugs-resolved.md](bugs-resolved.md) for approved work.
 
-## Playwright now runs headlessly by default
+## 0.8.1 release-test reliability fixes ready
 
-`playwright.config.ts` now sets `headless: true`, so focused Playwright runs and `release:test`
-will not open browser windows over other work. `scripts/check-local-fixture.mjs` retains its explicit
-`--headed` option for intentional visible-browser debugging. The HTML reporter uses `open: 'never'`,
-so a failed run still writes its report without opening or serving it interactively. Playwright
-loads the updated config and discovers all 33 tests. The `headless: true` hunk is already staged;
-the reporter configuration is also staged as part of Bug 57.
+The apparent Playwright hang after `[34/34]` was an earlier live WebGL test still running in
+parallel; the line reporter prints test starts rather than completions. Headless Chromium made the
+real Three.js/OV25 test dramatically slower, while headed Chromium completed the same work quickly.
+The release E2E suite now uses headed Chromium and the default five workers.
+
+The stale share-link test now compares the clipboard with the current page URL instead of requiring
+the removed `?configuration=` encoding. The visual test still verifies a responsive backing buffer
+and consecutive stable dimensions, but requires three stable samples rather than four because each
+cross-frame WebGL measurement can block for roughly ten seconds locally. A sticky fallback height
+assertion now tolerates at most one CSS pixel of subpixel rounding while still failing larger
+geometry changes.
+
+The headed suite passes all 34 Playwright tests. Its checkout snapshot was restored to the headed
+`444x50` baseline; visual inspection confirmed that only the expected scrollbar-width layout
+changed. The test fixes were committed as `328b8d8`.
+
+The complete `npm run release:test -- --release 0.8.1` run passed on 2026-08-06: type-check, unit
+tests, browser/component tests, both package builds, frozen setup install, react-test build, and all
+Playwright E2E tests. `setup/bun.lock` was committed as `a60ecb6`. The `0.8.1` release artifacts were
+refreshed from `ov25-ui@0.8.0` through `a60ecb6` and now await review/commit. Four modified tracker
+and notes files outside `releases/0.8.1` must also be handled before `release:deploy`.
+
+## Playwright now runs headed by default
+
+`playwright.config.ts` now sets `headless: false` because the real WebGL visual test is substantially
+faster with headed Chromium. This means release E2E browser windows will be visible while the suite
+runs. The HTML reporter retains `open: 'never'`, so a failed run writes its report without opening a
+second report window automatically.
 
 ## Bug 57 release-test fixes approved and staged
 

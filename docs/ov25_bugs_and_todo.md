@@ -15,6 +15,7 @@ Status summary:
 - **✅ APPROVED / COMMITTED FOR 0.8.0**: Bug 53 (`4dc3c24`).
 - **✅ APPROVED / STAGED FOR 0.8.0**: Bug 55 mobile Inline (sticky) boundary correction; the approved core is committed and the two-file follow-up is staged.
 - **✅ APPROVED / STAGED FOR 0.8.0**: Bug 57 release-test stabilization and Inline Sticky initialization recovery.
+- **✅ APPROVED / STAGED**: Bug 58 prevents Shopify/Dawn `div:empty` rules from hiding the injected gallery shadow host; approved and staged on 2026-08-06.
 - **✅ APPROVED / STAGED IN OV25**: Bug 56 removes the redundant static thumbnail strip from the OV25 configurator preview, leaving the real carousel as the only thumbnail UI.
 - **BUG 39 INTEGRATION FOLLOW-UP**: The approved core is committed as `fad225f`. OV25 preview/PluginSettings work is staged but blocked on the unreleased `ov25-setup/defaults` export; Shopify and Woo integration source is committed locally but not pushed. Exact package synchronization remains release work.
 
@@ -578,6 +579,20 @@ configurator: {
 - Manual review: approved by the user on 2026-08-04; the packet is archived in [bugs-resolved.md](bugs-resolved.md#56-configurator-preview-duplicates-the-real-carousel-with-fake-thumbnails).
 - Scoped diff: [bug-56-configurator-preview-remove-fake-thumbnails.diff](../review-diffs/bug-56-configurator-preview-remove-fake-thumbnails.diff).
 - Staging: the deletion is staged in the same OV25 preview file as the pending integration changes. Tracker and review files remain unstaged.
+
+### 58. Shopify Dawn hides the injected inline-sticky gallery as an empty div
+
+- Status: **MANUALLY APPROVED / STAGED** on 2026-08-06.
+- Summary: on the `ov25-demo-2` Shopify preview, standard `inline-sticky` successfully injects the configurator into `.product__media-wrapper`, but the injected `#ov-25-configurator-gallery-container` computes to `display: none` and collapses the entire media column to zero height.
+- Reproduction: load the protected [Shopify product preview](https://9idjphpb6756guiy-98059256106.shopifypreview.com/products_preview?preview_key=4fe2ca207d485598d0fb16d66c655877). The shared local fixture remains unchanged; the focused Playwright test injects the Dawn rule directly.
+- Root cause: Dawn applies `a:empty, ... div:empty { display: none; }`. The Product Gallery root renders its visible content into a shadow root via a React portal, and shadow content does not stop the host matching `:empty`.
+- Controls symptom: the corrected `#ov25-configurator-controls-container` target has an open shadow root and mounted variant-menu shell. A controlled probe with the same live iframe confirmed that it sends populated `ALL_PRODUCTS` and `CONFIGURATOR_STATE` messages when visible, but sends no messages while an ancestor has `display: none`; `WizardVariants` therefore receives an empty `variantPanelOptions` array and returns `null`.
+- Fix: render one hidden, inert light-DOM placeholder in the gallery host. It has no layout or accessibility output, but prevents generic Shopify `:empty` selectors from hiding the host.
+- Automated test: Playwright injects the exact failing CSS rule into the standard Inline Sticky fixture and asserts that the placeholder exists, `:empty` no longer matches, and both gallery and iframe retain non-zero dimensions.
+- Verification: `bun run type-check` and `git diff --check` pass. Focused Playwright discovery finds the new test; execution awaits the user's local rebuild because the browser suite consumes `dist`.
+- Controls selector status: the store setting has been corrected from `.ov25_configurator_controls` to `#ov25-configurator-controls-container`. The light-DOM `.ov25-placeholder` is intentionally retained to protect the controls host from the same class of theme rule; actual controls live in its shadow root.
+- Risk/blast radius: low. One hidden child is added to every Product Gallery root; visible gallery structure, shadow content, sticky sizing, and selector contracts are unchanged.
+- Suggested branch: `fix/shopify-empty-gallery-shadow-host`.
 
 - Default variant image / no thumbnails: repro fixture approved and committed as `4600b46` on 2026-07-09 as `gallery-inline-list-no-variant-thumbs.html`. Bug 50 supplies the user-selected woven placeholder through a package-owned asset URL. Any future compact image-free card treatment is a separate UX change, not part of the missing-asset fix.
 - Hide Buy Now button too: approved and committed as Bug 17 (`a08acd3`). Adds `flags.disableBuyNow` as the sole key, plus the setup Behaviour toggle/export and runtime checkout filtering for standard, mobile, Snap2, and wizard review flows.

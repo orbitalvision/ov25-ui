@@ -47,6 +47,26 @@ Last reconciled against `ov25-ui` and OV25 branch ancestry: 2026-08-04. Local `o
 
 ## Approved / staged (awaiting commit)
 
+### 58. Shopify Dawn hides the injected inline-sticky gallery as an empty div
+
+**Status:** Manually approved and staged on 2026-08-06.
+
+**Summary:** Dawn's generic `div:empty { display: none; }` rule hid the injected Product Gallery
+host because its visible content lives in a shadow root. That collapsed the media column and
+prevented the iframe from sending product/configurator state, leaving the separately mounted
+controls shell empty. `ProductGallery` now includes a hidden, inert light-DOM child so the host no
+longer matches `:empty`.
+
+**Verification:** Manual Shopify review passed. `bun run type-check` and the scoped whitespace
+check passed. The focused Playwright regression injects the Dawn rule itself and verifies the
+placeholder contract plus non-zero gallery and iframe dimensions; it was discovered but not run
+against `dist` because the user owns local rebuilds.
+
+**Changed files:** [product-gallery.tsx](../src/components/product-gallery.tsx) and
+[inline-sticky.test.ts](../test/e2e/inline-sticky.test.ts).
+
+**Scoped diff:** [bug-58-shopify-empty-gallery-shadow-host.diff](../review-diffs/bug-58-shopify-empty-gallery-shadow-host.diff).
+
 ### 56. Configurator preview duplicates the real carousel with fake thumbnails
 
 **Status:** Manually approved and staged in OV25 on 2026-08-04.

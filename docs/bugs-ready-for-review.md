@@ -14,11 +14,10 @@ Before/after comparison server: the retained clean baseline worktree is detached
 
 Coding work should be assigned to worker subagents by default. If a reviewed bug needs follow-up changes, send it back to the same worker when that agent is still available; otherwise assign a new worker with the same bug context. The main thread coordinates, reviews, verifies, updates this queue, and stages only after approval.
 
-Queue audit 2026-08-05: Bugs 50, 55, 56, and 57 are approved. Bug 54 is explicitly ignored for
-the `0.8.0` release. No bugs currently await manual review. Cross-repository release work remains
-tracked separately in [IMPORTANT_BUGS.md](IMPORTANT_BUGS.md).
+Queue audit 2026-08-06: Bugs 50, 55, 56, 57, and 58 are approved. Bug 54 is explicitly ignored.
+Cross-repository release work remains tracked separately in [IMPORTANT_BUGS.md](IMPORTANT_BUGS.md).
 
 ## Ready
 
-No bugs currently await manual review. Last audited on 2026-08-05 after Bug 57 approval; approved
-work is archived in [bugs-resolved.md](bugs-resolved.md).
+No bugs currently await manual review. Approved work is archived in
+[bugs-resolved.md](bugs-resolved.md).
