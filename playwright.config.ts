@@ -15,8 +15,8 @@ export default defineConfig({
     baseURL: 'http://localhost:3008',
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
-    /* Run tests headlessly by default (no browser windows) */
-    headless: true,
+    /* Use headed Chromium for hardware-accelerated WebGL and faster release tests. */
+    headless: false,
   },
   // 45 seconds max wait
   timeout: 45000,

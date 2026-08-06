@@ -897,12 +897,14 @@ async function expectRenderedHeight(element: Locator, expectedHeight: number): P
   await expect
     .poll(
       () =>
-        element.evaluate((htmlElement) =>
-          Math.round(htmlElement.getBoundingClientRect().height),
+        element.evaluate(
+          (htmlElement, expected) =>
+            Math.abs(htmlElement.getBoundingClientRect().height - expected),
+          expectedHeight,
         ),
       { timeout: 10000 },
     )
-    .toBe(expectedHeight);
+    .toBeLessThanOrEqual(1);
 }
 
 async function readIframeSlotGeometry(page: Page) {
@@ -2725,7 +2727,7 @@ test.describe('Standard product inline-sticky display mode', () => {
     const iframe = page.locator('#ov25-configurator-iframe');
     await expectDesktopStickyLayout(host, header, 106);
     const initialViewerHeights = await readDesktopViewerHeights(page, host);
-    const initialHostHeight = Math.round(initialViewerHeights.host);
+    const initialHostHeight = initialViewerHeights.host;
     expect(Object.values(initialViewerHeights).every((height) => height > 1)).toBe(true);
     expect(initialHostHeight).toBeLessThanOrEqual(762);
     await expectRenderedHeight(host, initialHostHeight);

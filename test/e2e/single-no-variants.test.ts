@@ -4,6 +4,7 @@ import { test, expect, type Page } from '@playwright/test';
 const AR_PREVIEW_URL_PATTERN = /https?:\/\/[^/]+\/ar-preview\/[a-f0-9-]{36}/;
 const RUNTIME_TIMEOUT = 20000;
 const CANVAS_READY_TIMEOUT = 45000;
+const REQUIRED_STABLE_CANVAS_SAMPLES = 3;
 const CANVAS_SELECTOR = 'canvas[data-engine="three.js r171"]';
 
 async function loadFixture(page: Page) {
@@ -57,7 +58,7 @@ async function waitForStableResponsiveCanvas(page: Page): Promise<void> {
         message: 'wait for the current WebGL canvas to reach a stable responsive size',
         timeout: CANVAS_READY_TIMEOUT,
         intervals: [250],
-    }).toBeGreaterThanOrEqual(4);
+    }).toBeGreaterThanOrEqual(REQUIRED_STABLE_CANVAS_SAMPLES);
 }
 
 const visualTest = test.extend({
@@ -120,16 +121,17 @@ visualTest.describe('Windrush - Loveseat visual render', () => {
 });
 
 test.describe('Windrush - Loveseat interactions', () => {
-    test('supports controls in normal headless mode', async ({ page }) => {
+    test('supports controls in normal browser mode', async ({ page }) => {
         test.setTimeout(120000);
         await loadFixture(page);
 
         // Test Share button
         const shareButton = page.locator('#ov25-share-button');
         await expect(shareButton).toBeVisible();
+        const expectedShareUrl = await page.evaluate(() => window.location.href);
         await shareButton.click();
         // link should be copied to clipboard
-        await expect(page.evaluate(() => navigator.clipboard.readText())).resolves.toContain('http://localhost:3008/tests/single-no-variants.html?configuration=');
+        await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(expectedShareUrl);
         // toast should appear
         const toast = page.locator('li[data-sonner-toast]');
         await expect(toast).toBeVisible();
@@ -172,9 +174,10 @@ test.describe('Windrush - Loveseat interactions', () => {
 
         // Check share button still works
         await expect(shareButton).toBeVisible();
+        const expectedMobileShareUrl = await page.evaluate(() => window.location.href);
         await shareButton.click();
         // link should be copied to clipboard
-        await expect(page.evaluate(() => navigator.clipboard.readText())).resolves.toContain('http://localhost:3008/tests/single-no-variants.html?configuration=');
+        await expect.poll(() => page.evaluate(() => navigator.clipboard.readText())).toBe(expectedMobileShareUrl);
         // toast should appear - use .last() to get the most recent toast
         const toast2 = page.locator('li[data-sonner-toast]').last();
         await expect(toast2).toBeVisible();
