@@ -33,6 +33,9 @@ import InitialiseMenu from "./VariantSelectMenu/InitialiseMenu.js"
 
 type ClosingProxyExit = 'sheet-slide-left' | 'drawer-slide-up' | 'modal-fade'
 
+// React 18's JSX types omit inert; widening this spread preserves the boolean HTML attribute.
+const INERT_HTML_ATTRIBUTE: Record<string, string> = { inert: '' }
+
 /**
  * Full-screen portaled bitmap at the pre-close iframe fixed rect; slides/fades with the shell while
  * the real iframe is already restored into the gallery.
@@ -677,7 +680,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
         <span
           data-ov25-portal-host-placeholder
           hidden
-          inert
+          {...INERT_HTML_ATTRIBUTE}
           aria-hidden="true"
         />
         {galleryShadowRoot && createPortal(galleryContent, galleryShadowRoot)}
