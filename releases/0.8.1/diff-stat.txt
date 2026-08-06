@@ -1,0 +1,8 @@
+playwright.config.ts                               |   4 +-
+ setup/bun.lock                                     |   4 +-
+ src/components/product-carousel.tsx                |  13 +++++-
+ src/components/product-gallery.tsx                 |   7 +++
+ test/e2e/inline-sticky.test.ts                     |  52 +++++++++++++++++++--
+ ...isable-add-to-cart-checkout-chromium-darwin.png | Bin 3002 -> 2859 bytes
+ test/e2e/single-no-variants.test.ts                |  11 +++--
+ 7 files changed, 77 insertions(+), 14 deletions(-)

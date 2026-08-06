@@ -1,0 +1,4 @@
+a60ecb6 (HEAD -> main, origin/main, origin/HEAD) (chore) bun lock
+328b8d8 fix(tests) ya
+ff077c1 fix(gallery): keep shadow host visible
+2b2ba55 (tag: ov25-ui-react18@0.8.0) fix(carousel): support React 18 popover

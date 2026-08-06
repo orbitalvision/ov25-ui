@@ -1,0 +1,7 @@
+playwright.config.ts
+setup/bun.lock
+src/components/product-carousel.tsx
+src/components/product-gallery.tsx
+test/e2e/inline-sticky.test.ts
+test/e2e/inline-variants-disable-add-to-cart.test.ts-snapshots/inline-variants-disable-add-to-cart-checkout-chromium-darwin.png
+test/e2e/single-no-variants.test.ts
