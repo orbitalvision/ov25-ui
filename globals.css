@@ -433,6 +433,23 @@ html {
     margin: 0px !important;
     overflow: hidden;
 }
+
+/*
+ * Pin the sticky iframe shell to the slot's final used box. WebKit can otherwise
+ * resolve percentage height from the slot's pre-flex aspect-ratio size and let
+ * the iframe cover the carousel. The specificity also beats legacy merchant
+ * height/max-height overrides that use !important.
+ */
+.ov25-inline-sticky-iframe-slot > #ov25-configurator-iframe-container:not([data-stacked="true"]),
+.ov25-inline-sticky-iframe-slot > [id^="ov25-configurator-iframe-container-"]:not([data-stacked="true"]) {
+    position: absolute !important;
+    inset: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+}
+
 @media (max-width: 767px) {
     #ov25-configurator-iframe-container:not([data-stacked="true"]),
     [id^="ov25-configurator-iframe-container-"]:not([data-stacked="true"]) {

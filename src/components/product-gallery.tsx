@@ -627,7 +627,10 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
                     data-clarity-mask="true"
                     ref={containerRef}
                     className={cn(
-                        "ov:h-full ov:w-full ov:relative ov:overflow-hidden ov:z-3",
+                        "ov:overflow-hidden ov:z-3",
+                        stickyLayoutActive
+                          ? "ov:absolute ov:inset-0 ov:h-auto ov:w-auto ov:min-h-0 ov:max-h-none"
+                          : "ov:relative ov:h-full ov:w-full",
                         iframeSlotBorderRadiusClass,
                         "ov:bg-(--ov25-configurator-iframe-background-color)",
                     )}>

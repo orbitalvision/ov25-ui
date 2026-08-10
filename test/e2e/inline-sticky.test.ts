@@ -1,6 +1,7 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 
 const DESKTOP_VIEWPORT = { width: 1280, height: 900 };
+const IPAD_LANDSCAPE_VIEWPORT = { width: 1180, height: 820 };
 const MOBILE_VIEWPORT = { width: 390, height: 844 };
 const STICKY_GAP = 16;
 const RUNTIME_TIMEOUT = 20000;
@@ -1051,12 +1052,29 @@ async function readDesktopViewerGeometry(page: Page, host: Locator) {
     iframeSlot.evaluate((element) => {
       const rect = element.getBoundingClientRect();
       return {
+        x: rect.x,
+        y: rect.y,
         width: rect.width,
         height: rect.height,
         aspectRatio: getComputedStyle(element).aspectRatio,
       };
     }),
-    outerIframeContainer.boundingBox(),
+    outerIframeContainer.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      const style = getComputedStyle(element);
+      return {
+        x: rect.x,
+        y: rect.y,
+        width: rect.width,
+        height: rect.height,
+        position: style.position,
+        top: style.top,
+        right: style.right,
+        bottom: style.bottom,
+        left: style.left,
+        maxHeight: style.maxHeight,
+      };
+    }),
     trueIframeContainer.boundingBox(),
     iframe.boundingBox(),
     embeddedCarousel.count(),
@@ -1065,7 +1083,7 @@ async function readDesktopViewerGeometry(page: Page, host: Locator) {
   const embeddedCarouselBox = embeddedCarouselCount > 0
     ? await embeddedCarousel.boundingBox()
     : null;
-  if (!rootBox || !outerBox || !trueBox || !iframeBox) return null;
+  if (!rootBox || !trueBox || !iframeBox) return null;
   return {
     ...hostMetrics,
     root: rootBox,
@@ -1076,6 +1094,7 @@ async function readDesktopViewerGeometry(page: Page, host: Locator) {
     iframe: iframeBox,
     embeddedCarouselCount,
     embeddedCarouselHeight: embeddedCarouselBox?.height ?? 0,
+    embeddedCarousel: embeddedCarouselBox,
   };
 }
 
@@ -1089,14 +1108,17 @@ async function expectDefaultDesktopViewerUsesNaturalSquare(
       async () => {
         const geometry = await readDesktopViewerGeometry(page, host);
         if (!geometry) return null;
-        const iframeLayerHeightError = Math.max(
-          Math.abs(
-            geometry.outerIframeContainer.height - geometry.iframeSlot.height,
-          ),
-          Math.abs(
-            geometry.trueIframeContainer.height - geometry.iframeSlot.height,
-          ),
-          Math.abs(geometry.iframe.height - geometry.iframeSlot.height),
+        const iframeLayerRectError = Math.max(
+          ...[
+            geometry.outerIframeContainer,
+            geometry.trueIframeContainer,
+            geometry.iframe,
+          ].flatMap((layer) => [
+            Math.abs(layer.x - geometry.iframeSlot.x),
+            Math.abs(layer.y - geometry.iframeSlot.y),
+            Math.abs(layer.width - geometry.iframeSlot.width),
+            Math.abs(layer.height - geometry.iframeSlot.height),
+          ]),
         );
 
         return {
@@ -1118,7 +1140,20 @@ async function expectDefaultDesktopViewerUsesNaturalSquare(
               ) <= 1
             : geometry.embeddedCarouselCount === 0 &&
               Math.abs(geometry.content.height - geometry.iframeSlot.height) <= 1,
-          iframeLayersMatchSlot: iframeLayerHeightError <= 1,
+          iframeLayersMatchSlot: iframeLayerRectError <= 1,
+          iframeShellPinnedToSlot:
+            geometry.outerIframeContainer.position === 'absolute' &&
+            geometry.outerIframeContainer.top === '0px' &&
+            geometry.outerIframeContainer.right === '0px' &&
+            geometry.outerIframeContainer.bottom === '0px' &&
+            geometry.outerIframeContainer.left === '0px' &&
+            geometry.outerIframeContainer.maxHeight === 'none',
+          iframeShellClearsCarousel:
+            !embeddedCarouselExpected ||
+            (!!geometry.embeddedCarousel &&
+              geometry.outerIframeContainer.y +
+                geometry.outerIframeContainer.height <=
+                geometry.embeddedCarousel.y + 1),
         };
       },
       { timeout: 10000 },
@@ -1128,6 +1163,8 @@ async function expectDefaultDesktopViewerUsesNaturalSquare(
       slotIsSquare: true,
       carouselSpaceMatchesMode: true,
       iframeLayersMatchSlot: true,
+      iframeShellPinnedToSlot: true,
+      iframeShellClearsCarousel: true,
     });
 }
 
@@ -2566,6 +2603,35 @@ test.describe('Standard product inline-sticky display mode', () => {
     await expectDesktopStickyLayout(host, header, 106);
     await expect(page.locator('[data-ov25-external-carousel="true"]')).toHaveCount(0);
     await expect(host.locator('.ov25-inline-sticky-carousel-host')).toHaveCount(1);
+    await expectDefaultDesktopViewerUsesNaturalSquare(page, host, true);
+  });
+
+  test('pins the sticky iframe shell despite legacy important percentage sizing', async ({
+    page,
+  }) => {
+    await page.setViewportSize(IPAD_LANDSCAPE_VIEWPORT);
+    await page.goto('/tests/inline-sticky-desktop-fixed-header.html');
+
+    const host = await waitForStickyGallery(page);
+    const outerIframeContainer = page.locator(
+      DESKTOP_VIEWER_HEIGHT_SELECTORS.outerIframeContainer,
+    );
+    await outerIframeContainer.evaluate((element) => {
+      const style = document.createElement('style');
+      style.dataset.ov25LegacySizingFixture = 'true';
+      style.textContent = `
+        #ov25-configurator-iframe-container[data-fullscreen="false"],
+        #true-ov25-configurator-iframe-container,
+        iframe[id^="ov25-configurator-iframe"] {
+          width: 100% !important;
+          height: 100% !important;
+          min-height: 0 !important;
+          max-height: 100% !important;
+        }
+      `;
+      element.getRootNode().appendChild(style);
+    });
+
     await expectDefaultDesktopViewerUsesNaturalSquare(page, host, true);
   });
 
