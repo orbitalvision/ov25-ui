@@ -2176,7 +2176,14 @@ export const OV25UIProvider: React.FC<{
 
   const hasCutout = !!(currentProduct?.metadata as any)?.cutoutImage
   const cutoutFirst = hasCutout && (isMobile || !deferThreeD)
-  const productImages = getProductGalleryImages(currentProduct?.metadata, { cutoutFirst })
+  const cutoutBacksThreeD =
+    showCarousel &&
+    (carouselLayout === CarouselDisplayMode.Carousel ||
+      carouselLayoutMobile === CarouselDisplayMode.Carousel)
+  const productImages = getProductGalleryImages(currentProduct?.metadata, {
+    cutoutFirst,
+    includeCutout: !cutoutBacksThreeD,
+  })
   const allImages = [...(images || []), ...productImages]
   
   const [galleryIndex, setGalleryIndex] = useState(0);

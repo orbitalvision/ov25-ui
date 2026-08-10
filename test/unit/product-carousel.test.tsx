@@ -41,10 +41,13 @@ describe('ProductCarousel', () => {
     originalShowPopover = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'showPopover');
     originalHidePopover = Object.getOwnPropertyDescriptor(HTMLElement.prototype, 'hidePopover');
     carouselContext.galleryIndex = 0;
+    carouselContext.currentProduct = { metadata: {} };
     carouselContext.carouselLayout = 'carousel';
     carouselContext.carouselLayoutMobile = 'carousel';
     carouselContext.isMobile = false;
     carouselContext.images = ['/first.jpg', '/second.jpg'];
+    carouselContext.galleryIndexToUse = 0;
+    carouselContext.deferThreeD = true;
     carouselContext.galleryCarouselFullscreenImage = null;
     setGalleryIndex.mockClear();
     carouselContext.setGalleryCarouselFullscreenImage.mockClear();
@@ -97,6 +100,173 @@ describe('ProductCarousel', () => {
       'false',
       'false',
     ]);
+  });
+
+  it('uses the OV25 cutout as the non-deferred 3D thumbnail without shifting merged images', () => {
+    carouselContext.currentProduct = {
+      metadata: {
+        cutoutImage: '/cutout.jpg',
+        images: ['/gallery.jpg'],
+      },
+    };
+    carouselContext.images = ['/shopify.jpg'];
+    carouselContext.deferThreeD = false;
+
+    const { container, rerender } = render(<ProductCarousel />);
+
+    let thumbnails = getThumbnailButtons(container);
+    expect(thumbnails.map((thumbnail) => thumbnail.querySelector('img')?.getAttribute('src'))).toEqual([
+      '/cutout.jpg',
+      '/shopify.jpg',
+      '/gallery.jpg',
+    ]);
+    expect(container.querySelectorAll('.ov25-360-label')).toHaveLength(1);
+    expect(thumbnails[0]).toHaveTextContent('360°');
+    expect(container.querySelectorAll('img[src="/cutout.jpg"]')).toHaveLength(1);
+    expect(thumbnails.map((thumbnail) => thumbnail.dataset.selected)).toEqual([
+      'true',
+      'false',
+      'false',
+    ]);
+
+    fireEvent.click(thumbnails[1]);
+    expect(setGalleryIndex).toHaveBeenLastCalledWith(1);
+    rerender(<ProductCarousel />);
+    expect(getThumbnailButtons(container).map((thumbnail) => thumbnail.dataset.selected)).toEqual([
+      'false',
+      'true',
+      'false',
+    ]);
+
+    thumbnails = getThumbnailButtons(container);
+    fireEvent.click(thumbnails[2]);
+    expect(setGalleryIndex).toHaveBeenLastCalledWith(2);
+    rerender(<ProductCarousel />);
+    expect(getThumbnailButtons(container).map((thumbnail) => thumbnail.dataset.selected)).toEqual([
+      'false',
+      'false',
+      'true',
+    ]);
+
+    thumbnails = getThumbnailButtons(container);
+    fireEvent.click(thumbnails[0]);
+    expect(setGalleryIndex).toHaveBeenLastCalledWith(0);
+    rerender(<ProductCarousel />);
+    expect(getThumbnailButtons(container).map((thumbnail) => thumbnail.dataset.selected)).toEqual([
+      'true',
+      'false',
+      'false',
+    ]);
+  });
+
+  it('uses the OV25 cutout as the deferred 3D thumbnail without shifting merged images', () => {
+    carouselContext.currentProduct = {
+      metadata: {
+        cutoutImage: '/cutout.jpg',
+        images: ['/gallery.jpg'],
+      },
+    };
+    carouselContext.images = ['/shopify.jpg'];
+    carouselContext.deferThreeD = true;
+    carouselContext.galleryIndexToUse = 1;
+
+    const { container, rerender } = render(<ProductCarousel />);
+
+    let thumbnails = getThumbnailButtons(container);
+    expect(thumbnails.map((thumbnail) => thumbnail.querySelector('img')?.getAttribute('src'))).toEqual([
+      '/shopify.jpg',
+      '/cutout.jpg',
+      '/gallery.jpg',
+    ]);
+    expect(container.querySelectorAll('.ov25-360-label')).toHaveLength(1);
+    expect(thumbnails[1]).toHaveTextContent('360°');
+    expect(container.querySelectorAll('img[src="/cutout.jpg"]')).toHaveLength(1);
+    expect(thumbnails.map((thumbnail) => thumbnail.dataset.selected)).toEqual([
+      'true',
+      'false',
+      'false',
+    ]);
+
+    fireEvent.click(thumbnails[1]);
+    expect(setGalleryIndex).toHaveBeenLastCalledWith(1);
+    rerender(<ProductCarousel />);
+    expect(getThumbnailButtons(container).map((thumbnail) => thumbnail.dataset.selected)).toEqual([
+      'false',
+      'true',
+      'false',
+    ]);
+
+    thumbnails = getThumbnailButtons(container);
+    fireEvent.click(thumbnails[2]);
+    expect(setGalleryIndex).toHaveBeenLastCalledWith(2);
+    rerender(<ProductCarousel />);
+    expect(getThumbnailButtons(container).map((thumbnail) => thumbnail.dataset.selected)).toEqual([
+      'false',
+      'false',
+      'true',
+    ]);
+  });
+
+  it('uses a cutout-first image as the deferred 3D thumbnail without duplicating it', () => {
+    carouselContext.currentProduct = {
+      metadata: {
+        heroImage: '/hero.jpg',
+        cutoutImage: '/cutout.jpg',
+        images: ['/gallery.jpg'],
+      },
+    };
+    carouselContext.images = [];
+    carouselContext.isMobile = true;
+    carouselContext.deferThreeD = true;
+    carouselContext.galleryIndexToUse = 1;
+
+    const { container, rerender } = render(<ProductCarousel />);
+
+    let thumbnails = getThumbnailButtons(container);
+    expect(thumbnails.map((thumbnail) => thumbnail.querySelector('img')?.getAttribute('src'))).toEqual([
+      '/hero.jpg',
+      '/cutout.jpg',
+      '/gallery.jpg',
+    ]);
+    expect(thumbnails[1]).toHaveTextContent('360°');
+    expect(container.querySelectorAll('img[src="/cutout.jpg"]')).toHaveLength(1);
+    expect(thumbnails.map((thumbnail) => thumbnail.dataset.selected)).toEqual([
+      'true',
+      'false',
+      'false',
+    ]);
+
+    fireEvent.click(thumbnails[1]);
+    expect(setGalleryIndex).toHaveBeenLastCalledWith(1);
+    rerender(<ProductCarousel />);
+    expect(getThumbnailButtons(container).map((thumbnail) => thumbnail.dataset.selected)).toEqual([
+      'false',
+      'true',
+      'false',
+    ]);
+
+    thumbnails = getThumbnailButtons(container);
+    fireEvent.click(thumbnails[2]);
+    expect(setGalleryIndex).toHaveBeenLastCalledWith(2);
+  });
+
+  it('keeps a cutout-only product available as the 3D thumbnail', () => {
+    carouselContext.currentProduct = {
+      metadata: {
+        cutoutImage: '/cutout.jpg',
+      },
+    };
+    carouselContext.images = [];
+    carouselContext.deferThreeD = true;
+    carouselContext.galleryIndexToUse = 0;
+
+    const { container } = render(<ProductCarousel />);
+    const thumbnails = getThumbnailButtons(container);
+
+    expect(thumbnails).toHaveLength(1);
+    expect(thumbnails[0]).toHaveTextContent('360°');
+    expect(thumbnails[0]).toHaveAttribute('data-selected', 'true');
+    expect(thumbnails[0].querySelector('img')).toHaveAttribute('src', '/cutout.jpg');
   });
 
   it('preserves horizontal slots while omitting missing images', () => {

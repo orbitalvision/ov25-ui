@@ -9,6 +9,7 @@ import { Ov25ShadowHost } from './Ov25ShadowHost.js'
 import { VariantsCloseButton } from './VariantSelectMenu/VariantsCloseButton.js'
 import { CONFIGURATOR_IFRAME_BACKGROUND_CSS_VAR } from '../lib/config/iframe-transition-snapshot.js'
 import { getResolvedConfiguratorIframeBackgroundColor } from '../utils/configurator-dom-queries.js'
+import { CarouselDisplayMode } from '../types/config-enums.js'
 
 function cssColorToHex(value: string | null | undefined): string | null {
     const raw = value?.trim();
@@ -133,6 +134,9 @@ export const IframeContainer = () => {
         bedAllowNoneQueryValue,
         diningShowAttachmentPoints,
         galleryIndexToUse,
+        carouselLayout,
+        carouselLayoutMobile,
+        showCarousel,
         images: passedImages,
         isProductGalleryStacked: isStacked,
         isVariantsOpen,
@@ -217,7 +221,14 @@ export const IframeContainer = () => {
 
     const hasCutout = !!(currentProduct?.metadata as any)?.cutoutImage
     const cutoutFirst = hasCutout && (isMobile || !deferThreeD)
-    const productImages = getProductGalleryImages(currentProduct?.metadata, { cutoutFirst })
+    const cutoutBacksThreeD =
+        showCarousel &&
+        (carouselLayout === CarouselDisplayMode.Carousel ||
+            carouselLayoutMobile === CarouselDisplayMode.Carousel)
+    const productImages = getProductGalleryImages(currentProduct?.metadata, {
+        cutoutFirst,
+        includeCutout: !cutoutBacksThreeD,
+    })
     const images = [...(passedImages || []), ...productImages]
 
     // Any component-specific state remains local

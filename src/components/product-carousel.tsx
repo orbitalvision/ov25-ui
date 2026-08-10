@@ -1,10 +1,17 @@
 import * as React from 'react'
 import { useOV25UI } from "../contexts/ov25-ui-context.js"
 import { CarouselDisplayMode } from "../types/config-enums.js"
-import { cn } from "../lib/utils.js"
-import { getProductGalleryImages, getCutoutIndex, resolveImageUrl } from "../lib/utils.js"
+import {
+  cn,
+  getProductCutoutImage,
+  getProductGalleryImages,
+  resolveImageUrl,
+  type ProductImageInput,
+} from "../lib/utils.js"
 
-function isThreeDPlaceholder(item: unknown): item is { is3D: true } {
+type ThreeDPlaceholder = { is3D: true; previewImage?: ProductImageInput }
+
+function isThreeDPlaceholder(item: unknown): item is ThreeDPlaceholder {
   return typeof item === 'object' && item !== null && 'is3D' in item && (item as { is3D: boolean }).is3D === true
 }
 
@@ -181,33 +188,33 @@ export function ProductCarousel() {
 
   const hasCutout = !!(currentProduct?.metadata as any)?.cutoutImage
   const cutoutFirst = hasCutout && (isMobile || !deferThreeD)
-  const productImages = getProductGalleryImages(currentProduct?.metadata, { cutoutFirst })
+  const cutoutBacksThreeD = effectiveCarouselLayout === CarouselDisplayMode.Carousel
+  const cutoutImage = cutoutBacksThreeD
+    ? getProductCutoutImage(currentProduct?.metadata)
+    : null
+  const productImages = getProductGalleryImages(currentProduct?.metadata, {
+    cutoutFirst,
+    includeCutout: !cutoutBacksThreeD,
+  })
   const maxImages = isMobile ? carouselMaxImagesMobile : carouselMaxImagesDesktop
   const allImages = [...(passedImages || []), ...productImages]
   const images = maxImages != null && maxImages > 0 ? allImages.slice(0, maxImages) : allImages
-  const cutoutIndexInProductGallery = getCutoutIndex(currentProduct?.metadata, { cutoutFirst })
-  const passedLen = (passedImages || []).length
-  const cutoutIndexCombined =
-    cutoutIndexInProductGallery >= 0 ? passedLen + cutoutIndexInProductGallery : -1
-  const useCutoutOnlyStrip =
-    !deferThreeD && cutoutIndexCombined >= 0 && cutoutIndexCombined < images.length
+  const carouselItems: (typeof images[0] | ThreeDPlaceholder)[] = [...images]
+  carouselItems.splice(galleryIndexToUse, 0, {
+    is3D: true,
+    previewImage: cutoutImage ?? undefined,
+  })
 
-  let carouselItems: (typeof images[0] | { is3D: boolean })[]
-  if (useCutoutOnlyStrip) {
-    carouselItems = images
-  } else {
-    carouselItems = [...images]
-    carouselItems.splice(galleryIndexToUse, 0, { is3D: true })
-  }
+  if ((images.length === 0 && !cutoutImage) || error) return null;
 
-  if (images.length === 0 || error) return null;
-
-  const renderCarouselThumbnail = (item: { is3D?: boolean } | typeof images[0], index: number) => {
+  const renderCarouselThumbnail = (item: ThreeDPlaceholder | typeof images[0], index: number) => {
 
     const is3DSlot = isThreeDPlaceholder(item)
-    const isCutout = useCutoutOnlyStrip && index === cutoutIndexCombined
     if (is3DSlot) {
       const isSelected = galleryIndex === galleryIndexToUse
+      const previewSrc = item.previewImage
+        ? resolveImageUrl(item.previewImage, 'carousel')
+        : ''
       return (
         <button
           key={index}
@@ -218,13 +225,31 @@ export function ProductCarousel() {
             isSelected ? "ov:ring-(--ov25-primary-color)" : "ov:ring-(--ov25-configurator-view-controls-border-color)"
           )}
         >
-          <span className="ov25-360-label ov:py-0.5 ov:rounded-full ov:bg-transparent ov:text-neutral-500  ov:text-xs ov:font-[250]  ">
-            360°
-          </span>
+          {previewSrc ? (
+            <>
+              <img
+                src={previewSrc}
+                alt=""
+                aria-hidden="true"
+                draggable={false}
+                onDragStart={(e) => e.preventDefault()}
+                className="ov:object-cover ov:w-full ov:h-full ov:absolute ov:inset-0"
+              />
+              <span className="ov25-360-label ov:absolute ov:inset-0 ov:flex ov:items-center ov:justify-center ov:pointer-events-none">
+                <span className="ov:px-1.5 ov:py-0.5 ov:pt-1 ov:rounded-md ov:backdrop-blur-xs ov:max-h-fit ov:text-white ov:text-xs ov:font-[250] ov:shadow-xs ov:[text-shadow:0_1px_2px_rgba(0,0,0,0.1)]">
+                  360°
+                </span>
+              </span>
+            </>
+          ) : (
+            <span className="ov25-360-label ov:py-0.5 ov:rounded-full ov:bg-transparent ov:text-neutral-500 ov:text-xs ov:font-[250]">
+              360°
+            </span>
+          )}
         </button>
       )
     }
-    const galleryIndexForSlot = isCutout ? galleryIndexToUse : (cutoutIndexCombined === 0 ? index + 1 : index)
+    const galleryIndexForSlot = index
     const isSelected = galleryIndex === galleryIndexForSlot
     const src = resolveImageUrl(item as any, 'carousel')
     if (!src) {
@@ -241,7 +266,7 @@ export function ProductCarousel() {
     return (
       <button
         key={index}
-        onClick={() => setGalleryIndex(isCutout ? galleryIndexToUse : (cutoutIndexCombined === 0 ? index + 1 : index))}
+        onClick={() => setGalleryIndex(galleryIndexForSlot)}
         data-selected={isSelected ? "true" : "false"}
         className={cn(
           "ov25-gallery-image-button ov:relative ov:aspect-square ov:w-full ov:overflow-hidden ov:rounded-(--ov25-configurator-iframe-border-radius) ov:bg-muted ov:cursor-pointer",
@@ -257,18 +282,11 @@ export function ProductCarousel() {
           className="ov:object-cover ov:w-full ov:h-full ov:absolute ov:inset-0"
         />
       
-        {isCutout && (
-          <span className="ov:absolute ov:pl-1 ov:inset-0 ov:flex ov:items-center ov:justify-center ov:pointer-events-none">
-            <span className="ov25-360-label ov:px-1.5 ov:py-0.5 ov:pt-1 ov:rounded-md ov:backdrop-blur-xs ov:max-h-fit ov:text-white ov:text-xs ov:font-[250] ov:shadow-xs ov:[text-shadow:0_1px_2px_rgba(0,0,0,0.1)] ">
-              360°
-            </span>
-          </span>
-        )}
       </button>
     )
   }
 
-  const renderStackedThumbnail = (item: typeof images[0] | { is3D?: boolean }, index: number) => {
+  const renderStackedThumbnail = (item: typeof images[0] | ThreeDPlaceholder, index: number) => {
     const is3DSlot = isThreeDPlaceholder(item)
     if (is3DSlot) {
       if (!deferThreeD) {

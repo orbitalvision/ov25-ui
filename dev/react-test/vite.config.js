@@ -62,6 +62,7 @@ const testPages = [
   'inline-sticky-desktop-fixed-header',
   'inline-sticky-desktop-collapsing-header',
   'gallery-carousel-horizontal',
+  'carousel-defer-threed-indexing',
   'gallery-carousel-stacked',
   'carousel-relocation',
   'gallery-no-carousel',
