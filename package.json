@@ -36,6 +36,7 @@
     "prepublishOnly": "node scripts/release/refuse-local-publish.js npm publish",
     "test:unit": "vitest run --config vitest.config.ts",
     "test:e2e": "playwright test --config playwright.config.ts",
+    "test:e2e:quiet": "OV25_E2E_NEW_HEADLESS=true playwright test --config playwright.config.ts",
     "test:browser": "VITEST_UI=true vitest --config vitest.browser.config.ts",
     "test:browser:ci": "CI=true vitest run --config vitest.browser.config.ts",
     "release:review": "node scripts/release/review.js",

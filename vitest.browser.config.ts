@@ -8,6 +8,9 @@ const isHeadless = process.env.CI === 'true' || !process.env.VITEST_UI;
 
 export default defineConfig({
   plugins: [react()],
+  resolve: {
+    dedupe: ['react', 'react-dom'],
+  },
   test: {
     include: ['test/browser/**/*.test.ts', 'test/browser/**/*.test.tsx'],
     browser: {

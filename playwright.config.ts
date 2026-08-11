@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const useNewHeadlessChromium = process.env.OV25_E2E_NEW_HEADLESS === 'true';
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -15,8 +17,9 @@ export default defineConfig({
     baseURL: 'http://localhost:3008',
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
-    /* Use headed Chromium for hardware-accelerated WebGL and faster release tests. */
-    headless: false,
+    /* Keep release tests headed; opt into real-Chromium headless for quiet routine runs. */
+    headless: useNewHeadlessChromium,
+    channel: useNewHeadlessChromium ? 'chromium' : undefined,
   },
   // 45 seconds max wait
   timeout: 45000,
