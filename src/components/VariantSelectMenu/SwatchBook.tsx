@@ -112,12 +112,12 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
             <VariantsCloseButton onClick={() => setIsSwatchBookOpen(false)} ariaLabel={'Close Swatch Book'} className="ov:top-0 ov:right-0" />
           </div>     
           {/* Featured/zoomed swatch section */}
-          {zoomedSwatch && zoomedSwatch.thumbnail && zoomedSwatch.thumbnail.miniThumbnails && (
+          {zoomedSwatch && (
             <div id="ov25-swatchbook-featured" className="ov:shrink-0">
               <div className="ov:flex ov:flex-col ov:items-center ov:gap-4">
                 <div className="ov25-selected-swatch-image-container ov:relative ov:w-[200px] ov:h-[200px] ov:md:w-[250px] ov:md:h-[250px] group">
                   <SwatchImage
-                    src={zoomedSwatch.thumbnail.miniThumbnails.large}
+                    src={zoomedSwatch.thumbnail?.miniThumbnails?.large || PLACEHOLDER_IMAGE_URL}
                     alt={getString('swatchBookZoomedSwatchName', { SWATCH_NAME: zoomedSwatch.name }, zoomedSwatch.name)}
                     className='ov25-swatch-image ov:w-full ov:h-full ov:aspect-square'
                   />

@@ -1,8 +1,9 @@
 import * as React from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { ModuleVariantCard } from '../../src/components/VariantSelectMenu/variant-cards/ModuleVariantCard';
 import { SizeVariantCard } from '../../src/components/VariantSelectMenu/variant-cards/SizeVariantCard';
+import { SwatchBook } from '../../src/components/VariantSelectMenu/SwatchBook';
 import { VariantThumb } from '../../src/components/VariantSelectMenu/variant-cards/VariantThumb';
 import type { Variant } from '../../src/components/VariantSelectMenu/ProductVariants';
 import { PLACEHOLDER_IMAGE_URL } from '../../src/lib/placeholder-image';
@@ -10,6 +11,44 @@ import type { CompatibleModule } from '../../src/utils/configurator-utils';
 
 const placeholderContext = {
   cssString: '',
+  shadowDOMs: undefined,
+  buySwatches: vi.fn(),
+  toggleSwatch: vi.fn(),
+  selectedSwatches: [
+    {
+      manufacturerId: 1,
+      name: 'Missing-image swatch',
+      option: 'Upholstery',
+      sku: 'MISSING-1',
+      description: 'Description remains visible without an image.',
+    },
+    {
+      manufacturerId: 1,
+      name: 'Real-image swatch',
+      option: 'Upholstery',
+      sku: 'REAL-1',
+      description: 'A swatch with an image.',
+      thumbnail: {
+        miniThumbnails: {
+          small: '/real-small.jpg',
+          medium: '/real-medium.jpg',
+          large: '/real-large.jpg',
+        },
+      },
+    },
+  ],
+  swatchRulesData: {
+    canExeedFreeLimit: false,
+    maxSwatches: 4,
+    freeSwatchLimit: 4,
+    pricePerSwatch: 0,
+    minSwatches: 1,
+  },
+  isSwatchBookOpen: true,
+  setIsSwatchBookOpen: vi.fn(),
+  isVariantsOpen: false,
+  openConfigurator: vi.fn(),
+  currencySymbol: '£',
   getString: (
     _key: string,
     _values?: Record<string, string>,
@@ -49,6 +88,29 @@ function moduleVariant(product: CompatibleModule['product']): Variant {
 }
 
 describe('placeholder image leaf fallbacks', () => {
+  it('keeps the featured swatch placeholder and metadata when its image is missing', async () => {
+    const { baseElement } = render(<SwatchBook isMobile={false} />);
+
+    const featured = await waitFor(() => {
+      const element = baseElement.querySelector('#ov25-swatchbook-featured');
+      expect(element).not.toBeNull();
+      return element as HTMLElement;
+    });
+    await waitFor(() => {
+      expect(featured.querySelector('image')).toHaveAttribute('href', '/real-large.jpg');
+    });
+
+    const zoomButtons = baseElement.querySelectorAll<HTMLButtonElement>('.ov25-swatch-zoom-button');
+    expect(zoomButtons).toHaveLength(2);
+    fireEvent.click(zoomButtons[0]);
+
+    expect(featured.querySelector('image')).toHaveAttribute('href', PLACEHOLDER_IMAGE_URL);
+    expect(featured.querySelector('.ov25-selected-swatch-name')).toHaveTextContent('Missing-image swatch');
+    expect(featured.querySelector('.ov25-selected-swatch-description')).toHaveTextContent(
+      'Description remains visible without an image.',
+    );
+  });
+
   it('uses the bundled placeholder in VariantThumb while preserving real and None variants', () => {
     const { container, rerender } = render(
       <VariantThumb imageUrl="" name="Missing thumbnail" />,
