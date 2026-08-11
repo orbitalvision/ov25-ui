@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useRef } from 'react';
+import { useEffect, useRef } from 'react';
 import { useOV25UI } from '../contexts/ov25-ui-context.js';
 import { IFRAME_HEIGHT_RATIO } from '../utils/configurator-utils.js';
 import { MODAL_GALLERY_SLOT_ID } from '../components/ConfiguratorModal.js';
@@ -9,23 +9,6 @@ import {
 
 /** Variant sheet UI (e.g. VariantContentDesktop) uses z-index 2147483644; iframe + deferThreeD poster must stack above it. */
 const DESKTOP_SHEET_IFRAME_Z_INDEX = '2147483645';
-const useBrowserLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
-
-type DesktopSheetScrollbarCompensation = {
-  bodyPaddingRight: string;
-  htmlScrollbarGutter: string;
-};
-
-const restoreDesktopSheetScrollbarCompensation = (
-  scrollbarCompensation: { current: DesktopSheetScrollbarCompensation | null },
-) => {
-  const styles = scrollbarCompensation.current;
-  if (!styles || typeof document === 'undefined') return;
-
-  document.body.style.paddingRight = styles.bodyPaddingRight;
-  document.documentElement.style.setProperty('scrollbar-gutter', styles.htmlScrollbarGutter);
-  scrollbarCompensation.current = null;
-};
 
 /**
  * Hook to position the iframe and its container at the top of the screen when drawer is open
@@ -40,13 +23,11 @@ export const useIframePositioning = () => {
     uniqueId,
     configuratorDisplayMode,
     configuratorDisplayModeMobile,
-    isVariantsOpen,
     useInstantIframeCloseRestore,
     setUseInstantIframeCloseRestore,
     stackedGalleryCloseSyncImmediateRef,
   } = useOV25UI();
   const isModalMode = isMobile ? configuratorDisplayModeMobile === 'modal' : configuratorDisplayMode === 'modal';
-  const desktopSheetScrollbarCompensation = useRef<DesktopSheetScrollbarCompensation | null>(null);
   const originalStyles = useRef<{
     container: {
       position: string;
@@ -83,39 +64,6 @@ export const useIframePositioning = () => {
       overflow: string;
     };
   } | null>(null);
-
-  useBrowserLayoutEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (!isVariantsOpen || isMobile || configuratorDisplayMode !== 'sheet') return;
-    if (desktopSheetScrollbarCompensation.current) return;
-
-    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-    if (scrollbarWidth <= 0) return;
-
-    desktopSheetScrollbarCompensation.current = {
-      bodyPaddingRight: document.body.style.paddingRight,
-      htmlScrollbarGutter: document.documentElement.style.getPropertyValue('scrollbar-gutter'),
-    };
-
-    if (typeof CSS !== 'undefined' && CSS.supports?.('scrollbar-gutter: stable')) {
-      document.documentElement.style.setProperty('scrollbar-gutter', 'stable');
-    } else {
-      const currentPaddingRight = parseFloat(window.getComputedStyle(document.body).paddingRight) || 0;
-      document.body.style.paddingRight = `${currentPaddingRight + scrollbarWidth}px`;
-    }
-  }, [configuratorDisplayMode, isMobile, isVariantsOpen]);
-
-  useEffect(() => {
-    if (!isVariantsOpen && !isDrawerOrDialogOpen) {
-      restoreDesktopSheetScrollbarCompensation(desktopSheetScrollbarCompensation);
-    }
-  }, [isDrawerOrDialogOpen, isVariantsOpen]);
-
-  useEffect(() => {
-    return () => {
-      restoreDesktopSheetScrollbarCompensation(desktopSheetScrollbarCompensation);
-    };
-  }, []);
 
   // This useEffect handles drawer opening and closing - saving and restoring original styles
   useEffect(() => {
@@ -164,7 +112,6 @@ export const useIframePositioning = () => {
         Object.assign(parent.style, styles.parent);
         setUseInstantIframeCloseRestore(false);
         stackedGalleryCloseSyncImmediateRef.current = true;
-        restoreDesktopSheetScrollbarCompensation(desktopSheetScrollbarCompensation);
         return;
       }
 
@@ -193,7 +140,6 @@ export const useIframePositioning = () => {
           Object.assign(container.style, styles.container);
           Object.assign(iframe.style, styles.iframe);
           Object.assign(parent.style, styles.parent);
-          restoreDesktopSheetScrollbarCompensation(desktopSheetScrollbarCompensation);
         }, 500);
       }
     };
