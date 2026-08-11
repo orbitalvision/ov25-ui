@@ -367,13 +367,17 @@ html {
 }
 
 .ov25-inline-sticky-list .ov25-option-header::before {
-  content: '';
   position: absolute;
   inset-inline: 0;
   bottom: 100%;
   height: var(--ov25-sticky-resolved-top-gap, 16px);
   background: var(--ov25-background-color, #fff);
   pointer-events: none;
+}
+
+.ov25-inline-sticky-list
+  .ov25-option-header[data-ov25-sticky-pinned='true']::before {
+  content: '';
 }
 
 .ov25-inline-sticky-list .ov25-group-header {

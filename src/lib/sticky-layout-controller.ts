@@ -18,6 +18,7 @@ export const STICKY_LAYOUT_CSS_PROPERTIES = {
 } as const;
 
 export const DEFAULT_STICKY_GAP = 16;
+export const STICKY_OPTION_HEADER_PINNED_ATTRIBUTE = 'data-ov25-sticky-pinned';
 
 type StickyLayoutCssProperty =
   (typeof STICKY_LAYOUT_CSS_PROPERTIES)[keyof typeof STICKY_LAYOUT_CSS_PROPERTIES];
@@ -1553,6 +1554,7 @@ export function createStickyLayoutController(
   let galleryColumnStretchRepair: StickyGalleryColumnStretchRepair | null = null;
   let galleryColumnStretchFailure: StickyGalleryColumnStretchFailure | null = null;
   let relinquishedGalleryColumnStretch: HTMLElement | null = null;
+  const pinnedOptionHeaders = new Set<HTMLElement>();
   const hostCssSnapshots = new Map<HTMLElement, StickyHostCssSnapshot>();
   let snapshot: StickyLayoutSnapshot = {
     headerOffset: 0,
@@ -1581,6 +1583,51 @@ export function createStickyLayoutController(
     } else {
       console.warn(`[OV25-UI] ${diagnostic.message}`);
     }
+  };
+
+  const clearPinnedOptionHeaders = (): void => {
+    for (const header of pinnedOptionHeaders) {
+      header.removeAttribute(STICKY_OPTION_HEADER_PINNED_ATTRIBUTE);
+    }
+    pinnedOptionHeaders.clear();
+  };
+
+  const reconcilePinnedOptionHeaders = (stickyTop: number): void => {
+    const listRoot = optionHeader?.closest<HTMLElement>('.ov25-inline-sticky-list');
+    const nextPinned = new Set<HTMLElement>();
+
+    if (listRoot) {
+      const headers = Array.from(
+        listRoot.querySelectorAll<HTMLElement>('.ov25-option-header'),
+      );
+      for (const header of headers) {
+        const style = readStyle(header);
+        const rect = header.getBoundingClientRect();
+        if (
+          style?.position === 'sticky' &&
+          style.display !== 'none' &&
+          style.visibility !== 'hidden' &&
+          rect.height > 0 &&
+          Math.abs(rect.top - stickyTop) <= 1
+        ) {
+          nextPinned.add(header);
+        }
+      }
+    }
+
+    for (const header of pinnedOptionHeaders) {
+      if (!nextPinned.has(header)) {
+        header.removeAttribute(STICKY_OPTION_HEADER_PINNED_ATTRIBUTE);
+      }
+    }
+    for (const header of nextPinned) {
+      if (!pinnedOptionHeaders.has(header)) {
+        header.setAttribute(STICKY_OPTION_HEADER_PINNED_ATTRIBUTE, 'true');
+      }
+    }
+
+    pinnedOptionHeaders.clear();
+    for (const header of nextPinned) pinnedOptionHeaders.add(header);
   };
 
   const reconnectResizeObserver = (elements: Array<Element | null | undefined>): void => {
@@ -2134,6 +2181,7 @@ export function createStickyLayoutController(
       top: options.topGapOverride ?? resolvedGaps.top,
       bottom: options.bottomGapOverride ?? resolvedGaps.bottom,
     };
+    reconcilePinnedOptionHeaders(headerOffset + gaps.top);
     const ancestorState = inspectAndRepairHostAncestors(headerOffset + gaps.top);
 
     reconnectResizeObserver([
@@ -2310,7 +2358,10 @@ export function createStickyLayoutController(
       restoreHostVariables(variantsHost);
       variantsHost = elements.variantsHost ?? null;
     }
-    if ('optionHeader' in elements) optionHeader = elements.optionHeader ?? null;
+    if ('optionHeader' in elements && elements.optionHeader !== optionHeader) {
+      clearPinnedOptionHeaders();
+      optionHeader = elements.optionHeader ?? null;
+    }
     scheduleMeasure();
   };
 
@@ -2329,6 +2380,7 @@ export function createStickyLayoutController(
     for (const element of motionHeaderElements) removeHeaderMotionListeners(element);
     motionHeaderElements = [];
     activeHeaderMotions.clear();
+    clearPinnedOptionHeaders();
     documentObject.removeEventListener('scroll', onViewportScroll, { capture: true });
     windowObject.removeEventListener('scroll', onViewportScroll);
     windowObject.removeEventListener('resize', onViewportResize);

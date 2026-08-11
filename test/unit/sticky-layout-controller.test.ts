@@ -7,6 +7,7 @@ import {
   getStickyHostNaturalDocumentTop,
   observeStickyHostNaturalDocumentTop,
   OV25_INJECTOR_OWNED_ATTRIBUTE,
+  STICKY_OPTION_HEADER_PINNED_ATTRIBUTE,
   type StickyLayoutDiagnostic,
 } from '../../src/lib/sticky-layout-controller';
 
@@ -1079,6 +1080,73 @@ describe('sticky layout controller lifecycle', () => {
     window.dispatchEvent(new Event('resize'));
     visualViewport.dispatchEvent(new Event('scroll'));
     expect(requestFrame).toHaveBeenCalledTimes(frameCallCount);
+  });
+
+  it('marks only pinned option headers and clears owned markers on rebind and destroy', () => {
+    const layout = installLayout();
+    layout.ownedWrapper.classList.add('ov25-inline-sticky-list');
+    layout.optionHeader.classList.add('ov25-option-header');
+    layout.optionHeader.style.position = 'sticky';
+    const firstHeaderRect = vi.mocked(layout.optionHeader.getBoundingClientRect);
+
+    const secondHeader = document.createElement('div');
+    secondHeader.className = 'ov25-option-header';
+    secondHeader.style.position = 'sticky';
+    layout.ownedWrapper.appendChild(secondHeader);
+    const secondHeaderRect = setRect(secondHeader, 500, 46, 520, 640);
+
+    const controller = createStickyLayoutController({
+      document,
+      galleryHost: layout.gallery,
+      variantsHost: layout.variants,
+      optionHeader: layout.optionHeader,
+      onDiagnostic: () => {},
+    });
+
+    controller.start();
+    flushFrame();
+    expect(layout.optionHeader).not.toHaveAttribute(
+      STICKY_OPTION_HEADER_PINNED_ATTRIBUTE,
+    );
+    expect(secondHeader).not.toHaveAttribute(STICKY_OPTION_HEADER_PINNED_ATTRIBUTE);
+
+    firstHeaderRect.mockReturnValue(domRect(88, 46, 520, 640));
+    controller.scheduleMeasure();
+    flushFrame();
+    expect(layout.optionHeader).toHaveAttribute(
+      STICKY_OPTION_HEADER_PINNED_ATTRIBUTE,
+      'true',
+    );
+    expect(secondHeader).not.toHaveAttribute(STICKY_OPTION_HEADER_PINNED_ATTRIBUTE);
+
+    firstHeaderRect.mockReturnValue(domRect(40, 46, 520, 640));
+    secondHeaderRect.mockReturnValue(domRect(88, 46, 520, 640));
+    controller.scheduleMeasure();
+    flushFrame();
+    expect(layout.optionHeader).not.toHaveAttribute(
+      STICKY_OPTION_HEADER_PINNED_ATTRIBUTE,
+    );
+    expect(secondHeader).toHaveAttribute(
+      STICKY_OPTION_HEADER_PINNED_ATTRIBUTE,
+      'true',
+    );
+
+    controller.setElements({ optionHeader: null });
+    expect(secondHeader).not.toHaveAttribute(STICKY_OPTION_HEADER_PINNED_ATTRIBUTE);
+
+    firstHeaderRect.mockReturnValue(domRect(88, 46, 520, 640));
+    secondHeaderRect.mockReturnValue(domRect(500, 46, 520, 640));
+    controller.setElements({ optionHeader: layout.optionHeader });
+    flushFrame();
+    expect(layout.optionHeader).toHaveAttribute(
+      STICKY_OPTION_HEADER_PINNED_ATTRIBUTE,
+      'true',
+    );
+
+    controller.destroy();
+    expect(layout.optionHeader).not.toHaveAttribute(
+      STICKY_OPTION_HEADER_PINNED_ATTRIBUTE,
+    );
   });
 
   it('captures nested document scrolls for scheduling and removes the listener on destroy', () => {

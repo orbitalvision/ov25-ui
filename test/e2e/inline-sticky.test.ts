@@ -601,6 +601,46 @@ async function expectOptionHeaderGapMask(
     });
 }
 
+async function expectInitialFilterControlsUnobscured(page: Page): Promise<void> {
+  const listRoot = page.locator('.ov25-inline-sticky-list').first();
+  await expect(listRoot.locator('#ov25-filter-controls-wrapper')).toBeVisible({
+    timeout: RUNTIME_TIMEOUT,
+  });
+  await expect(listRoot.locator('.ov25-option-header').first()).toBeVisible({
+    timeout: RUNTIME_TIMEOUT,
+  });
+
+  await expect
+    .poll(() =>
+      listRoot.evaluate((element) => {
+        const filters = element.querySelector<HTMLElement>(
+          '#ov25-filter-controls-wrapper',
+        );
+        const header = element.querySelector<HTMLElement>('.ov25-option-header');
+        if (!filters || !header) return null;
+
+        const filterRect = filters.getBoundingClientRect();
+        const headerRect = header.getBoundingClientRect();
+        const mask = getComputedStyle(header, '::before');
+        const boxesOverlap =
+          filterRect.top < headerRect.bottom && filterRect.bottom > headerRect.top;
+
+        return {
+          boxesOverlap,
+          edgesMeet: Math.abs(filterRect.bottom - headerRect.top) <= 1,
+          maskContent: mask.content,
+          pinned: header.getAttribute('data-ov25-sticky-pinned'),
+        };
+      }),
+    )
+    .toEqual({
+      boxesOverlap: false,
+      edgesMeet: true,
+      maskContent: 'none',
+      pinned: null,
+    });
+}
+
 async function expectNativeStickyGallery(page: Page, host: Locator): Promise<void> {
   await expect(page.locator('[data-ov25-sticky-placeholder]')).toHaveCount(0);
   await expect(page.locator('[data-ov25-sticky-body-layer]')).toHaveCount(0);
@@ -1560,6 +1600,7 @@ test.describe('Standard product inline-sticky display mode', () => {
       'desktop-no-header',
     );
     const host = await waitForStickyGallery(page);
+    await expectInitialFilterControlsUnobscured(page);
     await expect(host).toHaveAttribute('data-ov25-inline-sticky-mobile', 'false');
     await expectDesktopStickyLayout(host, null, 0);
     await expectGalleryColumnStretch(page, host);
@@ -1590,6 +1631,7 @@ test.describe('Standard product inline-sticky display mode', () => {
     await page.evaluate(() => window.scrollTo(0, 600));
     await expectNativeStickyGallery(page, host);
     await expectPinnedTop(host, STICKY_GAP);
+    await expectOptionHeaderGapMask(page, 0);
     expect(
       await iframe.evaluate(
         (element) =>
