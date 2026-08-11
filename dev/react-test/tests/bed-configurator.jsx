@@ -7,7 +7,7 @@ const DIAMOND_APIKEY = import.meta.env.VITE_DIAMOND_APIKEY;
 
 const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
   apiKey: () => DIAMOND_APIKEY,
-  productLink: () => '/bed-configurator/12',
+  productLink: () => '/bed-configurator/3',
   selectors: {
     gallery: { selector: '.configurator-container', replace: true },
     configureButton: { selector: '#ov25-fullscreen-button', replace: false },

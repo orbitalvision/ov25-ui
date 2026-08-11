@@ -173,6 +173,16 @@ describe('ConfiguratorSetup inline-sticky display mode', () => {
 });
 
 describe('ConfiguratorSetup preview overrides', () => {
+  it('uses the bed fixture authorized for the default preview API key', () => {
+    const state = buildFormStateFromInitialPayload({});
+    const bedConfig = buildSerializableConfig(
+      'bedConfigurator',
+      state.typeSettings.bedConfigurator,
+    );
+
+    expect(bedConfig.productLink).toBe('bed-configurator/3');
+  });
+
   it('resolves apiKey and productLink overrides per preview layout', () => {
     const state = buildFormStateFromInitialPayload({});
 

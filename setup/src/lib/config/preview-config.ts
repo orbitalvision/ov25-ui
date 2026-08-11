@@ -7,7 +7,8 @@ export const CONFIGURATOR_PREVIEW_LOCAL_BASE_URL = 'http://app.localhost:3000/co
 export const PREVIEW_PRODUCT_LINKS: Record<LayoutType, string> = {
   standard: '58',
   snap2: 'snap2/292',
-  bedConfigurator: 'bed-configurator/2',
+  // This bed must be accessible to the Demo Retailer encoded by DEFAULT_PREVIEW_API_KEY.
+  bedConfigurator: 'bed-configurator/3',
 };
 
 export const DEFAULT_PREVIEW_API_KEY =

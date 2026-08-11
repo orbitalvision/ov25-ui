@@ -48,7 +48,7 @@ describe('flags.hideGestureHint runtime contract', () => {
   it.each([
     ['standard', '58'],
     ['Snap2', 'snap2/292'],
-    ['Bed', 'bed-configurator/2'],
+    ['Bed', 'bed-configurator/3'],
   ])('adds hideGestureHint=true to %s iframe URLs', (_name, productLink) => {
     const url = new URL(
       getIframeSrc('key', productLink, null, null, null, null, true),
