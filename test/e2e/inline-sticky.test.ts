@@ -1588,6 +1588,197 @@ test.describe('Standard product inline-sticky display mode', () => {
       .toBe(true);
   });
 
+  test('keeps a fixed merchant mobile variants host in page flow and restores it on exit', async ({ page }) => {
+    await page.setViewportSize(MOBILE_VIEWPORT);
+    await page.goto(
+      `${RESPONSIVE_FIXTURE_PATH}?desktopMode=inline&fixedMobileVariants=1`,
+    );
+
+    const galleryHost = await waitForStickyGallery(page);
+    const variantsHost = page.locator('#ov25-sticky-controls');
+    const readHostStyles = () =>
+      variantsHost.evaluate((element) => {
+        const computed = getComputedStyle(element);
+        const properties = ['position', 'top', 'right', 'bottom', 'left', 'z-index'];
+        return Object.fromEntries(
+          properties.map((property) => [
+            property,
+            {
+              computed: computed.getPropertyValue(property),
+              inline: element.style.getPropertyValue(property),
+              priority: element.style.getPropertyPriority(property),
+            },
+          ]),
+        );
+      });
+
+    await expect
+      .poll(readHostStyles, { timeout: RUNTIME_TIMEOUT })
+      .toEqual({
+        position: { computed: 'relative', inline: 'relative', priority: 'important' },
+        top: { computed: '0px', inline: 'auto', priority: 'important' },
+        right: { computed: '0px', inline: 'auto', priority: 'important' },
+        bottom: { computed: '0px', inline: 'auto', priority: 'important' },
+        left: { computed: '0px', inline: 'auto', priority: 'important' },
+        'z-index': { computed: 'auto', inline: 'auto', priority: 'important' },
+      });
+    await expectMobileVariantsUsePageScroll(page);
+
+    const galleryBox = await galleryHost.boundingBox();
+    expect(galleryBox).not.toBeNull();
+    const viewerCenter = {
+      x: galleryBox!.x + galleryBox!.width / 2,
+      y: galleryBox!.y + galleryBox!.height / 2,
+    };
+    expect(
+      await variantsHost.evaluate((element, point) => {
+        const hit = document.elementFromPoint(point.x, point.y);
+        return hit === element || element.shadowRoot?.contains(hit) === true;
+      }, viewerCenter),
+    ).toBe(false);
+
+    const beforeScroll = await variantsHost.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return {
+        documentTop: rect.top + window.scrollY,
+        viewportTop: rect.top,
+        documentBottom: rect.bottom + window.scrollY,
+        documentScrollHeight: document.documentElement.scrollHeight,
+      };
+    });
+    expect(beforeScroll.documentScrollHeight + 1).toBeGreaterThanOrEqual(
+      beforeScroll.documentBottom,
+    );
+
+    await page.evaluate(() => window.scrollTo(0, 300));
+    await expect
+      .poll(
+        () =>
+          variantsHost.evaluate((element, before) => {
+            const rect = element.getBoundingClientRect();
+            const documentTop = rect.top + window.scrollY;
+            return {
+              reachedRequestedScroll: Math.abs(window.scrollY - 300) <= 1,
+              documentTopStayedStable: Math.abs(documentTop - before.documentTop) <= 1,
+              movedWithDocument:
+                Math.abs(rect.top - (before.viewportTop - window.scrollY)) <= 1,
+            };
+          }, beforeScroll),
+        { timeout: 10000 },
+      )
+      .toEqual({
+        reachedRequestedScroll: true,
+        documentTopStayedStable: true,
+        movedWithDocument: true,
+      });
+
+    await page.setViewportSize(DESKTOP_VIEWPORT);
+    await expect(page.locator('.ov25-inline-sticky-gallery-root')).toHaveCount(0, {
+      timeout: RUNTIME_TIMEOUT,
+    });
+    await expect
+      .poll(readHostStyles, { timeout: RUNTIME_TIMEOUT })
+      .toEqual({
+        position: { computed: 'relative', inline: 'relative', priority: '' },
+        top: { computed: '0px', inline: '', priority: '' },
+        right: { computed: '0px', inline: '', priority: '' },
+        bottom: { computed: '0px', inline: '', priority: '' },
+        left: { computed: '0px', inline: '', priority: '' },
+        'z-index': { computed: '2', inline: '2', priority: '' },
+      });
+
+    await page.setViewportSize(MOBILE_VIEWPORT);
+    await waitForStickyGallery(page);
+    await expect
+      .poll(readHostStyles, { timeout: RUNTIME_TIMEOUT })
+      .toEqual({
+        position: { computed: 'relative', inline: 'relative', priority: 'important' },
+        top: { computed: '0px', inline: 'auto', priority: 'important' },
+        right: { computed: '0px', inline: 'auto', priority: 'important' },
+        bottom: { computed: '0px', inline: 'auto', priority: 'important' },
+        left: { computed: '0px', inline: 'auto', priority: 'important' },
+        'z-index': { computed: 'auto', inline: 'auto', priority: 'important' },
+      });
+  });
+
+  test('leaves a fixed merchant variants host untouched outside mobile inline-sticky', async ({ page }) => {
+    await page.setViewportSize(MOBILE_VIEWPORT);
+    await page.goto(
+      `${RESPONSIVE_FIXTURE_PATH}?mobileMode=inline&fixedMobileVariants=1`,
+    );
+
+    const variantsHost = page.locator('#ov25-sticky-controls');
+    await expect(page.locator('#ov25-configurator-variant-menu-container')).toHaveCount(1, {
+      timeout: RUNTIME_TIMEOUT,
+    });
+    await expect
+      .poll(
+        () =>
+          variantsHost.evaluate((element) => {
+            const computed = getComputedStyle(element);
+            return {
+              computedPosition: computed.position,
+              computedZIndex: computed.zIndex,
+              inlinePosition: element.style.position,
+              inlinePositionPriority: element.style.getPropertyPriority('position'),
+              inlineZIndex: element.style.zIndex,
+              inlineZIndexPriority: element.style.getPropertyPriority('z-index'),
+              inlineTop: element.style.top,
+              inlineRight: element.style.right,
+              inlineBottom: element.style.bottom,
+              inlineLeft: element.style.left,
+            };
+          }),
+        { timeout: RUNTIME_TIMEOUT },
+      )
+      .toEqual({
+        computedPosition: 'fixed',
+        computedZIndex: '9999',
+        inlinePosition: 'relative',
+        inlinePositionPriority: '',
+        inlineZIndex: '2',
+        inlineZIndexPriority: '',
+        inlineTop: '',
+        inlineRight: '',
+        inlineBottom: '',
+        inlineLeft: '',
+      });
+  });
+
+  test('leaves an in-flow variants host untouched during mobile inline-sticky', async ({ page }) => {
+    await page.setViewportSize(MOBILE_VIEWPORT);
+    await page.goto(RESPONSIVE_FIXTURE_PATH);
+
+    await waitForStickyGallery(page);
+    const variantsHost = page.locator('#ov25-sticky-controls');
+    await expect(page.locator('#ov25-configurator-variant-menu-container')).toHaveCount(1, {
+      timeout: RUNTIME_TIMEOUT,
+    });
+    await expect
+      .poll(
+        () =>
+          variantsHost.evaluate((element) => ({
+            computedPosition: getComputedStyle(element).position,
+            inlinePosition: element.style.position,
+            inlineTop: element.style.top,
+            inlineRight: element.style.right,
+            inlineBottom: element.style.bottom,
+            inlineLeft: element.style.left,
+            inlineZIndex: element.style.zIndex,
+          })),
+        { timeout: RUNTIME_TIMEOUT },
+      )
+      .toEqual({
+        computedPosition: 'static',
+        inlinePosition: '',
+        inlineTop: '',
+        inlineRight: '',
+        inlineBottom: '',
+        inlineLeft: '',
+        inlineZIndex: '',
+      });
+  });
+
   test('keeps the no-header desktop gallery pinned and sized to the viewport', async ({ page }) => {
     const consoleWarnings: string[] = [];
     page.on('console', (message) => {

@@ -845,6 +845,78 @@ export const OV25UIProvider: React.FC<{
     stickyLayoutControllerRef.current?.setElements({ optionHeader: element });
   }, []);
 
+  // Mobile inline-sticky variants must remain in document flow. Some storefront themes reuse the
+  // variants target as a fixed bottom sheet; because OV25 mounts its ShadowRoot directly on that
+  // target, the merchant rule otherwise turns the released page-scroll list into a viewport overlay.
+  useLayoutEffect(() => {
+    if (
+      !stickyLayoutActive ||
+      !isMobile ||
+      !effectiveUseInlineVariantControls ||
+      !variantsHost ||
+      variantsHost === galleryHost
+    ) {
+      return;
+    }
+
+    const computedPosition = variantsHost.ownerDocument.defaultView
+      ?.getComputedStyle(variantsHost)
+      .getPropertyValue('position');
+    if (computedPosition !== 'fixed' && computedPosition !== 'absolute') return;
+
+    const ownedStyles: Array<readonly [string, string]> = [
+      ['position', 'relative'],
+      ['top', 'auto'],
+      ['right', 'auto'],
+      ['bottom', 'auto'],
+      ['left', 'auto'],
+      ['z-index', 'auto'],
+    ];
+    const previousStyles = new Map(
+      ownedStyles.map(([property]) => [
+        property,
+        {
+          value: variantsHost.style.getPropertyValue(property),
+          priority: variantsHost.style.getPropertyPriority(property),
+        },
+      ]),
+    );
+    const appliedStyles = new Map<string, { value: string; priority: string }>();
+
+    for (const [property, value] of ownedStyles) {
+      variantsHost.style.setProperty(property, value, 'important');
+      appliedStyles.set(property, {
+        value: variantsHost.style.getPropertyValue(property),
+        priority: variantsHost.style.getPropertyPriority(property),
+      });
+    }
+    stickyLayoutControllerRef.current?.scheduleMeasure({ afterCurrentFrame: true });
+
+    return () => {
+      for (const [property, previous] of previousStyles) {
+        const applied = appliedStyles.get(property);
+        if (
+          !applied ||
+          variantsHost.style.getPropertyValue(property) !== applied.value ||
+          variantsHost.style.getPropertyPriority(property) !== applied.priority
+        ) {
+          continue;
+        }
+        if (previous.value) {
+          variantsHost.style.setProperty(property, previous.value, previous.priority);
+        } else {
+          variantsHost.style.removeProperty(property);
+        }
+      }
+    };
+  }, [
+    stickyLayoutActive,
+    isMobile,
+    effectiveUseInlineVariantControls,
+    variantsHost,
+    galleryHost,
+  ]);
+
   // Keep one controller per active host/configuration so responsive changes remeasure current targets;
   // destroy releases observers/listeners and restores controller-owned CSS properties.
   useLayoutEffect(() => {

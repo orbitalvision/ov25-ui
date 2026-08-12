@@ -34,6 +34,7 @@ const useStackedGalleryPath = params.get('stackedGallery') === '1';
 const useCompactViewer = params.get('viewer') === 'compact';
 const useContentBoxGalleryTarget = params.get('hostBox') === 'content-box';
 const useReplacementStyleHazard = params.get('replacementStyle') === 'hazardous';
+const useFixedMobileVariantsHost = params.get('fixedMobileVariants') === '1';
 const forceBodyLayerFallback = params.get('fallback') === 'body-layer';
 const useFixtureRootOverflowBlocker =
   params.get('overflowBlocker') === 'fixture-root';
@@ -173,7 +174,15 @@ function ProductInformation() {
         <div className="fixture-carousel-target" data-ov25-sticky-mobile-carousel />
       ) : null}
 
-      <div id="ov25-sticky-controls" className="fixture-variant-slot" />
+      <div
+        id="ov25-sticky-controls"
+        className="fixture-variant-slot"
+        style={
+          useFixedMobileVariantsHost
+            ? { position: 'relative', zIndex: 2 }
+            : undefined
+        }
+      />
       <div id="ov25-sticky-swatches" className="fixture-swatch-slot" />
 
       <dl className="fixture-facts">
@@ -567,6 +576,17 @@ function App() {
         .fixture-movement-band--blue { background: #91bce2; }
 
         @media (max-width: 767px) {
+          ${useFixedMobileVariantsHost ? `
+            #ov25-sticky-controls {
+              position: fixed !important;
+              right: 16px !important;
+              bottom: 0 !important;
+              left: 16px !important;
+              z-index: 9999 !important;
+              border-radius: 15px !important;
+              padding: 0 !important;
+            }
+          ` : ''}
           .fixture-navigation { gap: 14px; }
           .fixture-navigation a:nth-child(2) { display: none; }
           .fixture-site-header { height: 60px; padding-inline: 16px; }
