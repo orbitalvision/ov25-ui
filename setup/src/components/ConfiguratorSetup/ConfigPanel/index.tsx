@@ -1,5 +1,5 @@
 import { useState, useCallback } from 'react';
-import { Copy, Check, Settings, Paintbrush, Save } from 'lucide-react';
+import { Copy, Check, Settings, Paintbrush, Plug, Save } from 'lucide-react';
 import { ScrollArea } from '../../ui/scroll-area';
 import { Label } from '../../ui/label';
 import { Input } from '../../ui/input';
@@ -12,9 +12,11 @@ import type {
   FormConfiguratorDisplayModeMobile, FormVariantDisplayMode,
   FormSnap2VariantPosition, FormSnap2ModulePosition,
 } from '../types';
-import { SectionHeader, SwitchRow, DesktopMobileRow, SectionDivider, CompactSelect } from '../shared-ui';
+import { SectionHeader, SwitchRow, DesktopMobileRow, CompactSelect } from '../shared-ui';
 import { StylePanel } from '../StyleEditor';
 import type { ConfiguratorSetupPayload } from '../useConfiguratorSetup';
+import { StorefrontIntegrationPanel } from '../StorefrontIntegrationPanel';
+import type { StorefrontIntegrationConfig } from '../storefront-integration';
 
 interface ConfigPanelProps {
   formState: ConfiguratorSetupFormState;
@@ -25,15 +27,16 @@ interface ConfigPanelProps {
   getExportJson: (mode: 'current' | 'all') => object;
   onSave?: (payload: ConfiguratorSetupPayload) => void;
   hideSaveButton?: boolean;
+  storefrontIntegration?: StorefrontIntegrationConfig;
 }
 
 const LAYOUT_OPTIONS: { value: PreviewLayoutType; label: string; description: string }[] = [
-  { value: 'standard', label: 'Standard', description: 'Single product / range configurator' },
-  { value: 'snap2', label: 'Snap2', description: 'Modal-based configurator' },
+  { value: 'standard', label: 'Standard', description: 'Single product or range' },
+  { value: 'snap2', label: 'Snap2', description: 'Modal product builder' },
   {
     value: 'bedConfigurator',
     label: 'Bed',
-    description: 'Bed configurator (standard shell, bed UX options)',
+    description: 'Bed configurator',
   },
 ];
 
@@ -101,7 +104,7 @@ const SNAP2_MODULE_POSITION_OPTIONS = [
 ];
 
 const ELEMENT_TOGGLES: { key: keyof TypeSettings['selectors']; label: string }[] = [
-  { key: 'gallery', label: 'Configurator' },
+  { key: 'gallery', label: 'Configurator container' },
   { key: 'price', label: 'Price' },
   { key: 'name', label: 'Product name' },
   { key: 'variants', label: 'Variant controls' },
@@ -165,7 +168,110 @@ function Snap2PositionRow({
 
 type ExportMode = 'current' | 'all';
 
-export function ConfigPanel({ formState, currentSettings, setLayout, updateSettings, updateNested, getExportJson, onSave, hideSaveButton }: ConfigPanelProps) {
+function ProductTypeSelector({
+  layout,
+  onChange,
+}: {
+  layout: PreviewLayoutType;
+  onChange: (layout: PreviewLayoutType) => void;
+}) {
+  return (
+    <section
+      className="shrink-0 border-b border-border pb-4"
+      data-ov25-setup-product-type
+    >
+      <SectionHeader description="Choose the configurator experience to edit. Each type keeps its own settings.">
+        Product Type
+      </SectionHeader>
+      <div className="mt-3 grid grid-cols-3 gap-1.5">
+        {LAYOUT_OPTIONS.map((option) => {
+          const selected = layout === option.value;
+          return (
+            <button
+              key={option.value}
+              type="button"
+              aria-pressed={selected}
+              data-ov25-setup-product-type-option={option.value}
+              onClick={() => onChange(option.value)}
+              className={`min-h-[4.75rem] rounded-lg border px-2 py-2 text-center transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                selected
+                  ? 'border-foreground bg-foreground text-background shadow-sm'
+                  : 'border-border bg-background text-muted-foreground hover:border-foreground/30 hover:bg-muted/40'
+              }`}
+            >
+              <span className="block text-xs font-semibold leading-tight">{option.label}</span>
+              <span
+                className={`mt-1 block text-[10px] leading-tight ${
+                  selected ? 'text-background/70' : 'text-muted-foreground/75'
+                }`}
+              >
+                {option.description}
+              </span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function SettingsSection({
+  id,
+  title,
+  description,
+  children,
+}: {
+  id: string;
+  title: string;
+  description: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <section
+      className="min-w-0 rounded-xl border border-border bg-muted/20 p-3.5"
+      data-ov25-setup-section={id}
+    >
+      <SectionHeader description={description}>{title}</SectionHeader>
+      <div className="mt-3 min-w-0 space-y-3">{children}</div>
+    </section>
+  );
+}
+
+function SelectorControl({
+  selectorKey,
+  label,
+  settings,
+  onToggle,
+  onSelectorChange,
+}: {
+  selectorKey: keyof TypeSettings['selectors'];
+  label: string;
+  settings: TypeSettings['selectors'][keyof TypeSettings['selectors']];
+  onToggle: (enabled: boolean) => void;
+  onSelectorChange: (selector: string) => void;
+}) {
+  const inputId = `ov25-setup-selector-${selectorKey}`;
+  return (
+    <div className="min-w-0 space-y-2 rounded-lg border border-border bg-background p-2.5">
+      <SwitchRow label={label} checked={settings.enabled} onCheckedChange={onToggle} />
+      <div className="min-w-0">
+        <Label htmlFor={inputId} className="mb-1 text-[10px] text-muted-foreground">
+          CSS selector
+        </Label>
+        <Input
+          id={inputId}
+          type="text"
+          value={settings.selector}
+          onChange={(event) => onSelectorChange(event.target.value)}
+          aria-label={`${label} selector`}
+          className="h-8 min-w-0 font-mono text-[11px]"
+        />
+      </div>
+    </div>
+  );
+}
+
+export function ConfigPanel({ formState, currentSettings, setLayout, updateSettings, updateNested, getExportJson, onSave, hideSaveButton, storefrontIntegration }: ConfigPanelProps) {
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [exportMode, setExportMode] = useState<ExportMode>('current');
   const [modalCopied, setModalCopied] = useState(false);
@@ -176,6 +282,10 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
 
   const handleSelectorToggle = (key: keyof TypeSettings['selectors'], enabled: boolean) => {
     updateNested('selectors', key, { ...currentSettings.selectors[key], enabled });
+  };
+
+  const handleSelectorChange = (key: keyof TypeSettings['selectors'], selector: string) => {
+    updateNested('selectors', key, { ...currentSettings.selectors[key], selector });
   };
 
   const getExportString = useCallback(() => {
@@ -202,9 +312,16 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
   }, [getExportString]);
 
   return (
-    <Tabs defaultValue="settings" className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
-      <div className="shrink-0">
-        <TabsList className="w-full h-9 p-1 bg-muted rounded-full grid grid-cols-2">
+    <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden" data-ov25-setup-config-panel>
+      <ProductTypeSelector layout={formState.layout} onChange={setLayout} />
+
+      <Tabs
+        defaultValue="settings"
+        className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden"
+        data-ov25-setup-editor-tabs
+      >
+      <div className="shrink-0 pt-3">
+        <TabsList className={`w-full h-9 p-1 bg-muted rounded-full grid ${storefrontIntegration ? 'grid-cols-3' : 'grid-cols-2'}`}>
           <TabsTrigger
             value="settings"
             className="rounded-full text-xs font-semibold text-muted-foreground gap-1.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#26E8FE] data-[state=active]:via-[#808AFF] data-[state=active]:to-[#A41EFE] data-[state=active]:text-white data-[state=active]:shadow-sm"
@@ -219,106 +336,29 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
             <Paintbrush className="h-3.5 w-3.5" />
             Style
           </TabsTrigger>
+          {storefrontIntegration && (
+            <TabsTrigger
+              value="integration"
+              data-ov25-setup-integration-tab
+              className="rounded-full text-xs font-semibold text-muted-foreground gap-1.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#26E8FE] data-[state=active]:via-[#808AFF] data-[state=active]:to-[#A41EFE] data-[state=active]:text-white data-[state=active]:shadow-sm"
+            >
+              <Plug className="h-3.5 w-3.5" />
+              Global
+            </TabsTrigger>
+          )}
         </TabsList>
       </div>
 
       <TabsContent value="settings" className="mt-0 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <ScrollArea className="h-full min-h-0 min-w-0">
-          <div className="min-w-0 max-w-full space-y-6 py-2 pr-4">
-
-            {/* --- Product Type --- */}
-            <div className="space-y-3">
-              <SectionHeader description="The type of configurator experience for this product">Product Type</SectionHeader>
-              <div className="grid grid-cols-3 gap-1.5">
-                {LAYOUT_OPTIONS.map((opt) => (
-                  <button
-                    key={opt.value}
-                    type="button"
-                    onClick={() => setLayout(opt.value)}
-                    className={`rounded-md px-1.5 py-2 text-center transition-all border ${
-                      formState.layout === opt.value
-                        ? 'border-foreground bg-foreground text-background shadow-sm'
-                        : 'border-border bg-white text-muted-foreground hover:border-foreground/30'
-                    }`}
-                  >
-                    <div className="text-xs font-medium leading-tight">{opt.label}</div>
-                    <div className={`text-[8px] mt-0.5 leading-snug ${formState.layout === opt.value ? 'text-background/70' : 'text-muted-foreground/60'}`}>{opt.description}</div>
-                  </button>
-                ))}
-              </div>
-              {isSnap2 && (
-                <SwitchRow
-                  label="Starting configuration"
-                  checked={!!currentSettings.snap2UseStartingConfig}
-                  onCheckedChange={(v) => updateSettings('snap2UseStartingConfig', v)}
-                />
-              )}
-              {isBed && currentSettings.bed && (
-                <div className="space-y-2.5 pt-1">
-                  <SectionHeader description="When checked, this part of the bed for example the headboard is allowed to be empty or not have a headboard selected.">
-                    Bed — allow “None”
-                  </SectionHeader>
-                  <SwitchRow
-                    label="Headboard"
-                    checked={currentSettings.bed.allowNoneHeadboard}
-                    onCheckedChange={(v) => updateNested('bed', 'allowNoneHeadboard', v)}
-                  />
-                  <SwitchRow
-                    label="Base"
-                    checked={currentSettings.bed.allowNoneBase}
-                    onCheckedChange={(v) => updateNested('bed', 'allowNoneBase', v)}
-                  />
-                  <SwitchRow
-                    label="Mattress"
-                    checked={currentSettings.bed.allowNoneMattress}
-                    onCheckedChange={(v) => updateNested('bed', 'allowNoneMattress', v)}
-                  />
-                  <SectionHeader description="When checked, this part of the bed for example the base will only display matching sizes.">
-                    Bed — only matching sizes
-                  </SectionHeader>
-                  <SwitchRow
-                    label="Headboard"
-                    checked={currentSettings.bed.filterMatchingSizeHeadboard}
-                    onCheckedChange={(v) => updateNested('bed', 'filterMatchingSizeHeadboard', v)}
-                  />
-                  <SwitchRow
-                    label="Base"
-                    checked={currentSettings.bed.filterMatchingSizeBase}
-                    onCheckedChange={(v) => updateNested('bed', 'filterMatchingSizeBase', v)}
-                  />
-                  <SwitchRow
-                    label="Mattress"
-                    checked={currentSettings.bed.filterMatchingSizeMattress}
-                    onCheckedChange={(v) => updateNested('bed', 'filterMatchingSizeMattress', v)}
-                  />
-                </div>
-              )}
-            </div>
-
-            {!isSnap2 && (
-              <>
-                {/* --- Elements --- */}
-                <SectionDivider />
-                <div className="space-y-2.5">
-                  <SectionHeader description="Toggle which UI elements the configurator injects into your page">Elements</SectionHeader>
-                  {ELEMENT_TOGGLES.map(({ key, label }) => (
-                    <SwitchRow
-                      key={key}
-                      label={label}
-                      checked={currentSettings.selectors[key].enabled}
-                      onCheckedChange={(v) => handleSelectorToggle(key, v)}
-                    />
-                  ))}
-                </div>
-              </>
-            )}
-
-            {/* --- Configurator --- */}
-            <SectionDivider />
-            <div className="space-y-3">
-              <SectionHeader description="How the variant selector appears and behaves on your product page">Configurator</SectionHeader>
+          <div className="min-w-0 max-w-full space-y-3 py-3 pr-4">
+            <SettingsSection
+              id="display-layout"
+              title="Display & layout"
+              description="Choose where the configurator appears and how product imagery is arranged."
+            >
               <DesktopMobileRow
-                label="Display mode"
+                label="Configurator display"
                 desktopValue={currentSettings.configurator.displayModeDesktop}
                 mobileValue={currentSettings.configurator.displayModeMobile}
                 onDesktopChange={(v) => updateNested('configurator', 'displayModeDesktop', v)}
@@ -326,24 +366,8 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
                 options={isSnap2 ? SNAP2_DISPLAY_DESKTOP_OPTIONS : DISPLAY_DESKTOP_OPTIONS}
                 mobileOptions={isSnap2 ? SNAP2_DISPLAY_MOBILE_OPTIONS : DISPLAY_MOBILE_OPTIONS}
               />
-              <DesktopMobileRow
-                label="Trigger style"
-                desktopValue={currentSettings.configurator.triggerStyleDesktop}
-                mobileValue={currentSettings.configurator.triggerStyleMobile}
-                onDesktopChange={(v) => updateNested('configurator', 'triggerStyleDesktop', v)}
-                onMobileChange={(v) => updateNested('configurator', 'triggerStyleMobile', v)}
-                options={TRIGGER_OPTIONS}
-              />
-              <DesktopMobileRow
-                label="Variant layout"
-                desktopValue={currentSettings.configurator.variantDisplayDesktop}
-                mobileValue={currentSettings.configurator.variantDisplayMobile}
-                onDesktopChange={(v) => updateNested('configurator', 'variantDisplayDesktop', v)}
-                onMobileChange={(v) => updateNested('configurator', 'variantDisplayMobile', v)}
-                options={VARIANT_OPTIONS}
-              />
               {showSnap2PositionControls && (
-                <>
+                <div className="space-y-3 border-t border-border pt-3">
                   <Snap2PositionRow
                     label="Variant position"
                     showDesktop={showSnap2DesktopPositionControls}
@@ -364,7 +388,72 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
                     onMobileChange={(v) => updateNested('configurator', 'snap2ModulePositionMobile', v)}
                     options={SNAP2_MODULE_POSITION_OPTIONS}
                   />
-                </>
+                </div>
+              )}
+              <div className="space-y-3 border-t border-border pt-3">
+                <SectionHeader description="Product images shown alongside the 3D viewer">
+                  Image gallery
+                </SectionHeader>
+                <DesktopMobileRow
+                  label="Gallery layout"
+                  desktopValue={currentSettings.carousel.desktop}
+                  mobileValue={currentSettings.carousel.mobile}
+                  onDesktopChange={(v) => updateNested('carousel', 'desktop', v)}
+                  onMobileChange={(v) => updateNested('carousel', 'mobile', v)}
+                  options={CAROUSEL_OPTIONS}
+                />
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Label className="text-[10px] text-muted-foreground">Max images (desktop)</Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      value={currentSettings.carousel.maxImagesDesktop}
+                      onChange={(e) => updateNested('carousel', 'maxImagesDesktop', parseInt(e.target.value) || 4)}
+                      className="h-7 text-xs"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-[10px] text-muted-foreground">Max images (mobile)</Label>
+                    <Input
+                      type="number"
+                      min={1}
+                      value={currentSettings.carousel.maxImagesMobile}
+                      onChange={(e) => updateNested('carousel', 'maxImagesMobile', parseInt(e.target.value) || 6)}
+                      className="h-7 text-xs"
+                    />
+                  </div>
+                </div>
+              </div>
+            </SettingsSection>
+
+            <SettingsSection
+              id="variant-experience"
+              title="Variant experience"
+              description="Control how customers open, browse, and inspect product options."
+            >
+              <DesktopMobileRow
+                label="Configure trigger"
+                desktopValue={currentSettings.configurator.triggerStyleDesktop}
+                mobileValue={currentSettings.configurator.triggerStyleMobile}
+                onDesktopChange={(v) => updateNested('configurator', 'triggerStyleDesktop', v)}
+                onMobileChange={(v) => updateNested('configurator', 'triggerStyleMobile', v)}
+                options={TRIGGER_OPTIONS}
+              />
+              <DesktopMobileRow
+                label="Variant layout"
+                desktopValue={currentSettings.configurator.variantDisplayDesktop}
+                mobileValue={currentSettings.configurator.variantDisplayMobile}
+                onDesktopChange={(v) => updateNested('configurator', 'variantDisplayDesktop', v)}
+                onMobileChange={(v) => updateNested('configurator', 'variantDisplayMobile', v)}
+                options={VARIANT_OPTIONS}
+              />
+              {isSnap2 && (
+                <SwitchRow
+                  label="Starting configuration"
+                  checked={!!currentSettings.snap2UseStartingConfig}
+                  onCheckedChange={(v) => updateSettings('snap2UseStartingConfig', v)}
+                />
               )}
               <div>
                 <Label className="text-[10px] text-muted-foreground">Hide variant options (comma-separated)</Label>
@@ -379,77 +468,72 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
                   className="h-7 text-xs"
                 />
               </div>
-            </div>
-
-            {/* --- Image Gallery --- */}
-            <SectionDivider />
-            <div className="space-y-3">
-              <SectionHeader description="Product images shown alongside the 3D viewer">Image Gallery</SectionHeader>
-              <DesktopMobileRow
-                label="Layout"
-                desktopValue={currentSettings.carousel.desktop}
-                mobileValue={currentSettings.carousel.mobile}
-                onDesktopChange={(v) => updateNested('carousel', 'desktop', v)}
-                onMobileChange={(v) => updateNested('carousel', 'mobile', v)}
-                options={CAROUSEL_OPTIONS}
-              />
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <Label className="text-[10px] text-muted-foreground">Max images (desktop)</Label>
-                  <Input
-                    type="number"
-                    min={1}
-                    value={currentSettings.carousel.maxImagesDesktop}
-                    onChange={(e) => updateNested('carousel', 'maxImagesDesktop', parseInt(e.target.value) || 4)}
-                    className="h-7 text-xs"
+              {isBed && currentSettings.bed && (
+                <div className="space-y-3 border-t border-border pt-3">
+                  <SectionHeader description="Allow individual bed sections to remain unselected.">
+                    Bed — allow “None”
+                  </SectionHeader>
+                  <SwitchRow
+                    label="Headboard"
+                    checked={currentSettings.bed.allowNoneHeadboard}
+                    onCheckedChange={(v) => updateNested('bed', 'allowNoneHeadboard', v)}
+                  />
+                  <SwitchRow
+                    label="Base"
+                    checked={currentSettings.bed.allowNoneBase}
+                    onCheckedChange={(v) => updateNested('bed', 'allowNoneBase', v)}
+                  />
+                  <SwitchRow
+                    label="Mattress"
+                    checked={currentSettings.bed.allowNoneMattress}
+                    onCheckedChange={(v) => updateNested('bed', 'allowNoneMattress', v)}
+                  />
+                  <SectionHeader description="Only show selections whose bed size matches the current model.">
+                    Bed — matching sizes
+                  </SectionHeader>
+                  <SwitchRow
+                    label="Headboard"
+                    checked={currentSettings.bed.filterMatchingSizeHeadboard}
+                    onCheckedChange={(v) => updateNested('bed', 'filterMatchingSizeHeadboard', v)}
+                  />
+                  <SwitchRow
+                    label="Base"
+                    checked={currentSettings.bed.filterMatchingSizeBase}
+                    onCheckedChange={(v) => updateNested('bed', 'filterMatchingSizeBase', v)}
+                  />
+                  <SwitchRow
+                    label="Mattress"
+                    checked={currentSettings.bed.filterMatchingSizeMattress}
+                    onCheckedChange={(v) => updateNested('bed', 'filterMatchingSizeMattress', v)}
                   />
                 </div>
-                <div>
-                  <Label className="text-[10px] text-muted-foreground">Max images (mobile)</Label>
-                  <Input
-                    type="number"
-                    min={1}
-                    value={currentSettings.carousel.maxImagesMobile}
-                    onChange={(e) => updateNested('carousel', 'maxImagesMobile', parseInt(e.target.value) || 6)}
-                    className="h-7 text-xs"
+              )}
+            </SettingsSection>
+
+            {!isSnap2 && (
+              <SettingsSection
+                id="storefront-selectors"
+                title="Storefront selectors"
+                description="Choose the existing page elements OV25 should use or replace. These values are saved in setup JSON."
+              >
+                {ELEMENT_TOGGLES.map(({ key, label }) => (
+                  <SelectorControl
+                    key={key}
+                    selectorKey={key}
+                    label={label}
+                    settings={currentSettings.selectors[key]}
+                    onToggle={(enabled) => handleSelectorToggle(key, enabled)}
+                    onSelectorChange={(selector) => handleSelectorChange(key, selector)}
                   />
-                </div>
-              </div>
-            </div>
+                ))}
+              </SettingsSection>
+            )}
 
-            {/* --- Branding --- */}
-            <SectionDivider />
-            <div className="space-y-3">
-              <SectionHeader description="Your brand logo displayed in the configurator header">Branding</SectionHeader>
-              <div>
-                <Label className="text-[10px] text-muted-foreground">Logo URL</Label>
-                <Input
-                  placeholder="https://..."
-                  value={currentSettings.branding.logoURL}
-                  onChange={(e) => updateNested('branding', 'logoURL', e.target.value)}
-                  className="h-7 text-xs mt-0.5"
-                />
-              </div>
-              <div>
-                <Label className="text-[10px] text-muted-foreground">Mobile logo URL</Label>
-                <Input
-                  placeholder="https://..."
-                  value={currentSettings.branding.mobileLogoURL}
-                  onChange={(e) => updateNested('branding', 'mobileLogoURL', e.target.value)}
-                  className="h-7 text-xs mt-0.5"
-                />
-              </div>
-              <SwitchRow
-                label="Hide logo"
-                checked={currentSettings.branding.hideLogo}
-                onCheckedChange={(v) => updateNested('branding', 'hideLogo', v)}
-              />
-            </div>
-
-            {/* --- Behaviour --- */}
-            <SectionDivider />
-            <div className="space-y-2.5">
-              <SectionHeader description="Fine-tune loading behaviour, visibility, and layout overrides">Behaviour</SectionHeader>
+            <SettingsSection
+              id="behaviour"
+              title="Behaviour"
+              description="Fine-tune loading, commerce controls, visibility, and responsive overrides."
+            >
               {FLAG_TOGGLES.map(({ key, label }) => (
                 <SwitchRow
                   key={key}
@@ -458,7 +542,7 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
                   onCheckedChange={(v) => updateNested('flags', key, v)}
                 />
               ))}
-            </div>
+            </SettingsSection>
             <div className="h-4" />
           </div>
         </ScrollArea>
@@ -467,6 +551,12 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
       <TabsContent value="style" className="mt-0 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <StylePanel currentSettings={currentSettings} updateSettings={updateSettings} updateNested={updateNested} />
       </TabsContent>
+
+      {storefrontIntegration && (
+        <TabsContent value="integration" className="mt-0 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+          <StorefrontIntegrationPanel config={storefrontIntegration} />
+        </TabsContent>
+      )}
 
       {!hideSaveButton && (
         <div className="shrink-0 pt-3 pb-1">
@@ -532,5 +622,6 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
         </DialogContent>
       </Dialog>
     </Tabs>
+    </div>
   );
 }

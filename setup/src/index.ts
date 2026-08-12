@@ -5,6 +5,20 @@ export { ConfigPanel } from './components/ConfiguratorSetup/ConfigPanel';
 export { PreviewArea } from './components/ConfiguratorSetup/PreviewArea';
 
 export type { ConfiguratorSetupProps, ConfiguratorSetupPayload } from './components/ConfiguratorSetup';
+export type {
+  StorefrontIntegrationConfig,
+  StorefrontIntegrationErrorConfig,
+  StorefrontIntegrationField,
+  StorefrontIntegrationLoadingConfig,
+  StorefrontIntegrationReadyConfig,
+  StorefrontIntegrationSection,
+  StorefrontIntegrationSelectField,
+  StorefrontIntegrationSelectOption,
+  StorefrontIntegrationSelectorField,
+  StorefrontIntegrationSwitchField,
+  StorefrontIntegrationTextField,
+  StorefrontIntegrationValue,
+} from './components/ConfiguratorSetup/storefront-integration';
 export type { LayoutType } from './lib/config/preview-config';
 export type { SerializableInjectConfig } from './components/ConfiguratorSetup/preview-config-serializable';
 export type { TypeSettings, ConfiguratorSetupFormState, SelectorFormState } from './components/ConfiguratorSetup/types';

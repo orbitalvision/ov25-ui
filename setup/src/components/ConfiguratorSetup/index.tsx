@@ -2,6 +2,7 @@ import { useConfiguratorSetup } from './useConfiguratorSetup';
 import type { ConfiguratorSetupOverrides, ConfiguratorSetupPayload } from './useConfiguratorSetup';
 import { ConfigPanel } from './ConfigPanel';
 import { PreviewArea } from './PreviewArea';
+import type { StorefrontIntegrationConfig } from './storefront-integration';
 
 export interface ConfiguratorSetupProps {
   apiKey?: ConfiguratorSetupOverrides['apiKey'];
@@ -17,10 +18,11 @@ export interface ConfiguratorSetupProps {
   onSave?: (payload: ConfiguratorSetupPayload) => void;
   hidePreview?: boolean;
   hideSaveButton?: boolean;
+  storefrontIntegration?: StorefrontIntegrationConfig;
   className?: string;
 }
 
-export type { ConfiguratorSetupPayload };
+export type { ConfiguratorSetupPayload, StorefrontIntegrationConfig };
 
 export default function ConfiguratorSetup(props: ConfiguratorSetupProps) {
   const overrides: ConfiguratorSetupOverrides = {
@@ -46,7 +48,7 @@ export default function ConfiguratorSetup(props: ConfiguratorSetupProps) {
   return (
     <div className={props.className || 'flex h-screen min-w-0 overflow-hidden'}>
       {!props.hidePreview && (
-        <main className="min-h-0 min-w-0 flex-1 overflow-hidden p-4">
+        <main className="min-h-0 min-w-0 flex-1 overflow-hidden p-0">
           <PreviewArea serializableConfig={serializableConfig} previewBaseUrl={props.previewBaseUrl} useLocalPreview={props.useLocalPreview} />
         </main>
       )}
@@ -60,6 +62,7 @@ export default function ConfiguratorSetup(props: ConfiguratorSetupProps) {
           getExportJson={getExportJson}
           onSave={props.onSave}
           hideSaveButton={props.hideSaveButton}
+          storefrontIntegration={props.storefrontIntegration}
         />
       </aside>
     </div>

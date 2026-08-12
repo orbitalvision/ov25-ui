@@ -63,6 +63,14 @@ const SAVED_CONFIG = {
 };
 
 function App() {
+  const [integrationValues, setIntegrationValues] = React.useState({
+    headerSelector: '.shopify-section-header',
+    desktopCarouselSelector: '.product-gallery--desktop',
+    mobileCarouselSelector: '.product-gallery--mobile',
+    addToCartFormSelector: 'form[action="/cart/add"]',
+    currencySymbol: '£',
+  });
+
   return (
     <ConfiguratorSetup
       useLocalPreview
@@ -75,6 +83,62 @@ function App() {
         snap2: 'snap2/119',
       }}
       initialConfig={SAVED_CONFIG}
+      storefrontIntegration={{
+        status: 'ready',
+        platformLabel: 'Shopify integration',
+        scopeLabel: 'fixture-store.myshopify.com · Store-wide',
+        notice: 'Integration settings are supplied and stored by the host platform, separately from setup JSON.',
+        sections: [
+          {
+            id: 'theme-targets',
+            title: 'Theme targets',
+            description: 'Connect OV25 to elements owned by the storefront theme.',
+            fields: [
+              {
+                type: 'selector',
+                key: 'headerSelector',
+                label: 'Header selector',
+                placeholder: '.site-header',
+              },
+              {
+                type: 'selector',
+                key: 'desktopCarouselSelector',
+                label: 'Desktop carousel target',
+                placeholder: '.product-gallery--desktop',
+              },
+              {
+                type: 'selector',
+                key: 'mobileCarouselSelector',
+                label: 'Mobile carousel target',
+                placeholder: '.product-gallery--mobile',
+              },
+              {
+                type: 'selector',
+                key: 'addToCartFormSelector',
+                label: 'Add to cart form selector',
+                placeholder: 'form[action="/cart/add"]',
+              },
+            ],
+          },
+          {
+            id: 'commerce',
+            title: 'Commerce',
+            description: 'Platform-owned cart and currency behaviour.',
+            fields: [
+              {
+                type: 'text',
+                key: 'currencySymbol',
+                label: 'Currency symbol',
+                placeholder: '£',
+              },
+            ],
+          },
+        ],
+        values: integrationValues,
+        onChange: (key, value) => {
+          setIntegrationValues((current) => ({ ...current, [key]: value }));
+        },
+      }}
     />
   );
 }

@@ -3,6 +3,8 @@ import { ChevronDown, ChevronRight, RotateCcw } from 'lucide-react';
 import type { StringReplacementRule } from 'ov25-ui';
 import { ScrollArea } from '../../ui/scroll-area';
 import { CSSEditor } from '../../ui/css-editor';
+import { Input } from '../../ui/input';
+import { Label } from '../../ui/label';
 import { STYLE_GROUPS } from '../../../lib/config/configurator-style-variables';
 import { OV25_VARIANT_RING_MODE_SOLID, OV25_VARIANT_THUMB_RING_MODE_VAR } from '../../../lib/config/variant-selection-style';
 import { formStringReplacementsToSerializable } from '../../../lib/string-replacements-config';
@@ -84,6 +86,46 @@ export function StylePanel({ currentSettings, updateSettings, updateNested }: St
     <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
       <ScrollArea className="min-h-0 flex-1 min-w-0">
       <div className="min-w-0 max-w-full space-y-6 py-2 pr-4">
+        <section
+          className="min-w-0 rounded-xl border border-border bg-muted/20 p-3.5"
+          data-ov25-setup-section="brand-identity"
+        >
+          <SectionHeader description="Add the logo shown in the configurator header, or hide it entirely.">
+            Brand identity
+          </SectionHeader>
+          <div className="mt-3 space-y-3">
+            <div>
+              <Label htmlFor="ov25-setup-logo-url" className="text-[10px] text-muted-foreground">
+                Logo URL
+              </Label>
+              <Input
+                id="ov25-setup-logo-url"
+                placeholder="https://..."
+                value={currentSettings.branding.logoURL}
+                onChange={(event) => updateNested('branding', 'logoURL', event.target.value)}
+                className="mt-0.5 h-8 text-xs"
+              />
+            </div>
+            <div>
+              <Label htmlFor="ov25-setup-mobile-logo-url" className="text-[10px] text-muted-foreground">
+                Mobile logo URL
+              </Label>
+              <Input
+                id="ov25-setup-mobile-logo-url"
+                placeholder="https://..."
+                value={currentSettings.branding.mobileLogoURL}
+                onChange={(event) => updateNested('branding', 'mobileLogoURL', event.target.value)}
+                className="mt-0.5 h-8 text-xs"
+              />
+            </div>
+            <SwitchRow
+              label="Hide logo"
+              checked={currentSettings.branding.hideLogo}
+              onCheckedChange={(value) => updateNested('branding', 'hideLogo', value)}
+            />
+          </div>
+        </section>
+        <SectionDivider />
         {hasOverrides && (
           <div className="flex justify-end">
             <button
@@ -153,7 +195,7 @@ export function StylePanel({ currentSettings, updateSettings, updateNested }: St
           onRulesChange={handleStringReplacementsRulesChange}
         />
         <SectionDivider />
-        <div className="space-y-2">
+        <div className="space-y-2" data-ov25-setup-section="custom-css">
           <SectionHeader description="Raw CSS that overrides everything above">Custom CSS</SectionHeader>
           <CSSEditor
             placeholder=".ov25-variant-control { ... }"
