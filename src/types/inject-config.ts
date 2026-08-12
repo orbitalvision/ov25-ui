@@ -41,7 +41,14 @@ export type CarouselConfig = ResponsiveValue<CarouselDisplayMode> & {
   maxImages?: number | ResponsiveValue<number>;
 };
 
-export type ConfiguratorDisplayMode = 'inline' | 'inline-sticky' | 'sheet' | 'drawer' | 'modal' | 'inline-sheet';
+export type ConfiguratorDisplayMode =
+  | 'inline'
+  | 'inline-sticky'
+  | 'sheet'
+  | 'drawer'
+  | 'modal'
+  | 'variants-only-sheet'
+  | 'inline-sheet';
 
 export type ConfiguratorConfig = {
   displayMode: ResponsiveValue<ConfiguratorDisplayMode>;
@@ -337,8 +344,8 @@ export interface LegacyInjectConfiguratorOptions {
   carouselDisplayMode?: CarouselDisplayMode;
   carouselDisplayModeMobile?: CarouselDisplayMode;
 
-  configuratorDisplayMode?: 'inline' | 'inline-sticky' | 'sheet' | 'modal' | 'inline-sheet';
-  configuratorDisplayModeMobile?: 'inline' | 'inline-sticky' | 'drawer' | 'modal';
+  configuratorDisplayMode?: 'inline' | 'inline-sticky' | 'sheet' | 'modal' | 'variants-only-sheet' | 'inline-sheet';
+  configuratorDisplayModeMobile?: 'inline' | 'inline-sticky' | 'drawer' | 'modal' | 'variants-only-sheet';
   configuratorTriggerStyle?: 'single-button' | 'split-buttons';
   configuratorTriggerStyleMobile?: 'single-button' | 'split-buttons';
 
@@ -423,8 +430,8 @@ export interface NormalizedInjectConfig {
   carouselMaxImagesDesktop?: number;
   carouselMaxImagesMobile?: number;
 
-  configuratorDisplayMode: 'inline' | 'inline-sticky' | 'sheet' | 'modal' | 'inline-sheet';
-  configuratorDisplayModeMobile: 'inline' | 'inline-sticky' | 'drawer' | 'modal';
+  configuratorDisplayMode: 'inline' | 'inline-sticky' | 'sheet' | 'modal' | 'variants-only-sheet' | 'inline-sheet';
+  configuratorDisplayModeMobile: 'inline' | 'inline-sticky' | 'drawer' | 'modal' | 'variants-only-sheet';
   configuratorTriggerStyle: 'single-button' | 'split-buttons';
   configuratorTriggerStyleMobile: 'single-button' | 'split-buttons';
 
