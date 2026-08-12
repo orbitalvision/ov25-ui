@@ -208,18 +208,35 @@ export interface Discount {
 export interface Swatch {
   name: string;
   option: string;
-  manufacturerId: string;
-  description: string;
-  sku: string;
-  thumbnail: {
-    blurHash: string;
-    thumbnail: string;
-    miniThumbnails: {
-      large: string;
-      medium: string;
-      small: string;
-    }
-  };
+  /** Backend ids are numeric; older cached entries may contain strings. */
+  manufacturerId: string | number;
+  group?: string | null;
+  description?: string | null;
+  sku?: string | null;
+  thumbnail?: {
+    blurHash?: string | null;
+    thumbnail?: string | null;
+    miniThumbnails?: {
+      large?: string | null;
+      medium?: string | null;
+      small?: string | null;
+    } | null;
+  } | null;
+}
+
+/**
+ * Compare swatches using the database uniqueness tuple. Entries saved before
+ * `group` was exposed remain a wildcard for that field so existing books can
+ * still be removed rather than becoming orphaned.
+ */
+export function swatchesMatch(a: Swatch, b: Swatch): boolean {
+  const baseMatches =
+    String(a.manufacturerId) === String(b.manufacturerId) &&
+    a.name === b.name &&
+    a.option === b.option;
+  if (!baseMatches) return false;
+  if (a.group == null || b.group == null) return true;
+  return a.group === b.group;
 }
 
 export type SwatchRulesData = {
@@ -1276,16 +1293,16 @@ export const OV25UIProvider: React.FC<{
 
   const toggleSwatch = useCallback((swatch: Swatch) => {
     setSelectedSwatches(prev => {
-      const index = prev.findIndex(s => s.manufacturerId === swatch.manufacturerId && s.name === swatch.name && s.option === swatch.option);
+      const index = prev.findIndex(s => swatchesMatch(s, swatch));
       if (index === -1) {
         return [...prev, swatch];
       }
-      return prev.filter(s => s.manufacturerId !== swatch.manufacturerId || s.name !== swatch.name || s.option !== swatch.option);
+      return prev.filter(s => !swatchesMatch(s, swatch));
     });
   }, []);
 
   const isSwatchSelected = useCallback((swatch: Swatch) => {
-    return selectedSwatches.some(s => s.manufacturerId === swatch.manufacturerId && s.name === swatch.name && s.option === swatch.option);
+    return selectedSwatches.some(s => swatchesMatch(s, swatch));
   }, [selectedSwatches]);
 
   const buySwatches = () => {

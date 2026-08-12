@@ -160,7 +160,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
             )}
             <div id="ov25-swatchbook-swatches-list" className="ov:grid ov:w-full ov:grid-cols-2 ov:gap-2 ov:overflow-y-hidden ov:px-4 ov:py-2 ov:sm:grid-cols-3 ov:md:grid-cols-4">
               {selectedSwatches.map((swatch) => (
-                <div key={`${swatch.manufacturerId}-${swatch.name}-${swatch.option}`} className={swatchItemClassName}>
+                <div key={`${swatch.manufacturerId}-${swatch.name}-${swatch.option}-${swatch.group ?? ''}`} className={swatchItemClassName}>
                   <div className={cn(swatchImageContainerClassName, 'ov:group')}>
                     <SwatchImage
                       src={swatch.thumbnail?.miniThumbnails?.medium || PLACEHOLDER_IMAGE_URL}

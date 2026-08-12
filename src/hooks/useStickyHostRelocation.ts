@@ -7,6 +7,10 @@ import {
   getStickyHostNaturalDocumentTop,
   observeStickyHostNaturalDocumentTop,
 } from '../lib/sticky-layout-controller.js';
+import {
+  BODY_STICKY_FULLSCREEN_PORTAL_Z_INDEX,
+  BODY_STICKY_PORTAL_Z_INDEX,
+} from '../lib/config/layers.js';
 
 export type StickyHostRelocationMode = 'normal' | 'fixed' | 'absolute-end';
 
@@ -37,8 +41,9 @@ interface CreateStickyHostRelocationOptions {
   onUnsupported?: (message: string) => void;
 }
 
-export const STICKY_BODY_LAYER_Z_INDEX = 2147483644;
-export const STICKY_BODY_LAYER_FULLSCREEN_Z_INDEX = 2147483646;
+export const STICKY_BODY_LAYER_Z_INDEX = BODY_STICKY_PORTAL_Z_INDEX;
+export const STICKY_BODY_LAYER_FULLSCREEN_Z_INDEX =
+  BODY_STICKY_FULLSCREEN_PORTAL_Z_INDEX;
 
 const useBrowserLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
 
