@@ -40,17 +40,21 @@ function shouldShowGroupName(groupName: string, optionTitle: string, groupCount:
 }
 
 function getSelectionImageSrc(selection: {
-  thumbnail?: string;
-  miniThumbnails?: { small: string; medium: string; large: string };
+  thumbnail?: string | null;
+  miniThumbnails?: {
+    small?: string | null;
+    medium?: string | null;
+    large?: string | null;
+  } | null;
   swatch?: {
     thumbnail?: {
-      thumbnail?: string;
+      thumbnail?: string | null;
       miniThumbnails?: {
-        large?: string;
-        medium?: string;
-        small?: string;
-      };
-    };
+        large?: string | null;
+        medium?: string | null;
+        small?: string | null;
+      } | null;
+    } | null;
   };
 }): string | undefined {
   return (
@@ -62,7 +66,7 @@ function getSelectionImageSrc(selection: {
     selection.swatch?.thumbnail?.miniThumbnails?.medium ??
     selection.swatch?.thumbnail?.miniThumbnails?.small ??
     selection.swatch?.thumbnail?.thumbnail
-  );
+  ) ?? undefined;
 }
 
 interface DiningFinishOptionsProps {

@@ -12,6 +12,7 @@ export {
   CarouselLayout,
   STRING_REPLACEMENT_DEFINITIONS,
 } from './utils/inject.js';
+export { SelectionDetailsDisplayMode } from './types/config-enums.js';
 export { injectDiningConfigurator, injectDiningConfigurator as injectDining } from './utils/inject-dining.js';
 export type {
   InjectConfiguratorOptions,
@@ -47,6 +48,11 @@ export type {
   StringInterpolationValueDefinition,
   StringReplacements,
 } from './utils/inject.js';
+export type {
+  SelectionDetailsConfig,
+  SelectionDetailsDesktopDisplayMode,
+  SelectionDetailsMobileDisplayMode,
+} from './types/inject-config.js';
 
 export type {
   InjectDiningConfiguratorOptions,

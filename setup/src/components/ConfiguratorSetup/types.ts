@@ -7,6 +7,11 @@ export type FormCarouselDisplayMode = 'none' | 'carousel' | 'stacked';
 export type FormConfiguratorDisplayMode = 'inline' | 'inline-sticky' | 'sheet' | 'modal' | 'variants-only-sheet';
 export type FormConfiguratorDisplayModeMobile = 'inline' | 'inline-sticky' | 'drawer' | 'modal' | 'variants-only-sheet';
 export type FormVariantDisplayMode = 'wizard' | 'list' | 'tabs' | 'accordion' | 'tree';
+export type FormSelectionDetailsDisplayMode = 'none' | 'sheet' | 'fullscreen' | 'modal' | 'tooltip';
+export type FormSelectionDetailsMobileDisplayMode = Exclude<
+  FormSelectionDetailsDisplayMode,
+  'tooltip' | 'sheet'
+>;
 export type FormSnap2VariantPosition = 'left' | 'right';
 export type FormSnap2ModulePosition = 'left' | 'right' | 'bottom';
 
@@ -39,6 +44,8 @@ export interface TypeSettings {
     triggerStyleMobile: 'single-button' | 'split-buttons';
     variantDisplayDesktop: FormVariantDisplayMode;
     variantDisplayMobile: FormVariantDisplayMode;
+    selectionDetailsDisplayModeDesktop: FormSelectionDetailsDisplayMode;
+    selectionDetailsDisplayModeMobile: FormSelectionDetailsMobileDisplayMode;
     snap2VariantPositionDesktop: FormSnap2VariantPosition;
     snap2VariantPositionMobile: FormSnap2VariantPosition;
     snap2ModulePositionDesktop: FormSnap2ModulePosition;
@@ -112,6 +119,8 @@ const DEFAULT_STANDARD_SETTINGS: TypeSettings = {
     triggerStyleMobile: 'single-button',
     variantDisplayDesktop: 'tree',
     variantDisplayMobile: 'list',
+    selectionDetailsDisplayModeDesktop: 'tooltip',
+    selectionDetailsDisplayModeMobile: 'fullscreen',
     snap2VariantPositionDesktop: 'right',
     snap2VariantPositionMobile: 'right',
     snap2ModulePositionDesktop: 'right',

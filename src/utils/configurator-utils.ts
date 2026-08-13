@@ -211,14 +211,15 @@ export const sendMessageToIframe = (
   type: string,
   payload: any,
   uniqueId?: string
-) => {
+): boolean => {
   const iframe = getConfiguratorIframe(uniqueId);
-  if (iframe?.contentWindow) {
-    iframe.contentWindow.postMessage({
-      type,
-      payload: JSON.stringify(payload)
-    }, '*');
-  }
+  if (!iframe?.contentWindow) return false;
+
+  iframe.contentWindow.postMessage({
+    type,
+    payload: JSON.stringify(payload)
+  }, '*');
+  return true;
 };
 
 /**

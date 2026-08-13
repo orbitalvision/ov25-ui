@@ -9,6 +9,7 @@ import VariantSelectMenu from '../components/VariantSelectMenu/VariantSelectMenu
 import InitialiseMenu from '../components/VariantSelectMenu/InitialiseMenu.js';
 import { SwatchesContainer } from '../components/SwatchesContainer.js';
 import { SwatchBook } from '../components/VariantSelectMenu/SwatchBook.js';
+import { SelectionDetailsSurface } from '../components/VariantSelectMenu/variant-cards/SelectionDetailsSurface.js';
 import { Snap2ConfigureButton, Snap2ConfigureUI } from '../components/Snap2ConfigureButton.js';
 import { ConfigureButton } from '../components/ConfigureButton.js';
 import { createPortal } from 'react-dom';
@@ -28,6 +29,7 @@ import {
   BODY_MODAL_PORTAL_Z_INDEX,
   BODY_POPOVER_PORTAL_Z_INDEX,
   BODY_SNAP2_CHECKOUT_SHEET_PORTAL_Z_INDEX,
+  BODY_SELECTION_DETAILS_PORTAL_Z_INDEX,
   BODY_SWATCHBOOK_PORTAL_Z_INDEX,
   BODY_TOASTER_PORTAL_Z_INDEX,
   BODY_TOASTER_SURFACE_Z_INDEX,
@@ -93,6 +95,7 @@ const cleanupShadowDOMContainers = () => {
     'ov25-modal-portal-container',
     'ov25-toaster-container',
     'ov25-swatchbook-portal-container',
+    'ov25-selection-details-portal-container',
     'ov25-provider-root'
   ];
 
@@ -104,6 +107,11 @@ const cleanupShadowDOMContainers = () => {
 
   const uniqueShadowContainers = document.querySelectorAll('[id^="ov25-configurator-view-controls-container-"]');
   uniqueShadowContainers.forEach(element => {
+    element.remove();
+  });
+
+  const uniqueSelectionDetailsContainers = document.querySelectorAll('[id^="ov25-selection-details-portal-container-"]');
+  uniqueSelectionDetailsContainers.forEach(element => {
     element.remove();
   });
 
@@ -281,6 +289,8 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     configuratorTriggerStyleMobile,
     variantDisplayMode,
     variantDisplayModeMobile,
+    selectionDetailsDisplayModeDesktop,
+    selectionDetailsDisplayModeMobile,
     useSimpleVariantsSelector,
     hideVariantOptions,
     addToBasketFunction,
@@ -601,6 +611,33 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     // Create Shadow DOM root for swatchbook portal
     const swatchbookPortalShadowRoot = swatchbookPortalContainer.attachShadow({ mode: 'open' });
     swatchbookPortalShadowRoot.adoptedStyleSheets = getBaseShadowStylesheets();
+
+    // Dedicated per-configurator portal: selection details must not share the
+    // legacy popover host because multiple configurators can mount together.
+    const selectionDetailsPortalContainerId = uniqueId
+      ? `ov25-selection-details-portal-container-${uniqueId}`
+      : 'ov25-selection-details-portal-container';
+    document.getElementById(selectionDetailsPortalContainerId)?.remove();
+    const selectionDetailsPortalContainer = document.createElement('div');
+    selectionDetailsPortalContainer.id = selectionDetailsPortalContainerId;
+    selectionDetailsPortalContainer.setAttribute('data-clarity-mask', 'true');
+    selectionDetailsPortalContainer.style.position = 'fixed';
+    selectionDetailsPortalContainer.style.top = '0';
+    selectionDetailsPortalContainer.style.left = '0';
+    selectionDetailsPortalContainer.style.width = '100%';
+    selectionDetailsPortalContainer.style.height = '100%';
+    selectionDetailsPortalContainer.style.pointerEvents = 'none';
+    selectionDetailsPortalContainer.style.zIndex = String(BODY_SELECTION_DETAILS_PORTAL_Z_INDEX);
+    document.body.appendChild(selectionDetailsPortalContainer);
+
+    const selectionDetailsPortalEmptySpan = document.createElement('span');
+    selectionDetailsPortalEmptySpan.style.width = '100%';
+    selectionDetailsPortalEmptySpan.style.height = '100%';
+    selectionDetailsPortalEmptySpan.style.pointerEvents = 'none';
+    selectionDetailsPortalContainer.appendChild(selectionDetailsPortalEmptySpan);
+
+    const selectionDetailsPortalShadowRoot = selectionDetailsPortalContainer.attachShadow({ mode: 'open' });
+    selectionDetailsPortalShadowRoot.adoptedStyleSheets = getBaseShadowStylesheets();
 
     const isAnyModalMode = shouldCreateModalPortal({
       isSnap2: isSnap2Product,
@@ -938,6 +975,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
 
     // Add swatchbook to portals
     portals.push(createPortal(<SwatchBook isMobile={false} />, swatchbookPortalShadowRoot));
+    portals.push(createPortal(<SelectionDetailsSurface />, selectionDetailsPortalShadowRoot));
 
     // Special handling for toaster - use body-level container for all modes to ensure visibility in fullscreen
     // Use the body-level toaster container to ensure it appears above fullscreen iframe
@@ -1030,6 +1068,8 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
         configuratorTriggerStyleMobile={configuratorTriggerStyleMobile}
         variantDisplayStyle={variantDisplayStyle}
         variantDisplayStyleMobile={variantDisplayStyleMobile}
+        selectionDetailsDisplayModeDesktop={selectionDetailsDisplayModeDesktop}
+        selectionDetailsDisplayModeMobile={selectionDetailsDisplayModeMobile}
         hideVariantOptions={hideVariantOptions}
         shadowDOMs={{
           mobileDrawer: mobileDrawerShadowRoot,
@@ -1037,7 +1077,8 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
           configuratorViewControls: configuratorViewControlsShadowRoot,
           popoverPortal: popoverPortalShadowRoot,
           modalPortal: modalPortalShadowRoot,
-          swatchbookPortal: swatchbookPortalShadowRoot
+          swatchbookPortal: swatchbookPortalShadowRoot,
+          selectionDetailsPortal: selectionDetailsPortalShadowRoot
         }}
         cssString={cssString}
         bedAllowNoneQueryValue={bedAllowNoneQueryValue}

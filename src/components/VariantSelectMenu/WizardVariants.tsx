@@ -98,7 +98,10 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
     variantPanelOptions.forEach(option => {
       if (option.id === 'modules') return;
       const filteredOption = option.id === 'size' ? option : applySearchAndFilters(option, option.id);
-      const currentFilteredCount = filteredOption.groups?.flatMap(group => group.selections || []).length || 0;
+      const currentFilteredCount = filteredOption.groups?.reduce(
+        (count, group) => count + (group.selections?.length ?? 0),
+        0,
+      ) || 0;
       const previousCount = previousFilteredCounts[option.id] || 0;
 
       if (currentFilteredCount !== previousCount) {
@@ -164,7 +167,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
       price: selection.price,
       image: currentOption!.id === 'size'
         ? (selection.thumbnail || '')
-        : (selection.miniThumbnails?.medium || ''),
+        : (selection.miniThumbnails?.medium || selection.thumbnail || ''),
       blurHash: selection.blurHash,
       data: currentOption!.id === 'size' ? products?.find(p => p?.id === selection?.id) : selection.data,
       isSelected: currentOption!.id === 'size'
@@ -176,7 +179,8 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
               sel.groupId === group.id &&
               sel.selectionId === selection.id
           ),
-      swatch: selection.swatch
+      swatch: selection.swatch,
+      selection: currentOption!.id === 'size' ? undefined : selection as any,
     })) || []
   ) ?? []) as Variant[];
 
@@ -409,7 +413,12 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
                       variantsToRender={visibleVariants}
                       VariantCard={currentOption!.id === 'size' ? SizeVariantCard : DefaultVariantCard}
                       isMobile={false}
-                      onSelect={(selection) => handleSelectionSelect(selection, currentOption!.id)}
+                      onSelect={(variant) => handleSelectionSelect(
+                        variant.selection
+                          ? { ...variant.selection, groupId: variant.groupId ?? variant.selection.groupId }
+                          : variant as any,
+                        currentOption!.id,
+                      )}
                       showImage={currentOption!.id === 'size' ? true : undefined}
                       showDimensions={currentOption!.id === 'size' ? false : undefined}
                     />

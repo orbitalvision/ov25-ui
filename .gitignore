@@ -13,3 +13,4 @@ review-diffs/
 review-screenshots/
 .pnpm-store
 /.worktrees/
+/.vitest-attachments/

@@ -42,3 +42,14 @@ export const VariantDisplayStyleOverlay = {
   Tree: 'tree',
 } as const;
 export type VariantDisplayStyleOverlay = (typeof VariantDisplayStyleOverlay)[keyof typeof VariantDisplayStyleOverlay];
+
+/** How extra information for an ordinary variant selection is presented. */
+export const SelectionDetailsDisplayMode = {
+  None: 'none',
+  Sheet: 'sheet',
+  Fullscreen: 'fullscreen',
+  Modal: 'modal',
+  Tooltip: 'tooltip',
+} as const;
+export type SelectionDetailsDisplayMode =
+  (typeof SelectionDetailsDisplayMode)[keyof typeof SelectionDetailsDisplayMode];

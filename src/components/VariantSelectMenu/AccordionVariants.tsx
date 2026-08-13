@@ -51,7 +51,10 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
 
 
   const handleVariantSelect = useCallback((variant: Variant) => {
-    const selection = {
+    const selection = variant.selection ? {
+      ...variant.selection,
+      groupId: variant.groupId ?? variant.selection.groupId,
+    } : {
       id: variant.id,
       name: variant.name,
       price: variant.price,
@@ -109,14 +112,15 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
                 name: selection?.name,
                 bedSize: selectionBedSizeFromMetadata(selection as { metadata?: ConfiguratorSelectionBedMetadata }),
                 price: selection?.price,
-                image: (selection as any)?.miniThumbnails?.medium || '',
+                image: (selection as any)?.miniThumbnails?.medium || selection.thumbnail || '',
                 blurHash: (selection as any).blurHash,
                 isSelected: selectedSelections.some(
                   sel => sel.optionId === option.id &&
                     sel.groupId === group.id &&
                     sel.selectionId === selection.id
                 ),
-                swatch: (selection as any)?.swatch
+                swatch: (selection as any)?.swatch,
+                selection,
               })) ?? []
             })) || []
         };

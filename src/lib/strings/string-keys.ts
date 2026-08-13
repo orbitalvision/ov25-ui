@@ -42,6 +42,11 @@ export const STRING_REPLACEMENT_DEFINITIONS: StringReplacements = [
       { name: 'VARIANT_NAME', description: 'Variant display name.' },
     ],
   },
+  { key: 'selectionDetailsApply', label: 'Selection details apply button', defaultTemplate: 'Apply to Model', interpolationValues: [] },
+  { key: 'selectionDetailsApplied', label: 'Selection details applied button', defaultTemplate: 'Applied', interpolationValues: [] },
+  { key: 'selectionDetailsAddToSwatchbook', label: 'Selection details add swatch button', defaultTemplate: 'Add to swatchbook', interpolationValues: [] },
+  { key: 'selectionDetailsRemoveFromSwatchbook', label: 'Selection details remove swatch button', defaultTemplate: 'Remove from swatchbook', interpolationValues: [] },
+  { key: 'selectionDetailsClose', label: 'Selection details close label', defaultTemplate: 'Close', interpolationValues: [] },
   { key: 'optionHeader', label: 'Option header', defaultTemplate: '${OPTION_NAME}', interpolationValues: [{ name: 'OPTION_NAME', description: 'Option display name.' }] },
   {
     key: 'groupHeader',

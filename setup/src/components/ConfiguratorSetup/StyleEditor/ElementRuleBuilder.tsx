@@ -2,7 +2,11 @@ import { useState, useCallback } from 'react';
 import { ChevronDown, ChevronRight, Plus, Trash2, Search, Copy, Check } from 'lucide-react';
 import { Input } from '../../ui/input';
 import { cn } from '../../../lib/utils';
-import { ELEMENT_SELECTORS, ELEMENT_CSS_PROPERTIES, generateElementCSS } from '../../../lib/config/configurator-style-variables';
+import {
+  ELEMENT_SELECTORS,
+  elementCssPropertiesFor,
+  generateElementCSS,
+} from '../../../lib/config/configurator-style-variables';
 import { CSSPropertyRow, AddPropertyButton } from './controls';
 import { SectionHeader } from '../shared-ui';
 
@@ -53,7 +57,7 @@ export function ElementRuleBuilder({ elementStyles, onUpdate }: ElementRuleBuild
   const addProperty = useCallback((selector: string) => {
     const current = { ...elementStyles[selector] };
     const usedProps = new Set(Object.keys(current));
-    const nextProp = ELEMENT_CSS_PROPERTIES.find((p) => !usedProps.has(p)) || '';
+    const nextProp = elementCssPropertiesFor(selector).find((p) => !usedProps.has(p)) || '';
     current[nextProp] = '';
     onUpdate(selector, current);
   }, [elementStyles, onUpdate]);
@@ -79,8 +83,10 @@ export function ElementRuleBuilder({ elementStyles, onUpdate }: ElementRuleBuild
         const props = elementStyles[selector];
         const meta = ELEMENT_SELECTORS.find((s) => s.selector === selector);
         const entries = Object.entries(props);
+        const availableProperties = elementCssPropertiesFor(selector);
         return (
           <RuleCard key={selector} selector={selector} label={meta?.label || selector} entries={entries}
+            availableProperties={availableProperties}
             onUpdateProperty={(oldProp, newProp, value) => updateProperty(selector, oldProp, newProp, value)}
             onRemoveProperty={(prop) => removeProperty(selector, prop)}
             onAddProperty={() => addProperty(selector)}
@@ -115,8 +121,9 @@ export function ElementRuleBuilder({ elementStyles, onUpdate }: ElementRuleBuild
   );
 }
 
-function RuleCard({ selector, label, entries, onUpdateProperty, onRemoveProperty, onAddProperty, onRemoveAll }: {
+function RuleCard({ selector, label, entries, availableProperties, onUpdateProperty, onRemoveProperty, onAddProperty, onRemoveAll }: {
   selector: string; label: string; entries: [string, string][];
+  availableProperties: readonly string[];
   onUpdateProperty: (oldProp: string, newProp: string, value: string) => void;
   onRemoveProperty: (prop: string) => void;
   onAddProperty: () => void; onRemoveAll: () => void;
@@ -154,7 +161,11 @@ function RuleCard({ selector, label, entries, onUpdateProperty, onRemoveProperty
               onPropertyChange={(newProp) => onUpdateProperty(prop, newProp, val)}
               onValueChange={(newVal) => onUpdateProperty(prop, prop, newVal)}
               onRemove={() => onRemoveProperty(prop)}
-              availableProperties={ELEMENT_CSS_PROPERTIES} />
+              availableProperties={
+                prop && !availableProperties.includes(prop)
+                  ? [prop, ...availableProperties]
+                  : availableProperties
+              } />
           ))}
           <AddPropertyButton onClick={onAddProperty} />
         </div>

@@ -10,6 +10,7 @@ import type {
   ConfiguratorSetupFormState, TypeSettings,
   FormCarouselDisplayMode, FormConfiguratorDisplayMode,
   FormConfiguratorDisplayModeMobile, FormVariantDisplayMode,
+  FormSelectionDetailsDisplayMode, FormSelectionDetailsMobileDisplayMode,
   FormSnap2VariantPosition, FormSnap2ModulePosition,
 } from '../types';
 import { SectionHeader, SwitchRow, DesktopMobileRow, CompactSelect } from '../shared-ui';
@@ -90,6 +91,20 @@ const VARIANT_OPTIONS = [
   { value: 'tabs' as FormVariantDisplayMode, label: 'Tabs', desc: 'Tabbed groups' },
   { value: 'accordion' as FormVariantDisplayMode, label: 'Accordion', desc: 'Collapsible groups' },
   { value: 'wizard' as FormVariantDisplayMode, label: 'Wizard', desc: 'Step by step' },
+];
+
+const SELECTION_DETAILS_DESKTOP_OPTIONS = [
+  { value: 'none' as FormSelectionDetailsDisplayMode, label: 'None', desc: 'Keep direct selection' },
+  { value: 'tooltip' as FormSelectionDetailsDisplayMode, label: 'Tooltip', desc: 'Preview on hover or keyboard focus' },
+  { value: 'sheet' as FormSelectionDetailsDisplayMode, label: 'Sheet', desc: 'Slide in from the right' },
+  { value: 'modal' as FormSelectionDetailsDisplayMode, label: 'Modal', desc: 'Near-fullscreen dialog' },
+  { value: 'fullscreen' as FormSelectionDetailsDisplayMode, label: 'Fullscreen', desc: 'Fill the viewport' },
+];
+
+const SELECTION_DETAILS_MOBILE_OPTIONS = [
+  { value: 'none' as FormSelectionDetailsMobileDisplayMode, label: 'None', desc: 'Keep direct selection' },
+  { value: 'modal' as FormSelectionDetailsMobileDisplayMode, label: 'Modal', desc: 'Near-fullscreen dialog' },
+  { value: 'fullscreen' as FormSelectionDetailsMobileDisplayMode, label: 'Fullscreen', desc: 'Fill viewport and slide in' },
 ];
 
 const SNAP2_VARIANT_POSITION_OPTIONS = [
@@ -447,6 +462,15 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
                 onDesktopChange={(v) => updateNested('configurator', 'variantDisplayDesktop', v)}
                 onMobileChange={(v) => updateNested('configurator', 'variantDisplayMobile', v)}
                 options={VARIANT_OPTIONS}
+              />
+              <DesktopMobileRow
+                label="Selection details"
+                desktopValue={currentSettings.configurator.selectionDetailsDisplayModeDesktop}
+                mobileValue={currentSettings.configurator.selectionDetailsDisplayModeMobile}
+                onDesktopChange={(v) => updateNested('configurator', 'selectionDetailsDisplayModeDesktop', v)}
+                onMobileChange={(v) => updateNested('configurator', 'selectionDetailsDisplayModeMobile', v)}
+                options={SELECTION_DETAILS_DESKTOP_OPTIONS}
+                mobileOptions={SELECTION_DETAILS_MOBILE_OPTIONS}
               />
               {isSnap2 && (
                 <SwitchRow

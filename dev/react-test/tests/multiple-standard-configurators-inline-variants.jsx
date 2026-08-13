@@ -1,10 +1,12 @@
 import React, { useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 import { injectConfigurator } from 'ov25-ui';
+import { readOptionalSelectionDetailsQuery } from '../templates/SelectionDetailsControls.jsx';
 import { TestBackButton } from '../templates/TestBackButton.jsx';
 import '../src/index.css';
 
 const DEMO_RETAILER_APIKEY = import.meta.env.VITE_DEMO_RETAILER_APIKEY;
+const selectionDetails = readOptionalSelectionDetailsQuery();
 
 let configuratorInitialized = false;
 
@@ -24,7 +26,10 @@ const initializeConfigurator = () => {
       configurator: {
         displayMode: { desktop: 'inline', mobile: 'inline' },
         triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
-        variants: { displayMode: { desktop: 'accordion', mobile: 'list' } },
+        variants: {
+          displayMode: { desktop: 'accordion', mobile: 'list' },
+          ...(selectionDetails ? { selectionDetails } : {}),
+        },
       },
       callbacks: {
         addToBasket: () => console.log('Add to basket - Product 1'),
@@ -44,7 +49,10 @@ const initializeConfigurator = () => {
       configurator: {
         displayMode: { desktop: 'inline', mobile: 'inline' },
         triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
-        variants: { displayMode: { desktop: 'accordion', mobile: 'list' } },
+        variants: {
+          displayMode: { desktop: 'accordion', mobile: 'list' },
+          ...(selectionDetails ? { selectionDetails } : {}),
+        },
       },
       callbacks: {
         addToBasket: () => console.log('Add to basket - Product 2'),

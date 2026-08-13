@@ -1,9 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { TestPageLayout } from '../templates/TestPageLayout.jsx';
+import { readOptionalSelectionDetailsQuery } from '../templates/SelectionDetailsControls.jsx';
 import '../src/index.css';
 
 const DEMO_RETAILER_APIKEY = import.meta.env.VITE_DEMO_RETAILER_APIKEY;
+const selectionDetails = readOptionalSelectionDetailsQuery();
 
 const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
   apiKey: () => DEMO_RETAILER_APIKEY,
@@ -19,7 +21,10 @@ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
   configurator: {
     displayMode: { desktop: 'sheet', mobile: 'drawer' },
     triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
-    variants: { displayMode: { desktop: 'tree', mobile: 'list' } },
+    variants: {
+      displayMode: { desktop: 'tree', mobile: 'list' },
+      ...(selectionDetails ? { selectionDetails } : {}),
+    },
   },
   callbacks: {
     addToBasket: () => alert('Checkout function called'),

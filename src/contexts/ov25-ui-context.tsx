@@ -25,6 +25,8 @@ import type {
   UnifiedPricePayload,
   UnifiedSkuPayload,
   ElementSelector,
+  SelectionDetailsDesktopDisplayMode,
+  SelectionDetailsMobileDisplayMode,
 } from '../types/inject-config.js';
 import type { StringReplacementsConfig } from '../types/string-replacements.js';
 import { normalizePricePayload, normalizeSkuPayload } from '../commerce/normalize-iframe-commerce.js';
@@ -140,8 +142,12 @@ export interface Selection {
   id: string;
   name: string;
   sku?: string;
-  thumbnail?: string;
-  miniThumbnails?: {small: string, medium: string, large: string}
+  thumbnail?: string | null;
+  miniThumbnails?: {
+    small?: string | null;
+    medium?: string | null;
+    large?: string | null;
+  } | null;
   price: number;
   blurHash: string;
   groupId?: string;
@@ -224,6 +230,40 @@ export interface Swatch {
   } | null;
 }
 
+export type SelectionDetailsDisplayMode = SelectionDetailsDesktopDisplayMode;
+
+export interface SelectionDetailsItem {
+  id: string;
+  optionId?: string;
+  groupId?: string;
+  name: string;
+  image?: string | null;
+  isSelected?: boolean;
+  selection: Selection;
+  swatch?: Swatch;
+}
+
+export interface SelectionDetailsState {
+  item: SelectionDetailsItem;
+  trigger: HTMLElement;
+  onApply: () => void;
+  /** Product active when this detail request opened. Guards delayed preload work. */
+  productId?: string;
+  displayMode: Exclude<SelectionDetailsDisplayMode, 'none'>;
+  pinned: boolean;
+  instant: boolean;
+  requestId: number;
+}
+
+export type SwatchRulesData = {
+  freeSwatchLimit: number;
+  canExeedFreeLimit: boolean;
+  pricePerSwatch: number;
+  minSwatches: number;
+  maxSwatches: number;
+  enabled: boolean;
+}
+
 /**
  * Compare swatches using the database uniqueness tuple. Entries saved before
  * `group` was exposed remain a wildcard for that field so existing books can
@@ -239,15 +279,6 @@ export function swatchesMatch(a: Swatch, b: Swatch): boolean {
   return a.group === b.group;
 }
 
-export type SwatchRulesData = {
-  freeSwatchLimit: number; 
-  canExeedFreeLimit: boolean;
-  pricePerSwatch: number; 
-  minSwatches: number;
-  maxSwatches: number;
-  enabled: boolean; 
-}
-
 // Context type
 interface OV25UIContextType {
   // Shadow DOM references
@@ -258,6 +289,7 @@ interface OV25UIContextType {
     popoverPortal?: ShadowRoot;
     modalPortal?: ShadowRoot;
     swatchbookPortal?: ShadowRoot;
+    selectionDetailsPortal?: ShadowRoot;
   };
   cssString?: string;
   // State
@@ -395,6 +427,8 @@ interface OV25UIContextType {
   variantDisplayStyleInlineMobile: VariantDisplayStyleOverlay;
   variantDisplayStyleOverlay: VariantDisplayStyleOverlay;
   variantDisplayStyleOverlayMobile: VariantDisplayStyleOverlay;
+  selectionDetailsDisplayMode: SelectionDetailsDisplayMode;
+  selectionDetailsState: SelectionDetailsState | null;
   snap2VariantSheetSide: 'left' | 'right';
   snap2ModuleSheetPosition: 'left' | 'right' | 'bottom';
   snap2ModulesEmbedInVariantSheet: boolean;
@@ -442,6 +476,31 @@ interface OV25UIContextType {
   setSwatchRulesData: React.Dispatch<React.SetStateAction<SwatchRulesData>>;
   toggleSwatch: (swatch: Swatch) => void;
   isSwatchSelected: (swatch: Swatch) => boolean;
+  openSelectionDetails: (request: {
+    item: SelectionDetailsItem;
+    trigger: HTMLElement;
+    onApply: () => void;
+    pinned?: boolean;
+    instant?: boolean;
+  }) => void;
+  /**
+   * Starts iframe preloading only after SelectionDetailsSurface has displayed
+   * its primary image. The request ID prevents stale image events from
+   * preloading a selection that has since been closed or replaced.
+   */
+  preloadSelectionDetails: (requestId: number) => void;
+  /**
+   * Keeps an already-started tooltip preview warm when its card immediately
+   * applies that same selection. This prevents its close path from cancelling
+   * work that the selection action is about to use.
+   */
+  commitSelectionDetailsPreload: (requestId: number) => void;
+  closeSelectionDetails: (returnFocus?: boolean) => void;
+  pinSelectionDetails: () => void;
+  scheduleSelectionDetailsClose: (delay?: number) => void;
+  cancelSelectionDetailsClose: () => void;
+  markSelectionDetailsApplied: (item: SelectionDetailsItem) => void;
+  isSelectionDetailsApplied: (item: SelectionDetailsItem) => boolean;
   setIsSwatchBookOpen: React.Dispatch<React.SetStateAction<boolean>>;
   setAvailableCameras: React.Dispatch<React.SetStateAction<Array<{
     id: string;
@@ -544,6 +603,8 @@ export const OV25UIProvider: React.FC<{
   variantDisplayStyleInlineMobile?: VariantDisplayStyleOverlay,
   variantDisplayStyleOverlay?: VariantDisplayStyleOverlay,
   variantDisplayStyleOverlayMobile?: VariantDisplayStyleOverlay,
+  selectionDetailsDisplayModeDesktop?: SelectionDetailsDesktopDisplayMode,
+  selectionDetailsDisplayModeMobile?: SelectionDetailsMobileDisplayMode,
   /** Normalized option keys (id or name, lowercase) to hide from variant UI; defaults stay from iframe. */
   hideVariantOptions?: string[],
   shadowDOMs?: {
@@ -553,6 +614,7 @@ export const OV25UIProvider: React.FC<{
     popoverPortal?: ShadowRoot;
     modalPortal?: ShadowRoot;
     swatchbookPortal?: ShadowRoot;
+    selectionDetailsPortal?: ShadowRoot;
   },
   cssString?: string,
   configuratorGalleryIsDeferred?: boolean,
@@ -616,6 +678,8 @@ export const OV25UIProvider: React.FC<{
   variantDisplayStyleInlineMobile: variantDisplayStyleInlineMobileProp,
   variantDisplayStyleOverlay: variantDisplayStyleOverlayProp,
   variantDisplayStyleOverlayMobile: variantDisplayStyleOverlayMobileProp,
+  selectionDetailsDisplayModeDesktop = 'none',
+  selectionDetailsDisplayModeMobile = 'none',
   hideVariantOptions = [],
   shadowDOMs,
   cssString,
@@ -755,6 +819,32 @@ export const OV25UIProvider: React.FC<{
   const isSelectingProduct = useRef(false);
 
   const [selectedSwatches, setSelectedSwatches] = useLocalStorage<Swatch[]>('ov25-selected-swatches', []);
+  const selectionDetailsDisplayMode: SelectionDetailsDisplayMode = isMobile
+    ? selectionDetailsDisplayModeMobile
+    : selectionDetailsDisplayModeDesktop;
+  const [selectionDetailsState, setSelectionDetailsState] = useState<SelectionDetailsState | null>(null);
+  const [selectionDetailsAppliedByScope, setSelectionDetailsAppliedByScope] = useState<Record<string, {
+    selectionId: string;
+    previousSelectionId?: string;
+    optionId?: string;
+    groupId?: string;
+  }>>({});
+  const selectionDetailsAppliedByScopeRef = useRef(selectionDetailsAppliedByScope);
+  selectionDetailsAppliedByScopeRef.current = selectionDetailsAppliedByScope;
+  const selectionDetailsAppliedTimersRef = useRef<Record<string, number>>({});
+  const selectionDetailsStateRef = useRef<SelectionDetailsState | null>(null);
+  selectionDetailsStateRef.current = selectionDetailsState;
+  const selectionDetailsRequestIdRef = useRef(0);
+  const selectionDetailsPreloadRequestRef = useRef<{
+    requestId: number;
+    productId?: string;
+    optionId: string;
+    groupId: string;
+    selectionId: string;
+    displayMode: Exclude<SelectionDetailsDisplayMode, 'none'>;
+    committed: boolean;
+  } | null>(null);
+  const selectionDetailsCloseTimerRef = useRef<number | null>(null);
   const [isSwatchBookOpen, setIsSwatchBookOpen] = useState<boolean>(false);
   const [swatchBookFlash, setSwatchBookFlash] = useState<'destructive' | 'cta' | null>(null);
   const [swatchRulesData, setSwatchRulesData] = useState<SwatchRulesData>({
@@ -1167,8 +1257,279 @@ export const OV25UIProvider: React.FC<{
     });
   }, []);
 
+  const cancelSelectionDetailsClose = useCallback(() => {
+    if (selectionDetailsCloseTimerRef.current != null) {
+      window.clearTimeout(selectionDetailsCloseTimerRef.current);
+      selectionDetailsCloseTimerRef.current = null;
+    }
+  }, []);
+
+  const disposeSelectionDetailsPreload = useCallback((state: SelectionDetailsState | null) => {
+    if (!state) return;
+    const preload = selectionDetailsPreloadRequestRef.current;
+    if (!preload || preload.requestId !== state.requestId) return;
+
+    selectionDetailsPreloadRequestRef.current = null;
+    if (state.displayMode !== 'tooltip' || preload.committed) return;
+
+    sendMessageToIframe('CANCEL_PRELOAD_SELECTION', {
+      requestId: preload.requestId,
+      ...(preload.productId ? { productId: preload.productId } : {}),
+      optionId: preload.optionId,
+      groupId: preload.groupId,
+      selectionId: preload.selectionId,
+    }, uniqueId);
+  }, [uniqueId]);
+
+  const closeSelectionDetails = useCallback((returnFocus = true) => {
+    cancelSelectionDetailsClose();
+    const current = selectionDetailsStateRef.current;
+    disposeSelectionDetailsPreload(current);
+    // Invalidate delayed image decode/paint callbacks immediately, rather
+    // than waiting for React to commit the state update below.
+    selectionDetailsStateRef.current = null;
+    setSelectionDetailsState(null);
+    if (returnFocus && current?.trigger.isConnected) {
+      window.requestAnimationFrame(() => {
+        window.requestAnimationFrame(() => {
+          if (!current.trigger.isConnected) return;
+          current.trigger.dataset.ov25SelectionDetailsRestoringFocus = 'true';
+          current.trigger.focus({ preventScroll: true });
+          window.requestAnimationFrame(() => {
+            delete current.trigger.dataset.ov25SelectionDetailsRestoringFocus;
+          });
+        });
+      });
+    }
+  }, [cancelSelectionDetailsClose, disposeSelectionDetailsPreload]);
+
+  const scheduleSelectionDetailsClose = useCallback((delay = 160) => {
+    cancelSelectionDetailsClose();
+    selectionDetailsCloseTimerRef.current = window.setTimeout(() => {
+      selectionDetailsCloseTimerRef.current = null;
+      const current = selectionDetailsStateRef.current;
+      if (!current || current.pinned) return;
+      disposeSelectionDetailsPreload(current);
+      selectionDetailsStateRef.current = null;
+      setSelectionDetailsState(null);
+    }, delay);
+  }, [cancelSelectionDetailsClose, disposeSelectionDetailsPreload]);
+
+  const openSelectionDetails = useCallback((request: {
+    item: SelectionDetailsItem;
+    trigger: HTMLElement;
+    onApply: () => void;
+    pinned?: boolean;
+    instant?: boolean;
+  }) => {
+    if (selectionDetailsDisplayMode === 'none') return;
+    cancelSelectionDetailsClose();
+    disposeSelectionDetailsPreload(selectionDetailsStateRef.current);
+    selectionDetailsRequestIdRef.current += 1;
+    const requestId = selectionDetailsRequestIdRef.current;
+    const nextState: SelectionDetailsState = {
+      item: request.item,
+      trigger: request.trigger,
+      onApply: request.onApply,
+      productId: currentProductId,
+      displayMode: selectionDetailsDisplayMode,
+      pinned: request.pinned ?? selectionDetailsDisplayMode !== 'tooltip',
+      instant: request.instant ?? false,
+      requestId,
+    };
+    selectionDetailsStateRef.current = nextState;
+    setSelectionDetailsState(nextState);
+  }, [
+    cancelSelectionDetailsClose,
+    currentProductId,
+    disposeSelectionDetailsPreload,
+    selectionDetailsDisplayMode,
+  ]);
+
+  const preloadSelectionDetails = useCallback((requestId: number) => {
+    const current = selectionDetailsStateRef.current;
+    if (!current || current.requestId !== requestId) return;
+    if (selectionDetailsPreloadRequestRef.current?.requestId === requestId) return;
+    // Product changes close details, but this also protects the gap before
+    // that effect commits if an image finishes loading at the same time.
+    if (current.productId != null && current.productId !== currentProductId) return;
+
+    const optionId = current.item.optionId?.trim();
+    const groupId = (current.item.groupId ?? current.item.selection.groupId)?.trim();
+    const selectionId = current.item.id?.trim();
+    if (!optionId || !groupId || !selectionId) return;
+
+    const sent = sendMessageToIframe('PRELOAD_SELECTION', {
+      requestId,
+      ...(current.productId ? { productId: current.productId } : {}),
+      optionId,
+      groupId,
+      selectionId,
+    }, uniqueId);
+    if (sent) {
+      selectionDetailsPreloadRequestRef.current = {
+        requestId,
+        ...(current.productId ? { productId: current.productId } : {}),
+        optionId,
+        groupId,
+        selectionId,
+        displayMode: current.displayMode,
+        committed: false,
+      };
+    }
+  }, [currentProductId, uniqueId]);
+
+  const commitSelectionDetailsPreload = useCallback((requestId: number) => {
+    const current = selectionDetailsStateRef.current;
+    const preload = selectionDetailsPreloadRequestRef.current;
+    if (
+      !current ||
+      current.displayMode !== 'tooltip' ||
+      current.requestId !== requestId ||
+      preload?.requestId !== requestId
+    ) {
+      return;
+    }
+    preload.committed = true;
+  }, []);
+
+  const selectionDetailsScopeKey = useCallback((item: SelectionDetailsItem) => JSON.stringify([
+    currentProductId ?? '',
+    item.optionId ?? '',
+    item.groupId ?? '',
+  ]), [currentProductId]);
+
+  const markSelectionDetailsApplied = useCallback((item: SelectionDetailsItem) => {
+    const scope = selectionDetailsScopeKey(item);
+    const previousSelection = selectedSelections.find((selected) =>
+      selected.optionId === item.optionId &&
+      (item.groupId == null || selected.groupId == null || selected.groupId === item.groupId)
+    );
+    const selectionId = String(item.id);
+    setSelectionDetailsAppliedByScope((current) => ({
+      ...current,
+      [scope]: {
+        selectionId,
+        previousSelectionId: previousSelection ? String(previousSelection.selectionId) : undefined,
+        optionId: item.optionId,
+        groupId: item.groupId,
+      },
+    }));
+
+    if (selectionDetailsAppliedTimersRef.current[scope] != null) {
+      window.clearTimeout(selectionDetailsAppliedTimersRef.current[scope]);
+    }
+    selectionDetailsAppliedTimersRef.current[scope] = window.setTimeout(() => {
+      delete selectionDetailsAppliedTimersRef.current[scope];
+      setSelectionDetailsAppliedByScope((current) => {
+        if (current[scope]?.selectionId !== selectionId) return current;
+        const next = { ...current };
+        delete next[scope];
+        return next;
+      });
+    }, 5000);
+  }, [selectedSelections, selectionDetailsScopeKey]);
+
+  const isSelectionDetailsApplied = useCallback((item: SelectionDetailsItem) =>
+    selectionDetailsAppliedByScope[selectionDetailsScopeKey(item)]?.selectionId === String(item.id),
+  [selectionDetailsAppliedByScope, selectionDetailsScopeKey]);
+
+  useEffect(() => {
+    const current = selectionDetailsAppliedByScopeRef.current;
+    let next = current;
+
+    for (const [scope, pending] of Object.entries(current)) {
+      const externalSelection = selectedSelections.find((selected) =>
+        selected.optionId === pending.optionId &&
+        (pending.groupId == null || selected.groupId == null || selected.groupId === pending.groupId)
+      );
+      const externalSelectionId = externalSelection
+        ? String(externalSelection.selectionId)
+        : undefined;
+      // On a cold load the iframe's initial selection can arrive after Apply.
+      // Without a known previous value, that first payload is not evidence of an override.
+      const overridden =
+        pending.previousSelectionId !== undefined &&
+        externalSelectionId !== pending.previousSelectionId &&
+        externalSelectionId !== pending.selectionId;
+
+      // Keep the optimistic marker through the five-second confirmation window.
+      // The local optimistic selectedSelections update is indistinguishable here
+      // from an iframe confirmation, and clearing on it lets a later stale iframe
+      // payload make the just-applied card appear unapplied.
+      if (!overridden) continue;
+      if (next === current) next = { ...current };
+      delete next[scope];
+      if (selectionDetailsAppliedTimersRef.current[scope] != null) {
+        window.clearTimeout(selectionDetailsAppliedTimersRef.current[scope]);
+        delete selectionDetailsAppliedTimersRef.current[scope];
+      }
+    }
+
+    if (next !== current) setSelectionDetailsAppliedByScope(next);
+  }, [selectedSelections]);
+
+  useEffect(() => () => {
+    for (const timer of Object.values(selectionDetailsAppliedTimersRef.current)) {
+      window.clearTimeout(timer);
+    }
+    selectionDetailsAppliedTimersRef.current = {};
+  }, []);
+
+  const pinSelectionDetails = useCallback(() => {
+    cancelSelectionDetailsClose();
+    setSelectionDetailsState((current) => current ? { ...current, pinned: true } : current);
+  }, [cancelSelectionDetailsClose]);
+
+  useEffect(() => () => {
+    cancelSelectionDetailsClose();
+    disposeSelectionDetailsPreload(selectionDetailsStateRef.current);
+    selectionDetailsStateRef.current = null;
+  }, [cancelSelectionDetailsClose, disposeSelectionDetailsPreload]);
+
+  const previousSelectionDetailsModeRef = useRef(selectionDetailsDisplayMode);
+  const previousSelectionDetailsMobileRef = useRef(isMobile);
+  useEffect(() => {
+    if (
+      previousSelectionDetailsModeRef.current !== selectionDetailsDisplayMode ||
+      previousSelectionDetailsMobileRef.current !== isMobile
+    ) {
+      closeSelectionDetails(false);
+      previousSelectionDetailsModeRef.current = selectionDetailsDisplayMode;
+      previousSelectionDetailsMobileRef.current = isMobile;
+    }
+  }, [closeSelectionDetails, isMobile, selectionDetailsDisplayMode]);
+
+  const previousDetailsProductIdRef = useRef(currentProductId);
+  useEffect(() => {
+    if (
+      previousDetailsProductIdRef.current != null &&
+      previousDetailsProductIdRef.current !== currentProductId
+    ) {
+      closeSelectionDetails(false);
+    }
+    previousDetailsProductIdRef.current = currentProductId;
+  }, [closeSelectionDetails, currentProductId]);
+
+  useEffect(() => {
+    for (const timer of Object.values(selectionDetailsAppliedTimersRef.current)) {
+      window.clearTimeout(timer);
+    }
+    selectionDetailsAppliedTimersRef.current = {};
+    setSelectionDetailsAppliedByScope({});
+  }, [currentProductId]);
+
+  const previousVariantsOpenForDetailsRef = useRef(isVariantsOpen);
+  useEffect(() => {
+    if (previousVariantsOpenForDetailsRef.current && !isVariantsOpen) {
+      closeSelectionDetails(false);
+    }
+    previousVariantsOpenForDetailsRef.current = isVariantsOpen;
+  }, [closeSelectionDetails, isVariantsOpen]);
+
   // Cleanup function for switching between configurators
   const cleanupConfigurator = useCallback(() => {
+    closeSelectionDetails(false);
     releaseConfiguratorTransitionProxy();
     setUseInstantIframeCloseRestore(false);
     // Close any open modal/drawer
@@ -1201,6 +1562,7 @@ export const OV25UIProvider: React.FC<{
     setGalleryCarouselFullscreenImage(null);
   }, [
     releaseConfiguratorTransitionProxy,
+    closeSelectionDetails,
     setUseInstantIframeCloseRestore,
     setIsModalOpen,
     setIsVariantsOpen,
@@ -1821,9 +2183,10 @@ export const OV25UIProvider: React.FC<{
 
   /** Close variant configurator drawer. Exposed for custom buttons. */
   const closeConfigurator = useCallback(() => {
+    closeSelectionDetails(false);
     setIsSwatchBookOpen(false);
     setIsVariantsOpen(false);
-  }, [setIsVariantsOpen]);
+  }, [closeSelectionDetails, setIsVariantsOpen]);
 
   /** Open the swatch book. Exposed for custom buttons. */
   const openSwatchBook = useCallback(() => {
@@ -2436,6 +2799,8 @@ export const OV25UIProvider: React.FC<{
     variantDisplayStyleInlineMobile,
     variantDisplayStyleOverlay,
     variantDisplayStyleOverlayMobile,
+    selectionDetailsDisplayMode,
+    selectionDetailsState,
     snap2VariantSheetSide,
     snap2ModuleSheetPosition,
     snap2ModulesEmbedInVariantSheet,
@@ -2478,6 +2843,15 @@ export const OV25UIProvider: React.FC<{
     setSelectedSwatches,
     toggleSwatch,
     isSwatchSelected,
+    openSelectionDetails,
+    preloadSelectionDetails,
+    commitSelectionDetailsPreload,
+    closeSelectionDetails,
+    pinSelectionDetails,
+    scheduleSelectionDetailsClose,
+    cancelSelectionDetailsClose,
+    markSelectionDetailsApplied,
+    isSelectionDetailsApplied,
     setSwatchRulesData,
     setIsSwatchBookOpen,
     setAvailableCameras,

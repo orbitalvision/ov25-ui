@@ -30,6 +30,7 @@ import { IframeContainer } from "./IframeContainer.js"
 import { ProductCarousel } from "./product-carousel.js"
 import { ArPreviewQRCodeDialog } from "./ar-preview-qr-code-dialog.js"
 import InitialiseMenu from "./VariantSelectMenu/InitialiseMenu.js"
+import { BODY_MOBILE_GALLERY_Z_INDEX } from "../lib/config/layers.js"
 
 type ClosingProxyExit = 'sheet-slide-left' | 'drawer-slide-up' | 'modal-fade'
 
@@ -452,7 +453,9 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
             : liftGalleryStacking
               ? isModalMode
                   ? 2147483647
-                  : 2147483644
+                  : isMobile
+                    ? BODY_MOBILE_GALLERY_Z_INDEX
+                    : 2147483644
               : undefined;
         if (zIndex === undefined) return undefined;
         const pointerEvents =
@@ -701,7 +704,13 @@ export function DeferredGalleryContainer() {
     const isModalMode = isMobile ? configuratorDisplayModeMobile === 'modal' : configuratorDisplayMode === 'modal';
     // Preload stays behind the page (z-index -1). When sheet/drawer opens, lift above the page.
     // Modal backdrop is z-2147483646 — deferred host must be higher so the iframe sits above the dimmer.
-    const openZ = isDrawerOrDialogOpen ? (isModalMode ? 2147483647 : 2147483644) : -1;
+    const openZ = isDrawerOrDialogOpen
+      ? isModalMode
+        ? 2147483647
+        : isMobile
+          ? BODY_MOBILE_GALLERY_Z_INDEX
+          : 2147483644
+      : -1;
     // Preload: none so the full-viewport host does not steal clicks from the page. Open: auto so the
     // iframe stack hit-tests reliably while the shell is visible.
     const pointerEvents = isDrawerOrDialogOpen ? 'auto' : 'none';

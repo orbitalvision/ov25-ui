@@ -30,6 +30,8 @@ const SNAP2_VARIANT_POSITIONS = ['left', 'right'] as const;
 const SNAP2_MODULE_POSITIONS = ['left', 'right', 'bottom'] as const;
 const DESKTOP_DISPLAY_MODES = ['inline', 'inline-sticky', 'sheet', 'modal', 'variants-only-sheet'] as const;
 const MOBILE_DISPLAY_MODES = ['inline', 'inline-sticky', 'drawer', 'modal', 'variants-only-sheet'] as const;
+const SELECTION_DETAILS_DESKTOP_MODES = ['none', 'sheet', 'fullscreen', 'modal', 'tooltip'] as const;
+const SELECTION_DETAILS_MOBILE_MODES = ['none', 'fullscreen', 'modal'] as const;
 
 function normalizePosition<T extends string>(value: unknown, allowed: readonly T[], fallback: T): T {
   const normalized = typeof value === 'string' ? value.trim().toLowerCase() : '';
@@ -78,6 +80,24 @@ function normalizeMobileDisplayMode(
     : fallback;
 }
 
+export function selectionDetailsMobileFallbackFromDesktop(
+  desktop: TypeSettings['configurator']['selectionDetailsDisplayModeDesktop'],
+): TypeSettings['configurator']['selectionDetailsDisplayModeMobile'] {
+  if (desktop === 'none') return 'none';
+  if (desktop === 'modal') return 'modal';
+  return 'fullscreen';
+}
+
+export function normalizeSelectionDetailsMobileMode(
+  value: unknown,
+  fallback: TypeSettings['configurator']['selectionDetailsDisplayModeMobile'],
+): TypeSettings['configurator']['selectionDetailsDisplayModeMobile'] {
+  const normalized = typeof value === 'string' ? value.trim().toLowerCase() : '';
+  return normalized === 'sheet' || normalized === 'tooltip'
+    ? 'fullscreen'
+    : normalizePosition(normalized, SELECTION_DETAILS_MOBILE_MODES, fallback);
+}
+
 /** Pulls `:host` / `:root` `--ov25-*` declarations into a flat map so they are not duplicated when re-exporting. */
 export function pullRootVariablesFromCss(css: string | undefined): { style: Record<string, string>; rest: string } {
   const style: Record<string, string> = {};
@@ -123,6 +143,10 @@ function mergeSerializableIntoTypeSettings(base: TypeSettings, saved: SavedLayou
     elementStyles: { ...base.elementStyles },
     stringReplacements: { ...base.stringReplacements },
   };
+
+  // Any non-empty saved layout without this new field is legacy and must retain direct-selection behaviour.
+  merged.configurator.selectionDetailsDisplayModeDesktop = 'none';
+  merged.configurator.selectionDetailsDisplayModeMobile = 'none';
 
   if (saved.selectors) {
     for (const rawKey of Object.keys(saved.selectors)) {
@@ -179,6 +203,20 @@ function mergeSerializableIntoTypeSettings(base: TypeSettings, saved: SavedLayou
     if (cf.variants?.displayMode) {
       merged.configurator.variantDisplayDesktop = cf.variants.displayMode.desktop as TypeSettings['configurator']['variantDisplayDesktop'];
       merged.configurator.variantDisplayMobile = cf.variants.displayMode.mobile as TypeSettings['configurator']['variantDisplayMobile'];
+    }
+    if (cf.variants?.selectionDetails?.displayMode) {
+      const detailsDisplayMode = cf.variants.selectionDetails.displayMode;
+      const normalizedDesktop = normalizePosition(
+        detailsDisplayMode.desktop,
+        SELECTION_DETAILS_DESKTOP_MODES,
+        'none',
+      );
+      const mobileFallback = selectionDetailsMobileFallbackFromDesktop(normalizedDesktop);
+      merged.configurator.selectionDetailsDisplayModeDesktop = normalizedDesktop;
+      merged.configurator.selectionDetailsDisplayModeMobile = normalizeSelectionDetailsMobileMode(
+        detailsDisplayMode.mobile,
+        mobileFallback,
+      );
     }
     if (cf.variants?.position) {
       const desktop = normalizePosition(
@@ -271,14 +309,17 @@ export function hasMeaningfulInitialConfig(config: Partial<ConfiguratorSetupPayl
 
 export function buildFormStateFromInitialPayload(initial: Partial<ConfiguratorSetupPayload> | undefined): ConfiguratorSetupFormState {
   const state: ConfiguratorSetupFormState = JSON.parse(JSON.stringify(DEFAULT_FORM_STATE)) as ConfiguratorSetupFormState;
-  if (!initial) return state;
+  // An absent/empty payload represents a brand-new Setup configuration and
+  // keeps the current defaults. Once any saved layout exists, however, the
+  // whole payload is legacy: omitted or empty layouts must not inherit newly
+  // introduced feature defaults when the payload is opened and re-saved.
+  if (!initial || !hasMeaningfulInitialConfig(initial)) return state;
 
   for (const layout of LAYOUTS) {
     const raw = initial[layout];
-    if (isLayoutPayloadEmpty(raw)) continue;
     state.typeSettings[layout] = mergeSerializableIntoTypeSettings(
       DEFAULT_TYPE_SETTINGS[layout],
-      raw as SavedLayout,
+      (isLayoutPayloadEmpty(raw) ? {} : raw) as SavedLayout,
       layout,
     );
   }

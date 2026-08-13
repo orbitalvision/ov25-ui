@@ -4,6 +4,8 @@ import { serializeBedAllowNoneQueryValue } from '../lib/config/bed-embed-query.j
 import { DEFAULT_CURRENCY_SYMBOL } from '../lib/config/currency-display.js';
 import type { ProductImageInput } from '../lib/utils.js';
 import type { StringReplacementsConfig } from './string-replacements.js';
+import type { SelectionDetailsDisplayMode } from './config-enums.js';
+export type { SelectionDetailsDisplayMode } from './config-enums.js';
 export type {
   StringReplacementRuleTrigger,
   StringReplacementDefinitionKey,
@@ -73,9 +75,24 @@ export type ModulesConfig = {
   position?: ResponsiveValue<Snap2ModulePanelPosition>;
 };
 
+export type SelectionDetailsDesktopDisplayMode = SelectionDetailsDisplayMode;
+export type SelectionDetailsMobileDisplayMode = Exclude<
+  SelectionDetailsDisplayMode,
+  'tooltip' | 'sheet'
+>;
+
+export type SelectionDetailsConfig = {
+  displayMode: {
+    desktop: SelectionDetailsDesktopDisplayMode;
+    mobile?: SelectionDetailsMobileDisplayMode;
+  };
+};
+
 export type VariantsConfig = {
   displayMode: ResponsiveValue<VariantDisplayMode>;
   position?: ResponsiveValue<Snap2VariantSheetSide>;
+  /** Optional rich selection view. Omitted keeps legacy direct-selection behaviour. */
+  selectionDetails?: SelectionDetailsConfig;
   useSimpleVariantsSelector?: boolean;
   /**
    * Option ids or display names (case-insensitive) to omit from variant UI (list, wizard, tabs, etc.).
@@ -437,6 +454,8 @@ export interface NormalizedInjectConfig {
 
   variantDisplayMode: VariantDisplayMode;
   variantDisplayModeMobile: VariantDisplayMode;
+  selectionDetailsDisplayModeDesktop: SelectionDetailsDesktopDisplayMode;
+  selectionDetailsDisplayModeMobile: SelectionDetailsMobileDisplayMode;
   useSimpleVariantsSelector: boolean;
   /** Lowercase trimmed option ids/names to hide from variant selectors (see {@link VariantsConfig.hideOptions}). */
   hideVariantOptions: string[];
@@ -495,6 +514,68 @@ function normalizeHideVariantOptions(raw: string[] | undefined): string[] {
     if (k) seen.add(k);
   }
   return [...seen];
+}
+
+const SELECTION_DETAILS_DESKTOP_MODES: readonly SelectionDetailsDesktopDisplayMode[] = [
+  'none',
+  'sheet',
+  'fullscreen',
+  'modal',
+  'tooltip',
+];
+const SELECTION_DETAILS_MOBILE_MODES: readonly SelectionDetailsMobileDisplayMode[] = [
+  'none',
+  'fullscreen',
+  'modal',
+];
+
+function normalizedModeString(value: unknown): string {
+  return typeof value === 'string' ? value.trim().toLowerCase() : '';
+}
+
+function normalizeSelectionDetailsDisplayModes(selectionDetails: unknown): {
+  desktop: SelectionDetailsDesktopDisplayMode;
+  mobile: SelectionDetailsMobileDisplayMode;
+} {
+  const displayMode =
+    selectionDetails && typeof selectionDetails === 'object'
+      ? (selectionDetails as { displayMode?: { desktop?: unknown; mobile?: unknown } }).displayMode
+      : undefined;
+  const rawDesktop = normalizedModeString(displayMode?.desktop);
+  const desktop = SELECTION_DETAILS_DESKTOP_MODES.includes(
+    rawDesktop as SelectionDetailsDesktopDisplayMode,
+  )
+    ? (rawDesktop as SelectionDetailsDesktopDisplayMode)
+    : 'none';
+  const inheritedMobile: SelectionDetailsMobileDisplayMode = desktop === 'none'
+    ? 'none'
+    : desktop === 'modal'
+      ? 'modal'
+      : 'fullscreen';
+
+  if (displayMode?.mobile === undefined) {
+    return { desktop, mobile: inheritedMobile };
+  }
+
+  const rawMobile = normalizedModeString(displayMode.mobile);
+  if (rawMobile === 'tooltip') {
+    console.warn(
+      '[OV25-UI] Selection details tooltip display mode is not supported on mobile; falling back to fullscreen.',
+    );
+    return { desktop, mobile: 'fullscreen' };
+  }
+  if (rawMobile === 'sheet') {
+    return { desktop, mobile: 'fullscreen' };
+  }
+
+  return {
+    desktop,
+    mobile: SELECTION_DETAILS_MOBILE_MODES.includes(
+      rawMobile as SelectionDetailsMobileDisplayMode,
+    )
+      ? (rawMobile as SelectionDetailsMobileDisplayMode)
+      : inheritedMobile,
+  };
 }
 
 export function normalizeInjectConfig(opts: InjectConfiguratorInput): NormalizedInjectConfig {
@@ -573,6 +654,9 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
   const variantDesktop = variants?.displayMode?.desktop ?? c.variantDisplayMode ?? c.variantDisplayStyle ?? 'tree';
   const variantMobileRaw = variants?.displayMode?.mobile ?? c.variantDisplayModeMobile ?? c.variantDisplayStyleMobile ?? 'tree';
   const variantMobile = variantMobileRaw;
+  const selectionDetailsDisplayModes = normalizeSelectionDetailsDisplayModes(
+    variants?.selectionDetails,
+  );
 
   const useSimpleVariantsSelector = variants?.useSimpleVariantsSelector ?? c.useSimpleVariantsSelector ?? true;
   const hideVariantOptions = normalizeHideVariantOptions(variants?.hideOptions ?? c.hideOptions);
@@ -679,6 +763,8 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
     configuratorTriggerStyleMobile: triggerMobile,
     variantDisplayMode: variantDesktop,
     variantDisplayModeMobile: variantMobile,
+    selectionDetailsDisplayModeDesktop: selectionDetailsDisplayModes.desktop,
+    selectionDetailsDisplayModeMobile: selectionDetailsDisplayModes.mobile,
     useSimpleVariantsSelector,
     hideVariantOptions,
     addToBasketFunction,

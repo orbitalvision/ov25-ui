@@ -2,10 +2,12 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { TestPageLayout } from '../templates/TestPageLayout.jsx';
 import { readSnap2LayoutQuery, Snap2PositionControls } from '../templates/Snap2PositionControls.jsx';
+import { readOptionalSelectionDetailsQuery } from '../templates/SelectionDetailsControls.jsx';
 import '../src/index.css';
 
 const MAZE_APIKEY = import.meta.env.VITE_MAZE_APIKEY;
 const ARLO_APIKEY = import.meta.env.VITE_ARLO_APIKEY;
+const selectionDetails = readOptionalSelectionDetailsQuery();
 
 const LAYOUT_DEFAULTS = {
   variantsDesktop: 'RIGHT',
@@ -39,6 +41,7 @@ function App() {
           variants: {
             displayMode: { desktop: 'tabs', mobile: 'list' },
             position: { desktop: layout.variantsDesktop, mobile: layout.variantsMobile },
+            ...(selectionDetails ? { selectionDetails } : {}),
           },
           modules: { position: { desktop: layout.modulesDesktop, mobile: layout.modulesMobile } },
         },

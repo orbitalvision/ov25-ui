@@ -8,6 +8,8 @@
  */
 export const BODY_STICKY_PORTAL_Z_INDEX = 2147483641;
 export const BODY_STICKY_FULLSCREEN_PORTAL_Z_INDEX = 2147483642;
+/** Keeps the fixed mobile viewer above merchant content but below its drawer. */
+export const BODY_MOBILE_GALLERY_Z_INDEX = 2147483642;
 export const BODY_MOBILE_DRAWER_PORTAL_Z_INDEX = 2147483643;
 export const BODY_POPOVER_PORTAL_Z_INDEX = 2147483643;
 export const BODY_MODAL_PORTAL_Z_INDEX = 2147483643;

@@ -84,7 +84,10 @@ export function ProductVariantsWrapper({
     // Wrapper to convert Variant to Selection format for handleSelectionSelect
     const handleVariantSelect = useCallback((variant: Variant) => {
       // Convert Variant to Selection-like object
-      const selection = {
+      const selection = variant.selection ? {
+        ...variant.selection,
+        groupId: variant.groupId ?? variant.selection.groupId,
+      } : {
         id: variant.id,
         name: variant.name,
         price: variant.price,
@@ -143,14 +146,15 @@ export function ProductVariantsWrapper({
                   name: selection?.name,
                   bedSize: selectionBedSizeFromMetadata(selection as { metadata?: ConfiguratorSelectionBedMetadata }),
                   price: selection?.price,
-                  image: (selection as any)?.miniThumbnails?.medium || '',
+                  image: (selection as any)?.miniThumbnails?.medium || selection.thumbnail || '',
                   blurHash: (selection as any).blurHash,
                   isSelected: selectedSelections.some(
                     sel => sel.optionId === option.id &&
                           sel.groupId === group.id &&
                           sel.selectionId === selection.id
                   ),
-                  swatch: (selection as any)?.swatch
+                  swatch: (selection as any)?.swatch,
+                  selection,
                 })) ?? []
               })) || []
           };

@@ -18,10 +18,9 @@ export function useSwatchActions() {
     return Boolean(swatch && isSwatchSelected(swatch));
   };
 
-  const getSwatchClickHandler = (isSelected: boolean, swatch: any) => (e: React.MouseEvent) => {
-    e.stopPropagation();
+  const toggleSwatchWithFeedback = (swatch: any): boolean => {
     if (!swatch) {
-      return;
+      return false;
     }
 
     const reachedLimit =
@@ -37,7 +36,7 @@ export function useSwatchActions() {
         },
         duration: 6000,
       });
-      return;
+      return false;
     }
 
     if (isSwatchSelected(swatch)) {
@@ -62,6 +61,12 @@ export function useSwatchActions() {
       });
     }
     toggleSwatch(swatch);
+    return true;
+  };
+
+  const getSwatchClickHandler = (_isSelected: boolean, swatch: any) => (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleSwatchWithFeedback(swatch);
   };
 
   return {
@@ -69,6 +74,6 @@ export function useSwatchActions() {
     shouldShowSwatchOverlay,
     isSwatchSelectedFor,
     getSwatchClickHandler,
+    toggleSwatchWithFeedback,
   };
 }
-

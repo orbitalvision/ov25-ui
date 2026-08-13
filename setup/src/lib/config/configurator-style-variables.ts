@@ -185,6 +185,7 @@ export const ELEMENT_SELECTORS: ElementSelector[] = [
   { selector: '#ov25-content-area', label: 'Content area', element: 'div' },
   { selector: '#ov25-desktop-variants-content-ungrouped', label: 'Ungrouped variants', element: 'div' },
   { selector: '#ov25-desktop-variants-content-grouped', label: 'Grouped variants', element: 'div' },
+  { selector: '.ov25-default-variant-card', label: 'Variant card', element: 'div' },
   { selector: '.ov25-variant-name', label: 'Variant name', element: 'span' },
   { selector: '.ov25-size-variant-card-grid', label: 'Size variant card grid', element: 'div' },
   { selector: '.ov25-size-variant-card-name', label: 'Size variant card name', element: 'h3' },
@@ -195,6 +196,18 @@ export const ELEMENT_SELECTORS: ElementSelector[] = [
   { selector: '.ov25-size-variant-card-dimension-value', label: 'Size variant dimension value', element: 'span' },
   { selector: '.ov25-group-name', label: 'Desktop variant group name', element: 'h3' },
   { selector: '.ov25-group-header', label: 'Variant group header', element: 'h4' },
+  { selector: '.ov25-selection-details-root', label: 'Selection details overlay', element: 'div' },
+  { selector: '.ov25-selection-details-backdrop', label: 'Selection details backdrop', element: 'div' },
+  { selector: '.ov25-selection-details-surface', label: 'Selection details surface', element: 'div' },
+  { selector: '.ov25-selection-details-close', label: 'Selection details close button', element: 'button' },
+  { selector: '.ov25-selection-details-image-frame', label: 'Selection details image frame', element: 'div' },
+  { selector: '.ov25-selection-details-image', label: 'Selection details image', element: 'img' },
+  { selector: '.ov25-selection-details-copy', label: 'Selection details text area', element: 'div' },
+  { selector: '.ov25-selection-details-title', label: 'Selection details title', element: 'h2' },
+  { selector: '.ov25-selection-details-description', label: 'Selection details description', element: 'p' },
+  { selector: '.ov25-selection-details-footer', label: 'Selection details actions', element: 'div' },
+  { selector: '.ov25-selection-details-swatch-toggle', label: 'Selection details swatchbook button', element: 'button' },
+  { selector: '.ov25-selection-details-apply', label: 'Selection details apply button', element: 'button' },
   { selector: '#ov25-mobile-filter-container', label: 'Mobile filter container', element: 'div' },
   { selector: '#ov25-mobile-content-area', label: 'Mobile content area', element: 'div' },
   { selector: '#ov25-mobile-variants-content', label: 'Mobile variants content', element: 'div' },
@@ -309,6 +322,20 @@ export const ELEMENT_CSS_PROPERTIES = [
   'font-size', 'font-family', 'font-weight', 'opacity', 'display',
   'max-height', 'min-height',
 ] as const;
+
+const EXCLUDED_ELEMENT_CSS_PROPERTIES: Record<string, readonly string[]> = {
+  // Runtime animation owns opacity on these elements. Offering the property in
+  // Element Styles would create CSS that is always superseded by that state.
+  '.ov25-selection-details-surface': ['opacity'],
+  '.ov25-selection-details-backdrop': ['opacity'],
+};
+
+/** Properties Configurator Setup can truthfully customize for this selector. */
+export function elementCssPropertiesFor(selector: string): readonly string[] {
+  const excluded = EXCLUDED_ELEMENT_CSS_PROPERTIES[selector];
+  if (!excluded?.length) return ELEMENT_CSS_PROPERTIES;
+  return ELEMENT_CSS_PROPERTIES.filter((property) => !excluded.includes(property));
+}
 
 export type PropertyInputType = 'color' | 'spacing' | 'size-px' | 'font-select' | 'weight-select' | 'display-select' | 'opacity' | 'text';
 

@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  BODY_MOBILE_GALLERY_Z_INDEX,
   BODY_MOBILE_DRAWER_PORTAL_Z_INDEX,
   BODY_SELECTION_DETAILS_PORTAL_Z_INDEX,
   BODY_SNAP2_CHECKOUT_SHEET_PORTAL_Z_INDEX,
@@ -15,6 +16,9 @@ describe('body portal layer order', () => {
       BODY_STICKY_FULLSCREEN_PORTAL_Z_INDEX,
     );
     expect(BODY_STICKY_FULLSCREEN_PORTAL_Z_INDEX).toBeLessThan(
+      BODY_MOBILE_DRAWER_PORTAL_Z_INDEX,
+    );
+    expect(BODY_MOBILE_GALLERY_Z_INDEX).toBeLessThan(
       BODY_MOBILE_DRAWER_PORTAL_Z_INDEX,
     );
     expect(BODY_MOBILE_DRAWER_PORTAL_Z_INDEX).toBeLessThan(

@@ -137,6 +137,12 @@ export function buildSerializableConfig(
       triggerStyle: { desktop: settings.configurator.triggerStyleDesktop, mobile: settings.configurator.triggerStyleMobile },
       variants: {
         displayMode: { desktop: settings.configurator.variantDisplayDesktop, mobile: settings.configurator.variantDisplayMobile },
+        selectionDetails: {
+          displayMode: {
+            desktop: settings.configurator.selectionDetailsDisplayModeDesktop,
+            mobile: settings.configurator.selectionDetailsDisplayModeMobile,
+          },
+        },
         ...(isSnap2
           ? {
               position: {

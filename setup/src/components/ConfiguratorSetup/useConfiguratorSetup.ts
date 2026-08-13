@@ -8,6 +8,8 @@ import { DEFAULT_FORM_STATE, DEFAULT_TYPE_SETTINGS } from './types';
 import {
   buildFormStateFromInitialPayload,
   hasMeaningfulInitialConfig,
+  normalizeSelectionDetailsMobileMode,
+  selectionDetailsMobileFallbackFromDesktop,
   type ConfiguratorSetupPayload,
 } from './initial-config-from-payload';
 import {
@@ -37,6 +39,13 @@ export function mergeStoredTypeSettings(
   saved: Partial<TypeSettings> | undefined,
 ): TypeSettings {
   if (!saved) return defaults;
+  const savedSelectionDetailsDesktop =
+    saved.configurator?.selectionDetailsDisplayModeDesktop ?? 'none';
+  const savedSelectionDetailsMobile = normalizeSelectionDetailsMobileMode(
+    (saved.configurator as { selectionDetailsDisplayModeMobile?: unknown } | undefined)
+      ?.selectionDetailsDisplayModeMobile,
+    selectionDetailsMobileFallbackFromDesktop(savedSelectionDetailsDesktop),
+  );
   return {
     selectors: {
       gallery: { ...defaults.selectors.gallery, ...saved.selectors?.gallery },
@@ -48,7 +57,12 @@ export function mergeStoredTypeSettings(
       initialiseMenu: { ...defaults.selectors.initialiseMenu, ...saved.selectors?.initialiseMenu },
     },
     carousel: { ...defaults.carousel, ...saved.carousel },
-    configurator: { ...defaults.configurator, ...saved.configurator },
+    configurator: {
+      ...defaults.configurator,
+      ...saved.configurator,
+      selectionDetailsDisplayModeDesktop: savedSelectionDetailsDesktop,
+      selectionDetailsDisplayModeMobile: savedSelectionDetailsMobile,
+    },
     flags: { ...defaults.flags, ...saved.flags },
     branding: { ...defaults.branding, ...saved.branding },
     style: { ...defaults.style, ...saved.style },
@@ -96,11 +110,20 @@ function readSavedState(storageKey: string): ConfiguratorSetupFormState | null {
     return {
       layout: parsed.layout ?? DEFAULT_FORM_STATE.layout,
       typeSettings: {
-        standard: mergeStoredTypeSettings(DEFAULT_TYPE_SETTINGS.standard, parsed.typeSettings?.standard),
-        snap2: mergeStoredTypeSettings(DEFAULT_TYPE_SETTINGS.snap2, parsed.typeSettings?.snap2),
+        // The presence of a stored form state makes omitted layouts legacy.
+        // Merge an empty object so new feature defaults are not silently
+        // enabled when an older partial draft is opened and saved.
+        standard: mergeStoredTypeSettings(
+          DEFAULT_TYPE_SETTINGS.standard,
+          parsed.typeSettings?.standard ?? {},
+        ),
+        snap2: mergeStoredTypeSettings(
+          DEFAULT_TYPE_SETTINGS.snap2,
+          parsed.typeSettings?.snap2 ?? {},
+        ),
         bedConfigurator: mergeStoredTypeSettings(
           DEFAULT_TYPE_SETTINGS.bedConfigurator,
-          parsed.typeSettings?.bedConfigurator,
+          parsed.typeSettings?.bedConfigurator ?? {},
         ),
       },
     };

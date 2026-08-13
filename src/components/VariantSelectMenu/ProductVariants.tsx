@@ -6,7 +6,7 @@ import { CheckoutButton } from "./CheckoutButton.js"
 import DesktopVariants from "./DesktopVariants.js"
 import { MobileVariants } from "./MobileVariants.js"
 import { useOV25UI } from "../../contexts/ov25-ui-context.js"
-import { Swatch } from '../../contexts/ov25-ui-context.js';
+import { Selection, Swatch } from '../../contexts/ov25-ui-context.js';
 
 export interface Variant {
   id: string
@@ -22,6 +22,8 @@ export interface Variant {
   data?: any
   isSelected?: boolean
   swatch?: Swatch
+  /** Original iframe selection, retained for rich details and exact apply payloads. */
+  selection?: Selection
 }
 
 export type DrawerSizes = 'closed' | 'small' | 'large'
