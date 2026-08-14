@@ -5,175 +5,13 @@ import { createPortal } from 'react-dom';
 import { useOV25UI } from "../../contexts/ov25-ui-context.js";
 import { requestTransitionSnapshotFromIframe } from "../../utils/request-transition-snapshot-from-iframe.js";
 import { getConfiguratorIframeContainerScreenRect } from "../../utils/configurator-dom-queries.js";
+import { acquirePageScrollLock } from '../../utils/page-scroll-lock.js';
 import { ProductVariantsWrapper } from './ProductVariantsWrapper.js';
 import { Snap2Wrapper } from './Snap2Wrapper.js';
 import { WizardVariants } from './WizardVariants.js';
 import { VariantsHeader } from './VariantsHeader.js';
 
 const useBrowserLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
-
-type SavedInlineStyleDeclaration = {
-  property: string;
-  value: string;
-  priority: string;
-};
-
-type DesktopSheetPageLockSnapshot = {
-  bodyDeclarations: SavedInlineStyleDeclaration[];
-  htmlDeclarations: SavedInlineStyleDeclaration[];
-  scrollX: number;
-  scrollY: number;
-};
-
-const BODY_PAGE_LOCK_PROPERTIES = new Set([
-  'overflow',
-  'overflow-x',
-  'overflow-y',
-  'position',
-  'inset',
-  'top',
-  'right',
-  'bottom',
-  'left',
-  'width',
-  'min-width',
-  'max-width',
-  'box-sizing',
-  'margin',
-  'margin-top',
-  'margin-right',
-  'margin-bottom',
-  'margin-left',
-]);
-const HTML_PAGE_LOCK_PROPERTIES = new Set([
-  'overflow',
-  'overflow-x',
-  'overflow-y',
-  'scrollbar-gutter',
-]);
-
-let desktopSheetPageLockCount = 0;
-let desktopSheetPageLockSnapshot: DesktopSheetPageLockSnapshot | null = null;
-
-function captureInlineStyleDeclarations(
-  element: HTMLElement,
-  properties: Set<string>,
-): SavedInlineStyleDeclaration[] {
-  const declarations: SavedInlineStyleDeclaration[] = [];
-  for (let index = 0; index < element.style.length; index += 1) {
-    const property = element.style.item(index);
-    if (!properties.has(property)) continue;
-    declarations.push({
-      property,
-      value: element.style.getPropertyValue(property),
-      priority: element.style.getPropertyPriority(property),
-    });
-  }
-  return declarations;
-}
-
-function restoreInlineStyleDeclarations(
-  element: HTMLElement,
-  properties: Set<string>,
-  declarations: SavedInlineStyleDeclaration[],
-): void {
-  for (const property of properties) element.style.removeProperty(property);
-  for (const declaration of declarations) {
-    element.style.setProperty(
-      declaration.property,
-      declaration.value,
-      declaration.priority,
-    );
-  }
-}
-
-function setPageLockStyle(
-  element: HTMLElement,
-  property: string,
-  value: string,
-): void {
-  element.style.setProperty(property, value, 'important');
-}
-
-function acquireDesktopSheetPageLock(): () => void {
-  if (typeof document === 'undefined' || typeof window === 'undefined') return () => {};
-
-  desktopSheetPageLockCount += 1;
-  if (desktopSheetPageLockCount === 1) {
-    const body = document.body;
-    const html = document.documentElement;
-    const bodyStyle = window.getComputedStyle(body);
-    const bodyRect = body.getBoundingClientRect();
-    const zoom = bodyStyle.getPropertyValue('zoom').trim();
-    const zoomIsNormal = !zoom || zoom === 'normal' || Math.abs((Number.parseFloat(zoom) || 1) - 1) < 0.001;
-    const canFreezeMeasuredBody =
-      bodyStyle.display !== 'contents' &&
-      bodyStyle.transform === 'none' &&
-      zoomIsNormal &&
-      bodyRect.width > 0;
-
-    desktopSheetPageLockSnapshot = {
-      bodyDeclarations: captureInlineStyleDeclarations(body, BODY_PAGE_LOCK_PROPERTIES),
-      htmlDeclarations: captureInlineStyleDeclarations(html, HTML_PAGE_LOCK_PROPERTIES),
-      scrollX: window.scrollX,
-      scrollY: window.scrollY,
-    };
-
-    setPageLockStyle(body, 'overflow-x', 'hidden');
-    setPageLockStyle(body, 'overflow-y', 'hidden');
-    setPageLockStyle(body, 'position', 'fixed');
-
-    if (canFreezeMeasuredBody) {
-      const frozenWidth = `${bodyRect.width}px`;
-      setPageLockStyle(body, 'box-sizing', 'border-box');
-      setPageLockStyle(body, 'margin-top', '0px');
-      setPageLockStyle(body, 'margin-right', '0px');
-      setPageLockStyle(body, 'margin-bottom', '0px');
-      setPageLockStyle(body, 'margin-left', '0px');
-      setPageLockStyle(body, 'top', `${bodyRect.top}px`);
-      setPageLockStyle(body, 'right', 'auto');
-      setPageLockStyle(body, 'bottom', 'auto');
-      setPageLockStyle(body, 'left', `${bodyRect.left}px`);
-      setPageLockStyle(body, 'width', frozenWidth);
-      setPageLockStyle(body, 'min-width', frozenWidth);
-      setPageLockStyle(body, 'max-width', frozenWidth);
-      setPageLockStyle(html, 'scrollbar-gutter', 'auto');
-    } else {
-      setPageLockStyle(body, 'top', `${-window.scrollY}px`);
-      setPageLockStyle(body, 'width', '100%');
-      if (window.innerWidth > html.clientWidth) {
-        setPageLockStyle(html, 'scrollbar-gutter', 'stable');
-      }
-    }
-
-    setPageLockStyle(html, 'overflow-x', 'hidden');
-    setPageLockStyle(html, 'overflow-y', 'hidden');
-  }
-
-  let released = false;
-  return () => {
-    if (released) return;
-    released = true;
-    desktopSheetPageLockCount = Math.max(0, desktopSheetPageLockCount - 1);
-    if (desktopSheetPageLockCount !== 0) return;
-
-    const snapshot = desktopSheetPageLockSnapshot;
-    desktopSheetPageLockSnapshot = null;
-    if (!snapshot) return;
-
-    restoreInlineStyleDeclarations(
-      document.body,
-      BODY_PAGE_LOCK_PROPERTIES,
-      snapshot.bodyDeclarations,
-    );
-    restoreInlineStyleDeclarations(
-      document.documentElement,
-      HTML_PAGE_LOCK_PROPERTIES,
-      snapshot.htmlDeclarations,
-    );
-    window.scrollTo(snapshot.scrollX, snapshot.scrollY);
-  };
-}
 
 export function VariantContentDesktop() {
     const {
@@ -203,7 +41,7 @@ export function VariantContentDesktop() {
     const shouldLockPage = isVariantsOpen || isDrawerOrDialogOpen;
     useBrowserLayoutEffect(() => {
       if (!shouldLockPage) return;
-      return acquireDesktopSheetPageLock();
+      return acquirePageScrollLock();
     }, [shouldLockPage]);
     
     useEffect(() => {

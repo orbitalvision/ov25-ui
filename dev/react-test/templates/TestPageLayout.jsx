@@ -56,6 +56,7 @@ function ProductTabs() {
  * @param {boolean} [props.showPrice]
  * @param {boolean} [props.showProductTabs]
  * @param {React.ReactNode} [props.topContent]
+ * @param {React.ReactNode} [props.bottomContent]
  * @param {React.ReactNode} [props.asideSlot]
  * @param {boolean} [props.renderControls]
  * @param {boolean} [props.renderSwatches]
@@ -72,6 +73,7 @@ export function TestPageLayout({
   showPrice = true,
   showProductTabs = false,
   topContent,
+  bottomContent,
   asideSlot,
   renderControls = true,
   renderSwatches = true,
@@ -149,6 +151,7 @@ export function TestPageLayout({
           </div>
         </div>
         {showProductTabs && <ProductTabs />}
+        {bottomContent}
       </div>
     </ViewportWrapper>
   );

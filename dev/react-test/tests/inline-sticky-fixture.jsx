@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import { injectConfigurator } from 'ov25-ui';
 import sofaImage from '../src/images/sofa.png';
 import '../src/index.css';
+import { readOptionalSelectionDetailsQuery } from '../templates/SelectionDetailsControls.jsx';
 
 const DEMO_RETAILER_APIKEY = import.meta.env.VITE_DEMO_RETAILER_APIKEY;
 
@@ -36,6 +37,7 @@ const useContentBoxGalleryTarget = params.get('hostBox') === 'content-box';
 const useReplacementStyleHazard = params.get('replacementStyle') === 'hazardous';
 const useFixedMobileVariantsHost = params.get('fixedMobileVariants') === '1';
 const forceBodyLayerFallback = params.get('fallback') === 'body-layer';
+const selectionDetails = readOptionalSelectionDetailsQuery();
 const useFixtureRootOverflowBlocker =
   params.get('overflowBlocker') === 'fixture-root';
 const requestedDesktopDisplayMode = params.get('desktopMode');
@@ -260,7 +262,10 @@ function App() {
       configurator: {
         displayMode: { desktop: desktopDisplayMode, mobile: mobileDisplayMode },
         triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
-        variants: { displayMode: { desktop: 'list', mobile: 'list' } },
+        variants: {
+          displayMode: { desktop: 'list', mobile: 'list' },
+          ...(selectionDetails ? { selectionDetails } : {}),
+        },
       },
       branding: {
         cssString: `
@@ -334,7 +339,12 @@ function App() {
               ) : (
                 <GalleryTarget />
               )}
-              <p className="fixture-gallery-note">Hepburn collection / three seat</p>
+              <p
+                className="fixture-gallery-note"
+                data-selection-details-scroll-sentinel
+              >
+                Hepburn collection / three seat
+              </p>
             </div>
             <aside className="fixture-product-information" aria-label="Product options">
               <ProductInformation />

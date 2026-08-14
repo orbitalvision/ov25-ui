@@ -21,6 +21,67 @@ const PRODUCT_FIXTURES = {
 
 type DetailMode = 'tooltip' | 'sheet' | 'modal' | 'fullscreen';
 
+type RectSnapshot = {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+  width: number;
+  height: number;
+};
+
+type SelectionDetailsPageLayoutSnapshot = {
+  scrollX: number;
+  scrollY: number;
+  body: RectSnapshot;
+  shell: RectSnapshot;
+  configurator: RectSnapshot;
+};
+
+type IntersectionSnapshot = {
+  boundingRect: RectSnapshot;
+  intersectionRect: RectSnapshot;
+  intersectionRatio: number;
+  isIntersecting: boolean;
+  visibleArea: number;
+};
+
+function rectsAreClose(
+  actual: RectSnapshot,
+  expected: RectSnapshot,
+  tolerance = 0.1,
+): boolean {
+  return (Object.keys(expected) as Array<keyof RectSnapshot>).every(
+    (property) =>
+      Math.abs(actual[property] - expected[property]) <= tolerance,
+  );
+}
+
+function visualPageLayoutIsStable(
+  actual: SelectionDetailsPageLayoutSnapshot,
+  expected: SelectionDetailsPageLayoutSnapshot,
+): boolean {
+  return (
+    actual.scrollX === expected.scrollX &&
+    rectsAreClose(actual.body, expected.body) &&
+    rectsAreClose(actual.shell, expected.shell) &&
+    rectsAreClose(actual.configurator, expected.configurator)
+  );
+}
+
+function intersectionIsStable(
+  actual: IntersectionSnapshot,
+  expected: IntersectionSnapshot,
+): boolean {
+  return (
+    actual.isIntersecting === expected.isIntersecting &&
+    rectsAreClose(actual.boundingRect, expected.boundingRect) &&
+    rectsAreClose(actual.intersectionRect, expected.intersectionRect) &&
+    Math.abs(actual.intersectionRatio - expected.intersectionRatio) <= 0.001 &&
+    Math.abs(actual.visibleArea - expected.visibleArea) <= 1
+  );
+}
+
 function fixtureUrl(
   path: string,
   params: Record<string, string | undefined> = {},
@@ -226,6 +287,99 @@ async function expectPageScrollLocked(page: Page): Promise<void> {
       { timeout: RUNTIME_TIMEOUT },
     )
     .toBe(true);
+}
+
+async function selectionDetailsPageLayoutSnapshot(
+  page: Page,
+  shellSelector = '.app',
+): Promise<SelectionDetailsPageLayoutSnapshot> {
+  return page.evaluate((clientShellSelector) => {
+    const findDeep = (
+      root: Document | ShadowRoot,
+      selector: string,
+    ): Element | null => {
+      const match = root.querySelector(selector);
+      if (match) return match;
+
+      for (const element of root.querySelectorAll('*')) {
+        if (element.shadowRoot) {
+          const shadowMatch = findDeep(element.shadowRoot, selector);
+          if (shadowMatch) return shadowMatch;
+        }
+      }
+      return null;
+    };
+    const snapshotRect = (element: Element | null): RectSnapshot => {
+      if (!element) throw new Error('Selection details reflow target not found');
+      const rect = element.getBoundingClientRect();
+      return {
+        top: rect.top,
+        right: rect.right,
+        bottom: rect.bottom,
+        left: rect.left,
+        width: rect.width,
+        height: rect.height,
+      };
+    };
+
+    return {
+      scrollX: window.scrollX,
+      scrollY: window.scrollY,
+      body: snapshotRect(document.body),
+      shell: snapshotRect(document.querySelector(clientShellSelector)),
+      configurator: snapshotRect(
+        findDeep(document, '#ov-25-configurator-gallery-container'),
+      ),
+    };
+  }, shellSelector);
+}
+
+async function inlineStyleSnapshot(page: Page) {
+  return page.evaluate(() => {
+    const declarations = (element: HTMLElement) =>
+      Array.from(element.style)
+        .sort()
+        .map((property) => ({
+          property,
+          value: element.style.getPropertyValue(property),
+          priority: element.style.getPropertyPriority(property),
+        }));
+
+    return {
+      body: declarations(document.body),
+      html: declarations(document.documentElement),
+    };
+  });
+}
+
+async function intersectionSnapshot(
+  locator: Locator,
+): Promise<IntersectionSnapshot> {
+  return locator.evaluate(
+    (element) =>
+      new Promise<IntersectionSnapshot>((resolve) => {
+        const snapshotRect = (rect: DOMRectReadOnly): RectSnapshot => ({
+          top: rect.top,
+          right: rect.right,
+          bottom: rect.bottom,
+          left: rect.left,
+          width: rect.width,
+          height: rect.height,
+        });
+        const observer = new IntersectionObserver(([entry]) => {
+          observer.disconnect();
+          const intersectionRect = snapshotRect(entry.intersectionRect);
+          resolve({
+            boundingRect: snapshotRect(entry.boundingClientRect),
+            intersectionRect,
+            intersectionRatio: entry.intersectionRatio,
+            isIntersecting: entry.isIntersecting,
+            visibleArea: intersectionRect.width * intersectionRect.height,
+          });
+        });
+        observer.observe(element);
+      }),
+  );
 }
 
 async function screenshotSurface(
@@ -638,6 +792,172 @@ test('desktop tooltip previews after its CSS hover delay and applies directly fr
       await expect(trigger).toBeFocused();
     });
   }
+
+  test('sheet preserves visible overflow on a scrolled inline-sticky client page and restores inline page styles', async ({
+    page,
+  }) => {
+    const shellSelector = '.fixture-product-grid';
+    const sentinelSelector = '[data-selection-details-scroll-sentinel]';
+    await page.goto(
+      fixtureUrl('/tests/inline-sticky-desktop-no-header.html', {
+        desktopDetails: 'sheet',
+        mobileDetails: 'fullscreen',
+      }),
+    );
+    const trigger = await getUnselectedTrigger(page);
+
+    await page.evaluate(() => {
+      document.body.style.setProperty('overflow-x', 'hidden', 'important');
+      document.body.style.setProperty('margin', '8px 11px 7px 5px', 'important');
+      document.body.style.setProperty('box-sizing', 'content-box', 'important');
+      document.body.style.setProperty('position', 'relative', 'important');
+      document.documentElement.style.setProperty('scrollbar-gutter', 'auto', 'important');
+    });
+    await expect(page.locator('#ov-25-configurator-gallery-container')).toBeVisible({
+      timeout: RUNTIME_TIMEOUT,
+    });
+    await expect(
+      page.locator('[data-ov25-inline-sticky-active="true"]'),
+    ).toBeVisible({ timeout: RUNTIME_TIMEOUT });
+
+    const sentinel = page.locator(sentinelSelector);
+    await expect(sentinel).toBeAttached();
+    const overflowGeometry = await page.evaluate((selector) => {
+      const element = document.querySelector(selector);
+      if (!element) throw new Error('Selection details scroll sentinel not found');
+      const bodyRect = document.body.getBoundingClientRect();
+      const sentinelRect = element.getBoundingClientRect();
+      return {
+        bodyHeight: bodyRect.height,
+        bodyScrollHeight: document.body.scrollHeight,
+        sentinelDocumentTop: sentinelRect.top + window.scrollY,
+        viewportHeight: window.innerHeight,
+      };
+    }, sentinelSelector);
+    expect(overflowGeometry.bodyScrollHeight).toBeGreaterThan(
+      overflowGeometry.bodyHeight,
+    );
+    expect(overflowGeometry.sentinelDocumentTop).toBeGreaterThan(
+      overflowGeometry.viewportHeight,
+    );
+
+    await sentinel.evaluate((element) => {
+      const documentTop = element.getBoundingClientRect().top + window.scrollY;
+      window.scrollTo(0, Math.max(1, documentTop - window.innerHeight * 0.6));
+    });
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+
+    const sentinelBeforeOpen = await intersectionSnapshot(sentinel);
+    expect(sentinelBeforeOpen.isIntersecting).toBe(true);
+    expect(sentinelBeforeOpen.visibleArea).toBeGreaterThan(0);
+
+    const layoutBeforeOpen = await selectionDetailsPageLayoutSnapshot(
+      page,
+      shellSelector,
+    );
+    const inlineStylesBeforeOpen = await inlineStyleSnapshot(page);
+    expect(layoutBeforeOpen.scrollY).toBeGreaterThan(0);
+
+    const openAndClose = async () => {
+      await trigger.evaluate((element) => (element as HTMLElement).click());
+      const surface = page.locator(`${DETAILS_SURFACE}:visible`);
+      await expect(surface).toBeVisible({ timeout: RUNTIME_TIMEOUT });
+      await expect(surface).toHaveAttribute('data-display-mode', 'sheet');
+      await expectPageScrollLocked(page);
+      await page.waitForTimeout(350);
+      await expect
+        .poll(
+          async () => {
+            const [layout, sheetGeometry, sentinelIntersection] = await Promise.all([
+              selectionDetailsPageLayoutSnapshot(page, shellSelector),
+              surface.evaluate((element) => {
+                const rect = element.getBoundingClientRect();
+                return {
+                  rootGutterRemoved:
+                    document.documentElement.clientWidth === window.innerWidth,
+                  reachesViewportRight:
+                    Math.abs(rect.right - window.innerWidth) <= 1,
+                };
+              }),
+              intersectionSnapshot(sentinel),
+            ]);
+            return {
+              visualLayoutStable: visualPageLayoutIsStable(
+                layout,
+                layoutBeforeOpen,
+              ),
+              sentinelIntersectionStable: intersectionIsStable(
+                sentinelIntersection,
+                sentinelBeforeOpen,
+              ),
+              sentinelVisibleArea: sentinelIntersection.visibleArea > 0,
+              ...sheetGeometry,
+            };
+          },
+          { timeout: RUNTIME_TIMEOUT },
+        )
+        .toEqual({
+          visualLayoutStable: true,
+          sentinelIntersectionStable: true,
+          sentinelVisibleArea: true,
+          rootGutterRemoved: true,
+          reachesViewportRight: true,
+        });
+
+      const lockedScrollPosition = await page.evaluate(() => ({
+        x: window.scrollX,
+        y: window.scrollY,
+      }));
+      await page.mouse.move(20, Math.round(DESKTOP.height / 2));
+      await page.mouse.wheel(0, 700);
+      await page.keyboard.press('PageDown');
+      await page.waitForTimeout(100);
+      expect(
+        await page.evaluate(() => ({ x: window.scrollX, y: window.scrollY })),
+      ).toEqual(lockedScrollPosition);
+
+      const intersectionAfterInput = await intersectionSnapshot(sentinel);
+      expect(
+        intersectionIsStable(intersectionAfterInput, sentinelBeforeOpen),
+      ).toBe(true);
+
+      await surface.locator(DETAILS_CLOSE).click();
+      await expectDetailsClosed(page);
+      await expect
+        .poll(() => inlineStyleSnapshot(page), { timeout: RUNTIME_TIMEOUT })
+        .toEqual(inlineStylesBeforeOpen);
+      await expect
+        .poll(
+          async () => {
+            const layout = await selectionDetailsPageLayoutSnapshot(
+              page,
+              shellSelector,
+            );
+            return {
+              scrollX: layout.scrollX,
+              scrollY: layout.scrollY,
+              visualLayoutRestored: visualPageLayoutIsStable(
+                layout,
+                layoutBeforeOpen,
+              ),
+            };
+          },
+          { timeout: RUNTIME_TIMEOUT },
+        )
+        .toEqual({
+          scrollX: layoutBeforeOpen.scrollX,
+          scrollY: layoutBeforeOpen.scrollY,
+          visualLayoutRestored: true,
+        });
+      const sentinelAfterClose = await intersectionSnapshot(sentinel);
+      expect(intersectionIsStable(sentinelAfterClose, sentinelBeforeOpen)).toBe(
+        true,
+      );
+    };
+
+    await openAndClose();
+    await openAndClose();
+  });
 
   test('breakpoint changes close details even when both modes resolve to fullscreen', async ({ page }) => {
     await page.goto(

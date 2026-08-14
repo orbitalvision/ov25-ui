@@ -8,6 +8,7 @@ import {
 } from '../../../contexts/ov25-ui-context.js';
 import { PLACEHOLDER_IMAGE_URL } from '../../../lib/placeholder-image.js';
 import { useSwatchActions } from '../../../hooks/useSwatchActions.js';
+import { acquirePageScrollLock } from '../../../utils/page-scroll-lock.js';
 import { Button } from '../../ui/button.js';
 
 const ENTER_MS = 220;
@@ -21,30 +22,15 @@ const TOOLTIP_HEIGHT = 360;
 const SELECTION_DETAILS_IMAGE_WIDTH_COMPACT = 400;
 const SELECTION_DETAILS_IMAGE_WIDTH_DESKTOP = 800;
 const OV25_CDN_ORIGIN = 'https://cdn.orbital.vision';
+const useBrowserLayoutEffect = typeof window === 'undefined' ? React.useEffect : React.useLayoutEffect;
 // React 18 drops `inert={true}`, while React 19 drops `inert=""`.
 // The canonical named value in a widened spread emits the boolean attribute in both.
 const INERT_HTML_ATTRIBUTE: Record<string, string> = { inert: 'inert' };
-let bodyScrollLockCount = 0;
-let bodyOverflowBeforeSelectionDetails = '';
 let backgroundIsolationCount = 0;
 const backgroundElementState = new Map<Element, {
   ariaHidden: string | null;
   inert: boolean;
 }>();
-
-function lockBodyScroll(): () => void {
-  if (bodyScrollLockCount === 0) {
-    bodyOverflowBeforeSelectionDetails = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-  }
-  bodyScrollLockCount += 1;
-  return () => {
-    bodyScrollLockCount = Math.max(0, bodyScrollLockCount - 1);
-    if (bodyScrollLockCount === 0) {
-      document.body.style.overflow = bodyOverflowBeforeSelectionDetails;
-    }
-  };
-}
 
 function isolatePageBackground(surface: HTMLElement): () => void {
   if (backgroundIsolationCount === 0) {
@@ -270,6 +256,7 @@ export function SelectionDetailsSurface() {
   }, []);
 
   const isTooltip = rendered?.displayMode === 'tooltip';
+  const shouldLockPage = Boolean(rendered && !isTooltip);
   const requestedImageUrl = rendered
     ? resolveSelectionDetailsImage(
       rendered.item,
@@ -416,17 +403,21 @@ export function SelectionDetailsSurface() {
     };
   }, [closeSelectionDetails, isTooltip, rendered]);
 
-  // Make modal-style surfaces exclusive by locking scroll and isolating page content.
+  // Freeze the page before paint and keep it frozen through the exit transition.
+  useBrowserLayoutEffect(() => {
+    if (!shouldLockPage) return;
+    return acquirePageScrollLock();
+  }, [shouldLockPage]);
+
+  // Make a presented modal-style surface exclusive to assistive technologies.
   React.useEffect(() => {
     if (!rendered || isTooltip || !present) return;
     const surface = surfaceRef.current;
     if (!surface) return;
 
-    const unlockBodyScroll = lockBodyScroll();
     const restorePageBackground = isolatePageBackground(surface);
 
     return () => {
-      unlockBodyScroll();
       restorePageBackground();
     };
   }, [isTooltip, present, rendered]);
@@ -577,13 +568,14 @@ export function SelectionDetailsSurface() {
     <div
       className="ov25-selection-details-root ov:fixed ov:inset-0 ov:pointer-events-none"
     >
-      {mode === 'modal' && (
+      {(mode === 'modal' || mode === 'sheet') && (
         <div
-          className="ov25-selection-details-backdrop ov:absolute ov:inset-0 ov:bg-black/45 ov:pointer-events-auto"
+          className={`ov25-selection-details-backdrop ov:absolute ov:inset-0 ov:pointer-events-auto ${mode === 'modal' ? 'ov:bg-black/45' : ''}`}
           style={{
-            opacity: present ? 1 : 0,
-            transition: animate ? `opacity ${transitionTiming}` : 'none',
+            opacity: mode === 'modal' ? (present ? 1 : 0) : 1,
+            transition: mode === 'modal' && animate ? `opacity ${transitionTiming}` : 'none',
           }}
+          data-display-mode={mode}
           data-present={present}
           aria-hidden="true"
           onPointerDown={() => closeSelectionDetails(true)}

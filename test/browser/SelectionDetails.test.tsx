@@ -679,7 +679,10 @@ test('sheet paints offscreen before sliding in from the right', async () => {
     await expect.poll(() =>
       container.querySelector<HTMLElement>('.ov25-selection-details-surface')?.dataset.present,
     ).toBe('false');
-    expect(container.querySelector('.ov25-selection-details-backdrop')).toBeNull();
+    expect(container.querySelector('.ov25-selection-details-backdrop')).toHaveAttribute(
+      'data-display-mode',
+      'sheet',
+    );
     const surface = container.querySelector<HTMLElement>('.ov25-selection-details-surface')!;
     expect(surface.getBoundingClientRect().width).toBe(384);
     expect(surface.style.transform).toBe('translateX(100%)');
@@ -692,6 +695,40 @@ test('sheet paints offscreen before sliding in from the right', async () => {
     cancelFrame.mockRestore();
     await page.viewport(originalViewport.width, originalViewport.height);
   }
+});
+
+test('sheet outside click dismisses without applying while inside clicks stay open', async () => {
+  const onSelect = vi.fn();
+  const { container } = await render(
+    <OV25UIProvider
+      {...providerProps}
+      selectionDetailsDisplayModeDesktop="sheet"
+      selectionDetailsDisplayModeMobile="fullscreen"
+    >
+      <DetailsHarness enabled includeSwatch onSelect={onSelect} />
+    </OV25UIProvider>,
+  );
+
+  const trigger = container.querySelector('.ov25-default-variant-card') as HTMLElement;
+  trigger.click();
+
+  await expect.poll(() =>
+    container.querySelector<HTMLElement>('.ov25-selection-details-surface')?.dataset.present,
+  ).toBe('true');
+  const surface = container.querySelector<HTMLElement>('.ov25-selection-details-surface')!;
+  const backdrop = container.querySelector<HTMLElement>('.ov25-selection-details-backdrop')!;
+
+  expect(getComputedStyle(backdrop).backgroundColor).toBe('rgba(0, 0, 0, 0)');
+  await page.elementLocator(surface).click({ position: { x: 20, y: 300 } });
+  expect(container.querySelector('.ov25-selection-details-surface')).toBe(surface);
+  expect(onSelect).not.toHaveBeenCalled();
+
+  await page.elementLocator(backdrop).click({ position: { x: 20, y: 300 } });
+  await expect.poll(() =>
+    container.querySelector('.ov25-selection-details-surface'),
+  ).toBeNull();
+  expect(onSelect).not.toHaveBeenCalled();
+  expect(trigger).toHaveAttribute('data-selected', 'false');
 });
 
 test('desktop fullscreen remains instant', async () => {

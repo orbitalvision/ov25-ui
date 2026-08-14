@@ -35,6 +35,41 @@ function getPreset() {
   return PRESETS[pageName] ?? PRESETS['selection-details-tooltip-sheet'];
 }
 
+function BelowFoldProductContent() {
+  const sections = [
+    {
+      title: 'Materials and care',
+      copy: 'Performance upholstery, solid timber framing, and removable seat cushions designed for everyday use.',
+    },
+    {
+      title: 'Dimensions',
+      copy: 'Review the overall width, seat height, and clearance recommendations before placing your order.',
+    },
+    {
+      title: 'Delivery and returns',
+      copy: 'Made-to-order pieces include room-of-choice delivery and a dedicated delivery-day support team.',
+    },
+  ];
+
+  return (
+    <div
+      className="ov:mt-10 ov:space-y-6 ov:pb-32"
+      data-selection-details-scroll-content
+    >
+      <h2 className="ov:text-2xl ov:font-semibold">Product information</h2>
+      {sections.map((section) => (
+        <section
+          key={section.title}
+          className="ov:min-h-[180px] ov:rounded-lg ov:border ov:border-gray-200 ov:bg-gray-50 ov:p-6"
+        >
+          <h3 className="ov:mb-3 ov:text-lg ov:font-semibold">{section.title}</h3>
+          <p className="ov:max-w-3xl ov:text-[#525252]">{section.copy}</p>
+        </section>
+      ))}
+    </div>
+  );
+}
+
 function App() {
   const preset = getPreset();
   const values = readSelectionDetailsFixtureQuery({
@@ -86,6 +121,7 @@ function App() {
       description={preset.description}
       injectConfig={config}
       topContent={<SelectionDetailsControls values={values} />}
+      bottomContent={<BelowFoldProductContent />}
     />
   );
 }
