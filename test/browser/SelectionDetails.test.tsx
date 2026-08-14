@@ -406,6 +406,20 @@ test('desktop tooltip previews on hover, has no actions, and applies directly on
   expect(onSelect).toHaveBeenCalledTimes(1);
   await expect.poll(() => container.querySelector('.ov25-selection-details-surface')).toBeNull();
 
+  // Applying the selection can replace/update the card while the pointer is
+  // stationary. That synthetic re-entry must not reopen the tooltip until the
+  // pointer genuinely leaves the card.
+  trigger.dispatchEvent(new PointerEvent('pointerover', {
+    bubbles: true,
+    relatedTarget: container,
+  }));
+  await new Promise<void>((resolve) => window.setTimeout(resolve, 100));
+  await expect.poll(() => container.querySelector('.ov25-selection-details-surface')).toBeNull();
+  trigger.dispatchEvent(new PointerEvent('pointerout', {
+    bubbles: true,
+    relatedTarget: container,
+  }));
+
   trigger.blur();
   trigger.focus();
   await expect.poll(() => container.querySelector('.ov25-selection-details-surface')).not.toBeNull();
@@ -415,6 +429,81 @@ test('desktop tooltip previews on hover, has no actions, and applies directly on
   );
   trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
   expect(onSelect).toHaveBeenCalledTimes(2);
+  await expect.poll(() => container.querySelector('.ov25-selection-details-surface')).toBeNull();
+});
+
+test('desktop tooltip reopens when the pointer returns from a React-managed ancestor', async () => {
+  const { container } = await render(
+    <OV25UIProvider
+      {...providerProps}
+      selectionDetailsDisplayModeDesktop="tooltip"
+      selectionDetailsDisplayModeMobile="fullscreen"
+    >
+      <div data-tooltip-pointer-boundary>
+        <DetailsHarness enabled includeSwatch onSelect={() => undefined} />
+      </div>
+    </OV25UIProvider>,
+  );
+  const boundary = container.querySelector('[data-tooltip-pointer-boundary]') as HTMLElement;
+  const trigger = container.querySelector('.ov25-default-variant-card') as HTMLElement;
+  trigger.style.setProperty(SELECTION_DETAILS_TOOLTIP_HOVER_DELAY_CSS_VARIABLE, '0ms');
+
+  trigger.dispatchEvent(new PointerEvent('pointerover', {
+    bubbles: true,
+    relatedTarget: null,
+  }));
+  await expect.poll(() =>
+    container.querySelector('.ov25-selection-details-surface')?.getAttribute('data-present'),
+  ).toBe('true');
+
+  trigger.dispatchEvent(new PointerEvent('pointerout', {
+    bubbles: true,
+    relatedTarget: boundary,
+  }));
+  await expect.poll(() =>
+    container.querySelector('.ov25-selection-details-surface'),
+  ).toBeNull();
+
+  trigger.dispatchEvent(new PointerEvent('pointerover', {
+    bubbles: true,
+    relatedTarget: boundary,
+  }));
+  await expect.poll(() =>
+    container.querySelector('.ov25-selection-details-surface')?.getAttribute('data-present'),
+  ).toBe('true');
+});
+
+test('desktop tooltip closes when its anchor is detached and reattached before observation', async () => {
+  const { container } = await render(
+    <OV25UIProvider
+      {...providerProps}
+      selectionDetailsDisplayModeDesktop="tooltip"
+      selectionDetailsDisplayModeMobile="fullscreen"
+    >
+      <DetailsHarness enabled includeSwatch onSelect={() => undefined} />
+    </OV25UIProvider>,
+  );
+  const trigger = container.querySelector('.ov25-default-variant-card') as HTMLElement;
+  const parent = trigger.parentElement!;
+  trigger.style.setProperty(SELECTION_DETAILS_TOOLTIP_HOVER_DELAY_CSS_VARIABLE, '0ms');
+
+  trigger.dispatchEvent(new PointerEvent('pointerover', { bubbles: true }));
+  await expect.poll(() =>
+    container.querySelector('.ov25-selection-details-surface')?.getAttribute('data-present'),
+  ).toBe('true');
+
+  trigger.remove();
+  parent.appendChild(trigger);
+  await expect.poll(() => container.querySelector('.ov25-selection-details-surface')).toBeNull();
+
+  const removedRelatedTarget = document.createElement('img');
+  parent.appendChild(removedRelatedTarget);
+  removedRelatedTarget.remove();
+  trigger.dispatchEvent(new PointerEvent('pointerover', {
+    bubbles: true,
+    relatedTarget: removedRelatedTarget,
+  }));
+  await new Promise<void>((resolve) => window.setTimeout(resolve, 20));
   await expect.poll(() => container.querySelector('.ov25-selection-details-surface')).toBeNull();
 });
 

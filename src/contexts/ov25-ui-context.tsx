@@ -74,6 +74,28 @@ function throttle<T extends (...args: any[]) => void>(
   };
 }
 
+/**
+ * `Element.closest()` stops at a shadow root, but page isolation can make a
+ * shadow host (or one of its light-DOM ancestors) inert. Follow the composed
+ * tree so focus is not restored while any such ancestor still blocks it.
+ */
+function hasInertComposedAncestor(element: HTMLElement): boolean {
+  let current: Node | null = element;
+
+  while (current) {
+    if (current instanceof Element && current.hasAttribute('inert')) return true;
+    if (current.parentNode) {
+      current = current.parentNode;
+    } else if (typeof ShadowRoot !== 'undefined' && current instanceof ShadowRoot) {
+      current = current.host;
+    } else {
+      current = null;
+    }
+  }
+
+  return false;
+}
+
 function useLocalStorage<T>(key: string, initialValue: T): [T, React.Dispatch<React.SetStateAction<T>>] {
   const [storedValue, setStoredValue] = useState<T>(() => {
     try {
@@ -845,6 +867,11 @@ export const OV25UIProvider: React.FC<{
     committed: boolean;
   } | null>(null);
   const selectionDetailsCloseTimerRef = useRef<number | null>(null);
+  const selectionDetailsFocusRestoreRef = useRef<{
+    trigger: HTMLElement;
+    observer: MutationObserver | null;
+    frame: number | null;
+  } | null>(null);
   const [isSwatchBookOpen, setIsSwatchBookOpen] = useState<boolean>(false);
   const [swatchBookFlash, setSwatchBookFlash] = useState<'destructive' | 'cta' | null>(null);
   const [swatchRulesData, setSwatchRulesData] = useState<SwatchRulesData>({
@@ -1264,6 +1291,65 @@ export const OV25UIProvider: React.FC<{
     }
   }, []);
 
+  const cancelSelectionDetailsFocusRestore = useCallback(() => {
+    const pending = selectionDetailsFocusRestoreRef.current;
+    if (!pending) return;
+
+    selectionDetailsFocusRestoreRef.current = null;
+    pending.observer?.disconnect();
+    if (pending.frame != null) window.cancelAnimationFrame(pending.frame);
+  }, []);
+
+  const restoreSelectionDetailsFocusWhenAvailable = useCallback((trigger: HTMLElement) => {
+    cancelSelectionDetailsFocusRestore();
+
+    const pending: NonNullable<typeof selectionDetailsFocusRestoreRef.current> = {
+      trigger,
+      observer: null,
+      frame: null,
+    };
+    const finish = () => {
+      if (selectionDetailsFocusRestoreRef.current !== pending) return;
+      if (!pending.trigger.isConnected) {
+        cancelSelectionDetailsFocusRestore();
+        return;
+      }
+      if (hasInertComposedAncestor(pending.trigger)) return;
+
+      selectionDetailsFocusRestoreRef.current = null;
+      pending.observer?.disconnect();
+      if (pending.frame != null) window.cancelAnimationFrame(pending.frame);
+
+      // DefaultVariantCard ignores this programmatic focus so tooltip mode
+      // does not immediately reopen the details surface being closed.
+      pending.trigger.dataset.ov25SelectionDetailsRestoringFocus = 'true';
+      try {
+        pending.trigger.focus({ preventScroll: true });
+      } finally {
+        delete pending.trigger.dataset.ov25SelectionDetailsRestoringFocus;
+      }
+    };
+
+    pending.observer = new MutationObserver(finish);
+    pending.observer.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['inert'],
+      childList: true,
+      subtree: true,
+    });
+    const triggerRoot = trigger.getRootNode();
+    if (triggerRoot instanceof ShadowRoot) {
+      pending.observer.observe(triggerRoot, {
+        attributes: true,
+        attributeFilter: ['inert'],
+        childList: true,
+        subtree: true,
+      });
+    }
+    selectionDetailsFocusRestoreRef.current = pending;
+    pending.frame = window.requestAnimationFrame(finish);
+  }, [cancelSelectionDetailsFocusRestore]);
+
   const disposeSelectionDetailsPreload = useCallback((state: SelectionDetailsState | null) => {
     if (!state) return;
     const preload = selectionDetailsPreloadRequestRef.current;
@@ -1290,18 +1376,16 @@ export const OV25UIProvider: React.FC<{
     selectionDetailsStateRef.current = null;
     setSelectionDetailsState(null);
     if (returnFocus && current?.trigger.isConnected) {
-      window.requestAnimationFrame(() => {
-        window.requestAnimationFrame(() => {
-          if (!current.trigger.isConnected) return;
-          current.trigger.dataset.ov25SelectionDetailsRestoringFocus = 'true';
-          current.trigger.focus({ preventScroll: true });
-          window.requestAnimationFrame(() => {
-            delete current.trigger.dataset.ov25SelectionDetailsRestoringFocus;
-          });
-        });
-      });
+      restoreSelectionDetailsFocusWhenAvailable(current.trigger);
+    } else if (!returnFocus) {
+      cancelSelectionDetailsFocusRestore();
     }
-  }, [cancelSelectionDetailsClose, disposeSelectionDetailsPreload]);
+  }, [
+    cancelSelectionDetailsClose,
+    cancelSelectionDetailsFocusRestore,
+    disposeSelectionDetailsPreload,
+    restoreSelectionDetailsFocusWhenAvailable,
+  ]);
 
   const scheduleSelectionDetailsClose = useCallback((delay = 160) => {
     cancelSelectionDetailsClose();
@@ -1324,6 +1408,7 @@ export const OV25UIProvider: React.FC<{
   }) => {
     if (selectionDetailsDisplayMode === 'none') return;
     cancelSelectionDetailsClose();
+    cancelSelectionDetailsFocusRestore();
     disposeSelectionDetailsPreload(selectionDetailsStateRef.current);
     selectionDetailsRequestIdRef.current += 1;
     const requestId = selectionDetailsRequestIdRef.current;
@@ -1341,6 +1426,7 @@ export const OV25UIProvider: React.FC<{
     setSelectionDetailsState(nextState);
   }, [
     cancelSelectionDetailsClose,
+    cancelSelectionDetailsFocusRestore,
     currentProductId,
     disposeSelectionDetailsPreload,
     selectionDetailsDisplayMode,
@@ -1483,9 +1569,14 @@ export const OV25UIProvider: React.FC<{
 
   useEffect(() => () => {
     cancelSelectionDetailsClose();
+    cancelSelectionDetailsFocusRestore();
     disposeSelectionDetailsPreload(selectionDetailsStateRef.current);
     selectionDetailsStateRef.current = null;
-  }, [cancelSelectionDetailsClose, disposeSelectionDetailsPreload]);
+  }, [
+    cancelSelectionDetailsClose,
+    cancelSelectionDetailsFocusRestore,
+    disposeSelectionDetailsPreload,
+  ]);
 
   const previousSelectionDetailsModeRef = useRef(selectionDetailsDisplayMode);
   const previousSelectionDetailsMobileRef = useRef(isMobile);

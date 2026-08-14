@@ -63,6 +63,7 @@ export const DefaultVariantCard = React.memo(({
   };
   const hoverTimerRef = React.useRef<number | null>(null);
   const tooltipHoverActiveRef = React.useRef(false);
+  const tooltipReopenBlockedUntilPointerOutRef = React.useRef(false);
   const pointerPressedRef = React.useRef(false);
 
   const cancelTooltipHover = React.useCallback(() => {
@@ -94,6 +95,11 @@ export const DefaultVariantCard = React.memo(({
   }, [onSelect, openSelectionDetails, sourceSelection, variant]);
 
   const applyTooltipSelection = React.useCallback(() => {
+    // Applying can rerender the selected card underneath a stationary pointer.
+    // Ignore the synthetic re-entry from that replacement until the pointer
+    // genuinely leaves, otherwise the tooltip immediately opens again.
+    tooltipReopenBlockedUntilPointerOutRef.current = tooltipHoverActiveRef.current;
+    tooltipHoverActiveRef.current = false;
     cancelTooltipHover();
     // A hover preview that has already sent a preload is now the selection
     // being applied, so retain its work rather than cancelling it on close.
@@ -131,8 +137,15 @@ export const DefaultVariantCard = React.memo(({
     openDetails(event.currentTarget, { pinned: true, instant: true });
   };
 
-  const handleTooltipPointerEnter = (event: React.PointerEvent<HTMLDivElement>) => {
-    if (!isDesktopTooltip) return;
+  const handleTooltipPointerOver = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (
+      !isDesktopTooltip ||
+      (event.relatedTarget instanceof Node && !event.relatedTarget.isConnected) ||
+      (event.relatedTarget instanceof Node && event.currentTarget.contains(event.relatedTarget)) ||
+      tooltipReopenBlockedUntilPointerOutRef.current
+    ) {
+      return;
+    }
     tooltipHoverActiveRef.current = true;
 
     if (isOpen) {
@@ -149,7 +162,14 @@ export const DefaultVariantCard = React.memo(({
     }, selectionDetailsTooltipHoverDelayFor(trigger));
   };
 
-  const handleTooltipPointerLeave = () => {
+  const handleTooltipPointerOut = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (
+      event.relatedTarget instanceof Node &&
+      event.currentTarget.contains(event.relatedTarget)
+    ) {
+      return;
+    }
+    tooltipReopenBlockedUntilPointerOutRef.current = false;
     tooltipHoverActiveRef.current = false;
     pointerPressedRef.current = false;
     cancelTooltipHover();
@@ -179,6 +199,7 @@ export const DefaultVariantCard = React.memo(({
   };
 
   React.useEffect(() => () => {
+    tooltipReopenBlockedUntilPointerOutRef.current = false;
     tooltipHoverActiveRef.current = false;
     cancelTooltipHover();
   }, [cancelTooltipHover]);
@@ -209,8 +230,8 @@ export const DefaultVariantCard = React.memo(({
       onPointerCancel={() => {
         pointerPressedRef.current = false;
       }}
-      onPointerEnter={handleTooltipPointerEnter}
-      onPointerLeave={handleTooltipPointerLeave}
+      onPointerOver={handleTooltipPointerOver}
+      onPointerOut={handleTooltipPointerOut}
       onFocus={handleTooltipFocus}
       onBlur={handleTooltipBlur}
     >

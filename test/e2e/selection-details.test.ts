@@ -582,14 +582,15 @@ test('desktop tooltip previews after its CSS hover delay and applies directly fr
       return surfaceBox.x + surfaceBox.width <= triggerBox.x;
     }).toBe(true);
     await trigger.click();
-    await expectDetailsClosed(page);
     const selected = page.getByTitle(title!, { exact: true }).filter({ visible: true });
     await expect(selected).toHaveAttribute('data-selected', 'true', {
       timeout: RUNTIME_TIMEOUT,
     });
     await expect(selected.locator('#ov25-variant-swatch-icon-container')).toBeVisible();
+    await expectDetailsClosed(page);
 
     const keyboardTrigger = await getUnselectedTrigger(page);
+    await keyboardTrigger.evaluate((element) => (element as HTMLElement).blur());
     await keyboardTrigger.focus();
     await expect(page.locator(`${DETAILS_SURFACE}:visible`)).toHaveAttribute('data-pinned', 'false');
     await keyboardTrigger.press('Enter');

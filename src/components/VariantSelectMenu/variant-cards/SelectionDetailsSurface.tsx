@@ -150,6 +150,21 @@ function getFocusableElements(root: HTMLElement): HTMLElement[] {
   )).filter((element) => !element.hasAttribute('hidden') && element.getAttribute('aria-hidden') !== 'true');
 }
 
+function isComposedAncestor(ancestor: Node, descendant: Node): boolean {
+  let current: Node | null = descendant;
+  while (current) {
+    if (current === ancestor) return true;
+    if (current.parentNode) {
+      current = current.parentNode;
+    } else if (current instanceof ShadowRoot) {
+      current = current.host;
+    } else {
+      current = null;
+    }
+  }
+  return false;
+}
+
 function tooltipPositionFor(trigger: HTMLElement, surface: HTMLElement | null): TooltipPosition {
   const triggerRect = trigger.getBoundingClientRect();
   const viewportWidth = window.innerWidth;
@@ -370,7 +385,22 @@ export function SelectionDetailsSurface() {
     const observer = new ResizeObserver(update);
     if (surfaceRef.current) observer.observe(surfaceRef.current);
     observer.observe(rendered.trigger);
-    const mutationObserver = new MutationObserver(update);
+    const mutationObserver = new MutationObserver((records) => {
+      // A framework render can detach and reattach the same card before this
+      // callback runs, making `isConnected` true again. Treat any mutation
+      // record that removed the captured anchor (or one of its ancestors) as
+      // an anchor removal so the tooltip cannot remain attached to stale UI.
+      const triggerWasRemoved = records.some((record) =>
+        Array.from(record.removedNodes).some((removedNode) =>
+          isComposedAncestor(removedNode, rendered.trigger)
+        ),
+      );
+      if (triggerWasRemoved) {
+        closeSelectionDetails(false);
+        return;
+      }
+      update();
+    });
     mutationObserver.observe(document.body, { childList: true, subtree: true });
     const triggerRoot = rendered.trigger.getRootNode();
     if (triggerRoot instanceof ShadowRoot) {
