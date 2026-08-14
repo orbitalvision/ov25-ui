@@ -1,0 +1,108 @@
+ .codex/skills/ov25-release-review/SKILL.md         |   8 +
+ .gitignore                                         |   1 +
+ README.md                                          |  25 +-
+ dev/react-test/index.html                          |   8 +
+ .../templates/SelectionDetailsControls.jsx         | 190 +++++
+ dev/react-test/templates/TestPageLayout.jsx        |  13 +-
+ dev/react-test/tests/bed-configurator.jsx          |   9 +-
+ .../tests/carousel-defer-threed-indexing.html      |  12 +
+ .../tests/carousel-defer-threed-indexing.jsx       | 132 +++
+ dev/react-test/tests/configurator-setup.jsx        |  64 ++
+ dev/react-test/tests/configurator-sizing.jsx       |   4 +-
+ dev/react-test/tests/inline-sticky-fixture.jsx     |  22 +-
+ dev/react-test/tests/multiple-configurators.jsx    |  10 +
+ ...iple-standard-configurators-inline-variants.jsx |  12 +-
+ dev/react-test/tests/range-with-groups.jsx         |   7 +-
+ .../tests/selection-details-fullscreen.html        |  12 +
+ dev/react-test/tests/selection-details-modal.html  |  12 +
+ .../tests/selection-details-tooltip-sheet.html     |  12 +
+ dev/react-test/tests/selection-details.jsx         |  99 +++
+ dev/react-test/tests/single-custom-css-branding.js | 598 +++++++++++++-
+ dev/react-test/tests/single-custom-css.jsx         |  21 +-
+ dev/react-test/tests/snap2-dialog.jsx              | 179 ++--
+ dev/react-test/tests/snap2-inline.jsx              |  13 +-
+ dev/react-test/tests/snap2-uuid.jsx                |   2 +-
+ dev/react-test/tests/string-replacement.jsx        |  41 +-
+ dev/react-test/vite.config.js                      |   4 +
+ docs/bugs-resolved.md                              |   9 +-
+ docs/ov25_bugs_and_todo.md                         |  10 +-
+ ...tomation-and-shopify-runtime-versioning-plan.md |   4 +
+ docs/release-runbook.md                            | 238 ++++++
+ globals.css                                        | 148 +++-
+ package.json                                       |   1 +
+ playwright.config.ts                               |   7 +-
+ release-drafts/ov25-ui-0.8.2.md                    | 128 +++
+ scripts/release/deploy.js                          | 485 +++++++++--
+ setup/bun.lock                                     |   4 +-
+ setup/package-lock.json                            |  79 +-
+ .../ConfiguratorSetup/ConfigPanel/index.tsx        | 493 ++++++-----
+ .../StorefrontIntegrationPanel/index.tsx           | 206 +++++
+ .../StyleEditor/ElementRuleBuilder.tsx             |  19 +-
+ .../ConfiguratorSetup/StyleEditor/index.tsx        |  44 +-
+ setup/src/components/ConfiguratorSetup/index.tsx   |   7 +-
+ .../initial-config-from-payload.ts                 |  47 +-
+ .../preview-config-serializable.ts                 |   3 +
+ .../ConfiguratorSetup/serialize-config.ts          |   6 +
+ .../ConfiguratorSetup/storefront-integration.ts    |  80 ++
+ setup/src/components/ConfiguratorSetup/types.ts    |   9 +
+ .../ConfiguratorSetup/useConfiguratorSetup.ts      |  31 +-
+ setup/src/index.ts                                 |  14 +
+ .../src/lib/config/configurator-style-variables.ts |  27 +
+ setup/src/lib/config/preview-config.ts             |   3 +-
+ src/components/IframeContainer.tsx                 |  13 +-
+ src/components/Snap2Controls.tsx                   |   6 +-
+ src/components/SwatchesContainer.tsx               |   5 +-
+ .../VariantSelectMenu/AccordionVariants.tsx        |  10 +-
+ .../VariantSelectMenu/ProductVariants.tsx          |   4 +-
+ .../VariantSelectMenu/ProductVariantsWrapper.tsx   |  10 +-
+ src/components/VariantSelectMenu/SwatchBook.tsx    |   6 +-
+ src/components/VariantSelectMenu/TreeVariants.tsx  |  10 +-
+ .../VariantSelectMenu/VariantContentDesktop.tsx    | 252 ++++--
+ .../VariantSelectMenu/WizardVariants.tsx           |  17 +-
+ .../variant-cards/DefaultVariantCard.tsx           | 320 +++++--
+ .../variant-cards/ModuleVariantCard.tsx            |   1 +
+ .../variant-cards/SelectionDetailsSurface.tsx      | 724 ++++++++++++++++
+ src/components/dining/DiningFinishOptions.tsx      |  22 +-
+ src/components/product-carousel.tsx                |  86 +-
+ src/components/product-gallery.tsx                 |  24 +-
+ src/contexts/ov25-ui-context.tsx                   | 605 +++++++++++++-
+ src/hooks/useIframePositioning.tsx                 |  56 +-
+ src/hooks/useStickyHostRelocation.ts               |   9 +-
+ src/hooks/useSwatchActions.ts                      |  15 +-
+ src/index.ts                                       |   6 +
+ src/lib/config/layers.ts                           |  28 +-
+ .../selection-details-tooltip-hover-delay.ts       |  43 +
+ src/lib/sticky-layout-controller.ts                |  54 +-
+ src/lib/strings/string-keys.ts                     |  23 +
+ src/lib/utils.ts                                   |  15 +-
+ src/types/config-enums.ts                          |  11 +
+ src/types/inject-config.ts                         | 103 ++-
+ src/utils/configurator-utils.ts                    |  15 +-
+ src/utils/inject.tsx                               |  43 +-
+ test/browser/ConfiguratorSetup.test.tsx            | 270 ++++++
+ test/browser/SelectionDetails.test.tsx             | 770 +++++++++++++++++
+ test/e2e/inline-sticky.test.ts                     | 323 +++++++-
+ test/e2e/mobile-drawer-stacking.test.ts            | 139 ++++
+ ...cing-mobile-drawer-boundary-chromium-darwin.png | Bin 0 -> 17536 bytes
+ test/e2e/selection-details.test.ts                 | 920 +++++++++++++++++++++
+ ...ection-details-bed-fallback-chromium-darwin.png | Bin 0 -> 45612 bytes
+ ...-details-desktop-fullscreen-chromium-darwin.png | Bin 0 -> 1379772 bytes
+ ...ction-details-desktop-modal-chromium-darwin.png | Bin 0 -> 641953 bytes
+ ...ction-details-desktop-sheet-chromium-darwin.png | Bin 0 -> 269714 bytes
+ ...ion-details-desktop-tooltip-chromium-darwin.png | Bin 0 -> 107504 bytes
+ ...n-details-mobile-fullscreen-chromium-darwin.png | Bin 0 -> 246855 bytes
+ ...ection-details-mobile-modal-chromium-darwin.png | Bin 0 -> 249731 bytes
+ ...election-details-swatch-add-chromium-darwin.png | Bin 0 -> 641953 bytes
+ ...ction-details-swatch-remove-chromium-darwin.png | Bin 0 -> 642119 bytes
+ test/e2e/sheet-reflow-debug.test.ts                | 163 ++++
+ test/unit/body-layer-order.test.ts                 |  37 +
+ .../unit/configurator-setup-initial-config.test.ts |  10 +
+ test/unit/hide-gesture-hint.test.ts                |   2 +-
+ test/unit/placeholder-image-fallback.test.tsx      |  64 +-
+ test/unit/product-carousel.test.tsx                | 170 ++++
+ test/unit/release-deploy.test.ts                   | 149 ++++
+ test/unit/selection-details-config.test.ts         | 447 ++++++++++
+ test/unit/sticky-layout-controller.test.ts         |  68 ++
+ test/unit/swatch-identity.test.ts                  |  27 +
+ vitest.browser.config.ts                           |   6 +-
+ 107 files changed, 8978 insertions(+), 735 deletions(-)

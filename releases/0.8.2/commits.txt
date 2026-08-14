@@ -1,0 +1,27 @@
+dcb55e5 (HEAD -> main, origin/main, origin/HEAD) v0.8.2 release draft
+e4d6ba1 feat(release) release runbook update
+13c7587 fix(release) update release script to stop lockfile drift issue
+16f12b3 fix(selection-details): stabilize interactions
+0bfc1f2 fix(docs) whitespace fix
+03e5de1 disable(tests) disable bed configurator tests because they time out. bed configurators work on prod.. z said dont worry bout it
+2ef1a78 fix(tests) whitespace fix, update lock files
+29386fb fix(react18) preserve inert attribute in react18 version
+6e83115 fix(tests) add selectionDetails displayMode to relevant fixtures
+9aab449 fix(tests) stringReplacement and customCss fixtures updates
+b4c966c fix(tests) various fixes to configuratorSizing fixture
+ec32789 fix(setup) add missing string replacement for modulevariantcard, selection details
+78f2158 feat(selection-details) new surfaces for showing selection details. ov25-setup settings and integration. selection preloading message sending (pending OV25 integration of preloading)
+25b204a feat(setup): redesign editor and integrations (move settings page into configurator setup page)
+9021103 fix(swatchbook): give swatchbook separate z-index layer to toasts, shuffle z-index to accomodate. add swatch key
+8222201 fix(sticky): keep mobile variants in page flow (for making 'inline-sticky' work)
+3a60444 fix(types): expose variants-only-sheet mode in type
+14c9a0e fix(swatchbook) fall back to swatch placeholder image
+9bd5e4f fix(ov25-ui) better fix for page reflows (remove scrollbar gutter gap)
+a9cb596 (codex/shopify-live-preview-setup) fix(tests) prevent react dupe in setup, headless playwright test runner for ai
+8e37a8d fix(swatchbook) show variant placeholder for zoomed swatch in SwatchBook
+c6fcf30 fix(setup) bed configurator test file change
+fee3ca2 fix(sticky): stop ov25-option-header overlapping filter-controls-wrapper when inline-sticky
+55f1444 fix(gallery): ensure correct sizing of iframe for inline-sticky (safari/tablet bug)
+b4468fb fix(carousel): stop bug where carousel indexes become mismatched when product pulls images from both shopify and OV25.
+4aa6a8f (docs) release docs and skills for ai bugfixer/release
+12aab1d (tag: ov25-ui-react18@0.8.1) fix(react18): type inert placeholder attribute
