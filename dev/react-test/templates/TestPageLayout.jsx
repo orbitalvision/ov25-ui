@@ -63,7 +63,7 @@ function ProductTabs() {
  * @param {boolean} [props.showTestBackButton] - When false, hides the fixed “Back to list” control (e.g. embedded in another test page)
  * @param {boolean} [props.fullWidthGallery] - When true, gallery column is full width and aside stacks below (single column layout)
  * @param {boolean} [props.wideConfigurator] - When true, removes the app max-width and gives the gallery a fixed-height, full-width slot
- * @param {boolean} [props.configuratorTall] - When true, uses a taller viewport-capped configurator slot
+ * @param {boolean} [props.configuratorTall] - When true, uses a viewport-height configurator slot capped to a 3:4 portrait width
  */
 export function TestPageLayout({
   title,
@@ -99,8 +99,12 @@ export function TestPageLayout({
   const useFullWidthLayout = fullWidthGallery || wideConfigurator;
   const appStyle = wideConfigurator ? { maxWidth: 'none', width: '100%' } : undefined;
   const configuratorHeightClassName = configuratorTall
-    ? 'ov:h-[calc(100svh-180px)] ov:max-h-[760px]'
+    ? 'ov:h-[calc(100svh-180px)] ov:max-h-none'
     : 'ov:h-[560px] ov:max-h-[560px]';
+  // 75% of the Tall height (100svh - 180px) keeps the slot at or below 3:4.
+  const galleryColumnStyle = configuratorTall
+    ? { maxWidth: 'calc(75svh - 135px)' }
+    : undefined;
   const galleryContainerClassName = wideConfigurator || configuratorTall
     ? `configurator-container ov:w-full ${wideConfigurator ? 'ov:max-w-none' : ''} ${configuratorHeightClassName} ov:overflow-hidden`
     : 'configurator-container ov:w-full';
@@ -119,7 +123,10 @@ export function TestPageLayout({
               : 'ov:flex ov:flex-col ov:md:flex-row ov:md:items-start'
           }
         >
-          <div className={useFullWidthLayout ? 'ov:w-full' : 'ov:w-full ov:md:w-[55%]'}>
+          <div
+            className={useFullWidthLayout ? 'ov:w-full' : 'ov:w-full ov:md:w-[55%]'}
+            style={galleryColumnStyle}
+          >
             <div className={galleryContainerClassName}>
               <img src={sofaImage} alt="Product" />
             </div>

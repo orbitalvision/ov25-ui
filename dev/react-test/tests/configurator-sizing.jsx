@@ -18,7 +18,7 @@ const CONFIGURATOR_MODES = {
   tall: {
     label: 'Tall',
     height: 'calc(100svh - 180px)',
-    maxHeight: '760px',
+    maxHeight: 'none',
     tall: true,
   },
   square: {
@@ -284,7 +284,7 @@ function ResponsiveWidthFixture({ configuratorMode }) {
   return (
     <div className="ov:min-h-full ov:bg-[#f5f5f5] ov:px-3 ov:py-4 ov:sm:px-6 ov:sm:py-6">
       <TestBackButton />
-      <main className="ov:mx-auto ov:flex ov:max-w-[1180px] ov:flex-col ov:gap-4">
+      <main className="ov:mx-auto ov:flex ov:w-full ov:flex-col ov:gap-4">
         <header>
           <h1 className="ov:mb-2 ov:text-2xl ov:font-semibold ov:text-[#1a1a1a]">Configurator Sizing</h1>
           <p className="ov:m-0 ov:max-w-[760px] ov:text-sm ov:text-[#525252]">
