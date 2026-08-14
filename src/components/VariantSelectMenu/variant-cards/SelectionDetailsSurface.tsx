@@ -457,8 +457,16 @@ export function SelectionDetailsSurface() {
   const { item } = rendered;
   const sourceSelection = item.selection;
   const eligibleSwatch = resolveEligibleSelectionDetailsSwatch(item, swatchRulesData.enabled);
-  const title = eligibleSwatch?.name?.trim() || sourceSelection.name || item.name;
-  const description = eligibleSwatch?.description?.trim() || '';
+  const rawTitle = eligibleSwatch?.name?.trim() || sourceSelection.name || item.name;
+  const rawDescription = eligibleSwatch?.description?.trim() || '';
+  const stringValues = {
+    SELECTION_NAME: rawTitle,
+    DESCRIPTION: rawDescription,
+  };
+  const title = getString('selectionDetailsTitle', stringValues, rawTitle);
+  const description = rawDescription
+    ? getString('selectionDetailsDescription', stringValues, rawDescription)
+    : '';
   const isApplied = Boolean(item.isSelected) || isSelectionDetailsApplied(item) || selectedSelections.some((selected) =>
     selected.optionId === item.optionId &&
     selected.selectionId === item.id &&

@@ -46,6 +46,22 @@ function mobileDetailsFallback(desktop) {
   return 'fullscreen';
 }
 
+function readSelectionDetailsModeChoice(query, defaults) {
+  return {
+    desktopDetails: readChoice(
+      query,
+      'desktopDetails',
+      SELECTION_DETAILS_DESKTOP_MODES,
+      defaults.desktopDetails,
+    ),
+    mobileDetails: readMobileDetailsChoice(query, defaults.mobileDetails),
+  };
+}
+
+export function readSelectionDetailsModeQuery(defaults) {
+  return readSelectionDetailsModeChoice(currentQuery(), defaults);
+}
+
 /**
  * Adds selection details to an existing fixture only when at least one detail
  * query parameter is supplied. This keeps each fixture's legacy default exact.
@@ -68,13 +84,10 @@ export function readOptionalSelectionDetailsQuery() {
 
 export function readSelectionDetailsFixtureQuery(defaults) {
   const query = currentQuery();
-  const desktopDetails = readChoice(
+  const { desktopDetails, mobileDetails } = readSelectionDetailsModeChoice(
     query,
-    'desktopDetails',
-    SELECTION_DETAILS_DESKTOP_MODES,
-    defaults.desktopDetails,
+    defaults,
   );
-  const mobileDetails = readMobileDetailsChoice(query, defaults.mobileDetails);
   const variantStyle = readChoice(
     query,
     'variantStyle',
@@ -123,12 +136,9 @@ function QuerySelect({ label, queryKey, value, options }) {
   );
 }
 
-export function SelectionDetailsControls({ values }) {
+function SelectionDetailsModeFields({ values }) {
   return (
-    <div
-      data-ov25-selection-details-fixture-controls
-      className="ov:mb-4 ov:flex ov:flex-wrap ov:gap-3 ov:rounded-lg ov:border ov:border-gray-200 ov:bg-gray-50 ov:p-3"
-    >
+    <>
       <QuerySelect
         label="Desktop details"
         queryKey="desktopDetails"
@@ -141,6 +151,28 @@ export function SelectionDetailsControls({ values }) {
         value={values.mobileDetails}
         options={SELECTION_DETAILS_MOBILE_MODES}
       />
+    </>
+  );
+}
+
+export function SelectionDetailsModeControls({ values }) {
+  return (
+    <div
+      data-ov25-selection-details-mode-controls
+      className="ov:flex ov:flex-wrap ov:gap-3 ov:rounded-lg ov:border ov:border-gray-200 ov:bg-gray-50 ov:p-3"
+    >
+      <SelectionDetailsModeFields values={values} />
+    </div>
+  );
+}
+
+export function SelectionDetailsControls({ values }) {
+  return (
+    <div
+      data-ov25-selection-details-fixture-controls
+      className="ov:mb-4 ov:flex ov:flex-wrap ov:gap-3 ov:rounded-lg ov:border ov:border-gray-200 ov:bg-gray-50 ov:p-3"
+    >
+      <SelectionDetailsModeFields values={values} />
       <QuerySelect
         label="Variant style"
         queryKey="variantStyle"

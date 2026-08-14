@@ -194,7 +194,10 @@ const Snap2Controls: React.FC = () => {
               {getString('snap2ControlsViewLabel', undefined, 'View')}
             </label>
             {isMobile ? (
-              <div className="ov:relative ov:w-8 ov:h-8 ov:flex ov:shrink-0 ov:items-center ov:justify-center ov:rounded-full ov:bg-(--ov25-overlay-button-color) ov:shadow-sm ov:transition-all ov:duration-200 ov:hover:opacity-80 ov:focus-within:ring-2 ov:focus-within:ring-neutral-400">
+              <div
+                data-ov25-snap2-view-control="mobile"
+                className="ov:relative ov:w-8 ov:h-8 ov:flex ov:shrink-0 ov:items-center ov:justify-center ov:rounded-full ov:bg-(--ov25-overlay-button-color) ov:shadow-sm ov:transition-all ov:duration-200 ov:hover:opacity-80 ov:focus-within:ring-2 ov:focus-within:ring-neutral-400"
+              >
                 <Camera className="ov:w-[16px] ov:h-[16px] ov:text-(--ov25-configurator-view-controls-text-color)" />
                 <select
                   id="ov25-snap2-view-select"
@@ -209,6 +212,7 @@ const Snap2Controls: React.FC = () => {
             ) : (
               <select
                 id="ov25-snap2-view-select"
+                data-ov25-snap2-view-control="desktop"
                 value={String(viewGroupId)}
                 onChange={handleViewGroupChange}
                 className="ov:h-8 ov:min-w-36 ov:max-w-44 ov:cursor-pointer ov:rounded-full ov:border-0 ov:bg-(--ov25-overlay-button-color) ov:px-2 ov:text-xs ov:font-medium ov:text-(--ov25-configurator-view-controls-text-color) ov:shadow-sm"

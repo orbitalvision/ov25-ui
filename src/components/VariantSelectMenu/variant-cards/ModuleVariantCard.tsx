@@ -344,6 +344,7 @@ export function ModuleVariantCard({
       data-ov25-module-variant-card
       data-selected={variant.isSelected ? 'true' : 'false'}
       data-ov25-module-variant-card-pick={pickOnActivate ? 'true' : undefined}
+      data-ov25-module-variant-card-loading={isLoading ? 'true' : 'false'}
       role={pickOnActivate ? 'button' : 'group'}
       tabIndex={isLoading ? -1 : 0}
       aria-expanded={pickOnActivate ? undefined : detailOpen}

@@ -42,6 +42,24 @@ export const STRING_REPLACEMENT_DEFINITIONS: StringReplacements = [
       { name: 'VARIANT_NAME', description: 'Variant display name.' },
     ],
   },
+  {
+    key: 'selectionDetailsTitle',
+    label: 'Selection details title',
+    defaultTemplate: '${SELECTION_NAME}',
+    interpolationValues: [
+      { name: 'SELECTION_NAME', description: 'Resolved selection details title (swatch name when available).' },
+      { name: 'DESCRIPTION', description: 'Selection details description, when available.' },
+    ],
+  },
+  {
+    key: 'selectionDetailsDescription',
+    label: 'Selection details description',
+    defaultTemplate: '${DESCRIPTION}',
+    interpolationValues: [
+      { name: 'SELECTION_NAME', description: 'Resolved selection details title (swatch name when available).' },
+      { name: 'DESCRIPTION', description: 'Selection details description.' },
+    ],
+  },
   { key: 'selectionDetailsApply', label: 'Selection details apply button', defaultTemplate: 'Apply to Model', interpolationValues: [] },
   { key: 'selectionDetailsApplied', label: 'Selection details applied button', defaultTemplate: 'Applied', interpolationValues: [] },
   { key: 'selectionDetailsAddToSwatchbook', label: 'Selection details add swatch button', defaultTemplate: 'Add to swatchbook', interpolationValues: [] },
