@@ -41,7 +41,7 @@ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
   configurator: {
     displayMode: { desktop: 'inline', mobile: 'inline' },
     triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
-    variants: { 
+    variants: {
       displayMode: {
         desktop: 'list',
         mobile: 'list'
