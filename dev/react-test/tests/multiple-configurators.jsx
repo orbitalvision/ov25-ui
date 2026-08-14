@@ -16,6 +16,11 @@ function App() {
         selectors: {
           configureButton: { selector: '#ov25-fullscreen-button', replace: true },
         },
+        configurator: {
+          displayMode: { desktop: 'sheet', mobile: 'modal' },
+          triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
+          variants: { displayMode: { desktop: 'tree', mobile: 'list' } },
+        },
         callbacks: {
           addToBasket: () => {},
           buyNow: () => {},
@@ -28,6 +33,11 @@ function App() {
         productLink: () => 'snap2/292',
         selectors: {
           configureButton: { selector: '#test', replace: true },
+        },
+        configurator: {
+          displayMode: { desktop: 'sheet', mobile: 'modal' },
+          triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
+          variants: { displayMode: { desktop: 'tree', mobile: 'list' } },
         },
         callbacks: {
           addToBasket: () => {},

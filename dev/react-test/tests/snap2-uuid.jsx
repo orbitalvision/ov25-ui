@@ -22,7 +22,7 @@ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
   },
   carousel: { desktop: 'stacked', mobile: 'carousel' },
   configurator: {
-    displayMode: { desktop: 'sheet', mobile: 'drawer' },
+    displayMode: { desktop: 'sheet', mobile: 'modal' },
     triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
     variants: { displayMode: { desktop: 'tree', mobile: 'list' } },
   },

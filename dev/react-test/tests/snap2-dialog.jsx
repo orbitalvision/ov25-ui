@@ -39,6 +39,12 @@ function App() {
           displayMode: { desktop: 'modal', mobile: 'modal' },
           triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
           variants: {
+            selectionDetails: {
+              displayMode: {
+                desktop: 'fullscreen',
+                mobile: 'fullscreen'
+              }
+            },
             displayMode: { desktop: 'tabs', mobile: 'list' },
             position: { desktop: layout.variantsDesktop, mobile: layout.variantsMobile },
             ...(selectionDetails ? { selectionDetails } : {}),
