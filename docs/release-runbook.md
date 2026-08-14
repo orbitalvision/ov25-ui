@@ -206,4 +206,3 @@ Recorded on 2026-08-06:
 - The current local WooCommerce checkout is behind remote `main` and has unstaged `0.8.1`
   dependency changes based on the older branch. Do not commit them directly; first reconcile with
   current remote `main`, then decide whether to make a `1.2.1` dependency-only release.
-
