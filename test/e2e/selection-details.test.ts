@@ -475,7 +475,7 @@ test.describe('selection detail interactions', () => {
     await expect(swatchbook).toBeVisible({ timeout: RUNTIME_TIMEOUT });
     await expect(surface).toBeVisible();
     await expect(surface).toHaveAttribute('aria-hidden', 'true');
-    await expect(surface).toHaveAttribute('inert', '');
+    await expect(surface).toHaveAttribute('inert');
     await expect
       .poll(() => page.evaluate(() => {
         const swatchbookHost = document.getElementById('ov25-swatchbook-portal-container');
@@ -504,7 +504,7 @@ test.describe('selection detail interactions', () => {
     await page.getByRole('button', { name: 'Close Swatch Book', exact: true }).click();
     await expect(swatchbook).toBeHidden({ timeout: RUNTIME_TIMEOUT });
     await expect(surface).not.toHaveAttribute('aria-hidden', 'true');
-    await expect(surface).not.toHaveAttribute('inert', '');
+    await expect(surface).not.toHaveAttribute('inert');
     await expect(surface).toHaveCSS('pointer-events', 'auto');
     await expect
       .poll(() => page.evaluate(() => {

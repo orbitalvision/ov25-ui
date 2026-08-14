@@ -34,8 +34,9 @@ import { BODY_MOBILE_GALLERY_Z_INDEX } from "../lib/config/layers.js"
 
 type ClosingProxyExit = 'sheet-slide-left' | 'drawer-slide-up' | 'modal-fade'
 
-// React 18's JSX types omit inert; widening this spread preserves the boolean HTML attribute.
-const INERT_HTML_ATTRIBUTE: Record<string, string> = { inert: '' }
+// React 18 drops `inert={true}`, while React 19 drops `inert=""`.
+// The canonical named value in a widened spread emits the boolean attribute in both.
+const INERT_HTML_ATTRIBUTE: Record<string, string> = { inert: 'inert' }
 
 /**
  * Full-screen portaled bitmap at the pre-close iframe fixed rect; slides/fades with the shell while

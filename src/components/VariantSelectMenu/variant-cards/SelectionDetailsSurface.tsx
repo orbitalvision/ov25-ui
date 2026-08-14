@@ -21,6 +21,9 @@ const TOOLTIP_HEIGHT = 360;
 const SELECTION_DETAILS_IMAGE_WIDTH_COMPACT = 400;
 const SELECTION_DETAILS_IMAGE_WIDTH_DESKTOP = 800;
 const OV25_CDN_ORIGIN = 'https://cdn.orbital.vision';
+// React 18 drops `inert={true}`, while React 19 drops `inert=""`.
+// The canonical named value in a widened spread emits the boolean attribute in both.
+const INERT_HTML_ATTRIBUTE: Record<string, string> = { inert: 'inert' };
 let bodyScrollLockCount = 0;
 let bodyOverflowBeforeSelectionDetails = '';
 let backgroundIsolationCount = 0;
@@ -561,7 +564,7 @@ export function SelectionDetailsSurface() {
         role={isTooltip ? 'tooltip' : 'dialog'}
         aria-modal={!isTooltip && !isSwatchBookOpen || undefined}
         aria-hidden={isSwatchBookOpen || undefined}
-        inert={isSwatchBookOpen || undefined}
+        {...(isSwatchBookOpen ? INERT_HTML_ATTRIBUTE : {})}
         aria-labelledby={titleId}
         tabIndex={isTooltip ? undefined : -1}
         className={`ov25-selection-details-surface ${isFullscreenDesktop ? 'ov:grid' : 'ov:flex ov:flex-col'} ov:min-w-0 ov:max-w-full ov:overflow-hidden ov:bg-(--ov25-background-color) ov:text-(--ov25-text-color) ov:shadow-2xl ov:border ov:border-(--ov25-border-color) ov:focus:outline-none`}

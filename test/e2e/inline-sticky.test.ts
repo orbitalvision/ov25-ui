@@ -1565,7 +1565,7 @@ test.describe('Standard product inline-sticky display mode', () => {
 
     await expect(placeholder).toHaveCount(1);
     await expect(placeholder).toHaveAttribute('hidden', '');
-    await expect(placeholder).toHaveAttribute('inert', '');
+    await expect(placeholder).toHaveAttribute('inert');
     await expect(placeholder).toHaveAttribute('aria-hidden', 'true');
     await expect(galleryRoot).toBeVisible();
     await expect(galleryRoot).not.toHaveCSS('display', 'none');
