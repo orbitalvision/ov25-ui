@@ -84,7 +84,7 @@ step can eventually be removed.
 Perform the manual fixture, Shopify theme, setup-preview, cart, and responsive checks identified by
 the review artifacts. Approve the final artifacts only after the tests and manual checks pass.
 
-## 4. Prepare Release Commit And Tags
+## 4. Prepare Release Commits And Tags
 
 Run without `--push` first:
 
@@ -92,13 +92,12 @@ Run without `--push` first:
 npm run release:deploy -- --release <version>
 ```
 
-The script updates package versions and lockfiles, updates `CHANGELOG.md`, commits the release, and
-creates these local annotated tags:
+The first phase updates the `ov25-ui` version and root npm lockfile, updates `CHANGELOG.md`, commits
+the reviewed release artifacts, and creates these local annotated tags:
 
 ```text
 ov25-ui@<version>
 ov25-ui-react18@<version>
-ov25-setup@<version>
 ```
 
 Review the release commit, tag targets, package metadata, and working-tree status before pushing.
@@ -106,17 +105,48 @@ Then push exactly what the script prints:
 
 ```bash
 git push origin main
-git push origin ov25-ui@<version> ov25-ui-react18@<version> ov25-setup@<version>
+git push origin ov25-ui@<version> ov25-ui-react18@<version>
 ```
 
-Alternatively, `release:deploy -- --release <version> --push` pushes the commit/tags and dispatches
-the OV25 dependency workflow automatically. A manual branch/tag push does not dispatch OV25; run
-the workflow separately in that case.
+Wait until `ov25-ui@<version>` is available on npm, then finalize Setup:
+
+```bash
+npm run release:deploy -- --release <version> --finalize-setup
+```
+
+This second phase updates `ov25-setup` and its exact `ov25-ui` dependency, regenerates both
+`setup/package-lock.json` and `setup/bun.lock` from the published package, verifies the Bun lock with
+a frozen install, builds Setup against that exact package, commits all three Setup files, and
+creates `ov25-setup@<version>`. Lock generation happens in a temporary directory so a transient
+registry failure does not leave partial tracked files. Review the commit and tag, then push exactly
+what the script prints:
+
+```bash
+git push origin main
+git push origin ov25-setup@<version>
+```
+
+The split is required because Bun's lockfile records the published tarball integrity, which does not
+exist before the `ov25-ui` workflow publishes the new version. Never replace only the version text
+in `setup/bun.lock`; that can silently keep Setup pinned to the previous package.
+
+Alternatively, `release:deploy -- --release <version> --push` performs both phases: it pushes the UI
+commit and tags, waits for `ov25-ui@<version>` on npm, refreshes and commits the Setup lockfiles,
+then pushes the Setup commit/tag and dispatches the OV25 dependency workflow. Before the Setup
+commit it fetches the current branch and refuses to proceed if the remote moved beyond the reviewed
+local release while npm was publishing, or if Setup source changed after the UI release tag. If the
+process stops after the UI tags publish, resume safely with `--finalize-setup --push`; an
+already-created Setup commit or matching unpushed local tag is validated and reused without
+requiring a duplicate commit or tag.
+
+A fully manual branch/tag push does not dispatch OV25; run the workflow separately after pushing the
+Setup tag.
 
 ## 5. Package Publication
 
-Each pushed package tag starts a separate GitHub Action in `orbitalvision/ov25-ui`. Watch all three
-workflows and verify npm after they pass:
+Each pushed package tag starts a separate GitHub Action in `orbitalvision/ov25-ui`. Watch the UI and
+React 18 workflows first; the Setup tag is created only after the main UI package is available.
+After the Setup workflow passes, verify all three npm packages:
 
 ```bash
 npm view ov25-ui@<version> version
