@@ -1,5 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import {
+  readSelectionDetailsModeQuery,
+  SelectionDetailsModeControls,
+} from '../templates/SelectionDetailsControls.jsx';
 import { TestPageLayout } from '../templates/TestPageLayout.jsx';
 import { SINGLE_CUSTOM_CSS_BRANDING } from './single-custom-css-branding.js';
 import '../src/index.css';
@@ -45,6 +49,10 @@ function App() {
   const qs = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
   const displayFromUrl = qs.get('display') || 'list';
   const menuFromUrl = qs.get('menu') || 'sheet';
+  const selectionDetailsValues = readSelectionDetailsModeQuery({
+    desktopDetails: 'sheet',
+    mobileDetails: 'fullscreen',
+  });
   const mobileVariantDisplay = displayFromUrl === 'accordion' ? 'list' : displayFromUrl;
   const configDisplay = CONFIG_DISPLAY_OPTIONS.find((o) => o.value === menuFromUrl) ?? CONFIG_DISPLAY_OPTIONS[0];
   const config = {
@@ -52,7 +60,15 @@ function App() {
     configurator: {
       ...baseConfig.configurator,
       displayMode: configDisplay.displayMode,
-      variants: { displayMode: { desktop: displayFromUrl, mobile: mobileVariantDisplay } },
+      variants: {
+        displayMode: { desktop: displayFromUrl, mobile: mobileVariantDisplay },
+        selectionDetails: {
+          displayMode: {
+            desktop: selectionDetailsValues.desktopDetails,
+            mobile: selectionDetailsValues.mobileDetails,
+          },
+        },
+      },
     },
   };
 
@@ -62,7 +78,7 @@ function App() {
   return (
     <TestPageLayout
       title="Single Product – Custom CSS"
-      description="Variant controls and dimensions styled with custom CSS."
+      description="Variant controls, dimensions, and every Selection Details display mode styled with custom CSS."
       injectConfig={config}
       topContent={
         <div className="ov:flex ov:flex-col ov:gap-2 ov:mb-3 ov:text-sm">
@@ -98,6 +114,7 @@ function App() {
               );
             })}
           </div>
+          <SelectionDetailsModeControls values={selectionDetailsValues} />
         </div>
       }
     />

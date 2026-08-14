@@ -1,5 +1,9 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import {
+  readSelectionDetailsModeQuery,
+  SelectionDetailsModeControls,
+} from '../templates/SelectionDetailsControls.jsx';
 import { TestPageLayout } from '../templates/TestPageLayout.jsx';
 import '../src/index.css';
 
@@ -8,6 +12,10 @@ const MAZE_APIKEY = import.meta.env.VITE_MAZE_APIKEY;
 const ARLO_APIKEY = import.meta.env.VITE_ARLO_APIKEY;
 const query = new URLSearchParams(window.location.search);
 const isSnap2Mode = query.get('mode') === 'snap2';
+const selectionDetailsValues = readSelectionDetailsModeQuery({
+  desktopDetails: 'sheet',
+  mobileDetails: 'fullscreen',
+});
 
 const injectConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
   // apiKey: () => MAZE_APIKEY,
@@ -33,6 +41,12 @@ const injectConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
       displayMode: isSnap2Mode
         ? { desktop: 'list', mobile: 'list' }
         : { desktop: 'wizard', mobile: 'list' },
+      selectionDetails: {
+        displayMode: {
+          desktop: selectionDetailsValues.desktopDetails,
+          mobile: selectionDetailsValues.mobileDetails,
+        },
+      },
     },
     modules: { position: { desktop: 'RIGHT', mobile: 'RIGHT' } }
   },
@@ -56,6 +70,14 @@ const injectConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
     productName: [{ template: '▽Product: ${PRODUCT_NAME}▽' }],
     configureButtonText: [{ template: '▽Open Configurator▽' }],
     variantName: [{ template: ' ▽Variant: ${VARIANT_NAME}▽'}],
+    // selection details
+    selectionDetailsTitle: [{ template: '▽Selection: ${SELECTION_NAME}▽' }],
+    selectionDetailsDescription: [{ template: '▽Description: ${DESCRIPTION}▽' }],
+    selectionDetailsApply: [{ template: '▽Apply selection▽' }],
+    selectionDetailsApplied: [{ template: '▽Selection applied▽' }],
+    selectionDetailsAddToSwatchbook: [{ template: '▽Add sample▽' }],
+    selectionDetailsRemoveFromSwatchbook: [{ template: '▽Remove sample▽' }],
+    selectionDetailsClose: [{ template: '▽Close details▽' }],
     // price
     priceValue: [{ template: 'Price ▽▽▽▽▽ ${PRICE}' }],
     priceSubtotal: [{ template: 'Subtotal ▽▽▽▽▽ ${SUBTOTAL}' }],
@@ -209,17 +231,20 @@ function App() {
   return (
     <TestPageLayout
       title="String replacement"
-      description={`Tests stringReplacements across name, price, CTA, filters, swatchbook, save/share, and Snap2 UI strings. Current mode: ${isSnap2Mode ? 'snap2' : 'standard'}.`}
+      description={`Tests stringReplacements across name, price, CTA, filters, Selection Details, swatchbook, save/share, and Snap2 UI strings. Current mode: ${isSnap2Mode ? 'snap2' : 'standard'}.`}
       injectConfig={injectConfig}
       dynamicConfig
       topContent={
-        <div className="ov:mb-3 ov:flex ov:items-center ov:gap-2 ov:text-sm">
-          <a href={standardHref} className="ov:rounded ov:bg-gray-200 ov:px-2 ov:py-1 ov:no-underline">
-            Standard mode
-          </a>
-          <a href={snap2Href} className="ov:rounded ov:bg-gray-200 ov:px-2 ov:py-1 ov:no-underline">
-            Snap2 mode
-          </a>
+        <div className="ov:mb-3 ov:flex ov:flex-col ov:gap-3 ov:text-sm">
+          <div className="ov:flex ov:items-center ov:gap-2">
+            <a href={standardHref} className="ov:rounded ov:bg-gray-200 ov:px-2 ov:py-1 ov:no-underline">
+              Standard mode
+            </a>
+            <a href={snap2Href} className="ov:rounded ov:bg-gray-200 ov:px-2 ov:py-1 ov:no-underline">
+              Snap2 mode
+            </a>
+          </div>
+          <SelectionDetailsModeControls values={selectionDetailsValues} />
         </div>
       }
       asideSlot={

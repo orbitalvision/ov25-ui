@@ -157,6 +157,38 @@ test('opens rich swatch details without applying until the primary action', asyn
   await expect.element(getByRole('button', { name: 'Applied' })).toBeDisabled();
 });
 
+test('string-replaces the selection details title and description', async () => {
+  const { container, getByRole } = await render(
+    <OV25UIProvider
+      {...providerProps}
+      selectionDetailsDisplayModeDesktop="modal"
+      selectionDetailsDisplayModeMobile="modal"
+      stringReplacements={{
+        selectionDetailsTitle: [
+          { template: 'Selected: ${SELECTION_NAME}' },
+        ],
+        selectionDetailsDescription: [
+          {
+            template: 'Featured: ${DESCRIPTION}',
+            trigger: { name: 'SELECTION_NAME', value: 'Ocean swatch' },
+          },
+          { template: 'Details: ${DESCRIPTION}' },
+        ],
+      }}
+    >
+      <DetailsHarness enabled includeSwatch onSelect={() => undefined} />
+    </OV25UIProvider>,
+  );
+
+  await expect.poll(() => container.querySelector('[data-swatch-eligible="true"]')).not.toBeNull();
+  (container.querySelector('.ov25-default-variant-card') as HTMLElement).click();
+
+  await expect.element(getByRole('heading', { name: 'Selected: Ocean swatch' })).toBeInTheDocument();
+  await expect.poll(() =>
+    container.querySelector('.ov25-selection-details-description')?.textContent,
+  ).toBe('Featured: A durable blue weave.');
+});
+
 test('waits for detail image decode and paint before passive preload, ignoring a closed request', async () => {
   const iframe = document.createElement('iframe');
   iframe.id = 'ov25-configurator-iframe-selection-details-preload';
@@ -226,6 +258,11 @@ test('shows selection-only fallback when swatches are disabled', async () => {
       {...providerProps}
       selectionDetailsDisplayModeDesktop="modal"
       selectionDetailsDisplayModeMobile="modal"
+      stringReplacements={{
+        selectionDetailsDescription: [
+          { template: 'Details: ${DESCRIPTION}' },
+        ],
+      }}
     >
       <DetailsHarness enabled={false} includeSwatch onSelect={() => undefined} />
     </OV25UIProvider>,

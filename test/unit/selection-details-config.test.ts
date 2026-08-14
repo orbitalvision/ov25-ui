@@ -436,6 +436,8 @@ describe('selection details content', () => {
     const definitions = new Map(
       STRING_REPLACEMENT_DEFINITIONS.map((definition) => [definition.key, definition.defaultTemplate]),
     );
+    expect(definitions.get('selectionDetailsTitle')).toBe('${SELECTION_NAME}');
+    expect(definitions.get('selectionDetailsDescription')).toBe('${DESCRIPTION}');
     expect(definitions.get('selectionDetailsApply')).toBe('Apply to Model');
     expect(definitions.get('selectionDetailsApplied')).toBe('Applied');
     expect(definitions.get('selectionDetailsAddToSwatchbook')).toBe('Add to swatchbook');
