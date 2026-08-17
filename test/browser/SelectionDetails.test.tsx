@@ -11,6 +11,7 @@ import {
 import { DefaultVariantCard } from '../../src/components/VariantSelectMenu/variant-cards/DefaultVariantCard';
 import { SelectionDetailsSurface } from '../../src/components/VariantSelectMenu/variant-cards/SelectionDetailsSurface';
 import { SELECTION_DETAILS_TOOLTIP_HOVER_DELAY_CSS_VARIABLE } from '../../src/lib/config/selection-details-tooltip-hover-delay';
+import { ANY_HOVER_CAPABILITY_MEDIA_QUERY } from '../../src/utils/viewport-mobile';
 import { generateElementCSS } from '../../setup/src/lib/config/configurator-style-variables';
 import '../../globals.css';
 
@@ -430,6 +431,41 @@ test('desktop tooltip previews on hover, has no actions, and applies directly on
   trigger.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
   expect(onSelect).toHaveBeenCalledTimes(2);
   await expect.poll(() => container.querySelector('.ov25-selection-details-surface')).toBeNull();
+});
+
+test('uses the mobile details surface on a touch-only tablet without changing the shell viewport', async () => {
+  const nativeMatchMedia = window.matchMedia.bind(window);
+  const touchOnlyMediaQuery = {
+    matches: false,
+    addEventListener: () => undefined,
+    removeEventListener: () => undefined,
+  } as unknown as MediaQueryList;
+  vi.stubGlobal('matchMedia', ((query: string) =>
+    query === ANY_HOVER_CAPABILITY_MEDIA_QUERY
+      ? touchOnlyMediaQuery
+      : nativeMatchMedia(query)) as typeof window.matchMedia);
+
+  try {
+    const { container } = await render(
+      <OV25UIProvider
+        {...providerProps}
+        selectionDetailsDisplayModeDesktop="tooltip"
+        selectionDetailsDisplayModeMobile="fullscreen"
+      >
+        <DetailsHarness enabled includeSwatch onSelect={() => undefined} />
+      </OV25UIProvider>,
+    );
+
+    const trigger = container.querySelector('.ov25-default-variant-card') as HTMLElement;
+    expect(trigger.dataset.displayMode).toBe('fullscreen');
+    trigger.click();
+
+    await expect.poll(() => container.querySelector('.ov25-selection-details-surface')?.getAttribute('data-display-mode'))
+      .toBe('fullscreen');
+    expect(container.querySelector('.ov25-selection-details-surface')?.getAttribute('data-mobile')).toBe('true');
+  } finally {
+    vi.unstubAllGlobals();
+  }
 });
 
 test('desktop tooltip reopens when the pointer returns from a React-managed ancestor', async () => {

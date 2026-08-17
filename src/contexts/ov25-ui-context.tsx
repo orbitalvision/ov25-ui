@@ -39,7 +39,11 @@ import {
   DEFAULT_CURRENCY_SYMBOL,
 } from '../lib/config/currency-display.js';
 import { findIframeWithUniqueId, type ConfiguratorIframeScreenRect } from '../utils/configurator-dom-queries.js';
-import { computeIsMobileViewport } from '../utils/viewport-mobile.js';
+import {
+  ANY_HOVER_CAPABILITY_MEDIA_QUERY,
+  computeIsMobileViewport,
+  computeSelectionDetailsUsesMobileMode,
+} from '../utils/viewport-mobile.js';
 import { resolveStringReplacement, type StringInterpolationVars } from '../lib/strings/resolve-string-replacement.js';
 import {
   createStickyLayoutController,
@@ -357,6 +361,8 @@ interface OV25UIContextType {
   animationState: AnimationState;
   iframeRef: React.RefObject<HTMLIFrameElement>;
   isMobile: boolean;
+  /** Details use the mobile interaction/surface on touch-only tablets without changing the main shell layout. */
+  selectionDetailsUsesMobileMode: boolean;
   deferThreeD: boolean;
   /** True when gallery mounts in the hidden preload container (no page slot): modal open should not wait on iframe ImageBitmap. */
   configuratorGalleryIsDeferred: boolean;
@@ -818,6 +824,9 @@ export const OV25UIProvider: React.FC<{
       isSnap2: isSnap2ProductLink,
     })
   );
+  const selectionDetailsCanHoverRef = useRef(
+    window.matchMedia?.(ANY_HOVER_CAPABILITY_MEDIA_QUERY).matches ?? true,
+  );
   const showCarouselForViewport =
     showCarousel &&
     (isMobile ? carouselLayoutMobile : carouselLayout) !== CarouselDisplayMode.None;
@@ -841,7 +850,11 @@ export const OV25UIProvider: React.FC<{
   const isSelectingProduct = useRef(false);
 
   const [selectedSwatches, setSelectedSwatches] = useLocalStorage<Swatch[]>('ov25-selected-swatches', []);
-  const selectionDetailsDisplayMode: SelectionDetailsDisplayMode = isMobile
+  const selectionDetailsUsesMobileMode = computeSelectionDetailsUsesMobileMode({
+    isMobile,
+    canHover: selectionDetailsCanHoverRef.current,
+  });
+  const selectionDetailsDisplayMode: SelectionDetailsDisplayMode = selectionDetailsUsesMobileMode
     ? selectionDetailsDisplayModeMobile
     : selectionDetailsDisplayModeDesktop;
   const [selectionDetailsState, setSelectionDetailsState] = useState<SelectionDetailsState | null>(null);
@@ -1579,17 +1592,17 @@ export const OV25UIProvider: React.FC<{
   ]);
 
   const previousSelectionDetailsModeRef = useRef(selectionDetailsDisplayMode);
-  const previousSelectionDetailsMobileRef = useRef(isMobile);
+  const previousSelectionDetailsMobileRef = useRef(selectionDetailsUsesMobileMode);
   useEffect(() => {
     if (
       previousSelectionDetailsModeRef.current !== selectionDetailsDisplayMode ||
-      previousSelectionDetailsMobileRef.current !== isMobile
+      previousSelectionDetailsMobileRef.current !== selectionDetailsUsesMobileMode
     ) {
       closeSelectionDetails(false);
       previousSelectionDetailsModeRef.current = selectionDetailsDisplayMode;
-      previousSelectionDetailsMobileRef.current = isMobile;
+      previousSelectionDetailsMobileRef.current = selectionDetailsUsesMobileMode;
     }
-  }, [closeSelectionDetails, isMobile, selectionDetailsDisplayMode]);
+  }, [closeSelectionDetails, selectionDetailsDisplayMode, selectionDetailsUsesMobileMode]);
 
   const previousDetailsProductIdRef = useRef(currentProductId);
   useEffect(() => {
@@ -2815,6 +2828,7 @@ export const OV25UIProvider: React.FC<{
     animationState,
     iframeRef,
     isMobile,
+    selectionDetailsUsesMobileMode,
     isProductGalleryStacked,
   carouselLayout,
   carouselLayoutMobile,

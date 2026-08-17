@@ -25,6 +25,7 @@ export const DefaultVariantCard = React.memo(({
   const {
     getString,
     selectionDetailsDisplayMode,
+    selectionDetailsUsesMobileMode,
     selectionDetailsState,
     swatchRulesData,
     openSelectionDetails,
@@ -40,7 +41,7 @@ export const DefaultVariantCard = React.memo(({
   const swatchVisible = (!detailsEnabled || isTooltip) && shouldShowSwatchOverlay(!!variant.isSelected, variant.swatch);
   const handleSwatchClick = getSwatchClickHandler(!!variant.isSelected, variant.swatch);
   const isSwatchSelected = isSwatchSelectedFor(variant.swatch);
-  const isDesktopTooltip = isTooltip && !isMobile;
+  const isDesktopTooltip = isTooltip && !selectionDetailsUsesMobileMode;
   const isOpen = Boolean(
     selectionDetailsState &&
     selectionDetailsState.item.id === variant.id &&

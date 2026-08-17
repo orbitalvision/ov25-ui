@@ -1,5 +1,6 @@
 export const MOBILE_WIDTH_BREAKPOINT_PX = 768;
 export const PORTRAIT_TABLET_MAX_WIDTH_PX = 1024;
+export const ANY_HOVER_CAPABILITY_MEDIA_QUERY = '(any-hover: hover)';
 
 type ComputeIsMobileViewportInput = {
   width: number;
@@ -29,4 +30,19 @@ export function computeIsMobileViewport({
   }
 
   return false;
+}
+
+/**
+ * Selection details configured as a desktop tooltip need an input capable of
+ * hovering. A touch-only tablet keeps its desktop shell, but must use the
+ * configured mobile details surface so a tap can open it.
+ */
+export function computeSelectionDetailsUsesMobileMode({
+  isMobile,
+  canHover,
+}: {
+  isMobile: boolean;
+  canHover: boolean;
+}): boolean {
+  return isMobile || !canHover;
 }

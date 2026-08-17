@@ -179,7 +179,7 @@ export function SelectionDetailsSurface() {
     preloadSelectionDetails,
     selectedSelections,
     swatchRulesData,
-    isMobile,
+    selectionDetailsUsesMobileMode,
     isSwatchBookOpen,
     getString,
     markSelectionDetailsApplied,
@@ -216,7 +216,7 @@ export function SelectionDetailsSurface() {
       appliedRequestRef.current = null;
       const skipTransition =
         selectionDetailsState.instant ||
-        (selectionDetailsState.displayMode === 'fullscreen' && !isMobile);
+        (selectionDetailsState.displayMode === 'fullscreen' && !selectionDetailsUsesMobileMode);
       if (skipTransition) {
         setPresent(true);
       } else {
@@ -236,7 +236,7 @@ export function SelectionDetailsSurface() {
     if (!rendered) return;
     const skipTransition =
       rendered.instant ||
-      (rendered.displayMode === 'fullscreen' && !isMobile);
+      (rendered.displayMode === 'fullscreen' && !selectionDetailsUsesMobileMode);
     if (skipTransition) {
       setRendered(null);
       setPresent(false);
@@ -248,7 +248,7 @@ export function SelectionDetailsSurface() {
       exitTimerRef.current = null;
       setRendered(null);
     }, exitDuration);
-  }, [selectionDetailsState, rendered, isMobile]);
+  }, [selectionDetailsState, rendered, selectionDetailsUsesMobileMode]);
 
   // Clear a pending exit transition if the entire surface unmounts.
   React.useEffect(() => () => {
@@ -260,7 +260,7 @@ export function SelectionDetailsSurface() {
   const requestedImageUrl = rendered
     ? resolveSelectionDetailsImage(
       rendered.item,
-      isMobile || isTooltip || rendered.displayMode === 'sheet'
+      selectionDetailsUsesMobileMode || isTooltip || rendered.displayMode === 'sheet'
         ? SELECTION_DETAILS_IMAGE_WIDTH_COMPACT
         : SELECTION_DETAILS_IMAGE_WIDTH_DESKTOP,
     )
@@ -500,10 +500,10 @@ export function SelectionDetailsSurface() {
   const titleId = `ov25-selection-details-title-${rendered.requestId}`;
   const mode = rendered.displayMode;
   const isFullscreen = mode === 'fullscreen';
-  const isFullscreenDesktop = isFullscreen && !isMobile;
-  const isModalDesktop = mode === 'modal' && !isMobile;
-  const slidesFromRight = mode === 'sheet' || (isFullscreen && isMobile);
-  const animate = !rendered.instant && (!isFullscreen || isMobile);
+  const isFullscreenDesktop = isFullscreen && !selectionDetailsUsesMobileMode;
+  const isModalDesktop = mode === 'modal' && !selectionDetailsUsesMobileMode;
+  const slidesFromRight = mode === 'sheet' || (isFullscreen && selectionDetailsUsesMobileMode);
+  const animate = !rendered.instant && (!isFullscreen || selectionDetailsUsesMobileMode);
   const transitionDuration = mode === 'tooltip'
     ? (present ? 160 : 125)
     : mode === 'sheet'
@@ -593,7 +593,7 @@ export function SelectionDetailsSurface() {
         style={panelStyle}
         data-display-mode={mode}
         data-layout={isFullscreenDesktop ? 'split' : 'stacked'}
-        data-mobile={isMobile}
+        data-mobile={selectionDetailsUsesMobileMode}
         data-present={present}
         data-pinned={rendered.pinned}
         data-interactive={!isTooltip && !isSwatchBookOpen}
