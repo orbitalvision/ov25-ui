@@ -1,0 +1,10 @@
+setup/bun.lock                                     |  4 +--
+ setup/package-lock.json                            | 12 ++++----
+ setup/package.json                                 |  4 +--
+ .../variant-cards/DefaultVariantCard.tsx           |  3 +-
+ .../variant-cards/SelectionDetailsSurface.tsx      | 20 ++++++------
+ src/contexts/ov25-ui-context.tsx                   | 26 ++++++++++++----
+ src/utils/viewport-mobile.ts                       | 16 ++++++++++
+ test/browser/SelectionDetails.test.tsx             | 36 ++++++++++++++++++++++
+ test/unit/selection-details-device-mode.test.ts    | 16 ++++++++++
+ 9 files changed, 110 insertions(+), 27 deletions(-)

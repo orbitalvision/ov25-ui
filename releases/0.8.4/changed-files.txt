@@ -1,0 +1,9 @@
+setup/bun.lock
+setup/package-lock.json
+setup/package.json
+src/components/VariantSelectMenu/variant-cards/DefaultVariantCard.tsx
+src/components/VariantSelectMenu/variant-cards/SelectionDetailsSurface.tsx
+src/contexts/ov25-ui-context.tsx
+src/utils/viewport-mobile.ts
+test/browser/SelectionDetails.test.tsx
+test/unit/selection-details-device-mode.test.ts

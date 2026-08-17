@@ -1,0 +1,363 @@
+diff --git a/setup/bun.lock b/setup/bun.lock
+index 2085650..6b1acb2 100644
+--- a/setup/bun.lock
++++ b/setup/bun.lock
+@@ -21,7 +21,7 @@
+         "class-variance-authority": "^0.7.0",
+         "clsx": "^2.1.0",
+         "lucide-react": "^0.540.0",
+-        "ov25-ui": "0.8.2",
++        "ov25-ui": "0.8.3",
+         "react-colorful": "^5.6.1",
+         "tailwind-merge": "^2.2.0",
+       },
+@@ -425,7 +425,7 @@
+ 
+     "object-assign": ["object-assign@4.1.1", "", {}, "sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg=="],
+ 
+-    "ov25-ui": ["ov25-ui@0.8.2", "", { "dependencies": { "@radix-ui/react-dialog": "^1.1.10", "@radix-ui/react-icons": "^1.3.2", "@radix-ui/react-popover": "^1.1.14", "@radix-ui/react-scroll-area": "^1.2.5", "@radix-ui/react-select": "^2.2.2", "@radix-ui/react-slot": "^1.0.2", "@radix-ui/react-tabs": "^1.1.2", "@react-spring/web": "^10.0.3", "@use-gesture/react": "^10.3.1", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "embla-carousel-react": "^8.6.0", "framer-motion": "^11.16.1", "gsap": "^3.13.0", "lucide-react": "^0.503.0", "react-qr-code": "^2.0.15", "sonner": "^1.7.1", "string-similarity-js": "^2.1.4", "tailwind-merge": "^3.2.0" }, "peerDependencies": { "react": "^19", "react-dom": "^19" } }, "sha512-jSFFWryWI3ZF6u30VkwNzXMZAqRUf8cMx5xuUMobgaOml4wtislySykkQenSCizVGQa+mXenFBkZHy33chy0qw=="],
++    "ov25-ui": ["ov25-ui@0.8.3", "", { "dependencies": { "@radix-ui/react-dialog": "^1.1.10", "@radix-ui/react-icons": "^1.3.2", "@radix-ui/react-popover": "^1.1.14", "@radix-ui/react-scroll-area": "^1.2.5", "@radix-ui/react-select": "^2.2.2", "@radix-ui/react-slot": "^1.0.2", "@radix-ui/react-tabs": "^1.1.2", "@react-spring/web": "^10.0.3", "@use-gesture/react": "^10.3.1", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "embla-carousel-react": "^8.6.0", "framer-motion": "^11.16.1", "gsap": "^3.13.0", "lucide-react": "^0.503.0", "react-qr-code": "^2.0.15", "sonner": "^1.7.1", "string-similarity-js": "^2.1.4", "tailwind-merge": "^3.2.0" }, "peerDependencies": { "react": "^19", "react-dom": "^19" } }, "sha512-42SmveQYB4Uuk22Ddh4V5TdyfggfasXkSy2Mt7ycZxWThKptj3qGTRJrXqw5HuZwr2n2glowGMKPm46ayncx4g=="],
+ 
+     "package-json-from-dist": ["package-json-from-dist@1.0.1", "", {}, "sha512-UEZIS3/by4OC8vL3P2dTXRETpebLI2NiI5vIrjaD/5UtrkFX/tNbwjTSRAGC/+7CAo2pIcBaRgWmcBBHcsaCIw=="],
+ 
+diff --git a/setup/package-lock.json b/setup/package-lock.json
+index c6eeefa..f562801 100644
+--- a/setup/package-lock.json
++++ b/setup/package-lock.json
+@@ -1,12 +1,12 @@
+ {
+   "name": "ov25-setup",
+-  "version": "0.8.2",
++  "version": "0.8.3",
+   "lockfileVersion": 3,
+   "requires": true,
+   "packages": {
+     "": {
+       "name": "ov25-setup",
+-      "version": "0.8.2",
++      "version": "0.8.3",
+       "dependencies": {
+         "@codemirror/commands": "^6.10.3",
+         "@codemirror/lang-css": "^6.3.1",
+@@ -24,7 +24,7 @@
+         "class-variance-authority": "^0.7.0",
+         "clsx": "^2.1.0",
+         "lucide-react": "^0.540.0",
+-        "ov25-ui": "0.8.2",
++        "ov25-ui": "0.8.3",
+         "react-colorful": "^5.6.1",
+         "tailwind-merge": "^2.2.0"
+       },
+@@ -3116,9 +3116,9 @@
+       }
+     },
+     "node_modules/ov25-ui": {
+-      "version": "0.8.2",
+-      "resolved": "https://registry.npmjs.org/ov25-ui/-/ov25-ui-0.8.2.tgz",
+-      "integrity": "sha512-jSFFWryWI3ZF6u30VkwNzXMZAqRUf8cMx5xuUMobgaOml4wtislySykkQenSCizVGQa+mXenFBkZHy33chy0qw==",
++      "version": "0.8.3",
++      "resolved": "https://registry.npmjs.org/ov25-ui/-/ov25-ui-0.8.3.tgz",
++      "integrity": "sha512-42SmveQYB4Uuk22Ddh4V5TdyfggfasXkSy2Mt7ycZxWThKptj3qGTRJrXqw5HuZwr2n2glowGMKPm46ayncx4g==",
+       "license": "MIT",
+       "dependencies": {
+         "@radix-ui/react-dialog": "^1.1.10",
+diff --git a/setup/package.json b/setup/package.json
+index cff14cf..06412af 100644
+--- a/setup/package.json
++++ b/setup/package.json
+@@ -1,6 +1,6 @@
+ {
+   "name": "ov25-setup",
+-  "version": "0.8.2",
++  "version": "0.8.3",
+   "description": "OV25 Configurator Setup visual editor component",
+   "repository": {
+     "type": "git",
+@@ -53,7 +53,7 @@
+     "class-variance-authority": "^0.7.0",
+     "clsx": "^2.1.0",
+     "lucide-react": "^0.540.0",
+-    "ov25-ui": "0.8.2",
++    "ov25-ui": "0.8.3",
+     "react-colorful": "^5.6.1",
+     "tailwind-merge": "^2.2.0"
+   },
+diff --git a/src/components/VariantSelectMenu/variant-cards/DefaultVariantCard.tsx b/src/components/VariantSelectMenu/variant-cards/DefaultVariantCard.tsx
+index 021ae4e..9c29b13 100644
+--- a/src/components/VariantSelectMenu/variant-cards/DefaultVariantCard.tsx
++++ b/src/components/VariantSelectMenu/variant-cards/DefaultVariantCard.tsx
+@@ -25,6 +25,7 @@ export const DefaultVariantCard = React.memo(({
+   const {
+     getString,
+     selectionDetailsDisplayMode,
++    selectionDetailsUsesMobileMode,
+     selectionDetailsState,
+     swatchRulesData,
+     openSelectionDetails,
+@@ -40,7 +41,7 @@ export const DefaultVariantCard = React.memo(({
+   const swatchVisible = (!detailsEnabled || isTooltip) && shouldShowSwatchOverlay(!!variant.isSelected, variant.swatch);
+   const handleSwatchClick = getSwatchClickHandler(!!variant.isSelected, variant.swatch);
+   const isSwatchSelected = isSwatchSelectedFor(variant.swatch);
+-  const isDesktopTooltip = isTooltip && !isMobile;
++  const isDesktopTooltip = isTooltip && !selectionDetailsUsesMobileMode;
+   const isOpen = Boolean(
+     selectionDetailsState &&
+     selectionDetailsState.item.id === variant.id &&
+diff --git a/src/components/VariantSelectMenu/variant-cards/SelectionDetailsSurface.tsx b/src/components/VariantSelectMenu/variant-cards/SelectionDetailsSurface.tsx
+index 655042b..dfe1698 100644
+--- a/src/components/VariantSelectMenu/variant-cards/SelectionDetailsSurface.tsx
++++ b/src/components/VariantSelectMenu/variant-cards/SelectionDetailsSurface.tsx
+@@ -179,7 +179,7 @@ export function SelectionDetailsSurface() {
+     preloadSelectionDetails,
+     selectedSelections,
+     swatchRulesData,
+-    isMobile,
++    selectionDetailsUsesMobileMode,
+     isSwatchBookOpen,
+     getString,
+     markSelectionDetailsApplied,
+@@ -216,7 +216,7 @@ export function SelectionDetailsSurface() {
+       appliedRequestRef.current = null;
+       const skipTransition =
+         selectionDetailsState.instant ||
+-        (selectionDetailsState.displayMode === 'fullscreen' && !isMobile);
++        (selectionDetailsState.displayMode === 'fullscreen' && !selectionDetailsUsesMobileMode);
+       if (skipTransition) {
+         setPresent(true);
+       } else {
+@@ -236,7 +236,7 @@ export function SelectionDetailsSurface() {
+     if (!rendered) return;
+     const skipTransition =
+       rendered.instant ||
+-      (rendered.displayMode === 'fullscreen' && !isMobile);
++      (rendered.displayMode === 'fullscreen' && !selectionDetailsUsesMobileMode);
+     if (skipTransition) {
+       setRendered(null);
+       setPresent(false);
+@@ -248,7 +248,7 @@ export function SelectionDetailsSurface() {
+       exitTimerRef.current = null;
+       setRendered(null);
+     }, exitDuration);
+-  }, [selectionDetailsState, rendered, isMobile]);
++  }, [selectionDetailsState, rendered, selectionDetailsUsesMobileMode]);
+ 
+   // Clear a pending exit transition if the entire surface unmounts.
+   React.useEffect(() => () => {
+@@ -260,7 +260,7 @@ export function SelectionDetailsSurface() {
+   const requestedImageUrl = rendered
+     ? resolveSelectionDetailsImage(
+       rendered.item,
+-      isMobile || isTooltip || rendered.displayMode === 'sheet'
++      selectionDetailsUsesMobileMode || isTooltip || rendered.displayMode === 'sheet'
+         ? SELECTION_DETAILS_IMAGE_WIDTH_COMPACT
+         : SELECTION_DETAILS_IMAGE_WIDTH_DESKTOP,
+     )
+@@ -500,10 +500,10 @@ export function SelectionDetailsSurface() {
+   const titleId = `ov25-selection-details-title-${rendered.requestId}`;
+   const mode = rendered.displayMode;
+   const isFullscreen = mode === 'fullscreen';
+-  const isFullscreenDesktop = isFullscreen && !isMobile;
+-  const isModalDesktop = mode === 'modal' && !isMobile;
+-  const slidesFromRight = mode === 'sheet' || (isFullscreen && isMobile);
+-  const animate = !rendered.instant && (!isFullscreen || isMobile);
++  const isFullscreenDesktop = isFullscreen && !selectionDetailsUsesMobileMode;
++  const isModalDesktop = mode === 'modal' && !selectionDetailsUsesMobileMode;
++  const slidesFromRight = mode === 'sheet' || (isFullscreen && selectionDetailsUsesMobileMode);
++  const animate = !rendered.instant && (!isFullscreen || selectionDetailsUsesMobileMode);
+   const transitionDuration = mode === 'tooltip'
+     ? (present ? 160 : 125)
+     : mode === 'sheet'
+@@ -593,7 +593,7 @@ export function SelectionDetailsSurface() {
+         style={panelStyle}
+         data-display-mode={mode}
+         data-layout={isFullscreenDesktop ? 'split' : 'stacked'}
+-        data-mobile={isMobile}
++        data-mobile={selectionDetailsUsesMobileMode}
+         data-present={present}
+         data-pinned={rendered.pinned}
+         data-interactive={!isTooltip && !isSwatchBookOpen}
+diff --git a/src/contexts/ov25-ui-context.tsx b/src/contexts/ov25-ui-context.tsx
+index 44fc1fd..be2c00a 100644
+--- a/src/contexts/ov25-ui-context.tsx
++++ b/src/contexts/ov25-ui-context.tsx
+@@ -39,7 +39,11 @@ import {
+   DEFAULT_CURRENCY_SYMBOL,
+ } from '../lib/config/currency-display.js';
+ import { findIframeWithUniqueId, type ConfiguratorIframeScreenRect } from '../utils/configurator-dom-queries.js';
+-import { computeIsMobileViewport } from '../utils/viewport-mobile.js';
++import {
++  ANY_HOVER_CAPABILITY_MEDIA_QUERY,
++  computeIsMobileViewport,
++  computeSelectionDetailsUsesMobileMode,
++} from '../utils/viewport-mobile.js';
+ import { resolveStringReplacement, type StringInterpolationVars } from '../lib/strings/resolve-string-replacement.js';
+ import {
+   createStickyLayoutController,
+@@ -357,6 +361,8 @@ interface OV25UIContextType {
+   animationState: AnimationState;
+   iframeRef: React.RefObject<HTMLIFrameElement>;
+   isMobile: boolean;
++  /** Details use the mobile interaction/surface on touch-only tablets without changing the main shell layout. */
++  selectionDetailsUsesMobileMode: boolean;
+   deferThreeD: boolean;
+   /** True when gallery mounts in the hidden preload container (no page slot): modal open should not wait on iframe ImageBitmap. */
+   configuratorGalleryIsDeferred: boolean;
+@@ -818,6 +824,9 @@ export const OV25UIProvider: React.FC<{
+       isSnap2: isSnap2ProductLink,
+     })
+   );
++  const selectionDetailsCanHoverRef = useRef(
++    window.matchMedia?.(ANY_HOVER_CAPABILITY_MEDIA_QUERY).matches ?? true,
++  );
+   const showCarouselForViewport =
+     showCarousel &&
+     (isMobile ? carouselLayoutMobile : carouselLayout) !== CarouselDisplayMode.None;
+@@ -841,7 +850,11 @@ export const OV25UIProvider: React.FC<{
+   const isSelectingProduct = useRef(false);
+ 
+   const [selectedSwatches, setSelectedSwatches] = useLocalStorage<Swatch[]>('ov25-selected-swatches', []);
+-  const selectionDetailsDisplayMode: SelectionDetailsDisplayMode = isMobile
++  const selectionDetailsUsesMobileMode = computeSelectionDetailsUsesMobileMode({
++    isMobile,
++    canHover: selectionDetailsCanHoverRef.current,
++  });
++  const selectionDetailsDisplayMode: SelectionDetailsDisplayMode = selectionDetailsUsesMobileMode
+     ? selectionDetailsDisplayModeMobile
+     : selectionDetailsDisplayModeDesktop;
+   const [selectionDetailsState, setSelectionDetailsState] = useState<SelectionDetailsState | null>(null);
+@@ -1579,17 +1592,17 @@ export const OV25UIProvider: React.FC<{
+   ]);
+ 
+   const previousSelectionDetailsModeRef = useRef(selectionDetailsDisplayMode);
+-  const previousSelectionDetailsMobileRef = useRef(isMobile);
++  const previousSelectionDetailsMobileRef = useRef(selectionDetailsUsesMobileMode);
+   useEffect(() => {
+     if (
+       previousSelectionDetailsModeRef.current !== selectionDetailsDisplayMode ||
+-      previousSelectionDetailsMobileRef.current !== isMobile
++      previousSelectionDetailsMobileRef.current !== selectionDetailsUsesMobileMode
+     ) {
+       closeSelectionDetails(false);
+       previousSelectionDetailsModeRef.current = selectionDetailsDisplayMode;
+-      previousSelectionDetailsMobileRef.current = isMobile;
++      previousSelectionDetailsMobileRef.current = selectionDetailsUsesMobileMode;
+     }
+-  }, [closeSelectionDetails, isMobile, selectionDetailsDisplayMode]);
++  }, [closeSelectionDetails, selectionDetailsDisplayMode, selectionDetailsUsesMobileMode]);
+ 
+   const previousDetailsProductIdRef = useRef(currentProductId);
+   useEffect(() => {
+@@ -2815,6 +2828,7 @@ export const OV25UIProvider: React.FC<{
+     animationState,
+     iframeRef,
+     isMobile,
++    selectionDetailsUsesMobileMode,
+     isProductGalleryStacked,
+   carouselLayout,
+   carouselLayoutMobile,
+diff --git a/src/utils/viewport-mobile.ts b/src/utils/viewport-mobile.ts
+index 463763f..548f334 100644
+--- a/src/utils/viewport-mobile.ts
++++ b/src/utils/viewport-mobile.ts
+@@ -1,5 +1,6 @@
+ export const MOBILE_WIDTH_BREAKPOINT_PX = 768;
+ export const PORTRAIT_TABLET_MAX_WIDTH_PX = 1024;
++export const ANY_HOVER_CAPABILITY_MEDIA_QUERY = '(any-hover: hover)';
+ 
+ type ComputeIsMobileViewportInput = {
+   width: number;
+@@ -30,3 +31,18 @@ export function computeIsMobileViewport({
+ 
+   return false;
+ }
++
++/**
++ * Selection details configured as a desktop tooltip need an input capable of
++ * hovering. A touch-only tablet keeps its desktop shell, but must use the
++ * configured mobile details surface so a tap can open it.
++ */
++export function computeSelectionDetailsUsesMobileMode({
++  isMobile,
++  canHover,
++}: {
++  isMobile: boolean;
++  canHover: boolean;
++}): boolean {
++  return isMobile || !canHover;
++}
+diff --git a/test/browser/SelectionDetails.test.tsx b/test/browser/SelectionDetails.test.tsx
+index 14e7a4f..98fde31 100644
+--- a/test/browser/SelectionDetails.test.tsx
++++ b/test/browser/SelectionDetails.test.tsx
+@@ -11,6 +11,7 @@ import {
+ import { DefaultVariantCard } from '../../src/components/VariantSelectMenu/variant-cards/DefaultVariantCard';
+ import { SelectionDetailsSurface } from '../../src/components/VariantSelectMenu/variant-cards/SelectionDetailsSurface';
+ import { SELECTION_DETAILS_TOOLTIP_HOVER_DELAY_CSS_VARIABLE } from '../../src/lib/config/selection-details-tooltip-hover-delay';
++import { ANY_HOVER_CAPABILITY_MEDIA_QUERY } from '../../src/utils/viewport-mobile';
+ import { generateElementCSS } from '../../setup/src/lib/config/configurator-style-variables';
+ import '../../globals.css';
+ 
+@@ -432,6 +433,41 @@ test('desktop tooltip previews on hover, has no actions, and applies directly on
+   await expect.poll(() => container.querySelector('.ov25-selection-details-surface')).toBeNull();
+ });
+ 
++test('uses the mobile details surface on a touch-only tablet without changing the shell viewport', async () => {
++  const nativeMatchMedia = window.matchMedia.bind(window);
++  const touchOnlyMediaQuery = {
++    matches: false,
++    addEventListener: () => undefined,
++    removeEventListener: () => undefined,
++  } as unknown as MediaQueryList;
++  vi.stubGlobal('matchMedia', ((query: string) =>
++    query === ANY_HOVER_CAPABILITY_MEDIA_QUERY
++      ? touchOnlyMediaQuery
++      : nativeMatchMedia(query)) as typeof window.matchMedia);
++
++  try {
++    const { container } = await render(
++      <OV25UIProvider
++        {...providerProps}
++        selectionDetailsDisplayModeDesktop="tooltip"
++        selectionDetailsDisplayModeMobile="fullscreen"
++      >
++        <DetailsHarness enabled includeSwatch onSelect={() => undefined} />
++      </OV25UIProvider>,
++    );
++
++    const trigger = container.querySelector('.ov25-default-variant-card') as HTMLElement;
++    expect(trigger.dataset.displayMode).toBe('fullscreen');
++    trigger.click();
++
++    await expect.poll(() => container.querySelector('.ov25-selection-details-surface')?.getAttribute('data-display-mode'))
++      .toBe('fullscreen');
++    expect(container.querySelector('.ov25-selection-details-surface')?.getAttribute('data-mobile')).toBe('true');
++  } finally {
++    vi.unstubAllGlobals();
++  }
++});
++
+ test('desktop tooltip reopens when the pointer returns from a React-managed ancestor', async () => {
+   const { container } = await render(
+     <OV25UIProvider
+diff --git a/test/unit/selection-details-device-mode.test.ts b/test/unit/selection-details-device-mode.test.ts
+new file mode 100644
+index 0000000..de8b491
+--- /dev/null
++++ b/test/unit/selection-details-device-mode.test.ts
+@@ -0,0 +1,16 @@
++import { describe, expect, it } from 'vitest';
++import { computeSelectionDetailsUsesMobileMode } from '../../src/utils/viewport-mobile';
++
++describe('selection-details device mode', () => {
++  it.each([
++    [true, true, true],
++    [true, false, true],
++    [false, false, true],
++    [false, true, false],
++  ])(
++    'uses the mobile details surface when isMobile=%s and canHover=%s',
++    (isMobile, canHover, expected) => {
++      expect(computeSelectionDetailsUsesMobileMode({ isMobile, canHover })).toBe(expected);
++    },
++  );
++});

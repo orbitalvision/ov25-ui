@@ -1,0 +1,2 @@
+3d48de3 (HEAD -> main, origin/main, origin/HEAD) fix(details): use mobile mode on touch tablets
+380c3fa (tag: ov25-setup@0.8.3) chore: release ov25-setup 0.8.3
