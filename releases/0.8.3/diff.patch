@@ -1,0 +1,1024 @@
+diff --git a/dev/react-test/templates/TestPageLayout.jsx b/dev/react-test/templates/TestPageLayout.jsx
+index ce9d0d1..a81efae 100644
+--- a/dev/react-test/templates/TestPageLayout.jsx
++++ b/dev/react-test/templates/TestPageLayout.jsx
+@@ -56,6 +56,7 @@ function ProductTabs() {
+  * @param {boolean} [props.showPrice]
+  * @param {boolean} [props.showProductTabs]
+  * @param {React.ReactNode} [props.topContent]
++ * @param {React.ReactNode} [props.bottomContent]
+  * @param {React.ReactNode} [props.asideSlot]
+  * @param {boolean} [props.renderControls]
+  * @param {boolean} [props.renderSwatches]
+@@ -72,6 +73,7 @@ export function TestPageLayout({
+   showPrice = true,
+   showProductTabs = false,
+   topContent,
++  bottomContent,
+   asideSlot,
+   renderControls = true,
+   renderSwatches = true,
+@@ -149,6 +151,7 @@ export function TestPageLayout({
+           </div>
+         </div>
+         {showProductTabs && <ProductTabs />}
++        {bottomContent}
+       </div>
+     </ViewportWrapper>
+   );
+diff --git a/dev/react-test/tests/inline-sticky-fixture.jsx b/dev/react-test/tests/inline-sticky-fixture.jsx
+index 1239c65..55a6b6e 100644
+--- a/dev/react-test/tests/inline-sticky-fixture.jsx
++++ b/dev/react-test/tests/inline-sticky-fixture.jsx
+@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
+ import { injectConfigurator } from 'ov25-ui';
+ import sofaImage from '../src/images/sofa.png';
+ import '../src/index.css';
++import { readOptionalSelectionDetailsQuery } from '../templates/SelectionDetailsControls.jsx';
+ 
+ const DEMO_RETAILER_APIKEY = import.meta.env.VITE_DEMO_RETAILER_APIKEY;
+ 
+@@ -36,6 +37,7 @@ const useContentBoxGalleryTarget = params.get('hostBox') === 'content-box';
+ const useReplacementStyleHazard = params.get('replacementStyle') === 'hazardous';
+ const useFixedMobileVariantsHost = params.get('fixedMobileVariants') === '1';
+ const forceBodyLayerFallback = params.get('fallback') === 'body-layer';
++const selectionDetails = readOptionalSelectionDetailsQuery();
+ const useFixtureRootOverflowBlocker =
+   params.get('overflowBlocker') === 'fixture-root';
+ const requestedDesktopDisplayMode = params.get('desktopMode');
+@@ -260,7 +262,10 @@ function App() {
+       configurator: {
+         displayMode: { desktop: desktopDisplayMode, mobile: mobileDisplayMode },
+         triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
+-        variants: { displayMode: { desktop: 'list', mobile: 'list' } },
++        variants: {
++          displayMode: { desktop: 'list', mobile: 'list' },
++          ...(selectionDetails ? { selectionDetails } : {}),
++        },
+       },
+       branding: {
+         cssString: `
+@@ -334,7 +339,12 @@ function App() {
+               ) : (
+                 <GalleryTarget />
+               )}
+-              <p className="fixture-gallery-note">Hepburn collection / three seat</p>
++              <p
++                className="fixture-gallery-note"
++                data-selection-details-scroll-sentinel
++              >
++                Hepburn collection / three seat
++              </p>
+             </div>
+             <aside className="fixture-product-information" aria-label="Product options">
+               <ProductInformation />
+diff --git a/dev/react-test/tests/selection-details.jsx b/dev/react-test/tests/selection-details.jsx
+index e17d9c5..9baecc0 100644
+--- a/dev/react-test/tests/selection-details.jsx
++++ b/dev/react-test/tests/selection-details.jsx
+@@ -35,6 +35,41 @@ function getPreset() {
+   return PRESETS[pageName] ?? PRESETS['selection-details-tooltip-sheet'];
+ }
+ 
++function BelowFoldProductContent() {
++  const sections = [
++    {
++      title: 'Materials and care',
++      copy: 'Performance upholstery, solid timber framing, and removable seat cushions designed for everyday use.',
++    },
++    {
++      title: 'Dimensions',
++      copy: 'Review the overall width, seat height, and clearance recommendations before placing your order.',
++    },
++    {
++      title: 'Delivery and returns',
++      copy: 'Made-to-order pieces include room-of-choice delivery and a dedicated delivery-day support team.',
++    },
++  ];
++
++  return (
++    <div
++      className="ov:mt-10 ov:space-y-6 ov:pb-32"
++      data-selection-details-scroll-content
++    >
++      <h2 className="ov:text-2xl ov:font-semibold">Product information</h2>
++      {sections.map((section) => (
++        <section
++          key={section.title}
++          className="ov:min-h-[180px] ov:rounded-lg ov:border ov:border-gray-200 ov:bg-gray-50 ov:p-6"
++        >
++          <h3 className="ov:mb-3 ov:text-lg ov:font-semibold">{section.title}</h3>
++          <p className="ov:max-w-3xl ov:text-[#525252]">{section.copy}</p>
++        </section>
++      ))}
++    </div>
++  );
++}
++
+ function App() {
+   const preset = getPreset();
+   const values = readSelectionDetailsFixtureQuery({
+@@ -86,6 +121,7 @@ function App() {
+       description={preset.description}
+       injectConfig={config}
+       topContent={<SelectionDetailsControls values={values} />}
++      bottomContent={<BelowFoldProductContent />}
+     />
+   );
+ }
+diff --git a/src/components/VariantSelectMenu/VariantContentDesktop.tsx b/src/components/VariantSelectMenu/VariantContentDesktop.tsx
+index 9f11dca..4fa15d8 100644
+--- a/src/components/VariantSelectMenu/VariantContentDesktop.tsx
++++ b/src/components/VariantSelectMenu/VariantContentDesktop.tsx
+@@ -5,6 +5,7 @@ import { createPortal } from 'react-dom';
+ import { useOV25UI } from "../../contexts/ov25-ui-context.js";
+ import { requestTransitionSnapshotFromIframe } from "../../utils/request-transition-snapshot-from-iframe.js";
+ import { getConfiguratorIframeContainerScreenRect } from "../../utils/configurator-dom-queries.js";
++import { acquirePageScrollLock } from '../../utils/page-scroll-lock.js';
+ import { ProductVariantsWrapper } from './ProductVariantsWrapper.js';
+ import { Snap2Wrapper } from './Snap2Wrapper.js';
+ import { WizardVariants } from './WizardVariants.js';
+@@ -12,169 +13,6 @@ import { VariantsHeader } from './VariantsHeader.js';
+ 
+ const useBrowserLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
+ 
+-type SavedInlineStyleDeclaration = {
+-  property: string;
+-  value: string;
+-  priority: string;
+-};
+-
+-type DesktopSheetPageLockSnapshot = {
+-  bodyDeclarations: SavedInlineStyleDeclaration[];
+-  htmlDeclarations: SavedInlineStyleDeclaration[];
+-  scrollX: number;
+-  scrollY: number;
+-};
+-
+-const BODY_PAGE_LOCK_PROPERTIES = new Set([
+-  'overflow',
+-  'overflow-x',
+-  'overflow-y',
+-  'position',
+-  'inset',
+-  'top',
+-  'right',
+-  'bottom',
+-  'left',
+-  'width',
+-  'min-width',
+-  'max-width',
+-  'box-sizing',
+-  'margin',
+-  'margin-top',
+-  'margin-right',
+-  'margin-bottom',
+-  'margin-left',
+-]);
+-const HTML_PAGE_LOCK_PROPERTIES = new Set([
+-  'overflow',
+-  'overflow-x',
+-  'overflow-y',
+-  'scrollbar-gutter',
+-]);
+-
+-let desktopSheetPageLockCount = 0;
+-let desktopSheetPageLockSnapshot: DesktopSheetPageLockSnapshot | null = null;
+-
+-function captureInlineStyleDeclarations(
+-  element: HTMLElement,
+-  properties: Set<string>,
+-): SavedInlineStyleDeclaration[] {
+-  const declarations: SavedInlineStyleDeclaration[] = [];
+-  for (let index = 0; index < element.style.length; index += 1) {
+-    const property = element.style.item(index);
+-    if (!properties.has(property)) continue;
+-    declarations.push({
+-      property,
+-      value: element.style.getPropertyValue(property),
+-      priority: element.style.getPropertyPriority(property),
+-    });
+-  }
+-  return declarations;
+-}
+-
+-function restoreInlineStyleDeclarations(
+-  element: HTMLElement,
+-  properties: Set<string>,
+-  declarations: SavedInlineStyleDeclaration[],
+-): void {
+-  for (const property of properties) element.style.removeProperty(property);
+-  for (const declaration of declarations) {
+-    element.style.setProperty(
+-      declaration.property,
+-      declaration.value,
+-      declaration.priority,
+-    );
+-  }
+-}
+-
+-function setPageLockStyle(
+-  element: HTMLElement,
+-  property: string,
+-  value: string,
+-): void {
+-  element.style.setProperty(property, value, 'important');
+-}
+-
+-function acquireDesktopSheetPageLock(): () => void {
+-  if (typeof document === 'undefined' || typeof window === 'undefined') return () => {};
+-
+-  desktopSheetPageLockCount += 1;
+-  if (desktopSheetPageLockCount === 1) {
+-    const body = document.body;
+-    const html = document.documentElement;
+-    const bodyStyle = window.getComputedStyle(body);
+-    const bodyRect = body.getBoundingClientRect();
+-    const zoom = bodyStyle.getPropertyValue('zoom').trim();
+-    const zoomIsNormal = !zoom || zoom === 'normal' || Math.abs((Number.parseFloat(zoom) || 1) - 1) < 0.001;
+-    const canFreezeMeasuredBody =
+-      bodyStyle.display !== 'contents' &&
+-      bodyStyle.transform === 'none' &&
+-      zoomIsNormal &&
+-      bodyRect.width > 0;
+-
+-    desktopSheetPageLockSnapshot = {
+-      bodyDeclarations: captureInlineStyleDeclarations(body, BODY_PAGE_LOCK_PROPERTIES),
+-      htmlDeclarations: captureInlineStyleDeclarations(html, HTML_PAGE_LOCK_PROPERTIES),
+-      scrollX: window.scrollX,
+-      scrollY: window.scrollY,
+-    };
+-
+-    setPageLockStyle(body, 'overflow-x', 'hidden');
+-    setPageLockStyle(body, 'overflow-y', 'hidden');
+-    setPageLockStyle(body, 'position', 'fixed');
+-
+-    if (canFreezeMeasuredBody) {
+-      const frozenWidth = `${bodyRect.width}px`;
+-      setPageLockStyle(body, 'box-sizing', 'border-box');
+-      setPageLockStyle(body, 'margin-top', '0px');
+-      setPageLockStyle(body, 'margin-right', '0px');
+-      setPageLockStyle(body, 'margin-bottom', '0px');
+-      setPageLockStyle(body, 'margin-left', '0px');
+-      setPageLockStyle(body, 'top', `${bodyRect.top}px`);
+-      setPageLockStyle(body, 'right', 'auto');
+-      setPageLockStyle(body, 'bottom', 'auto');
+-      setPageLockStyle(body, 'left', `${bodyRect.left}px`);
+-      setPageLockStyle(body, 'width', frozenWidth);
+-      setPageLockStyle(body, 'min-width', frozenWidth);
+-      setPageLockStyle(body, 'max-width', frozenWidth);
+-      setPageLockStyle(html, 'scrollbar-gutter', 'auto');
+-    } else {
+-      setPageLockStyle(body, 'top', `${-window.scrollY}px`);
+-      setPageLockStyle(body, 'width', '100%');
+-      if (window.innerWidth > html.clientWidth) {
+-        setPageLockStyle(html, 'scrollbar-gutter', 'stable');
+-      }
+-    }
+-
+-    setPageLockStyle(html, 'overflow-x', 'hidden');
+-    setPageLockStyle(html, 'overflow-y', 'hidden');
+-  }
+-
+-  let released = false;
+-  return () => {
+-    if (released) return;
+-    released = true;
+-    desktopSheetPageLockCount = Math.max(0, desktopSheetPageLockCount - 1);
+-    if (desktopSheetPageLockCount !== 0) return;
+-
+-    const snapshot = desktopSheetPageLockSnapshot;
+-    desktopSheetPageLockSnapshot = null;
+-    if (!snapshot) return;
+-
+-    restoreInlineStyleDeclarations(
+-      document.body,
+-      BODY_PAGE_LOCK_PROPERTIES,
+-      snapshot.bodyDeclarations,
+-    );
+-    restoreInlineStyleDeclarations(
+-      document.documentElement,
+-      HTML_PAGE_LOCK_PROPERTIES,
+-      snapshot.htmlDeclarations,
+-    );
+-    window.scrollTo(snapshot.scrollX, snapshot.scrollY);
+-  };
+-}
+-
+ export function VariantContentDesktop() {
+     const {
+         isVariantsOpen,
+@@ -203,7 +41,7 @@ export function VariantContentDesktop() {
+     const shouldLockPage = isVariantsOpen || isDrawerOrDialogOpen;
+     useBrowserLayoutEffect(() => {
+       if (!shouldLockPage) return;
+-      return acquireDesktopSheetPageLock();
++      return acquirePageScrollLock();
+     }, [shouldLockPage]);
+     
+     useEffect(() => {
+diff --git a/src/components/VariantSelectMenu/variant-cards/SelectionDetailsSurface.tsx b/src/components/VariantSelectMenu/variant-cards/SelectionDetailsSurface.tsx
+index 2863904..655042b 100644
+--- a/src/components/VariantSelectMenu/variant-cards/SelectionDetailsSurface.tsx
++++ b/src/components/VariantSelectMenu/variant-cards/SelectionDetailsSurface.tsx
+@@ -8,6 +8,7 @@ import {
+ } from '../../../contexts/ov25-ui-context.js';
+ import { PLACEHOLDER_IMAGE_URL } from '../../../lib/placeholder-image.js';
+ import { useSwatchActions } from '../../../hooks/useSwatchActions.js';
++import { acquirePageScrollLock } from '../../../utils/page-scroll-lock.js';
+ import { Button } from '../../ui/button.js';
+ 
+ const ENTER_MS = 220;
+@@ -21,31 +22,16 @@ const TOOLTIP_HEIGHT = 360;
+ const SELECTION_DETAILS_IMAGE_WIDTH_COMPACT = 400;
+ const SELECTION_DETAILS_IMAGE_WIDTH_DESKTOP = 800;
+ const OV25_CDN_ORIGIN = 'https://cdn.orbital.vision';
++const useBrowserLayoutEffect = typeof window === 'undefined' ? React.useEffect : React.useLayoutEffect;
+ // React 18 drops `inert={true}`, while React 19 drops `inert=""`.
+ // The canonical named value in a widened spread emits the boolean attribute in both.
+ const INERT_HTML_ATTRIBUTE: Record<string, string> = { inert: 'inert' };
+-let bodyScrollLockCount = 0;
+-let bodyOverflowBeforeSelectionDetails = '';
+ let backgroundIsolationCount = 0;
+ const backgroundElementState = new Map<Element, {
+   ariaHidden: string | null;
+   inert: boolean;
+ }>();
+ 
+-function lockBodyScroll(): () => void {
+-  if (bodyScrollLockCount === 0) {
+-    bodyOverflowBeforeSelectionDetails = document.body.style.overflow;
+-    document.body.style.overflow = 'hidden';
+-  }
+-  bodyScrollLockCount += 1;
+-  return () => {
+-    bodyScrollLockCount = Math.max(0, bodyScrollLockCount - 1);
+-    if (bodyScrollLockCount === 0) {
+-      document.body.style.overflow = bodyOverflowBeforeSelectionDetails;
+-    }
+-  };
+-}
+-
+ function isolatePageBackground(surface: HTMLElement): () => void {
+   if (backgroundIsolationCount === 0) {
+     const rootNode = surface.getRootNode();
+@@ -270,6 +256,7 @@ export function SelectionDetailsSurface() {
+   }, []);
+ 
+   const isTooltip = rendered?.displayMode === 'tooltip';
++  const shouldLockPage = Boolean(rendered && !isTooltip);
+   const requestedImageUrl = rendered
+     ? resolveSelectionDetailsImage(
+       rendered.item,
+@@ -416,17 +403,21 @@ export function SelectionDetailsSurface() {
+     };
+   }, [closeSelectionDetails, isTooltip, rendered]);
+ 
+-  // Make modal-style surfaces exclusive by locking scroll and isolating page content.
++  // Freeze the page before paint and keep it frozen through the exit transition.
++  useBrowserLayoutEffect(() => {
++    if (!shouldLockPage) return;
++    return acquirePageScrollLock();
++  }, [shouldLockPage]);
++
++  // Make a presented modal-style surface exclusive to assistive technologies.
+   React.useEffect(() => {
+     if (!rendered || isTooltip || !present) return;
+     const surface = surfaceRef.current;
+     if (!surface) return;
+ 
+-    const unlockBodyScroll = lockBodyScroll();
+     const restorePageBackground = isolatePageBackground(surface);
+ 
+     return () => {
+-      unlockBodyScroll();
+       restorePageBackground();
+     };
+   }, [isTooltip, present, rendered]);
+@@ -577,13 +568,14 @@ export function SelectionDetailsSurface() {
+     <div
+       className="ov25-selection-details-root ov:fixed ov:inset-0 ov:pointer-events-none"
+     >
+-      {mode === 'modal' && (
++      {(mode === 'modal' || mode === 'sheet') && (
+         <div
+-          className="ov25-selection-details-backdrop ov:absolute ov:inset-0 ov:bg-black/45 ov:pointer-events-auto"
++          className={`ov25-selection-details-backdrop ov:absolute ov:inset-0 ov:pointer-events-auto ${mode === 'modal' ? 'ov:bg-black/45' : ''}`}
+           style={{
+-            opacity: present ? 1 : 0,
+-            transition: animate ? `opacity ${transitionTiming}` : 'none',
++            opacity: mode === 'modal' ? (present ? 1 : 0) : 1,
++            transition: mode === 'modal' && animate ? `opacity ${transitionTiming}` : 'none',
+           }}
++          data-display-mode={mode}
+           data-present={present}
+           aria-hidden="true"
+           onPointerDown={() => closeSelectionDetails(true)}
+diff --git a/src/utils/page-scroll-lock.ts b/src/utils/page-scroll-lock.ts
+new file mode 100644
+index 0000000..ac22c5c
+--- /dev/null
++++ b/src/utils/page-scroll-lock.ts
+@@ -0,0 +1,173 @@
++type SavedInlineStyleDeclaration = {
++  property: string;
++  value: string;
++  priority: string;
++};
++
++type PageScrollLockSnapshot = {
++  bodyDeclarations: SavedInlineStyleDeclaration[];
++  htmlDeclarations: SavedInlineStyleDeclaration[];
++  scrollX: number;
++  scrollY: number;
++};
++
++const BODY_PAGE_LOCK_PROPERTIES = new Set([
++  'overflow',
++  'overflow-x',
++  'overflow-y',
++  'position',
++  'inset',
++  'top',
++  'right',
++  'bottom',
++  'left',
++  'width',
++  'min-width',
++  'max-width',
++  'box-sizing',
++  'margin',
++  'margin-top',
++  'margin-right',
++  'margin-bottom',
++  'margin-left',
++]);
++const HTML_PAGE_LOCK_PROPERTIES = new Set([
++  'overflow',
++  'overflow-x',
++  'overflow-y',
++  'scrollbar-gutter',
++]);
++
++let pageScrollLockCount = 0;
++let pageScrollLockSnapshot: PageScrollLockSnapshot | null = null;
++
++function captureInlineStyleDeclarations(
++  element: HTMLElement,
++  properties: Set<string>,
++): SavedInlineStyleDeclaration[] {
++  const declarations: SavedInlineStyleDeclaration[] = [];
++  for (let index = 0; index < element.style.length; index += 1) {
++    const property = element.style.item(index);
++    if (!properties.has(property)) continue;
++    declarations.push({
++      property,
++      value: element.style.getPropertyValue(property),
++      priority: element.style.getPropertyPriority(property),
++    });
++  }
++  return declarations;
++}
++
++function restoreInlineStyleDeclarations(
++  element: HTMLElement,
++  properties: Set<string>,
++  declarations: SavedInlineStyleDeclaration[],
++): void {
++  for (const property of properties) element.style.removeProperty(property);
++  for (const declaration of declarations) {
++    element.style.setProperty(
++      declaration.property,
++      declaration.value,
++      declaration.priority,
++    );
++  }
++}
++
++function setPageLockStyle(
++  element: HTMLElement,
++  property: string,
++  value: string,
++): void {
++  element.style.setProperty(property, value, 'important');
++}
++
++/**
++ * Freeze the merchant page at its current geometry while a modal-style
++ * overlay is mounted. Calls are reference counted so nested overlays share a
++ * single snapshot and restore the original inline styles only after the final
++ * overlay releases its lock.
++ */
++export function acquirePageScrollLock(): () => void {
++  if (typeof document === 'undefined' || typeof window === 'undefined') return () => {};
++
++  pageScrollLockCount += 1;
++  if (pageScrollLockCount === 1) {
++    const body = document.body;
++    const html = document.documentElement;
++    const bodyStyle = window.getComputedStyle(body);
++    const bodyRect = body.getBoundingClientRect();
++    const zoom = bodyStyle.getPropertyValue('zoom').trim();
++    const zoomIsNormal = !zoom || zoom === 'normal' || Math.abs((Number.parseFloat(zoom) || 1) - 1) < 0.001;
++    const canFreezeMeasuredBody =
++      bodyStyle.display !== 'contents' &&
++      bodyStyle.transform === 'none' &&
++      zoomIsNormal &&
++      bodyRect.width > 0;
++
++    pageScrollLockSnapshot = {
++      bodyDeclarations: captureInlineStyleDeclarations(body, BODY_PAGE_LOCK_PROPERTIES),
++      htmlDeclarations: captureInlineStyleDeclarations(html, HTML_PAGE_LOCK_PROPERTIES),
++      scrollX: window.scrollX,
++      scrollY: window.scrollY,
++    };
++
++    // Once the body becomes fixed, its authored root overflow stops being
++    // propagated to the viewport and can clip content that extends beyond a
++    // percentage-height body. Keep both axes visible and let the locked root
++    // element own viewport clipping instead. Both axes are required because a
++    // non-visible value on either axis can coerce the other axis to `auto`.
++    setPageLockStyle(body, 'overflow-x', 'visible');
++    setPageLockStyle(body, 'overflow-y', 'visible');
++    setPageLockStyle(body, 'position', 'fixed');
++
++    if (canFreezeMeasuredBody) {
++      const frozenWidth = `${bodyRect.width}px`;
++      setPageLockStyle(body, 'box-sizing', 'border-box');
++      setPageLockStyle(body, 'margin-top', '0px');
++      setPageLockStyle(body, 'margin-right', '0px');
++      setPageLockStyle(body, 'margin-bottom', '0px');
++      setPageLockStyle(body, 'margin-left', '0px');
++      setPageLockStyle(body, 'top', `${bodyRect.top}px`);
++      setPageLockStyle(body, 'right', 'auto');
++      setPageLockStyle(body, 'bottom', 'auto');
++      setPageLockStyle(body, 'left', `${bodyRect.left}px`);
++      setPageLockStyle(body, 'width', frozenWidth);
++      setPageLockStyle(body, 'min-width', frozenWidth);
++      setPageLockStyle(body, 'max-width', frozenWidth);
++      setPageLockStyle(html, 'scrollbar-gutter', 'auto');
++    } else {
++      setPageLockStyle(body, 'top', `${-window.scrollY}px`);
++      setPageLockStyle(body, 'width', '100%');
++      if (window.innerWidth > html.clientWidth) {
++        setPageLockStyle(html, 'scrollbar-gutter', 'stable');
++      }
++    }
++
++    setPageLockStyle(html, 'overflow-x', 'hidden');
++    setPageLockStyle(html, 'overflow-y', 'hidden');
++  }
++
++  let released = false;
++  return () => {
++    if (released) return;
++    released = true;
++    pageScrollLockCount = Math.max(0, pageScrollLockCount - 1);
++    if (pageScrollLockCount !== 0) return;
++
++    const snapshot = pageScrollLockSnapshot;
++    pageScrollLockSnapshot = null;
++    if (!snapshot) return;
++
++    restoreInlineStyleDeclarations(
++      document.body,
++      BODY_PAGE_LOCK_PROPERTIES,
++      snapshot.bodyDeclarations,
++    );
++    restoreInlineStyleDeclarations(
++      document.documentElement,
++      HTML_PAGE_LOCK_PROPERTIES,
++      snapshot.htmlDeclarations,
++    );
++    window.scrollTo(snapshot.scrollX, snapshot.scrollY);
++  };
++}
+diff --git a/test/browser/SelectionDetails.test.tsx b/test/browser/SelectionDetails.test.tsx
+index f8fdbaf..14e7a4f 100644
+--- a/test/browser/SelectionDetails.test.tsx
++++ b/test/browser/SelectionDetails.test.tsx
+@@ -679,7 +679,10 @@ test('sheet paints offscreen before sliding in from the right', async () => {
+     await expect.poll(() =>
+       container.querySelector<HTMLElement>('.ov25-selection-details-surface')?.dataset.present,
+     ).toBe('false');
+-    expect(container.querySelector('.ov25-selection-details-backdrop')).toBeNull();
++    expect(container.querySelector('.ov25-selection-details-backdrop')).toHaveAttribute(
++      'data-display-mode',
++      'sheet',
++    );
+     const surface = container.querySelector<HTMLElement>('.ov25-selection-details-surface')!;
+     expect(surface.getBoundingClientRect().width).toBe(384);
+     expect(surface.style.transform).toBe('translateX(100%)');
+@@ -694,6 +697,40 @@ test('sheet paints offscreen before sliding in from the right', async () => {
+   }
+ });
+ 
++test('sheet outside click dismisses without applying while inside clicks stay open', async () => {
++  const onSelect = vi.fn();
++  const { container } = await render(
++    <OV25UIProvider
++      {...providerProps}
++      selectionDetailsDisplayModeDesktop="sheet"
++      selectionDetailsDisplayModeMobile="fullscreen"
++    >
++      <DetailsHarness enabled includeSwatch onSelect={onSelect} />
++    </OV25UIProvider>,
++  );
++
++  const trigger = container.querySelector('.ov25-default-variant-card') as HTMLElement;
++  trigger.click();
++
++  await expect.poll(() =>
++    container.querySelector<HTMLElement>('.ov25-selection-details-surface')?.dataset.present,
++  ).toBe('true');
++  const surface = container.querySelector<HTMLElement>('.ov25-selection-details-surface')!;
++  const backdrop = container.querySelector<HTMLElement>('.ov25-selection-details-backdrop')!;
++
++  expect(getComputedStyle(backdrop).backgroundColor).toBe('rgba(0, 0, 0, 0)');
++  await page.elementLocator(surface).click({ position: { x: 20, y: 300 } });
++  expect(container.querySelector('.ov25-selection-details-surface')).toBe(surface);
++  expect(onSelect).not.toHaveBeenCalled();
++
++  await page.elementLocator(backdrop).click({ position: { x: 20, y: 300 } });
++  await expect.poll(() =>
++    container.querySelector('.ov25-selection-details-surface'),
++  ).toBeNull();
++  expect(onSelect).not.toHaveBeenCalled();
++  expect(trigger).toHaveAttribute('data-selected', 'false');
++});
++
+ test('desktop fullscreen remains instant', async () => {
+   const originalViewport = { width: window.innerWidth, height: window.innerHeight };
+   await page.viewport(1024, 768);
+diff --git a/test/e2e/mobile-drawer-stacking.test.ts-snapshots/single-no-pricing-mobile-drawer-boundary-chromium-darwin.png b/test/e2e/mobile-drawer-stacking.test.ts-snapshots/single-no-pricing-mobile-drawer-boundary-chromium-darwin.png
+index b14f71f..2e861c6 100644
+Binary files a/test/e2e/mobile-drawer-stacking.test.ts-snapshots/single-no-pricing-mobile-drawer-boundary-chromium-darwin.png and b/test/e2e/mobile-drawer-stacking.test.ts-snapshots/single-no-pricing-mobile-drawer-boundary-chromium-darwin.png differ
+diff --git a/test/e2e/selection-details.test.ts b/test/e2e/selection-details.test.ts
+index cc21298..c980e13 100644
+--- a/test/e2e/selection-details.test.ts
++++ b/test/e2e/selection-details.test.ts
+@@ -21,6 +21,67 @@ const PRODUCT_FIXTURES = {
+ 
+ type DetailMode = 'tooltip' | 'sheet' | 'modal' | 'fullscreen';
+ 
++type RectSnapshot = {
++  top: number;
++  right: number;
++  bottom: number;
++  left: number;
++  width: number;
++  height: number;
++};
++
++type SelectionDetailsPageLayoutSnapshot = {
++  scrollX: number;
++  scrollY: number;
++  body: RectSnapshot;
++  shell: RectSnapshot;
++  configurator: RectSnapshot;
++};
++
++type IntersectionSnapshot = {
++  boundingRect: RectSnapshot;
++  intersectionRect: RectSnapshot;
++  intersectionRatio: number;
++  isIntersecting: boolean;
++  visibleArea: number;
++};
++
++function rectsAreClose(
++  actual: RectSnapshot,
++  expected: RectSnapshot,
++  tolerance = 0.1,
++): boolean {
++  return (Object.keys(expected) as Array<keyof RectSnapshot>).every(
++    (property) =>
++      Math.abs(actual[property] - expected[property]) <= tolerance,
++  );
++}
++
++function visualPageLayoutIsStable(
++  actual: SelectionDetailsPageLayoutSnapshot,
++  expected: SelectionDetailsPageLayoutSnapshot,
++): boolean {
++  return (
++    actual.scrollX === expected.scrollX &&
++    rectsAreClose(actual.body, expected.body) &&
++    rectsAreClose(actual.shell, expected.shell) &&
++    rectsAreClose(actual.configurator, expected.configurator)
++  );
++}
++
++function intersectionIsStable(
++  actual: IntersectionSnapshot,
++  expected: IntersectionSnapshot,
++): boolean {
++  return (
++    actual.isIntersecting === expected.isIntersecting &&
++    rectsAreClose(actual.boundingRect, expected.boundingRect) &&
++    rectsAreClose(actual.intersectionRect, expected.intersectionRect) &&
++    Math.abs(actual.intersectionRatio - expected.intersectionRatio) <= 0.001 &&
++    Math.abs(actual.visibleArea - expected.visibleArea) <= 1
++  );
++}
++
+ function fixtureUrl(
+   path: string,
+   params: Record<string, string | undefined> = {},
+@@ -228,6 +289,99 @@ async function expectPageScrollLocked(page: Page): Promise<void> {
+     .toBe(true);
+ }
+ 
++async function selectionDetailsPageLayoutSnapshot(
++  page: Page,
++  shellSelector = '.app',
++): Promise<SelectionDetailsPageLayoutSnapshot> {
++  return page.evaluate((clientShellSelector) => {
++    const findDeep = (
++      root: Document | ShadowRoot,
++      selector: string,
++    ): Element | null => {
++      const match = root.querySelector(selector);
++      if (match) return match;
++
++      for (const element of root.querySelectorAll('*')) {
++        if (element.shadowRoot) {
++          const shadowMatch = findDeep(element.shadowRoot, selector);
++          if (shadowMatch) return shadowMatch;
++        }
++      }
++      return null;
++    };
++    const snapshotRect = (element: Element | null): RectSnapshot => {
++      if (!element) throw new Error('Selection details reflow target not found');
++      const rect = element.getBoundingClientRect();
++      return {
++        top: rect.top,
++        right: rect.right,
++        bottom: rect.bottom,
++        left: rect.left,
++        width: rect.width,
++        height: rect.height,
++      };
++    };
++
++    return {
++      scrollX: window.scrollX,
++      scrollY: window.scrollY,
++      body: snapshotRect(document.body),
++      shell: snapshotRect(document.querySelector(clientShellSelector)),
++      configurator: snapshotRect(
++        findDeep(document, '#ov-25-configurator-gallery-container'),
++      ),
++    };
++  }, shellSelector);
++}
++
++async function inlineStyleSnapshot(page: Page) {
++  return page.evaluate(() => {
++    const declarations = (element: HTMLElement) =>
++      Array.from(element.style)
++        .sort()
++        .map((property) => ({
++          property,
++          value: element.style.getPropertyValue(property),
++          priority: element.style.getPropertyPriority(property),
++        }));
++
++    return {
++      body: declarations(document.body),
++      html: declarations(document.documentElement),
++    };
++  });
++}
++
++async function intersectionSnapshot(
++  locator: Locator,
++): Promise<IntersectionSnapshot> {
++  return locator.evaluate(
++    (element) =>
++      new Promise<IntersectionSnapshot>((resolve) => {
++        const snapshotRect = (rect: DOMRectReadOnly): RectSnapshot => ({
++          top: rect.top,
++          right: rect.right,
++          bottom: rect.bottom,
++          left: rect.left,
++          width: rect.width,
++          height: rect.height,
++        });
++        const observer = new IntersectionObserver(([entry]) => {
++          observer.disconnect();
++          const intersectionRect = snapshotRect(entry.intersectionRect);
++          resolve({
++            boundingRect: snapshotRect(entry.boundingClientRect),
++            intersectionRect,
++            intersectionRatio: entry.intersectionRatio,
++            isIntersecting: entry.isIntersecting,
++            visibleArea: intersectionRect.width * intersectionRect.height,
++          });
++        });
++        observer.observe(element);
++      }),
++  );
++}
++
+ async function screenshotSurface(
+   surface: Locator,
+   snapshotName: string,
+@@ -639,6 +793,172 @@ test('desktop tooltip previews after its CSS hover delay and applies directly fr
+     });
+   }
+ 
++  test('sheet preserves visible overflow on a scrolled inline-sticky client page and restores inline page styles', async ({
++    page,
++  }) => {
++    const shellSelector = '.fixture-product-grid';
++    const sentinelSelector = '[data-selection-details-scroll-sentinel]';
++    await page.goto(
++      fixtureUrl('/tests/inline-sticky-desktop-no-header.html', {
++        desktopDetails: 'sheet',
++        mobileDetails: 'fullscreen',
++      }),
++    );
++    const trigger = await getUnselectedTrigger(page);
++
++    await page.evaluate(() => {
++      document.body.style.setProperty('overflow-x', 'hidden', 'important');
++      document.body.style.setProperty('margin', '8px 11px 7px 5px', 'important');
++      document.body.style.setProperty('box-sizing', 'content-box', 'important');
++      document.body.style.setProperty('position', 'relative', 'important');
++      document.documentElement.style.setProperty('scrollbar-gutter', 'auto', 'important');
++    });
++    await expect(page.locator('#ov-25-configurator-gallery-container')).toBeVisible({
++      timeout: RUNTIME_TIMEOUT,
++    });
++    await expect(
++      page.locator('[data-ov25-inline-sticky-active="true"]'),
++    ).toBeVisible({ timeout: RUNTIME_TIMEOUT });
++
++    const sentinel = page.locator(sentinelSelector);
++    await expect(sentinel).toBeAttached();
++    const overflowGeometry = await page.evaluate((selector) => {
++      const element = document.querySelector(selector);
++      if (!element) throw new Error('Selection details scroll sentinel not found');
++      const bodyRect = document.body.getBoundingClientRect();
++      const sentinelRect = element.getBoundingClientRect();
++      return {
++        bodyHeight: bodyRect.height,
++        bodyScrollHeight: document.body.scrollHeight,
++        sentinelDocumentTop: sentinelRect.top + window.scrollY,
++        viewportHeight: window.innerHeight,
++      };
++    }, sentinelSelector);
++    expect(overflowGeometry.bodyScrollHeight).toBeGreaterThan(
++      overflowGeometry.bodyHeight,
++    );
++    expect(overflowGeometry.sentinelDocumentTop).toBeGreaterThan(
++      overflowGeometry.viewportHeight,
++    );
++
++    await sentinel.evaluate((element) => {
++      const documentTop = element.getBoundingClientRect().top + window.scrollY;
++      window.scrollTo(0, Math.max(1, documentTop - window.innerHeight * 0.6));
++    });
++    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
++
++    const sentinelBeforeOpen = await intersectionSnapshot(sentinel);
++    expect(sentinelBeforeOpen.isIntersecting).toBe(true);
++    expect(sentinelBeforeOpen.visibleArea).toBeGreaterThan(0);
++
++    const layoutBeforeOpen = await selectionDetailsPageLayoutSnapshot(
++      page,
++      shellSelector,
++    );
++    const inlineStylesBeforeOpen = await inlineStyleSnapshot(page);
++    expect(layoutBeforeOpen.scrollY).toBeGreaterThan(0);
++
++    const openAndClose = async () => {
++      await trigger.evaluate((element) => (element as HTMLElement).click());
++      const surface = page.locator(`${DETAILS_SURFACE}:visible`);
++      await expect(surface).toBeVisible({ timeout: RUNTIME_TIMEOUT });
++      await expect(surface).toHaveAttribute('data-display-mode', 'sheet');
++      await expectPageScrollLocked(page);
++      await page.waitForTimeout(350);
++      await expect
++        .poll(
++          async () => {
++            const [layout, sheetGeometry, sentinelIntersection] = await Promise.all([
++              selectionDetailsPageLayoutSnapshot(page, shellSelector),
++              surface.evaluate((element) => {
++                const rect = element.getBoundingClientRect();
++                return {
++                  rootGutterRemoved:
++                    document.documentElement.clientWidth === window.innerWidth,
++                  reachesViewportRight:
++                    Math.abs(rect.right - window.innerWidth) <= 1,
++                };
++              }),
++              intersectionSnapshot(sentinel),
++            ]);
++            return {
++              visualLayoutStable: visualPageLayoutIsStable(
++                layout,
++                layoutBeforeOpen,
++              ),
++              sentinelIntersectionStable: intersectionIsStable(
++                sentinelIntersection,
++                sentinelBeforeOpen,
++              ),
++              sentinelVisibleArea: sentinelIntersection.visibleArea > 0,
++              ...sheetGeometry,
++            };
++          },
++          { timeout: RUNTIME_TIMEOUT },
++        )
++        .toEqual({
++          visualLayoutStable: true,
++          sentinelIntersectionStable: true,
++          sentinelVisibleArea: true,
++          rootGutterRemoved: true,
++          reachesViewportRight: true,
++        });
++
++      const lockedScrollPosition = await page.evaluate(() => ({
++        x: window.scrollX,
++        y: window.scrollY,
++      }));
++      await page.mouse.move(20, Math.round(DESKTOP.height / 2));
++      await page.mouse.wheel(0, 700);
++      await page.keyboard.press('PageDown');
++      await page.waitForTimeout(100);
++      expect(
++        await page.evaluate(() => ({ x: window.scrollX, y: window.scrollY })),
++      ).toEqual(lockedScrollPosition);
++
++      const intersectionAfterInput = await intersectionSnapshot(sentinel);
++      expect(
++        intersectionIsStable(intersectionAfterInput, sentinelBeforeOpen),
++      ).toBe(true);
++
++      await surface.locator(DETAILS_CLOSE).click();
++      await expectDetailsClosed(page);
++      await expect
++        .poll(() => inlineStyleSnapshot(page), { timeout: RUNTIME_TIMEOUT })
++        .toEqual(inlineStylesBeforeOpen);
++      await expect
++        .poll(
++          async () => {
++            const layout = await selectionDetailsPageLayoutSnapshot(
++              page,
++              shellSelector,
++            );
++            return {
++              scrollX: layout.scrollX,
++              scrollY: layout.scrollY,
++              visualLayoutRestored: visualPageLayoutIsStable(
++                layout,
++                layoutBeforeOpen,
++              ),
++            };
++          },
++          { timeout: RUNTIME_TIMEOUT },
++        )
++        .toEqual({
++          scrollX: layoutBeforeOpen.scrollX,
++          scrollY: layoutBeforeOpen.scrollY,
++          visualLayoutRestored: true,
++        });
++      const sentinelAfterClose = await intersectionSnapshot(sentinel);
++      expect(intersectionIsStable(sentinelAfterClose, sentinelBeforeOpen)).toBe(
++        true,
++      );
++    };
++
++    await openAndClose();
++    await openAndClose();
++  });
++
+   test('breakpoint changes close details even when both modes resolve to fullscreen', async ({ page }) => {
+     await page.goto(
+       fixtureUrl(PRODUCT_FIXTURES.fullscreen, {
+diff --git a/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-fullscreen-chromium-darwin.png b/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-fullscreen-chromium-darwin.png
+index 0db0759..cae9f75 100644
+Binary files a/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-fullscreen-chromium-darwin.png and b/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-fullscreen-chromium-darwin.png differ
+diff --git a/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-modal-chromium-darwin.png b/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-modal-chromium-darwin.png
+index 7107bf0..8ed21d2 100644
+Binary files a/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-modal-chromium-darwin.png and b/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-modal-chromium-darwin.png differ
+diff --git a/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-sheet-chromium-darwin.png b/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-sheet-chromium-darwin.png
+index 8b8a158..5116b97 100644
+Binary files a/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-sheet-chromium-darwin.png and b/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-sheet-chromium-darwin.png differ
+diff --git a/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-tooltip-chromium-darwin.png b/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-tooltip-chromium-darwin.png
+index 2faa6fc..dd668ed 100644
+Binary files a/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-tooltip-chromium-darwin.png and b/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-tooltip-chromium-darwin.png differ
+diff --git a/test/e2e/selection-details.test.ts-snapshots/selection-details-mobile-fullscreen-chromium-darwin.png b/test/e2e/selection-details.test.ts-snapshots/selection-details-mobile-fullscreen-chromium-darwin.png
+index d5ad9b3..59b6a86 100644
+Binary files a/test/e2e/selection-details.test.ts-snapshots/selection-details-mobile-fullscreen-chromium-darwin.png and b/test/e2e/selection-details.test.ts-snapshots/selection-details-mobile-fullscreen-chromium-darwin.png differ
+diff --git a/test/e2e/selection-details.test.ts-snapshots/selection-details-mobile-modal-chromium-darwin.png b/test/e2e/selection-details.test.ts-snapshots/selection-details-mobile-modal-chromium-darwin.png
+index a60398d..e4d1423 100644
+Binary files a/test/e2e/selection-details.test.ts-snapshots/selection-details-mobile-modal-chromium-darwin.png and b/test/e2e/selection-details.test.ts-snapshots/selection-details-mobile-modal-chromium-darwin.png differ
+diff --git a/test/e2e/selection-details.test.ts-snapshots/selection-details-swatch-add-chromium-darwin.png b/test/e2e/selection-details.test.ts-snapshots/selection-details-swatch-add-chromium-darwin.png
+index 7107bf0..8ed21d2 100644
+Binary files a/test/e2e/selection-details.test.ts-snapshots/selection-details-swatch-add-chromium-darwin.png and b/test/e2e/selection-details.test.ts-snapshots/selection-details-swatch-add-chromium-darwin.png differ
+diff --git a/test/e2e/selection-details.test.ts-snapshots/selection-details-swatch-remove-chromium-darwin.png b/test/e2e/selection-details.test.ts-snapshots/selection-details-swatch-remove-chromium-darwin.png
+index fcc79f5..b36188d 100644
+Binary files a/test/e2e/selection-details.test.ts-snapshots/selection-details-swatch-remove-chromium-darwin.png and b/test/e2e/selection-details.test.ts-snapshots/selection-details-swatch-remove-chromium-darwin.png differ

@@ -1,0 +1,39 @@
+{
+  "generatedAt": "2026-08-17T07:23:13.677Z",
+  "package": "ov25-ui",
+  "bump": "patch",
+  "currentVersion": "0.8.2",
+  "nextVersion": "0.8.3",
+  "baseRef": "ov25-setup@0.8.2",
+  "baseSha": "e9da768e85aef8254d5f723ad8f99c4421b79694",
+  "headRef": "45fa5b5f92410d53ee379c12afb305038d7983cf",
+  "headSha": "45fa5b5f92410d53ee379c12afb305038d7983cf",
+  "range": "ov25-setup@0.8.2..45fa5b5f92410d53ee379c12afb305038d7983cf",
+  "branch": "main",
+  "npmPackageSafety": {
+    "ov25UiFiles": [
+      "dist"
+    ],
+    "ov25SetupFiles": [
+      "dist"
+    ],
+    "ov25UiExcludesReleaseArtifacts": true,
+    "ov25SetupExcludesReleaseArtifacts": true
+  },
+  "commands": {
+    "committedLog": "git log --oneline --decorate=short ov25-setup@0.8.2..45fa5b5f92410d53ee379c12afb305038d7983cf",
+    "committedDiffStat": "git diff --stat ov25-setup@0.8.2..45fa5b5f92410d53ee379c12afb305038d7983cf",
+    "committedChangedFiles": "git diff --name-only ov25-setup@0.8.2..45fa5b5f92410d53ee379c12afb305038d7983cf",
+    "committedDiff": "git diff ov25-setup@0.8.2..45fa5b5f92410d53ee379c12afb305038d7983cf",
+    "status": "git status --short"
+  },
+  "artifacts": {
+    "releaseDir": "releases/0.8.3",
+    "contextJson": "releases/0.8.3/context.json",
+    "contextMarkdown": "releases/0.8.3/context.md",
+    "commits": "releases/0.8.3/commits.txt",
+    "changedFiles": "releases/0.8.3/changed-files.txt",
+    "diffStat": "releases/0.8.3/diff-stat.txt",
+    "diffPatch": "releases/0.8.3/diff.patch"
+  }
+}

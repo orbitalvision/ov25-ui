@@ -1,0 +1,18 @@
+dev/react-test/templates/TestPageLayout.jsx        |   3 +
+ dev/react-test/tests/inline-sticky-fixture.jsx     |  14 +-
+ dev/react-test/tests/selection-details.jsx         |  36 +++
+ .../VariantSelectMenu/VariantContentDesktop.tsx    | 166 +----------
+ .../variant-cards/SelectionDetailsSurface.tsx      |  38 +--
+ src/utils/page-scroll-lock.ts                      | 173 +++++++++++
+ test/browser/SelectionDetails.test.tsx             |  39 ++-
+ ...cing-mobile-drawer-boundary-chromium-darwin.png | Bin 17536 -> 28374 bytes
+ test/e2e/selection-details.test.ts                 | 320 +++++++++++++++++++++
+ ...-details-desktop-fullscreen-chromium-darwin.png | Bin 1379772 -> 1300432 bytes
+ ...ction-details-desktop-modal-chromium-darwin.png | Bin 641953 -> 616559 bytes
+ ...ction-details-desktop-sheet-chromium-darwin.png | Bin 269714 -> 261467 bytes
+ ...ion-details-desktop-tooltip-chromium-darwin.png | Bin 107504 -> 103725 bytes
+ ...n-details-mobile-fullscreen-chromium-darwin.png | Bin 246855 -> 241304 bytes
+ ...ection-details-mobile-modal-chromium-darwin.png | Bin 249731 -> 243727 bytes
+ ...election-details-swatch-add-chromium-darwin.png | Bin 641953 -> 616559 bytes
+ ...ction-details-swatch-remove-chromium-darwin.png | Bin 642119 -> 616733 bytes
+ 17 files changed, 599 insertions(+), 190 deletions(-)

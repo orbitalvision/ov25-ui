@@ -1,0 +1,2 @@
+45fa5b5 (HEAD -> main, origin/main, origin/HEAD) fix(tests) regenerate test screenshots because thumbnails were regenerated
+ef86b56 fix(selection-details) extract scroll locker and use it for selection details sheet also, stopping page reflow and layout jumps

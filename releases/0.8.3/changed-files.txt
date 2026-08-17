@@ -1,0 +1,17 @@
+dev/react-test/templates/TestPageLayout.jsx
+dev/react-test/tests/inline-sticky-fixture.jsx
+dev/react-test/tests/selection-details.jsx
+src/components/VariantSelectMenu/VariantContentDesktop.tsx
+src/components/VariantSelectMenu/variant-cards/SelectionDetailsSurface.tsx
+src/utils/page-scroll-lock.ts
+test/browser/SelectionDetails.test.tsx
+test/e2e/mobile-drawer-stacking.test.ts-snapshots/single-no-pricing-mobile-drawer-boundary-chromium-darwin.png
+test/e2e/selection-details.test.ts
+test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-fullscreen-chromium-darwin.png
+test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-modal-chromium-darwin.png
+test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-sheet-chromium-darwin.png
+test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-tooltip-chromium-darwin.png
+test/e2e/selection-details.test.ts-snapshots/selection-details-mobile-fullscreen-chromium-darwin.png
+test/e2e/selection-details.test.ts-snapshots/selection-details-mobile-modal-chromium-darwin.png
+test/e2e/selection-details.test.ts-snapshots/selection-details-swatch-add-chromium-darwin.png
+test/e2e/selection-details.test.ts-snapshots/selection-details-swatch-remove-chromium-darwin.png
