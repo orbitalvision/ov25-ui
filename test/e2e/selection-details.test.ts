@@ -61,9 +61,14 @@ function visualPageLayoutIsStable(
   actual: SelectionDetailsPageLayoutSnapshot,
   expected: SelectionDetailsPageLayoutSnapshot,
 ): boolean {
+  const bodyViewportGeometryIsStable =
+    Math.abs(actual.body.top - expected.body.top) <= 0.1 &&
+    Math.abs(actual.body.right - expected.body.right) <= 0.1 &&
+    Math.abs(actual.body.left - expected.body.left) <= 0.1 &&
+    Math.abs(actual.body.width - expected.body.width) <= 0.1;
   return (
     actual.scrollX === expected.scrollX &&
-    rectsAreClose(actual.body, expected.body) &&
+    bodyViewportGeometryIsStable &&
     rectsAreClose(actual.shell, expected.shell) &&
     rectsAreClose(actual.configurator, expected.configurator)
   );
@@ -875,6 +880,8 @@ test('desktop tooltip previews after its CSS hover delay and applies directly fr
                 return {
                   rootGutterRemoved:
                     document.documentElement.clientWidth === window.innerWidth,
+                  bodyStayedInFlow:
+                    getComputedStyle(document.body).position === 'relative',
                   reachesViewportRight:
                     Math.abs(rect.right - window.innerWidth) <= 1,
                 };
@@ -901,6 +908,7 @@ test('desktop tooltip previews after its CSS hover delay and applies directly fr
           sentinelIntersectionStable: true,
           sentinelVisibleArea: true,
           rootGutterRemoved: true,
+          bodyStayedInFlow: true,
           reachesViewportRight: true,
         });
 

@@ -26,7 +26,7 @@ async function expectOpenSheetGeometry(
   layoutBeforeOpen: PageLayoutSnapshot,
   scrollbarWidth: number,
 ): Promise<void> {
-  await expect(page.locator('body')).toHaveCSS('position', 'fixed', {
+  await expect(page.locator('body')).not.toHaveCSS('position', 'fixed', {
     timeout: RUNTIME_TIMEOUT,
   });
 
@@ -56,6 +56,7 @@ async function expectOpenSheetGeometry(
                 document.documentElement.clientWidth === window.innerWidth,
               rootGutterWasRemoved:
                 getComputedStyle(document.documentElement).scrollbarGutter === 'auto',
+              bodyStayedInFlow: getComputedStyle(document.body).position !== 'fixed',
               bodyKeptOriginalWidth: close(body.width, baseline.bodyWidth),
               shellStayedStill:
                 close(shell.left, baseline.left) &&
@@ -77,6 +78,7 @@ async function expectOpenSheetGeometry(
     .toEqual({
       scrollbarWasRemoved: true,
       rootGutterWasRemoved: true,
+      bodyStayedInFlow: true,
       bodyKeptOriginalWidth: true,
       shellStayedStill: true,
       hostReachesViewport: true,

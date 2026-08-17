@@ -12,24 +12,11 @@ type PageScrollLockSnapshot = {
 };
 
 const BODY_PAGE_LOCK_PROPERTIES = new Set([
-  'overflow',
-  'overflow-x',
-  'overflow-y',
-  'position',
-  'inset',
-  'top',
-  'right',
-  'bottom',
-  'left',
   'width',
   'min-width',
   'max-width',
+  'min-height',
   'box-sizing',
-  'margin',
-  'margin-top',
-  'margin-right',
-  'margin-bottom',
-  'margin-left',
 ]);
 const HTML_PAGE_LOCK_PROPERTIES = new Set([
   'overflow',
@@ -85,7 +72,8 @@ function setPageLockStyle(
  * Freeze the merchant page at its current geometry while a modal-style
  * overlay is mounted. Calls are reference counted so nested overlays share a
  * single snapshot and restore the original inline styles only after the final
- * overlay releases its lock.
+ * overlay releases its lock. The body deliberately stays in normal flow so
+ * merchant sticky/fixed elements do not recompute when an overlay opens.
  */
 export function acquirePageScrollLock(): () => void {
   if (typeof document === 'undefined' || typeof window === 'undefined') return () => {};
@@ -94,11 +82,16 @@ export function acquirePageScrollLock(): () => void {
   if (pageScrollLockCount === 1) {
     const body = document.body;
     const html = document.documentElement;
+    const hasReservedScrollbar = window.innerWidth > html.clientWidth;
     const bodyStyle = window.getComputedStyle(body);
     const bodyRect = body.getBoundingClientRect();
+    const bodyScrollHeight = body.scrollHeight;
     const zoom = bodyStyle.getPropertyValue('zoom').trim();
-    const zoomIsNormal = !zoom || zoom === 'normal' || Math.abs((Number.parseFloat(zoom) || 1) - 1) < 0.001;
-    const canFreezeMeasuredBody =
+    const zoomIsNormal =
+      !zoom ||
+      zoom === 'normal' ||
+      Math.abs((Number.parseFloat(zoom) || 1) - 1) < 0.001;
+    const canFreezeBodyWidth =
       bodyStyle.display !== 'contents' &&
       bodyStyle.transform === 'none' &&
       zoomIsNormal &&
@@ -111,38 +104,25 @@ export function acquirePageScrollLock(): () => void {
       scrollY: window.scrollY,
     };
 
-    // Once the body becomes fixed, its authored root overflow stops being
-    // propagated to the viewport and can clip content that extends beyond a
-    // percentage-height body. Keep both axes visible and let the locked root
-    // element own viewport clipping instead. Both axes are required because a
-    // non-visible value on either axis can coerce the other axis to `auto`.
-    setPageLockStyle(body, 'overflow-x', 'visible');
-    setPageLockStyle(body, 'overflow-y', 'visible');
-    setPageLockStyle(body, 'position', 'fixed');
-
-    if (canFreezeMeasuredBody) {
+    // Removing a classic scrollbar normally widens the root layout viewport.
+    // Preserve the body's existing border box while leaving it in normal flow,
+    // so merchant sticky/fixed elements keep their scrolling context. OV25's
+    // fixed portal hosts can then use the newly exposed physical viewport edge.
+    if (hasReservedScrollbar && canFreezeBodyWidth) {
       const frozenWidth = `${bodyRect.width}px`;
       setPageLockStyle(body, 'box-sizing', 'border-box');
-      setPageLockStyle(body, 'margin-top', '0px');
-      setPageLockStyle(body, 'margin-right', '0px');
-      setPageLockStyle(body, 'margin-bottom', '0px');
-      setPageLockStyle(body, 'margin-left', '0px');
-      setPageLockStyle(body, 'top', `${bodyRect.top}px`);
-      setPageLockStyle(body, 'right', 'auto');
-      setPageLockStyle(body, 'bottom', 'auto');
-      setPageLockStyle(body, 'left', `${bodyRect.left}px`);
       setPageLockStyle(body, 'width', frozenWidth);
       setPageLockStyle(body, 'min-width', frozenWidth);
       setPageLockStyle(body, 'max-width', frozenWidth);
-      setPageLockStyle(html, 'scrollbar-gutter', 'auto');
-    } else {
-      setPageLockStyle(body, 'top', `${-window.scrollY}px`);
-      setPageLockStyle(body, 'width', '100%');
-      if (window.innerWidth > html.clientWidth) {
-        setPageLockStyle(html, 'scrollbar-gutter', 'stable');
+      if (bodyScrollHeight > bodyRect.height) {
+        setPageLockStyle(body, 'min-height', `${bodyScrollHeight}px`);
       }
+      setPageLockStyle(html, 'scrollbar-gutter', 'auto');
+    } else if (hasReservedScrollbar) {
+      // Unusual transformed/zoomed/display:contents bodies cannot be measured
+      // safely. Preserve their layout viewport with the native gutter instead.
+      setPageLockStyle(html, 'scrollbar-gutter', 'stable');
     }
-
     setPageLockStyle(html, 'overflow-x', 'hidden');
     setPageLockStyle(html, 'overflow-y', 'hidden');
   }
