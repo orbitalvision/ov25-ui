@@ -1,0 +1,241 @@
+diff --git a/globals.css b/globals.css
+index e2f5af0..c5ac25a 100644
+--- a/globals.css
++++ b/globals.css
+@@ -350,6 +350,7 @@ html {
+   z-index: 1;
+   margin: 0;
+   color: #fff;
++  mix-blend-mode: difference;
+   font-size: 14px;
+   font-weight: 500;
+   line-height: 1.25;
+diff --git a/setup/bun.lock b/setup/bun.lock
+index 9e55462..d33f830 100644
+--- a/setup/bun.lock
++++ b/setup/bun.lock
+@@ -21,7 +21,7 @@
+         "class-variance-authority": "^0.7.0",
+         "clsx": "^2.1.0",
+         "lucide-react": "^0.540.0",
+-        "ov25-ui": "0.8.5",
++        "ov25-ui": "0.8.6",
+         "react-colorful": "^5.6.1",
+         "tailwind-merge": "^2.2.0",
+       },
+@@ -425,7 +425,7 @@
+ 
+     "object-assign": ["object-assign@4.1.1", "", {}, "sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg=="],
+ 
+-    "ov25-ui": ["ov25-ui@0.8.5", "", { "dependencies": { "@radix-ui/react-dialog": "^1.1.10", "@radix-ui/react-icons": "^1.3.2", "@radix-ui/react-popover": "^1.1.14", "@radix-ui/react-scroll-area": "^1.2.5", "@radix-ui/react-select": "^2.2.2", "@radix-ui/react-slot": "^1.0.2", "@radix-ui/react-tabs": "^1.1.2", "@react-spring/web": "^10.0.3", "@use-gesture/react": "^10.3.1", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "embla-carousel-react": "^8.6.0", "framer-motion": "^11.16.1", "gsap": "^3.13.0", "lucide-react": "^0.503.0", "react-qr-code": "^2.0.15", "sonner": "^1.7.1", "string-similarity-js": "^2.1.4", "tailwind-merge": "^3.2.0" }, "peerDependencies": { "react": "^19", "react-dom": "^19" } }, "sha512-0n2pFFNMVkyQ2qz0OoyDoidJ+kpnu2pDAv8tTv5+lZwOqufOA2i5rccpwGiyIvJdBmqe+8L93rzYMoeGSDzGEw=="],
++    "ov25-ui": ["ov25-ui@0.8.6", "", { "dependencies": { "@radix-ui/react-dialog": "^1.1.10", "@radix-ui/react-icons": "^1.3.2", "@radix-ui/react-popover": "^1.1.14", "@radix-ui/react-scroll-area": "^1.2.5", "@radix-ui/react-select": "^2.2.2", "@radix-ui/react-slot": "^1.0.2", "@radix-ui/react-tabs": "^1.1.2", "@react-spring/web": "^10.0.3", "@use-gesture/react": "^10.3.1", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "embla-carousel-react": "^8.6.0", "framer-motion": "^11.16.1", "gsap": "^3.13.0", "lucide-react": "^0.503.0", "react-qr-code": "^2.0.15", "sonner": "^1.7.1", "string-similarity-js": "^2.1.4", "tailwind-merge": "^3.2.0" }, "peerDependencies": { "react": "^19", "react-dom": "^19" } }, "sha512-f+3Z0Sp6zKUft1BA+seiRBafzML7psdxdxCB8E/gevGNW7+w/Mpe6V2J1l2KNo//ca1i088q+/bDiBs2fe5nxg=="],
+ 
+     "package-json-from-dist": ["package-json-from-dist@1.0.1", "", {}, "sha512-UEZIS3/by4OC8vL3P2dTXRETpebLI2NiI5vIrjaD/5UtrkFX/tNbwjTSRAGC/+7CAo2pIcBaRgWmcBBHcsaCIw=="],
+ 
+diff --git a/setup/package-lock.json b/setup/package-lock.json
+index 00b7975..97d8370 100644
+--- a/setup/package-lock.json
++++ b/setup/package-lock.json
+@@ -1,12 +1,12 @@
+ {
+   "name": "ov25-setup",
+-  "version": "0.8.5",
++  "version": "0.8.6",
+   "lockfileVersion": 3,
+   "requires": true,
+   "packages": {
+     "": {
+       "name": "ov25-setup",
+-      "version": "0.8.5",
++      "version": "0.8.6",
+       "dependencies": {
+         "@codemirror/commands": "^6.10.3",
+         "@codemirror/lang-css": "^6.3.1",
+@@ -24,7 +24,7 @@
+         "class-variance-authority": "^0.7.0",
+         "clsx": "^2.1.0",
+         "lucide-react": "^0.540.0",
+-        "ov25-ui": "0.8.5",
++        "ov25-ui": "0.8.6",
+         "react-colorful": "^5.6.1",
+         "tailwind-merge": "^2.2.0"
+       },
+@@ -3116,9 +3116,9 @@
+       }
+     },
+     "node_modules/ov25-ui": {
+-      "version": "0.8.5",
+-      "resolved": "https://registry.npmjs.org/ov25-ui/-/ov25-ui-0.8.5.tgz",
+-      "integrity": "sha512-0n2pFFNMVkyQ2qz0OoyDoidJ+kpnu2pDAv8tTv5+lZwOqufOA2i5rccpwGiyIvJdBmqe+8L93rzYMoeGSDzGEw==",
++      "version": "0.8.6",
++      "resolved": "https://registry.npmjs.org/ov25-ui/-/ov25-ui-0.8.6.tgz",
++      "integrity": "sha512-f+3Z0Sp6zKUft1BA+seiRBafzML7psdxdxCB8E/gevGNW7+w/Mpe6V2J1l2KNo//ca1i088q+/bDiBs2fe5nxg==",
+       "license": "MIT",
+       "dependencies": {
+         "@radix-ui/react-dialog": "^1.1.10",
+diff --git a/setup/package.json b/setup/package.json
+index 6b62092..9b34b0f 100644
+--- a/setup/package.json
++++ b/setup/package.json
+@@ -1,6 +1,6 @@
+ {
+   "name": "ov25-setup",
+-  "version": "0.8.5",
++  "version": "0.8.6",
+   "description": "OV25 Configurator Setup visual editor component",
+   "repository": {
+     "type": "git",
+@@ -53,7 +53,7 @@
+     "class-variance-authority": "^0.7.0",
+     "clsx": "^2.1.0",
+     "lucide-react": "^0.540.0",
+-    "ov25-ui": "0.8.5",
++    "ov25-ui": "0.8.6",
+     "react-colorful": "^5.6.1",
+     "tailwind-merge": "^2.2.0"
+   },
+diff --git a/src/components/VariantSelectMenu/variant-cards/SelectionDetailsSurface.tsx b/src/components/VariantSelectMenu/variant-cards/SelectionDetailsSurface.tsx
+index 2f623b4..e9416e2 100644
+--- a/src/components/VariantSelectMenu/variant-cards/SelectionDetailsSurface.tsx
++++ b/src/components/VariantSelectMenu/variant-cards/SelectionDetailsSurface.tsx
+@@ -16,6 +16,8 @@ const ENTER_MS = 220;
+ const EXIT_MS = 180;
+ const SHEET_ENTER_MS = 260;
+ const SHEET_EXIT_MS = 220;
++const MOBILE_FULLSCREEN_ENTER_MS = ENTER_MS * 2;
++const MOBILE_FULLSCREEN_EXIT_MS = EXIT_MS * 2;
+ const VIEWPORT_GAP = 12;
+ const TOOLTIP_GAP = 10;
+ const TOOLTIP_WIDTH = 240;
+@@ -222,14 +224,6 @@ export function SelectionDetailsSurface() {
+         setPresent(true);
+       } else {
+         setPresent(false);
+-        let enterFrame: number | null = null;
+-        const mountFrame = window.requestAnimationFrame(() => {
+-          enterFrame = window.requestAnimationFrame(() => setPresent(true));
+-        });
+-        return () => {
+-          window.cancelAnimationFrame(mountFrame);
+-          if (enterFrame != null) window.cancelAnimationFrame(enterFrame);
+-        };
+       }
+       return;
+     }
+@@ -244,13 +238,42 @@ export function SelectionDetailsSurface() {
+       return;
+     }
+     setPresent(false);
+-    const exitDuration = rendered.displayMode === 'sheet' ? SHEET_EXIT_MS : EXIT_MS;
++    const exitDuration = rendered.displayMode === 'sheet'
++      ? SHEET_EXIT_MS
++      : rendered.displayMode === 'fullscreen' && selectionDetailsUsesMobileMode
++        ? MOBILE_FULLSCREEN_EXIT_MS
++        : EXIT_MS;
+     exitTimerRef.current = window.setTimeout(() => {
+       exitTimerRef.current = null;
+       setRendered(null);
+     }, exitDuration);
+   }, [selectionDetailsState, rendered, selectionDetailsUsesMobileMode]);
+ 
++  // Start the enter transition only after the requested surface exists in the
++  // DOM. Starting it while `rendered` is still null lets React batch the mount
++  // and presented state, making every fully-unmounted open appear instant.
++  useBrowserLayoutEffect(() => {
++    if (!selectionDetailsState || !rendered) return;
++    if (selectionDetailsState.requestId !== rendered.requestId) return;
++
++    const skipTransition =
++      rendered.instant ||
++      (rendered.displayMode === 'fullscreen' && !selectionDetailsUsesMobileMode);
++    if (skipTransition || !surfaceRef.current) return;
++
++    setPresent(false);
++
++    let enterFrame: number | null = null;
++    const mountFrame = window.requestAnimationFrame(() => {
++      enterFrame = window.requestAnimationFrame(() => setPresent(true));
++    });
++
++    return () => {
++      window.cancelAnimationFrame(mountFrame);
++      if (enterFrame != null) window.cancelAnimationFrame(enterFrame);
++    };
++  }, [rendered, selectionDetailsState, selectionDetailsUsesMobileMode]);
++
+   // Clear a pending exit transition if the entire surface unmounts.
+   React.useEffect(() => () => {
+     if (exitTimerRef.current != null) window.clearTimeout(exitTimerRef.current);
+@@ -509,13 +532,17 @@ export function SelectionDetailsSurface() {
+     ? (present ? 160 : 125)
+     : mode === 'sheet'
+       ? (present ? SHEET_ENTER_MS : SHEET_EXIT_MS)
+-      : (present ? ENTER_MS : EXIT_MS);
++      : isFullscreen && selectionDetailsUsesMobileMode
++        ? (present ? MOBILE_FULLSCREEN_ENTER_MS : MOBILE_FULLSCREEN_EXIT_MS)
++        : (present ? ENTER_MS : EXIT_MS);
+   const transitionEasing = slidesFromRight
+     ? 'cubic-bezier(0.32, 0.72, 0, 1)'
+     : 'cubic-bezier(0.22, 1, 0.36, 1)';
+   const transitionTiming = `${transitionDuration}ms ${transitionEasing}`;
+   const panelTransition = animate
+-    ? `opacity ${transitionTiming}, transform ${transitionTiming}`
++    ? (slidesFromRight
++      ? `transform ${transitionTiming}`
++      : `opacity ${transitionTiming}, transform ${transitionTiming}`)
+     : 'none';
+   const actionButtonWidthClass = isFullscreenDesktop
+     ? 'ov:w-full'
+@@ -545,7 +572,6 @@ export function SelectionDetailsSurface() {
+       }
+     : slidesFromRight
+       ? {
+-          opacity: present ? 1 : 0,
+           transform: present ? 'translateX(0)' : 'translateX(100%)',
+           transition: panelTransition,
+         }
+@@ -624,7 +650,7 @@ export function SelectionDetailsSurface() {
+               : isTooltip
+               ? 'ov:w-full ov:aspect-square ov:shrink-0 ov:overflow-hidden ov:bg-neutral-100'
+               : isFullscreen
+-              ? 'ov:flex ov:w-full ov:justify-center ov:px-4 ov:pt-16 ov:md:px-8 ov:md:pt-8'
++              ? 'ov:flex ov:min-h-0 ov:w-full ov:aspect-square ov:shrink-0 ov:items-center ov:justify-center ov:overflow-hidden ov:px-4 ov:pt-16 ov:md:px-8 ov:md:pt-8'
+               : `ov:mx-auto ov:w-full ov:aspect-square ov:overflow-hidden ov:bg-neutral-100 ${mode === 'modal' ? 'ov:mt-4' : ''}`}`}
+             data-image-presentation={isFullscreen ? 'contain' : 'square-crop'}
+           >
+@@ -636,7 +662,7 @@ export function SelectionDetailsSurface() {
+               className={`ov25-selection-details-image ${isFullscreenDesktop
+                 ? 'ov:block ov:h-full ov:w-full ov:object-contain'
+                 : isFullscreen
+-                ? 'ov:block ov:w-auto ov:h-auto ov:max-w-full ov:object-contain'
++                ? 'ov:block ov:w-auto ov:h-auto ov:max-w-full ov:max-h-full ov:object-contain'
+                 : 'ov:w-full ov:h-full ov:object-cover'}`}
+               onLoad={(event) => {
+                 schedulePreloadAfterImagePaint(
+diff --git a/test/e2e/mobile-drawer-stacking.test.ts-snapshots/single-no-pricing-mobile-drawer-boundary-chromium-darwin.png b/test/e2e/mobile-drawer-stacking.test.ts-snapshots/single-no-pricing-mobile-drawer-boundary-chromium-darwin.png
+index 44c478e..5b82659 100644
+Binary files a/test/e2e/mobile-drawer-stacking.test.ts-snapshots/single-no-pricing-mobile-drawer-boundary-chromium-darwin.png and b/test/e2e/mobile-drawer-stacking.test.ts-snapshots/single-no-pricing-mobile-drawer-boundary-chromium-darwin.png differ
+diff --git a/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-fullscreen-chromium-darwin.png b/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-fullscreen-chromium-darwin.png
+index 28dfb96..26a997c 100644
+Binary files a/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-fullscreen-chromium-darwin.png and b/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-fullscreen-chromium-darwin.png differ
+diff --git a/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-modal-chromium-darwin.png b/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-modal-chromium-darwin.png
+index 7225dba..9654f25 100644
+Binary files a/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-modal-chromium-darwin.png and b/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-modal-chromium-darwin.png differ
+diff --git a/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-sheet-chromium-darwin.png b/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-sheet-chromium-darwin.png
+index d89e645..8009611 100644
+Binary files a/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-sheet-chromium-darwin.png and b/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-sheet-chromium-darwin.png differ
+diff --git a/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-tooltip-chromium-darwin.png b/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-tooltip-chromium-darwin.png
+index 7bfbe30..e7b932a 100644
+Binary files a/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-tooltip-chromium-darwin.png and b/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-tooltip-chromium-darwin.png differ
+diff --git a/test/e2e/selection-details.test.ts-snapshots/selection-details-mobile-fullscreen-chromium-darwin.png b/test/e2e/selection-details.test.ts-snapshots/selection-details-mobile-fullscreen-chromium-darwin.png
+index e21f3de..de512d3 100644
+Binary files a/test/e2e/selection-details.test.ts-snapshots/selection-details-mobile-fullscreen-chromium-darwin.png and b/test/e2e/selection-details.test.ts-snapshots/selection-details-mobile-fullscreen-chromium-darwin.png differ
+diff --git a/test/e2e/selection-details.test.ts-snapshots/selection-details-mobile-modal-chromium-darwin.png b/test/e2e/selection-details.test.ts-snapshots/selection-details-mobile-modal-chromium-darwin.png
+index 4ee7911..293f8a4 100644
+Binary files a/test/e2e/selection-details.test.ts-snapshots/selection-details-mobile-modal-chromium-darwin.png and b/test/e2e/selection-details.test.ts-snapshots/selection-details-mobile-modal-chromium-darwin.png differ
+diff --git a/test/e2e/selection-details.test.ts-snapshots/selection-details-swatch-add-chromium-darwin.png b/test/e2e/selection-details.test.ts-snapshots/selection-details-swatch-add-chromium-darwin.png
+index 7225dba..9654f25 100644
+Binary files a/test/e2e/selection-details.test.ts-snapshots/selection-details-swatch-add-chromium-darwin.png and b/test/e2e/selection-details.test.ts-snapshots/selection-details-swatch-add-chromium-darwin.png differ
+diff --git a/test/e2e/selection-details.test.ts-snapshots/selection-details-swatch-remove-chromium-darwin.png b/test/e2e/selection-details.test.ts-snapshots/selection-details-swatch-remove-chromium-darwin.png
+index f9ecc76..b80ea2c 100644
+Binary files a/test/e2e/selection-details.test.ts-snapshots/selection-details-swatch-remove-chromium-darwin.png and b/test/e2e/selection-details.test.ts-snapshots/selection-details-swatch-remove-chromium-darwin.png differ

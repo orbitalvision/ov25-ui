@@ -1,0 +1,15 @@
+globals.css                                        |   1 +
+ setup/bun.lock                                     |   4 +-
+ setup/package-lock.json                            |  12 ++---
+ setup/package.json                                 |   4 +-
+ .../variant-cards/SelectionDetailsSurface.tsx      |  54 +++++++++++++++------
+ ...cing-mobile-drawer-boundary-chromium-darwin.png | Bin 28329 -> 28341 bytes
+ ...-details-desktop-fullscreen-chromium-darwin.png | Bin 1575980 -> 842477 bytes
+ ...ction-details-desktop-modal-chromium-darwin.png | Bin 720350 -> 408353 bytes
+ ...ction-details-desktop-sheet-chromium-darwin.png | Bin 313715 -> 158940 bytes
+ ...ion-details-desktop-tooltip-chromium-darwin.png | Bin 126617 -> 70231 bytes
+ ...n-details-mobile-fullscreen-chromium-darwin.png | Bin 284950 -> 144180 bytes
+ ...ection-details-mobile-modal-chromium-darwin.png | Bin 287826 -> 139891 bytes
+ ...election-details-swatch-add-chromium-darwin.png | Bin 720350 -> 408353 bytes
+ ...ction-details-swatch-remove-chromium-darwin.png | Bin 720518 -> 408502 bytes
+ 14 files changed, 51 insertions(+), 24 deletions(-)

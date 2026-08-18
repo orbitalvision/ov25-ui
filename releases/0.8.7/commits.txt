@@ -1,0 +1,4 @@
+b277201 (HEAD -> main, origin/main, origin/HEAD) fix(test) update screenshots after selection reordering
+4e77089 fix(selection-details) use white text on black background, black text on white background (mix-blend)
+da49927 fix(selection-details) correct animations when opening mobile 'sheet'. stop reflow in sheet by reserving space for the image.
+2d13ca6 (tag: ov25-setup@0.8.6) chore: release ov25-setup 0.8.6

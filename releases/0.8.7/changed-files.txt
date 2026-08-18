@@ -1,0 +1,14 @@
+globals.css
+setup/bun.lock
+setup/package-lock.json
+setup/package.json
+src/components/VariantSelectMenu/variant-cards/SelectionDetailsSurface.tsx
+test/e2e/mobile-drawer-stacking.test.ts-snapshots/single-no-pricing-mobile-drawer-boundary-chromium-darwin.png
+test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-fullscreen-chromium-darwin.png
+test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-modal-chromium-darwin.png
+test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-sheet-chromium-darwin.png
+test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-tooltip-chromium-darwin.png
+test/e2e/selection-details.test.ts-snapshots/selection-details-mobile-fullscreen-chromium-darwin.png
+test/e2e/selection-details.test.ts-snapshots/selection-details-mobile-modal-chromium-darwin.png
+test/e2e/selection-details.test.ts-snapshots/selection-details-swatch-add-chromium-darwin.png
+test/e2e/selection-details.test.ts-snapshots/selection-details-swatch-remove-chromium-darwin.png
