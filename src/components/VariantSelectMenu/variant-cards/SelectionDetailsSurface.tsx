@@ -16,6 +16,8 @@ const ENTER_MS = 220;
 const EXIT_MS = 180;
 const SHEET_ENTER_MS = 260;
 const SHEET_EXIT_MS = 220;
+const MOBILE_FULLSCREEN_ENTER_MS = ENTER_MS * 2;
+const MOBILE_FULLSCREEN_EXIT_MS = EXIT_MS * 2;
 const VIEWPORT_GAP = 12;
 const TOOLTIP_GAP = 10;
 const TOOLTIP_WIDTH = 240;
@@ -222,14 +224,6 @@ export function SelectionDetailsSurface() {
         setPresent(true);
       } else {
         setPresent(false);
-        let enterFrame: number | null = null;
-        const mountFrame = window.requestAnimationFrame(() => {
-          enterFrame = window.requestAnimationFrame(() => setPresent(true));
-        });
-        return () => {
-          window.cancelAnimationFrame(mountFrame);
-          if (enterFrame != null) window.cancelAnimationFrame(enterFrame);
-        };
       }
       return;
     }
@@ -244,12 +238,41 @@ export function SelectionDetailsSurface() {
       return;
     }
     setPresent(false);
-    const exitDuration = rendered.displayMode === 'sheet' ? SHEET_EXIT_MS : EXIT_MS;
+    const exitDuration = rendered.displayMode === 'sheet'
+      ? SHEET_EXIT_MS
+      : rendered.displayMode === 'fullscreen' && selectionDetailsUsesMobileMode
+        ? MOBILE_FULLSCREEN_EXIT_MS
+        : EXIT_MS;
     exitTimerRef.current = window.setTimeout(() => {
       exitTimerRef.current = null;
       setRendered(null);
     }, exitDuration);
   }, [selectionDetailsState, rendered, selectionDetailsUsesMobileMode]);
+
+  // Start the enter transition only after the requested surface exists in the
+  // DOM. Starting it while `rendered` is still null lets React batch the mount
+  // and presented state, making every fully-unmounted open appear instant.
+  useBrowserLayoutEffect(() => {
+    if (!selectionDetailsState || !rendered) return;
+    if (selectionDetailsState.requestId !== rendered.requestId) return;
+
+    const skipTransition =
+      rendered.instant ||
+      (rendered.displayMode === 'fullscreen' && !selectionDetailsUsesMobileMode);
+    if (skipTransition || !surfaceRef.current) return;
+
+    setPresent(false);
+
+    let enterFrame: number | null = null;
+    const mountFrame = window.requestAnimationFrame(() => {
+      enterFrame = window.requestAnimationFrame(() => setPresent(true));
+    });
+
+    return () => {
+      window.cancelAnimationFrame(mountFrame);
+      if (enterFrame != null) window.cancelAnimationFrame(enterFrame);
+    };
+  }, [rendered, selectionDetailsState, selectionDetailsUsesMobileMode]);
 
   // Clear a pending exit transition if the entire surface unmounts.
   React.useEffect(() => () => {
@@ -509,13 +532,17 @@ export function SelectionDetailsSurface() {
     ? (present ? 160 : 125)
     : mode === 'sheet'
       ? (present ? SHEET_ENTER_MS : SHEET_EXIT_MS)
-      : (present ? ENTER_MS : EXIT_MS);
+      : isFullscreen && selectionDetailsUsesMobileMode
+        ? (present ? MOBILE_FULLSCREEN_ENTER_MS : MOBILE_FULLSCREEN_EXIT_MS)
+        : (present ? ENTER_MS : EXIT_MS);
   const transitionEasing = slidesFromRight
     ? 'cubic-bezier(0.32, 0.72, 0, 1)'
     : 'cubic-bezier(0.22, 1, 0.36, 1)';
   const transitionTiming = `${transitionDuration}ms ${transitionEasing}`;
   const panelTransition = animate
-    ? `opacity ${transitionTiming}, transform ${transitionTiming}`
+    ? (slidesFromRight
+      ? `transform ${transitionTiming}`
+      : `opacity ${transitionTiming}, transform ${transitionTiming}`)
     : 'none';
   const actionButtonWidthClass = isFullscreenDesktop
     ? 'ov:w-full'
@@ -545,7 +572,6 @@ export function SelectionDetailsSurface() {
       }
     : slidesFromRight
       ? {
-          opacity: present ? 1 : 0,
           transform: present ? 'translateX(0)' : 'translateX(100%)',
           transition: panelTransition,
         }
@@ -624,7 +650,7 @@ export function SelectionDetailsSurface() {
               : isTooltip
               ? 'ov:w-full ov:aspect-square ov:shrink-0 ov:overflow-hidden ov:bg-neutral-100'
               : isFullscreen
-              ? 'ov:flex ov:w-full ov:justify-center ov:px-4 ov:pt-16 ov:md:px-8 ov:md:pt-8'
+              ? 'ov:flex ov:min-h-0 ov:w-full ov:aspect-square ov:shrink-0 ov:items-center ov:justify-center ov:overflow-hidden ov:px-4 ov:pt-16 ov:md:px-8 ov:md:pt-8'
               : `ov:mx-auto ov:w-full ov:aspect-square ov:overflow-hidden ov:bg-neutral-100 ${mode === 'modal' ? 'ov:mt-4' : ''}`}`}
             data-image-presentation={isFullscreen ? 'contain' : 'square-crop'}
           >
@@ -636,7 +662,7 @@ export function SelectionDetailsSurface() {
               className={`ov25-selection-details-image ${isFullscreenDesktop
                 ? 'ov:block ov:h-full ov:w-full ov:object-contain'
                 : isFullscreen
-                ? 'ov:block ov:w-auto ov:h-auto ov:max-w-full ov:object-contain'
+                ? 'ov:block ov:w-auto ov:h-auto ov:max-w-full ov:max-h-full ov:object-contain'
                 : 'ov:w-full ov:h-full ov:object-cover'}`}
               onLoad={(event) => {
                 schedulePreloadAfterImagePaint(
