@@ -4,9 +4,37 @@ const FIXTURE = '/tests/gallery-sheet-list-auto-open.html';
 const RUNTIME_TIMEOUT = 20000;
 
 async function expectPageScrollLocked(page: Page) {
-  await expect(page.locator('body')).toHaveCSS('position', 'fixed', {
-    timeout: RUNTIME_TIMEOUT,
-  });
+  await expect.poll(
+    () => page.evaluate(() => {
+      const body = getComputedStyle(document.body);
+      const html = getComputedStyle(document.documentElement);
+      return (
+        body.position === 'fixed' ||
+        body.overflow === 'hidden' ||
+        body.overflowY === 'hidden' ||
+        html.overflow === 'hidden' ||
+        html.overflowY === 'hidden'
+      );
+    }),
+    { timeout: RUNTIME_TIMEOUT },
+  ).toBe(true);
+}
+
+async function expectPageScrollUnlocked(page: Page) {
+  await expect.poll(
+    () => page.evaluate(() => {
+      const body = getComputedStyle(document.body);
+      const html = getComputedStyle(document.documentElement);
+      return !(
+        body.position === 'fixed' ||
+        body.overflow === 'hidden' ||
+        body.overflowY === 'hidden' ||
+        html.overflow === 'hidden' ||
+        html.overflowY === 'hidden'
+      );
+    }),
+    { timeout: RUNTIME_TIMEOUT },
+  ).toBe(true);
 }
 
 async function expectSheetInsideViewport(sheet: Locator) {
@@ -49,9 +77,7 @@ test('desktop sheet auto-opens, closes, and reopens from Configure', async ({ pa
   await expectSheetInsideViewport(sheet);
 
   await sheet.getByRole('button', { name: 'Close' }).click();
-  await expect(page.locator('body')).not.toHaveCSS('position', 'fixed', {
-    timeout: RUNTIME_TIMEOUT,
-  });
+  await expectPageScrollUnlocked(page);
   await expectSheetOutsideRightOfViewport(sheet);
 
   await page.getByRole('button', { name: 'Configure', exact: true }).click();

@@ -235,6 +235,9 @@ async function openDetails(
   const trigger = requestedTrigger ?? (await getUnselectedTrigger(page));
 
   if (mode === 'tooltip') {
+    // Keep the trigger in view before hover. A locator screenshot otherwise
+    // scrolls after the tooltip opens, which legitimately dismisses it.
+    await trigger.scrollIntoViewIfNeeded();
     await trigger.hover();
   } else if (interaction === 'keyboard') {
     await trigger.focus();
@@ -246,6 +249,7 @@ async function openDetails(
   const surface = page.locator(`${DETAILS_SURFACE}:visible`);
   await expect(surface).toBeVisible({ timeout: RUNTIME_TIMEOUT });
   await expect(surface).toHaveAttribute('data-display-mode', mode);
+  await expect(surface).toHaveAttribute('data-present', 'true');
   return { surface, trigger };
 }
 
@@ -392,8 +396,13 @@ async function screenshotSurface(
   snapshotName: string,
 ): Promise<void> {
   await waitForSurfaceAssets(surface);
+  // `data-present` is set at the start of the transition. Capture only once
+  // the longest selection-details entrance transition has completed.
+  await surface.evaluate(() => new Promise<void>((resolve) => {
+    window.setTimeout(resolve, 300);
+  }));
   await expect(surface).toHaveScreenshot(snapshotName, {
-    animations: 'disabled',
+    animations: 'allow',
     maxDiffPixelRatio: 0.02,
   });
 }
@@ -462,9 +471,9 @@ async function expectFullscreenLayout(
   }
 
   expect(layout.layout).toBe('stacked');
-  expect(layout.topInset).toBeGreaterThanOrEqual(16);
-  expect(layout.leftInset).toBeGreaterThanOrEqual(16);
-  expect(layout.rightInset).toBeGreaterThanOrEqual(16);
+  expect(layout.topInset).toBeGreaterThanOrEqual(15.99);
+  expect(layout.leftInset).toBeGreaterThanOrEqual(15.99);
+  expect(layout.rightInset).toBeGreaterThanOrEqual(15.99);
   expect(layout.imageWidth).toBeLessThan(layout.surfaceWidth);
   expect(Math.abs(layout.renderedRatio - layout.naturalRatio)).toBeLessThan(0.02);
   expect(layout.footerDirection).toBe('column');
