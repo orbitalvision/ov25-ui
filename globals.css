@@ -279,6 +279,16 @@ html {
   gap: 0.5rem;
 }
 
+/* Match the centred title and description in modal/fullscreen detail layouts. */
+:where(
+  .ov25-selection-details-surface[data-display-mode="modal"],
+  .ov25-selection-details-surface[data-display-mode="fullscreen"]
+) :where(.ov25-selection-details-metadata-row) {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
 :where(.ov25-selection-details-metadata-label),
 :where(.ov25-selected-swatch-metadata-label) {
   font-weight: 500;
