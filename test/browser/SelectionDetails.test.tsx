@@ -453,7 +453,8 @@ test('desktop tooltip previews on hover, has no actions, and applies directly on
   expect(titleStyle.textShadow).toBe('none');
   expect(description.style.fontSize).toBe('');
   expect(descriptionStyle.position).toBe('static');
-  expect(descriptionStyle.height).toBe('auto');
+  expect(description.style.height).toBe('');
+  expect(Number.parseFloat(descriptionStyle.height)).toBeLessThan(120);
   expect(descriptionStyle.fontSize).toBe('11px');
   expect(getComputedStyle(copyBody).minHeight).toBe('120px');
   expect(metadata.parentElement).toBe(copyBody);
