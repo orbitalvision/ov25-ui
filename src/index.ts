@@ -69,7 +69,12 @@ export type {
 } from './types/dining-inject-config.js';
 
 export { normalizeSkuPayload, normalizePricePayload, parseIframeJsonPayload } from './commerce/normalize-iframe-commerce.js';
-export type { Swatch, SwatchRulesData } from './contexts/ov25-ui-context.js';
+export type {
+  Swatch,
+  SwatchMaterial,
+  SwatchParameter,
+  SwatchRulesData,
+} from './contexts/ov25-ui-context.js';
 export type { ProductImageInput } from './lib/utils.js';
 export { useOv25String } from './lib/strings/use-ov25-string.js';
 

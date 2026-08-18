@@ -29,6 +29,7 @@ const testPages = [
   'range-inline-variants-groups',
   'snap2-dialog',
   'snap2-inline',
+  'Maze_snap2',
   'snap2-uuid',
   'bed-configurator',
   'dining-configurator',

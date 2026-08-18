@@ -21,6 +21,19 @@ const placeholderContext = {
       option: 'Upholstery',
       sku: 'MISSING-1',
       description: 'Description remains visible without an image.',
+      material: {
+        id: 1,
+        name: 'Missing image material',
+        type: 'Fabric',
+        range: 'Test Range',
+        supplier: 'Test Supplier',
+        colors: [],
+        palette: [],
+        dominantColorHex: null,
+        aiTags: [],
+        caption: null,
+      },
+      metadata: { weave: 'Plain weave' },
     },
     {
       manufacturerId: 1,
@@ -43,6 +56,8 @@ const placeholderContext = {
     freeSwatchLimit: 4,
     pricePerSwatch: 0,
     minSwatches: 1,
+    enabled: true,
+    parameters: [{ id: 'weave', label: 'Weave' }],
   },
   isSwatchBookOpen: true,
   setIsSwatchBookOpen: vi.fn(),
@@ -108,6 +123,24 @@ describe('placeholder image leaf fallbacks', () => {
     expect(featured.querySelector('.ov25-selected-swatch-name')).toHaveTextContent('Missing-image swatch');
     expect(featured.querySelector('.ov25-selected-swatch-description')).toHaveTextContent(
       'Description remains visible without an image.',
+    );
+    expect(featured.querySelector('.ov25-selected-swatch-metadata')).toHaveTextContent(
+      'Range',
+    );
+    expect(featured.querySelector('.ov25-selected-swatch-metadata')).toHaveTextContent(
+      'Test Range',
+    );
+    expect(featured.querySelector('.ov25-selected-swatch-metadata')).toHaveTextContent(
+      'Supplier',
+    );
+    expect(featured.querySelector('.ov25-selected-swatch-metadata')).toHaveTextContent(
+      'Test Supplier',
+    );
+    expect(featured.querySelector('.ov25-selected-swatch-metadata')).toHaveTextContent(
+      'Weave',
+    );
+    expect(featured.querySelector('.ov25-selected-swatch-metadata')).toHaveTextContent(
+      'Plain weave',
     );
   });
 

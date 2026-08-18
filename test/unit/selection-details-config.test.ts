@@ -173,7 +173,12 @@ describe('ConfiguratorSetup selection details', () => {
       { selector: '.ov25-selection-details-image', label: 'Selection details image', element: 'img' },
       { selector: '.ov25-selection-details-copy', label: 'Selection details text area', element: 'div' },
       { selector: '.ov25-selection-details-title', label: 'Selection details title', element: 'h2' },
-      { selector: '.ov25-selection-details-description', label: 'Selection details description', element: 'p' },
+      { selector: '.ov25-selection-details-description', label: 'Selection details description', element: 'dl' },
+      { selector: '.ov25-selection-details-description-label', label: 'Selection details description label', element: 'dt' },
+      { selector: '.ov25-selection-details-metadata', label: 'Selection details metadata', element: 'dl' },
+      { selector: '.ov25-selection-details-metadata-row', label: 'Selection details metadata row', element: 'div' },
+      { selector: '.ov25-selection-details-metadata-label', label: 'Selection details metadata label', element: 'dt' },
+      { selector: '.ov25-selection-details-metadata-value', label: 'Selection details metadata value', element: 'dd' },
       { selector: '.ov25-selection-details-footer', label: 'Selection details actions', element: 'div' },
       { selector: '.ov25-selection-details-swatch-toggle', label: 'Selection details swatchbook button', element: 'button' },
       { selector: '.ov25-selection-details-apply', label: 'Selection details apply button', element: 'button' },
@@ -183,6 +188,12 @@ describe('ConfiguratorSetup selection details', () => {
       label: 'Variant card',
       element: 'div',
     });
+    expect(ELEMENT_SELECTORS).toEqual(expect.arrayContaining([
+      { selector: '.ov25-selected-swatch-metadata', label: 'Selected swatch metadata', element: 'dl' },
+      { selector: '.ov25-selected-swatch-metadata-row', label: 'Selected swatch metadata row', element: 'div' },
+      { selector: '.ov25-selected-swatch-metadata-label', label: 'Selected swatch metadata label', element: 'dt' },
+      { selector: '.ov25-selected-swatch-metadata-value', label: 'Selected swatch metadata value', element: 'dd' },
+    ]));
   });
 
   it('does not offer opacity where selection-details animation owns it', () => {
@@ -443,5 +454,8 @@ describe('selection details content', () => {
     expect(definitions.get('selectionDetailsAddToSwatchbook')).toBe('Add to swatchbook');
     expect(definitions.get('selectionDetailsRemoveFromSwatchbook')).toBe('Remove from swatchbook');
     expect(definitions.get('selectionDetailsClose')).toBe('Close');
+    expect(definitions.get('swatchMetadataDescription')).toBe('Description');
+    expect(definitions.get('swatchMetadataRange')).toBe('Range');
+    expect(definitions.get('swatchMetadataSupplier')).toBe('Supplier');
   });
 });

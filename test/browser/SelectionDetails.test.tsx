@@ -25,6 +25,23 @@ const swatch: Swatch = {
   name: 'Ocean swatch',
   description: 'A durable blue weave.',
   sku: 'OCEAN-1',
+  material: {
+    id: 12,
+    name: 'Ocean Linen',
+    type: 'Fabric',
+    range: 'Coastal Collection',
+    supplier: 'Orbital Textiles',
+    colors: ['Blue'],
+    palette: [],
+    dominantColorHex: null,
+    aiTags: [],
+    caption: null,
+  },
+  metadata: {
+    weave: 'Plain weave',
+    martindale: '50,000 rubs',
+    hidden: 'This field has no configured label',
+  },
   thumbnail: {
     thumbnail: IMAGE_DATA_URL,
     miniThumbnails: {
@@ -91,6 +108,10 @@ function DetailsHarness({
       pricePerSwatch: 0,
       minSwatches: 0,
       maxSwatches: 4,
+      parameters: [
+        { id: 'weave', label: 'Weave' },
+        { id: 'martindale', label: 'Martindale' },
+      ],
     });
   }, [enabled, setSwatchRulesData]);
 
@@ -147,6 +168,21 @@ test('opens rich swatch details without applying until the primary action', asyn
   expect(onSelect).not.toHaveBeenCalled();
   await expect.element(getByRole('heading', { name: 'Ocean swatch' })).toBeInTheDocument();
   await expect.element(getByRole('button', { name: 'Add to swatchbook' })).toBeInTheDocument();
+  const metadata = container.querySelector('.ov25-selection-details-metadata')!;
+  expect(metadata).toHaveTextContent('Range');
+  expect(metadata).toHaveTextContent('Coastal Collection');
+  expect(metadata).toHaveTextContent('Supplier');
+  expect(metadata).toHaveTextContent('Orbital Textiles');
+  expect(metadata).toHaveTextContent('Weave');
+  expect(metadata).toHaveTextContent('Plain weave');
+  expect(metadata).toHaveTextContent('Martindale');
+  expect(metadata).toHaveTextContent('50,000 rubs');
+  expect(metadata).not.toHaveTextContent('This field has no configured label');
+  const descriptionLabel = container.querySelector<HTMLElement>(
+    '.ov25-selection-details-description-label',
+  )!;
+  expect(descriptionLabel).toHaveTextContent('Description');
+  expect(getComputedStyle(descriptionLabel).display).toBe('none');
 
   await getByRole('button', { name: 'Apply to Model' }).click();
   expect(onSelect).toHaveBeenCalledTimes(1);
@@ -272,6 +308,7 @@ test('shows selection-only fallback when swatches are disabled', async () => {
   (container.querySelector('.ov25-default-variant-card') as HTMLElement).click();
   await expect.element(getByRole('heading', { name: 'Ocean selection' })).toBeInTheDocument();
   expect(container.querySelector('.ov25-selection-details-description')).toBeNull();
+  expect(container.querySelector('.ov25-selection-details-metadata')).toBeNull();
   expect(container.querySelector('.ov25-selection-details-swatch-toggle')).toBeNull();
 });
 
@@ -378,6 +415,10 @@ test('desktop tooltip previews on hover, has no actions, and applies directly on
   const imageFrame = surface.querySelector<HTMLElement>('.ov25-selection-details-image-frame')!;
   const title = surface.querySelector<HTMLElement>('.ov25-selection-details-title')!;
   const description = surface.querySelector<HTMLElement>('.ov25-selection-details-description')!;
+  const descriptionLabel = surface.querySelector<HTMLElement>(
+    '.ov25-selection-details-description-label',
+  )!;
+  const metadata = surface.querySelector<HTMLElement>('.ov25-selection-details-metadata')!;
   const surfaceStyle = getComputedStyle(surface);
   const titleStyle = getComputedStyle(title);
   const descriptionStyle = getComputedStyle(description);
@@ -402,6 +443,9 @@ test('desktop tooltip previews on hover, has no actions, and applies directly on
   expect(description.style.fontSize).toBe('');
   expect(descriptionStyle.height).toBe('120px');
   expect(descriptionStyle.fontSize).toBe('11px');
+  expect(getComputedStyle(descriptionLabel).display).toBe('none');
+  expect(metadata).toBeInTheDocument();
+  expect(getComputedStyle(metadata).display).toBe('none');
 
   trigger.click();
   expect(onSelect).toHaveBeenCalledTimes(1);
@@ -562,6 +606,9 @@ test('Setup element styles override fixed selection-details defaults', async () 
       'font-size': '15px',
       padding: '18px',
     },
+    '.ov25-selection-details-metadata': {
+      display: 'grid',
+    },
   });
   document.head.appendChild(customStyles);
 
@@ -584,6 +631,7 @@ test('Setup element styles override fixed selection-details defaults', async () 
     const description = surface.querySelector<HTMLElement>(
       '.ov25-selection-details-description',
     )!;
+    const metadata = surface.querySelector<HTMLElement>('.ov25-selection-details-metadata')!;
 
     expect(getComputedStyle(surface).backgroundColor).toBe('rgb(16, 32, 48)');
     expect(getComputedStyle(surface).borderRadius).toBe('17px');
@@ -595,6 +643,7 @@ test('Setup element styles override fixed selection-details defaults', async () 
     expect(getComputedStyle(description).color).toBe('rgb(253, 230, 138)');
     expect(getComputedStyle(description).fontSize).toBe('15px');
     expect(getComputedStyle(description).padding).toBe('18px');
+    expect(getComputedStyle(metadata).display).toBe('grid');
 
     expect(surface.style.borderRadius).toBe('');
     expect(title.style.color).toBe('');

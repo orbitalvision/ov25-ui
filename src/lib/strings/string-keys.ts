@@ -142,6 +142,9 @@ export const STRING_REPLACEMENT_DEFINITIONS: StringReplacements = [
   { key: 'swatchBookZoomedSwatchName', label: 'Swatch book zoomed swatch name', defaultTemplate: '${SWATCH_NAME}', interpolationValues: [{ name: 'SWATCH_NAME', description: 'Selected swatch display name.' }] },
   { key: 'swatchBookZoomedSwatchOption', label: 'Swatch book zoomed option line', defaultTemplate: '- ${SWATCH_OPTION}', interpolationValues: [{ name: 'SWATCH_OPTION', description: 'Swatch option label text.' }] },
   { key: 'swatchBookZoomedSwatchSku', label: 'Swatch book zoomed SKU line', defaultTemplate: '- ${SWATCH_SKU}', interpolationValues: [{ name: 'SWATCH_SKU', description: 'Swatch SKU text.' }] },
+  { key: 'swatchMetadataDescription', label: 'Swatch description label', defaultTemplate: 'Description', interpolationValues: [] },
+  { key: 'swatchMetadataRange', label: 'Swatch material range label', defaultTemplate: 'Range', interpolationValues: [] },
+  { key: 'swatchMetadataSupplier', label: 'Swatch material supplier label', defaultTemplate: 'Supplier', interpolationValues: [] },
   // swatches 
   { key: 'swatchBookFirstFreeCount', label: 'Swatch book first free line', defaultTemplate: 'First ${FREE_SWATCH_LIMIT} are free', interpolationValues: [{ name: 'FREE_SWATCH_LIMIT', description: 'Number of swatch samples included free.' }] },
   { key: 'swatchesContainerOrderUpToFreeSwatches', label: 'Swatches container order up to free swatches line', defaultTemplate: '+ Order up to ${FREE_SWATCH_LIMIT} Free Swatches', interpolationValues: [{ name: 'FREE_SWATCH_LIMIT', description: 'Maximum number of free swatch samples.' }] },

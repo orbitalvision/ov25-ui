@@ -10,6 +10,7 @@ import { PLACEHOLDER_IMAGE_URL } from '../../../lib/placeholder-image.js';
 import { useSwatchActions } from '../../../hooks/useSwatchActions.js';
 import { acquirePageScrollLock } from '../../../utils/page-scroll-lock.js';
 import { Button } from '../../ui/button.js';
+import { SwatchMetadata } from '../SwatchMetadata.js';
 
 const ENTER_MS = 220;
 const EXIT_MS = 180;
@@ -670,12 +671,26 @@ export function SelectionDetailsSurface() {
                 {title}
               </h2>
               {description && (
-                <p
+                <dl
                   className={`ov25-selection-details-description ${isFullscreenDesktop ? 'ov:mt-4 ov:text-base ov:leading-7' : isTooltip ? '' : 'ov:mt-3 ov:text-sm ov:leading-6'} ov:whitespace-pre-wrap ov:text-(--ov25-text-color)`}
                 >
-                  {description}
-                </p>
+                  <div className="ov25-selection-details-description-row">
+                    <dt className="ov25-selection-details-metadata-label ov25-selection-details-description-label">
+                      {getString('swatchMetadataDescription', undefined, 'Description')}
+                    </dt>
+                    <dd className="ov25-selection-details-metadata-value ov25-selection-details-description-value ov:whitespace-pre-wrap">
+                      {description}
+                    </dd>
+                  </div>
+                </dl>
               )}
+              <SwatchMetadata
+                swatch={eligibleSwatch}
+                parameters={swatchRulesData.parameters}
+                getString={getString}
+                classPrefix="ov25-selection-details"
+                className={`${isFullscreenDesktop ? 'ov:mt-5' : isTooltip ? '' : 'ov:mt-4'} ov:grid ov:gap-1 ov:text-left ov:text-sm ov:text-(--ov25-text-color)`}
+              />
             </div>
           </div>
         </div>

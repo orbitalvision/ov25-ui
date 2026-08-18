@@ -4,10 +4,11 @@ import { Dialog, DialogContent, DialogTitle } from "../ui/dialog.js";
 import { Button } from "../ui/button.js";
 import { VariantsCloseButton } from "./VariantsCloseButton.js";
 import { SwatchImage } from "../SwatchImage.js";
-import { Swatch, useOV25UI } from "../../contexts/ov25-ui-context.js";
+import { type Swatch, useOV25UI } from "../../contexts/ov25-ui-context.js";
 import { cn } from '../../lib/utils.js';
 import { SWATCH_PATH } from '../../lib/svgs/SwatchIconSvg.js';
 import { PLACEHOLDER_IMAGE_URL } from '../../lib/placeholder-image.js';
+import { SwatchMetadata } from './SwatchMetadata.js';
 
 interface SwatchBookProps {
   isMobile: boolean;
@@ -117,7 +118,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
               <div className="ov:flex ov:flex-col ov:items-center ov:gap-4">
                 <div className="ov25-selected-swatch-image-container ov:relative ov:w-[200px] ov:h-[200px] ov:md:w-[250px] ov:md:h-[250px] group">
                   <SwatchImage
-                    src={zoomedSwatch.thumbnail?.miniThumbnails?.large || PLACEHOLDER_IMAGE_URL}
+                    src={zoomedSwatch.thumbnail?.miniThumbnails?.large || zoomedSwatch.thumbnail?.thumbnail || PLACEHOLDER_IMAGE_URL}
                     alt={getString('swatchBookZoomedSwatchName', { SWATCH_NAME: zoomedSwatch.name }, zoomedSwatch.name)}
                     className='ov25-swatch-image ov:w-full ov:h-full ov:aspect-square'
                   />
@@ -127,14 +128,27 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
                     <h3 className="ov25-selected-swatch-name ov:text-base ov:md:text-lg ov:font-medium ov:text-black">
                       {getString('swatchBookZoomedSwatchName', { SWATCH_NAME: zoomedSwatch.name }, zoomedSwatch.name)}
                     </h3>
-                    <p className="ov25-selected-swatch-option ov:text-gray-600 ov:text-xs ov:italic">
-                      {getString('swatchBookZoomedSwatchOption', { SWATCH_OPTION: zoomedSwatch.option }, `- ${zoomedSwatch.option}`)}
-                    </p>
-                    <p className="ov25-selected-swatch-sku ov:text-gray-600 ov:text-xs ov:italic">
-                      {getString('swatchBookZoomedSwatchSku', { SWATCH_SKU: zoomedSwatch.sku }, `- ${zoomedSwatch.sku}`)}
-                    </p>
+                    {zoomedSwatch.option?.trim() && (
+                      <p className="ov25-selected-swatch-option ov:text-gray-600 ov:text-xs ov:italic">
+                        {getString('swatchBookZoomedSwatchOption', { SWATCH_OPTION: zoomedSwatch.option }, `- ${zoomedSwatch.option}`)}
+                      </p>
+                    )}
+                    {zoomedSwatch.sku?.trim() && (
+                      <p className="ov25-selected-swatch-sku ov:text-gray-600 ov:text-xs ov:italic">
+                        {getString('swatchBookZoomedSwatchSku', { SWATCH_SKU: zoomedSwatch.sku }, `- ${zoomedSwatch.sku}`)}
+                      </p>
+                    )}
                   </div>
-                  <p className="ov25-selected-swatch-description ov:text-black ov:text-sm ov:font-normal ov:leading-6 ov:line-clamp-5 ov:md:line-clamp-3 ov:md:min-h-18">{zoomedSwatch.description}</p>
+                  {zoomedSwatch.description?.trim() && (
+                    <p className="ov25-selected-swatch-description ov:text-black ov:text-sm ov:font-normal ov:leading-6 ov:line-clamp-5 ov:md:line-clamp-3 ov:md:min-h-18">{zoomedSwatch.description}</p>
+                  )}
+                  <SwatchMetadata
+                    swatch={zoomedSwatch}
+                    parameters={swatchRulesData.parameters}
+                    getString={getString}
+                    classPrefix="ov25-selected-swatch"
+                    className="ov:mt-3 ov:grid ov:gap-1 ov:text-left ov:text-sm ov:text-(--ov25-text-color)"
+                  />
                 </div>
               </div>
             </div>
@@ -163,7 +177,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
                 <div key={`${swatch.manufacturerId}-${swatch.name}-${swatch.option}-${swatch.group ?? ''}`} className={swatchItemClassName}>
                   <div className={cn(swatchImageContainerClassName, 'ov:group')}>
                     <SwatchImage
-                      src={swatch.thumbnail?.miniThumbnails?.medium || PLACEHOLDER_IMAGE_URL}
+                      src={swatch.thumbnail?.miniThumbnails?.medium || swatch.thumbnail?.thumbnail || PLACEHOLDER_IMAGE_URL}
                       alt={swatch.name}
                       className='ov25-swatch-image ov:w-full ov:h-full ov:scale-120'
                     />

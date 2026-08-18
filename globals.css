@@ -261,9 +261,48 @@ html {
 }
 
 :where(.ov25-selection-details-title),
-:where(.ov25-selection-details-description) {
+:where(.ov25-selection-details-description),
+:where(.ov25-selection-details-metadata),
+:where(.ov25-selection-details-metadata-label),
+:where(.ov25-selection-details-metadata-value),
+:where(.ov25-selected-swatch-metadata),
+:where(.ov25-selected-swatch-metadata-label),
+:where(.ov25-selected-swatch-metadata-value) {
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+:where(.ov25-selection-details-metadata-row),
+:where(.ov25-selected-swatch-metadata-row) {
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
+  gap: 0.5rem;
+}
+
+:where(.ov25-selection-details-metadata-label),
+:where(.ov25-selected-swatch-metadata-label) {
+  font-weight: 500;
+}
+
+:where(.ov25-selection-details-metadata-value),
+:where(.ov25-selected-swatch-metadata-value),
+:where(.ov25-selection-details-description-value) {
+  margin: 0;
+}
+
+:where(.ov25-selection-details-description-row) {
+  display: block;
+}
+
+/* The description keeps its existing prose presentation until a merchant opts into its label. */
+:where(.ov25-selection-details-description-label) {
+  display: none;
+}
+
+/* Keep tooltip geometry compact, but leave the complete metadata available to merchant CSS. */
+:where(.ov25-selection-details-surface[data-display-mode="tooltip"])
+  :where(.ov25-selection-details-metadata) {
+  display: none;
 }
 
 :where(.ov25-selection-details-surface[data-display-mode="tooltip"])

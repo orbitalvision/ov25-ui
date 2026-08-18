@@ -237,6 +237,19 @@ export interface Discount {
   formattedAmount: string;
 }
 
+export interface SwatchMaterial {
+  id: number;
+  name: string;
+  type: string;
+  range: string;
+  supplier: string;
+  colors: string[];
+  palette: unknown[];
+  dominantColorHex: string | null;
+  aiTags: unknown[];
+  caption: string | null;
+}
+
 export interface Swatch {
   name: string;
   option: string;
@@ -245,6 +258,10 @@ export interface Swatch {
   group?: string | null;
   description?: string | null;
   sku?: string | null;
+  /** Retailer-authored values keyed by swatchSettings.parameters[].id. */
+  metadata?: Record<string, string> | null;
+  /** Derived material data. Only the customer-facing range and supplier are displayed. */
+  material?: SwatchMaterial | null;
   thumbnail?: {
     blurHash?: string | null;
     thumbnail?: string | null;
@@ -281,6 +298,11 @@ export interface SelectionDetailsState {
   requestId: number;
 }
 
+export type SwatchParameter = {
+  id: string;
+  label: string;
+};
+
 export type SwatchRulesData = {
   freeSwatchLimit: number;
   canExeedFreeLimit: boolean;
@@ -288,6 +310,8 @@ export type SwatchRulesData = {
   minSwatches: number;
   maxSwatches: number;
   enabled: boolean;
+  /** Ordered retailer-authored fields available for each swatch. */
+  parameters?: SwatchParameter[];
 }
 
 /**
