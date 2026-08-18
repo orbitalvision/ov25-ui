@@ -1,0 +1,349 @@
+diff --git a/globals.css b/globals.css
+index 091949c..e2f5af0 100644
+--- a/globals.css
++++ b/globals.css
+@@ -213,7 +213,7 @@ html {
+ }
+ 
+ :where(.ov25-selection-details-surface[data-display-mode="tooltip"]) {
+-  height: min(360px, max(1px, calc(100dvh - 24px)));
++  height: auto;
+   max-height: calc(100dvh - 24px);
+   border-radius: 0;
+   border-color: var(--ov25-border-color);
+@@ -323,7 +323,7 @@ html {
+ 
+ :where(.ov25-selection-details-surface[data-display-mode="tooltip"])
+   :where(.ov25-selection-details-image-frame) {
+-  height: calc(100% - 120px);
++  height: auto;
+   max-width: none;
+ }
+ 
+@@ -358,22 +358,45 @@ html {
+ }
+ 
+ :where(.ov25-selection-details-surface[data-display-mode="tooltip"])
+-  :where(.ov25-selection-details-description) {
+-  position: absolute;
+-  right: 0;
+-  bottom: 0;
+-  left: 0;
++:where(.ov25-selection-details-copy > div) {
++  height: auto;
++}
++
++/* Description and optional metadata share one bottom panel. It grows beneath
++ * the square image until the viewport limit, then its own content scrolls. */
++:where(.ov25-selection-details-surface[data-display-mode="tooltip"])
++  :where(.ov25-selection-details-copy-body) {
+   box-sizing: border-box;
+-  height: 120px;
++  min-height: min(120px, max(0px, calc(100dvh - 264px)));
++  max-height: max(0px, calc(100dvh - 264px));
+   margin: 0;
+   padding: 12px;
+-  overflow: hidden;
++  overflow-x: hidden;
++  overflow-y: auto;
+   background: var(--ov25-background-color);
+   color: var(--ov25-text-color);
+   font-size: 11px;
+   line-height: 1.3;
+ }
+ 
++:where(.ov25-selection-details-surface[data-display-mode="tooltip"])
++  :where(.ov25-selection-details-copy-body:empty) {
++  display: none;
++}
++
++:where(.ov25-selection-details-surface[data-display-mode="tooltip"])
++  :where(.ov25-selection-details-description) {
++  box-sizing: border-box;
++  margin: 0;
++  padding: 0;
++  overflow: visible;
++}
++
++:where(.ov25-selection-details-surface[data-display-mode="tooltip"])
++  :where(.ov25-selection-details-description + .ov25-selection-details-metadata) {
++  margin-top: 8px;
++}
++
+ [data-ov25-wizard-variants-mode="inline"] [data-ov25-wizard-variants-content] {
+   flex: 1;
+   min-height: 0;
+diff --git a/scripts/release/common.js b/scripts/release/common.js
+index 1c88712..631f516 100644
+--- a/scripts/release/common.js
++++ b/scripts/release/common.js
+@@ -53,6 +53,18 @@ export function run(command, args = [], options = {}) {
+     encoding: 'utf8',
+   });
+ 
++  if (result.error) {
++    throw new Error(
++      `${command} ${args.join(' ')} could not be started: ${result.error.message}`,
++    );
++  }
++
++  if (result.signal) {
++    throw new Error(
++      `${command} ${args.join(' ')} was terminated by signal ${result.signal}`,
++    );
++  }
++
+   if (result.status !== 0) {
+     throw new Error(`${command} ${args.join(' ')} failed with exit code ${result.status}`);
+   }
+diff --git a/setup/bun.lock b/setup/bun.lock
+index b44d7dc..9e55462 100644
+--- a/setup/bun.lock
++++ b/setup/bun.lock
+@@ -21,7 +21,7 @@
+         "class-variance-authority": "^0.7.0",
+         "clsx": "^2.1.0",
+         "lucide-react": "^0.540.0",
+-        "ov25-ui": "0.8.4",
++        "ov25-ui": "0.8.5",
+         "react-colorful": "^5.6.1",
+         "tailwind-merge": "^2.2.0",
+       },
+@@ -425,7 +425,7 @@
+ 
+     "object-assign": ["object-assign@4.1.1", "", {}, "sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg=="],
+ 
+-    "ov25-ui": ["ov25-ui@0.8.4", "", { "dependencies": { "@radix-ui/react-dialog": "^1.1.10", "@radix-ui/react-icons": "^1.3.2", "@radix-ui/react-popover": "^1.1.14", "@radix-ui/react-scroll-area": "^1.2.5", "@radix-ui/react-select": "^2.2.2", "@radix-ui/react-slot": "^1.0.2", "@radix-ui/react-tabs": "^1.1.2", "@react-spring/web": "^10.0.3", "@use-gesture/react": "^10.3.1", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "embla-carousel-react": "^8.6.0", "framer-motion": "^11.16.1", "gsap": "^3.13.0", "lucide-react": "^0.503.0", "react-qr-code": "^2.0.15", "sonner": "^1.7.1", "string-similarity-js": "^2.1.4", "tailwind-merge": "^3.2.0" }, "peerDependencies": { "react": "^19", "react-dom": "^19" } }, "sha512-sRnAHYgxiz9fblcA9L02b8diYfaWYxRaNDJdM4+bVKvwdlsdgS+TeAiopy2tfNx8X0NL5yEkUxQnfSg7cxv64A=="],
++    "ov25-ui": ["ov25-ui@0.8.5", "", { "dependencies": { "@radix-ui/react-dialog": "^1.1.10", "@radix-ui/react-icons": "^1.3.2", "@radix-ui/react-popover": "^1.1.14", "@radix-ui/react-scroll-area": "^1.2.5", "@radix-ui/react-select": "^2.2.2", "@radix-ui/react-slot": "^1.0.2", "@radix-ui/react-tabs": "^1.1.2", "@react-spring/web": "^10.0.3", "@use-gesture/react": "^10.3.1", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "embla-carousel-react": "^8.6.0", "framer-motion": "^11.16.1", "gsap": "^3.13.0", "lucide-react": "^0.503.0", "react-qr-code": "^2.0.15", "sonner": "^1.7.1", "string-similarity-js": "^2.1.4", "tailwind-merge": "^3.2.0" }, "peerDependencies": { "react": "^19", "react-dom": "^19" } }, "sha512-0n2pFFNMVkyQ2qz0OoyDoidJ+kpnu2pDAv8tTv5+lZwOqufOA2i5rccpwGiyIvJdBmqe+8L93rzYMoeGSDzGEw=="],
+ 
+     "package-json-from-dist": ["package-json-from-dist@1.0.1", "", {}, "sha512-UEZIS3/by4OC8vL3P2dTXRETpebLI2NiI5vIrjaD/5UtrkFX/tNbwjTSRAGC/+7CAo2pIcBaRgWmcBBHcsaCIw=="],
+ 
+diff --git a/setup/package-lock.json b/setup/package-lock.json
+index 302f583..00b7975 100644
+--- a/setup/package-lock.json
++++ b/setup/package-lock.json
+@@ -1,12 +1,12 @@
+ {
+   "name": "ov25-setup",
+-  "version": "0.8.4",
++  "version": "0.8.5",
+   "lockfileVersion": 3,
+   "requires": true,
+   "packages": {
+     "": {
+       "name": "ov25-setup",
+-      "version": "0.8.4",
++      "version": "0.8.5",
+       "dependencies": {
+         "@codemirror/commands": "^6.10.3",
+         "@codemirror/lang-css": "^6.3.1",
+@@ -24,7 +24,7 @@
+         "class-variance-authority": "^0.7.0",
+         "clsx": "^2.1.0",
+         "lucide-react": "^0.540.0",
+-        "ov25-ui": "0.8.4",
++        "ov25-ui": "0.8.5",
+         "react-colorful": "^5.6.1",
+         "tailwind-merge": "^2.2.0"
+       },
+@@ -3116,9 +3116,9 @@
+       }
+     },
+     "node_modules/ov25-ui": {
+-      "version": "0.8.4",
+-      "resolved": "https://registry.npmjs.org/ov25-ui/-/ov25-ui-0.8.4.tgz",
+-      "integrity": "sha512-sRnAHYgxiz9fblcA9L02b8diYfaWYxRaNDJdM4+bVKvwdlsdgS+TeAiopy2tfNx8X0NL5yEkUxQnfSg7cxv64A==",
++      "version": "0.8.5",
++      "resolved": "https://registry.npmjs.org/ov25-ui/-/ov25-ui-0.8.5.tgz",
++      "integrity": "sha512-0n2pFFNMVkyQ2qz0OoyDoidJ+kpnu2pDAv8tTv5+lZwOqufOA2i5rccpwGiyIvJdBmqe+8L93rzYMoeGSDzGEw==",
+       "license": "MIT",
+       "dependencies": {
+         "@radix-ui/react-dialog": "^1.1.10",
+diff --git a/setup/package.json b/setup/package.json
+index 9e19776..6b62092 100644
+--- a/setup/package.json
++++ b/setup/package.json
+@@ -1,6 +1,6 @@
+ {
+   "name": "ov25-setup",
+-  "version": "0.8.4",
++  "version": "0.8.5",
+   "description": "OV25 Configurator Setup visual editor component",
+   "repository": {
+     "type": "git",
+@@ -53,7 +53,7 @@
+     "class-variance-authority": "^0.7.0",
+     "clsx": "^2.1.0",
+     "lucide-react": "^0.540.0",
+-    "ov25-ui": "0.8.4",
++    "ov25-ui": "0.8.5",
+     "react-colorful": "^5.6.1",
+     "tailwind-merge": "^2.2.0"
+   },
+diff --git a/src/components/VariantSelectMenu/SwatchMetadata.tsx b/src/components/VariantSelectMenu/SwatchMetadata.tsx
+index 665fef0..852363c 100644
+--- a/src/components/VariantSelectMenu/SwatchMetadata.tsx
++++ b/src/components/VariantSelectMenu/SwatchMetadata.tsx
+@@ -90,7 +90,9 @@ export function SwatchMetadata({
+           key={row.id}
+           className={`${classPrefix}-metadata-row ${classPrefix}-metadata-row-${row.id}`}
+         >
+-          <dt className={`${classPrefix}-metadata-label`}>{row.label}</dt>
++          <dt className={`${classPrefix}-metadata-label`}>
++            {row.label.endsWith(':') ? row.label : `${row.label}:`}
++          </dt>
+           <dd className={`${classPrefix}-metadata-value`}>{row.value}</dd>
+         </div>
+       ))}
+diff --git a/src/components/VariantSelectMenu/variant-cards/SelectionDetailsSurface.tsx b/src/components/VariantSelectMenu/variant-cards/SelectionDetailsSurface.tsx
+index 72168b8..2f623b4 100644
+--- a/src/components/VariantSelectMenu/variant-cards/SelectionDetailsSurface.tsx
++++ b/src/components/VariantSelectMenu/variant-cards/SelectionDetailsSurface.tsx
+@@ -615,14 +615,14 @@ export function SelectionDetailsSurface() {
+           className={isFullscreenDesktop
+             ? 'ov:contents'
+             : isTooltip
+-              ? 'ov:relative ov:h-full ov:min-h-0 ov:flex-none ov:overflow-hidden'
++              ? 'ov:relative ov:flex ov:min-h-0 ov:w-full ov:flex-col ov:overflow-hidden'
+               : 'ov:flex-1 ov:min-h-0 ov:min-w-0 ov:overflow-x-hidden ov:overflow-y-auto'}
+         >
+           <div
+             className={`ov25-selection-details-image-frame ${isFullscreenDesktop
+               ? 'ov:col-start-1 ov:row-start-1 ov:row-span-2 ov:flex ov:min-h-0 ov:min-w-0 ov:items-center ov:justify-center ov:overflow-hidden ov:bg-neutral-100 ov:p-8'
+               : isTooltip
+-              ? 'ov:w-full ov:overflow-hidden ov:bg-neutral-100'
++              ? 'ov:w-full ov:aspect-square ov:shrink-0 ov:overflow-hidden ov:bg-neutral-100'
+               : isFullscreen
+               ? 'ov:flex ov:w-full ov:justify-center ov:px-4 ov:pt-16 ov:md:px-8 ov:md:pt-8'
+               : `ov:mx-auto ov:w-full ov:aspect-square ov:overflow-hidden ov:bg-neutral-100 ${mode === 'modal' ? 'ov:mt-4' : ''}`}`}
+@@ -656,13 +656,13 @@ export function SelectionDetailsSurface() {
+             className={`ov25-selection-details-copy ${isFullscreenDesktop
+               ? 'ov:col-start-2 ov:row-start-1 ov:flex ov:min-h-0 ov:min-w-0 ov:flex-col ov:overflow-x-hidden ov:overflow-y-auto ov:border-l ov:border-(--ov25-border-color) ov:px-8 ov:py-20 ov:text-center'
+               : isTooltip
+-              ? 'ov:absolute ov:inset-0 ov:min-w-0 ov:p-0'
++              ? 'ov:min-w-0 ov:p-0'
+               : `ov:min-w-0 ov:max-w-full ov:px-5 ov:pt-5 ${description ? 'ov:pb-5' : 'ov:pb-6'} ${isFullscreen || mode === 'modal' ? 'ov:text-center' : ''}`}`}
+           >
+             <div className={isFullscreenDesktop
+               ? 'ov:my-auto ov:w-full ov:min-w-0 ov:max-w-full'
+               : isTooltip
+-                ? 'ov:h-full ov:w-full ov:min-w-0 ov:max-w-full'
++                ? 'ov:w-full ov:min-w-0 ov:max-w-full'
+                 : 'ov:min-w-0 ov:max-w-full'}>
+               <h2
+                 id={titleId}
+@@ -670,27 +670,29 @@ export function SelectionDetailsSurface() {
+               >
+                 {title}
+               </h2>
+-              {description && (
+-                <dl
+-                  className={`ov25-selection-details-description ${isFullscreenDesktop ? 'ov:mt-4 ov:text-base ov:leading-7' : isTooltip ? '' : 'ov:mt-3 ov:text-sm ov:leading-6'} ov:whitespace-pre-wrap ov:text-(--ov25-text-color)`}
+-                >
+-                  <div className="ov25-selection-details-description-row">
+-                    <dt className="ov25-selection-details-metadata-label ov25-selection-details-description-label">
+-                      {getString('swatchMetadataDescription', undefined, 'Description')}
+-                    </dt>
+-                    <dd className="ov25-selection-details-metadata-value ov25-selection-details-description-value ov:whitespace-pre-wrap">
+-                      {description}
+-                    </dd>
+-                  </div>
+-                </dl>
+-              )}
+-              <SwatchMetadata
+-                swatch={eligibleSwatch}
+-                parameters={swatchRulesData.parameters}
+-                getString={getString}
+-                classPrefix="ov25-selection-details"
+-                className={`${isFullscreenDesktop ? 'ov:mt-5' : isTooltip ? '' : 'ov:mt-4'} ov:grid ov:gap-1 ${isFullscreen || mode === 'modal' ? 'ov:text-center' : 'ov:text-left'} ov:text-sm ov:text-(--ov25-text-color)`}
+-              />
++              <div className="ov25-selection-details-copy-body">
++                {description && (
++                  <dl
++                    className={`ov25-selection-details-description ${isFullscreenDesktop ? 'ov:mt-4 ov:text-base ov:leading-7' : isTooltip ? '' : 'ov:mt-3 ov:text-sm ov:leading-6'} ov:whitespace-pre-wrap ov:text-(--ov25-text-color)`}
++                  >
++                    <div className="ov25-selection-details-description-row">
++                      <dt className="ov25-selection-details-metadata-label ov25-selection-details-description-label">
++                        {`${getString('swatchMetadataDescription', undefined, 'Description').replace(/:$/, '')}:`}
++                      </dt>
++                      <dd className="ov25-selection-details-metadata-value ov25-selection-details-description-value ov:whitespace-pre-wrap">
++                        {description}
++                      </dd>
++                    </div>
++                  </dl>
++                )}
++                <SwatchMetadata
++                  swatch={eligibleSwatch}
++                  parameters={swatchRulesData.parameters}
++                  getString={getString}
++                  classPrefix="ov25-selection-details"
++                  className={`${isFullscreenDesktop ? 'ov:mt-5' : isTooltip ? '' : 'ov:mt-4'} ov:grid ov:gap-1 ${isFullscreen || mode === 'modal' ? 'ov:text-center' : 'ov:text-left'} ov:text-sm ov:text-(--ov25-text-color)`}
++                />
++              </div>
+             </div>
+           </div>
+         </div>
+diff --git a/test/browser/SelectionDetails.test.tsx b/test/browser/SelectionDetails.test.tsx
+index e0c8d11..a2f5bf3 100644
+--- a/test/browser/SelectionDetails.test.tsx
++++ b/test/browser/SelectionDetails.test.tsx
+@@ -175,6 +175,8 @@ test('opens rich swatch details without applying until the primary action', asyn
+   const supplierRow = container.querySelector<HTMLElement>(
+     '.ov25-selection-details-metadata-row-material-supplier',
+   )!;
++  expect(rangeRow.querySelector('.ov25-selection-details-metadata-label')).toHaveTextContent('Range:');
++  expect(supplierRow.querySelector('.ov25-selection-details-metadata-label')).toHaveTextContent('Supplier:');
+   expect(metadata).toHaveTextContent('Range');
+   expect(metadata).toHaveTextContent('Coastal Collection');
+   expect(metadata).toHaveTextContent('Supplier');
+@@ -189,7 +191,7 @@ test('opens rich swatch details without applying until the primary action', asyn
+   const descriptionLabel = container.querySelector<HTMLElement>(
+     '.ov25-selection-details-description-label',
+   )!;
+-  expect(descriptionLabel).toHaveTextContent('Description');
++  expect(descriptionLabel).toHaveTextContent('Description:');
+   expect(getComputedStyle(descriptionLabel).display).toBe('none');
+ 
+   await getByRole('button', { name: 'Apply to Model' }).click();
+@@ -426,6 +428,7 @@ test('desktop tooltip previews on hover, has no actions, and applies directly on
+   const descriptionLabel = surface.querySelector<HTMLElement>(
+     '.ov25-selection-details-description-label',
+   )!;
++  const copyBody = surface.querySelector<HTMLElement>('.ov25-selection-details-copy-body')!;
+   const metadata = surface.querySelector<HTMLElement>('.ov25-selection-details-metadata')!;
+   const surfaceStyle = getComputedStyle(surface);
+   const titleStyle = getComputedStyle(title);
+@@ -449,8 +452,11 @@ test('desktop tooltip previews on hover, has no actions, and applies directly on
+   expect(titleStyle.fontSize).toBe('14px');
+   expect(titleStyle.textShadow).toBe('none');
+   expect(description.style.fontSize).toBe('');
+-  expect(descriptionStyle.height).toBe('120px');
++  expect(descriptionStyle.position).toBe('static');
++  expect(descriptionStyle.height).toBe('auto');
+   expect(descriptionStyle.fontSize).toBe('11px');
++  expect(getComputedStyle(copyBody).minHeight).toBe('120px');
++  expect(metadata.parentElement).toBe(copyBody);
+   expect(getComputedStyle(descriptionLabel).display).toBe('none');
+   expect(metadata).toBeInTheDocument();
+   expect(getComputedStyle(metadata).display).toBe('none');
+diff --git a/test/unit/release-common.test.ts b/test/unit/release-common.test.ts
+index 0977463..e4b29d5 100644
+--- a/test/unit/release-common.test.ts
++++ b/test/unit/release-common.test.ts
+@@ -1,4 +1,4 @@
+-import { capture } from '../../scripts/release/common.js';
++import { capture, run } from '../../scripts/release/common.js';
+ 
+ describe('release command capture', () => {
+   it('preserves the leading status column from git status --short output', () => {
+@@ -9,4 +9,10 @@ describe('release command capture', () => {
+ 
+     expect(status).toBe(' M releases/0.8.0/client-email.md');
+   });
++
++  it('reports a command that could not be started', () => {
++    expect(() => run('definitely-not-a-release-command')).toThrow(
++      /could not be started: spawnSync definitely-not-a-release-command ENOENT/,
++    );
++  });
+ });

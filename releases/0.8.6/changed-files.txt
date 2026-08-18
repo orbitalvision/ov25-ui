@@ -1,0 +1,9 @@
+globals.css
+scripts/release/common.js
+setup/bun.lock
+setup/package-lock.json
+setup/package.json
+src/components/VariantSelectMenu/SwatchMetadata.tsx
+src/components/VariantSelectMenu/variant-cards/SelectionDetailsSurface.tsx
+test/browser/SelectionDetails.test.tsx
+test/unit/release-common.test.ts

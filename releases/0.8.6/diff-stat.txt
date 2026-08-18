@@ -1,0 +1,10 @@
+globals.css                                        | 41 +++++++++++++----
+ scripts/release/common.js                          | 12 +++++
+ setup/bun.lock                                     |  4 +-
+ setup/package-lock.json                            | 12 ++---
+ setup/package.json                                 |  4 +-
+ .../VariantSelectMenu/SwatchMetadata.tsx           |  4 +-
+ .../variant-cards/SelectionDetailsSurface.tsx      | 52 +++++++++++-----------
+ test/browser/SelectionDetails.test.tsx             | 10 ++++-
+ test/unit/release-common.test.ts                   |  8 +++-
+ 9 files changed, 99 insertions(+), 48 deletions(-)
