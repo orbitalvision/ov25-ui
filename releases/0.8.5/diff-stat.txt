@@ -1,0 +1,32 @@
+dev/react-test/tests/string-replacement.jsx        |   3 +
+ dev/react-test/vite.config.js                      |   1 +
+ globals.css                                        |  57 ++-
+ setup/bun.lock                                     |   4 +-
+ setup/package-lock.json                            |  12 +-
+ setup/package.json                                 |   4 +-
+ .../src/lib/config/configurator-style-variables.ts |  13 +-
+ src/components/VariantSelectMenu/SwatchBook.tsx    |  34 +-
+ .../VariantSelectMenu/SwatchMetadata.tsx           |  99 +++++
+ .../variant-cards/SelectionDetailsSurface.tsx      |  21 +-
+ src/contexts/ov25-ui-context.tsx                   |  24 ++
+ src/index.ts                                       |   7 +-
+ src/lib/strings/string-keys.ts                     |   3 +
+ src/utils/page-scroll-lock.ts                      |  64 ++--
+ test/browser/SelectionDetails.test.tsx             |  59 ++-
+ test/e2e/gallery-sheet-list-auto-open.test.ts      |  38 +-
+ test/e2e/maze-snap2-dimensions.test.ts             | 420 +++++++++++++++++++++
+ ...cing-mobile-drawer-boundary-chromium-darwin.png | Bin 28374 -> 28329 bytes
+ test/e2e/selection-details.test.ts                 |  27 +-
+ ...-details-desktop-fullscreen-chromium-darwin.png | Bin 1300432 -> 1575980 bytes
+ ...ction-details-desktop-modal-chromium-darwin.png | Bin 616559 -> 720350 bytes
+ ...ction-details-desktop-sheet-chromium-darwin.png | Bin 261467 -> 313715 bytes
+ ...ion-details-desktop-tooltip-chromium-darwin.png | Bin 103725 -> 126617 bytes
+ ...n-details-mobile-fullscreen-chromium-darwin.png | Bin 241304 -> 284950 bytes
+ ...ection-details-mobile-modal-chromium-darwin.png | Bin 243727 -> 287826 bytes
+ ...election-details-swatch-add-chromium-darwin.png | Bin 616559 -> 720350 bytes
+ ...ction-details-swatch-remove-chromium-darwin.png | Bin 616733 -> 720518 bytes
+ test/e2e/sheet-reflow-debug.test.ts                |   4 +-
+ test/unit/placeholder-image-fallback.test.tsx      |  33 ++
+ test/unit/selection-details-config.test.ts         |  18 +-
+ test/unit/swatch-metadata.test.ts                  |  55 +++
+ 31 files changed, 918 insertions(+), 82 deletions(-)

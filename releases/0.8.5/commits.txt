@@ -1,0 +1,9 @@
+a0a0e88 (HEAD -> main, origin/main, origin/HEAD) fix(selection-details) centre text 2
+deffa73 fix(selection-details) centre text
+eaedafa fix(tests) regenerate screenshots after selection ordering
+77076d7 fix(selection-details) hide range/supplier by default
+f24541d fix(tests)
+ce7f200 add(tests) tests for basic snap2 scenarios
+c298e2b feat(swatches): show retailer metadata
+4b8061b fix(details): prevent sheet-open page reflow
+8518b34 (tag: ov25-setup@0.8.4) chore: release ov25-setup 0.8.4

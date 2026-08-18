@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.8.5
+
+- Prevent selection-details sheets from causing a one-frame merchant page reflow or sticky-element flicker.
+- Show retailer-defined Swatch Fields, plus material Range and Supplier, in selection details and the SwatchBook.
+- Keep tooltip metadata available for merchant CSS while hidden by default.
+- Add basic Snap2 scenario coverage.
+
 ## 0.8.4
 
 # OV25 UI 0.8.4

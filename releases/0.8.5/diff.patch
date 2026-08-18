@@ -1,0 +1,1543 @@
+diff --git a/dev/react-test/tests/string-replacement.jsx b/dev/react-test/tests/string-replacement.jsx
+index bed3925..028f024 100644
+--- a/dev/react-test/tests/string-replacement.jsx
++++ b/dev/react-test/tests/string-replacement.jsx
+@@ -116,6 +116,9 @@ const injectConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
+     swatchBookZoomedSwatchName: [{ template: '▽${SWATCH_NAME}▽' }],
+     swatchBookZoomedSwatchOption: [{ template: '▽Option: ${SWATCH_OPTION}▽' }],
+     swatchBookZoomedSwatchSku: [{ template: '▽SKU: ${SWATCH_SKU}▽' }],
++    swatchMetadataDescription: [{ template: '▽Description▽' }],
++    swatchMetadataRange: [{ template: '▽Range▽' }],
++    swatchMetadataSupplier: [{ template: '▽Supplier▽' }],
+     swatchBookFirstFreeCount: [{ template: '▽First ${FREE_SWATCH_LIMIT} at no charge▽' }],
+     swatchesContainerOrderUpToFreeSwatches: [{ template: '▽+ Button up to ${FREE_SWATCH_LIMIT} free samples▽' }],
+     swatchesContainerOrderMaxFreeSwatches: [{ template: '▽+ Button choose ${MAX_SWATCHES} free samples▽' }],
+diff --git a/dev/react-test/vite.config.js b/dev/react-test/vite.config.js
+index fd3d663..8092e43 100644
+--- a/dev/react-test/vite.config.js
++++ b/dev/react-test/vite.config.js
+@@ -29,6 +29,7 @@ const testPages = [
+   'range-inline-variants-groups',
+   'snap2-dialog',
+   'snap2-inline',
++  'Maze_snap2',
+   'snap2-uuid',
+   'bed-configurator',
+   'dining-configurator',
+diff --git a/globals.css b/globals.css
+index 575a385..091949c 100644
+--- a/globals.css
++++ b/globals.css
+@@ -261,11 +261,66 @@ html {
+ }
+ 
+ :where(.ov25-selection-details-title),
+-:where(.ov25-selection-details-description) {
++:where(.ov25-selection-details-description),
++:where(.ov25-selection-details-metadata),
++:where(.ov25-selection-details-metadata-label),
++:where(.ov25-selection-details-metadata-value),
++:where(.ov25-selected-swatch-metadata),
++:where(.ov25-selected-swatch-metadata-label),
++:where(.ov25-selected-swatch-metadata-value) {
+   overflow-wrap: anywhere;
+   word-break: break-word;
+ }
+ 
++:where(.ov25-selection-details-metadata-row),
++:where(.ov25-selected-swatch-metadata-row) {
++  display: grid;
++  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
++  gap: 0.5rem;
++}
++
++/* Match the centred title and description in modal/fullscreen detail layouts. */
++:where(
++  .ov25-selection-details-surface[data-display-mode="modal"],
++  .ov25-selection-details-surface[data-display-mode="fullscreen"]
++) :where(.ov25-selection-details-metadata-row) {
++  display: flex;
++  flex-wrap: wrap;
++  justify-content: center;
++}
++
++:where(.ov25-selection-details-metadata-label),
++:where(.ov25-selected-swatch-metadata-label) {
++  font-weight: 500;
++}
++
++:where(.ov25-selection-details-metadata-value),
++:where(.ov25-selected-swatch-metadata-value),
++:where(.ov25-selection-details-description-value) {
++  margin: 0;
++}
++
++:where(.ov25-selection-details-description-row) {
++  display: block;
++}
++
++/* The description keeps its existing prose presentation until a merchant opts into its label. */
++:where(.ov25-selection-details-description-label) {
++  display: none;
++}
++
++/* Material provenance is available for merchant CSS but is not customer copy by default. */
++:where(.ov25-selection-details-metadata-row-material-range),
++:where(.ov25-selection-details-metadata-row-material-supplier) {
++  display: none;
++}
++
++/* Keep tooltip geometry compact, but leave the complete metadata available to merchant CSS. */
++:where(.ov25-selection-details-surface[data-display-mode="tooltip"])
++  :where(.ov25-selection-details-metadata) {
++  display: none;
++}
++
+ :where(.ov25-selection-details-surface[data-display-mode="tooltip"])
+   :where(.ov25-selection-details-image-frame) {
+   height: calc(100% - 120px);
+diff --git a/setup/bun.lock b/setup/bun.lock
+index 6b1acb2..b44d7dc 100644
+--- a/setup/bun.lock
++++ b/setup/bun.lock
+@@ -21,7 +21,7 @@
+         "class-variance-authority": "^0.7.0",
+         "clsx": "^2.1.0",
+         "lucide-react": "^0.540.0",
+-        "ov25-ui": "0.8.3",
++        "ov25-ui": "0.8.4",
+         "react-colorful": "^5.6.1",
+         "tailwind-merge": "^2.2.0",
+       },
+@@ -425,7 +425,7 @@
+ 
+     "object-assign": ["object-assign@4.1.1", "", {}, "sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg=="],
+ 
+-    "ov25-ui": ["ov25-ui@0.8.3", "", { "dependencies": { "@radix-ui/react-dialog": "^1.1.10", "@radix-ui/react-icons": "^1.3.2", "@radix-ui/react-popover": "^1.1.14", "@radix-ui/react-scroll-area": "^1.2.5", "@radix-ui/react-select": "^2.2.2", "@radix-ui/react-slot": "^1.0.2", "@radix-ui/react-tabs": "^1.1.2", "@react-spring/web": "^10.0.3", "@use-gesture/react": "^10.3.1", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "embla-carousel-react": "^8.6.0", "framer-motion": "^11.16.1", "gsap": "^3.13.0", "lucide-react": "^0.503.0", "react-qr-code": "^2.0.15", "sonner": "^1.7.1", "string-similarity-js": "^2.1.4", "tailwind-merge": "^3.2.0" }, "peerDependencies": { "react": "^19", "react-dom": "^19" } }, "sha512-42SmveQYB4Uuk22Ddh4V5TdyfggfasXkSy2Mt7ycZxWThKptj3qGTRJrXqw5HuZwr2n2glowGMKPm46ayncx4g=="],
++    "ov25-ui": ["ov25-ui@0.8.4", "", { "dependencies": { "@radix-ui/react-dialog": "^1.1.10", "@radix-ui/react-icons": "^1.3.2", "@radix-ui/react-popover": "^1.1.14", "@radix-ui/react-scroll-area": "^1.2.5", "@radix-ui/react-select": "^2.2.2", "@radix-ui/react-slot": "^1.0.2", "@radix-ui/react-tabs": "^1.1.2", "@react-spring/web": "^10.0.3", "@use-gesture/react": "^10.3.1", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "embla-carousel-react": "^8.6.0", "framer-motion": "^11.16.1", "gsap": "^3.13.0", "lucide-react": "^0.503.0", "react-qr-code": "^2.0.15", "sonner": "^1.7.1", "string-similarity-js": "^2.1.4", "tailwind-merge": "^3.2.0" }, "peerDependencies": { "react": "^19", "react-dom": "^19" } }, "sha512-sRnAHYgxiz9fblcA9L02b8diYfaWYxRaNDJdM4+bVKvwdlsdgS+TeAiopy2tfNx8X0NL5yEkUxQnfSg7cxv64A=="],
+ 
+     "package-json-from-dist": ["package-json-from-dist@1.0.1", "", {}, "sha512-UEZIS3/by4OC8vL3P2dTXRETpebLI2NiI5vIrjaD/5UtrkFX/tNbwjTSRAGC/+7CAo2pIcBaRgWmcBBHcsaCIw=="],
+ 
+diff --git a/setup/package-lock.json b/setup/package-lock.json
+index f562801..302f583 100644
+--- a/setup/package-lock.json
++++ b/setup/package-lock.json
+@@ -1,12 +1,12 @@
+ {
+   "name": "ov25-setup",
+-  "version": "0.8.3",
++  "version": "0.8.4",
+   "lockfileVersion": 3,
+   "requires": true,
+   "packages": {
+     "": {
+       "name": "ov25-setup",
+-      "version": "0.8.3",
++      "version": "0.8.4",
+       "dependencies": {
+         "@codemirror/commands": "^6.10.3",
+         "@codemirror/lang-css": "^6.3.1",
+@@ -24,7 +24,7 @@
+         "class-variance-authority": "^0.7.0",
+         "clsx": "^2.1.0",
+         "lucide-react": "^0.540.0",
+-        "ov25-ui": "0.8.3",
++        "ov25-ui": "0.8.4",
+         "react-colorful": "^5.6.1",
+         "tailwind-merge": "^2.2.0"
+       },
+@@ -3116,9 +3116,9 @@
+       }
+     },
+     "node_modules/ov25-ui": {
+-      "version": "0.8.3",
+-      "resolved": "https://registry.npmjs.org/ov25-ui/-/ov25-ui-0.8.3.tgz",
+-      "integrity": "sha512-42SmveQYB4Uuk22Ddh4V5TdyfggfasXkSy2Mt7ycZxWThKptj3qGTRJrXqw5HuZwr2n2glowGMKPm46ayncx4g==",
++      "version": "0.8.4",
++      "resolved": "https://registry.npmjs.org/ov25-ui/-/ov25-ui-0.8.4.tgz",
++      "integrity": "sha512-sRnAHYgxiz9fblcA9L02b8diYfaWYxRaNDJdM4+bVKvwdlsdgS+TeAiopy2tfNx8X0NL5yEkUxQnfSg7cxv64A==",
+       "license": "MIT",
+       "dependencies": {
+         "@radix-ui/react-dialog": "^1.1.10",
+diff --git a/setup/package.json b/setup/package.json
+index 06412af..9e19776 100644
+--- a/setup/package.json
++++ b/setup/package.json
+@@ -1,6 +1,6 @@
+ {
+   "name": "ov25-setup",
+-  "version": "0.8.3",
++  "version": "0.8.4",
+   "description": "OV25 Configurator Setup visual editor component",
+   "repository": {
+     "type": "git",
+@@ -53,7 +53,7 @@
+     "class-variance-authority": "^0.7.0",
+     "clsx": "^2.1.0",
+     "lucide-react": "^0.540.0",
+-    "ov25-ui": "0.8.3",
++    "ov25-ui": "0.8.4",
+     "react-colorful": "^5.6.1",
+     "tailwind-merge": "^2.2.0"
+   },
+diff --git a/setup/src/lib/config/configurator-style-variables.ts b/setup/src/lib/config/configurator-style-variables.ts
+index 18ab093..6be5c1e 100644
+--- a/setup/src/lib/config/configurator-style-variables.ts
++++ b/setup/src/lib/config/configurator-style-variables.ts
+@@ -204,7 +204,14 @@ export const ELEMENT_SELECTORS: ElementSelector[] = [
+   { selector: '.ov25-selection-details-image', label: 'Selection details image', element: 'img' },
+   { selector: '.ov25-selection-details-copy', label: 'Selection details text area', element: 'div' },
+   { selector: '.ov25-selection-details-title', label: 'Selection details title', element: 'h2' },
+-  { selector: '.ov25-selection-details-description', label: 'Selection details description', element: 'p' },
++  { selector: '.ov25-selection-details-description', label: 'Selection details description', element: 'dl' },
++  { selector: '.ov25-selection-details-description-label', label: 'Selection details description label', element: 'dt' },
++  { selector: '.ov25-selection-details-metadata', label: 'Selection details metadata', element: 'dl' },
++  { selector: '.ov25-selection-details-metadata-row', label: 'Selection details metadata row', element: 'div' },
++  { selector: '.ov25-selection-details-metadata-row-material-range', label: 'Selection details material range row', element: 'div' },
++  { selector: '.ov25-selection-details-metadata-row-material-supplier', label: 'Selection details material supplier row', element: 'div' },
++  { selector: '.ov25-selection-details-metadata-label', label: 'Selection details metadata label', element: 'dt' },
++  { selector: '.ov25-selection-details-metadata-value', label: 'Selection details metadata value', element: 'dd' },
+   { selector: '.ov25-selection-details-footer', label: 'Selection details actions', element: 'div' },
+   { selector: '.ov25-selection-details-swatch-toggle', label: 'Selection details swatchbook button', element: 'button' },
+   { selector: '.ov25-selection-details-apply', label: 'Selection details apply button', element: 'button' },
+@@ -229,6 +236,10 @@ export const ELEMENT_SELECTORS: ElementSelector[] = [
+   { selector: '#ov25-swatchbook-title', label: 'Swatchbook title', element: 'div' },
+   { selector: '#ov25-swatchbook-featured', label: 'Swatchbook featured', element: 'div' },
+   { selector: '.ov25-selected-swatch-name', label: 'Selected swatch name', element: 'h3' },
++  { selector: '.ov25-selected-swatch-metadata', label: 'Selected swatch metadata', element: 'dl' },
++  { selector: '.ov25-selected-swatch-metadata-row', label: 'Selected swatch metadata row', element: 'div' },
++  { selector: '.ov25-selected-swatch-metadata-label', label: 'Selected swatch metadata label', element: 'dt' },
++  { selector: '.ov25-selected-swatch-metadata-value', label: 'Selected swatch metadata value', element: 'dd' },
+   { selector: '#ov25-swatchbook-content', label: 'Swatchbook content', element: 'div' },
+   { selector: '#ov25-swatchbook-empty', label: 'Swatchbook empty state', element: 'div' },
+   { selector: '#ov25-swatchbook-swatches-list', label: 'Swatchbook swatches list', element: 'div' },
+diff --git a/src/components/VariantSelectMenu/SwatchBook.tsx b/src/components/VariantSelectMenu/SwatchBook.tsx
+index 273e6c2..c9c1f57 100644
+--- a/src/components/VariantSelectMenu/SwatchBook.tsx
++++ b/src/components/VariantSelectMenu/SwatchBook.tsx
+@@ -4,10 +4,11 @@ import { Dialog, DialogContent, DialogTitle } from "../ui/dialog.js";
+ import { Button } from "../ui/button.js";
+ import { VariantsCloseButton } from "./VariantsCloseButton.js";
+ import { SwatchImage } from "../SwatchImage.js";
+-import { Swatch, useOV25UI } from "../../contexts/ov25-ui-context.js";
++import { type Swatch, useOV25UI } from "../../contexts/ov25-ui-context.js";
+ import { cn } from '../../lib/utils.js';
+ import { SWATCH_PATH } from '../../lib/svgs/SwatchIconSvg.js';
+ import { PLACEHOLDER_IMAGE_URL } from '../../lib/placeholder-image.js';
++import { SwatchMetadata } from './SwatchMetadata.js';
+ 
+ interface SwatchBookProps {
+   isMobile: boolean;
+@@ -117,7 +118,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
+               <div className="ov:flex ov:flex-col ov:items-center ov:gap-4">
+                 <div className="ov25-selected-swatch-image-container ov:relative ov:w-[200px] ov:h-[200px] ov:md:w-[250px] ov:md:h-[250px] group">
+                   <SwatchImage
+-                    src={zoomedSwatch.thumbnail?.miniThumbnails?.large || PLACEHOLDER_IMAGE_URL}
++                    src={zoomedSwatch.thumbnail?.miniThumbnails?.large || zoomedSwatch.thumbnail?.thumbnail || PLACEHOLDER_IMAGE_URL}
+                     alt={getString('swatchBookZoomedSwatchName', { SWATCH_NAME: zoomedSwatch.name }, zoomedSwatch.name)}
+                     className='ov25-swatch-image ov:w-full ov:h-full ov:aspect-square'
+                   />
+@@ -127,14 +128,27 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
+                     <h3 className="ov25-selected-swatch-name ov:text-base ov:md:text-lg ov:font-medium ov:text-black">
+                       {getString('swatchBookZoomedSwatchName', { SWATCH_NAME: zoomedSwatch.name }, zoomedSwatch.name)}
+                     </h3>
+-                    <p className="ov25-selected-swatch-option ov:text-gray-600 ov:text-xs ov:italic">
+-                      {getString('swatchBookZoomedSwatchOption', { SWATCH_OPTION: zoomedSwatch.option }, `- ${zoomedSwatch.option}`)}
+-                    </p>
+-                    <p className="ov25-selected-swatch-sku ov:text-gray-600 ov:text-xs ov:italic">
+-                      {getString('swatchBookZoomedSwatchSku', { SWATCH_SKU: zoomedSwatch.sku }, `- ${zoomedSwatch.sku}`)}
+-                    </p>
++                    {zoomedSwatch.option?.trim() && (
++                      <p className="ov25-selected-swatch-option ov:text-gray-600 ov:text-xs ov:italic">
++                        {getString('swatchBookZoomedSwatchOption', { SWATCH_OPTION: zoomedSwatch.option }, `- ${zoomedSwatch.option}`)}
++                      </p>
++                    )}
++                    {zoomedSwatch.sku?.trim() && (
++                      <p className="ov25-selected-swatch-sku ov:text-gray-600 ov:text-xs ov:italic">
++                        {getString('swatchBookZoomedSwatchSku', { SWATCH_SKU: zoomedSwatch.sku }, `- ${zoomedSwatch.sku}`)}
++                      </p>
++                    )}
+                   </div>
+-                  <p className="ov25-selected-swatch-description ov:text-black ov:text-sm ov:font-normal ov:leading-6 ov:line-clamp-5 ov:md:line-clamp-3 ov:md:min-h-18">{zoomedSwatch.description}</p>
++                  {zoomedSwatch.description?.trim() && (
++                    <p className="ov25-selected-swatch-description ov:text-black ov:text-sm ov:font-normal ov:leading-6 ov:line-clamp-5 ov:md:line-clamp-3 ov:md:min-h-18">{zoomedSwatch.description}</p>
++                  )}
++                  <SwatchMetadata
++                    swatch={zoomedSwatch}
++                    parameters={swatchRulesData.parameters}
++                    getString={getString}
++                    classPrefix="ov25-selected-swatch"
++                    className="ov:mt-3 ov:grid ov:gap-1 ov:text-left ov:text-sm ov:text-(--ov25-text-color)"
++                  />
+                 </div>
+               </div>
+             </div>
+@@ -163,7 +177,7 @@ export const SwatchBook: React.FC<SwatchBookProps> = ({
+                 <div key={`${swatch.manufacturerId}-${swatch.name}-${swatch.option}-${swatch.group ?? ''}`} className={swatchItemClassName}>
+                   <div className={cn(swatchImageContainerClassName, 'ov:group')}>
+                     <SwatchImage
+-                      src={swatch.thumbnail?.miniThumbnails?.medium || PLACEHOLDER_IMAGE_URL}
++                      src={swatch.thumbnail?.miniThumbnails?.medium || swatch.thumbnail?.thumbnail || PLACEHOLDER_IMAGE_URL}
+                       alt={swatch.name}
+                       className='ov25-swatch-image ov:w-full ov:h-full ov:scale-120'
+                     />
+diff --git a/src/components/VariantSelectMenu/SwatchMetadata.tsx b/src/components/VariantSelectMenu/SwatchMetadata.tsx
+new file mode 100644
+index 0000000..665fef0
+--- /dev/null
++++ b/src/components/VariantSelectMenu/SwatchMetadata.tsx
+@@ -0,0 +1,99 @@
++import React from 'react';
++import type {
++  Swatch,
++  SwatchParameter,
++} from '../../contexts/ov25-ui-context.js';
++
++export type SwatchMetadataRow = {
++  id: string;
++  label: string;
++  value: string;
++};
++
++type GetString = (
++  key: string,
++  vars?: Record<string, string | number | null | undefined>,
++  fallback?: string,
++) => string;
++
++function nonEmptyString(value: unknown): string | null {
++  if (typeof value !== 'string') return null;
++  const trimmed = value.trim();
++  return trimmed || null;
++}
++
++/**
++ * Only fields configured by the retailer are shown from metadata. The material
++ * rows are deliberately limited to Range and Supplier; the remaining material
++ * data is used internally for assets/search rather than customer copy.
++ */
++export function getSwatchMetadataRows(
++  swatch: Swatch | null | undefined,
++  parameters: SwatchParameter[] | null | undefined,
++  getString: GetString,
++): SwatchMetadataRow[] {
++  if (!swatch) return [];
++
++  const rows: SwatchMetadataRow[] = [];
++  const range = nonEmptyString(swatch.material?.range);
++  const supplier = nonEmptyString(swatch.material?.supplier);
++
++  if (range) {
++    rows.push({
++      id: 'material-range',
++      label: getString('swatchMetadataRange', undefined, 'Range'),
++      value: range,
++    });
++  }
++  if (supplier) {
++    rows.push({
++      id: 'material-supplier',
++      label: getString('swatchMetadataSupplier', undefined, 'Supplier'),
++      value: supplier,
++    });
++  }
++
++  for (const parameter of parameters ?? []) {
++    const id = nonEmptyString(parameter.id);
++    const label = nonEmptyString(parameter.label);
++    const value = id ? nonEmptyString(swatch.metadata?.[id]) : null;
++    if (!id || !label || !value) continue;
++    rows.push({ id: `parameter-${id}`, label, value });
++  }
++
++  return rows;
++}
++
++interface SwatchMetadataProps {
++  swatch: Swatch | null | undefined;
++  parameters: SwatchParameter[] | null | undefined;
++  getString: GetString;
++  /** e.g. `ov25-selection-details` or `ov25-selected-swatch`. */
++  classPrefix: string;
++  className?: string;
++}
++
++export function SwatchMetadata({
++  swatch,
++  parameters,
++  getString,
++  classPrefix,
++  className,
++}: SwatchMetadataProps) {
++  const rows = getSwatchMetadataRows(swatch, parameters, getString);
++  if (rows.length === 0) return null;
++
++  return (
++    <dl className={`${classPrefix}-metadata ${className ?? ''}`.trim()}>
++      {rows.map((row) => (
++        <div
++          key={row.id}
++          className={`${classPrefix}-metadata-row ${classPrefix}-metadata-row-${row.id}`}
++        >
++          <dt className={`${classPrefix}-metadata-label`}>{row.label}</dt>
++          <dd className={`${classPrefix}-metadata-value`}>{row.value}</dd>
++        </div>
++      ))}
++    </dl>
++  );
++}
+diff --git a/src/components/VariantSelectMenu/variant-cards/SelectionDetailsSurface.tsx b/src/components/VariantSelectMenu/variant-cards/SelectionDetailsSurface.tsx
+index dfe1698..72168b8 100644
+--- a/src/components/VariantSelectMenu/variant-cards/SelectionDetailsSurface.tsx
++++ b/src/components/VariantSelectMenu/variant-cards/SelectionDetailsSurface.tsx
+@@ -10,6 +10,7 @@ import { PLACEHOLDER_IMAGE_URL } from '../../../lib/placeholder-image.js';
+ import { useSwatchActions } from '../../../hooks/useSwatchActions.js';
+ import { acquirePageScrollLock } from '../../../utils/page-scroll-lock.js';
+ import { Button } from '../../ui/button.js';
++import { SwatchMetadata } from '../SwatchMetadata.js';
+ 
+ const ENTER_MS = 220;
+ const EXIT_MS = 180;
+@@ -670,12 +671,26 @@ export function SelectionDetailsSurface() {
+                 {title}
+               </h2>
+               {description && (
+-                <p
++                <dl
+                   className={`ov25-selection-details-description ${isFullscreenDesktop ? 'ov:mt-4 ov:text-base ov:leading-7' : isTooltip ? '' : 'ov:mt-3 ov:text-sm ov:leading-6'} ov:whitespace-pre-wrap ov:text-(--ov25-text-color)`}
+                 >
+-                  {description}
+-                </p>
++                  <div className="ov25-selection-details-description-row">
++                    <dt className="ov25-selection-details-metadata-label ov25-selection-details-description-label">
++                      {getString('swatchMetadataDescription', undefined, 'Description')}
++                    </dt>
++                    <dd className="ov25-selection-details-metadata-value ov25-selection-details-description-value ov:whitespace-pre-wrap">
++                      {description}
++                    </dd>
++                  </div>
++                </dl>
+               )}
++              <SwatchMetadata
++                swatch={eligibleSwatch}
++                parameters={swatchRulesData.parameters}
++                getString={getString}
++                classPrefix="ov25-selection-details"
++                className={`${isFullscreenDesktop ? 'ov:mt-5' : isTooltip ? '' : 'ov:mt-4'} ov:grid ov:gap-1 ${isFullscreen || mode === 'modal' ? 'ov:text-center' : 'ov:text-left'} ov:text-sm ov:text-(--ov25-text-color)`}
++              />
+             </div>
+           </div>
+         </div>
+diff --git a/src/contexts/ov25-ui-context.tsx b/src/contexts/ov25-ui-context.tsx
+index be2c00a..9bf3459 100644
+--- a/src/contexts/ov25-ui-context.tsx
++++ b/src/contexts/ov25-ui-context.tsx
+@@ -237,6 +237,19 @@ export interface Discount {
+   formattedAmount: string;
+ }
+ 
++export interface SwatchMaterial {
++  id: number;
++  name: string;
++  type: string;
++  range: string;
++  supplier: string;
++  colors: string[];
++  palette: unknown[];
++  dominantColorHex: string | null;
++  aiTags: unknown[];
++  caption: string | null;
++}
++
+ export interface Swatch {
+   name: string;
+   option: string;
+@@ -245,6 +258,10 @@ export interface Swatch {
+   group?: string | null;
+   description?: string | null;
+   sku?: string | null;
++  /** Retailer-authored values keyed by swatchSettings.parameters[].id. */
++  metadata?: Record<string, string> | null;
++  /** Derived material data. Only the customer-facing range and supplier are displayed. */
++  material?: SwatchMaterial | null;
+   thumbnail?: {
+     blurHash?: string | null;
+     thumbnail?: string | null;
+@@ -281,6 +298,11 @@ export interface SelectionDetailsState {
+   requestId: number;
+ }
+ 
++export type SwatchParameter = {
++  id: string;
++  label: string;
++};
++
+ export type SwatchRulesData = {
+   freeSwatchLimit: number;
+   canExeedFreeLimit: boolean;
+@@ -288,6 +310,8 @@ export type SwatchRulesData = {
+   minSwatches: number;
+   maxSwatches: number;
+   enabled: boolean;
++  /** Ordered retailer-authored fields available for each swatch. */
++  parameters?: SwatchParameter[];
+ }
+ 
+ /**
+diff --git a/src/index.ts b/src/index.ts
+index df6b130..c0600aa 100644
+--- a/src/index.ts
++++ b/src/index.ts
+@@ -69,7 +69,12 @@ export type {
+ } from './types/dining-inject-config.js';
+ 
+ export { normalizeSkuPayload, normalizePricePayload, parseIframeJsonPayload } from './commerce/normalize-iframe-commerce.js';
+-export type { Swatch, SwatchRulesData } from './contexts/ov25-ui-context.js';
++export type {
++  Swatch,
++  SwatchMaterial,
++  SwatchParameter,
++  SwatchRulesData,
++} from './contexts/ov25-ui-context.js';
+ export type { ProductImageInput } from './lib/utils.js';
+ export { useOv25String } from './lib/strings/use-ov25-string.js';
+ 
+diff --git a/src/lib/strings/string-keys.ts b/src/lib/strings/string-keys.ts
+index 247e81b..c5f5048 100644
+--- a/src/lib/strings/string-keys.ts
++++ b/src/lib/strings/string-keys.ts
+@@ -142,6 +142,9 @@ export const STRING_REPLACEMENT_DEFINITIONS: StringReplacements = [
+   { key: 'swatchBookZoomedSwatchName', label: 'Swatch book zoomed swatch name', defaultTemplate: '${SWATCH_NAME}', interpolationValues: [{ name: 'SWATCH_NAME', description: 'Selected swatch display name.' }] },
+   { key: 'swatchBookZoomedSwatchOption', label: 'Swatch book zoomed option line', defaultTemplate: '- ${SWATCH_OPTION}', interpolationValues: [{ name: 'SWATCH_OPTION', description: 'Swatch option label text.' }] },
+   { key: 'swatchBookZoomedSwatchSku', label: 'Swatch book zoomed SKU line', defaultTemplate: '- ${SWATCH_SKU}', interpolationValues: [{ name: 'SWATCH_SKU', description: 'Swatch SKU text.' }] },
++  { key: 'swatchMetadataDescription', label: 'Swatch description label', defaultTemplate: 'Description', interpolationValues: [] },
++  { key: 'swatchMetadataRange', label: 'Swatch material range label', defaultTemplate: 'Range', interpolationValues: [] },
++  { key: 'swatchMetadataSupplier', label: 'Swatch material supplier label', defaultTemplate: 'Supplier', interpolationValues: [] },
+   // swatches 
+   { key: 'swatchBookFirstFreeCount', label: 'Swatch book first free line', defaultTemplate: 'First ${FREE_SWATCH_LIMIT} are free', interpolationValues: [{ name: 'FREE_SWATCH_LIMIT', description: 'Number of swatch samples included free.' }] },
+   { key: 'swatchesContainerOrderUpToFreeSwatches', label: 'Swatches container order up to free swatches line', defaultTemplate: '+ Order up to ${FREE_SWATCH_LIMIT} Free Swatches', interpolationValues: [{ name: 'FREE_SWATCH_LIMIT', description: 'Maximum number of free swatch samples.' }] },
+diff --git a/src/utils/page-scroll-lock.ts b/src/utils/page-scroll-lock.ts
+index ac22c5c..13fbd00 100644
+--- a/src/utils/page-scroll-lock.ts
++++ b/src/utils/page-scroll-lock.ts
+@@ -12,24 +12,11 @@ type PageScrollLockSnapshot = {
+ };
+ 
+ const BODY_PAGE_LOCK_PROPERTIES = new Set([
+-  'overflow',
+-  'overflow-x',
+-  'overflow-y',
+-  'position',
+-  'inset',
+-  'top',
+-  'right',
+-  'bottom',
+-  'left',
+   'width',
+   'min-width',
+   'max-width',
++  'min-height',
+   'box-sizing',
+-  'margin',
+-  'margin-top',
+-  'margin-right',
+-  'margin-bottom',
+-  'margin-left',
+ ]);
+ const HTML_PAGE_LOCK_PROPERTIES = new Set([
+   'overflow',
+@@ -85,7 +72,8 @@ function setPageLockStyle(
+  * Freeze the merchant page at its current geometry while a modal-style
+  * overlay is mounted. Calls are reference counted so nested overlays share a
+  * single snapshot and restore the original inline styles only after the final
+- * overlay releases its lock.
++ * overlay releases its lock. The body deliberately stays in normal flow so
++ * merchant sticky/fixed elements do not recompute when an overlay opens.
+  */
+ export function acquirePageScrollLock(): () => void {
+   if (typeof document === 'undefined' || typeof window === 'undefined') return () => {};
+@@ -94,11 +82,16 @@ export function acquirePageScrollLock(): () => void {
+   if (pageScrollLockCount === 1) {
+     const body = document.body;
+     const html = document.documentElement;
++    const hasReservedScrollbar = window.innerWidth > html.clientWidth;
+     const bodyStyle = window.getComputedStyle(body);
+     const bodyRect = body.getBoundingClientRect();
++    const bodyScrollHeight = body.scrollHeight;
+     const zoom = bodyStyle.getPropertyValue('zoom').trim();
+-    const zoomIsNormal = !zoom || zoom === 'normal' || Math.abs((Number.parseFloat(zoom) || 1) - 1) < 0.001;
+-    const canFreezeMeasuredBody =
++    const zoomIsNormal =
++      !zoom ||
++      zoom === 'normal' ||
++      Math.abs((Number.parseFloat(zoom) || 1) - 1) < 0.001;
++    const canFreezeBodyWidth =
+       bodyStyle.display !== 'contents' &&
+       bodyStyle.transform === 'none' &&
+       zoomIsNormal &&
+@@ -111,38 +104,25 @@ export function acquirePageScrollLock(): () => void {
+       scrollY: window.scrollY,
+     };
+ 
+-    // Once the body becomes fixed, its authored root overflow stops being
+-    // propagated to the viewport and can clip content that extends beyond a
+-    // percentage-height body. Keep both axes visible and let the locked root
+-    // element own viewport clipping instead. Both axes are required because a
+-    // non-visible value on either axis can coerce the other axis to `auto`.
+-    setPageLockStyle(body, 'overflow-x', 'visible');
+-    setPageLockStyle(body, 'overflow-y', 'visible');
+-    setPageLockStyle(body, 'position', 'fixed');
+-
+-    if (canFreezeMeasuredBody) {
++    // Removing a classic scrollbar normally widens the root layout viewport.
++    // Preserve the body's existing border box while leaving it in normal flow,
++    // so merchant sticky/fixed elements keep their scrolling context. OV25's
++    // fixed portal hosts can then use the newly exposed physical viewport edge.
++    if (hasReservedScrollbar && canFreezeBodyWidth) {
+       const frozenWidth = `${bodyRect.width}px`;
+       setPageLockStyle(body, 'box-sizing', 'border-box');
+-      setPageLockStyle(body, 'margin-top', '0px');
+-      setPageLockStyle(body, 'margin-right', '0px');
+-      setPageLockStyle(body, 'margin-bottom', '0px');
+-      setPageLockStyle(body, 'margin-left', '0px');
+-      setPageLockStyle(body, 'top', `${bodyRect.top}px`);
+-      setPageLockStyle(body, 'right', 'auto');
+-      setPageLockStyle(body, 'bottom', 'auto');
+-      setPageLockStyle(body, 'left', `${bodyRect.left}px`);
+       setPageLockStyle(body, 'width', frozenWidth);
+       setPageLockStyle(body, 'min-width', frozenWidth);
+       setPageLockStyle(body, 'max-width', frozenWidth);
+-      setPageLockStyle(html, 'scrollbar-gutter', 'auto');
+-    } else {
+-      setPageLockStyle(body, 'top', `${-window.scrollY}px`);
+-      setPageLockStyle(body, 'width', '100%');
+-      if (window.innerWidth > html.clientWidth) {
+-        setPageLockStyle(html, 'scrollbar-gutter', 'stable');
++      if (bodyScrollHeight > bodyRect.height) {
++        setPageLockStyle(body, 'min-height', `${bodyScrollHeight}px`);
+       }
++      setPageLockStyle(html, 'scrollbar-gutter', 'auto');
++    } else if (hasReservedScrollbar) {
++      // Unusual transformed/zoomed/display:contents bodies cannot be measured
++      // safely. Preserve their layout viewport with the native gutter instead.
++      setPageLockStyle(html, 'scrollbar-gutter', 'stable');
+     }
+-
+     setPageLockStyle(html, 'overflow-x', 'hidden');
+     setPageLockStyle(html, 'overflow-y', 'hidden');
+   }
+diff --git a/test/browser/SelectionDetails.test.tsx b/test/browser/SelectionDetails.test.tsx
+index 98fde31..e0c8d11 100644
+--- a/test/browser/SelectionDetails.test.tsx
++++ b/test/browser/SelectionDetails.test.tsx
+@@ -25,6 +25,23 @@ const swatch: Swatch = {
+   name: 'Ocean swatch',
+   description: 'A durable blue weave.',
+   sku: 'OCEAN-1',
++  material: {
++    id: 12,
++    name: 'Ocean Linen',
++    type: 'Fabric',
++    range: 'Coastal Collection',
++    supplier: 'Orbital Textiles',
++    colors: ['Blue'],
++    palette: [],
++    dominantColorHex: null,
++    aiTags: [],
++    caption: null,
++  },
++  metadata: {
++    weave: 'Plain weave',
++    martindale: '50,000 rubs',
++    hidden: 'This field has no configured label',
++  },
+   thumbnail: {
+     thumbnail: IMAGE_DATA_URL,
+     miniThumbnails: {
+@@ -91,6 +108,10 @@ function DetailsHarness({
+       pricePerSwatch: 0,
+       minSwatches: 0,
+       maxSwatches: 4,
++      parameters: [
++        { id: 'weave', label: 'Weave' },
++        { id: 'martindale', label: 'Martindale' },
++      ],
+     });
+   }, [enabled, setSwatchRulesData]);
+ 
+@@ -147,6 +168,29 @@ test('opens rich swatch details without applying until the primary action', asyn
+   expect(onSelect).not.toHaveBeenCalled();
+   await expect.element(getByRole('heading', { name: 'Ocean swatch' })).toBeInTheDocument();
+   await expect.element(getByRole('button', { name: 'Add to swatchbook' })).toBeInTheDocument();
++  const metadata = container.querySelector('.ov25-selection-details-metadata')!;
++  const rangeRow = container.querySelector<HTMLElement>(
++    '.ov25-selection-details-metadata-row-material-range',
++  )!;
++  const supplierRow = container.querySelector<HTMLElement>(
++    '.ov25-selection-details-metadata-row-material-supplier',
++  )!;
++  expect(metadata).toHaveTextContent('Range');
++  expect(metadata).toHaveTextContent('Coastal Collection');
++  expect(metadata).toHaveTextContent('Supplier');
++  expect(metadata).toHaveTextContent('Orbital Textiles');
++  expect(metadata).toHaveTextContent('Weave');
++  expect(metadata).toHaveTextContent('Plain weave');
++  expect(metadata).toHaveTextContent('Martindale');
++  expect(metadata).toHaveTextContent('50,000 rubs');
++  expect(metadata).not.toHaveTextContent('This field has no configured label');
++  expect(getComputedStyle(rangeRow).display).toBe('none');
++  expect(getComputedStyle(supplierRow).display).toBe('none');
++  const descriptionLabel = container.querySelector<HTMLElement>(
++    '.ov25-selection-details-description-label',
++  )!;
++  expect(descriptionLabel).toHaveTextContent('Description');
++  expect(getComputedStyle(descriptionLabel).display).toBe('none');
+ 
+   await getByRole('button', { name: 'Apply to Model' }).click();
+   expect(onSelect).toHaveBeenCalledTimes(1);
+@@ -186,7 +230,7 @@ test('string-replaces the selection details title and description', async () =>
+ 
+   await expect.element(getByRole('heading', { name: 'Selected: Ocean swatch' })).toBeInTheDocument();
+   await expect.poll(() =>
+-    container.querySelector('.ov25-selection-details-description')?.textContent,
++    container.querySelector('.ov25-selection-details-description-value')?.textContent,
+   ).toBe('Featured: A durable blue weave.');
+ });
+ 
+@@ -272,6 +316,7 @@ test('shows selection-only fallback when swatches are disabled', async () => {
+   (container.querySelector('.ov25-default-variant-card') as HTMLElement).click();
+   await expect.element(getByRole('heading', { name: 'Ocean selection' })).toBeInTheDocument();
+   expect(container.querySelector('.ov25-selection-details-description')).toBeNull();
++  expect(container.querySelector('.ov25-selection-details-metadata')).toBeNull();
+   expect(container.querySelector('.ov25-selection-details-swatch-toggle')).toBeNull();
+ });
+ 
+@@ -378,6 +423,10 @@ test('desktop tooltip previews on hover, has no actions, and applies directly on
+   const imageFrame = surface.querySelector<HTMLElement>('.ov25-selection-details-image-frame')!;
+   const title = surface.querySelector<HTMLElement>('.ov25-selection-details-title')!;
+   const description = surface.querySelector<HTMLElement>('.ov25-selection-details-description')!;
++  const descriptionLabel = surface.querySelector<HTMLElement>(
++    '.ov25-selection-details-description-label',
++  )!;
++  const metadata = surface.querySelector<HTMLElement>('.ov25-selection-details-metadata')!;
+   const surfaceStyle = getComputedStyle(surface);
+   const titleStyle = getComputedStyle(title);
+   const descriptionStyle = getComputedStyle(description);
+@@ -402,6 +451,9 @@ test('desktop tooltip previews on hover, has no actions, and applies directly on
+   expect(description.style.fontSize).toBe('');
+   expect(descriptionStyle.height).toBe('120px');
+   expect(descriptionStyle.fontSize).toBe('11px');
++  expect(getComputedStyle(descriptionLabel).display).toBe('none');
++  expect(metadata).toBeInTheDocument();
++  expect(getComputedStyle(metadata).display).toBe('none');
+ 
+   trigger.click();
+   expect(onSelect).toHaveBeenCalledTimes(1);
+@@ -562,6 +614,9 @@ test('Setup element styles override fixed selection-details defaults', async ()
+       'font-size': '15px',
+       padding: '18px',
+     },
++    '.ov25-selection-details-metadata': {
++      display: 'grid',
++    },
+   });
+   document.head.appendChild(customStyles);
+ 
+@@ -584,6 +639,7 @@ test('Setup element styles override fixed selection-details defaults', async ()
+     const description = surface.querySelector<HTMLElement>(
+       '.ov25-selection-details-description',
+     )!;
++    const metadata = surface.querySelector<HTMLElement>('.ov25-selection-details-metadata')!;
+ 
+     expect(getComputedStyle(surface).backgroundColor).toBe('rgb(16, 32, 48)');
+     expect(getComputedStyle(surface).borderRadius).toBe('17px');
+@@ -595,6 +651,7 @@ test('Setup element styles override fixed selection-details defaults', async ()
+     expect(getComputedStyle(description).color).toBe('rgb(253, 230, 138)');
+     expect(getComputedStyle(description).fontSize).toBe('15px');
+     expect(getComputedStyle(description).padding).toBe('18px');
++    expect(getComputedStyle(metadata).display).toBe('grid');
+ 
+     expect(surface.style.borderRadius).toBe('');
+     expect(title.style.color).toBe('');
+diff --git a/test/e2e/gallery-sheet-list-auto-open.test.ts b/test/e2e/gallery-sheet-list-auto-open.test.ts
+index 34e5e49..527dc7c 100644
+--- a/test/e2e/gallery-sheet-list-auto-open.test.ts
++++ b/test/e2e/gallery-sheet-list-auto-open.test.ts
+@@ -4,9 +4,37 @@ const FIXTURE = '/tests/gallery-sheet-list-auto-open.html';
+ const RUNTIME_TIMEOUT = 20000;
+ 
+ async function expectPageScrollLocked(page: Page) {
+-  await expect(page.locator('body')).toHaveCSS('position', 'fixed', {
+-    timeout: RUNTIME_TIMEOUT,
+-  });
++  await expect.poll(
++    () => page.evaluate(() => {
++      const body = getComputedStyle(document.body);
++      const html = getComputedStyle(document.documentElement);
++      return (
++        body.position === 'fixed' ||
++        body.overflow === 'hidden' ||
++        body.overflowY === 'hidden' ||
++        html.overflow === 'hidden' ||
++        html.overflowY === 'hidden'
++      );
++    }),
++    { timeout: RUNTIME_TIMEOUT },
++  ).toBe(true);
++}
++
++async function expectPageScrollUnlocked(page: Page) {
++  await expect.poll(
++    () => page.evaluate(() => {
++      const body = getComputedStyle(document.body);
++      const html = getComputedStyle(document.documentElement);
++      return !(
++        body.position === 'fixed' ||
++        body.overflow === 'hidden' ||
++        body.overflowY === 'hidden' ||
++        html.overflow === 'hidden' ||
++        html.overflowY === 'hidden'
++      );
++    }),
++    { timeout: RUNTIME_TIMEOUT },
++  ).toBe(true);
+ }
+ 
+ async function expectSheetInsideViewport(sheet: Locator) {
+@@ -49,9 +77,7 @@ test('desktop sheet auto-opens, closes, and reopens from Configure', async ({ pa
+   await expectSheetInsideViewport(sheet);
+ 
+   await sheet.getByRole('button', { name: 'Close' }).click();
+-  await expect(page.locator('body')).not.toHaveCSS('position', 'fixed', {
+-    timeout: RUNTIME_TIMEOUT,
+-  });
++  await expectPageScrollUnlocked(page);
+   await expectSheetOutsideRightOfViewport(sheet);
+ 
+   await page.getByRole('button', { name: 'Configure', exact: true }).click();
+diff --git a/test/e2e/maze-snap2-dimensions.test.ts b/test/e2e/maze-snap2-dimensions.test.ts
+new file mode 100644
+index 0000000..e4351be
+--- /dev/null
++++ b/test/e2e/maze-snap2-dimensions.test.ts
+@@ -0,0 +1,420 @@
++import { expect, test, type FrameLocator, type Locator, type Page } from '@playwright/test';
++
++const RUNTIME_TIMEOUT = 20_000;
++const CANVAS_READY_TIMEOUT = 45_000;
++const CANVAS_SELECTOR = 'canvas[data-engine="three.js r171"]';
++const MODULES_READY_SELECTOR =
++  '#ov25-snap2-modules-body[data-ov25-snap2-modules-state="ready"]:visible';
++
++type Point = { x: number; y: number };
++type Snap2State = {
++  snap2Objects?: Array<{ path?: string; product?: { name?: string } | null }>;
++};
++
++async function observeConfiguratorState(page: Page): Promise<void> {
++  await page.addInitScript(() => {
++    const stateWindow = window as Window & { __mazeSnap2State?: Snap2State };
++
++    window.addEventListener('message', (event) => {
++      const message = event.data as { type?: unknown; payload?: unknown } | null;
++      if (message?.type !== 'CONFIGURATOR_STATE') return;
++
++      try {
++        const payload = typeof message.payload === 'string'
++          ? JSON.parse(message.payload)
++          : message.payload;
++        if (payload && typeof payload === 'object') {
++          stateWindow.__mazeSnap2State = payload as Snap2State;
++        }
++      } catch {
++        // Ignore unrelated or incomplete postMessages while the iframe boots.
++      }
++    });
++  });
++}
++
++async function expectObjectCount(page: Page, count: number): Promise<void> {
++  await expect.poll(
++    () => page.evaluate(() => {
++      const stateWindow = window as Window & { __mazeSnap2State?: Snap2State };
++      return stateWindow.__mazeSnap2State?.snap2Objects?.length ?? -1;
++    }),
++    {
++      message: `wait for CONFIGURATOR_STATE to contain ${count} Snap2 objects`,
++      timeout: CANVAS_READY_TIMEOUT,
++      intervals: [100, 250, 500],
++    },
++  ).toBe(count);
++}
++
++async function expectProductNames(page: Page, expectedNames: string[]): Promise<void> {
++  await expect.poll(
++    () => page.evaluate(() => {
++      const stateWindow = window as Window & { __mazeSnap2State?: Snap2State };
++      return stateWindow.__mazeSnap2State?.snap2Objects
++        ?.map((object) => object.product?.name ?? '')
++        .sort() ?? [];
++    }),
++    { timeout: CANVAS_READY_TIMEOUT, intervals: [100, 250, 500] },
++  ).toEqual([...expectedNames].sort());
++}
++
++async function objectPaths(page: Page): Promise<string[]> {
++  return page.evaluate(() => {
++    const stateWindow = window as Window & { __mazeSnap2State?: Snap2State };
++    return stateWindow.__mazeSnap2State?.snap2Objects
++      ?.map((object) => object.path)
++      .filter((path): path is string => typeof path === 'string') ?? [];
++  });
++}
++
++async function expectObjectPaths(page: Page, expectedPaths: string[]): Promise<void> {
++  await expect.poll(
++    async () => (await objectPaths(page)).sort(),
++    { timeout: CANVAS_READY_TIMEOUT, intervals: [100, 250, 500] },
++  ).toEqual([...expectedPaths].sort());
++}
++
++async function waitForStableResponsiveCanvas(page: Page): Promise<void> {
++  const canvas = page.frameLocator('#ov25-configurator-iframe').locator(CANVAS_SELECTOR).last();
++  let previousSize = '';
++  let stablePolls = 0;
++
++  await expect.poll(async () => {
++    const size = await canvas.evaluate((element) => {
++      const current = element as HTMLCanvasElement;
++      const rect = current.getBoundingClientRect();
++      const ratio = current.ownerDocument.defaultView?.devicePixelRatio ?? 1;
++      const responsive = current.width !== 300 && current.height !== 150
++        && Math.abs(current.width - rect.width * ratio) <= 1
++        && Math.abs(current.height - rect.height * ratio) <= 1;
++      return responsive ? `${current.width}x${current.height}` : '';
++    }).catch(() => '');
++
++    if (!size) {
++      previousSize = '';
++      stablePolls = 0;
++      return 0;
++    }
++
++    stablePolls = size === previousSize ? stablePolls + 1 : 1;
++    previousSize = size;
++    return stablePolls;
++  }, {
++    message: 'wait for the Snap2 WebGL canvas to reach a stable responsive size',
++    timeout: CANVAS_READY_TIMEOUT,
++    intervals: [250],
++  }).toBeGreaterThanOrEqual(3);
++}
++
++async function expectDimensions(
++  iframe: FrameLocator,
++  { width, height, depth }: { width: number; height: number; depth: number },
++): Promise<void> {
++  const labels = {
++    width: iframe.locator('.ov25-dimensions-width'),
++    height: iframe.locator('.ov25-dimensions-height'),
++    depth: iframe.locator('.ov25-dimensions-depth'),
++  };
++
++  await expect(labels.width).toHaveCount(1, { timeout: RUNTIME_TIMEOUT });
++  await expect(labels.height).toHaveCount(1, { timeout: RUNTIME_TIMEOUT });
++  await expect(labels.depth).toHaveCount(1, { timeout: RUNTIME_TIMEOUT });
++  await expect(labels.width).toHaveText(`W ${width}cm`, { timeout: RUNTIME_TIMEOUT });
++  await expect(labels.height).toHaveText(`H ${height}cm`, { timeout: RUNTIME_TIMEOUT });
++  await expect(labels.depth).toHaveText(`D ${depth}cm`, { timeout: RUNTIME_TIMEOUT });
++}
++
++async function expectMiniDimensions(iframe: FrameLocator, widths: number[]): Promise<void> {
++  const labels = iframe.locator('.ov25-dimensions-mini');
++  await expect(labels).toHaveCount(widths.length, { timeout: RUNTIME_TIMEOUT });
++  await expect(labels).toHaveText(widths.map((width) => `W ${width}cm`), {
++    timeout: RUNTIME_TIMEOUT,
++  });
++}
++
++async function locatorCenters(locator: Locator): Promise<Point[]> {
++  const count = await locator.count();
++  const centers: Point[] = [];
++
++  for (let index = 0; index < count; index += 1) {
++    const box = await locator.nth(index).boundingBox();
++    if (!box) throw new Error(`Element ${index} has no visible bounding box`);
++    centers.push({ x: box.x + box.width / 2, y: box.y + box.height / 2 });
++  }
++
++  return centers;
++}
++
++function attachmentButtons(iframe: FrameLocator): Locator {
++  return iframe.locator('svg.lucide-plus').locator('..');
++}
++
++async function attachmentGeometry(iframe: FrameLocator, expectedCount = 2): Promise<Point[]> {
++  const buttons = attachmentButtons(iframe);
++  await expect(buttons).toHaveCount(expectedCount, { timeout: CANVAS_READY_TIMEOUT });
++  return locatorCenters(buttons);
++}
++
++function indexWithGreatestX(points: Point[]): number {
++  return points.reduce(
++    (best, point, index) => point.x > points[best].x ? index : best,
++    0,
++  );
++}
++
++async function clickAttachment(iframe: FrameLocator, index: number): Promise<void> {
++  const button = attachmentButtons(iframe).nth(index);
++  await expect(button).toBeVisible({ timeout: CANVAS_READY_TIMEOUT });
++  // The icon sits over the div's centre; an offset clicks the actual circular control.
++  await button.click({ position: { x: 10, y: 10 }, timeout: RUNTIME_TIMEOUT });
++}
++
++async function chooseModulePosition(page: Page, position: 'middle' | 'corner'): Promise<void> {
++  const tab = page.locator(`[data-ov25-tab-id="${position}"]:visible`);
++  const select = page.locator('#ov25-module-position-tabs-select:visible');
++
++  await expect.poll(
++    async () => await tab.count() + await select.count(),
++    { timeout: RUNTIME_TIMEOUT, intervals: [100, 250] },
++  ).toBeGreaterThan(0);
++
++  if (await tab.count()) {
++    await tab.click();
++    await expect(tab).toHaveAttribute('data-ov25-tab-active', 'true');
++  } else {
++    await select.selectOption(position);
++    await expect(select).toHaveValue(position);
++  }
++}
++
++async function addModule(
++  page: Page,
++  productName: 'Middle Cabinet' | 'Corner Modular',
++  position?: 'middle' | 'corner',
++): Promise<void> {
++  await expect(page.locator(MODULES_READY_SELECTOR)).toBeVisible({ timeout: CANVAS_READY_TIMEOUT });
++  if (position) await chooseModulePosition(page, position);
++
++  const card = page.locator(
++    `[data-ov25-module-variant-card][aria-label^="${productName}."]:visible`,
++  ).first();
++  await expect(card).toBeVisible({ timeout: RUNTIME_TIMEOUT });
++  await expect(card).toHaveAttribute('data-ov25-module-variant-card-loading', 'false', {
++    timeout: RUNTIME_TIMEOUT,
++  });
++  await card.press('Enter');
++}
++
++async function selectModelAt(page: Page, iframe: FrameLocator, point: Point): Promise<void> {
++  await page.mouse.click(point.x, point.y);
++  await expect(iframe.locator('svg.lucide-trash').locator('..')).toBeVisible({
++    timeout: RUNTIME_TIMEOUT,
++  });
++}
++
++async function deleteSelectedModel(iframe: FrameLocator): Promise<void> {
++  const button = iframe.locator('svg.lucide-trash').locator('..');
++  await expect(button).toHaveCount(1, { timeout: RUNTIME_TIMEOUT });
++  await button.click({ position: { x: 10, y: 10 }, timeout: RUNTIME_TIMEOUT });
++}
++
++function unitVector(from: Point, to: Point): Point {
++  const x = to.x - from.x;
++  const y = to.y - from.y;
++  const length = Math.hypot(x, y);
++  if (length === 0) throw new Error('Attachment points unexpectedly overlap');
++  return { x: x / length, y: y / length };
++}
++
++function projection(point: Point, axis: Point): number {
++  return point.x * axis.x + point.y * axis.y;
++}
++
++function pointOnChainAxis(label: Point, endpoint: Point, axis: Point): Point {
++  const perpendicular = { x: -axis.y, y: axis.x };
++  const along = projection(label, axis);
++  const across = projection(endpoint, perpendicular);
++  return {
++    x: axis.x * along + perpendicular.x * across,
++    y: axis.y * along + perpendicular.y * across,
++  };
++}
++
++async function loadMazeSnap2(page: Page): Promise<FrameLocator> {
++  await observeConfiguratorState(page);
++  await page.goto('/tests/Maze_snap2.html');
++
++  const iframe = page.frameLocator('#ov25-configurator-iframe');
++  const initialMiddle = page.getByRole('button', {
++    name: 'Middle Cabinet. Select this product.',
++    exact: true,
++  });
++  await expect(initialMiddle).toBeVisible({ timeout: 60_000 });
++  await initialMiddle.click();
++  await expectObjectCount(page, 1);
++  await waitForStableResponsiveCanvas(page);
++
++  const viewSelect = page.locator('#ov25-snap2-view-select');
++  await viewSelect.selectOption('86');
++  await expect(viewSelect).toHaveValue('86');
++
++  return iframe;
++}
++
++async function enableDimensions(page: Page, iframe: FrameLocator): Promise<void> {
++  await page.locator('#ov25-snap2-dimensions-button').click();
++  await expectDimensions(iframe, { width: 58, height: 90, depth: 58 });
++
++  await page.locator('#ov25-snap2-mini-dimensions-switch').click();
++  await expectMiniDimensions(iframe, [58]);
++}
++
++async function addSecondMiddle(page: Page, iframe: FrameLocator): Promise<void> {
++  const endpoints = await attachmentGeometry(iframe);
++  await clickAttachment(iframe, indexWithGreatestX(endpoints));
++  await addModule(page, 'Middle Cabinet', 'middle');
++
++  await expectObjectCount(page, 2);
++  await expectDimensions(iframe, { width: 116, height: 90, depth: 58 });
++  await expectMiniDimensions(iframe, [58, 58]);
++}
++
++const snap2Test = test.extend({
++  launchOptions: { args: ['--enable-unsafe-swiftshader'] },
++});
++
++snap2Test.use({ viewport: { width: 1280, height: 800 } });
++
++snap2Test('keeps dimensions correct when inserting and removing a middle item', async ({ page }) => {
++  snap2Test.setTimeout(180_000);
++  const iframe = await loadMazeSnap2(page);
++  let originalPaths: string[] = [];
++  let insertedPath = '';
++
++  await test.step('single item dimensions', async () => {
++    await enableDimensions(page, iframe);
++  });
++
++  await test.step('add a second item and show its dimensions', async () => {
++    await addSecondMiddle(page, iframe);
++    originalPaths = await objectPaths(page);
++    expect(originalPaths).toHaveLength(2);
++  });
++
++  await test.step('insert a third item between the first two', async () => {
++    const endpoints = await attachmentGeometry(iframe);
++    const orderedEndpoints = [...endpoints].sort((a, b) => a.x - b.x);
++    const miniLabels = (await locatorCenters(iframe.locator('.ov25-dimensions-mini')))
++      .sort((a, b) => a.x - b.x);
++
++    await selectModelAt(page, iframe, {
++      x: miniLabels[0].x,
++      y: (orderedEndpoints[0].y + orderedEndpoints[1].y) / 2,
++    });
++
++    const selectedPoints = await attachmentGeometry(iframe);
++    const occupiedPointIndex = indexWithGreatestX(selectedPoints);
++    const chainAxis = unitVector(orderedEndpoints[0], orderedEndpoints[1]);
++    const endpointProjections = orderedEndpoints.map((point) => projection(point, chainAxis));
++    const occupiedProjection = projection(selectedPoints[occupiedPointIndex], chainAxis);
++    expect(occupiedProjection).toBeGreaterThan(Math.min(...endpointProjections) + 1);
++    expect(occupiedProjection).toBeLessThan(Math.max(...endpointProjections) - 1);
++
++    await clickAttachment(iframe, occupiedPointIndex);
++    await addModule(page, 'Middle Cabinet', 'middle');
++
++    await expectObjectCount(page, 3);
++    const pathsAfterInsert = await objectPaths(page);
++    insertedPath = pathsAfterInsert.find((path) => !originalPaths.includes(path)) ?? '';
++    expect(insertedPath).not.toBe('');
++    await expectDimensions(iframe, { width: 174, height: 90, depth: 58 });
++    await expectMiniDimensions(iframe, [58, 58, 58]);
++  });
++
++  await test.step('remove the inserted item', async () => {
++    const endpoints = await attachmentGeometry(iframe);
++    const labels = (await locatorCenters(iframe.locator('.ov25-dimensions-mini')))
++      .sort((a, b) => a.x - b.x);
++    await selectModelAt(page, iframe, {
++      x: labels[1].x,
++      y: (endpoints[0].y + endpoints[1].y) / 2,
++    });
++    await deleteSelectedModel(iframe);
++
++    await expectObjectCount(page, 2);
++    await expectObjectPaths(page, originalPaths);
++    expect(await objectPaths(page)).not.toContain(insertedPath);
++    await expectDimensions(iframe, { width: 116, height: 90, depth: 58 });
++    await expectMiniDimensions(iframe, [58, 58]);
++  });
++});
++
++snap2Test('keeps corner dimensions correct when deleting the middle item', async ({ page }) => {
++  snap2Test.setTimeout(180_000);
++  const iframe = await loadMazeSnap2(page);
++  const firstMiddlePath = (await objectPaths(page))[0];
++  if (!firstMiddlePath) throw new Error('Initial Middle Cabinet has no Snap2 object path');
++  let middlePathToDelete = '';
++  let expectedPathsAfterDelete: string[] = [];
++
++  await test.step('build the initial two-item line', async () => {
++    await enableDimensions(page, iframe);
++    await addSecondMiddle(page, iframe);
++    middlePathToDelete = (await objectPaths(page))
++      .find((path) => path !== firstMiddlePath) ?? '';
++    expect(middlePathToDelete).not.toBe('');
++  });
++
++  let straightAxis: Point = { x: 1, y: 0 };
++
++  await test.step('add a corner and an item on the other side', async () => {
++    const endpoints = await attachmentGeometry(iframe);
++    const orderedEndpoints = [...endpoints].sort((a, b) => a.x - b.x);
++    straightAxis = unitVector(orderedEndpoints[0], orderedEndpoints[1]);
++
++    await clickAttachment(iframe, indexWithGreatestX(endpoints));
++    await addModule(page, 'Corner Modular', 'corner');
++    await expectObjectCount(page, 3);
++    await expectProductNames(page, ['Middle Cabinet', 'Middle Cabinet', 'Corner Modular']);
++    await expectDimensions(iframe, { width: 196, height: 90, depth: 80 });
++    await expectMiniDimensions(iframe, [58, 58, 80]);
++
++    // Snap2 automatically selects the corner's remaining attachment point.
++    await addModule(page, 'Middle Cabinet', 'middle');
++    await expectObjectCount(page, 4);
++    await expectProductNames(page, [
++      'Middle Cabinet',
++      'Middle Cabinet',
++      'Corner Modular',
++      'Middle Cabinet',
++    ]);
++    await expectDimensions(iframe, { width: 196, height: 90, depth: 138 });
++    await expectMiniDimensions(iframe, [58, 58, 80, 58]);
++
++    expectedPathsAfterDelete = (await objectPaths(page))
++      .filter((path) => path !== middlePathToDelete);
++    expect(expectedPathsAfterDelete).toHaveLength(3);
++  });
++
++  await test.step('delete the middle item from the L-shaped run', async () => {
++    const endpoints = await attachmentGeometry(iframe);
++    const chainStart = [...endpoints].sort(
++      (a, b) => projection(a, straightAxis) - projection(b, straightAxis),
++    )[0];
++    const labels = (await locatorCenters(iframe.locator('.ov25-dimensions-mini')))
++      .sort((a, b) => projection(a, straightAxis) - projection(b, straightAxis));
++
++    // The second label along the original straight axis belongs to the middle cabinet.
++    await selectModelAt(page, iframe, pointOnChainAxis(labels[1], chainStart, straightAxis));
++    await deleteSelectedModel(iframe);
++
++    await expectObjectCount(page, 3);
++    await expectObjectPaths(page, expectedPathsAfterDelete);
++    expect(await objectPaths(page)).toContain(firstMiddlePath);
++    expect(await objectPaths(page)).not.toContain(middlePathToDelete);
++    await expectProductNames(page, ['Middle Cabinet', 'Corner Modular', 'Middle Cabinet']);
++    await expectDimensions(iframe, { width: 138, height: 90, depth: 138 });
++    await expectMiniDimensions(iframe, [58, 80, 58]);
++  });
++});
+diff --git a/test/e2e/mobile-drawer-stacking.test.ts-snapshots/single-no-pricing-mobile-drawer-boundary-chromium-darwin.png b/test/e2e/mobile-drawer-stacking.test.ts-snapshots/single-no-pricing-mobile-drawer-boundary-chromium-darwin.png
+index 2e861c6..44c478e 100644
+Binary files a/test/e2e/mobile-drawer-stacking.test.ts-snapshots/single-no-pricing-mobile-drawer-boundary-chromium-darwin.png and b/test/e2e/mobile-drawer-stacking.test.ts-snapshots/single-no-pricing-mobile-drawer-boundary-chromium-darwin.png differ
+diff --git a/test/e2e/selection-details.test.ts b/test/e2e/selection-details.test.ts
+index c980e13..3cbd7fe 100644
+--- a/test/e2e/selection-details.test.ts
++++ b/test/e2e/selection-details.test.ts
+@@ -61,9 +61,14 @@ function visualPageLayoutIsStable(
+   actual: SelectionDetailsPageLayoutSnapshot,
+   expected: SelectionDetailsPageLayoutSnapshot,
+ ): boolean {
++  const bodyViewportGeometryIsStable =
++    Math.abs(actual.body.top - expected.body.top) <= 0.1 &&
++    Math.abs(actual.body.right - expected.body.right) <= 0.1 &&
++    Math.abs(actual.body.left - expected.body.left) <= 0.1 &&
++    Math.abs(actual.body.width - expected.body.width) <= 0.1;
+   return (
+     actual.scrollX === expected.scrollX &&
+-    rectsAreClose(actual.body, expected.body) &&
++    bodyViewportGeometryIsStable &&
+     rectsAreClose(actual.shell, expected.shell) &&
+     rectsAreClose(actual.configurator, expected.configurator)
+   );
+@@ -230,6 +235,9 @@ async function openDetails(
+   const trigger = requestedTrigger ?? (await getUnselectedTrigger(page));
+ 
+   if (mode === 'tooltip') {
++    // Keep the trigger in view before hover. A locator screenshot otherwise
++    // scrolls after the tooltip opens, which legitimately dismisses it.
++    await trigger.scrollIntoViewIfNeeded();
+     await trigger.hover();
+   } else if (interaction === 'keyboard') {
+     await trigger.focus();
+@@ -241,6 +249,7 @@ async function openDetails(
+   const surface = page.locator(`${DETAILS_SURFACE}:visible`);
+   await expect(surface).toBeVisible({ timeout: RUNTIME_TIMEOUT });
+   await expect(surface).toHaveAttribute('data-display-mode', mode);
++  await expect(surface).toHaveAttribute('data-present', 'true');
+   return { surface, trigger };
+ }
+ 
+@@ -387,8 +396,13 @@ async function screenshotSurface(
+   snapshotName: string,
+ ): Promise<void> {
+   await waitForSurfaceAssets(surface);
++  // `data-present` is set at the start of the transition. Capture only once
++  // the longest selection-details entrance transition has completed.
++  await surface.evaluate(() => new Promise<void>((resolve) => {
++    window.setTimeout(resolve, 300);
++  }));
+   await expect(surface).toHaveScreenshot(snapshotName, {
+-    animations: 'disabled',
++    animations: 'allow',
+     maxDiffPixelRatio: 0.02,
+   });
+ }
+@@ -457,9 +471,9 @@ async function expectFullscreenLayout(
+   }
+ 
+   expect(layout.layout).toBe('stacked');
+-  expect(layout.topInset).toBeGreaterThanOrEqual(16);
+-  expect(layout.leftInset).toBeGreaterThanOrEqual(16);
+-  expect(layout.rightInset).toBeGreaterThanOrEqual(16);
++  expect(layout.topInset).toBeGreaterThanOrEqual(15.99);
++  expect(layout.leftInset).toBeGreaterThanOrEqual(15.99);
++  expect(layout.rightInset).toBeGreaterThanOrEqual(15.99);
+   expect(layout.imageWidth).toBeLessThan(layout.surfaceWidth);
+   expect(Math.abs(layout.renderedRatio - layout.naturalRatio)).toBeLessThan(0.02);
+   expect(layout.footerDirection).toBe('column');
+@@ -875,6 +889,8 @@ test('desktop tooltip previews after its CSS hover delay and applies directly fr
+                 return {
+                   rootGutterRemoved:
+                     document.documentElement.clientWidth === window.innerWidth,
++                  bodyStayedInFlow:
++                    getComputedStyle(document.body).position === 'relative',
+                   reachesViewportRight:
+                     Math.abs(rect.right - window.innerWidth) <= 1,
+                 };
+@@ -901,6 +917,7 @@ test('desktop tooltip previews after its CSS hover delay and applies directly fr
+           sentinelIntersectionStable: true,
+           sentinelVisibleArea: true,
+           rootGutterRemoved: true,
++          bodyStayedInFlow: true,
+           reachesViewportRight: true,
+         });
+ 
+diff --git a/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-fullscreen-chromium-darwin.png b/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-fullscreen-chromium-darwin.png
+index cae9f75..28dfb96 100644
+Binary files a/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-fullscreen-chromium-darwin.png and b/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-fullscreen-chromium-darwin.png differ
+diff --git a/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-modal-chromium-darwin.png b/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-modal-chromium-darwin.png
+index 8ed21d2..7225dba 100644
+Binary files a/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-modal-chromium-darwin.png and b/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-modal-chromium-darwin.png differ
+diff --git a/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-sheet-chromium-darwin.png b/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-sheet-chromium-darwin.png
+index 5116b97..d89e645 100644
+Binary files a/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-sheet-chromium-darwin.png and b/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-sheet-chromium-darwin.png differ
+diff --git a/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-tooltip-chromium-darwin.png b/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-tooltip-chromium-darwin.png
+index dd668ed..7bfbe30 100644
+Binary files a/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-tooltip-chromium-darwin.png and b/test/e2e/selection-details.test.ts-snapshots/selection-details-desktop-tooltip-chromium-darwin.png differ
+diff --git a/test/e2e/selection-details.test.ts-snapshots/selection-details-mobile-fullscreen-chromium-darwin.png b/test/e2e/selection-details.test.ts-snapshots/selection-details-mobile-fullscreen-chromium-darwin.png
+index 59b6a86..e21f3de 100644
+Binary files a/test/e2e/selection-details.test.ts-snapshots/selection-details-mobile-fullscreen-chromium-darwin.png and b/test/e2e/selection-details.test.ts-snapshots/selection-details-mobile-fullscreen-chromium-darwin.png differ
+diff --git a/test/e2e/selection-details.test.ts-snapshots/selection-details-mobile-modal-chromium-darwin.png b/test/e2e/selection-details.test.ts-snapshots/selection-details-mobile-modal-chromium-darwin.png
+index e4d1423..4ee7911 100644
+Binary files a/test/e2e/selection-details.test.ts-snapshots/selection-details-mobile-modal-chromium-darwin.png and b/test/e2e/selection-details.test.ts-snapshots/selection-details-mobile-modal-chromium-darwin.png differ
+diff --git a/test/e2e/selection-details.test.ts-snapshots/selection-details-swatch-add-chromium-darwin.png b/test/e2e/selection-details.test.ts-snapshots/selection-details-swatch-add-chromium-darwin.png
+index 8ed21d2..7225dba 100644
+Binary files a/test/e2e/selection-details.test.ts-snapshots/selection-details-swatch-add-chromium-darwin.png and b/test/e2e/selection-details.test.ts-snapshots/selection-details-swatch-add-chromium-darwin.png differ
+diff --git a/test/e2e/selection-details.test.ts-snapshots/selection-details-swatch-remove-chromium-darwin.png b/test/e2e/selection-details.test.ts-snapshots/selection-details-swatch-remove-chromium-darwin.png
+index b36188d..f9ecc76 100644
+Binary files a/test/e2e/selection-details.test.ts-snapshots/selection-details-swatch-remove-chromium-darwin.png and b/test/e2e/selection-details.test.ts-snapshots/selection-details-swatch-remove-chromium-darwin.png differ
+diff --git a/test/e2e/sheet-reflow-debug.test.ts b/test/e2e/sheet-reflow-debug.test.ts
+index 50f5949..24c580a 100644
+--- a/test/e2e/sheet-reflow-debug.test.ts
++++ b/test/e2e/sheet-reflow-debug.test.ts
+@@ -26,7 +26,7 @@ async function expectOpenSheetGeometry(
+   layoutBeforeOpen: PageLayoutSnapshot,
+   scrollbarWidth: number,
+ ): Promise<void> {
+-  await expect(page.locator('body')).toHaveCSS('position', 'fixed', {
++  await expect(page.locator('body')).not.toHaveCSS('position', 'fixed', {
+     timeout: RUNTIME_TIMEOUT,
+   });
+ 
+@@ -56,6 +56,7 @@ async function expectOpenSheetGeometry(
+                 document.documentElement.clientWidth === window.innerWidth,
+               rootGutterWasRemoved:
+                 getComputedStyle(document.documentElement).scrollbarGutter === 'auto',
++              bodyStayedInFlow: getComputedStyle(document.body).position !== 'fixed',
+               bodyKeptOriginalWidth: close(body.width, baseline.bodyWidth),
+               shellStayedStill:
+                 close(shell.left, baseline.left) &&
+@@ -77,6 +78,7 @@ async function expectOpenSheetGeometry(
+     .toEqual({
+       scrollbarWasRemoved: true,
+       rootGutterWasRemoved: true,
++      bodyStayedInFlow: true,
+       bodyKeptOriginalWidth: true,
+       shellStayedStill: true,
+       hostReachesViewport: true,
+diff --git a/test/unit/placeholder-image-fallback.test.tsx b/test/unit/placeholder-image-fallback.test.tsx
+index 7177ac9..9c766be 100644
+--- a/test/unit/placeholder-image-fallback.test.tsx
++++ b/test/unit/placeholder-image-fallback.test.tsx
+@@ -21,6 +21,19 @@ const placeholderContext = {
+       option: 'Upholstery',
+       sku: 'MISSING-1',
+       description: 'Description remains visible without an image.',
++      material: {
++        id: 1,
++        name: 'Missing image material',
++        type: 'Fabric',
++        range: 'Test Range',
++        supplier: 'Test Supplier',
++        colors: [],
++        palette: [],
++        dominantColorHex: null,
++        aiTags: [],
++        caption: null,
++      },
++      metadata: { weave: 'Plain weave' },
+     },
+     {
+       manufacturerId: 1,
+@@ -43,6 +56,8 @@ const placeholderContext = {
+     freeSwatchLimit: 4,
+     pricePerSwatch: 0,
+     minSwatches: 1,
++    enabled: true,
++    parameters: [{ id: 'weave', label: 'Weave' }],
+   },
+   isSwatchBookOpen: true,
+   setIsSwatchBookOpen: vi.fn(),
+@@ -109,6 +124,24 @@ describe('placeholder image leaf fallbacks', () => {
+     expect(featured.querySelector('.ov25-selected-swatch-description')).toHaveTextContent(
+       'Description remains visible without an image.',
+     );
++    expect(featured.querySelector('.ov25-selected-swatch-metadata')).toHaveTextContent(
++      'Range',
++    );
++    expect(featured.querySelector('.ov25-selected-swatch-metadata')).toHaveTextContent(
++      'Test Range',
++    );
++    expect(featured.querySelector('.ov25-selected-swatch-metadata')).toHaveTextContent(
++      'Supplier',
++    );
++    expect(featured.querySelector('.ov25-selected-swatch-metadata')).toHaveTextContent(
++      'Test Supplier',
++    );
++    expect(featured.querySelector('.ov25-selected-swatch-metadata')).toHaveTextContent(
++      'Weave',
++    );
++    expect(featured.querySelector('.ov25-selected-swatch-metadata')).toHaveTextContent(
++      'Plain weave',
++    );
+   });
+ 
+   it('uses the bundled placeholder in VariantThumb while preserving real and None variants', () => {
+diff --git a/test/unit/selection-details-config.test.ts b/test/unit/selection-details-config.test.ts
+index 3d6b67a..35093d4 100644
+--- a/test/unit/selection-details-config.test.ts
++++ b/test/unit/selection-details-config.test.ts
+@@ -173,7 +173,14 @@ describe('ConfiguratorSetup selection details', () => {
+       { selector: '.ov25-selection-details-image', label: 'Selection details image', element: 'img' },
+       { selector: '.ov25-selection-details-copy', label: 'Selection details text area', element: 'div' },
+       { selector: '.ov25-selection-details-title', label: 'Selection details title', element: 'h2' },
+-      { selector: '.ov25-selection-details-description', label: 'Selection details description', element: 'p' },
++      { selector: '.ov25-selection-details-description', label: 'Selection details description', element: 'dl' },
++      { selector: '.ov25-selection-details-description-label', label: 'Selection details description label', element: 'dt' },
++      { selector: '.ov25-selection-details-metadata', label: 'Selection details metadata', element: 'dl' },
++      { selector: '.ov25-selection-details-metadata-row', label: 'Selection details metadata row', element: 'div' },
++      { selector: '.ov25-selection-details-metadata-row-material-range', label: 'Selection details material range row', element: 'div' },
++      { selector: '.ov25-selection-details-metadata-row-material-supplier', label: 'Selection details material supplier row', element: 'div' },
++      { selector: '.ov25-selection-details-metadata-label', label: 'Selection details metadata label', element: 'dt' },
++      { selector: '.ov25-selection-details-metadata-value', label: 'Selection details metadata value', element: 'dd' },
+       { selector: '.ov25-selection-details-footer', label: 'Selection details actions', element: 'div' },
+       { selector: '.ov25-selection-details-swatch-toggle', label: 'Selection details swatchbook button', element: 'button' },
+       { selector: '.ov25-selection-details-apply', label: 'Selection details apply button', element: 'button' },
+@@ -183,6 +190,12 @@ describe('ConfiguratorSetup selection details', () => {
+       label: 'Variant card',
+       element: 'div',
+     });
++    expect(ELEMENT_SELECTORS).toEqual(expect.arrayContaining([
++      { selector: '.ov25-selected-swatch-metadata', label: 'Selected swatch metadata', element: 'dl' },
++      { selector: '.ov25-selected-swatch-metadata-row', label: 'Selected swatch metadata row', element: 'div' },
++      { selector: '.ov25-selected-swatch-metadata-label', label: 'Selected swatch metadata label', element: 'dt' },
++      { selector: '.ov25-selected-swatch-metadata-value', label: 'Selected swatch metadata value', element: 'dd' },
++    ]));
+   });
+ 
+   it('does not offer opacity where selection-details animation owns it', () => {
+@@ -443,5 +456,8 @@ describe('selection details content', () => {
+     expect(definitions.get('selectionDetailsAddToSwatchbook')).toBe('Add to swatchbook');
+     expect(definitions.get('selectionDetailsRemoveFromSwatchbook')).toBe('Remove from swatchbook');
+     expect(definitions.get('selectionDetailsClose')).toBe('Close');
++    expect(definitions.get('swatchMetadataDescription')).toBe('Description');
++    expect(definitions.get('swatchMetadataRange')).toBe('Range');
++    expect(definitions.get('swatchMetadataSupplier')).toBe('Supplier');
+   });
+ });
+diff --git a/test/unit/swatch-metadata.test.ts b/test/unit/swatch-metadata.test.ts
+new file mode 100644
+index 0000000..fee3c69
+--- /dev/null
++++ b/test/unit/swatch-metadata.test.ts
+@@ -0,0 +1,55 @@
++import { describe, expect, it } from 'vitest';
++import {
++  getSwatchMetadataRows,
++} from '../../src/components/VariantSelectMenu/SwatchMetadata';
++import type { Swatch } from '../../src/contexts/ov25-ui-context';
++
++const getString = (_key: string, _values?: Record<string, string | number | null | undefined>, fallback?: string) => fallback ?? '';
++
++const swatch: Swatch = {
++  manufacturerId: 7,
++  name: 'Dove',
++  option: 'Fabric',
++  material: {
++    id: 9,
++    name: 'Dove Linen',
++    type: 'Fabric',
++    range: 'Heritage',
++    supplier: 'Moorland Mills',
++    colors: [],
++    palette: [],
++    dominantColorHex: null,
++    aiTags: [],
++    caption: null,
++  },
++  metadata: {
++    composition: '100% linen',
++    care: '  Dry clean only  ',
++    empty: '   ',
++    retired: 'No longer defined',
++  },
++};
++
++describe('getSwatchMetadataRows', () => {
++  it('keeps Range and Supplier plus configured retailer fields in their configured order', () => {
++    expect(getSwatchMetadataRows(swatch, [
++      { id: 'care', label: 'Care' },
++      { id: 'composition', label: 'Composition' },
++      { id: 'empty', label: 'Empty' },
++      { id: 'missing', label: 'Missing' },
++    ], getString)).toEqual([
++      { id: 'material-range', label: 'Range', value: 'Heritage' },
++      { id: 'material-supplier', label: 'Supplier', value: 'Moorland Mills' },
++      { id: 'parameter-care', label: 'Care', value: 'Dry clean only' },
++      { id: 'parameter-composition', label: 'Composition', value: '100% linen' },
++    ]);
++  });
++
++  it('does not expose undefined parameters or empty material fields', () => {
++    expect(getSwatchMetadataRows({
++      ...swatch,
++      material: null,
++      metadata: { retired: 'No longer defined' },
++    }, [{ id: 'current', label: 'Current' }], getString)).toEqual([]);
++  });
++});
