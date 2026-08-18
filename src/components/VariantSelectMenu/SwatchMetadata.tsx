@@ -90,7 +90,9 @@ export function SwatchMetadata({
           key={row.id}
           className={`${classPrefix}-metadata-row ${classPrefix}-metadata-row-${row.id}`}
         >
-          <dt className={`${classPrefix}-metadata-label`}>{row.label}</dt>
+          <dt className={`${classPrefix}-metadata-label`}>
+            {row.label.endsWith(':') ? row.label : `${row.label}:`}
+          </dt>
           <dd className={`${classPrefix}-metadata-value`}>{row.value}</dd>
         </div>
       ))}

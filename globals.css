@@ -213,7 +213,7 @@ html {
 }
 
 :where(.ov25-selection-details-surface[data-display-mode="tooltip"]) {
-  height: min(360px, max(1px, calc(100dvh - 24px)));
+  height: auto;
   max-height: calc(100dvh - 24px);
   border-radius: 0;
   border-color: var(--ov25-border-color);
@@ -323,7 +323,7 @@ html {
 
 :where(.ov25-selection-details-surface[data-display-mode="tooltip"])
   :where(.ov25-selection-details-image-frame) {
-  height: calc(100% - 120px);
+  height: auto;
   max-width: none;
 }
 
@@ -358,20 +358,43 @@ html {
 }
 
 :where(.ov25-selection-details-surface[data-display-mode="tooltip"])
-  :where(.ov25-selection-details-description) {
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
+:where(.ov25-selection-details-copy > div) {
+  height: auto;
+}
+
+/* Description and optional metadata share one bottom panel. It grows beneath
+ * the square image until the viewport limit, then its own content scrolls. */
+:where(.ov25-selection-details-surface[data-display-mode="tooltip"])
+  :where(.ov25-selection-details-copy-body) {
   box-sizing: border-box;
-  height: 120px;
+  min-height: min(120px, max(0px, calc(100dvh - 264px)));
+  max-height: max(0px, calc(100dvh - 264px));
   margin: 0;
   padding: 12px;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
   background: var(--ov25-background-color);
   color: var(--ov25-text-color);
   font-size: 11px;
   line-height: 1.3;
+}
+
+:where(.ov25-selection-details-surface[data-display-mode="tooltip"])
+  :where(.ov25-selection-details-copy-body:empty) {
+  display: none;
+}
+
+:where(.ov25-selection-details-surface[data-display-mode="tooltip"])
+  :where(.ov25-selection-details-description) {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+}
+
+:where(.ov25-selection-details-surface[data-display-mode="tooltip"])
+  :where(.ov25-selection-details-description + .ov25-selection-details-metadata) {
+  margin-top: 8px;
 }
 
 [data-ov25-wizard-variants-mode="inline"] [data-ov25-wizard-variants-content] {

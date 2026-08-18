@@ -175,6 +175,8 @@ test('opens rich swatch details without applying until the primary action', asyn
   const supplierRow = container.querySelector<HTMLElement>(
     '.ov25-selection-details-metadata-row-material-supplier',
   )!;
+  expect(rangeRow.querySelector('.ov25-selection-details-metadata-label')).toHaveTextContent('Range:');
+  expect(supplierRow.querySelector('.ov25-selection-details-metadata-label')).toHaveTextContent('Supplier:');
   expect(metadata).toHaveTextContent('Range');
   expect(metadata).toHaveTextContent('Coastal Collection');
   expect(metadata).toHaveTextContent('Supplier');
@@ -189,7 +191,7 @@ test('opens rich swatch details without applying until the primary action', asyn
   const descriptionLabel = container.querySelector<HTMLElement>(
     '.ov25-selection-details-description-label',
   )!;
-  expect(descriptionLabel).toHaveTextContent('Description');
+  expect(descriptionLabel).toHaveTextContent('Description:');
   expect(getComputedStyle(descriptionLabel).display).toBe('none');
 
   await getByRole('button', { name: 'Apply to Model' }).click();
@@ -426,6 +428,7 @@ test('desktop tooltip previews on hover, has no actions, and applies directly on
   const descriptionLabel = surface.querySelector<HTMLElement>(
     '.ov25-selection-details-description-label',
   )!;
+  const copyBody = surface.querySelector<HTMLElement>('.ov25-selection-details-copy-body')!;
   const metadata = surface.querySelector<HTMLElement>('.ov25-selection-details-metadata')!;
   const surfaceStyle = getComputedStyle(surface);
   const titleStyle = getComputedStyle(title);
@@ -449,8 +452,11 @@ test('desktop tooltip previews on hover, has no actions, and applies directly on
   expect(titleStyle.fontSize).toBe('14px');
   expect(titleStyle.textShadow).toBe('none');
   expect(description.style.fontSize).toBe('');
-  expect(descriptionStyle.height).toBe('120px');
+  expect(descriptionStyle.position).toBe('static');
+  expect(descriptionStyle.height).toBe('auto');
   expect(descriptionStyle.fontSize).toBe('11px');
+  expect(getComputedStyle(copyBody).minHeight).toBe('120px');
+  expect(metadata.parentElement).toBe(copyBody);
   expect(getComputedStyle(descriptionLabel).display).toBe('none');
   expect(metadata).toBeInTheDocument();
   expect(getComputedStyle(metadata).display).toBe('none');

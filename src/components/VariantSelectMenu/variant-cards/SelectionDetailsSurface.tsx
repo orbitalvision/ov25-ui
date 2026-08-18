@@ -615,14 +615,14 @@ export function SelectionDetailsSurface() {
           className={isFullscreenDesktop
             ? 'ov:contents'
             : isTooltip
-              ? 'ov:relative ov:h-full ov:min-h-0 ov:flex-none ov:overflow-hidden'
+              ? 'ov:relative ov:flex ov:min-h-0 ov:w-full ov:flex-col ov:overflow-hidden'
               : 'ov:flex-1 ov:min-h-0 ov:min-w-0 ov:overflow-x-hidden ov:overflow-y-auto'}
         >
           <div
             className={`ov25-selection-details-image-frame ${isFullscreenDesktop
               ? 'ov:col-start-1 ov:row-start-1 ov:row-span-2 ov:flex ov:min-h-0 ov:min-w-0 ov:items-center ov:justify-center ov:overflow-hidden ov:bg-neutral-100 ov:p-8'
               : isTooltip
-              ? 'ov:w-full ov:overflow-hidden ov:bg-neutral-100'
+              ? 'ov:w-full ov:aspect-square ov:shrink-0 ov:overflow-hidden ov:bg-neutral-100'
               : isFullscreen
               ? 'ov:flex ov:w-full ov:justify-center ov:px-4 ov:pt-16 ov:md:px-8 ov:md:pt-8'
               : `ov:mx-auto ov:w-full ov:aspect-square ov:overflow-hidden ov:bg-neutral-100 ${mode === 'modal' ? 'ov:mt-4' : ''}`}`}
@@ -656,13 +656,13 @@ export function SelectionDetailsSurface() {
             className={`ov25-selection-details-copy ${isFullscreenDesktop
               ? 'ov:col-start-2 ov:row-start-1 ov:flex ov:min-h-0 ov:min-w-0 ov:flex-col ov:overflow-x-hidden ov:overflow-y-auto ov:border-l ov:border-(--ov25-border-color) ov:px-8 ov:py-20 ov:text-center'
               : isTooltip
-              ? 'ov:absolute ov:inset-0 ov:min-w-0 ov:p-0'
+              ? 'ov:min-w-0 ov:p-0'
               : `ov:min-w-0 ov:max-w-full ov:px-5 ov:pt-5 ${description ? 'ov:pb-5' : 'ov:pb-6'} ${isFullscreen || mode === 'modal' ? 'ov:text-center' : ''}`}`}
           >
             <div className={isFullscreenDesktop
               ? 'ov:my-auto ov:w-full ov:min-w-0 ov:max-w-full'
               : isTooltip
-                ? 'ov:h-full ov:w-full ov:min-w-0 ov:max-w-full'
+                ? 'ov:w-full ov:min-w-0 ov:max-w-full'
                 : 'ov:min-w-0 ov:max-w-full'}>
               <h2
                 id={titleId}
@@ -670,27 +670,29 @@ export function SelectionDetailsSurface() {
               >
                 {title}
               </h2>
-              {description && (
-                <dl
-                  className={`ov25-selection-details-description ${isFullscreenDesktop ? 'ov:mt-4 ov:text-base ov:leading-7' : isTooltip ? '' : 'ov:mt-3 ov:text-sm ov:leading-6'} ov:whitespace-pre-wrap ov:text-(--ov25-text-color)`}
-                >
-                  <div className="ov25-selection-details-description-row">
-                    <dt className="ov25-selection-details-metadata-label ov25-selection-details-description-label">
-                      {getString('swatchMetadataDescription', undefined, 'Description')}
-                    </dt>
-                    <dd className="ov25-selection-details-metadata-value ov25-selection-details-description-value ov:whitespace-pre-wrap">
-                      {description}
-                    </dd>
-                  </div>
-                </dl>
-              )}
-              <SwatchMetadata
-                swatch={eligibleSwatch}
-                parameters={swatchRulesData.parameters}
-                getString={getString}
-                classPrefix="ov25-selection-details"
-                className={`${isFullscreenDesktop ? 'ov:mt-5' : isTooltip ? '' : 'ov:mt-4'} ov:grid ov:gap-1 ${isFullscreen || mode === 'modal' ? 'ov:text-center' : 'ov:text-left'} ov:text-sm ov:text-(--ov25-text-color)`}
-              />
+              <div className="ov25-selection-details-copy-body">
+                {description && (
+                  <dl
+                    className={`ov25-selection-details-description ${isFullscreenDesktop ? 'ov:mt-4 ov:text-base ov:leading-7' : isTooltip ? '' : 'ov:mt-3 ov:text-sm ov:leading-6'} ov:whitespace-pre-wrap ov:text-(--ov25-text-color)`}
+                  >
+                    <div className="ov25-selection-details-description-row">
+                      <dt className="ov25-selection-details-metadata-label ov25-selection-details-description-label">
+                        {`${getString('swatchMetadataDescription', undefined, 'Description').replace(/:$/, '')}:`}
+                      </dt>
+                      <dd className="ov25-selection-details-metadata-value ov25-selection-details-description-value ov:whitespace-pre-wrap">
+                        {description}
+                      </dd>
+                    </div>
+                  </dl>
+                )}
+                <SwatchMetadata
+                  swatch={eligibleSwatch}
+                  parameters={swatchRulesData.parameters}
+                  getString={getString}
+                  classPrefix="ov25-selection-details"
+                  className={`${isFullscreenDesktop ? 'ov:mt-5' : isTooltip ? '' : 'ov:mt-4'} ov:grid ov:gap-1 ${isFullscreen || mode === 'modal' ? 'ov:text-center' : 'ov:text-left'} ov:text-sm ov:text-(--ov25-text-color)`}
+                />
+              </div>
             </div>
           </div>
         </div>
