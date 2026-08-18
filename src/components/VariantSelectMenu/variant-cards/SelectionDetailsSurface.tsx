@@ -689,7 +689,7 @@ export function SelectionDetailsSurface() {
                 parameters={swatchRulesData.parameters}
                 getString={getString}
                 classPrefix="ov25-selection-details"
-                className={`${isFullscreenDesktop ? 'ov:mt-5' : isTooltip ? '' : 'ov:mt-4'} ov:grid ov:gap-1 ov:text-left ov:text-sm ov:text-(--ov25-text-color)`}
+                className={`${isFullscreenDesktop ? 'ov:mt-5' : isTooltip ? '' : 'ov:mt-4'} ov:grid ov:gap-1 ${isFullscreen || mode === 'modal' ? 'ov:text-center' : 'ov:text-left'} ov:text-sm ov:text-(--ov25-text-color)`}
               />
             </div>
           </div>
