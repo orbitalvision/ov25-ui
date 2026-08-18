@@ -222,7 +222,7 @@ test('string-replaces the selection details title and description', async () => 
 
   await expect.element(getByRole('heading', { name: 'Selected: Ocean swatch' })).toBeInTheDocument();
   await expect.poll(() =>
-    container.querySelector('.ov25-selection-details-description')?.textContent,
+    container.querySelector('.ov25-selection-details-description-value')?.textContent,
   ).toBe('Featured: A durable blue weave.');
 });
 
