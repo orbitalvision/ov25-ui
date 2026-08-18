@@ -53,6 +53,18 @@ export function run(command, args = [], options = {}) {
     encoding: 'utf8',
   });
 
+  if (result.error) {
+    throw new Error(
+      `${command} ${args.join(' ')} could not be started: ${result.error.message}`,
+    );
+  }
+
+  if (result.signal) {
+    throw new Error(
+      `${command} ${args.join(' ')} was terminated by signal ${result.signal}`,
+    );
+  }
+
   if (result.status !== 0) {
     throw new Error(`${command} ${args.join(' ')} failed with exit code ${result.status}`);
   }
