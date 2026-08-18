@@ -350,6 +350,7 @@ html {
   z-index: 1;
   margin: 0;
   color: #fff;
+  mix-blend-mode: difference;
   font-size: 14px;
   font-weight: 500;
   line-height: 1.25;
