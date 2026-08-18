@@ -169,6 +169,12 @@ test('opens rich swatch details without applying until the primary action', asyn
   await expect.element(getByRole('heading', { name: 'Ocean swatch' })).toBeInTheDocument();
   await expect.element(getByRole('button', { name: 'Add to swatchbook' })).toBeInTheDocument();
   const metadata = container.querySelector('.ov25-selection-details-metadata')!;
+  const rangeRow = container.querySelector<HTMLElement>(
+    '.ov25-selection-details-metadata-row-material-range',
+  )!;
+  const supplierRow = container.querySelector<HTMLElement>(
+    '.ov25-selection-details-metadata-row-material-supplier',
+  )!;
   expect(metadata).toHaveTextContent('Range');
   expect(metadata).toHaveTextContent('Coastal Collection');
   expect(metadata).toHaveTextContent('Supplier');
@@ -178,6 +184,8 @@ test('opens rich swatch details without applying until the primary action', asyn
   expect(metadata).toHaveTextContent('Martindale');
   expect(metadata).toHaveTextContent('50,000 rubs');
   expect(metadata).not.toHaveTextContent('This field has no configured label');
+  expect(getComputedStyle(rangeRow).display).toBe('none');
+  expect(getComputedStyle(supplierRow).display).toBe('none');
   const descriptionLabel = container.querySelector<HTMLElement>(
     '.ov25-selection-details-description-label',
   )!;

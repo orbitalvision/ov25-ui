@@ -208,6 +208,8 @@ export const ELEMENT_SELECTORS: ElementSelector[] = [
   { selector: '.ov25-selection-details-description-label', label: 'Selection details description label', element: 'dt' },
   { selector: '.ov25-selection-details-metadata', label: 'Selection details metadata', element: 'dl' },
   { selector: '.ov25-selection-details-metadata-row', label: 'Selection details metadata row', element: 'div' },
+  { selector: '.ov25-selection-details-metadata-row-material-range', label: 'Selection details material range row', element: 'div' },
+  { selector: '.ov25-selection-details-metadata-row-material-supplier', label: 'Selection details material supplier row', element: 'div' },
   { selector: '.ov25-selection-details-metadata-label', label: 'Selection details metadata label', element: 'dt' },
   { selector: '.ov25-selection-details-metadata-value', label: 'Selection details metadata value', element: 'dd' },
   { selector: '.ov25-selection-details-footer', label: 'Selection details actions', element: 'div' },

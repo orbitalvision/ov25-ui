@@ -86,7 +86,10 @@ export function SwatchMetadata({
   return (
     <dl className={`${classPrefix}-metadata ${className ?? ''}`.trim()}>
       {rows.map((row) => (
-        <div key={row.id} className={`${classPrefix}-metadata-row`}>
+        <div
+          key={row.id}
+          className={`${classPrefix}-metadata-row ${classPrefix}-metadata-row-${row.id}`}
+        >
           <dt className={`${classPrefix}-metadata-label`}>{row.label}</dt>
           <dd className={`${classPrefix}-metadata-value`}>{row.value}</dd>
         </div>

@@ -299,6 +299,12 @@ html {
   display: none;
 }
 
+/* Material provenance is available for merchant CSS but is not customer copy by default. */
+:where(.ov25-selection-details-metadata-row-material-range),
+:where(.ov25-selection-details-metadata-row-material-supplier) {
+  display: none;
+}
+
 /* Keep tooltip geometry compact, but leave the complete metadata available to merchant CSS. */
 :where(.ov25-selection-details-surface[data-display-mode="tooltip"])
   :where(.ov25-selection-details-metadata) {
