@@ -638,11 +638,11 @@ export function SelectionDetailsSurface() {
         )}
 
         <div
-          className={isFullscreenDesktop
+          className={`ov25-selection-details-content ${isFullscreenDesktop
             ? 'ov:contents'
             : isTooltip
               ? 'ov:relative ov:flex ov:min-h-0 ov:w-full ov:flex-col ov:overflow-hidden'
-              : 'ov:flex-1 ov:min-h-0 ov:min-w-0 ov:overflow-x-hidden ov:overflow-y-auto'}
+              : 'ov:flex-1 ov:min-h-0 ov:min-w-0 ov:overflow-x-hidden ov:overflow-y-auto'}`}
         >
           <div
             className={`ov25-selection-details-image-frame ${isFullscreenDesktop

@@ -493,6 +493,8 @@ test('desktop tooltip previews on hover, has no actions, and applies directly on
 });
 
 test('uses the mobile details surface on a touch-only tablet without changing the shell viewport', async () => {
+  const originalViewport = { width: window.innerWidth, height: window.innerHeight };
+  await page.viewport(1024, 768);
   const nativeMatchMedia = window.matchMedia.bind(window);
   const touchOnlyMediaQuery = {
     matches: false,
@@ -521,9 +523,20 @@ test('uses the mobile details surface on a touch-only tablet without changing th
 
     await expect.poll(() => container.querySelector('.ov25-selection-details-surface')?.getAttribute('data-display-mode'))
       .toBe('fullscreen');
-    expect(container.querySelector('.ov25-selection-details-surface')?.getAttribute('data-mobile')).toBe('true');
+    const surface = container.querySelector<HTMLElement>('.ov25-selection-details-surface')!;
+    expect(surface.getAttribute('data-mobile')).toBe('true');
+    await expect.poll(() => surface.dataset.present).toBe('true');
+
+    const content = surface.querySelector<HTMLElement>('.ov25-selection-details-content')!;
+    const imageFrame = surface.querySelector<HTMLElement>('.ov25-selection-details-image-frame')!;
+    expect(getComputedStyle(content).display).toBe('grid');
+    expect(content.scrollHeight).toBeLessThanOrEqual(content.clientHeight + 1);
+    expect(Math.abs(
+      imageFrame.getBoundingClientRect().width - imageFrame.getBoundingClientRect().height,
+    )).toBeLessThanOrEqual(1);
   } finally {
     vi.unstubAllGlobals();
+    await page.viewport(originalViewport.width, originalViewport.height);
   }
 });
 
@@ -786,6 +799,13 @@ test('sheet paints offscreen before sliding in from the right', async () => {
     const surface = container.querySelector<HTMLElement>('.ov25-selection-details-surface')!;
     expect(surface.getBoundingClientRect().width).toBe(384);
     expect(surface.style.transform).toBe('translateX(100%)');
+    const content = surface.querySelector<HTMLElement>('.ov25-selection-details-content')!;
+    const imageFrame = surface.querySelector<HTMLElement>('.ov25-selection-details-image-frame')!;
+    expect(getComputedStyle(content).display).toBe('grid');
+    expect(content.scrollHeight).toBeLessThanOrEqual(content.clientHeight + 1);
+    expect(Math.abs(
+      imageFrame.getBoundingClientRect().width - imageFrame.getBoundingClientRect().height,
+    )).toBeLessThanOrEqual(1);
 
     await expect.poll(() => surface.dataset.present).toBe('true');
     expect(surface.style.transform).toBe('translateX(0px)');
