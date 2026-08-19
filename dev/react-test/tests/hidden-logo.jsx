@@ -74,7 +74,10 @@ function App() {
       injectConfig={injectConfig}
       dynamicConfig
       topContent={
-        <div className="ov:flex ov:flex-col ov:gap-3 ov:mb-4">
+        <div
+          className="ov:flex ov:flex-col ov:gap-3 ov:mb-4"
+          data-testid="hidden-logo-fixture-controls"
+        >
           <div className="ov:flex ov:flex-wrap ov:items-center ov:gap-2">
             <span className="ov:text-sm ov:text-[#525252]">productLink:</span>
             <button

@@ -131,6 +131,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: path.resolve(__dirname, 'index.html'),
+        'e2e-ledger': path.resolve(__dirname, 'e2e-ledger.html'),
         'mobile-preview': path.resolve(__dirname, 'mobile-preview.html'),
         ...testInputs,
       },

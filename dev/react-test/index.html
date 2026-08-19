@@ -14,7 +14,11 @@
       .header { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
       h1 { margin: 0; font-size: 20px; font-weight: 600; }
       .subtitle { color: #525252; font-size: 13px; margin: 4px 0 0 0; }
-      .reset-btn { padding: 6px 12px; font-size: 12px; font-weight: 500; color: #6c757d; background: #f8f9fa; border: 1px solid #dee2e6; border-radius: 4px; cursor: pointer; font-family: inherit; }
+      .header-actions { display: flex; align-items: center; gap: 8px; }
+      .matrix-btn, .reset-btn { padding: 6px 12px; font-size: 12px; font-weight: 500; border: 1px solid #dee2e6; border-radius: 4px; cursor: pointer; font-family: inherit; text-decoration: none; }
+      .matrix-btn { color: #fff; background: #1a1a1a; border-color: #1a1a1a; }
+      .matrix-btn:hover { background: #353535; border-color: #353535; }
+      .reset-btn { color: #6c757d; background: #f8f9fa; }
       .reset-btn:hover { background: #e9ecef; color: #495057; }
       .checklist-header { display: flex; align-items: center; gap: 8px; padding: 6px 0; font-size: 10px; font-weight: 600; color: #6c757d; text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid #e8e8e8; margin-bottom: 4px; }
       .checklist-header .col-m, .checklist-header .col-d { width: 14px; flex-shrink: 0; }
@@ -50,10 +54,18 @@
           <p class="subtitle">Shift+click = fail ✕</p>
           <p class="subtitle">Ctrl+click test name = add comment</p>
         </div>
-        <button type="button" class="reset-btn" id="reset-btn">Reset all</button>
+        <div class="header-actions">
+          <a class="matrix-btn" href="e2e-ledger.html">E2E ledger</a>
+          <button type="button" class="reset-btn" id="reset-btn">Reset all</button>
+        </div>
       </div>
 
       <div class="checklist-header"><span class="col-m">M</span><span class="col-d">D</span><span>Test</span></div>
+
+      <div class="checklist-section">Fully E2E Tested (Safe to Skip)</div>
+      <ul class="checklist">
+        <li class="checklist-item" data-id="hidden-logo"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/hidden-logo.html" >Hidden logo (hideLogo toggle)</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+      </ul>
 
       <div class="checklist-section">Single Product</div>
       <ul class="checklist">
@@ -64,7 +76,6 @@
         <li class="checklist-item" data-id="product-with-swatches"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/product-with-swatches.html" >Product with swatches</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
         <li class="checklist-item" data-id="single-inline-variants"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/single-inline-variants.html" >Inline variants</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
         <li class="checklist-item" data-id="animation-test"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/animation-test.html" >Animation test</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
-        <li class="checklist-item" data-id="hidden-logo"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/hidden-logo.html" >Hidden logo (hideLogo toggle)</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
         <li class="checklist-item" data-id="inline-variants-disable-add-to-cart"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/inline-variants-disable-add-to-cart.html" >Inline variants — disable add to cart</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
         <li class="checklist-item" data-id="single-custom-button"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/single-custom-button.html" >Custom open/close buttons</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
         <li class="checklist-item" data-id="single-custom-css"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/single-custom-css.html" >Custom CSS</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
