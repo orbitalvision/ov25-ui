@@ -2,12 +2,14 @@ import { defineConfig } from 'vite';
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
+import { viewportMatrixPlugin } from './plugins/viewport-matrix.js';
 
 const testPages = [
   'configure-button-only',
   'configure-button-modal',
   'single-product-gallery',
   'configurator-sizing',
+  'responsive-layout-matrix',
   'split-variant-triggers',
   'string-replacement',
   'single-no-variants',
@@ -117,7 +119,7 @@ function watchLinkedPackagesReload() {
 
 export default defineConfig({
   envDir: path.resolve(__dirname, '../..'),
-  plugins: [tailwindcss(), react(), watchLinkedPackagesReload()],
+  plugins: [tailwindcss(), react(), watchLinkedPackagesReload(), viewportMatrixPlugin()],
   resolve: {
     alias: {
       'ov25-ui': path.resolve(__dirname, '../../dist'),

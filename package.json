@@ -39,6 +39,7 @@
     "test:e2e:quiet": "OV25_E2E_NEW_HEADLESS=true playwright test --config playwright.config.ts",
     "test:e2e:ledger": "node scripts/validate-e2e-fixture-ledger.mjs",
     "test:e2e:fixture": "node scripts/run-fixture-e2e.mjs",
+    "capture:viewports": "node scripts/capture-viewport-matrix.mjs",
     "test:browser": "VITEST_UI=true vitest --config vitest.browser.config.ts",
     "test:browser:ci": "CI=true vitest run --config vitest.browser.config.ts",
     "release:review": "node scripts/release/review.js",
