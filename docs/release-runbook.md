@@ -5,6 +5,10 @@ This is the canonical operational procedure for releasing `ov25-ui`, `ov25-ui-re
 [release automation plan](release-automation-and-shopify-runtime-versioning-plan.md) records design
 history and may describe superseded phases.
 
+Bug fixing, feature implementation, multi-agent coordination, code review, and active bookkeeping
+before release scope is frozen follow the
+[pre-release engineering runbook](pre-release-engineering-runbook.md).
+
 Agents may prepare review artifacts and source changes, but the user runs tests, commits, pushes,
 tags, package publication triggers, and platform deployments.
 
