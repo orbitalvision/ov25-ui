@@ -76,6 +76,7 @@ export const STRING_REPLACEMENT_DEFINITIONS: StringReplacements = [
     ],
   },
   // prices
+  { key: 'priceLoading', label: 'Price loading label', description: 'Screen-reader label shown while the configurator price loads.', defaultTemplate: 'Loading price', interpolationValues: [] },
   { key: 'priceValue',label: 'Price value', defaultTemplate: '${PRICE}',interpolationValues: [
       { name: 'PRICE', description: 'Current formatted price.' },
       { name: 'SUBTOTAL', description: 'Current formatted subtotal.' },

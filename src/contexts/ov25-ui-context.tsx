@@ -31,6 +31,10 @@ import type {
 import type { StringReplacementsConfig } from '../types/string-replacements.js';
 import { normalizePricePayload, normalizeSkuPayload } from '../commerce/normalize-iframe-commerce.js';
 import {
+  isCheckoutPayloadReady,
+  isUsableIframeSkuPayload,
+} from '../commerce/iframe-commerce-readiness.js';
+import {
   IFRAME_MSG_TRANSITION_SNAPSHOT,
   IFRAME_MSG_TRANSITION_SNAPSHOT_ERROR,
 } from '../lib/config/iframe-transition-snapshot.js';
@@ -357,6 +361,12 @@ interface OV25UIContextType {
   subtotal: number;
   formattedPrice: string;
   formattedSubtotal: string;
+  /** False until the configurator's first normalized CURRENT_PRICE; price fields are placeholder zeros until then. */
+  hasReceivedPrice: boolean;
+  /** False until the configurator has supplied a usable CURRENT_SKU for the current configuration. */
+  hasReceivedSku: boolean;
+  /** Checkout callbacks are safe only once the current configuration has both a price and a SKU. */
+  isCheckoutPayloadReady: boolean;
   discount: Discount;
   galleryIndex: number;
   currentSku: any;
@@ -791,6 +801,8 @@ export const OV25UIProvider: React.FC<{
   // State definitions
   const [products, setProducts] = useState<Product[]>([]);
   const [currentProductId, setCurrentProductId] = useState<string>();
+  const currentProductIdRef = useRef<string | undefined>(currentProductId);
+  currentProductIdRef.current = currentProductId;
   const [configuratorState, setConfiguratorState] = useState<ConfiguratorState>();
   const [selectedSelections, setSelectedSelections] = useState<Array<{
     optionId: string;
@@ -810,6 +822,11 @@ export const OV25UIProvider: React.FC<{
   const [formattedPrice, setFormattedPrice] = useState<string>(
     () => `${effectiveCurrencySymbol}0.00`,
   );
+  /** Pricing lives in the configurator, so every price field above is a placeholder zero until a
+   * normalized CURRENT_PRICE arrives. Consumers must hide that placeholder rather than show a
+   * real-looking free-product price. */
+  const [hasReceivedPrice, setHasReceivedPrice] = useState(false);
+  const [hasReceivedSku, setHasReceivedSku] = useState(false);
   const [formattedSubtotal, setFormattedSubtotal] = useState<string>(
     () => `${effectiveCurrencySymbol}0.00`,
   );
@@ -1295,6 +1312,20 @@ export const OV25UIProvider: React.FC<{
   const onChangeRef = useRef(onChange);
   onChangeRef.current = onChange;
 
+  const resetCommerceSnapshots = useCallback(() => {
+    latestPriceRef.current = null;
+    latestSkuRef.current = null;
+    setCommercePriceSnapshot(null);
+    setCurrentSku(null);
+    setPrice(0);
+    setSubtotal(0);
+    setFormattedPrice(`${effectiveCurrencySymbol}0.00`);
+    setFormattedSubtotal(`${effectiveCurrencySymbol}0.00`);
+    setDiscount({ percentage: 0, amount: 0, formattedAmount: `${effectiveCurrencySymbol}0.00` });
+    setHasReceivedPrice(false);
+    setHasReceivedSku(false);
+  }, [effectiveCurrencySymbol]);
+
   const prevSnap2ObjectCountRef = useRef(0);
 
   const addToBasketWithPayload = useCallback(() => {
@@ -1660,6 +1691,10 @@ export const OV25UIProvider: React.FC<{
     closeSelectionDetails(false);
     releaseConfiguratorTransitionProxy();
     setUseInstantIframeCloseRestore(false);
+    // Start a new product-ID epoch for the replacement iframe. Its first CURRENT_PRODUCT_ID is
+    // initial state, even when its SKU and price have already arrived.
+    currentProductIdRef.current = undefined;
+    setCurrentProductId(undefined);
     // Close any open modal/drawer
     setIsModalOpen(false);
     setIsVariantsOpen(false);
@@ -1672,10 +1707,8 @@ export const OV25UIProvider: React.FC<{
     setControlsHidden(false);
     setIsModulePanelOpen(false);
     setIsModuleSelectionLoading(false);
-    setCommercePriceSnapshot(null);
     setIsSnap2CheckoutSheetOpen(false);
-    latestPriceRef.current = null;
-    latestSkuRef.current = null;
+    resetCommerceSnapshots();
     setCurrentBedSize(null);
 
     // Reset iframe
@@ -1702,6 +1735,7 @@ export const OV25UIProvider: React.FC<{
     setIsModulePanelOpen,
     setIsModuleSelectionLoading,
     setIsSnap2CheckoutSheetOpen,
+    resetCommerceSnapshots,
     setIframeResetKey,
     setActiveOptionId,
     setSelectedSelections,
@@ -2403,12 +2437,12 @@ export const OV25UIProvider: React.FC<{
           return;
         }
 
-        // For standard configurators with uniqueId, filter messages by iframe source
-        if (uniqueId) {
-          const iframe = findIframeWithUniqueId(uniqueId) as HTMLIFrameElement | null;
-          if (!iframe || event.source !== iframe.contentWindow) {
-            return;
-          }
+        // Every instance, including the default/no-uniqueId instance, must accept messages only
+        // from its currently mounted iframe. A retired iframe can otherwise repopulate checkout
+        // state after cleanup while its replacement is still starting.
+        const iframe = findIframeWithUniqueId(uniqueId) as HTMLIFrameElement | null;
+        if (!iframe || event.source !== iframe.contentWindow) {
+          return;
         }
 
         if (type === IFRAME_MSG_TRANSITION_SNAPSHOT || type === IFRAME_MSG_TRANSITION_SNAPSHOT_ERROR) {
@@ -2426,6 +2460,18 @@ export const OV25UIProvider: React.FC<{
             setProducts(data);
             break;
           case 'CURRENT_PRODUCT_ID':
+            // The initial ID can arrive after the first state messages. It describes the same
+            // initial configuration, so only clear snapshots for an actual product transition.
+            if (
+              currentProductIdRef.current != null &&
+              data != null &&
+              data !== currentProductIdRef.current
+            ) {
+              resetCommerceSnapshots();
+            }
+            if (data != null) {
+              currentProductIdRef.current = data;
+            }
             setCurrentProductId(data);
             break;
           case 'SELECTED_SELECTIONS': {
@@ -2547,14 +2593,16 @@ export const OV25UIProvider: React.FC<{
             setFormattedSubtotal(pricePayload.formattedSubtotal);
             setFormattedPrice(pricePayload.formattedPrice);
             setDiscount(pricePayload.discount);
+            setHasReceivedPrice(true);
             onChangeRef.current?.({ skus: latestSkuRef.current ?? null, price: pricePayload });
             break;
           }
           case 'CURRENT_SKU': {
             const skuPayload = normalizeSkuPayload(data);
-            if (!skuPayload) break;
+            if (!isUsableIframeSkuPayload(skuPayload)) break;
             latestSkuRef.current = skuPayload;
             setCurrentSku(skuPayload);
+            setHasReceivedSku(true);
             onChangeRef.current?.({ skus: skuPayload, price: latestPriceRef.current ?? null });
             break;
           }
@@ -2751,6 +2799,7 @@ export const OV25UIProvider: React.FC<{
     isMobile,
     effectiveUseInlineVariantControls,
     hasConfigureButtonState,
+    resetCommerceSnapshots,
     snap2ModulesEmbedInVariantSheet,
   ]);
 
@@ -2789,6 +2838,8 @@ export const OV25UIProvider: React.FC<{
       if (currentProductId !== selection.id) {
         if (isSelectingProduct.current) return;
         isSelectingProduct.current = true;
+        resetCommerceSnapshots();
+        currentProductIdRef.current = selection.id;
         setPendingProductId(selection.id);
         setSelectedSelections(prev => {
           const newSelections = prev.filter(sel => sel.optionId !== 'size');
@@ -2809,7 +2860,7 @@ export const OV25UIProvider: React.FC<{
       selectionId: selection.id
     }, uniqueId);
     restoreInlineGalleryToIframe();
-  }, [activeOptionId, currentProductId, restoreInlineGalleryToIframe, uniqueId]);
+  }, [activeOptionId, currentProductId, resetCommerceSnapshots, restoreInlineGalleryToIframe, uniqueId]);
   handleSelectionSelectRef.current = handleSelectionSelectImpl;
 
   const contextValue: OV25UIContextType = {
@@ -2826,6 +2877,9 @@ export const OV25UIProvider: React.FC<{
     price,
     subtotal,
     formattedPrice,
+    hasReceivedPrice,
+    hasReceivedSku,
+    isCheckoutPayloadReady: isCheckoutPayloadReady(hasReceivedPrice, hasReceivedSku),
     discount,
     formattedSubtotal,
     galleryIndex,

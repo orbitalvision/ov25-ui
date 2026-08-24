@@ -8,6 +8,21 @@ export const checkoutCommerceCtaButtonClasses =
 
 const baseButtonClasses = checkoutCommerceCtaButtonClasses;
 
+/*
+ * `disabled` alone isn't enough on these CTAs: :hover still matches a disabled button, so the
+ * base classes' hover colours would fire under a not-allowed cursor. Pin the background and text
+ * back to their resting values instead of reaching for pointer-events-none, which would also
+ * suppress the cursor affordance.
+ */
+const disabledCtaClasses =
+  'ov:disabled:opacity-50 ov:disabled:cursor-not-allowed ov:disabled:hover:bg-(--ov25-cta-color) ov:disabled:hover:text-(--ov25-cta-text-color)';
+
+/* The combo layout's halves are transparent hit areas over separately rendered content, so their
+   own hover tint is what needs neutralising; the opacity does the work on the cart icon, and the
+   Buy now label is dimmed alongside it. */
+const disabledOverlayClasses =
+  'ov:disabled:opacity-50 ov:disabled:cursor-not-allowed ov:disabled:hover:bg-transparent';
+
 function buttonFontWeight(embedded: boolean) {
   return embedded ? 'ov:font-normal' : 'ov:font-medium';
 }
@@ -39,12 +54,31 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
     formattedPrice,
     formattedSubtotal,
     discount,
+    hasReceivedPrice,
+    isCheckoutPayloadReady,
     disableAddToCart,
     disableBuyNow,
     getString,
   } = useOV25UI();
-  const addToBasketText = getString('checkoutAddToBasket', { PRICE: formattedPrice, SUBTOTAL: formattedSubtotal, DISCOUNT_AMOUNT: discount.formattedAmount, DISCOUNT_PERCENTAGE: discount.percentage }, 'Add to basket');
-  const buyNowText = getString('checkoutBuyNow', { PRICE: formattedPrice, SUBTOTAL: formattedSubtotal, DISCOUNT_AMOUNT: discount.formattedAmount, DISCOUNT_PERCENTAGE: discount.percentage }, 'Buy now');
+  /*
+   * Pricing comes from the configurator after mount, so every price field is a placeholder zero
+   * until the first CURRENT_PRICE. Omit the price rather than print "£0.00" on a CTA. The blanks
+   * cover merchant templates too — a configured "Buy now ${PRICE}" would otherwise interpolate
+   * the zero even though the standalone price node is hidden.
+   */
+  const priceVars = hasReceivedPrice
+    ? { PRICE: formattedPrice, SUBTOTAL: formattedSubtotal, DISCOUNT_AMOUNT: discount.formattedAmount, DISCOUNT_PERCENTAGE: discount.percentage }
+    : { PRICE: '', SUBTOTAL: '', DISCOUNT_AMOUNT: '', DISCOUNT_PERCENTAGE: '' };
+  const addToBasketText = getString('checkoutAddToBasket', priceVars, 'Add to basket');
+  const buyNowText = getString('checkoutBuyNow', priceVars, 'Buy now');
+  /* Rendered as nothing, not an empty span: the button is a flex row with a gap, so an empty
+     node would still reserve that gap and knock the label off centre. */
+  const priceLabel = hasReceivedPrice ? <span>{formattedPrice}</span> : null;
+  /*
+   * Both callbacks need the current normalized price and SKU. Those messages are independent and
+   * may arrive in either order, so a valid price alone must not enable checkout with a null/stale SKU.
+   */
+  const awaitingPrice = !isCheckoutPayloadReady;
   const hasAddToBasket = typeof addToBasketFunction === 'function';
   const hasBuyNow = typeof buyNowFunction === 'function';
   const effectiveHasAddToBasket = hasAddToBasket && !disableAddToCart;
@@ -64,16 +98,17 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
       <button
         id="ov25-add-to-basket-button"
         type="button"
+        disabled={awaitingPrice}
         onClick={(e) => {
           stopCommerceClick(e);
           setIsVariantsOpen(false);
           addToBasketFunction();
           onAfterAddToBasket?.();
         }}
-        className={cn(baseButtonClasses, buttonFontWeight(embedded), 'ov:w-full ov:min-w-0 ov:max-w-full')}
+        className={cn(baseButtonClasses, buttonFontWeight(embedded), 'ov:w-full ov:min-w-0 ov:max-w-full', disabledCtaClasses)}
       >
         <span>{addToBasketText}</span>
-        <span>{formattedPrice}</span>
+        {priceLabel}
       </button>
       </div>
     );
@@ -85,15 +120,16 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
       <button
         id="ov25-checkout-button"
         type="button"
+        disabled={awaitingPrice}
         onClick={(e) => {
           stopCommerceClick(e);
           buyNowFunction();
           onAfterBuyNow?.();
         }}
-        className={cn(baseButtonClasses, buttonFontWeight(embedded), 'ov:w-full ov:min-w-0 ov:max-w-full')}
+        className={cn(baseButtonClasses, buttonFontWeight(embedded), 'ov:w-full ov:min-w-0 ov:max-w-full', disabledCtaClasses)}
       >
         <span>{buyNowText}</span>
-        <span>{formattedPrice}</span>
+        {priceLabel}
       </button>
       </div>
     );
@@ -102,7 +138,7 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
   const labelContent = (
     <>
       <span>{buyNowText}</span>
-      <span>{formattedPrice}</span>
+      {priceLabel}
     </>
   );
 
@@ -124,7 +160,10 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
         <ShoppingCart size={20} />
       </div>
       <div
-        className="ov25-checkout-combo-button-text ov:absolute ov:z-12 ov:inset-0 ov:flex ov:items-center ov:justify-center ov:gap-2 ov:pointer-events-none"
+        className={cn(
+          'ov25-checkout-combo-button-text ov:absolute ov:z-12 ov:inset-0 ov:flex ov:items-center ov:justify-center ov:gap-2 ov:pointer-events-none',
+          awaitingPrice && 'ov:opacity-50'
+        )}
         aria-hidden
       >
         {labelContent}
@@ -132,12 +171,13 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
       <button
         id="ov25-checkout-button"
         type="button"
+        disabled={awaitingPrice}
         onClick={(e) => {
           stopCommerceClick(e);
           buyNowFunction();
           onAfterBuyNow?.();
         }}
-        className={cn(baseButtonClasses, 'ov:absolute ov:inset-0 ov:right-14 ov:z-11 ov:cursor-pointer ov:bg-transparent ov:border-0 ov:rounded-none')}
+        className={cn(baseButtonClasses, 'ov:absolute ov:inset-0 ov:right-14 ov:z-11 ov:cursor-pointer ov:bg-transparent ov:border-0 ov:rounded-none', disabledOverlayClasses)}
         aria-label={buyNowText}
       >
       </button>
@@ -145,13 +185,17 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
       <button
         id="ov25-add-to-basket-button"
         type="button"
+        disabled={awaitingPrice}
         onClick={(e) => {
           stopCommerceClick(e);
           setIsVariantsOpen(false);
           addToBasketFunction();
           onAfterAddToBasket?.();
         }}
-        className="ov:absolute ov:right-0 ov:top-0 ov:bottom-0 ov:w-14 ov:z-20 ov:flex ov:items-center ov:justify-center ov:cursor-pointer ov:bg-transparent ov:border-0 ov:hover:bg-white/10 ov:transition-colors"
+        className={cn(
+          'ov:absolute ov:right-0 ov:top-0 ov:bottom-0 ov:w-14 ov:z-20 ov:flex ov:items-center ov:justify-center ov:cursor-pointer ov:bg-transparent ov:border-0 ov:hover:bg-white/10 ov:transition-colors',
+          disabledOverlayClasses
+        )}
         aria-label={addToBasketText}
       >
         <ShoppingCart size={20} />

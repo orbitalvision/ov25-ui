@@ -1148,3 +1148,62 @@ html #ov25-configurator-variant-menu-container {
   box-shadow: inset 0 2px 8px 0 rgba(154, 154, 154, 0.5), 
               inset 0 2px 4px 0 rgba(243, 244, 246, 0.15);
 }
+
+/*
+  Price loading skeleton.
+
+  Kept as hand-written CSS rather than Tailwind utilities because the sweep lives on a
+  ::after pseudo-element, which utilities can't target, and because motion-reduce utilities
+  can't reach a pseudo-element either. The Shopify price block (ov25_configurator_price.liquid)
+  paints the same skeleton in the light DOM before ov25-ui mounts; it can't import this file, so
+  it carries a copy of these rules that must be kept in step or the handoff flickers.
+
+  The sweep animates transform/opacity only, so it stays on the compositor: this skeleton is on
+  screen during the exact window the bundle is parsing and the configurator iframe is booting,
+  and a repainting animation would compete with them for the main thread.
+*/
+.ov25-price-skeleton {
+  display: flex;
+  align-items: center;
+}
+.ov25-price-skeleton__bar {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: 0.25em;
+  /* Fallback first: color-mix keeps the bar legible on light and dark themes alike. */
+  background-color: rgba(128, 128, 128, 0.18);
+  background-color: color-mix(in srgb, currentColor 15%, transparent);
+}
+/*
+  Overlay placement, used where the skeleton sits inside the real text element so that element's
+  own line box reserves the height. Declared here rather than as Tailwind utilities because the
+  base rule above sets `position: relative` and, appended after the utility layer, would win.
+*/
+.ov25-price-skeleton__bar--overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1em;
+  transform: translateY(-50%);
+}
+.ov25-price-skeleton__bar::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(90deg, transparent, currentColor, transparent);
+  opacity: 0.12;
+  animation: ov25-price-skeleton-sweep 2.2s ease-in-out infinite;
+}
+/* Travels for 60% of the cycle, then rests: a continuous sweep across a bar this short reads as busy. */
+@keyframes ov25-price-skeleton-sweep {
+  0% { transform: translateX(-100%); }
+  60%, 100% { transform: translateX(100%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ov25-price-skeleton__bar::after {
+    animation: none;
+  }
+}
