@@ -1,4 +1,5 @@
 import React from 'react';
+import { useOV25UI } from '../../../contexts/ov25-ui-context.js';
 
 interface VariantCardProps {
   variant: any;
@@ -11,7 +12,9 @@ interface VariantCardProps {
 
 // Use React.memo to prevent unnecessary re-renders
 export const SizeVariantCard = React.memo(
-  ({ variant, onSelect, index, isMobile, showImage = false, showDimensions = true }: VariantCardProps) => {
+  ({ variant, onSelect, index, isMobile, showImage = true, showDimensions = true }: VariantCardProps) => {
+    const { getString } = useOV25UI();
+
     return (
       <div
         onClick={(e) => {
@@ -25,10 +28,10 @@ export const SizeVariantCard = React.memo(
       >
         <div className="ov:flex ov:flex-1 ov:flex-col ov:items-center ov:justify-between">
           {showImage && variant.image ? (
-            <img src={variant.image} alt={variant.name} className="ov:w-full ov:h-full ov:object-cover ov:rounded-lg" />
+            <img src={variant.image} alt={variant.name} className="ov:w-full ov:h-full ov:object-contain ov:rounded-lg" />
           ) : null}
           <div className="ov:flex ov:flex-col ov:justify-center ov:items-center">
-            <h3 className="ov25-size-variant-card-name ov:font-[350] ov:text-base ov:text-center ov:leading-[2em] ov:text-[var(--ov25-secondary-text-color)]">{variant.name}</h3>
+            <h3 className="ov25-size-variant-card-name ov:font-[350] ov:text-base ov:text-center ov:leading-[2em] ov:text-[var(--ov25-secondary-text-color)] ov:whitespace-pre-line">{getString('variantName', { VARIANT_NAME: variant.name }, variant.name)}</h3>
           </div>
         </div>
         {showDimensions && (
@@ -54,11 +57,13 @@ export const SizeVariantCard = React.memo(
     // Only re-render if these properties changed
     return (
       prevProps.variant.id === nextProps.variant.id &&
+      prevProps.variant.name === nextProps.variant.name &&
       prevProps.variant.isSelected === nextProps.variant.isSelected &&
       prevProps.variant.image === nextProps.variant.image &&
       prevProps.index === nextProps.index &&
       prevProps.isMobile === nextProps.isMobile &&
-      prevProps.showImage === nextProps.showImage
+      prevProps.showImage === nextProps.showImage &&
+      prevProps.showDimensions === nextProps.showDimensions
     );
   }
 );

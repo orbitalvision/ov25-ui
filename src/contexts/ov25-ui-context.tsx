@@ -18,7 +18,7 @@ import {
 } from '../types/config-enums.js';
 import { stringSimilarity } from 'string-similarity-js';
 import { launchARWithGLBBlob } from '../utils/launchARWithGLBBlob.js';
-import { getProductGalleryImages, resolveImageUrl, type ProductImageInput } from '../lib/utils.js';
+import { getProductCutoutImage, getProductGalleryImages, resolveImageUrl, type ProductImageInput } from '../lib/utils.js';
 import type {
   BedPartSizeFilterFlags,
   OnChangePayload,
@@ -166,6 +166,7 @@ export interface Product {
   discount: number;
   lowestPrice: number;
   metadata: any;
+  configuratorThumbnail?: ProductImageInput | null;
 }
 
 export interface Selection {
@@ -2050,6 +2051,15 @@ export const OV25UIProvider: React.FC<{
         price: p?.price,
         discount: p?.discount,
         thumbnail: (() => {
+          const cutout = getProductCutoutImage(p?.metadata)
+          const cutoutUrl = cutout && resolveImageUrl(cutout, 'carousel')
+          if (cutoutUrl) return cutoutUrl
+
+          const configuratorThumbnailUrl = p?.configuratorThumbnail
+            ? resolveImageUrl(p.configuratorThumbnail, 'carousel')
+            : ''
+          if (configuratorThumbnailUrl) return configuratorThumbnailUrl
+
           const imgs = p?.metadata?.images
           if (!imgs?.length) return undefined
           const last = imgs[imgs.length - 1]
