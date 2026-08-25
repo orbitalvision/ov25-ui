@@ -7,12 +7,36 @@ queue is [bugs-ready-for-review.md](bugs-ready-for-review.md), and approved work
 
 ## ACTION REQUIRED — 0.8.8
 
-No active user actions.
+### A-0.8.8-006 — Commit bookkeeping before preparing release tags
+
+- Commit only the five modified `docs/` bookkeeping/runbook files listed by `git status`.
+- Leave `releases/0.8.8/` untracked: `release:deploy` is designed to stage those approved artifacts
+  with `CHANGELOG.md`, `package.json`, and `package-lock.json` in the generated UI release commit.
+- After the bookkeeping commit is pushed and the working tree contains only
+  `releases/0.8.8/`, run the local preparation phase without `--push`.
+- Do not commit the release artifacts separately; doing so would obscure the generated release
+  commit boundary expected by the current automation.
 
 ## Historical Notes
 
 The entries below preserve earlier release context. They are not an active user-action queue unless
 an item is explicitly promoted into the action-required section above.
+
+### A-0.8.8-005 — Release artifacts approved
+
+- Approved: 2026-08-25
+- The release owner reviewed and approved the patch notes, developer summary, client email,
+  compatibility notes, downstream order, and manual staging checklist.
+- Tested/frozen release head: `b4fa145`.
+- No version bump, tag, publication, or deployment occurred during review.
+
+### A-0.8.8-004 — Bug 62/63 release-test follow-ups complete
+
+- Completed: 2026-08-25
+- Bug 62's layout correction is committed in `e2a90c7`; its final geometry coverage and Bug 63's
+  deterministic E2E synchronization are committed in `b4fa145`.
+- The complete 0.8.8 release test and isolated React 18 publish build both passed at `b4fa145`.
+- The active review queue is clear; release artifacts now await review.
 
 ### A-0.8.8-002 — Bug 61 approved
 

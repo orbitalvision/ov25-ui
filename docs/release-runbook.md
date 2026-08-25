@@ -28,12 +28,17 @@ Before generating release context or artifacts, confirm the active release queue
 approved source commits are stable. Run:
 
 ```bash
-npm run release:test -- --release <version>
+OV25_E2E_NEW_HEADLESS=true npm run release:test -- --release <version>
 ```
 
 This runs type checking, unit tests, browser/component tests, the React 19 package build, the setup
 frozen install/build, the react-test build, and Playwright. Review
 `releases/<version>/test-summary.md` after it completes.
+
+Headless execution is the default because headed browser windows interrupt other work. Use headed
+mode only when a specific failure cannot be diagnosed or verified headlessly. Notify the user
+before starting a headed run, explain why it is necessary, and limit it to the smallest relevant
+test scope.
 
 ### Required React 18 Preflight
 

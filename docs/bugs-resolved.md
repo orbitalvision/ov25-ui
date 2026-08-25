@@ -49,6 +49,34 @@ text below records the point at which work was reviewed or staged; use live Git 
 
 ## Approved release work
 
+<a id="bug-63"></a>
+### Bug 63. Stabilize the 0.8.8 release E2E checks
+
+**Status:** Completed in `b4fa145` and covered by the passing final 0.8.8 release test on
+2026-08-25.
+
+**Outcome:** The Buy Now screenshot now waits for the ready/enabled state, the hidden-logo mobile
+test synchronizes with the mounted Snap2 state instead of a desktop-only element, and the Selection
+Details tooltip screenshot uses stable focus ownership. Runtime code and visual baselines are
+unchanged.
+
+**Verification:** Focused repeated runs passed, followed by the complete Playwright suite and final
+`release:test` sequence. The fixes do not increase global timeouts or weaken the intended product
+assertions.
+
+<a id="bug-62"></a>
+### Bug 62. Keep Selection Details content at the top of landscape panels
+
+**Status:** Completed in `e2a90c7` with final geometry coverage in `b4fa145`; covered by the passing
+0.8.8 release test on 2026-08-25.
+
+**Outcome:** Landscape desktop sheets and mobile fullscreen surfaces top-pack the image, title, and
+description. The square image shrinks first on short panels, long copy can scroll within its own
+region, and the action footer remains pinned.
+
+**Verification:** Focused component geometry checks cover 1024×400 desktop-sheet and 844×390 mobile
+fullscreen viewports. The rebuilt screenshot regression and complete release sequence pass.
+
 <a id="bug-61"></a>
 ### Bug 61. Prefer cutouts for synthetic Size-card thumbnails
 

@@ -25,7 +25,7 @@ Status summary:
 - **✅ APPROVED / STAGED FOR 0.8.0**: Bug 57 release-test stabilization and Inline Sticky initialization recovery.
 - **✅ RELEASED IN 0.8.1**: Bug 58 prevents Shopify/Dawn `div:empty` rules from hiding the injected gallery shadow host; the runtime fix shipped in `ov25-ui@0.8.1` and the React 18-compatible build shipped in `ov25-ui-react18@0.8.1`.
 - **✅ APPROVED / STAGED IN OV25**: Bug 56 removes the redundant static thumbnail strip from the OV25 configurator preview, leaving the real carousel as the only thumbnail UI.
-- **✅ APPROVED / UNSTAGED FOR 0.8.8**: Feature 60 adds newline-safe `variantName` replacements,
+- **✅ APPROVED / COMMITTED FOR 0.8.8**: Feature 60 adds newline-safe `variantName` replacements,
   contained Size-card images, and complete memo comparison for name/dimension visibility.
 - **BUG 39 INTEGRATION FOLLOW-UP**: The approved core is committed as `fad225f`. OV25 preview/PluginSettings work is staged but blocked on the unreleased `ov25-setup/defaults` export; Shopify and Woo integration source is committed locally but not pushed. Exact package synchronization remains release work.
 
@@ -707,6 +707,8 @@ configurator: {
 - [x]  ov25-variant-name still has ov:text-black
 - [x]  Better default variant image - Bug 50 was manually approved and committed as `0df85c3` on 2026-08-03. Missing image leaves use the bundled woven placeholder while parent selection data preserves raw URLs. Any future compact image-free/text-card behavior remains a separate UX change.
 - [x]  Bug 61, Size-card cutout precedence - approved and staged on 2026-08-25. Size cards prefer the product-information cutout, then the projected configurator screenshot thumbnail, then the final gallery image, and otherwise render without an image. Valid images show by default with `object-contain`; product-ID switching is unchanged.
+- [x]  Bug 62, desktop selection-details sheet content is vertically displaced - fixed in `e2a90c7` with final geometry coverage in `b4fa145`; the final 0.8.8 release test passed.
+- [x]  Bug 63, 0.8.8 release E2E stabilization - deterministic Buy Now, hidden-logo, and tooltip synchronization committed in `b4fa145`; the final 0.8.8 release test passed.
 - [x]  Bug 59, Shopify product price flashes £0.00 - implementation complete on 2026-08-25 across OV25 `63796903`, ov25-ui `77cf203`, and Shopify `ec70686`. Publishing the package and rebuilding/deploying the extension are release tasks; the local OV25 theme-patcher/template-route experiment remains a separate testing follow-up.
 - [x]  ov25-snap2-controls is in the DOM twice for snap2. one is redundant. - fixed as Bug 6.
 - [x]  £ signs showing in line item properties in checkout bedconfig - Bug 20 was already fixed upstream / not reproducible with current OV25. OV25 commit `b9cf4049` (2026-04-01) disables standard single-product pricing for bed mode and emits `productBreakdowns`; clean `ov25-ui` already remaps `productBreakdowns`. The port 3009 baseline shares current OV25, so it confirmed current cross-repo behavior rather than isolating the older OV25 path.

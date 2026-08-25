@@ -293,6 +293,18 @@ where rationale matters.
 10. Repeat until no blocking review finding remains.
 11. Generate/update the scoped diff and full user review packet.
 
+### Browser test execution policy
+
+Run Playwright and other browser tests headlessly by default so test windows do not interrupt the
+user's work. For this repository, use `bun run test:e2e:quiet` for the full browser suite, or set
+`OV25_E2E_NEW_HEADLESS=true` on focused Playwright commands.
+
+Use headed mode only when it is genuinely required to diagnose or verify behaviour that cannot be
+reproduced reliably headlessly, such as a browser/WebGL-specific failure or a manual visual or
+interaction check. Before starting a headed run, notify the user, explain why it is necessary, and
+limit the run to the smallest relevant test scope. Historical notes about headed test performance
+do not override this policy for agent-run tests.
+
 Review severity should distinguish:
 
 - **Blocking:** incorrect behaviour, regression, data/commerce risk, compatibility break, missing
