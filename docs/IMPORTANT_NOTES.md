@@ -1,6 +1,38 @@
 # Important Notes
 
-Current queue and release-review state was reconciled against local repositories on 2026-08-05. Use [IMPORTANT_BUGS.md](IMPORTANT_BUGS.md) for required user actions, [bugs-ready-for-review.md](bugs-ready-for-review.md) for the active manual queue, and [bugs-resolved.md](bugs-resolved.md) for approved work.
+This is the only authoritative user-action inbox for the active pre-release cycle. The complete
+workflow is in the [pre-release engineering runbook](pre-release-engineering-runbook.md), the live
+queue is [bugs-ready-for-review.md](bugs-ready-for-review.md), and approved work is archived in
+[bugs-resolved.md](bugs-resolved.md).
+
+## ACTION REQUIRED — 0.8.8
+
+No active user actions.
+
+## Historical Notes
+
+The entries below preserve earlier release context. They are not an active user-action queue unless
+an item is explicitly promoted into the action-required section above.
+
+### A-0.8.8-002 — Bug 61 approved
+
+- Approved: 2026-08-25
+- Read: [Bug 61 archive](bugs-resolved.md#bug-61)
+- The four approved ov25-ui implementation/test files are staged. The user confirmed the required
+  OV25 payload projection is already committed.
+- Chair Studio's per-product-title replacement rules remain downstream merchant configuration;
+  no title list or saved replacement content exists in this workspace.
+- Nothing was published or deployed by this approval.
+
+### A-0.8.8-001 — Bug 59 approved
+
+- Approved: 2026-08-24
+- Completed: 2026-08-25
+- Read: [Bug 59 archive](bugs-resolved.md#bug-59)
+- Runtime commits: OV25 `63796903` on remote `main`, ov25-ui `77cf203`, and Shopify `ec70686`.
+- Theme-patcher/template-route work remains intentionally local and unstaged as a separately tested
+  follow-up.
+- Publishing ov25-ui 0.8.8 and rebuilding/deploying the Shopify extension remain release work.
 
 ## 0.8.1 release-test reliability fixes ready
 

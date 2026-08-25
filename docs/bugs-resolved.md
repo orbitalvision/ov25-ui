@@ -49,6 +49,102 @@ text below records the point at which work was reviewed or staged; use live Git 
 
 ## Approved release work
 
+<a id="bug-61"></a>
+### Bug 61. Prefer cutouts for synthetic Size-card thumbnails
+
+**Status:** Manually approved and staged in ov25-ui on 2026-08-25. The user confirmed the required
+OV25 payload projection is already committed.
+
+**Outcome:** Native Size cards now show images by default and choose the first resolvable source in
+this order: product-information `metadata.cutoutImage`, the product-card configurator screenshot
+received as `configuratorThumbnail`, the final `metadata.images[]` entry, then no image. Transparent
+cutouts use `object-contain`; explicit `showImage={false}` and missing-image behavior remain
+supported. Product selection continues to use the same product ID.
+
+**OV25 contract:** The existing inline `ALL_PRODUCTS` cleaning map copies the non-empty
+`configurator.screenshotThumbnail` string to `configuratorThumbnail` before deleting the full
+configurator and other private fields. Per user direction, no exported helper or new OV25 test was
+introduced.
+
+**Changed files:** [ov25-ui-context.tsx](../src/contexts/ov25-ui-context.tsx),
+[SizeVariantCard.tsx](../src/components/VariantSelectMenu/variant-cards/SizeVariantCard.tsx),
+[size-option-thumbnail-selection.test.tsx](../test/unit/size-option-thumbnail-selection.test.tsx),
+and [size-variant-card.test.tsx](../test/unit/size-variant-card.test.tsx).
+
+**Scoped diffs:** [ov25-ui](../review-diffs/bug-61-cutout-first-size-thumbnails.diff) and
+[OV25 payload](../review-diffs/bug-61-ov25-configurator-thumbnail-payload.diff).
+
+**Verification:** The combined Size-card, Size-option, and placeholder suites passed 13/13. Direct
+type-check, scoped whitespace checks, artifact reverse checks, main review, and independent review
+passed. Runtime diagnosis confirmed the test range's iframe payload contained valid screenshot
+thumbnail URLs; the missing display was caused by `SizeVariantCard` previously defaulting
+`showImage` to false.
+
+**Approval:** The user reviewed and approved Bug 61 on 2026-08-25. Publishing and deployment remain
+separate release actions.
+
+<a id="bug-59"></a>
+### Bug 59. Product price flashes £0.00 on OV25 product pages
+
+**Status:** Implementation complete across all three repositories. Manually approved on 2026-08-24;
+OV25 `63796903` is on remote `main`, ov25-ui is committed as `77cf203`, and Shopify is committed as
+`ec70686`.
+
+**Outcome:** Shopify and ov25-ui render a loading skeleton instead of placeholder zero pricing,
+checkout remains disabled until usable SKU and price data arrive, and OV25 suppresses its premature
+zero message. The final runtime regression was caused by the initial OV25 sequence
+`CURRENT_PRODUCT_ID: null → SKU/price → product ID`; ov25-ui no longer treats the null placeholder
+as a prior product or clears the valid initial quote.
+
+**Verification:** The final focused Bug 59 suite passed, direct type-check and staged whitespace
+checks passed, and a clean rebuilt browser fixture displayed `£100.00` immediately with Buy now and
+Add to basket enabled. Published ov25-ui 0.8.7 remained compatible with the already-deployed OV25
+suppression.
+
+**Deferred follow-up:** OV25 theme-patcher/template-route work remains intentionally local and
+unstaged for separate testing. It is not part of the completed runtime commit set.
+
+**Approval:** The user approved Bug 59 on 2026-08-24 and confirmed it complete on 2026-08-25.
+Publishing ov25-ui 0.8.8, rebuilding the Shopify extension from that package, and deploying the
+extension remain release actions rather than open Bug 59 implementation.
+
+<a id="feature-60"></a>
+### Feature 60. Multiline native Size-card names
+
+**Status:** Manually approved on 2026-08-24. The shared Size-card implementation and test are staged
+with approved Bug 61 as of 2026-08-25.
+
+**Outcome:** Native Size-card headings now resolve through
+`getString('variantName', { VARIANT_NAME: variant.name }, variant.name)`. Replacement templates
+containing real newline characters render on separate visible lines with `white-space: pre-line`
+while React continues treating the value as safe text—no HTML rendering or `<br>` conversion was
+introduced. Unmatched rules retain the original product name.
+
+**Additional corrections:** Size-card images use `object-contain` so transparent cutouts are not
+cropped. The memo comparator now includes `variant.name` and `showDimensions`; card selection
+still passes the original variant and product ID.
+
+**Changed files:** [SizeVariantCard.tsx](../src/components/VariantSelectMenu/variant-cards/SizeVariantCard.tsx)
+and [size-variant-card.test.tsx](../test/unit/size-variant-card.test.tsx).
+
+**Scoped diff:** [feature-60-multiline-size-card-names.diff](../review-diffs/feature-60-multiline-size-card-names.diff).
+
+**Verification:** The focused component suite passed 5/5. The combined Size-card, Size-option
+thumbnail, and existing placeholder regression suites passed 13/13. Direct `tsc --noEmit`, scoped
+`git diff --check`, and review-artifact reverse checking passed. Main review returned two
+test-quality findings to the original worker; independent closure review found no remaining issue.
+
+**Manual evidence:** No screenshot was generated because ov25-ui was not rebuilt and the workspace
+contains no Chair Studio title/replacement configuration. A read-only audit confirmed that setup
+already serializes triggered `variantName` rules through Shopify into `injectConfigurator` and
+preserves embedded newlines. Chair Studio's per-product-title rules remain downstream configuration
+because no title list or desired replacement content exists locally.
+
+**Residual risk:** Low. Merchant-specific output still depends on correctly configured triggered
+rules, and the user owns the post-rebuild visual check.
+
+**Approval:** The user approved Feature 60 on 2026-08-24.
+
 ### 58. Shopify Dawn hides the injected inline-sticky gallery as an empty div
 
 **Status:** Released in `0.8.1` on 2026-08-06. Runtime commit `ff077c1`; React 18 JSX typing

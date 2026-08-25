@@ -2,9 +2,11 @@
 
 > Post-release note (2026-08-06): `0.8.0` and the Shopify compatibility patch `0.8.1` have been
 > released. The dated status summary below preserves the implementation/review history and is not a
-> live release dashboard. Start future release work from live Git/npm state and
-> [release-runbook.md](release-runbook.md); use [bugs-ready-for-review.md](bugs-ready-for-review.md)
-> for active review and [PARKED_BUGS.md](PARKED_BUGS.md) for deferred work.
+> live release dashboard. Start future release work from live Git/npm state and the
+> [pre-release engineering runbook](pre-release-engineering-runbook.md); use
+> [bugs-ready-for-review.md](bugs-ready-for-review.md) for the complete active lifecycle and
+> [PARKED_BUGS.md](PARKED_BUGS.md) for deferred work. After pre-release scope closes, use the
+> [release runbook](release-runbook.md).
 
 Status summary:
 
@@ -23,6 +25,8 @@ Status summary:
 - **✅ APPROVED / STAGED FOR 0.8.0**: Bug 57 release-test stabilization and Inline Sticky initialization recovery.
 - **✅ RELEASED IN 0.8.1**: Bug 58 prevents Shopify/Dawn `div:empty` rules from hiding the injected gallery shadow host; the runtime fix shipped in `ov25-ui@0.8.1` and the React 18-compatible build shipped in `ov25-ui-react18@0.8.1`.
 - **✅ APPROVED / STAGED IN OV25**: Bug 56 removes the redundant static thumbnail strip from the OV25 configurator preview, leaving the real carousel as the only thumbnail UI.
+- **✅ APPROVED / UNSTAGED FOR 0.8.8**: Feature 60 adds newline-safe `variantName` replacements,
+  contained Size-card images, and complete memo comparison for name/dimension visibility.
 - **BUG 39 INTEGRATION FOLLOW-UP**: The approved core is committed as `fad225f`. OV25 preview/PluginSettings work is staged but blocked on the unreleased `ov25-setup/defaults` export; Shopify and Woo integration source is committed locally but not pushed. Exact package synchronization remains release work.
 
 Release-cleanup state: Bug 12 was resumed on 2026-07-30, manually approved, and committed as `4d038ec` on 2026-08-03. Bug 50 is approved and committed as `0df85c3`; its material-only placeholder-scope correction is approved and staged. Bugs 15, 33, 42, 43 (`ov25-ui`), and 45 are absent from current `ov25-ui` main; Bugs 28, 35, 36, 41, and the OV25 side of Bug 43 were never applied to current OV25 main; and the distinct Bug 34 proposal was not applied to main while the approved committed Bug 24 equivalent remains. Bug 23 is approved and committed as `eaa808d`.
@@ -39,10 +43,17 @@ Before/after manual review: `.worktrees/ov25-ui-clean-baseline-3009` is detached
 
 ## Implementation workflow
 
+The canonical workflow is now [pre-release-engineering-runbook.md](pre-release-engineering-runbook.md).
+The bullets below preserve useful historical detail where they do not conflict with that runbook.
+
 - Before fixing any bug, first verify whether it is still reproducible from current code/fixtures. If it already appears fixed, record the evidence instead of changing code. If reproduction needs a specific product/config that is not in the repo, ask the user for the fixture details.
 - Before implementing a still-reproducible bug, record: summary, repro, rough fix, manual test, automated test candidates, risk/blast radius, and branch name or patch owner.
-- When a bug fix is ready for manual testing, create or update a per-bug implementation diff file under `review-diffs/`, then add or update a full review packet in `docs/bugs-ready-for-review.md` that links to it. This is the canonical queue for the user to check when returning to the chat.
-- Also append a short unread entry to `docs/IMPORTANT_BUGS.md` whenever a bug becomes ready to re-check, an important decision needs user input, or a test environment/fixture changes. Include the bug number, test URL, expected result, and any action needed. The user removes entries after reading them; never stage this queue with bug implementation files. `docs/IMPORTANT_NOTES.md` is retained only as historical context.
+- Add every active bug or feature to `docs/bugs-ready-for-review.md` at intake and move it through
+  the lifecycle sections defined by the canonical runbook. When it becomes ready for manual testing,
+  create or update a per-bug implementation diff under `review-diffs/` and complete its review packet.
+- Add questions and required user actions only to `docs/IMPORTANT_NOTES.md`, then notify the user.
+  `IMPORTANT_BUGS.md` and `bugs-questions-for-user.md` are historical inventories, not competing
+  active inboxes.
 - For UI bugs, generate before/after screenshots with Playwright when practical. Store screenshots under `review-screenshots/`, link them from the bug packet in `docs/bugs-ready-for-review.md`, and state when screenshots were skipped because the bug is interaction-only or needs unreproducible product/setup data.
 - When practical, include both manual comparison URLs, but label the retained `localhost:3009` worktree as historical commit `bb56186`; use a refreshed worktree when a true current-HEAD baseline is required.
 - Prefer the stable Playwright helper `node scripts/check-local-fixture.mjs ...` for local fixture checks and screenshots. Ask for one persistent approval for the prefix `["node", "scripts/check-local-fixture.mjs"]` instead of using long one-off `node -e` Playwright commands.
@@ -695,6 +706,8 @@ configurator: {
 - [x]  “auto open configurator” in ov25-setup does not work? - Bug 12 was manually approved and committed as `4d038ec` on 2026-08-03. Auto-open and external Configure clicks use the same product-aware handler as the visible trigger; desktop auto-open, close/reopen, mobile drawer behavior, and Snap2 regression behavior passed manual review.
 - [x]  ov25-variant-name still has ov:text-black
 - [x]  Better default variant image - Bug 50 was manually approved and committed as `0df85c3` on 2026-08-03. Missing image leaves use the bundled woven placeholder while parent selection data preserves raw URLs. Any future compact image-free/text-card behavior remains a separate UX change.
+- [x]  Bug 61, Size-card cutout precedence - approved and staged on 2026-08-25. Size cards prefer the product-information cutout, then the projected configurator screenshot thumbnail, then the final gallery image, and otherwise render without an image. Valid images show by default with `object-contain`; product-ID switching is unchanged.
+- [x]  Bug 59, Shopify product price flashes £0.00 - implementation complete on 2026-08-25 across OV25 `63796903`, ov25-ui `77cf203`, and Shopify `ec70686`. Publishing the package and rebuilding/deploying the extension are release tasks; the local OV25 theme-patcher/template-route experiment remains a separate testing follow-up.
 - [x]  ov25-snap2-controls is in the DOM twice for snap2. one is redundant. - fixed as Bug 6.
 - [x]  £ signs showing in line item properties in checkout bedconfig - Bug 20 was already fixed upstream / not reproducible with current OV25. OV25 commit `b9cf4049` (2026-04-01) disables standard single-product pricing for bed mode and emits `productBreakdowns`; clean `ov25-ui` already remaps `productBreakdowns`. The port 3009 baseline shares current OV25, so it confirmed current cross-repo behavior rather than isolating the older OV25 path.
 - [x]  remove duplicate “product type” from ov25-setup

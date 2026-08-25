@@ -1,4 +1,4 @@
-// Release phase 2: run all tests and generate test-summary.md.
+// Release phase 1: run all tests and generate test-summary.md.
 
 import { spawn } from 'node:child_process';
 import fs from 'node:fs';

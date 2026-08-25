@@ -1,5 +1,9 @@
 # Important Bugs
 
+> Historical queue. Active pre-release questions and required user actions now belong only in
+> [IMPORTANT_NOTES.md](IMPORTANT_NOTES.md) under the current release's `ACTION REQUIRED` section.
+> Do not add new 0.8.8 actions here.
+
 Items that currently need user action. Remove an item after it has been handled.
 
 Last reconciled against local repositories: 2026-08-04.

@@ -22,38 +22,10 @@ tags, package publication triggers, and platform deployments.
 
 All three packages use the same release version.
 
-## 1. Preflight
+## 1. Test And Stabilize
 
-1. Inspect live Git state in `ov25-ui`, `OV25`, `shopify-plugin`, `ov25-woo-extension`, and
-   `ov25-docs`. Do not rely on historical status snapshots in bug trackers or release artifacts.
-2. Confirm approved source work is committed and pushed. Keep unrelated local work out of the
-   release.
-3. Confirm the intended version does not already exist on npm and its three package tags do not
-   already exist.
-4. Confirm the previous package tags identify the comparison base.
-5. Review parked bugs separately; parked work is not release-approved.
-
-## 2. Review
-
-Ask an agent to run the repository `$ov25-release-review` skill, for example:
-
-```text
-Use $ov25-release-review for a patch release since ov25-ui@0.8.1.
-```
-
-The agent runs only the context collector and writes `releases/<version>/` artifacts. The user:
-
-1. Reviews patch notes, developer summary, client email, raw diff, adapter impact, and docs impact.
-2. Requests corrections.
-3. Explicitly approves the artifacts.
-4. Changes patch notes and developer summary from draft to approved.
-5. Commits tracker/docs changes separately from approved release artifacts.
-
-The review agent must not test, commit, tag, push, publish, or deploy.
-
-## 3. Test
-
-Run:
+Before generating release context or artifacts, confirm the active release queue is clear and the
+approved source commits are stable. Run:
 
 ```bash
 npm run release:test -- --release <version>
@@ -85,8 +57,48 @@ package metadata and installs a React 18 dependency tree.
 Automation follow-up: integrate this isolated React 18 build into `release:test` so this manual
 step can eventually be removed.
 
-Perform the manual fixture, Shopify theme, setup-preview, cart, and responsive checks identified by
-the review artifacts. Approve the final artifacts only after the tests and manual checks pass.
+If any test or stabilization check fails, fix the source, commit and push the fix, then rerun all of
+Step 1. Do not proceed with a partially tested source state.
+
+## 2. Preflight And Freeze Tested Scope
+
+1. Inspect live Git state in `ov25-ui`, `OV25`, `shopify-plugin`, `ov25-woo-extension`, and
+   `ov25-docs`. Do not rely on historical status snapshots in bug trackers or release artifacts.
+2. Confirm approved source work is committed and pushed. Keep unrelated local work out of the
+   release.
+3. Confirm the intended version does not already exist on npm and its three package tags do not
+   already exist.
+4. Confirm the previous package tags identify the comparison base.
+5. Review parked bugs separately; parked work is not release-approved.
+6. Record the exact tested `HEAD` for each repository and freeze the reviewed release scope before
+   generating artifacts.
+
+## 3. Generate And Review Artifacts
+
+Ask an agent to run the repository `$ov25-release-review` skill, for example:
+
+```text
+Use $ov25-release-review for a patch release since ov25-ui@0.8.1.
+```
+
+The agent runs only the context collector and writes `releases/<version>/` artifacts. The user:
+
+1. Reviews patch notes, developer summary, client email, raw diff, adapter impact, and docs impact.
+2. Requests corrections.
+3. Explicitly approves the artifacts.
+4. Changes patch notes and developer summary from draft to approved.
+5. Commits tracker/docs changes separately from approved release artifacts.
+
+The review agent must not test, commit, tag, push, publish, or deploy.
+
+The collector and artifact review happen only after Step 1 is green and Step 2 has frozen the exact
+tested scope. Perform the manual fixture, Shopify theme, setup-preview, cart, and responsive checks
+identified by the review artifacts; additional manual checks may be discovered from the artifacts.
+Approve the final artifacts only after the tests and manual checks pass.
+
+Any code change after Step 1 completes or after artifacts are generated requires returning to Step 1,
+rerunning the complete test and stabilization sequence, refreezing the tested scope in Step 2, and
+regenerating the Step 3 artifacts.
 
 ## 4. Prepare Release Commits And Tags
 

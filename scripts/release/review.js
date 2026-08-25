@@ -1,4 +1,4 @@
-// Release phase 1: creates raw context files about the current release.
+// Release phase 2: creates raw context files about the current release.
 // This is triggered by AI Agent when you trigger the /release-review skill.
 
 import { execFileSync } from 'node:child_process';

@@ -1,5 +1,8 @@
 # Bug clarification questions
 
+> Historical clarification inventory. Active release questions must be promoted to
+> [IMPORTANT_NOTES.md](IMPORTANT_NOTES.md), which is the only current user-action inbox.
+
 Last updated: 2026-07-28
 
 Use this file as the short decision queue for bug work that cannot be safely implemented from the current repo state alone. Answering any item here can unblock a focused bug packet or subagent assignment. The fuller source notes remain in `docs/ov25_bugs_and_todo.md`.

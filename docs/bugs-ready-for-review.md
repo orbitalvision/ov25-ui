@@ -1,23 +1,73 @@
 # Bugs ready for review
 
-This file is the active manual review queue for the upcoming release. When a bug fix is ready, Codex should add a review packet here with the fixture as a clickable Markdown link, visual steps, changed files, implementation diff file, diff summary, verification run, residual risk, and approval instruction. Post-release exclusions are retained separately in [PARKED_BUGS.md](PARKED_BUGS.md).
+This file is the live lifecycle board for every bug and feature in the upcoming release, from
+intake through user review. The complete operating procedure is the
+[pre-release engineering runbook](pre-release-engineering-runbook.md). Post-release exclusions are
+retained separately in [PARKED_BUGS.md](PARKED_BUGS.md).
 
-For UI bugs, include before/after screenshots when practical. Generate them with Playwright against the relevant fixture, store them under `review-screenshots/`, and link the PNGs in that bug's review packet. If a UI bug is interaction-only or needs data/setup that cannot be reproduced locally, add a short note explaining why screenshots were not generated.
+When a fix becomes ready for the user, its packet must include the fixture as a clickable Markdown
+link, visual steps, changed files, implementation diff file, diff summary, verification run,
+residual risk, and approval instruction.
 
-After manual approval, Codex should remove the item from this file and mark the source item fixed in [ov25_bugs_and_todo.md](ov25_bugs_and_todo.md), but should not stage either tracker file. Only implementation and test files for the approved bug should be staged.
+For UI bugs, include before/after screenshots when practical. Generate them with Playwright against
+the relevant fixture, store them under `review-screenshots/`, and link the PNGs in that bug's review
+packet. If a UI bug is interaction-only or needs data/setup that cannot be reproduced locally, add
+a short note explaining why screenshots were not generated.
 
-Do not rebuild `ov25-ui` for manual review unless the user explicitly asks; the user handles local rebuilds.
+After manual approval, remove the item from this file and mark the source item fixed in
+[ov25_bugs_and_todo.md](ov25_bugs_and_todo.md), but do not stage either tracker file. Only approved
+implementation and test files may be staged, and only when the user requests staging.
 
-Parked bugs must not be approved or staged from this queue. Move the entire packet back here from [PARKED_BUGS.md](PARKED_BUGS.md) and refresh its evidence before review resumes.
+Do not rebuild `ov25-ui` for manual review unless the user explicitly asks; the user handles local
+rebuilds.
 
-Before/after comparison server: the retained clean baseline worktree is detached at historical commit `bb56186`, not current `HEAD`. It is available at `/Users/orbital/Documents/CODE/ORBITAL VISION/ov25-ui/.worktrees/ov25-ui-clean-baseline-3009` and is intended to run on [localhost:3009](http://127.0.0.1:3009/). Use port `3009` only for historical pre-fix behavior and port `3008` for current local main. A current-HEAD baseline requires a newly refreshed worktree. Not every fixture added after `bb56186` exists on `3009`.
+Parked bugs must not be approved or staged from this queue. Move the entire packet back here from
+[PARKED_BUGS.md](PARKED_BUGS.md) and refresh its evidence before review resumes.
 
-Coding work should be assigned to worker subagents by default. If a reviewed bug needs follow-up changes, send it back to the same worker when that agent is still available; otherwise assign a new worker with the same bug context. The main thread coordinates, reviews, verifies, updates this queue, and stages only after approval.
+Before/after comparison server: the retained clean baseline worktree is detached at historical
+commit `bb56186`, not current `HEAD`. It is available at
+`/Users/orbital/Documents/CODE/ORBITAL VISION/ov25-ui/.worktrees/ov25-ui-clean-baseline-3009` and is
+intended to run on [localhost:3009](http://127.0.0.1:3009/). Use port `3009` only for historical
+pre-fix behavior and port `3008` for current local main. A current-HEAD baseline requires a newly
+refreshed worktree. Not every fixture added after `bb56186` exists on `3009`.
 
-Queue audit 2026-08-06: Bugs 50, 55, 56, 57, and 58 are approved. Bug 54 is explicitly ignored.
-Cross-repository release work remains tracked separately in [IMPORTANT_BUGS.md](IMPORTANT_BUGS.md).
+All implementation work must be assigned to worker subagents. If review finds follow-up changes,
+send them back to the same worker when that agent is still available; otherwise assign a new worker
+with the same bug context. The main thread coordinates, reviews, verifies, and updates this queue.
 
-## Ready
+Questions or actions requiring the user belong only in [IMPORTANT_NOTES.md](IMPORTANT_NOTES.md).
+The orchestrator must notify the user whenever a new active entry is added there.
 
-No bugs currently await manual review. Approved work is archived in
+## Inbox
+
+No untriaged 0.8.8 items. Approved Bugs 59 and 61 and Feature 60 are archived in
 [bugs-resolved.md](bugs-resolved.md).
+
+## Investigating
+
+No items.
+
+## Ready For Implementation
+
+No items.
+
+## In Progress
+
+No items.
+
+## Reviewing
+
+No items.
+
+## Changes Requested
+
+No items.
+
+## Ready For User Review
+
+No items.
+
+## Blocked — User Action Required
+
+No items. If this changes, the blocking question will be added to
+[IMPORTANT_NOTES.md](IMPORTANT_NOTES.md) and the user will be notified immediately.
