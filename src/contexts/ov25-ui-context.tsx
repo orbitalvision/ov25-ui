@@ -2436,8 +2436,9 @@ export const OV25UIProvider: React.FC<{
     }
   }, []);
 
-  // Message handler for iframe communication
-  useEffect(() => {
+  // Install the listener during the commit phase. A cached iframe can emit its one-shot initial
+  // commerce messages before passive effects run, especially on Safari/iOS.
+  useLayoutEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       try {
         const { type, payload } = event.data;
@@ -2469,13 +2470,21 @@ export const OV25UIProvider: React.FC<{
             });
             setProducts(data);
             break;
-          case 'CURRENT_PRODUCT_ID':
+          case 'CURRENT_PRODUCT_ID': {
             // The initial ID can arrive after the first state messages. It describes the same
             // initial configuration, so only clear snapshots for an actual product transition.
+            // OV25 emits numeric DB IDs while selections and legacy integrations may use strings;
+            // normalize both forms before comparison so an equivalent ID cannot clear a quote.
+            const comparableProductId =
+              data == null ? undefined : String(data);
+            const previousProductId =
+              currentProductIdRef.current == null
+                ? undefined
+                : String(currentProductIdRef.current);
             if (
-              currentProductIdRef.current != null &&
-              data != null &&
-              data !== currentProductIdRef.current
+              previousProductId != null &&
+              comparableProductId != null &&
+              comparableProductId !== previousProductId
             ) {
               resetCommerceSnapshots();
             }
@@ -2484,6 +2493,7 @@ export const OV25UIProvider: React.FC<{
             }
             setCurrentProductId(data);
             break;
+          }
           case 'SELECTED_SELECTIONS': {
             const raw = Array.isArray(data)
               ? data.filter(

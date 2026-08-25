@@ -15,11 +15,12 @@ const providerProps = {
 };
 
 function Harness() {
-  const { cleanupConfigurator, isCheckoutPayloadReady } = useOV25UI();
+  const { cleanupConfigurator, currentProduct, isCheckoutPayloadReady } = useOV25UI();
   return (
     <>
       <CheckoutButton />
       <output data-testid="checkout-ready">{String(isCheckoutPayloadReady)}</output>
+      <output data-testid="current-product">{currentProduct?.name ?? ''}</output>
       <button type="button" onClick={cleanupConfigurator}>Reset configurator</button>
     </>
   );
@@ -34,13 +35,33 @@ function mountIframe() {
   return iframe;
 }
 
+function dispatchIframeMessage(type: string, payload: unknown, source = activeIframe) {
+  window.dispatchEvent(new MessageEvent('message', {
+    data: { type, payload: JSON.stringify(payload) },
+    source: source.contentWindow,
+  }));
+}
+
 function sendIframeMessage(type: string, payload: unknown, source = activeIframe) {
-  act(() => {
-    window.dispatchEvent(new MessageEvent('message', {
-      data: { type, payload: JSON.stringify(payload) },
-      source: source.contentWindow,
-    }));
-  });
+  act(() => dispatchIframeMessage(type, payload, source));
+}
+
+function InitialCommerceEmitter() {
+  React.useEffect(() => {
+    dispatchIframeMessage('CURRENT_PRODUCT_ID', null);
+    dispatchIframeMessage('CURRENT_SKU', {
+      skuString: 'SOFIA-INITIAL',
+      skuMap: { Products: 'SOFIA-INITIAL' },
+    });
+    dispatchIframeMessage('CURRENT_PRICE', {
+      totalPrice: 27500,
+      subtotal: 27500,
+      formattedPrice: '£275.00',
+      formattedSubtotal: '£275.00',
+    });
+  }, []);
+
+  return null;
 }
 
 describe('checkout callback readiness', () => {
@@ -50,6 +71,39 @@ describe('checkout callback readiness', () => {
 
   afterEach(() => {
     activeIframe.remove();
+  });
+
+  it('receives initial commerce messages emitted before child passive effects complete', () => {
+    render(
+      <OV25UIProvider {...providerProps} buyNowFunction={vi.fn()} addToBasketFunction={vi.fn()}>
+        <InitialCommerceEmitter />
+        <Harness />
+      </OV25UIProvider>,
+    );
+
+    expect(screen.getByTestId('checkout-ready')).toHaveTextContent('true');
+    expect(screen.getAllByText('£275.00')).not.toHaveLength(0);
+    expect(document.getElementById('ov25-checkout-button')).toBeEnabled();
+  });
+
+  it('preserves numeric wire IDs when resolving the current product', () => {
+    render(
+      <OV25UIProvider {...providerProps} buyNowFunction={vi.fn()} addToBasketFunction={vi.fn()}>
+        <Harness />
+      </OV25UIProvider>,
+    );
+
+    sendIframeMessage('ALL_PRODUCTS', [{
+      id: 1682,
+      name: 'Sofia Dining Chair',
+      price: 27500,
+      discount: 0,
+      lowestPrice: 27500,
+      metadata: {},
+    }]);
+    sendIframeMessage('CURRENT_PRODUCT_ID', 1682);
+
+    expect(screen.getByTestId('current-product')).toHaveTextContent('Sofia Dining Chair');
   });
 
   it('waits for price and SKU in either order, and clears both on product switch and cleanup', () => {
@@ -169,6 +223,36 @@ describe('checkout callback readiness', () => {
 
     expect(screen.getByTestId('checkout-ready')).toHaveTextContent('true');
     expect(screen.getAllByText('£100.00')).not.toHaveLength(0);
+    expect(document.getElementById('ov25-checkout-button')).toBeEnabled();
+  });
+
+  it.each([
+    ['number then string', 1682, '1682'],
+    ['string then number', '1682', 1682],
+  ])('keeps the quote when the same product ID changes representation: %s', (_label, firstId, repeatedId) => {
+    render(
+      <OV25UIProvider {...providerProps} buyNowFunction={vi.fn()} addToBasketFunction={vi.fn()}>
+        <Harness />
+      </OV25UIProvider>,
+    );
+
+    sendIframeMessage('CURRENT_PRODUCT_ID', firstId);
+    sendIframeMessage('CURRENT_SKU', {
+      skuString: 'SOFIA-INITIAL',
+      skuMap: { Products: 'SOFIA-INITIAL' },
+    });
+    sendIframeMessage('CURRENT_PRICE', {
+      totalPrice: 27500,
+      subtotal: 27500,
+      formattedPrice: '£275.00',
+      formattedSubtotal: '£275.00',
+    });
+    expect(screen.getByTestId('checkout-ready')).toHaveTextContent('true');
+
+    sendIframeMessage('CURRENT_PRODUCT_ID', repeatedId);
+
+    expect(screen.getByTestId('checkout-ready')).toHaveTextContent('true');
+    expect(screen.getAllByText('£275.00')).not.toHaveLength(0);
     expect(document.getElementById('ov25-checkout-button')).toBeEnabled();
   });
 
