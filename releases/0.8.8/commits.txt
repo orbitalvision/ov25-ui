@@ -1,0 +1,12 @@
+b4fa145 (HEAD -> main, origin/main, origin/HEAD) fix(tests) yo
+e2a90c7 fix(selection-details) fix layout for sheet
+29826fc release artifacts, and move test step to be first step
+28b8505 feat(ov25-ui) use auto or user cutouts for size cards
+efcd13f update(tests) use dev retailer
+77cf203 fix(price): show skeleton while price loads
+3e3308e feat(release-runbook) .md for orchestrating release bookkeeping
+509bdf2 (tests) update test to DEV_RETAILER
+e3b3486 feat(dev): add responsive viewport matrix
+0cb79dc feat(tests) add full-e2e tested ledger (for stuff i can exclude from manual test). add tests for hidden-logo fixture and retire it from manul
+bb558cc fix(selection-details) fit content within selection-details sheet/panel without vertical scrollbar
+b94edd9 (tag: ov25-setup@0.8.7) chore: release ov25-setup 0.8.7
