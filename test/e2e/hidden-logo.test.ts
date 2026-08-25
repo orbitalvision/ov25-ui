@@ -28,8 +28,16 @@ async function openRangeFixture(page: Page, mobile = false): Promise<void> {
   );
 }
 
-async function switchToSnap2(page: Page): Promise<void> {
+async function switchToSnap2(page: Page, mobile = false): Promise<void> {
   await page.getByTestId('product-snap2-button').click();
+  if (mobile) {
+    await expect(page.locator('#ov25-configurator-iframe')).toHaveAttribute(
+      'title',
+      /^Modular 3D configurator(?: for .+ range)?\.$/,
+      { timeout: RUNTIME_TIMEOUT },
+    );
+    return;
+  }
   await expect(page.locator('#ov25-snap2-options-layout').first()).toBeAttached({
     timeout: RUNTIME_TIMEOUT,
   });
@@ -316,9 +324,9 @@ test.describe('Hidden logo (branding.hideLogo)', () => {
     await expect(configuratorIframe).toHaveAttribute('title', /^3D configurator for .+ range\.$/);
     await expect(price).toBeVisible();
 
-    await switchToSnap2(page);
+    await switchToSnap2(page, true);
     await expect(hideLogoButton).toHaveClass(/ov:bg-\[#1a1a1a\]/);
-    await expect(mobileHeader).toHaveCount(1, { timeout: RUNTIME_TIMEOUT });
+    await expect(mobileHeader).toHaveCount(0, { timeout: RUNTIME_TIMEOUT });
     await expect(desktopHeaderWrapper).toHaveCount(0);
     await expect(headerLogo).toHaveCount(0);
     await expect(configuratorIframe).toHaveAttribute(
@@ -330,7 +338,7 @@ test.describe('Hidden logo (branding.hideLogo)', () => {
 
     await showLogoButton.click();
     await expect(showLogoButton).toHaveClass(/ov:bg-\[#1a1a1a\]/);
-    await expect(mobileHeader).toHaveCount(1, { timeout: RUNTIME_TIMEOUT });
+    await expect(mobileHeader).toHaveCount(0, { timeout: RUNTIME_TIMEOUT });
     await expect(desktopHeaderWrapper).toHaveCount(0);
     await expect(headerLogo).toHaveCount(0);
     await expect(configuratorIframe).toHaveAttribute(

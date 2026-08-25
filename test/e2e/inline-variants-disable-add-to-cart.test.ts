@@ -33,6 +33,7 @@ test.describe('Inline variants — disable add to cart', () => {
 
     const buyNow = page.locator('#ov25-checkout-button');
     await expect(buyNow).toBeVisible({ timeout: 15000 });
+    await expect(buyNow).toBeEnabled({ timeout: 15000 });
 
     await expectNoAddToBasketChrome(page);
 

@@ -238,7 +238,11 @@ async function openDetails(
     // Keep the trigger in view before hover. A locator screenshot otherwise
     // scrolls after the tooltip opens, which legitimately dismisses it.
     await trigger.scrollIntoViewIfNeeded();
-    await trigger.hover();
+    if (interaction === 'keyboard') {
+      await trigger.focus();
+    } else {
+      await trigger.hover();
+    }
   } else if (interaction === 'keyboard') {
     await trigger.focus();
     await trigger.press('Enter');
@@ -1168,10 +1172,18 @@ test.describe('selection detail screenshots', () => {
           ...scenario.params,
         }),
       );
+      const tooltipTrigger = scenario.mode === 'tooltip'
+        ? page.getByTitle('Farrow Chalk', { exact: true }).filter({ visible: true }).first()
+        : undefined;
+      if (tooltipTrigger) {
+        await visibleTriggers(page);
+        await expect(tooltipTrigger).toBeVisible({ timeout: RUNTIME_TIMEOUT });
+      }
       const { surface } = await openDetails(
         page,
         scenario.mode,
-        'click',
+        scenario.mode === 'tooltip' ? 'keyboard' : 'click',
+        tooltipTrigger,
       );
       if (scenario.mode === 'fullscreen') {
         await waitForSurfaceAssets(surface);

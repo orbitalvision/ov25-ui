@@ -529,7 +529,7 @@ test('uses the mobile details surface on a touch-only tablet without changing th
 
     const content = surface.querySelector<HTMLElement>('.ov25-selection-details-content')!;
     const imageFrame = surface.querySelector<HTMLElement>('.ov25-selection-details-image-frame')!;
-    expect(getComputedStyle(content).display).toBe('grid');
+    expect(getComputedStyle(content).display).toBe('flex');
     expect(content.scrollHeight).toBeLessThanOrEqual(content.clientHeight + 1);
     expect(Math.abs(
       imageFrame.getBoundingClientRect().width - imageFrame.getBoundingClientRect().height,
@@ -801,18 +801,132 @@ test('sheet paints offscreen before sliding in from the right', async () => {
     expect(surface.style.transform).toBe('translateX(100%)');
     const content = surface.querySelector<HTMLElement>('.ov25-selection-details-content')!;
     const imageFrame = surface.querySelector<HTMLElement>('.ov25-selection-details-image-frame')!;
-    expect(getComputedStyle(content).display).toBe('grid');
+    expect(getComputedStyle(content).display).toBe('flex');
     expect(content.scrollHeight).toBeLessThanOrEqual(content.clientHeight + 1);
     expect(Math.abs(
       imageFrame.getBoundingClientRect().width - imageFrame.getBoundingClientRect().height,
     )).toBeLessThanOrEqual(1);
 
     await expect.poll(() => surface.dataset.present).toBe('true');
+    const copy = surface.querySelector<HTMLElement>('.ov25-selection-details-copy')!;
+    const contentRect = content.getBoundingClientRect();
+    const imageFrameRect = imageFrame.getBoundingClientRect();
+    const copyRect = copy.getBoundingClientRect();
+    expect(imageFrameRect.top).toBeCloseTo(contentRect.top, 0);
+    expect(copyRect.top).toBeCloseTo(imageFrameRect.bottom, 0);
     expect(surface.style.transform).toBe('translateX(0px)');
     expect(surface.style.transition).toContain('cubic-bezier(0.32, 0.72, 0, 1)');
   } finally {
     requestFrame.mockRestore();
     cancelFrame.mockRestore();
+    await page.viewport(originalViewport.width, originalViewport.height);
+  }
+});
+
+test('short landscape sheets shrink the image before clipping the copy', async () => {
+  const originalViewport = { width: window.innerWidth, height: window.innerHeight };
+  await page.viewport(1024, 400);
+
+  try {
+    const { container } = await render(
+      <OV25UIProvider
+        {...providerProps}
+        selectionDetailsDisplayModeDesktop="sheet"
+        selectionDetailsDisplayModeMobile="fullscreen"
+      >
+        <DetailsHarness enabled includeSwatch onSelect={() => undefined} />
+      </OV25UIProvider>,
+    );
+
+    (container.querySelector('.ov25-default-variant-card') as HTMLElement).click();
+    await expect.poll(() =>
+      container.querySelector<HTMLElement>('.ov25-selection-details-surface')?.dataset.present,
+    ).toBe('true');
+
+    const surface = container.querySelector<HTMLElement>('.ov25-selection-details-surface')!;
+    const content = surface.querySelector<HTMLElement>('.ov25-selection-details-content')!;
+    const imageFrame = surface.querySelector<HTMLElement>('.ov25-selection-details-image-frame')!;
+    const copy = surface.querySelector<HTMLElement>('.ov25-selection-details-copy')!;
+    const title = surface.querySelector<HTMLElement>('.ov25-selection-details-title')!;
+    const description = surface.querySelector<HTMLElement>('.ov25-selection-details-description')!;
+    const footer = surface.querySelector<HTMLElement>('.ov25-selection-details-footer')!;
+    const contentRect = content.getBoundingClientRect();
+    const imageFrameRect = imageFrame.getBoundingClientRect();
+    const copyRect = copy.getBoundingClientRect();
+    const footerRect = footer.getBoundingClientRect();
+
+    expect(imageFrameRect.top).toBeCloseTo(contentRect.top, 0);
+    expect(copyRect.top).toBeCloseTo(imageFrameRect.bottom, 0);
+    expect(copyRect.height).toBeGreaterThan(0);
+    expect(title.getBoundingClientRect().height).toBeGreaterThan(0);
+    expect(description.getBoundingClientRect().height).toBeGreaterThan(0);
+    expect(Math.abs(imageFrameRect.width - imageFrameRect.height)).toBeLessThanOrEqual(1);
+    expect(content.scrollHeight).toBeLessThanOrEqual(content.clientHeight + 1);
+    expect(footerRect.bottom).toBeCloseTo(surface.getBoundingClientRect().bottom, 0);
+  } finally {
+    await page.viewport(originalViewport.width, originalViewport.height);
+  }
+});
+
+test('landscape mobile fullscreen keeps the image and copy reachable', async () => {
+  const originalViewport = { width: window.innerWidth, height: window.innerHeight };
+  await page.viewport(844, 390);
+  const nativeMatchMedia = window.matchMedia.bind(window);
+  const touchOnlyMediaQuery = {
+    matches: false,
+    addEventListener: () => undefined,
+    removeEventListener: () => undefined,
+  } as unknown as MediaQueryList;
+  vi.stubGlobal('matchMedia', ((query: string) =>
+    query === ANY_HOVER_CAPABILITY_MEDIA_QUERY
+      ? touchOnlyMediaQuery
+      : nativeMatchMedia(query)) as typeof window.matchMedia);
+
+  try {
+    const { container } = await render(
+      <OV25UIProvider
+        {...providerProps}
+        selectionDetailsDisplayModeDesktop="tooltip"
+        selectionDetailsDisplayModeMobile="fullscreen"
+      >
+        <DetailsHarness enabled includeSwatch onSelect={() => undefined} />
+      </OV25UIProvider>,
+    );
+
+    const trigger = container.querySelector('.ov25-default-variant-card') as HTMLElement;
+    expect(trigger.dataset.displayMode).toBe('fullscreen');
+    trigger.click();
+    await expect.poll(() =>
+      container.querySelector<HTMLElement>('.ov25-selection-details-surface')?.dataset.present,
+    ).toBe('true');
+
+    const surface = container.querySelector<HTMLElement>('.ov25-selection-details-surface')!;
+    const content = surface.querySelector<HTMLElement>('.ov25-selection-details-content')!;
+    const imageFrame = surface.querySelector<HTMLElement>('.ov25-selection-details-image-frame')!;
+    const copy = surface.querySelector<HTMLElement>('.ov25-selection-details-copy')!;
+    const title = surface.querySelector<HTMLElement>('.ov25-selection-details-title')!;
+    const description = surface.querySelector<HTMLElement>('.ov25-selection-details-description')!;
+    const footer = surface.querySelector<HTMLElement>('.ov25-selection-details-footer')!;
+    const contentRect = content.getBoundingClientRect();
+    const imageFrameRect = imageFrame.getBoundingClientRect();
+    const copyRect = copy.getBoundingClientRect();
+
+    expect(surface.dataset.displayMode).toBe('fullscreen');
+    expect(surface.dataset.mobile).toBe('true');
+    expect(getComputedStyle(content).display).toBe('flex');
+    expect(imageFrameRect.top).toBeCloseTo(contentRect.top, 0);
+    expect(copyRect.top).toBeCloseTo(imageFrameRect.bottom, 0);
+    expect(copyRect.height).toBeGreaterThan(0);
+    expect(title.getBoundingClientRect().height).toBeGreaterThan(0);
+    expect(description.getBoundingClientRect().height).toBeGreaterThan(0);
+    expect(Math.abs(imageFrameRect.width - imageFrameRect.height)).toBeLessThanOrEqual(1);
+    expect(content.scrollHeight).toBeLessThanOrEqual(content.clientHeight + 1);
+    expect(footer.getBoundingClientRect().bottom).toBeCloseTo(
+      surface.getBoundingClientRect().bottom,
+      0,
+    );
+  } finally {
+    vi.unstubAllGlobals();
     await page.viewport(originalViewport.width, originalViewport.height);
   }
 });
