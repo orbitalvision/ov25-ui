@@ -13,6 +13,32 @@ export const HIDDEN_LOGO_REPORT_SCREENSHOTS = Object.freeze({
   mobileRangeDrawerHideLogoEnabled: 'mobile-range-drawer-logo-free-hide-enabled.png',
 });
 
+const NO_PRICING_VARIANT_DISPLAY_MODES = Object.freeze([
+  'wizard',
+  'guided-overview',
+  'list',
+  'tabs',
+  'accordion',
+  'tree',
+]);
+
+const NO_PRICING_TESTS = Object.freeze(
+  ['standard', 'snap2'].flatMap((profile) =>
+    NO_PRICING_VARIANT_DISPLAY_MODES.map((displayMode) =>
+      Object.freeze({
+        title: `${profile} / ${displayMode}: hides page pricing and purchase actions`,
+        viewport: 'Desktop 1440 × 900',
+        mode: `${profile === 'snap2' ? 'Snap2' : 'Standard'} · ${displayMode}`,
+        covers:
+          `flags.hidePricing removes product-page pricing and visible checkout actions before and after opening the rendered ${displayMode} variants surface.` +
+          (displayMode === 'guided-overview'
+            ? ' The hidden Buy Now action reserves no column, and Previous/Next share two equal columns.'
+            : ''),
+      }),
+    ),
+  ),
+);
+
 export const E2E_FIXTURE_LEDGER = Object.freeze([
   Object.freeze({
     id: 'hidden-logo',
@@ -53,6 +79,25 @@ export const E2E_FIXTURE_LEDGER = Object.freeze([
       traceScreenshotsOnLedgerRun: true,
       note:
         'Each ledger run attaches named PNG screenshots for the tested states and records an action-by-action Playwright trace. Each mobile state has a fixture-controls image showing the active hideLogo toggle and a matching Range drawer image; the drawer is logo-free because mobile has no visible logo header by design. These are review artifacts; there are no committed golden visual-regression baselines.',
+    }),
+  }),
+  Object.freeze({
+    id: 'single-no-pricing',
+    title: 'No pricing',
+    fixturePath: '/tests/single-no-pricing.html',
+    fixtureDocumentTitle: 'Single Product - No Pricing',
+    sourceFiles: Object.freeze([
+      'dev/react-test/tests/single-no-pricing.html',
+      'dev/react-test/tests/single-no-pricing.jsx',
+    ]),
+    specFiles: Object.freeze(['test/e2e/single-no-pricing.test.ts']),
+    tests: NO_PRICING_TESTS,
+    visualArtifacts: Object.freeze({
+      baselineScreenshots: Object.freeze([]),
+      reportScreenshots: Object.freeze([]),
+      traceScreenshotsOnLedgerRun: false,
+      note:
+        'Behavioral coverage verifies the rendered Standard and Snap2 variant surfaces across every public Variants.displayMode. Ledger runs record an action-by-action Playwright trace; there are no committed screenshot baselines or named report screenshots.',
     }),
   }),
 ]);
