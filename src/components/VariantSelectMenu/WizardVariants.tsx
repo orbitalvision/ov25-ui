@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronDown, ChevronLeft, ChevronRight, Undo2 } from 'lucide-react';
 import { useOV25UI } from '../../contexts/ov25-ui-context.js';
 import { VariantsContent } from './VariantsContent.js';
 import type { Variant } from './ProductVariants.js';
@@ -23,12 +23,14 @@ const SIZE_BATCH_SIZE = 4;
 const DROPDOWN_STEP_THRESHOLD = 6;
 
 export type WizardVariantsMode = 'inline' | 'drawer';
+export type WizardVariantsDisplayMode = 'wizard' | 'guided-overview';
 
 export interface WizardVariantsProps {
   mode: WizardVariantsMode;
+  displayMode?: WizardVariantsDisplayMode;
 }
 
-export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
+export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode, displayMode = 'wizard' }) => {
   const {
     variantPanelOptions,
     selectedSelections,
@@ -42,18 +44,25 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
     addToBasketFunction,
     disableAddToCart,
     disableBuyNow,
+    hidePricing,
     isSnap2Mode,
     activeOptionId,
     setActiveOptionId,
     getString,
   } = useOV25UI();
 
-  const [currentStep, setCurrentStep] = useState(0);
+  const isGuidedOverview = displayMode === 'guided-overview';
+  const [currentStep, setCurrentStep] = useState(() => isGuidedOverview ? variantPanelOptions.length : 0);
+  const previousOptionCountRef = useRef(variantPanelOptions.length);
 
   useEffect(() => {
+    // Guided Overview owns its entry state: opening a sheet must stay on Review even when the
+    // configurator already has an active/default option. Once the user enters an editor,
+    // currentStep is no longer the review index and normal active-option syncing resumes.
+    if (isGuidedOverview && currentStep === variantPanelOptions.length) return;
     const idx = variantPanelOptions.findIndex(o => o.id === activeOptionId);
     if (idx >= 0) setCurrentStep(idx);
-  }, [activeOptionId, variantPanelOptions]);
+  }, [activeOptionId, currentStep, isGuidedOverview, variantPanelOptions]);
   const [visibleCount, setVisibleCount] = useState<{ [optionId: string]: number }>({});
   const [isFilterOpen, setIsFilterOpen] = useState<{ [optionId: string]: boolean }>({});
   const [previousFilteredCounts, setPreviousFilteredCounts] = useState<{ [optionId: string]: number }>({});
@@ -76,12 +85,37 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
     }));
   }, []);
 
+  const goToReview = () => {
+    setCurrentStep(variantPanelOptions.length);
+    setActiveOptionId(null);
+  };
+
   const goNext = () => {
+    if (isGuidedOverview) {
+      const nextStep = isReviewStep
+        ? 0
+        : currentStep < variantPanelOptions.length - 1
+          ? currentStep + 1
+          : variantPanelOptions.length;
+      setCurrentStep(nextStep);
+      setActiveOptionId(variantPanelOptions[nextStep]?.id ?? null);
+      return;
+    }
     const nextStep = Math.min(currentStep + 1, totalSteps - 1);
     setCurrentStep(nextStep);
     setActiveOptionId(nextStep < variantPanelOptions.length ? variantPanelOptions[nextStep].id : null);
   };
   const goBack = () => {
+    if (isGuidedOverview) {
+      if (isReviewStep || currentStep === 0) {
+        goToReview();
+        return;
+      }
+      const previousStep = currentStep - 1;
+      setCurrentStep(previousStep);
+      setActiveOptionId(variantPanelOptions[previousStep]?.id ?? null);
+      return;
+    }
     const prevStep = Math.max(currentStep - 1, 0);
     setCurrentStep(prevStep);
     setActiveOptionId(variantPanelOptions[prevStep]?.id ?? null);
@@ -118,8 +152,14 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
   }, [variantPanelOptions, applySearchAndFilters, previousFilteredCounts]);
 
   useEffect(() => {
-    setCurrentStep(s => Math.min(s, Math.max(0, totalSteps - 1)));
-  }, [totalSteps]);
+    const previousReviewStep = previousOptionCountRef.current;
+    const nextReviewStep = variantPanelOptions.length;
+    setCurrentStep(s => {
+      if (isGuidedOverview && s === previousReviewStep) return nextReviewStep;
+      return Math.min(s, Math.max(0, totalSteps - 1));
+    });
+    previousOptionCountRef.current = variantPanelOptions.length;
+  }, [isGuidedOverview, totalSteps, variantPanelOptions.length]);
 
   useEffect(() => {
     if (mode !== 'drawer' || !rootRef.current) return;
@@ -189,20 +229,45 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
   const hasMore = count < allVariants.length;
   const isFilterOpenForOption = currentOption ? (isFilterOpen[currentOption.id] || false) : false;
 
-  const useDropdown = totalSteps > DROPDOWN_STEP_THRESHOLD;
+  const useDropdown = !isGuidedOverview && totalSteps > DROPDOWN_STEP_THRESHOLD;
   const hasAddToBasket = typeof addToBasketFunction === 'function' && !disableAddToCart;
   const hasBuyNow = typeof buyNowFunction === 'function' && !disableBuyNow;
-  const hasCheckoutActions = hasAddToBasket || hasBuyNow;
+  const hasCheckoutActions = !hidePricing && (hasAddToBasket || hasBuyNow);
+  const showGuidedOverviewBuyNow = !hidePricing && hasBuyNow;
   const reviewStepLabel = hasCheckoutActions
     ? getString('wizardReview', undefined, 'Review')
     : getString('wizardOverview', undefined, 'Overview');
   const getStepLabel = (idx: number) =>
     idx === totalSteps - 1 ? reviewStepLabel : variantPanelOptions[idx]?.name ?? '';
+  const guidedOverviewPreviousStep = isReviewStep
+    ? null
+    : currentStep === 0
+      ? totalSteps - 1
+      : currentStep - 1;
+  const guidedOverviewNextStep = isReviewStep
+    ? 0
+    : currentStep < variantPanelOptions.length - 1
+      ? currentStep + 1
+      : totalSteps - 1;
+  const guidedOverviewPreviousLabel = guidedOverviewPreviousStep == null
+    ? getString('wizardPreviousButtonLabel', {}, 'Prev')
+    : getString(
+        'wizardPreviousStep',
+        { STEP_LABEL: getStepLabel(guidedOverviewPreviousStep) },
+        getStepLabel(guidedOverviewPreviousStep),
+      );
+  const guidedOverviewNextLabel = guidedOverviewNextStep == null
+    ? getString('wizardNextButtonLabel', {}, 'Next')
+    : getString(
+        'wizardNextStep',
+        { STEP_LABEL: getStepLabel(guidedOverviewNextStep) },
+        getStepLabel(guidedOverviewNextStep),
+      );
   const stepContentClasses = mode === 'inline'
     ? 'ov:flex ov:flex-col ov:bg-[var(--ov25-background-color)]'
     : 'ov:flex ov:flex-col ov:bg-[var(--ov25-background-color)]';
 
-  const stepIndicatorBlock = (
+  const standardStepIndicatorBlock = (
     <div className="ov25-option-header ov:flex ov:flex-col ov:gap-2 ov:px-4 ov:py-3">
       {useDropdown ? (
         <div className="ov:relative">
@@ -275,6 +340,36 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
     </div>
   );
 
+  const guidedOverviewHeaderBlock = (
+    <div
+      data-ov25-guided-overview-header
+      className="ov25-option-header ov:relative ov:flex ov:items-center ov:justify-center ov:min-h-16 ov:px-12 ov:py-3 ov:border-b ov:border-(--ov25-border-color)"
+    >
+      <h2 className="ov:text-base ov:font-semibold ov:text-(--ov25-secondary-color) ov:text-center">
+        {isReviewStep || !currentOption
+          ? reviewStepLabel
+          : getString(
+              'wizardChooseOption',
+              { OPTION_NAME: currentOption.name },
+              `Choose ${currentOption.name}`,
+            )}
+      </h2>
+      {!isReviewStep && (
+        <button
+          type="button"
+          onClick={goToReview}
+          aria-label={getString('wizardBackToReviewLabel', {}, 'Back to review')}
+          title={getString('wizardBackToReviewLabel', {}, 'Back to review')}
+          className="ov25-guided-overview-back ov:absolute ov:left-3 ov:top-1/2 ov:-translate-y-1/2 ov:flex ov:h-9 ov:w-9 ov:items-center ov:justify-center ov:rounded-full ov:text-(--ov25-secondary-text-color) ov:cursor-pointer ov:hover:bg-(--ov25-hover-color) ov:transition-colors"
+        >
+          <Undo2 size={20} strokeWidth={1.75} aria-hidden />
+        </button>
+      )}
+    </div>
+  );
+
+  const stepIndicatorBlock = isGuidedOverview ? guidedOverviewHeaderBlock : standardStepIndicatorBlock;
+
   const filterBlock = !isReviewStep && currentOption && currentOption.id !== 'size' && currentOption.id !== 'modules' && (
     <div className="ov:shrink-0 ov:h-(--ov25-wizard-variants-filter-height) ov:flex ov:items-center">
       <div className="ov:w-full">
@@ -289,11 +384,11 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
   );
 
   const buttonsBlock = totalSteps > 1 && (
-    <div className={`ov25-checkout-button-wrapper ov:shrink-0 ov:flex ov:items-center ov:justify-between ov:gap-3 ${isReviewStep ? '' : 'ov:px-4 ov:py-2'}`}>
+    <div className={`ov25-checkout-button-wrapper ov25-wizard-button-block ov:shrink-0 ov:flex ov:items-center ov:justify-between ov:gap-3 ${isReviewStep ? '' : 'ov:px-4 ov:py-2'}`}>
       <button
         onClick={goBack}
         disabled={isFirstStep}
-        className="ov:flex ov:items-center ov:gap-1 ov:px-3 ov:py-2 ov:text-sm ov:text-(--ov25-secondary-text-color) ov:disabled:opacity-30 ov:disabled:cursor-not-allowed ov:hover:bg-(--ov25-hover-color) ov:rounded ov:transition-colors"
+        className="ov25-wizard-button-back ov:flex ov:items-center ov:gap-1 ov:px-3 ov:py-2 ov:text-sm ov:text-(--ov25-secondary-text-color) ov:disabled:opacity-30 ov:disabled:cursor-not-allowed ov:hover:bg-(--ov25-hover-color) ov:rounded ov:transition-colors"
       >
         <ChevronLeft size={18} />
         {getString('wizardBackButtonLabel', {}, 'Back')}
@@ -310,7 +405,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
         <Button
           onClick={goNext}
           variant="configure"
-          className="ov:flex-1 ov:flex ov:items-center ov:justify-center  ov:gap-1 ov:uppercase ov:disabled:cursor-not-allowed"
+          className="ov25-wizard-button-next ov:flex-1 ov:flex ov:items-center ov:justify-center  ov:gap-1 ov:uppercase ov:disabled:cursor-not-allowed"
         >
           {getString('wizardNextButtonLabel', {}, 'Next')}
           <ChevronRight size={18} />
@@ -319,11 +414,50 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
     </div>
   );
 
+  const guidedOverviewButtonsBlock = (
+    <div
+      data-ov25-guided-overview-actions
+      data-ov25-guided-overview-has-buy-now={showGuidedOverviewBuyNow ? 'true' : 'false'}
+      className="ov25-checkout-button-wrapper ov25-wizard-button-block ov:shrink-0 ov:grid ov:grid-cols-2 ov:items-stretch ov:gap-2 ov:px-4 ov:py-3 ov:border-t ov:border-(--ov25-border-color) ov:bg-(--ov25-background-color)"
+    >
+      <button
+        type="button"
+        onClick={goBack}
+        disabled={isReviewStep}
+        title={guidedOverviewPreviousLabel}
+        data-ov25-guided-overview-action="previous"
+        className="ov25-wizard-button-back ov:flex ov:items-center ov:justify-center ov:gap-1 ov:min-w-0 ov:px-2 ov:py-2 ov:text-sm ov:uppercase ov:text-(--ov25-secondary-text-color) ov:border ov:border-(--ov25-border-color) ov:rounded-[var(--ov25-cta-border-radius)] ov:cursor-pointer ov:hover:bg-(--ov25-hover-color) ov:disabled:opacity-30 ov:disabled:cursor-not-allowed ov:transition-colors"
+      >
+        <ChevronLeft size={18} />
+        <span className="ov:truncate">{guidedOverviewPreviousLabel}</span>
+      </button>
+      <button
+        type="button"
+        onClick={goNext}
+        disabled={variantPanelOptions.length === 0}
+        title={guidedOverviewNextLabel}
+        data-ov25-guided-overview-action="next"
+        className="ov25-wizard-button-next ov:flex ov:items-center ov:justify-center ov:gap-1 ov:min-w-0 ov:px-2 ov:py-2 ov:text-sm ov:uppercase ov:text-(--ov25-secondary-text-color) ov:border ov:border-(--ov25-border-color) ov:rounded-[var(--ov25-cta-border-radius)] ov:cursor-pointer ov:hover:bg-(--ov25-hover-color) ov:disabled:opacity-30 ov:disabled:cursor-not-allowed ov:transition-colors"
+      >
+        <span className="ov:truncate">{guidedOverviewNextLabel}</span>
+        <ChevronRight size={18} />
+      </button>
+      {showGuidedOverviewBuyNow ? (
+        <div data-ov25-guided-overview-action="buy-now" className="ov:col-span-2 ov:min-w-0 ov:[&_.ov25-checkout-button-wrapper]:h-full ov:[&_button]:h-full">
+          <CheckoutButton embedded />
+        </div>
+      ) : null}
+    </div>
+  );
+
+  const activeButtonsBlock = isGuidedOverview ? guidedOverviewButtonsBlock : buttonsBlock;
+
   const stepContentOnly = (
     <>
       {isReviewStep ? (
         <div
           data-ov25-wizard-variants-step-content
+          data-ov25-guided-overview-review={isGuidedOverview ? 'true' : undefined}
           className={`${stepContentClasses} ov25-variant-group-content`}
         >
           <div
@@ -361,23 +495,27 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
                   SELECTION_LABEL: value || '—',
                 };
                 return (
-                  <div key={option.id} className="ov:flex ov:items-center ov:gap-3">
+                  <div
+                    key={option.id}
+                    data-ov25-guided-overview-review-row={isGuidedOverview ? option.id : undefined}
+                    className="ov:flex ov:items-center ov:gap-3"
+                  >
                     <button
                       type="button"
+                      className="ov25-wizard-button-option ov:flex ov:items-center ov:gap-3 ov:w-full ov:text-left ov:cursor-pointer ov:hover:bg-(--ov25-hover-color) ov:rounded-md ov:p-2 ov:-m-2 ov:transition-colors"
                       onClick={() => {
                         setCurrentStep(idx);
                         setActiveOptionId(variantPanelOptions[idx]?.id ?? null);
                       }}
-                      className="ov:flex ov:items-center ov:gap-3 ov:w-full ov:text-left ov:cursor-pointer ov:hover:bg-(--ov25-hover-color) ov:rounded-md ov:p-2 ov:-m-2 ov:transition-colors"
                     >
-                      <div className="ov:shrink-0">
+                      <div data-ov25-guided-overview-review-part="thumbnail" className="ov25-wizard-button-option-image ov:shrink-0">
                         <VariantThumb imageUrl={imageUrl} size="lg" />
                       </div>
                       <div className="ov:flex ov:flex-1 ov:min-w-0 ov:justify-between ov:gap-4">
-                        <dt className="ov:text-(--ov25-secondary-text-color) ov:capitalize ov:shrink-0">
+                        <dt data-ov25-guided-overview-review-part="option" className="ov25-wizard-button-option-name ov:text-(--ov25-secondary-text-color) ov:capitalize ov:shrink-0">
                           {getString('wizardReviewStepOption', reviewStepStringVars, option.name)}
                         </dt>
-                        <dd className="ov:text-(--ov25-secondary-text-color) ov:font-normal ov:text-right ov:truncate">
+                        <dd data-ov25-guided-overview-review-part="selection" className="ov25-wizard-button-option-value ov:text-(--ov25-secondary-text-color) ov:font-normal ov:text-right ov:truncate">
                           {getString('wizardReviewStepSelection', reviewStepStringVars, value || '—')}
                         </dd>
                       </div>
@@ -389,7 +527,11 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
             </div>
           </div>
         ) : !isReviewStep && currentOption?.id === 'modules' ? (
-        <div data-ov25-wizard-variants-step-content className={`${stepContentClasses} ov25-variant-group-content`}>
+        <div
+          data-ov25-wizard-variants-step-content
+          data-ov25-guided-overview-editor={isGuidedOverview ? currentOption.id : undefined}
+          className={`${stepContentClasses} ov25-variant-group-content`}
+        >
           <div
             data-ov25-wizard-variants-content
             className="ov:relative ov:w-full ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:overflow-y-auto"
@@ -398,7 +540,11 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
           </div>
         </div>
         ) : (
-        <div data-ov25-wizard-variants-step-content className={`${stepContentClasses} ov25-variant-group-content`}>
+        <div
+          data-ov25-wizard-variants-step-content
+          data-ov25-guided-overview-editor={isGuidedOverview ? currentOption?.id : undefined}
+          className={`${stepContentClasses} ov25-variant-group-content`}
+        >
           <div data-ov25-wizard-variants-content className="ov:relative ov:w-full ov:flex ov:flex-col ov:flex-1 ov:min-h-0">
             <div className="ov:relative ov:w-full ov:h-full ov:flex ov:flex-col">
               {filteredOption && allVariants.length === 0 && (
@@ -452,6 +598,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
     <div
       ref={rootRef}
       data-ov25-wizard-variants-mode={mode}
+      data-ov25-wizard-display-mode={displayMode}
       className="ov:w-full ov:flex-1 ov:min-h-0 ov:flex ov:flex-col ov:bg-(--ov25-background-color) ov:overflow-hidden"
       style={mode === 'drawer' && availableHeight != null ? { '--ov25-wizard-variants-available-height': `${availableHeight}px` } as React.CSSProperties : undefined}
     >
@@ -459,7 +606,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
       {mode !== 'inline' && filterBlock}
       <div className="ov:flex-1 ov:min-h-0 ov:flex ov:flex-col">
         {stepContentOnly}
-        {mode !== 'inline' && buttonsBlock}
+        {mode !== 'inline' && activeButtonsBlock}
       </div>
     </div>
   );
@@ -468,6 +615,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
     const inlineNode = (
       <div
         data-ov25-list-variants-mode="inline"
+        data-ov25-wizard-display-mode={displayMode}
         className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:h-full ov:overflow-hidden ov:bg-(--ov25-background-color)"
       >
         <div className="ov:shrink-0">
@@ -476,11 +624,15 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
         </div>
         <div
           data-ov25-list-variants-content
-          className="ov:flex-1 ov:min-h-0 ov:overflow-y-auto ov:pt-0 ov:pb-2"
+          className={`ov:flex-1 ov:min-h-0 ov:pt-0 ${
+            isGuidedOverview
+              ? 'ov:overflow-hidden ov:pb-0'
+              : 'ov:overflow-y-auto ov:pb-2'
+          }`}
         >
           {stepContentOnly}
         </div>
-        {buttonsBlock}
+        {activeButtonsBlock}
       </div>
     );
     return isSnap2Mode ? <Snap2VariantSheetColumn>{inlineNode}</Snap2VariantSheetColumn> : inlineNode;

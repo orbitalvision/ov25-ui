@@ -182,11 +182,13 @@ export const Snap2ConfiguratorModal: React.FC<Snap2ConfiguratorModalProps> = ({ 
             style={{ clipPath: 'inset(0 round var(--ov25-rounded-3xl))' }}
             data-ov25-snap2-shell="modal"
           >
-            <VariantsCloseButton
-              onClick={onClose}
-              ariaLabel="Close modal"
-              className={cn('ov:z-101', isShareDialogOpen && 'ov:opacity-0 ov:pointer-events-none')}
-            />
+            {!isMobile && (
+              <VariantsCloseButton
+                onClick={onClose}
+                ariaLabel="Close modal"
+                className={cn('ov:z-101', isShareDialogOpen && 'ov:opacity-0 ov:pointer-events-none')}
+              />
+            )}
 
             <div
               className={cn(
@@ -213,13 +215,16 @@ export const Snap2ConfiguratorModal: React.FC<Snap2ConfiguratorModalProps> = ({ 
                 'ov:border-l-0 ov:border-r-0 ov:border-t ov:border-gray-200'
               ) : undefined}
             >
-              {effectiveOverlayStyle === 'wizard' ? (
+              {['wizard', 'guided-overview'].includes(effectiveOverlayStyle) ? (
                 <div className="ov:flex ov:flex-col ov:h-full ov:bg-(--ov25-background-color)">
-                  <VariantsHeader />
+                  <VariantsHeader
+                    hideCloseButton={effectiveOverlayStyle === 'guided-overview' && !isMobile}
+                    hideMobileControls={effectiveOverlayStyle === 'guided-overview'}
+                  />
                   <div
                     className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:overflow-hidden"
                   >
-                    <WizardVariants mode="drawer" />
+                    <WizardVariants mode="drawer" displayMode={effectiveOverlayStyle as 'wizard' | 'guided-overview'} />
                   </div>
                 </div>
               ) : (

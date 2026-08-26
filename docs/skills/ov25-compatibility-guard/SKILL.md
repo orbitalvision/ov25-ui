@@ -24,6 +24,19 @@ Do not introduce breaking changes unless the user explicitly requests a breaking
 
 When in doubt, preserve old behavior and add new behavior behind an additive option, feature flag, or separate path.
 
+Every new user-visible feature, component, display mode, state, and action must support both OV25
+customization channels before it is complete:
+
+- all owned UI copy must resolve through `stringReplacements`, with its key and interpolation
+  values registered in `STRING_REPLACEMENT_DEFINITIONS`; and
+- all meaningful visual parts and states must be targetable through stable hooks consumed by
+  `branding.cssString`, without requiring selectors that depend on incidental DOM nesting or
+  generated utility classes.
+
+Add the feature to both `dev/react-test/tests/string-replacement.jsx` and
+`dev/react-test/tests/single-custom-css.jsx` (or their shared CSS fixture) so these contracts remain
+manually verifiable.
+
 ## Compatibility Contract
 
 ### Public TypeScript/API Surface
@@ -160,6 +173,11 @@ Not allowed without explicit breaking-release approval:
 
 Before finishing any change, answer these questions:
 
+- Does every new owned UI string use a registered `stringReplacements` key, including visible
+  fragments such as prices, empty states, button labels, titles, tooltips, and accessible labels?
+- Can `branding.cssString` target every meaningful new feature part/state through a stable id,
+  class, data attribute, or CSS variable?
+- Were the string-replacement and custom-CSS fixtures updated to exercise the new feature?
 - Does this remove or rename any public export, type, option, callback, field, selector, CSS variable, metafield, or cart property?
 - Does this alter frontend DOM/HTML structure that a theme stylesheet or `injectConfigurator({ cssString })` selector may target?
 - Do existing ids/classes/data attributes still exist in the same shadow/root context?
@@ -176,6 +194,10 @@ If any answer indicates risk, either add a compatibility layer or flag the chang
 ## Implementation Rules
 
 - Prefer additive changes over replacements.
+- Treat `stringReplacements` and `branding.cssString` support as acceptance criteria for every
+  user-visible feature, not optional follow-up work.
+- Prefer semantic, feature-owned CSS hooks. Do not make clients target Tailwind utility classes,
+  child indexes, or incidental wrapper depth.
 - Keep old fields populated when introducing new fields.
 - Normalize at boundaries; keep public payloads stable.
 - Gate new behavior with optional config, feature flag, runtime version, or migration default.
@@ -199,6 +221,10 @@ Automatic client updates are only safe for patch/minor releases that pass the ch
 
 For compatibility-sensitive changes, add or run tests that cover:
 
+- New string keys, their interpolation values, and fallback behavior.
+- Stable custom-CSS hooks for the feature root, meaningful parts, actions, and states.
+- The feature in `string-replacement.jsx` and `single-custom-css.jsx` (or the shared branding CSS
+  imported by that fixture).
 - Existing/legacy config payloads.
 - Missing optional fields.
 - Unknown extra fields.

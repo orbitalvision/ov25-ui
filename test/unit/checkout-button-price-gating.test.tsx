@@ -21,8 +21,10 @@ function createContext(hasReceivedPrice: boolean, overrides: Record<string, any>
     isCheckoutPayloadReady: hasReceivedPrice,
     disableAddToCart: false,
     disableBuyNow: false,
-    getString: (_key: string, vars: Record<string, unknown>, fallback: string) =>
-      `${fallback}${vars.PRICE ? ` ${vars.PRICE}` : ''}`,
+    getString: (key: string, vars: Record<string, unknown>, fallback: string) =>
+      key === 'checkoutBuyNow'
+        ? `${fallback}${vars.PRICE ? ` ${vars.PRICE}` : ''}`
+        : fallback,
     ...overrides,
   };
 }
@@ -44,6 +46,18 @@ describe('CheckoutButton price gating', () => {
     render(<CheckoutButton />);
 
     expect(screen.getByRole('button').textContent).toContain('£1,299.00');
+  });
+
+  it('routes the appended checkout price through string replacements', () => {
+    checkoutContext = createContext(true, {
+      getString: (key: string, vars: Record<string, unknown>, fallback: string) =>
+        key === 'checkoutPriceLabel' ? `Total ${vars.PRICE}` : fallback,
+    });
+
+    render(<CheckoutButton />);
+
+    expect(screen.getByRole('button')).toHaveTextContent('Buy nowTotal £1,299.00');
+    expect(document.querySelector('[data-ov25-checkout-price-label]')).toHaveTextContent('Total £1,299.00');
   });
 
   it('blanks interpolated price vars so merchant templates cannot print the zero', () => {

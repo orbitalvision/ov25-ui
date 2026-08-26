@@ -91,6 +91,7 @@ const VARIANT_OPTIONS = [
   { value: 'tabs' as FormVariantDisplayMode, label: 'Tabs', desc: 'Tabbed groups' },
   { value: 'accordion' as FormVariantDisplayMode, label: 'Accordion', desc: 'Collapsible groups' },
   { value: 'wizard' as FormVariantDisplayMode, label: 'Wizard', desc: 'Step by step' },
+  { value: 'guided-overview' as FormVariantDisplayMode, label: 'Guided overview', desc: 'Review hub with focused option editors' },
 ];
 
 const SELECTION_DETAILS_DESKTOP_OPTIONS = [

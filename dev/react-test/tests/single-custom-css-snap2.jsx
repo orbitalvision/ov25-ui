@@ -29,7 +29,7 @@ const SNAP2_INLINE_OV25_CSS = `
 }
 `;
 
-const VARIANT_DISPLAY_TYPES = ['tree', 'list', 'tabs', 'accordion', 'wizard'];
+const VARIANT_DISPLAY_TYPES = ['tree', 'list', 'tabs', 'accordion', 'wizard', 'guided-overview'];
 
 const LAYOUT_DEFAULTS = {
   variantsDesktop: 'RIGHT',

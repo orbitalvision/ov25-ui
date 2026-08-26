@@ -12,6 +12,10 @@ const MAZE_APIKEY = import.meta.env.VITE_MAZE_APIKEY;
 const ARLO_APIKEY = import.meta.env.VITE_ARLO_APIKEY;
 const query = new URLSearchParams(window.location.search);
 const isSnap2Mode = query.get('mode') === 'snap2';
+const requestedVariantDisplay = query.get('display');
+const variantDisplayOverride = requestedVariantDisplay === 'wizard' || requestedVariantDisplay === 'guided-overview'
+  ? requestedVariantDisplay
+  : null;
 const selectionDetailsValues = readSelectionDetailsModeQuery({
   desktopDetails: 'sheet',
   mobileDetails: 'fullscreen',
@@ -38,9 +42,11 @@ const injectConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
       : { desktop: 'sheet', mobile: 'drawer' },
     triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
     variants: {
-      displayMode: isSnap2Mode
-        ? { desktop: 'list', mobile: 'list' }
-        : { desktop: 'wizard', mobile: 'list' },
+      displayMode: variantDisplayOverride
+        ? { desktop: variantDisplayOverride, mobile: variantDisplayOverride }
+        : isSnap2Mode
+          ? { desktop: 'list', mobile: 'list' }
+          : { desktop: 'wizard', mobile: 'list' },
       selectionDetails: {
         displayMode: {
           desktop: selectionDetailsValues.desktopDetails,
@@ -90,6 +96,7 @@ const injectConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
         template: "${DISCOUNT_AMOUNT}${SUBTOTAL}",
       }
     ],
+    checkoutPriceLabel: [{ template: '▽Price on CTA: ${PRICE}▽' }],
     // options
     optionHeader: [
       { trigger: { name: 'OPTION_NAME', value: 'upholstery fabrics' }, template: '▽upholstery fabrics▽' },
@@ -137,7 +144,10 @@ const injectConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
     controlsLightFallback: [{ template: '▽Group ${GROUP_INDEX}▽' }],
     // wizard
     wizardBackButtonLabel: [{ template: '▽Back▽' }],
+    wizardPreviousButtonLabel: [{ template: '▽Prev▽' }],
     wizardNextButtonLabel: [{ template: '▽Next▽' }],
+    wizardBackToReviewLabel: [{ template: '▽Back to overview▽' }],
+    wizardChooseOption: [{ template: '▽Choose ${OPTION_NAME}▽' }],
     wizardStepProgress: [{ template: '▽Step ${CURRENT_STEP} / ${TOTAL_STEPS}▽' }],
     wizardCurrentStep: [{ template: '▽${STEP_LABEL}▽' }],
     wizardPreviousStep: [{ template: '▽← ${STEP_LABEL}▽' }],
@@ -230,11 +240,17 @@ function App() {
   const standardHref = `?${modeParams.toString()}`;
   modeParams.set('mode', 'snap2');
   const snap2Href = `?${modeParams.toString()}`;
+  const displayParams = new URLSearchParams(window.location.search);
+  displayParams.set('display', 'wizard');
+  const wizardHref = `?${displayParams.toString()}`;
+  displayParams.set('display', 'guided-overview');
+  const guidedOverviewHref = `?${displayParams.toString()}`;
+  const currentVariantDisplay = variantDisplayOverride ?? (isSnap2Mode ? 'list' : 'wizard/list');
 
   return (
     <TestPageLayout
       title="String replacement"
-      description={`Tests stringReplacements across name, price, CTA, filters, Selection Details, swatchbook, save/share, and Snap2 UI strings. Current mode: ${isSnap2Mode ? 'snap2' : 'standard'}.`}
+      description={`Tests stringReplacements across name, price, CTA, filters, Guided Overview, Selection Details, swatchbook, save/share, and Snap2 UI strings. Current mode: ${isSnap2Mode ? 'snap2' : 'standard'}; variants: ${currentVariantDisplay}.`}
       injectConfig={injectConfig}
       dynamicConfig
       topContent={
@@ -245,6 +261,15 @@ function App() {
             </a>
             <a href={snap2Href} className="ov:rounded ov:bg-gray-200 ov:px-2 ov:py-1 ov:no-underline">
               Snap2 mode
+            </a>
+          </div>
+          <div className="ov:flex ov:items-center ov:gap-2">
+            <span className="ov:text-gray-600">Variants:</span>
+            <a href={wizardHref} className="ov:rounded ov:bg-gray-200 ov:px-2 ov:py-1 ov:no-underline">
+              Wizard
+            </a>
+            <a href={guidedOverviewHref} className="ov:rounded ov:bg-gray-200 ov:px-2 ov:py-1 ov:no-underline">
+              Guided overview
             </a>
           </div>
           <SelectionDetailsModeControls values={selectionDetailsValues} />

@@ -168,11 +168,13 @@ export function VariantContentDesktop() {
                 transform: 'translateX(100%)'
               }}
             >
-                {variantDisplayStyleOverlay === 'wizard' ? (
+                {['wizard', 'guided-overview'].includes(variantDisplayStyleOverlay) ? (
                   <div className="ov:flex ov:flex-col ov:h-full ov:bg-(--ov25-background-color)">
-                    <VariantsHeader />
+                    <VariantsHeader
+                      hideMobileControls={variantDisplayStyleOverlay === 'guided-overview'}
+                    />
                     <div className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:overflow-hidden">
-                      <WizardVariants mode="drawer" />
+                      <WizardVariants mode="drawer" displayMode={variantDisplayStyleOverlay as 'wizard' | 'guided-overview'} />
                     </div>
                   </div>
                 ) : (

@@ -59,8 +59,8 @@ export type ConfiguratorConfig = {
   modules?: ModulesConfig;
 };
 
-/** Variant UI style: wizard | list | tabs | accordion | tree. */
-export type VariantDisplayMode = 'wizard' | 'list' | 'tabs' | 'accordion' | 'tree';
+/** Variant UI style. `guided-overview` opens on the review hub and uses focused option editors. */
+export type VariantDisplayMode = 'wizard' | 'guided-overview' | 'list' | 'tabs' | 'accordion' | 'tree';
 
 /** Snap2 / inline-sheet: which horizontal edge the variant settings sheet attaches to. */
 export type Snap2VariantSheetSide = 'LEFT' | 'RIGHT';

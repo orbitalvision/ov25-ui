@@ -241,11 +241,14 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({
                   : 'ov:shrink-0 ov:w-[384px] ov:h-full ov:border-l ov:border-gray-200'
               )}
             >
-              {effectiveOverlayStyle === 'wizard' ? (
+              {['wizard', 'guided-overview'].includes(effectiveOverlayStyle) ? (
                 <div className="ov:flex ov:flex-col ov:h-full ov:bg-(--ov25-background-color)">
-                  <VariantsHeader />
+                  <VariantsHeader
+                    hideCloseButton={effectiveOverlayStyle === 'guided-overview' && !isMobile}
+                    hideMobileControls={effectiveOverlayStyle === 'guided-overview'}
+                  />
                   <div className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:overflow-hidden">
-                    <WizardVariants mode="drawer" />
+                    <WizardVariants mode="drawer" displayMode={effectiveOverlayStyle as 'wizard' | 'guided-overview'} />
                   </div>
                 </div>
               ) : (

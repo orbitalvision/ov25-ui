@@ -13,12 +13,25 @@ export interface VariantsHeaderProps {
   hideCloseButton?: boolean;
   /** When set, used as {@link VariantsCloseButton} `onClick` instead of the default sheet close behavior. */
   onCloseButtonClick?: () => void;
+  /** Omit the compact previous/next controls; the guided-overview wizard owns its navigation. */
+  hideMobileControls?: boolean;
 }
 
-export const VariantsHeader = ({ hideCloseButton = false, onCloseButtonClick }: VariantsHeaderProps = {}) => {
+export const VariantsHeader = ({ hideCloseButton = false, onCloseButtonClick, hideMobileControls = false }: VariantsHeaderProps = {}) => {
   const { logoURL, hideLogo, handleNextOption, handlePreviousOption, activeOptionId, allOptions, showOptional, isSnap2Mode, isMobile, currentProduct } = useOV25UI();
 
-  if (isMobile) return <div id="ov25-variants-header-mobile" className='w-full h-1'></div>;
+  if (isMobile) {
+    return (
+      <div
+        id="ov25-variants-header-mobile"
+        className={cn('ov:relative ov:w-full', hideMobileControls ? 'ov:min-h-12' : 'ov:h-1')}
+      >
+        {hideMobileControls && !hideCloseButton && (
+          <VariantsCloseButton onClick={onCloseButtonClick} className="ov:top-3" />
+        )}
+      </div>
+    );
+  }
 
   const currentOption = allOptions.find(opt => opt.id === activeOptionId);
 
@@ -47,7 +60,7 @@ export const VariantsHeader = ({ hideCloseButton = false, onCloseButtonClick }: 
       </div>}
 
       {/* Mobile(ipad size) Controls: Title with separate chevron buttons */}
-      <div id="ov25-carousel-controls" className={cn(
+      {!hideMobileControls && <div id="ov25-carousel-controls" className={cn(
         "ov25-mobile-variants-carousel-controls ov:relative ov:flex ov:cursor-pointer ov:items-center ov:justify-between ov:w-full ov:p-4 ov:py-4.5 ov:pt-6",
         isSnap2Mode ? "ov:lg:hidden" : "ov:md:hidden"
       )}>
@@ -74,7 +87,7 @@ export const VariantsHeader = ({ hideCloseButton = false, onCloseButtonClick }: 
         >
           <ChevronUp strokeWidth={1} className="ov:rotate-90 ov:h-5.5 ov:fill-transparent ov:text-(--ov25-secondary-text-color)" />
         </button>
-      </div>
+      </div>}
     </>
   );
 };

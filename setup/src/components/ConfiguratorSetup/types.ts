@@ -6,7 +6,7 @@ export type PreviewLayoutType = LayoutType;
 export type FormCarouselDisplayMode = 'none' | 'carousel' | 'stacked';
 export type FormConfiguratorDisplayMode = 'inline' | 'inline-sticky' | 'sheet' | 'modal' | 'variants-only-sheet';
 export type FormConfiguratorDisplayModeMobile = 'inline' | 'inline-sticky' | 'drawer' | 'modal' | 'variants-only-sheet';
-export type FormVariantDisplayMode = 'wizard' | 'list' | 'tabs' | 'accordion' | 'tree';
+export type FormVariantDisplayMode = 'wizard' | 'guided-overview' | 'list' | 'tabs' | 'accordion' | 'tree';
 export type FormSelectionDetailsDisplayMode = 'none' | 'sheet' | 'fullscreen' | 'modal' | 'tooltip';
 export type FormSelectionDetailsMobileDisplayMode = Exclude<
   FormSelectionDetailsDisplayMode,

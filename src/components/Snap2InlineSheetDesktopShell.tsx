@@ -133,11 +133,13 @@ export const Snap2InlineSheetDesktopShell: React.FC = () => {
             sheetZClass="ov:z-102 ov:pointer-events-auto"
             showCloseButton={false}
           >
-            {effectiveOverlayStyle === 'wizard' ? (
+            {['wizard', 'guided-overview'].includes(effectiveOverlayStyle) ? (
               <div className="ov:flex ov:flex-col ov:h-full ov:bg-(--ov25-background-color)">
-                <VariantsHeader />
+                <VariantsHeader
+                  hideMobileControls={effectiveOverlayStyle === 'guided-overview'}
+                />
                 <div className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:overflow-hidden">
-                  <WizardVariants mode="drawer" />
+                  <WizardVariants mode="drawer" displayMode={effectiveOverlayStyle as 'wizard' | 'guided-overview'} />
                 </div>
               </div>
             ) : (

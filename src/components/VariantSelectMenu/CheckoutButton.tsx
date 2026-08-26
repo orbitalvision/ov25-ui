@@ -73,7 +73,12 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
   const buyNowText = getString('checkoutBuyNow', priceVars, 'Buy now');
   /* Rendered as nothing, not an empty span: the button is a flex row with a gap, so an empty
      node would still reserve that gap and knock the label off centre. */
-  const priceLabel = hasReceivedPrice ? <span>{formattedPrice}</span> : null;
+  const priceLabelText = hasReceivedPrice
+    ? getString('checkoutPriceLabel', priceVars, formattedPrice)
+    : '';
+  const priceLabel = priceLabelText
+    ? <span data-ov25-checkout-price-label>{priceLabelText}</span>
+    : null;
   /*
    * Both callbacks need the current normalized price and SKU. Those messages are independent and
    * may arrive in either order, so a valid price alone must not enable checkout with a null/stale SKU.

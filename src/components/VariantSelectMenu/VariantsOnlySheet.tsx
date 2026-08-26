@@ -173,11 +173,11 @@ export function VariantsOnlySheet() {
             >
               <X size={24} className="ov:text-(--ov25-secondary-text-color)" strokeWidth={2} />
             </button>
-            {effectiveOverlayStyle === 'wizard' ? (
+            {['wizard', 'guided-overview'].includes(effectiveOverlayStyle) ? (
               <>
-                <VariantsHeader hideCloseButton />
+                <VariantsHeader hideCloseButton hideMobileControls={effectiveOverlayStyle === 'guided-overview'} />
                 <div className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:overflow-hidden">
-                  <WizardVariants mode="drawer" />
+                  <WizardVariants mode="drawer" displayMode={effectiveOverlayStyle as 'wizard' | 'guided-overview'} />
                 </div>
               </>
             ) : (

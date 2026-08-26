@@ -764,7 +764,7 @@ export const OV25UIProvider: React.FC<{
   const carouselLayout = carouselDisplayModeProp ?? carouselLayoutProp ?? CarouselDisplayMode.Stacked;
   const carouselLayoutMobile = carouselDisplayModeMobileProp ?? carouselDisplayModeProp ?? carouselLayoutProp ?? CarouselDisplayMode.Stacked;
   const variantDisplayStyleMobile = variantDisplayStyleMobileProp ?? variantDisplayStyle ?? VariantDisplayMode.Tree;
-  const listLikeStyles: VariantDisplayMode[] = [VariantDisplayMode.Wizard, VariantDisplayMode.List, VariantDisplayMode.Tabs, VariantDisplayMode.Accordion, VariantDisplayMode.Tree];
+  const listLikeStyles: VariantDisplayMode[] = [VariantDisplayMode.Wizard, VariantDisplayMode.GuidedOverview, VariantDisplayMode.List, VariantDisplayMode.Tabs, VariantDisplayMode.Accordion, VariantDisplayMode.Tree];
   const isListLike = variantDisplayStyle != null && listLikeStyles.includes(variantDisplayStyle);
   const isListLikeMobile = variantDisplayStyleMobile != null && listLikeStyles.includes(variantDisplayStyleMobile);
   const variantDisplayStyleInline: VariantDisplayStyleOverlay = isListLike ? (variantDisplayStyle as VariantDisplayStyleOverlay) : (variantDisplayStyleInlineProp ?? VariantDisplayStyleOverlay.Wizard);

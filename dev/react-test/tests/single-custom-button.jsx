@@ -29,7 +29,7 @@ const baseConfig = /** @type {import('ov25-ui').InjectConfiguratorOptions} */ ({
   flags: { hidePricing: false },
 });
 
-const DISPLAY_TYPES = ['tree', 'list', 'tabs', 'accordion', 'wizard'];
+const DISPLAY_TYPES = ['tree', 'list', 'tabs', 'accordion', 'wizard', 'guided-overview'];
 
 function App() {
   const displayFromUrl =

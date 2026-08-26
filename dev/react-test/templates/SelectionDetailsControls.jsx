@@ -14,7 +14,7 @@ export const SELECTION_DETAILS_MOBILE_MODES = [
   'fullscreen',
 ];
 
-export const VARIANT_STYLES = ['tree', 'list', 'tabs', 'accordion', 'wizard'];
+export const VARIANT_STYLES = ['tree', 'list', 'tabs', 'accordion', 'wizard', 'guided-overview'];
 export const CONFIGURATOR_MODES = ['sheet', 'modal', 'inline'];
 
 const CONFIGURATOR_DISPLAY_MODES = {

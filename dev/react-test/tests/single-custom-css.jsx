@@ -38,7 +38,7 @@ const baseConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
   flags: { hidePricing: false },
 });
 
-const VARIANT_DISPLAY_TYPES = ['tree', 'list', 'tabs', 'accordion', 'wizard'];
+const VARIANT_DISPLAY_TYPES = ['tree', 'list', 'tabs', 'accordion', 'wizard', 'guided-overview'];
 /** Sheet = desktop sheet + mobile drawer. Inline = both inline. */
 const CONFIG_DISPLAY_OPTIONS = [
   { value: 'sheet', label: 'sheet', displayMode: { desktop: 'sheet', mobile: 'drawer' } },
@@ -78,7 +78,7 @@ function App() {
   return (
     <TestPageLayout
       title="Single Product – Custom CSS"
-      description="Variant controls, dimensions, and every Selection Details display mode styled with custom CSS."
+      description="Variant controls—including Guided Overview—dimensions, and every Selection Details display mode styled with custom CSS."
       injectConfig={config}
       topContent={
         <div className="ov:flex ov:flex-col ov:gap-2 ov:mb-3 ov:text-sm">

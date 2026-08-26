@@ -116,6 +116,12 @@ export const STRING_REPLACEMENT_DEFINITIONS: StringReplacements = [
     { name: 'DISCOUNT_AMOUNT', description: 'Formatted discount amount.' },
     { name: 'DISCOUNT_PERCENTAGE', description: 'Discount percentage.' },
   ] },
+  { key: 'checkoutPriceLabel', label: 'Checkout button price label', defaultTemplate: '${PRICE}', interpolationValues: [
+    { name: 'PRICE', description: 'Current formatted price.' },
+    { name: 'SUBTOTAL', description: 'Current formatted subtotal.' },
+    { name: 'DISCOUNT_AMOUNT', description: 'Formatted discount amount.' },
+    { name: 'DISCOUNT_PERCENTAGE', description: 'Discount percentage.' },
+  ] },
   // filters
   { key: 'filtersLabel', label: 'Filters button label', defaultTemplate: 'Filters', interpolationValues: [] },
   { key: 'filtersSearchPlaceholder', label: 'Filters search placeholder', defaultTemplate: 'Search', interpolationValues: [] },
@@ -167,7 +173,12 @@ export const STRING_REPLACEMENT_DEFINITIONS: StringReplacements = [
 
   // wizard 
   { key: 'wizardBackButtonLabel', label: 'Wizard back button label', defaultTemplate: 'Back', interpolationValues: [] },
+  { key: 'wizardPreviousButtonLabel', label: 'Guided Overview previous button label', defaultTemplate: 'Prev', interpolationValues: [] },
   { key: 'wizardNextButtonLabel', label: 'Wizard next button label', defaultTemplate: 'Next', interpolationValues: [] },
+  { key: 'wizardBackToReviewLabel', label: 'Guided Overview back to review label', defaultTemplate: 'Back to review', interpolationValues: [] },
+  { key: 'wizardChooseOption', label: 'Guided Overview option title', defaultTemplate: 'Choose ${OPTION_NAME}', interpolationValues: [
+    { name: 'OPTION_NAME', description: 'Option display name.' },
+  ]},
   {
     key: 'wizardStepProgress',
     label: 'Wizard step progress',

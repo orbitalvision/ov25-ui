@@ -105,7 +105,7 @@ export const VariantSelectMenu: React.FC<VariantSelectMenuProps> = ({
   ];
   const effectiveVariantDisplayStyleInline = isMobile ? variantDisplayStyleInlineMobile : variantDisplayStyleInline;
   const isInlineListLike = inlineVariantsEnabled && listLikeInline.includes(effectiveVariantDisplayStyleInline);
-  const isInlineWizard = inlineVariantsEnabled && effectiveVariantDisplayStyleInline === 'wizard';
+  const isInlineWizard = inlineVariantsEnabled && ['wizard', 'guided-overview'].includes(effectiveVariantDisplayStyleInline);
   const isInlineTall = isInlineListLike || isInlineWizard;
   const usePageScrollStickyList =
     stickyLayoutActive &&
@@ -139,7 +139,7 @@ export const VariantSelectMenu: React.FC<VariantSelectMenuProps> = ({
   /** Render the page controls for the role active in the current responsive mode. */
   const renderTriggerOrInlineVariants = () => {
     if (inlineVariantsEnabled) {
-      if (isInlineWizard) return <div className={inlineTallWrapperClass}><WizardVariants mode="inline" /></div>;
+      if (isInlineWizard) return <div className={inlineTallWrapperClass}><WizardVariants mode="inline" displayMode={effectiveVariantDisplayStyleInline as 'wizard' | 'guided-overview'} /></div>;
       if (isInlineListLike) {
         return (
           <div
@@ -174,17 +174,19 @@ export const VariantSelectMenu: React.FC<VariantSelectMenuProps> = ({
         className="ov:z-10"
       >
         <div className='ov:w-full ov:h-full ov:flex ov:flex-col ov:absolute ov:top-0 ov:left-0 ov:pointer-events-auto'>
-          {variantDisplayStyleMobile === 'wizard' ? (
+          {['wizard', 'guided-overview'].includes(variantDisplayStyleMobile) ? (
             <div className="ov:flex ov:flex-col ov:h-full ov:bg-(--ov25-background-color)">
-              <VariantsHeader />
+              <VariantsHeader
+                hideMobileControls={variantDisplayStyleMobile === 'guided-overview'}
+              />
               <div className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:overflow-hidden">
-                <WizardVariants mode="drawer" />
+                <WizardVariants mode="drawer" displayMode={variantDisplayStyleMobile as 'wizard' | 'guided-overview'} />
               </div>
             </div>
           ) : (
             isSnap2Mode ? <Snap2Wrapper /> : <ProductVariantsWrapper />
           )}
-          {variantDisplayStyleMobile !== 'wizard' && (
+          {!['wizard', 'guided-overview'].includes(variantDisplayStyleMobile) && (
             <div className={`${drawerSize === 'large' || drawerSize === 'small' ? 'ov:fixed ov:bottom-0 ov:left-0 ov:w-full ov:z-20' : ''}`}>
               <MobileCheckoutButton />
             </div>

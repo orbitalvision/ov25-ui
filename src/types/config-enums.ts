@@ -26,6 +26,7 @@ export type CarouselLayout = CarouselDisplayMode;
 /** Variant display style for mobile and main variant selector. */
 export const VariantDisplayMode = {
   Wizard: 'wizard',
+  GuidedOverview: 'guided-overview',
   List: 'list',
   Tabs: 'tabs',
   Accordion: 'accordion',
@@ -36,6 +37,7 @@ export type VariantDisplayMode = (typeof VariantDisplayMode)[keyof typeof Varian
 /** Variant display style for inline and overlay variant selectors. */
 export const VariantDisplayStyleOverlay = {
   Wizard: 'wizard',
+  GuidedOverview: 'guided-overview',
   List: 'list',
   Tabs: 'tabs',
   Accordion: 'accordion',

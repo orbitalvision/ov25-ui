@@ -196,9 +196,73 @@ export const SINGLE_CUSTOM_CSS_BRANDING = `
         background: lightblue;
       }
 
+      [data-ov25-wizard-display-mode="guided-overview"] {
+        outline: 3px solid indigo;
+        outline-offset: -3px;
+      }
+
+      [data-ov25-guided-overview-header] {
+        background: lavender;
+        border-color: rebeccapurple;
+      }
+
+      .ov25-guided-overview-back {
+        background: lightsteelblue;
+        color: midnightblue;
+      }
+
+      [data-ov25-guided-overview-review="true"] {
+        background: aliceblue;
+      }
+
+      [data-ov25-guided-overview-review-row] {
+        border: 2px solid teal;
+        border-radius: 8px;
+      }
+
+      [data-ov25-guided-overview-review-part="thumbnail"] {
+        background: palegreen;
+      }
+
+      [data-ov25-guided-overview-review-part="option"] {
+        color: darkred;
+      }
+
+      [data-ov25-guided-overview-review-part="selection"] {
+        color: darkblue;
+      }
+
+      [data-ov25-guided-overview-editor] {
+        background: lavenderblush;
+      }
+
+      [data-ov25-guided-overview-actions] {
+        background: peachpuff;
+        border-color: darkorange;
+      }
+
+      [data-ov25-guided-overview-action="previous"] {
+        background: lightcyan;
+        color: darkslategray;
+      }
+
+      [data-ov25-guided-overview-action="buy-now"] {
+        outline: 2px solid darkorange;
+      }
+
+      [data-ov25-guided-overview-action="next"] {
+        background: lightgreen;
+        color: darkgreen;
+      }
+
       #ov25-checkout-button {
         background: orange;
         color: black;
+      }
+
+      [data-ov25-checkout-price-label] {
+        color: darkred;
+        text-decoration: underline;
       }
 
       #ov25-add-to-basket-button {
