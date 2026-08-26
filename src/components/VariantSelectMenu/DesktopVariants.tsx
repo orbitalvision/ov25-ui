@@ -135,7 +135,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
               <NoResults />
             )}
             {((shouldDestructureGroups || !isGrouped) ? (
-              <div id="ov25-desktop-variants-content-ungrouped" className={`ov:grid ov:h-full ov:pb-8 ov:content-start ${isSizeOption ? 'ov25-size-variant-card-grid' : ''} ${getGridColsClass(gridDivide)} ${isFilterOpen ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}>
+              <div id="ov25-desktop-variants-content-ungrouped" className={`ov:grid ov:h-full ov:pb-8 ov:content-start ${isSizeOption ? `ov25-size-variant-card-grid ${getGridColsClass(gridDivide)}` : 'ov25-variant-card-grid'} ${isFilterOpen ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}>
                 <VariantsContent variantsToRender={isGrouped ? (variantsToRender as VariantGroup[])[0].variants : variantsToRender as Variant[]} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
               </div>
             ) : (
@@ -146,7 +146,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
                       <div className="ov:flex ov:items-center ov:mx-4 ov:justify-between ov:border-t ov:border-gray-200 ">
                         <h3 className="ov25-group-name ov:text-lg ov:py-2 ov:text-(--ov25-secondary-text-color)">{variantGroup.groupName}</h3>
                       </div>
-                      <div id="ov25-variant-group-content" className={`ov:grid ${getGridColsClass(gridDivide)} ov:pb-4`}>
+                      <div id="ov25-variant-group-content" className={`ov:grid ${isSizeOption ? `ov25-size-variant-card-grid ${getGridColsClass(gridDivide)}` : 'ov25-variant-card-grid'} ov:pb-4`}>
                         <VariantsContent variantsToRender={variantGroup.variants} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
                       </div>
                     </div>

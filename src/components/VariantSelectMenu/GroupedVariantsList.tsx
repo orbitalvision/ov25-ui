@@ -17,7 +17,6 @@ export interface GroupedVariantsListGroup {
 
 export interface GroupedVariantsListProps {
   groups: GroupedVariantsListGroup[];
-  gridColsClass: string;
   VariantCard: React.ComponentType<VariantCardProps>;
   isMobile: boolean;
   onSelect: (variant: Variant) => void;
@@ -31,7 +30,6 @@ export interface GroupedVariantsListProps {
 
 export const GroupedVariantsList: React.FC<GroupedVariantsListProps> = ({
   groups,
-  gridColsClass,
   VariantCard,
   isMobile,
   onSelect,
@@ -55,7 +53,7 @@ export const GroupedVariantsList: React.FC<GroupedVariantsListProps> = ({
                 )}
               </h4>
             )}
-            <div className={`ov:grid ${gridColsClass}`}>
+            <div className="ov25-variant-card-grid ov:grid">
               <VariantsContent
                 variantsToRender={group.variants}
                 VariantCard={VariantCard}

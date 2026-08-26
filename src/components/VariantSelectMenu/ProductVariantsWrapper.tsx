@@ -301,7 +301,7 @@ export function ProductVariantsWrapper({
                   </h4>
                 )}
                 <div className="ov25-variant-group-content ov:bg-(--ov25-background-color) ov:pt-4">
-                  <div className={`ov:grid ${getGridColsClass(4)}`}>
+                  <div className="ov25-variant-card-grid ov:grid">
                     <VariantsContent
                       variantsToRender={group.variants}
                       VariantCard={DefaultVariantCard}

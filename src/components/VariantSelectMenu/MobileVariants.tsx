@@ -189,7 +189,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
                   ) : (
                     <>
                       <div id="ov25-mobile-variants-content" className={`ov:h-full ${isFilterOpen ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}>
-                        <div style={{ display: 'grid' }} className={`ov:px-2 ov:pb-63 ${getGridColsClass(gridDivide)}`}>
+                        <div style={{ display: 'grid' }} className={`ov:px-2 ov:pb-63 ${isSizeOption ? `ov25-size-variant-card-grid ${getGridColsClass(gridDivide)}` : 'ov25-variant-card-grid'}`}>
                           <VariantsContent variantsToRender={group.variants} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
                         </div>
                       </div>
@@ -250,7 +250,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
             <NoResults />
             )}
             <div id="ov25-mobile-variants-content" className={`ov:h-full ${isFilterOpen ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}>
-              <div style={{ display: 'grid' }} className={`ov:px-0 ov:pb-63 ov:gap-2 ${isSizeOption ? 'ov25-size-variant-card-grid' : ''} ${getGridColsClass(gridDivide)}`}>
+              <div style={{ display: 'grid' }} className={`ov:px-0 ov:pb-63 ov:gap-2 ${isSizeOption ? `ov25-size-variant-card-grid ${getGridColsClass(gridDivide)}` : 'ov25-variant-card-grid'}`}>
                 <VariantsContent variantsToRender={variantsToRender} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
               </div>
             </div>

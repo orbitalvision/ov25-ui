@@ -174,6 +174,9 @@ html {
     --ov25-wizard-variants-content-height: 600px;
     --ov25-wizard-variants-available-height: 100%;
 
+    /* Standard selection cards use four fluid columns by default. */
+    --ov25-variants-per-row: 4;
+
     /* Inline list: aside taller so scrollable area gets 600px + room for checkout button */
     --ov25-inline-list-aside-min-height: 1000px;
     --ov25-inline-list-aside-min-height-mobile: 100px;
@@ -678,6 +681,37 @@ html {
 
 .ov25-variant-thumb-wrapper {
   border-radius: var(--ov25-variant-thumb-border-radius);
+}
+
+/*
+ * Shared by every standard variant display mode. The cards have no fixed width:
+ * changing the column count lets each card fill its available grid track.
+ * Size/product cards intentionally retain their existing two-column layout.
+ */
+.ov25-variant-card-grid.ov25-variant-card-grid {
+  grid-template-columns: repeat(var(--ov25-variants-per-row), minmax(0, 1fr)) !important;
+}
+
+/*
+ * Keep the existing 4-column thumbnail at 4rem, then scale it with the space
+ * created by the column control. The extra 0.5rem accounts for the wrapper's
+ * padding, while min() prevents a thumbnail from overflowing a narrow track.
+ */
+.ov25-variant-card-grid .ov25-default-variant-card > .ov25-variant-thumb-wrapper {
+  width: min(100%, calc(16rem / var(--ov25-variants-per-row) + 0.5rem));
+}
+
+.ov25-variant-card-grid.ov25-variant-card-grid
+  .ov25-variant-image-container.ov25-variant-image-container {
+  width: 100% !important;
+  height: auto !important;
+  aspect-ratio: 1;
+}
+
+.ov25-variant-card-grid.ov25-variant-card-grid
+  .ov25-variant-thumb-overlay.ov25-variant-thumb-overlay {
+  width: 100% !important;
+  height: 100% !important;
 }
 
 .ov25-selection-thumbnail img {

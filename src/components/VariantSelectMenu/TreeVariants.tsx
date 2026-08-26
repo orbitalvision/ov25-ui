@@ -246,7 +246,6 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
           >
             <GroupedVariantsList
               groups={opt.variants}
-              gridColsClass={getGridColsClass(4)}
               VariantCard={DefaultVariantCard}
               isMobile={isMobile}
               onSelect={handleVariantSelect}

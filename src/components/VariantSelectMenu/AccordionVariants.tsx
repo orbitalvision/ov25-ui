@@ -213,7 +213,6 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
                     ) : (
                       <GroupedVariantsList
                         groups={variants}
-                        gridColsClass={getGridColsClass(4)}
                         VariantCard={DefaultVariantCard}
                         isMobile={isMobile}
                         onSelect={handleVariantSelect}

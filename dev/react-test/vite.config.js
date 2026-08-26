@@ -9,6 +9,7 @@ const testPages = [
   'configure-button-modal',
   'single-product-gallery',
   'configurator-sizing',
+  'variants-per-row',
   'responsive-layout-matrix',
   'split-variant-triggers',
   'string-replacement',

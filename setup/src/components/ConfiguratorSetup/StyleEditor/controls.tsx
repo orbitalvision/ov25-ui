@@ -85,7 +85,8 @@ export function StyleSliderControl({ variable, value, defaultValue, onChange }: 
   const current = value || defaultValue;
   const numericValue = parseNumericValue(current);
   const isModified = !!value && value !== defaultValue;
-  const unit = variable.sliderUnit || 'px';
+  // Empty string is intentional for unitless CSS values such as grid column counts.
+  const unit = variable.sliderUnit ?? 'px';
   const min = variable.sliderMin ?? 0;
   const max = variable.sliderMax ?? 100;
   const step = variable.sliderStep ?? 1;

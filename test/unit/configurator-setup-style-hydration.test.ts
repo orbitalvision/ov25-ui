@@ -84,4 +84,19 @@ describe('ConfiguratorSetup initial config style variables', () => {
     expect(hydrated.style['--ov25-cta-color']).toBe('#405060');
     expect(hydrated.branding.cssString).toBe('');
   });
+
+  it('round-trips the unitless variants-per-row style value', () => {
+    const state = buildFormStateFromInitialPayload({});
+    state.typeSettings.standard.style['--ov25-variants-per-row'] = '3';
+
+    const exported = buildSerializableConfig('standard', state.typeSettings.standard);
+    const { apiKey: _apiKey, productLink: _productLink, images: _images, ...savedStandard } = exported;
+    const hydrated = buildFormStateFromInitialPayload({
+      standard: savedStandard,
+    } as Partial<ConfiguratorSetupPayload>).typeSettings.standard;
+
+    expect(exported.branding?.cssString).toContain('--ov25-variants-per-row: 3;');
+    expect(hydrated.style['--ov25-variants-per-row']).toBe('3');
+    expect(hydrated.branding.cssString).toBe('');
+  });
 });
