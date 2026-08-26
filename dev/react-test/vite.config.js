@@ -17,7 +17,6 @@ const testPages = [
   'sheet-reflow-debug',
   'single-with-discounts',
   'single-with-groups',
-  'single-inline-variants',
   'animation-test',
   'hidden-logo',
   'inline-variants-disable-add-to-cart',
