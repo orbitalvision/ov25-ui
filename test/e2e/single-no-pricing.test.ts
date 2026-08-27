@@ -181,7 +181,6 @@ test.describe('Single product — hidePricing mobile drawer layout', () => {
 
   for (const mode of ['tabs', 'tree'] as const) {
     test(`${mode} fills the drawer without reserving hidden checkout space`, async ({ page }) => {
-      test.setTimeout(90_000);
       const { drawer, surface } = await openMobileVariantSurface(page, mode);
 
       await expectNoPricing(page);
@@ -206,7 +205,6 @@ test.describe('Single product — hidePricing mobile drawer layout', () => {
   }
 
   test('guided overview keeps only the viewer-level close button', async ({ page }) => {
-    test.setTimeout(90_000);
     const { drawer } = await openMobileVariantSurface(page, 'guided-overview');
 
     await expect(drawer.locator('#ov25-variants-header-mobile')).toHaveCount(0);
@@ -217,7 +215,6 @@ test.describe('Single product — hidePricing mobile drawer layout', () => {
   });
 
   test('wizard keeps Back in the same position on the final overview', async ({ page }) => {
-    test.setTimeout(90_000);
     const { surface } = await openMobileVariantSurface(page, 'wizard');
     const back = surface.locator('.ov25-wizard-button-back');
     const next = surface.locator('.ov25-wizard-button-next');
