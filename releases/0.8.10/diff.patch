@@ -1,0 +1,3158 @@
+diff --git a/dev/react-test/config/e2e-fixture-ledger.js b/dev/react-test/config/e2e-fixture-ledger.js
+index 91560df..0eb7609 100644
+--- a/dev/react-test/config/e2e-fixture-ledger.js
++++ b/dev/react-test/config/e2e-fixture-ledger.js
+@@ -13,6 +13,55 @@ export const HIDDEN_LOGO_REPORT_SCREENSHOTS = Object.freeze({
+   mobileRangeDrawerHideLogoEnabled: 'mobile-range-drawer-logo-free-hide-enabled.png',
+ });
+ 
++const NO_PRICING_VARIANT_DISPLAY_MODES = Object.freeze([
++  'wizard',
++  'guided-overview',
++  'list',
++  'tabs',
++  'accordion',
++  'tree',
++]);
++
++const NO_PRICING_TESTS = Object.freeze([
++  ...['standard', 'snap2'].flatMap((profile) =>
++    NO_PRICING_VARIANT_DISPLAY_MODES.map((displayMode) =>
++      Object.freeze({
++        title: `${profile} / ${displayMode}: hides page pricing and purchase actions`,
++        viewport: 'Desktop 1440 × 900',
++        mode: `${profile === 'snap2' ? 'Snap2' : 'Standard'} · ${displayMode}`,
++        covers:
++          `flags.hidePricing removes product-page pricing and visible checkout actions before and after opening the rendered ${displayMode} variants surface.` +
++          (displayMode === 'guided-overview'
++            ? ' The hidden Buy Now action reserves no column, and Previous/Next share two equal columns.'
++            : ''),
++      }),
++    ),
++  ),
++  ...['tabs', 'tree'].map((displayMode) =>
++    Object.freeze({
++      title: `${displayMode} fills the drawer without reserving hidden checkout space`,
++      viewport: 'Mobile 375 × 667',
++      mode: `Standard · ${displayMode}`,
++      covers:
++        'flags.hidePricing removes the checkout action and its reserved drawer padding so the variants surface reaches the bottom edge.',
++    }),
++  ),
++  Object.freeze({
++    title: 'guided overview keeps only the viewer-level close button',
++    viewport: 'Mobile 375 × 667',
++    mode: 'Standard · guided-overview',
++    covers:
++      'The mobile drawer omits its duplicate local close control while retaining the viewer-level close button.',
++  }),
++  Object.freeze({
++    title: 'wizard keeps Back in the same position on the final overview',
++    viewport: 'Mobile 375 × 667',
++    mode: 'Standard · wizard',
++    covers:
++      'The Back button keeps the same position and dimensions when the wizard advances to its final review.',
++  }),
++]);
++
+ export const E2E_FIXTURE_LEDGER = Object.freeze([
+   Object.freeze({
+     id: 'hidden-logo',
+@@ -55,4 +104,23 @@ export const E2E_FIXTURE_LEDGER = Object.freeze([
+         'Each ledger run attaches named PNG screenshots for the tested states and records an action-by-action Playwright trace. Each mobile state has a fixture-controls image showing the active hideLogo toggle and a matching Range drawer image; the drawer is logo-free because mobile has no visible logo header by design. These are review artifacts; there are no committed golden visual-regression baselines.',
+     }),
+   }),
++  Object.freeze({
++    id: 'single-no-pricing',
++    title: 'No pricing',
++    fixturePath: '/tests/single-no-pricing.html',
++    fixtureDocumentTitle: 'Single Product - No Pricing',
++    sourceFiles: Object.freeze([
++      'dev/react-test/tests/single-no-pricing.html',
++      'dev/react-test/tests/single-no-pricing.jsx',
++    ]),
++    specFiles: Object.freeze(['test/e2e/single-no-pricing.test.ts']),
++    tests: NO_PRICING_TESTS,
++    visualArtifacts: Object.freeze({
++      baselineScreenshots: Object.freeze([]),
++      reportScreenshots: Object.freeze([]),
++      traceScreenshotsOnLedgerRun: false,
++      note:
++        'Behavioral coverage verifies the rendered Standard and Snap2 variant surfaces across every public Variants.displayMode, plus mobile drawer spacing and controls for the affected modes. Ledger runs record an action-by-action Playwright trace; there are no committed screenshot baselines or named report screenshots.',
++    }),
++  }),
+ ]);
+diff --git a/dev/react-test/index.html b/dev/react-test/index.html
+index 87c3c40..61cdc01 100644
+--- a/dev/react-test/index.html
++++ b/dev/react-test/index.html
+@@ -66,16 +66,15 @@
+       <div class="checklist-section">Fully E2E Tested (Safe to Skip)</div>
+       <ul class="checklist">
+         <li class="checklist-item" data-id="hidden-logo"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/hidden-logo.html" >Hidden logo (hideLogo toggle)</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
++        <li class="checklist-item" data-id="single-no-pricing"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/single-no-pricing.html" >No pricing</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+       </ul>
+ 
+       <div class="checklist-section">Single Product</div>
+       <ul class="checklist">
+         <li class="checklist-item" data-id="single-no-variants"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/single-no-variants.html" >No variants</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+-        <li class="checklist-item" data-id="single-no-pricing"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/single-no-pricing.html" >No pricing</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+         <li class="checklist-item" data-id="single-with-discounts"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/single-with-discounts.html" >With discounts</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+         <li class="checklist-item" data-id="single-with-groups"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/single-with-groups.html" >With groups</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+         <li class="checklist-item" data-id="product-with-swatches"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/product-with-swatches.html" >Product with swatches</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+-        <li class="checklist-item" data-id="single-inline-variants"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/single-inline-variants.html" >Inline variants</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+         <li class="checklist-item" data-id="animation-test"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/animation-test.html" >Animation test</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+         <li class="checklist-item" data-id="inline-variants-disable-add-to-cart"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/inline-variants-disable-add-to-cart.html" >Inline variants — disable add to cart</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+         <li class="checklist-item" data-id="single-custom-button"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/single-custom-button.html" >Custom open/close buttons</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+@@ -100,6 +99,7 @@
+         <li class="checklist-item" data-id="carousel-defer-threed-indexing"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/carousel-defer-threed-indexing.html?defer3d=0&amp;hostImages=1" >Inline Variants + Carousel  — Shopify + OV25 images</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+         <li class="checklist-item" data-id="single-product-gallery"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/single-product-gallery.html" >Full gallery (sheet + tabs)</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+         <li class="checklist-item" data-id="configurator-sizing"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/configurator-sizing.html" >Configurator sizing</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
++        <li class="checklist-item" data-id="variants-per-row"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/variants-per-row.html" >Variants per row</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+         <li class="checklist-item" data-id="cart-thumbnail"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/cart-thumbnail.html" >Cart thumbnail</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+         <li class="checklist-item" data-id="configure-button-only"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/configure-button-only.html" >Configure button only (toggle defer3D)</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+         <li class="checklist-item" data-id="configure-button-modal"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/configure-button-modal.html" >Configure button — Modal (toggle defer3D)</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+@@ -113,6 +113,7 @@
+         <li class="checklist-item" data-id="gallery-sheet-list"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/gallery-sheet-list.html" >List</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+         <li class="checklist-item" data-id="sheet-reflow-debug"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/sheet-reflow-debug.html" >Sheet reflow debug</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+         <li class="checklist-item" data-id="gallery-sheet-wizard"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/gallery-sheet-wizard.html" >Wizard</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
++        <li class="checklist-item" data-id="gallery-sheet-guided-overview"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/gallery-sheet-guided-overview.html" >Guided overview</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+         <li class="checklist-item" data-id="variants-only-sheet"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/variants-only-sheet.html" >Variants only sheet</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+       </ul>
+ 
+@@ -123,6 +124,7 @@
+         <li class="checklist-item" data-id="gallery-sheet-tree-hide-fabrics"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/gallery-sheet-tree-hide-fabrics.html" >Tree</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+         <li class="checklist-item" data-id="gallery-sheet-list-hide-fabrics"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/gallery-sheet-list-hide-fabrics.html" >List</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+         <li class="checklist-item" data-id="gallery-sheet-wizard-hide-fabrics"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/gallery-sheet-wizard-hide-fabrics.html" >Wizard</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
++        <li class="checklist-item" data-id="gallery-sheet-guided-overview-hide-fabrics"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/gallery-sheet-guided-overview-hide-fabrics.html" >Guided overview</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+         <li class="checklist-item" data-id="variants-only-sheet-hide-fabrics"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/variants-only-sheet-hide-fabrics.html" >Variants only sheet</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+       </ul>
+ 
+@@ -133,6 +135,7 @@
+         <li class="checklist-item" data-id="gallery-inline-tree"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/gallery-inline-tree.html" >Tree</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+         <li class="checklist-item" data-id="gallery-inline-list"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/gallery-inline-list.html" >List</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+         <li class="checklist-item" data-id="gallery-inline-wizard"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/gallery-inline-wizard.html" >Wizard</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
++        <li class="checklist-item" data-id="gallery-inline-guided-overview"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/gallery-inline-guided-overview.html">Guided overview</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+       </ul>
+ 
+       <div class="checklist-section">Inline Sticky</div>
+diff --git a/dev/react-test/templates/SelectionDetailsControls.jsx b/dev/react-test/templates/SelectionDetailsControls.jsx
+index cf1636c..eb22c35 100644
+--- a/dev/react-test/templates/SelectionDetailsControls.jsx
++++ b/dev/react-test/templates/SelectionDetailsControls.jsx
+@@ -14,7 +14,7 @@ export const SELECTION_DETAILS_MOBILE_MODES = [
+   'fullscreen',
+ ];
+ 
+-export const VARIANT_STYLES = ['tree', 'list', 'tabs', 'accordion', 'wizard'];
++export const VARIANT_STYLES = ['tree', 'list', 'tabs', 'accordion', 'wizard', 'guided-overview'];
+ export const CONFIGURATOR_MODES = ['sheet', 'modal', 'inline'];
+ 
+ const CONFIGURATOR_DISPLAY_MODES = {
+diff --git a/dev/react-test/tests/gallery-inline-guided-overview.html b/dev/react-test/tests/gallery-inline-guided-overview.html
+new file mode 100644
+index 0000000..f02cacf
+--- /dev/null
++++ b/dev/react-test/tests/gallery-inline-guided-overview.html
+@@ -0,0 +1,12 @@
++<!doctype html>
++<html lang="en">
++  <head>
++    <meta charset="UTF-8" />
++    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
++    <title>Gallery - Inline + Guided overview</title>
++  </head>
++  <body>
++    <div id="root"></div>
++    <script type="module" src="./gallery-inline-guided-overview.jsx"></script>
++  </body>
++</html>
+diff --git a/dev/react-test/tests/gallery-inline-guided-overview.jsx b/dev/react-test/tests/gallery-inline-guided-overview.jsx
+new file mode 100644
+index 0000000..b5525aa
+--- /dev/null
++++ b/dev/react-test/tests/gallery-inline-guided-overview.jsx
+@@ -0,0 +1,38 @@
++import React from 'react';
++import ReactDOM from 'react-dom/client';
++import { TestPageLayout } from '../templates/TestPageLayout.jsx';
++import '../src/index.css';
++
++const DEV_RETAILER_APIKEY = import.meta.env.VITE_DEV_RETAILER_APIKEY;
++
++const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
++  apiKey: () => DEV_RETAILER_APIKEY,
++  productLink: () => '9034',
++  selectors: {
++    gallery: { selector: '.configurator-container', replace: true },
++    variants: '#ov25-controls',
++    swatches: '#ov25-swatches',
++    price: { selector: '#price', replace: true },
++    name: { selector: '#name', replace: true },
++  },
++  carousel: { desktop: 'stacked', mobile: 'carousel' },
++  configurator: {
++    displayMode: { desktop: 'inline', mobile: 'inline' },
++    triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
++    variants: { displayMode: { desktop: 'guided-overview', mobile: 'guided-overview' } },
++  },
++  branding: {
++    cssString: `:host {
++      --ov25-wizard-variants-content-height: 500px;
++    }`,
++  },
++  callbacks: { addToBasket: () => alert('Add to basket'), buyNow: () => alert('Buy now'), buySwatches: () => alert('Add swatches to cart') },
++  flags: { hidePricing: false },
++});
++
++function App() {
++  return <TestPageLayout title="Gallery - Inline + Guided overview" description="Inline configurator with a review hub and focused option editors." injectConfig={config} showProductTabs />;
++}
++
++ReactDOM.createRoot(document.getElementById('root')).render(<React.StrictMode><App /></React.StrictMode>);
++export default App;
+diff --git a/dev/react-test/tests/single-inline-variants.html b/dev/react-test/tests/gallery-sheet-guided-overview-hide-fabrics.html
+similarity index 53%
+rename from dev/react-test/tests/single-inline-variants.html
+rename to dev/react-test/tests/gallery-sheet-guided-overview-hide-fabrics.html
+index 6d86bff..b4264da 100644
+--- a/dev/react-test/tests/single-inline-variants.html
++++ b/dev/react-test/tests/gallery-sheet-guided-overview-hide-fabrics.html
+@@ -2,12 +2,11 @@
+ <html lang="en">
+   <head>
+     <meta charset="UTF-8" />
+-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+-    <title>Single Product - Inline Variants</title>
++    <title>Hide fabrics - Sheet + Guided overview</title>
+   </head>
+   <body>
+     <div id="root"></div>
+-    <script type="module" src="./single-inline-variants.jsx"></script>
++    <script type="module" src="./gallery-sheet-guided-overview-hide-fabrics.jsx"></script>
+   </body>
+ </html>
+diff --git a/dev/react-test/tests/single-inline-variants.jsx b/dev/react-test/tests/gallery-sheet-guided-overview-hide-fabrics.jsx
+similarity index 58%
+rename from dev/react-test/tests/single-inline-variants.jsx
+rename to dev/react-test/tests/gallery-sheet-guided-overview-hide-fabrics.jsx
+index 4b57f78..2d070d7 100644
+--- a/dev/react-test/tests/single-inline-variants.jsx
++++ b/dev/react-test/tests/gallery-sheet-guided-overview-hide-fabrics.jsx
+@@ -17,32 +17,27 @@ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
+   },
+   carousel: { desktop: 'stacked', mobile: 'carousel' },
+   configurator: {
+-    displayMode: { desktop: 'inline', mobile: 'inline' },
++    displayMode: { desktop: 'sheet', mobile: 'drawer' },
+     triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
+-    variants: { displayMode: { desktop: 'accordion', mobile: 'list' } },
+-  },
+-  callbacks: {
+-    addToBasket: () => alert('Add to basket function called'),
+-    buyNow: () => alert('Buy now function called'),
+-    buySwatches: () => alert('Add swatches to cart'),
++    variants: {
++      displayMode: { desktop: 'guided-overview', mobile: 'guided-overview' },
++      hideOptions: ['fabric', 'fabrics'],
++    },
+   },
++  callbacks: { addToBasket: () => alert('Add to basket'), buyNow: () => alert('Buy now'), buySwatches: () => alert('Add swatches to cart') },
+   flags: { hidePricing: false },
+ });
+ 
+ function App() {
+   return (
+     <TestPageLayout
+-      title="Single Product - Inline Variants"
+-      description="Arlo&Jacob - Otto - Large 1 Arm Unit RHF with inline variant controls."
++      title="Hide fabrics — Sheet + Guided overview"
++      description="Same as gallery sheet + guided overview; fabric option omitted from variant UI (iframe default remains)."
+       injectConfig={config}
++      showProductTabs
+     />
+   );
+ }
+ 
+-ReactDOM.createRoot(document.getElementById('root')).render(
+-  <React.StrictMode>
+-    <App />
+-  </React.StrictMode>,
+-);
+-
++ReactDOM.createRoot(document.getElementById('root')).render(<React.StrictMode><App /></React.StrictMode>);
+ export default App;
+diff --git a/dev/react-test/tests/gallery-sheet-guided-overview.html b/dev/react-test/tests/gallery-sheet-guided-overview.html
+new file mode 100644
+index 0000000..f6c4d21
+--- /dev/null
++++ b/dev/react-test/tests/gallery-sheet-guided-overview.html
+@@ -0,0 +1,12 @@
++<!DOCTYPE html>
++<html lang="en">
++  <head>
++    <meta charset="UTF-8" />
++    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
++    <title>Gallery - Sheet + Guided overview</title>
++  </head>
++  <body>
++    <div id="root"></div>
++    <script type="module" src="./gallery-sheet-guided-overview.jsx"></script>
++  </body>
++</html>
+diff --git a/dev/react-test/tests/gallery-sheet-guided-overview.jsx b/dev/react-test/tests/gallery-sheet-guided-overview.jsx
+new file mode 100644
+index 0000000..65e913a
+--- /dev/null
++++ b/dev/react-test/tests/gallery-sheet-guided-overview.jsx
+@@ -0,0 +1,33 @@
++import React from 'react';
++import ReactDOM from 'react-dom/client';
++import { TestPageLayout } from '../templates/TestPageLayout.jsx';
++import '../src/index.css';
++
++const DEMO_RETAILER_APIKEY = import.meta.env.VITE_DEMO_RETAILER_APIKEY;
++
++const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
++  apiKey: () => DEMO_RETAILER_APIKEY,
++  productLink: () => '58',
++  selectors: {
++    gallery: { selector: '.configurator-container', replace: true },
++    variants: '#ov25-controls',
++    swatches: '#ov25-swatches',
++    price: { selector: '#price', replace: true },
++    name: { selector: '#name', replace: true },
++  },
++  carousel: { desktop: 'stacked', mobile: 'carousel' },
++  configurator: {
++    displayMode: { desktop: 'sheet', mobile: 'drawer' },
++    triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
++    variants: { displayMode: { desktop: 'guided-overview', mobile: 'guided-overview' } },
++  },
++  callbacks: { addToBasket: () => alert('Add to basket'), buyNow: () => alert('Buy now'), buySwatches: () => alert('Add swatches to cart') },
++  flags: { hidePricing: false },
++});
++
++function App() {
++  return <TestPageLayout title="Gallery - Sheet + Guided overview" description="Configurator sheet with a review hub and focused option editors." injectConfig={config} showProductTabs />;
++}
++
++ReactDOM.createRoot(document.getElementById('root')).render(<React.StrictMode><App /></React.StrictMode>);
++export default App;
+diff --git a/dev/react-test/tests/single-custom-button.jsx b/dev/react-test/tests/single-custom-button.jsx
+index 9da178c..c8f4a47 100644
+--- a/dev/react-test/tests/single-custom-button.jsx
++++ b/dev/react-test/tests/single-custom-button.jsx
+@@ -29,7 +29,7 @@ const baseConfig = /** @type {import('ov25-ui').InjectConfiguratorOptions} */ ({
+   flags: { hidePricing: false },
+ });
+ 
+-const DISPLAY_TYPES = ['tree', 'list', 'tabs', 'accordion', 'wizard'];
++const DISPLAY_TYPES = ['tree', 'list', 'tabs', 'accordion', 'wizard', 'guided-overview'];
+ 
+ function App() {
+   const displayFromUrl =
+diff --git a/dev/react-test/tests/single-custom-css-branding.js b/dev/react-test/tests/single-custom-css-branding.js
+index 65a6185..24e9673 100644
+--- a/dev/react-test/tests/single-custom-css-branding.js
++++ b/dev/react-test/tests/single-custom-css-branding.js
+@@ -196,11 +196,75 @@ export const SINGLE_CUSTOM_CSS_BRANDING = `
+         background: lightblue;
+       }
+ 
++      [data-ov25-wizard-display-mode="guided-overview"] {
++        outline: 3px solid indigo;
++        outline-offset: -3px;
++      }
++
++      [data-ov25-guided-overview-header] {
++        background: lavender;
++        border-color: rebeccapurple;
++      }
++
++      .ov25-guided-overview-back {
++        background: lightsteelblue;
++        color: midnightblue;
++      }
++
++      [data-ov25-guided-overview-review="true"] {
++        background: aliceblue;
++      }
++
++      [data-ov25-guided-overview-review-row] {
++        border: 2px solid teal;
++        border-radius: 8px;
++      }
++
++      [data-ov25-guided-overview-review-part="thumbnail"] {
++        background: palegreen;
++      }
++
++      [data-ov25-guided-overview-review-part="option"] {
++        color: darkred;
++      }
++
++      [data-ov25-guided-overview-review-part="selection"] {
++        color: darkblue;
++      }
++
++      [data-ov25-guided-overview-editor] {
++        background: lavenderblush;
++      }
++
++      [data-ov25-guided-overview-actions] {
++        background: peachpuff;
++        border-color: darkorange;
++      }
++
++      [data-ov25-guided-overview-action="previous"] {
++        background: lightcyan;
++        color: darkslategray;
++      }
++
++      [data-ov25-guided-overview-action="buy-now"] {
++        outline: 2px solid darkorange;
++      }
++
++      [data-ov25-guided-overview-action="next"] {
++        background: lightgreen;
++        color: darkgreen;
++      }
++
+       #ov25-checkout-button {
+         background: orange;
+         color: black;
+       }
+ 
++      [data-ov25-checkout-price-label] {
++        color: darkred;
++        text-decoration: underline;
++      }
++
+       #ov25-add-to-basket-button {
+         background: red;
+         color: black;
+diff --git a/dev/react-test/tests/single-custom-css-snap2.jsx b/dev/react-test/tests/single-custom-css-snap2.jsx
+index 3460086..c5a55b4 100644
+--- a/dev/react-test/tests/single-custom-css-snap2.jsx
++++ b/dev/react-test/tests/single-custom-css-snap2.jsx
+@@ -29,7 +29,7 @@ const SNAP2_INLINE_OV25_CSS = `
+ }
+ `;
+ 
+-const VARIANT_DISPLAY_TYPES = ['tree', 'list', 'tabs', 'accordion', 'wizard'];
++const VARIANT_DISPLAY_TYPES = ['tree', 'list', 'tabs', 'accordion', 'wizard', 'guided-overview'];
+ 
+ const LAYOUT_DEFAULTS = {
+   variantsDesktop: 'RIGHT',
+diff --git a/dev/react-test/tests/single-custom-css.jsx b/dev/react-test/tests/single-custom-css.jsx
+index 7aabef3..9e92215 100644
+--- a/dev/react-test/tests/single-custom-css.jsx
++++ b/dev/react-test/tests/single-custom-css.jsx
+@@ -38,7 +38,7 @@ const baseConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
+   flags: { hidePricing: false },
+ });
+ 
+-const VARIANT_DISPLAY_TYPES = ['tree', 'list', 'tabs', 'accordion', 'wizard'];
++const VARIANT_DISPLAY_TYPES = ['tree', 'list', 'tabs', 'accordion', 'wizard', 'guided-overview'];
+ /** Sheet = desktop sheet + mobile drawer. Inline = both inline. */
+ const CONFIG_DISPLAY_OPTIONS = [
+   { value: 'sheet', label: 'sheet', displayMode: { desktop: 'sheet', mobile: 'drawer' } },
+@@ -78,7 +78,7 @@ function App() {
+   return (
+     <TestPageLayout
+       title="Single Product – Custom CSS"
+-      description="Variant controls, dimensions, and every Selection Details display mode styled with custom CSS."
++      description="Variant controls—including Guided Overview—dimensions, and every Selection Details display mode styled with custom CSS."
+       injectConfig={config}
+       topContent={
+         <div className="ov:flex ov:flex-col ov:gap-2 ov:mb-3 ov:text-sm">
+diff --git a/dev/react-test/tests/single-no-pricing.jsx b/dev/react-test/tests/single-no-pricing.jsx
+index bd5f198..029de20 100644
+--- a/dev/react-test/tests/single-no-pricing.jsx
++++ b/dev/react-test/tests/single-no-pricing.jsx
+@@ -3,37 +3,142 @@ import ReactDOM from 'react-dom/client';
+ import { TestPageLayout } from '../templates/TestPageLayout.jsx';
+ import '../src/index.css';
+ 
++const DEV_RETAILER_APIKEY = import.meta.env.VITE_DEV_RETAILER_APIKEY;
+ const DEMO_RETAILER_APIKEY = import.meta.env.VITE_DEMO_RETAILER_APIKEY;
+ 
+-const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
+-  apiKey: () => DEMO_RETAILER_APIKEY,
+-  productLink: () => '576',
+-  selectors: {
+-    gallery: { selector: '.configurator-container', replace: true },
+-    variants: '#ov25-controls',
+-    name: { selector: '#name', replace: true },
+-  },
+-  carousel: { desktop: 'stacked', mobile: 'carousel' },
+-  configurator: {
+-    displayMode: { desktop: 'sheet', mobile: 'drawer' },
+-    triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
+-    variants: { displayMode: { desktop: 'tree', mobile: 'list' } },
+-  },
+-  callbacks: {
+-    addToBasket: () => {},
+-    buyNow: () => {},
+-    buySwatches: () => {},
+-  },
+-  flags: { hidePricing: true },
+-});
++const VARIANT_DISPLAY_MODES = ['wizard', 'guided-overview', 'list', 'tabs', 'accordion', 'tree'];
++const query = new URLSearchParams(window.location.search);
++const profile = query.get('profile') === 'snap2' ? 'snap2' : 'standard';
++const requestedDisplayMode = query.get('display');
++const displayMode = VARIANT_DISPLAY_MODES.includes(requestedDisplayMode)
++  ? requestedDisplayMode
++  : 'tree';
++
++const callbacks = {
++  addToBasket: () => {},
++  buyNow: () => {},
++  buySwatches: () => {},
++};
++
++/**
++ * @param {'standard' | 'snap2'} selectedProfile
++ * @param {string} selectedDisplayMode
++ * @returns {import('ov25-ui').InjectConfiguratorInput}
++ */
++function buildConfig(selectedProfile, selectedDisplayMode) {
++  const shared = {
++    selectors: {
++      gallery: { selector: '.configurator-container', replace: true },
++      variants: '#ov25-controls',
++      name: { selector: '#name', replace: true },
++    },
++    carousel: { desktop: 'stacked', mobile: 'carousel' },
++    configurator: {
++      displayMode: { desktop: 'sheet', mobile: 'drawer' },
++      triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
++      variants: {
++        displayMode: { desktop: selectedDisplayMode, mobile: selectedDisplayMode },
++      },
++    },
++    callbacks,
++    flags: { hidePricing: true },
++  };
++
++  if (selectedProfile === 'snap2') {
++    return {
++      ...shared,
++      apiKey: () => DEMO_RETAILER_APIKEY,
++      productLink: () => 'snap2/126',
++      // A saved configuration skips InitialiseMenu so every variant display mode is directly reviewable.
++      configurationUuid: () => '8943fbc7-761e-4dbd-8e9d-29cf87127956',
++      selectors: {
++        ...shared.selectors,
++        configureButton: { selector: '#ov25-fullscreen-button', replace: false },
++      },
++    };
++  }
++
++  return {
++    ...shared,
++    apiKey: () => DEV_RETAILER_APIKEY,
++    productLink: () => '9035',
++  };
++}
++
++const config = buildConfig(profile, displayMode);
++
++function fixtureHref(nextProfile, nextDisplayMode) {
++  const params = new URLSearchParams(window.location.search);
++  params.set('profile', nextProfile);
++  params.set('display', nextDisplayMode);
++  return `?${params.toString()}`;
++}
++
++function controlClass(active) {
++  return `ov:rounded-md ov:border ov:px-3 ov:py-1.5 ov:text-sm ov:no-underline ${
++    active
++      ? 'ov:border-[#1a1a1a] ov:bg-[#1a1a1a] ov:text-white'
++      : 'ov:border-gray-300 ov:bg-white ov:text-[#1a1a1a] hover:ov:bg-gray-50'
++  }`;
++}
+ 
+ function App() {
+   return (
+     <TestPageLayout
+       title="Single Product - No Pricing"
+-      description="Aughton - Petit"
++      description={`${profile === 'snap2' ? 'Snap2' : 'Standard'} product · Variants.displayMode: ${displayMode} · flags.hidePricing: true`}
+       injectConfig={config}
+       showPrice={false}
++      topContent={
++        <div
++          className="ov:flex ov:flex-col ov:gap-3 ov:mb-4"
++          data-testid="no-pricing-fixture-controls"
++          data-profile={profile}
++          data-display-mode={displayMode}
++          data-hide-pricing="true"
++        >
++          <div className="ov:flex ov:flex-wrap ov:items-center ov:gap-2">
++            <span className="ov:text-sm ov:text-[#525252]">Product:</span>
++            {['standard', 'snap2'].map((value) => (
++              <a
++                key={value}
++                href={fixtureHref(value, displayMode)}
++                className={controlClass(profile === value)}
++                aria-current={profile === value ? 'page' : undefined}
++              >
++                {value === 'snap2' ? 'Snap2' : 'Standard'}
++              </a>
++            ))}
++          </div>
++          <div className="ov:flex ov:flex-wrap ov:items-center ov:gap-2">
++            <span className="ov:text-sm ov:text-[#525252]">Variants.displayMode:</span>
++            {VARIANT_DISPLAY_MODES.map((value) => (
++              <a
++                key={value}
++                href={fixtureHref(profile, value)}
++                className={controlClass(displayMode === value)}
++                aria-current={displayMode === value ? 'page' : undefined}
++              >
++                {value}
++              </a>
++            ))}
++          </div>
++          <div className="ov:text-sm ov:text-[#525252]">
++            <code>flags.hidePricing: true</code>
++          </div>
++        </div>
++      }
++      asideSlot={
++        profile === 'snap2' ? (
++          <button
++            id="ov25-fullscreen-button"
++            type="button"
++            className="ov:mb-2 ov:cursor-pointer ov:rounded-md ov:border ov:border-gray-300 ov:bg-white ov:px-3 ov:py-2 ov:text-sm ov:text-[#1a1a1a] hover:ov:bg-gray-50"
++          >
++            Configure (Snap2)
++          </button>
++        ) : undefined
++      }
+     />
+   );
+ }
+diff --git a/dev/react-test/tests/string-replacement.jsx b/dev/react-test/tests/string-replacement.jsx
+index 028f024..d095e8c 100644
+--- a/dev/react-test/tests/string-replacement.jsx
++++ b/dev/react-test/tests/string-replacement.jsx
+@@ -12,6 +12,10 @@ const MAZE_APIKEY = import.meta.env.VITE_MAZE_APIKEY;
+ const ARLO_APIKEY = import.meta.env.VITE_ARLO_APIKEY;
+ const query = new URLSearchParams(window.location.search);
+ const isSnap2Mode = query.get('mode') === 'snap2';
++const requestedVariantDisplay = query.get('display');
++const variantDisplayOverride = requestedVariantDisplay === 'wizard' || requestedVariantDisplay === 'guided-overview'
++  ? requestedVariantDisplay
++  : null;
+ const selectionDetailsValues = readSelectionDetailsModeQuery({
+   desktopDetails: 'sheet',
+   mobileDetails: 'fullscreen',
+@@ -38,9 +42,11 @@ const injectConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
+       : { desktop: 'sheet', mobile: 'drawer' },
+     triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
+     variants: {
+-      displayMode: isSnap2Mode
+-        ? { desktop: 'list', mobile: 'list' }
+-        : { desktop: 'wizard', mobile: 'list' },
++      displayMode: variantDisplayOverride
++        ? { desktop: variantDisplayOverride, mobile: variantDisplayOverride }
++        : isSnap2Mode
++          ? { desktop: 'list', mobile: 'list' }
++          : { desktop: 'wizard', mobile: 'list' },
+       selectionDetails: {
+         displayMode: {
+           desktop: selectionDetailsValues.desktopDetails,
+@@ -90,6 +96,7 @@ const injectConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
+         template: "${DISCOUNT_AMOUNT}${SUBTOTAL}",
+       }
+     ],
++    checkoutPriceLabel: [{ template: '▽Price on CTA: ${PRICE}▽' }],
+     // options
+     optionHeader: [
+       { trigger: { name: 'OPTION_NAME', value: 'upholstery fabrics' }, template: '▽upholstery fabrics▽' },
+@@ -137,7 +144,10 @@ const injectConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
+     controlsLightFallback: [{ template: '▽Group ${GROUP_INDEX}▽' }],
+     // wizard
+     wizardBackButtonLabel: [{ template: '▽Back▽' }],
++    wizardPreviousButtonLabel: [{ template: '▽Prev▽' }],
+     wizardNextButtonLabel: [{ template: '▽Next▽' }],
++    wizardBackToReviewLabel: [{ template: '▽Back to overview▽' }],
++    wizardChooseOption: [{ template: '▽Choose ${OPTION_NAME}▽' }],
+     wizardStepProgress: [{ template: '▽Step ${CURRENT_STEP} / ${TOTAL_STEPS}▽' }],
+     wizardCurrentStep: [{ template: '▽${STEP_LABEL}▽' }],
+     wizardPreviousStep: [{ template: '▽← ${STEP_LABEL}▽' }],
+@@ -230,11 +240,17 @@ function App() {
+   const standardHref = `?${modeParams.toString()}`;
+   modeParams.set('mode', 'snap2');
+   const snap2Href = `?${modeParams.toString()}`;
++  const displayParams = new URLSearchParams(window.location.search);
++  displayParams.set('display', 'wizard');
++  const wizardHref = `?${displayParams.toString()}`;
++  displayParams.set('display', 'guided-overview');
++  const guidedOverviewHref = `?${displayParams.toString()}`;
++  const currentVariantDisplay = variantDisplayOverride ?? (isSnap2Mode ? 'list' : 'wizard/list');
+ 
+   return (
+     <TestPageLayout
+       title="String replacement"
+-      description={`Tests stringReplacements across name, price, CTA, filters, Selection Details, swatchbook, save/share, and Snap2 UI strings. Current mode: ${isSnap2Mode ? 'snap2' : 'standard'}.`}
++      description={`Tests stringReplacements across name, price, CTA, filters, Guided Overview, Selection Details, swatchbook, save/share, and Snap2 UI strings. Current mode: ${isSnap2Mode ? 'snap2' : 'standard'}; variants: ${currentVariantDisplay}.`}
+       injectConfig={injectConfig}
+       dynamicConfig
+       topContent={
+@@ -247,6 +263,15 @@ function App() {
+               Snap2 mode
+             </a>
+           </div>
++          <div className="ov:flex ov:items-center ov:gap-2">
++            <span className="ov:text-gray-600">Variants:</span>
++            <a href={wizardHref} className="ov:rounded ov:bg-gray-200 ov:px-2 ov:py-1 ov:no-underline">
++              Wizard
++            </a>
++            <a href={guidedOverviewHref} className="ov:rounded ov:bg-gray-200 ov:px-2 ov:py-1 ov:no-underline">
++              Guided overview
++            </a>
++          </div>
+           <SelectionDetailsModeControls values={selectionDetailsValues} />
+         </div>
+       }
+diff --git a/dev/react-test/tests/variants-per-row.html b/dev/react-test/tests/variants-per-row.html
+new file mode 100644
+index 0000000..3f18adb
+--- /dev/null
++++ b/dev/react-test/tests/variants-per-row.html
+@@ -0,0 +1,12 @@
++<!DOCTYPE html>
++<html lang="en">
++  <head>
++    <meta charset="UTF-8" />
++    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
++    <title>Variants Per Row</title>
++  </head>
++  <body>
++    <div id="root"></div>
++    <script type="module" src="./variants-per-row.jsx"></script>
++  </body>
++</html>
+diff --git a/dev/react-test/tests/variants-per-row.jsx b/dev/react-test/tests/variants-per-row.jsx
+new file mode 100644
+index 0000000..55004cc
+--- /dev/null
++++ b/dev/react-test/tests/variants-per-row.jsx
+@@ -0,0 +1,189 @@
++import React, { useEffect, useState } from 'react';
++import ReactDOM from 'react-dom/client';
++import { TestPageLayout } from '../templates/TestPageLayout.jsx';
++import '../src/index.css';
++
++const DEMO_RETAILER_APIKEY = import.meta.env.VITE_DEMO_RETAILER_APIKEY;
++const VARIANT_DISPLAY_MODES = ['wizard', 'guided-overview', 'list', 'tabs', 'accordion', 'tree'];
++const CONFIGURATOR_DISPLAY_MODES = {
++  inline: { desktop: 'inline', mobile: 'inline' },
++  'inline-sticky': { desktop: 'inline-sticky', mobile: 'inline-sticky' },
++  sheet: { desktop: 'sheet', mobile: 'drawer' },
++  modal: { desktop: 'modal', mobile: 'modal' },
++  'variants-only-sheet': { desktop: 'variants-only-sheet', mobile: 'variants-only-sheet' },
++  'inline-sheet': { desktop: 'inline-sheet', mobile: 'drawer' },
++};
++
++const query = new URLSearchParams(window.location.search);
++const requestedVariantMode = query.get('variants');
++const variantDisplayMode = VARIANT_DISPLAY_MODES.includes(requestedVariantMode)
++  ? requestedVariantMode
++  : 'tabs';
++const requestedConfiguratorMode = query.get('configurator');
++const configuratorMode = requestedConfiguratorMode in CONFIGURATOR_DISPLAY_MODES
++  ? requestedConfiguratorMode
++  : 'inline';
++const parsedInitialCount = Number.parseInt(query.get('count') || '4', 10);
++const initialCount = Number.isFinite(parsedInitialCount)
++  ? Math.min(6, Math.max(1, parsedInitialCount))
++  : 4;
++
++const selectedConfiguratorDisplayMode = CONFIGURATOR_DISPLAY_MODES[configuratorMode];
++const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
++  apiKey: () => DEMO_RETAILER_APIKEY,
++  productLink: () => '58',
++  selectors: {
++    gallery: { selector: '.configurator-container', replace: true },
++    variants: '#ov25-controls',
++    swatches: '#ov25-swatches',
++    price: { selector: '#price', replace: true },
++    name: { selector: '#name', replace: true },
++  },
++  carousel: { desktop: 'stacked', mobile: 'carousel' },
++  configurator: {
++    displayMode: selectedConfiguratorDisplayMode,
++    triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
++    variants: {
++      displayMode: { desktop: variantDisplayMode, mobile: variantDisplayMode },
++      // Size/product cards intentionally keep their established two-column treatment.
++      hideOptions: ['size'],
++    },
++  },
++  branding: {
++    cssString: `:host { --ov25-variants-per-row: ${initialCount}; }`,
++  },
++  callbacks: {
++    addToBasket: () => alert('Add to basket'),
++    buyNow: () => alert('Buy now'),
++    buySwatches: () => alert('Add swatches to cart'),
++  },
++  flags: {
++    hidePricing: false,
++    autoOpen: !['inline', 'inline-sticky'].includes(configuratorMode),
++  },
++});
++
++function updateFixtureQuery(name, value) {
++  const params = new URLSearchParams(window.location.search);
++  params.set(name, value);
++  window.location.search = params.toString();
++}
++
++function replaceFixtureQuery(name, value) {
++  const params = new URLSearchParams(window.location.search);
++  params.set(name, value);
++  window.history.replaceState(null, '', `?${params.toString()}`);
++}
++
++function applyVariantsPerRow(count) {
++  const visit = (root) => {
++    for (const grid of root.querySelectorAll('.ov25-variant-card-grid')) {
++      grid.style.setProperty('--ov25-variants-per-row', String(count), 'important');
++    }
++    for (const element of root.querySelectorAll('*')) {
++      if (!element.shadowRoot) continue;
++      element.style.setProperty('--ov25-variants-per-row', String(count), 'important');
++      visit(element.shadowRoot);
++    }
++  };
++  visit(document);
++}
++
++function FixtureControls() {
++  const [count, setCount] = useState(initialCount);
++
++  useEffect(() => {
++    applyVariantsPerRow(count);
++    const observer = new MutationObserver(() => applyVariantsPerRow(count));
++    observer.observe(document.documentElement, { childList: true, subtree: true });
++    const retry = window.setInterval(() => applyVariantsPerRow(count), 500);
++    return () => {
++      observer.disconnect();
++      window.clearInterval(retry);
++    };
++  }, [count]);
++
++  return (
++    <section
++      className="ov:mb-4 ov:grid ov:gap-4 ov:rounded-lg ov:border ov:border-gray-200 ov:bg-white ov:p-4 ov:md:grid-cols-3"
++      data-testid="variants-per-row-controls"
++      data-variants-per-row={count}
++      data-variant-display-mode={variantDisplayMode}
++      data-configurator-display-mode={configuratorMode}
++    >
++      <label className="ov:flex ov:flex-col ov:gap-2 ov:text-sm ov:text-[#1a1a1a]">
++        <span className="ov:flex ov:items-center ov:justify-between ov:gap-3">
++          <span>Variants per row</span>
++          <output
++            htmlFor="variants-per-row-slider"
++            className="ov:min-w-8 ov:rounded-md ov:bg-gray-100 ov:px-2 ov:py-1 ov:text-center ov:font-mono ov:tabular-nums"
++            aria-live="polite"
++          >
++            {count}
++          </output>
++        </span>
++        <input
++          id="variants-per-row-slider"
++          data-testid="variants-per-row-slider"
++          type="range"
++          min="1"
++          max="6"
++          step="1"
++          value={count}
++          onChange={(event) => {
++            const nextCount = Number(event.target.value);
++            setCount(nextCount);
++            replaceFixtureQuery('count', String(nextCount));
++          }}
++          className="ov:w-full ov:cursor-pointer"
++        />
++        <span className="ov:flex ov:justify-between ov:text-xs ov:text-[#6b7280]">
++          <span>Fewer, larger cards</span>
++          <span>More, smaller cards</span>
++        </span>
++      </label>
++
++      <label className="ov:flex ov:flex-col ov:gap-2 ov:text-sm ov:text-[#1a1a1a]">
++        <span>Variants.displayMode</span>
++        <select
++          value={variantDisplayMode}
++          onChange={(event) => updateFixtureQuery('variants', event.target.value)}
++          className="ov:h-10 ov:rounded-md ov:border ov:border-gray-300 ov:bg-white ov:px-3"
++        >
++          {VARIANT_DISPLAY_MODES.map((mode) => <option key={mode} value={mode}>{mode}</option>)}
++        </select>
++      </label>
++
++      <label className="ov:flex ov:flex-col ov:gap-2 ov:text-sm ov:text-[#1a1a1a]">
++        <span>Configurator displayMode</span>
++        <select
++          value={configuratorMode}
++          onChange={(event) => updateFixtureQuery('configurator', event.target.value)}
++          className="ov:h-10 ov:rounded-md ov:border ov:border-gray-300 ov:bg-white ov:px-3"
++        >
++          {Object.keys(CONFIGURATOR_DISPLAY_MODES).map((mode) => <option key={mode} value={mode}>{mode}</option>)}
++        </select>
++      </label>
++    </section>
++  );
++}
++
++function App() {
++  return (
++    <TestPageLayout
++      title="Variants Per Row"
++      description="Move the slider to verify fluid variant-card columns. Switch either display mode to exercise the same setting across every variants surface."
++      injectConfig={config}
++      topContent={<FixtureControls />}
++      showProductTabs
++    />
++  );
++}
++
++ReactDOM.createRoot(document.getElementById('root')).render(
++  <React.StrictMode>
++    <App />
++  </React.StrictMode>,
++);
++
++export default App;
+diff --git a/dev/react-test/vite.config.js b/dev/react-test/vite.config.js
+index 338e37b..ec13e87 100644
+--- a/dev/react-test/vite.config.js
++++ b/dev/react-test/vite.config.js
+@@ -9,6 +9,7 @@ const testPages = [
+   'configure-button-modal',
+   'single-product-gallery',
+   'configurator-sizing',
++  'variants-per-row',
+   'responsive-layout-matrix',
+   'split-variant-triggers',
+   'string-replacement',
+@@ -17,7 +18,6 @@ const testPages = [
+   'sheet-reflow-debug',
+   'single-with-discounts',
+   'single-with-groups',
+-  'single-inline-variants',
+   'animation-test',
+   'hidden-logo',
+   'inline-variants-disable-add-to-cart',
+@@ -52,11 +52,13 @@ const testPages = [
+   'gallery-sheet-list',
+   'gallery-sheet-list-auto-open',
+   'gallery-sheet-wizard',
++  'gallery-sheet-guided-overview',
+   'gallery-sheet-tabs-hide-fabrics',
+   'gallery-sheet-accordion-hide-fabrics',
+   'gallery-sheet-tree-hide-fabrics',
+   'gallery-sheet-list-hide-fabrics',
+   'gallery-sheet-wizard-hide-fabrics',
++  'gallery-sheet-guided-overview-hide-fabrics',
+   'variants-only-sheet-hide-fabrics',
+   'gallery-inline-tabs',
+   'gallery-inline-accordion',
+@@ -64,6 +66,7 @@ const testPages = [
+   'gallery-inline-list',
+   'gallery-inline-list-no-variant-thumbs',
+   'gallery-inline-wizard',
++  'gallery-inline-guided-overview',
+   'inline-sticky-desktop-no-header',
+   'inline-sticky-desktop-fixed-header',
+   'inline-sticky-desktop-collapsing-header',
+diff --git a/docs/skills/ov25-compatibility-guard/SKILL.md b/docs/skills/ov25-compatibility-guard/SKILL.md
+index 601e0c9..2774887 100644
+--- a/docs/skills/ov25-compatibility-guard/SKILL.md
++++ b/docs/skills/ov25-compatibility-guard/SKILL.md
+@@ -24,6 +24,19 @@ Do not introduce breaking changes unless the user explicitly requests a breaking
+ 
+ When in doubt, preserve old behavior and add new behavior behind an additive option, feature flag, or separate path.
+ 
++Every new user-visible feature, component, display mode, state, and action must support both OV25
++customization channels before it is complete:
++
++- all owned UI copy must resolve through `stringReplacements`, with its key and interpolation
++  values registered in `STRING_REPLACEMENT_DEFINITIONS`; and
++- all meaningful visual parts and states must be targetable through stable hooks consumed by
++  `branding.cssString`, without requiring selectors that depend on incidental DOM nesting or
++  generated utility classes.
++
++Add the feature to both `dev/react-test/tests/string-replacement.jsx` and
++`dev/react-test/tests/single-custom-css.jsx` (or their shared CSS fixture) so these contracts remain
++manually verifiable.
++
+ ## Compatibility Contract
+ 
+ ### Public TypeScript/API Surface
+@@ -160,6 +173,11 @@ Not allowed without explicit breaking-release approval:
+ 
+ Before finishing any change, answer these questions:
+ 
++- Does every new owned UI string use a registered `stringReplacements` key, including visible
++  fragments such as prices, empty states, button labels, titles, tooltips, and accessible labels?
++- Can `branding.cssString` target every meaningful new feature part/state through a stable id,
++  class, data attribute, or CSS variable?
++- Were the string-replacement and custom-CSS fixtures updated to exercise the new feature?
+ - Does this remove or rename any public export, type, option, callback, field, selector, CSS variable, metafield, or cart property?
+ - Does this alter frontend DOM/HTML structure that a theme stylesheet or `injectConfigurator({ cssString })` selector may target?
+ - Do existing ids/classes/data attributes still exist in the same shadow/root context?
+@@ -176,6 +194,10 @@ If any answer indicates risk, either add a compatibility layer or flag the chang
+ ## Implementation Rules
+ 
+ - Prefer additive changes over replacements.
++- Treat `stringReplacements` and `branding.cssString` support as acceptance criteria for every
++  user-visible feature, not optional follow-up work.
++- Prefer semantic, feature-owned CSS hooks. Do not make clients target Tailwind utility classes,
++  child indexes, or incidental wrapper depth.
+ - Keep old fields populated when introducing new fields.
+ - Normalize at boundaries; keep public payloads stable.
+ - Gate new behavior with optional config, feature flag, runtime version, or migration default.
+@@ -199,6 +221,10 @@ Automatic client updates are only safe for patch/minor releases that pass the ch
+ 
+ For compatibility-sensitive changes, add or run tests that cover:
+ 
++- New string keys, their interpolation values, and fallback behavior.
++- Stable custom-CSS hooks for the feature root, meaningful parts, actions, and states.
++- The feature in `string-replacement.jsx` and `single-custom-css.jsx` (or the shared branding CSS
++  imported by that fixture).
+ - Existing/legacy config payloads.
+ - Missing optional fields.
+ - Unknown extra fields.
+diff --git a/globals.css b/globals.css
+index 1fa091d..c94eb00 100644
+--- a/globals.css
++++ b/globals.css
+@@ -174,6 +174,9 @@ html {
+     --ov25-wizard-variants-content-height: 600px;
+     --ov25-wizard-variants-available-height: 100%;
+ 
++    /* Standard selection cards use four fluid columns by default. */
++    --ov25-variants-per-row: 4;
++
+     /* Inline list: aside taller so scrollable area gets 600px + room for checkout button */
+     --ov25-inline-list-aside-min-height: 1000px;
+     --ov25-inline-list-aside-min-height-mobile: 100px;
+@@ -476,6 +479,16 @@ html {
+   max-height: var(--ov25-wizard-variants-content-height);
+ }
+ 
++[data-ov25-list-variants-mode="inline"]
++  :is(
++    [data-ov25-guided-overview-review="true"],
++    [data-ov25-guided-overview-editor]
++  ) {
++  height: var(--ov25-wizard-variants-content-height);
++  min-height: var(--ov25-wizard-variants-content-height);
++  max-height: var(--ov25-wizard-variants-content-height);
++}
++
+ /* ProductGallery adopts this stylesheet into its own shadow root. */
+ :host(.ov25-inline-sticky-gallery-root-desktop) {
+   display: flex;
+@@ -670,6 +683,37 @@ html {
+   border-radius: var(--ov25-variant-thumb-border-radius);
+ }
+ 
++/*
++ * Shared by every standard variant display mode. The cards have no fixed width:
++ * changing the column count lets each card fill its available grid track.
++ * Size/product cards intentionally retain their existing two-column layout.
++ */
++.ov25-variant-card-grid.ov25-variant-card-grid {
++  grid-template-columns: repeat(var(--ov25-variants-per-row), minmax(0, 1fr)) !important;
++}
++
++/*
++ * Keep the existing 4-column thumbnail at 4rem, then scale it with the space
++ * created by the column control. The extra 0.5rem accounts for the wrapper's
++ * padding, while min() prevents a thumbnail from overflowing a narrow track.
++ */
++.ov25-variant-card-grid .ov25-default-variant-card > .ov25-variant-thumb-wrapper {
++  width: min(100%, calc(16rem / var(--ov25-variants-per-row) + 0.5rem));
++}
++
++.ov25-variant-card-grid.ov25-variant-card-grid
++  .ov25-variant-image-container.ov25-variant-image-container {
++  width: 100% !important;
++  height: auto !important;
++  aspect-ratio: 1;
++}
++
++.ov25-variant-card-grid.ov25-variant-card-grid
++  .ov25-variant-thumb-overlay.ov25-variant-thumb-overlay {
++  width: 100% !important;
++  height: 100% !important;
++}
++
+ .ov25-selection-thumbnail img {
+   width: 100%;
+   height: 100%;
+diff --git a/setup/bun.lock b/setup/bun.lock
+index 3d19578..7ec3b0d 100644
+--- a/setup/bun.lock
++++ b/setup/bun.lock
+@@ -21,7 +21,7 @@
+         "class-variance-authority": "^0.7.0",
+         "clsx": "^2.1.0",
+         "lucide-react": "^0.540.0",
+-        "ov25-ui": "0.8.8",
++        "ov25-ui": "0.8.9",
+         "react-colorful": "^5.6.1",
+         "tailwind-merge": "^2.2.0",
+       },
+@@ -425,7 +425,7 @@
+ 
+     "object-assign": ["object-assign@4.1.1", "", {}, "sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg=="],
+ 
+-    "ov25-ui": ["ov25-ui@0.8.8", "", { "dependencies": { "@radix-ui/react-dialog": "^1.1.10", "@radix-ui/react-icons": "^1.3.2", "@radix-ui/react-popover": "^1.1.14", "@radix-ui/react-scroll-area": "^1.2.5", "@radix-ui/react-select": "^2.2.2", "@radix-ui/react-slot": "^1.0.2", "@radix-ui/react-tabs": "^1.1.2", "@react-spring/web": "^10.0.3", "@use-gesture/react": "^10.3.1", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "embla-carousel-react": "^8.6.0", "framer-motion": "^11.16.1", "gsap": "^3.13.0", "lucide-react": "^0.503.0", "react-qr-code": "^2.0.15", "sonner": "^1.7.1", "string-similarity-js": "^2.1.4", "tailwind-merge": "^3.2.0" }, "peerDependencies": { "react": "^19", "react-dom": "^19" } }, "sha512-FIP8GsUiUjNfJgWIPgD0VARJjlzMFZkAZNeuwbLsCe+b3S4UbWl3RqWpB7DEty0MJHJbUA94bgtsoTM7pMcb5w=="],
++    "ov25-ui": ["ov25-ui@0.8.9", "", { "dependencies": { "@radix-ui/react-dialog": "^1.1.10", "@radix-ui/react-icons": "^1.3.2", "@radix-ui/react-popover": "^1.1.14", "@radix-ui/react-scroll-area": "^1.2.5", "@radix-ui/react-select": "^2.2.2", "@radix-ui/react-slot": "^1.0.2", "@radix-ui/react-tabs": "^1.1.2", "@react-spring/web": "^10.0.3", "@use-gesture/react": "^10.3.1", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "embla-carousel-react": "^8.6.0", "framer-motion": "^11.16.1", "gsap": "^3.13.0", "lucide-react": "^0.503.0", "react-qr-code": "^2.0.15", "sonner": "^1.7.1", "string-similarity-js": "^2.1.4", "tailwind-merge": "^3.2.0" }, "peerDependencies": { "react": "^19", "react-dom": "^19" } }, "sha512-r+9PFPGxtUQ8Guzv41K5Dcmz7CrlNcKsFaGzT9PdRkSz70aRIkVNFeiTPLlypex5dJNnqTxg2IdEdtzvt1h8FA=="],
+ 
+     "package-json-from-dist": ["package-json-from-dist@1.0.1", "", {}, "sha512-UEZIS3/by4OC8vL3P2dTXRETpebLI2NiI5vIrjaD/5UtrkFX/tNbwjTSRAGC/+7CAo2pIcBaRgWmcBBHcsaCIw=="],
+ 
+diff --git a/setup/package-lock.json b/setup/package-lock.json
+index 6a59e0a..b0513aa 100644
+--- a/setup/package-lock.json
++++ b/setup/package-lock.json
+@@ -1,12 +1,12 @@
+ {
+   "name": "ov25-setup",
+-  "version": "0.8.8",
++  "version": "0.8.9",
+   "lockfileVersion": 3,
+   "requires": true,
+   "packages": {
+     "": {
+       "name": "ov25-setup",
+-      "version": "0.8.8",
++      "version": "0.8.9",
+       "dependencies": {
+         "@codemirror/commands": "^6.10.3",
+         "@codemirror/lang-css": "^6.3.1",
+@@ -24,7 +24,7 @@
+         "class-variance-authority": "^0.7.0",
+         "clsx": "^2.1.0",
+         "lucide-react": "^0.540.0",
+-        "ov25-ui": "0.8.8",
++        "ov25-ui": "0.8.9",
+         "react-colorful": "^5.6.1",
+         "tailwind-merge": "^2.2.0"
+       },
+@@ -3116,9 +3116,9 @@
+       }
+     },
+     "node_modules/ov25-ui": {
+-      "version": "0.8.8",
+-      "resolved": "https://registry.npmjs.org/ov25-ui/-/ov25-ui-0.8.8.tgz",
+-      "integrity": "sha512-FIP8GsUiUjNfJgWIPgD0VARJjlzMFZkAZNeuwbLsCe+b3S4UbWl3RqWpB7DEty0MJHJbUA94bgtsoTM7pMcb5w==",
++      "version": "0.8.9",
++      "resolved": "https://registry.npmjs.org/ov25-ui/-/ov25-ui-0.8.9.tgz",
++      "integrity": "sha512-r+9PFPGxtUQ8Guzv41K5Dcmz7CrlNcKsFaGzT9PdRkSz70aRIkVNFeiTPLlypex5dJNnqTxg2IdEdtzvt1h8FA==",
+       "license": "MIT",
+       "dependencies": {
+         "@radix-ui/react-dialog": "^1.1.10",
+diff --git a/setup/package.json b/setup/package.json
+index 3bb89c3..5611c20 100644
+--- a/setup/package.json
++++ b/setup/package.json
+@@ -1,6 +1,6 @@
+ {
+   "name": "ov25-setup",
+-  "version": "0.8.8",
++  "version": "0.8.9",
+   "description": "OV25 Configurator Setup visual editor component",
+   "repository": {
+     "type": "git",
+@@ -53,7 +53,7 @@
+     "class-variance-authority": "^0.7.0",
+     "clsx": "^2.1.0",
+     "lucide-react": "^0.540.0",
+-    "ov25-ui": "0.8.8",
++    "ov25-ui": "0.8.9",
+     "react-colorful": "^5.6.1",
+     "tailwind-merge": "^2.2.0"
+   },
+diff --git a/setup/src/components/ConfiguratorSetup/ConfigPanel/index.tsx b/setup/src/components/ConfiguratorSetup/ConfigPanel/index.tsx
+index 3628a19..f0f086c 100644
+--- a/setup/src/components/ConfiguratorSetup/ConfigPanel/index.tsx
++++ b/setup/src/components/ConfiguratorSetup/ConfigPanel/index.tsx
+@@ -91,6 +91,7 @@ const VARIANT_OPTIONS = [
+   { value: 'tabs' as FormVariantDisplayMode, label: 'Tabs', desc: 'Tabbed groups' },
+   { value: 'accordion' as FormVariantDisplayMode, label: 'Accordion', desc: 'Collapsible groups' },
+   { value: 'wizard' as FormVariantDisplayMode, label: 'Wizard', desc: 'Step by step' },
++  { value: 'guided-overview' as FormVariantDisplayMode, label: 'Guided overview', desc: 'Review hub with focused option editors' },
+ ];
+ 
+ const SELECTION_DETAILS_DESKTOP_OPTIONS = [
+diff --git a/setup/src/components/ConfiguratorSetup/StyleEditor/controls.tsx b/setup/src/components/ConfiguratorSetup/StyleEditor/controls.tsx
+index 1acc68b..9b7b26c 100644
+--- a/setup/src/components/ConfiguratorSetup/StyleEditor/controls.tsx
++++ b/setup/src/components/ConfiguratorSetup/StyleEditor/controls.tsx
+@@ -85,7 +85,8 @@ export function StyleSliderControl({ variable, value, defaultValue, onChange }:
+   const current = value || defaultValue;
+   const numericValue = parseNumericValue(current);
+   const isModified = !!value && value !== defaultValue;
+-  const unit = variable.sliderUnit || 'px';
++  // Empty string is intentional for unitless CSS values such as grid column counts.
++  const unit = variable.sliderUnit ?? 'px';
+   const min = variable.sliderMin ?? 0;
+   const max = variable.sliderMax ?? 100;
+   const step = variable.sliderStep ?? 1;
+diff --git a/setup/src/components/ConfiguratorSetup/types.ts b/setup/src/components/ConfiguratorSetup/types.ts
+index 2cf7245..78ee4ba 100644
+--- a/setup/src/components/ConfiguratorSetup/types.ts
++++ b/setup/src/components/ConfiguratorSetup/types.ts
+@@ -6,7 +6,7 @@ export type PreviewLayoutType = LayoutType;
+ export type FormCarouselDisplayMode = 'none' | 'carousel' | 'stacked';
+ export type FormConfiguratorDisplayMode = 'inline' | 'inline-sticky' | 'sheet' | 'modal' | 'variants-only-sheet';
+ export type FormConfiguratorDisplayModeMobile = 'inline' | 'inline-sticky' | 'drawer' | 'modal' | 'variants-only-sheet';
+-export type FormVariantDisplayMode = 'wizard' | 'list' | 'tabs' | 'accordion' | 'tree';
++export type FormVariantDisplayMode = 'wizard' | 'guided-overview' | 'list' | 'tabs' | 'accordion' | 'tree';
+ export type FormSelectionDetailsDisplayMode = 'none' | 'sheet' | 'fullscreen' | 'modal' | 'tooltip';
+ export type FormSelectionDetailsMobileDisplayMode = Exclude<
+   FormSelectionDetailsDisplayMode,
+diff --git a/setup/src/lib/config/configurator-style-variables.ts b/setup/src/lib/config/configurator-style-variables.ts
+index 6be5c1e..7b659c0 100644
+--- a/setup/src/lib/config/configurator-style-variables.ts
++++ b/setup/src/lib/config/configurator-style-variables.ts
+@@ -81,6 +81,7 @@ export const STYLE_GROUPS: StyleGroup[] = [
+       { variable: '--ov25-button-text-color', label: 'Collection text color', defaultValue: '#000000', control: 'color' },
+       { variable: '--ov25-button-hover-background-color', label: 'Collection hover fill', defaultValue: '#fafafa', control: 'color' },
+       { variable: '--ov25-button-hover-text-color', label: 'Collection hover text', defaultValue: '#000000', control: 'color' },
++      { variable: '--ov25-variants-per-row', label: 'Variants per row', defaultValue: '4', control: 'slider', sliderMin: 1, sliderMax: 6, sliderStep: 1, sliderUnit: '', sliderLabels: ['Fewer', 'More'] },
+       { variable: '--ov25-wizard-variants-content-height', label: 'Variant panel height', defaultValue: '600px', control: 'slider', sliderMin: 200, sliderMax: 1200, sliderStep: 50, sliderUnit: 'px', sliderLabels: ['Short', 'Tall'] },
+     ],
+   },
+@@ -185,6 +186,7 @@ export const ELEMENT_SELECTORS: ElementSelector[] = [
+   { selector: '#ov25-content-area', label: 'Content area', element: 'div' },
+   { selector: '#ov25-desktop-variants-content-ungrouped', label: 'Ungrouped variants', element: 'div' },
+   { selector: '#ov25-desktop-variants-content-grouped', label: 'Grouped variants', element: 'div' },
++  { selector: '.ov25-variant-card-grid', label: 'Variant card grid', element: 'div' },
+   { selector: '.ov25-default-variant-card', label: 'Variant card', element: 'div' },
+   { selector: '.ov25-variant-name', label: 'Variant name', element: 'span' },
+   { selector: '.ov25-size-variant-card-grid', label: 'Size variant card grid', element: 'div' },
+@@ -286,6 +288,20 @@ export const ELEMENT_SELECTORS: ElementSelector[] = [
+   { selector: '[data-ov25-snap2-settings-sheet]', label: 'Snap2 settings sheet (variants / checkout)', element: 'div' },
+   { selector: '[data-ov25-wizard-variants-content]', label: 'Wizard content', element: 'div' },
+   { selector: '[data-ov25-wizard-variants-step-content]', label: 'Wizard step content', element: 'div' },
++  { selector: '[data-ov25-wizard-display-mode="guided-overview"]', label: 'Guided Overview root', element: 'div' },
++  { selector: '[data-ov25-guided-overview-header]', label: 'Guided Overview header', element: 'div' },
++  { selector: '.ov25-guided-overview-back', label: 'Guided Overview back to review button', element: 'button' },
++  { selector: '[data-ov25-guided-overview-review="true"]', label: 'Guided Overview review', element: 'div' },
++  { selector: '[data-ov25-guided-overview-review-row]', label: 'Guided Overview review row', element: 'div' },
++  { selector: '[data-ov25-guided-overview-review-part="thumbnail"]', label: 'Guided Overview review thumbnail', element: 'div' },
++  { selector: '[data-ov25-guided-overview-review-part="option"]', label: 'Guided Overview review option', element: 'dt' },
++  { selector: '[data-ov25-guided-overview-review-part="selection"]', label: 'Guided Overview review selection', element: 'dd' },
++  { selector: '[data-ov25-guided-overview-editor]', label: 'Guided Overview option editor', element: 'div' },
++  { selector: '[data-ov25-guided-overview-actions]', label: 'Guided Overview actions', element: 'div' },
++  { selector: '[data-ov25-guided-overview-action="previous"]', label: 'Guided Overview previous action', element: 'button' },
++  { selector: '[data-ov25-guided-overview-action="buy-now"]', label: 'Guided Overview buy now action', element: 'div' },
++  { selector: '[data-ov25-guided-overview-action="next"]', label: 'Guided Overview next action', element: 'button' },
++  { selector: '[data-ov25-checkout-price-label]', label: 'Checkout button price label', element: 'span' },
+   { selector: '[data-ov25-list-variants-content]', label: 'List content', element: 'div' },
+   { selector: '[data-ov25-tabs]', label: 'Tabs container', element: 'div' },
+   { selector: '[data-ov25-tab]', label: 'Individual tab', element: 'div' },
+diff --git a/src/components/ConfiguratorModal.tsx b/src/components/ConfiguratorModal.tsx
+index 8e4f02a..ac47b66 100644
+--- a/src/components/ConfiguratorModal.tsx
++++ b/src/components/ConfiguratorModal.tsx
+@@ -241,11 +241,14 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({
+                   : 'ov:shrink-0 ov:w-[384px] ov:h-full ov:border-l ov:border-gray-200'
+               )}
+             >
+-              {effectiveOverlayStyle === 'wizard' ? (
++              {['wizard', 'guided-overview'].includes(effectiveOverlayStyle) ? (
+                 <div className="ov:flex ov:flex-col ov:h-full ov:bg-(--ov25-background-color)">
+-                  <VariantsHeader />
++                  <VariantsHeader
++                    hideCloseButton={effectiveOverlayStyle === 'guided-overview' && !isMobile}
++                    hideMobileControls={effectiveOverlayStyle === 'guided-overview'}
++                  />
+                   <div className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:overflow-hidden">
+-                    <WizardVariants mode="drawer" />
++                    <WizardVariants mode="drawer" displayMode={effectiveOverlayStyle as 'wizard' | 'guided-overview'} />
+                   </div>
+                 </div>
+               ) : (
+diff --git a/src/components/Snap2ConfiguratorModal.tsx b/src/components/Snap2ConfiguratorModal.tsx
+index 83e6324..9bcc398 100644
+--- a/src/components/Snap2ConfiguratorModal.tsx
++++ b/src/components/Snap2ConfiguratorModal.tsx
+@@ -182,11 +182,13 @@ export const Snap2ConfiguratorModal: React.FC<Snap2ConfiguratorModalProps> = ({
+             style={{ clipPath: 'inset(0 round var(--ov25-rounded-3xl))' }}
+             data-ov25-snap2-shell="modal"
+           >
+-            <VariantsCloseButton
+-              onClick={onClose}
+-              ariaLabel="Close modal"
+-              className={cn('ov:z-101', isShareDialogOpen && 'ov:opacity-0 ov:pointer-events-none')}
+-            />
++            {!isMobile && (
++              <VariantsCloseButton
++                onClick={onClose}
++                ariaLabel="Close modal"
++                className={cn('ov:z-101', isShareDialogOpen && 'ov:opacity-0 ov:pointer-events-none')}
++              />
++            )}
+ 
+             <div
+               className={cn(
+@@ -213,13 +215,16 @@ export const Snap2ConfiguratorModal: React.FC<Snap2ConfiguratorModalProps> = ({
+                 'ov:border-l-0 ov:border-r-0 ov:border-t ov:border-gray-200'
+               ) : undefined}
+             >
+-              {effectiveOverlayStyle === 'wizard' ? (
++              {['wizard', 'guided-overview'].includes(effectiveOverlayStyle) ? (
+                 <div className="ov:flex ov:flex-col ov:h-full ov:bg-(--ov25-background-color)">
+-                  <VariantsHeader />
++                  <VariantsHeader
++                    hideCloseButton={effectiveOverlayStyle === 'guided-overview' && !isMobile}
++                    hideMobileControls={effectiveOverlayStyle === 'guided-overview'}
++                  />
+                   <div
+                     className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:overflow-hidden"
+                   >
+-                    <WizardVariants mode="drawer" />
++                    <WizardVariants mode="drawer" displayMode={effectiveOverlayStyle as 'wizard' | 'guided-overview'} />
+                   </div>
+                 </div>
+               ) : (
+diff --git a/src/components/Snap2InlineSheetDesktopShell.tsx b/src/components/Snap2InlineSheetDesktopShell.tsx
+index b88f6b2..ec4f191 100644
+--- a/src/components/Snap2InlineSheetDesktopShell.tsx
++++ b/src/components/Snap2InlineSheetDesktopShell.tsx
+@@ -133,11 +133,13 @@ export const Snap2InlineSheetDesktopShell: React.FC = () => {
+             sheetZClass="ov:z-102 ov:pointer-events-auto"
+             showCloseButton={false}
+           >
+-            {effectiveOverlayStyle === 'wizard' ? (
++            {['wizard', 'guided-overview'].includes(effectiveOverlayStyle) ? (
+               <div className="ov:flex ov:flex-col ov:h-full ov:bg-(--ov25-background-color)">
+-                <VariantsHeader />
++                <VariantsHeader
++                  hideMobileControls={effectiveOverlayStyle === 'guided-overview'}
++                />
+                 <div className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:overflow-hidden">
+-                  <WizardVariants mode="drawer" />
++                  <WizardVariants mode="drawer" displayMode={effectiveOverlayStyle as 'wizard' | 'guided-overview'} />
+                 </div>
+               </div>
+             ) : (
+diff --git a/src/components/VariantSelectMenu/AccordionVariants.tsx b/src/components/VariantSelectMenu/AccordionVariants.tsx
+index 7539f31..39ef85e 100644
+--- a/src/components/VariantSelectMenu/AccordionVariants.tsx
++++ b/src/components/VariantSelectMenu/AccordionVariants.tsx
+@@ -39,6 +39,7 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
+     isVariantsOpen,
+     setActiveOptionId,
+     expandToOptionIdOnOpen,
++    hidePricing,
+     getString,
+   } = useOV25UI();
+ 
+@@ -169,7 +170,7 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
+           />
+           {expandedAccordion === 'size' && (
+             <div
+-              className={`ov:min-h-0 ov:max-h-full ov:overflow-y-auto  ov:pt-4 ov:pb-4 ${mode === 'drawer' && isMobile ? 'ov:pb-20' : ''}`}
++              className={`ov:min-h-0 ov:max-h-full ov:overflow-y-auto  ov:pt-4 ov:pb-4 ${mode === 'drawer' && isMobile && !hidePricing ? 'ov:pb-20' : ''}`}
+               {...(mode === 'inline' ? { 'data-ov25-list-variants-content': true as const } : {})}
+             >
+               <div className={`ov25-size-variant-card-grid ov:grid ${getGridColsClass(2)}`}>
+@@ -205,7 +206,7 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
+                 )}
+                 <div className="ov:relative ov:min-h-0 ov:flex-1 ov:flex ov:flex-col ov:pb-4">
+                   <div
+-                    className={`ov:min-h-0 ov:flex-1 ${mode === 'drawer' && isMobile ? 'ov:pb-20' : ''} ${optionId !== 'modules' && isFilterOpen[optionId] ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}
++                    className={`ov:min-h-0 ov:flex-1 ${mode === 'drawer' && isMobile && !hidePricing ? 'ov:pb-20' : ''} ${optionId !== 'modules' && isFilterOpen[optionId] ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}
+                     {...(mode === 'inline' ? { 'data-ov25-list-variants-content': true as const } : {})}
+                   >
+                     {optionId === 'modules' ? (
+@@ -213,7 +214,6 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
+                     ) : (
+                       <GroupedVariantsList
+                         groups={variants}
+-                        gridColsClass={getGridColsClass(4)}
+                         VariantCard={DefaultVariantCard}
+                         isMobile={isMobile}
+                         onSelect={handleVariantSelect}
+diff --git a/src/components/VariantSelectMenu/CheckoutButton.tsx b/src/components/VariantSelectMenu/CheckoutButton.tsx
+index 85d4336..2a6f356 100644
+--- a/src/components/VariantSelectMenu/CheckoutButton.tsx
++++ b/src/components/VariantSelectMenu/CheckoutButton.tsx
+@@ -73,7 +73,12 @@ export const CheckoutButton: React.FC<CheckoutButtonProps> = ({
+   const buyNowText = getString('checkoutBuyNow', priceVars, 'Buy now');
+   /* Rendered as nothing, not an empty span: the button is a flex row with a gap, so an empty
+      node would still reserve that gap and knock the label off centre. */
+-  const priceLabel = hasReceivedPrice ? <span>{formattedPrice}</span> : null;
++  const priceLabelText = hasReceivedPrice
++    ? getString('checkoutPriceLabel', priceVars, formattedPrice)
++    : '';
++  const priceLabel = priceLabelText
++    ? <span data-ov25-checkout-price-label>{priceLabelText}</span>
++    : null;
+   /*
+    * Both callbacks need the current normalized price and SKU. Those messages are independent and
+    * may arrive in either order, so a valid price alone must not enable checkout with a null/stale SKU.
+diff --git a/src/components/VariantSelectMenu/DesktopVariants.tsx b/src/components/VariantSelectMenu/DesktopVariants.tsx
+index 7d52981..a0f2642 100644
+--- a/src/components/VariantSelectMenu/DesktopVariants.tsx
++++ b/src/components/VariantSelectMenu/DesktopVariants.tsx
+@@ -135,7 +135,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
+               <NoResults />
+             )}
+             {((shouldDestructureGroups || !isGrouped) ? (
+-              <div id="ov25-desktop-variants-content-ungrouped" className={`ov:grid ov:h-full ov:pb-8 ov:content-start ${isSizeOption ? 'ov25-size-variant-card-grid' : ''} ${getGridColsClass(gridDivide)} ${isFilterOpen ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}>
++              <div id="ov25-desktop-variants-content-ungrouped" className={`ov:grid ov:h-full ov:pb-8 ov:content-start ${isSizeOption ? `ov25-size-variant-card-grid ${getGridColsClass(gridDivide)}` : 'ov25-variant-card-grid'} ${isFilterOpen ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}>
+                 <VariantsContent variantsToRender={isGrouped ? (variantsToRender as VariantGroup[])[0].variants : variantsToRender as Variant[]} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
+               </div>
+             ) : (
+@@ -146,7 +146,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
+                       <div className="ov:flex ov:items-center ov:mx-4 ov:justify-between ov:border-t ov:border-gray-200 ">
+                         <h3 className="ov25-group-name ov:text-lg ov:py-2 ov:text-(--ov25-secondary-text-color)">{variantGroup.groupName}</h3>
+                       </div>
+-                      <div id="ov25-variant-group-content" className={`ov:grid ${getGridColsClass(gridDivide)} ov:pb-4`}>
++                      <div id="ov25-variant-group-content" className={`ov:grid ${isSizeOption ? `ov25-size-variant-card-grid ${getGridColsClass(gridDivide)}` : 'ov25-variant-card-grid'} ov:pb-4`}>
+                         <VariantsContent variantsToRender={variantGroup.variants} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
+                       </div>
+                     </div>
+@@ -164,4 +164,4 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
+   );
+ };
+ 
+-export default DesktopVariants
+\ No newline at end of file
++export default DesktopVariants
+diff --git a/src/components/VariantSelectMenu/GroupedVariantsList.tsx b/src/components/VariantSelectMenu/GroupedVariantsList.tsx
+index b54e266..0716002 100644
+--- a/src/components/VariantSelectMenu/GroupedVariantsList.tsx
++++ b/src/components/VariantSelectMenu/GroupedVariantsList.tsx
+@@ -17,7 +17,6 @@ export interface GroupedVariantsListGroup {
+ 
+ export interface GroupedVariantsListProps {
+   groups: GroupedVariantsListGroup[];
+-  gridColsClass: string;
+   VariantCard: React.ComponentType<VariantCardProps>;
+   isMobile: boolean;
+   onSelect: (variant: Variant) => void;
+@@ -31,7 +30,6 @@ export interface GroupedVariantsListProps {
+ 
+ export const GroupedVariantsList: React.FC<GroupedVariantsListProps> = ({
+   groups,
+-  gridColsClass,
+   VariantCard,
+   isMobile,
+   onSelect,
+@@ -55,7 +53,7 @@ export const GroupedVariantsList: React.FC<GroupedVariantsListProps> = ({
+                 )}
+               </h4>
+             )}
+-            <div className={`ov:grid ${gridColsClass}`}>
++            <div className="ov25-variant-card-grid ov:grid">
+               <VariantsContent
+                 variantsToRender={group.variants}
+                 VariantCard={VariantCard}
+diff --git a/src/components/VariantSelectMenu/MobileVariants.tsx b/src/components/VariantSelectMenu/MobileVariants.tsx
+index b2d6190..98c8659 100644
+--- a/src/components/VariantSelectMenu/MobileVariants.tsx
++++ b/src/components/VariantSelectMenu/MobileVariants.tsx
+@@ -189,7 +189,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
+                   ) : (
+                     <>
+                       <div id="ov25-mobile-variants-content" className={`ov:h-full ${isFilterOpen ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}>
+-                        <div style={{ display: 'grid' }} className={`ov:px-2 ov:pb-63 ${getGridColsClass(gridDivide)}`}>
++                        <div style={{ display: 'grid' }} className={`ov:px-2 ov:pb-63 ${isSizeOption ? `ov25-size-variant-card-grid ${getGridColsClass(gridDivide)}` : 'ov25-variant-card-grid'}`}>
+                           <VariantsContent variantsToRender={group.variants} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
+                         </div>
+                       </div>
+@@ -250,7 +250,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
+             <NoResults />
+             )}
+             <div id="ov25-mobile-variants-content" className={`ov:h-full ${isFilterOpen ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}>
+-              <div style={{ display: 'grid' }} className={`ov:px-0 ov:pb-63 ov:gap-2 ${isSizeOption ? 'ov25-size-variant-card-grid' : ''} ${getGridColsClass(gridDivide)}`}>
++              <div style={{ display: 'grid' }} className={`ov:px-0 ov:pb-63 ov:gap-2 ${isSizeOption ? `ov25-size-variant-card-grid ${getGridColsClass(gridDivide)}` : 'ov25-variant-card-grid'}`}>
+                 <VariantsContent variantsToRender={variantsToRender} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
+               </div>
+             </div>
+@@ -297,4 +297,4 @@ export const MobileVariants = React.memo(({variants, VariantCard, isMobile, onSe
+     prevProps.VariantCard === nextProps.VariantCard &&
+     prevProps.onSelect === nextProps.onSelect
+   );
+-});
+\ No newline at end of file
++});
+diff --git a/src/components/VariantSelectMenu/ProductVariantsWrapper.tsx b/src/components/VariantSelectMenu/ProductVariantsWrapper.tsx
+index e974eaf..1f4b969 100644
+--- a/src/components/VariantSelectMenu/ProductVariantsWrapper.tsx
++++ b/src/components/VariantSelectMenu/ProductVariantsWrapper.tsx
+@@ -301,7 +301,7 @@ export function ProductVariantsWrapper({
+                   </h4>
+                 )}
+                 <div className="ov25-variant-group-content ov:bg-(--ov25-background-color) ov:pt-4">
+-                  <div className={`ov:grid ${getGridColsClass(4)}`}>
++                  <div className="ov25-variant-card-grid ov:grid">
+                     <VariantsContent
+                       variantsToRender={group.variants}
+                       VariantCard={DefaultVariantCard}
+@@ -321,7 +321,7 @@ export function ProductVariantsWrapper({
+       </div>
+     );
+ 
+-    const needsBottomMarginForButton = isMobile && !isInline;
++    const needsBottomMarginForButton = isMobile && !isInline && !hidePricing;
+     const isMobileList = isMobile && !isInline && variantShellOverlayStyle === VariantDisplayStyleOverlay.List;
+ 
+     // When the active option changes, scroll to the active option (list mode only, used for when you have a custom button to open the configurator on an option)
+diff --git a/src/components/VariantSelectMenu/TreeVariants.tsx b/src/components/VariantSelectMenu/TreeVariants.tsx
+index ca790b7..b1b979c 100644
+--- a/src/components/VariantSelectMenu/TreeVariants.tsx
++++ b/src/components/VariantSelectMenu/TreeVariants.tsx
+@@ -40,6 +40,7 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
+     isVariantsOpen,
+     activeOptionId,
+     setActiveOptionId,
++    hidePricing,
+     getString,
+   } = useOV25UI();
+ 
+@@ -159,7 +160,7 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
+     setCurrentView(null);
+   }, [isTreePanelOpen, activeOptionId, validOptionIds]);
+ 
+-  const scrollContentClass = mode === 'drawer' && isMobile ? 'ov:pb-20' : '';
++  const scrollContentClass = mode === 'drawer' && isMobile && !hidePricing ? 'ov:pb-20' : '';
+ 
+   const getOptionHeaderLabel = useCallback(
+     (optionName: string) =>
+@@ -246,7 +247,6 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
+           >
+             <GroupedVariantsList
+               groups={opt.variants}
+-              gridColsClass={getGridColsClass(4)}
+               VariantCard={DefaultVariantCard}
+               isMobile={isMobile}
+               onSelect={handleVariantSelect}
+diff --git a/src/components/VariantSelectMenu/VariantContentDesktop.tsx b/src/components/VariantSelectMenu/VariantContentDesktop.tsx
+index 4fa15d8..d8dd604 100644
+--- a/src/components/VariantSelectMenu/VariantContentDesktop.tsx
++++ b/src/components/VariantSelectMenu/VariantContentDesktop.tsx
+@@ -168,11 +168,13 @@ export function VariantContentDesktop() {
+                 transform: 'translateX(100%)'
+               }}
+             >
+-                {variantDisplayStyleOverlay === 'wizard' ? (
++                {['wizard', 'guided-overview'].includes(variantDisplayStyleOverlay) ? (
+                   <div className="ov:flex ov:flex-col ov:h-full ov:bg-(--ov25-background-color)">
+-                    <VariantsHeader />
++                    <VariantsHeader
++                      hideMobileControls={variantDisplayStyleOverlay === 'guided-overview'}
++                    />
+                     <div className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:overflow-hidden">
+-                      <WizardVariants mode="drawer" />
++                      <WizardVariants mode="drawer" displayMode={variantDisplayStyleOverlay as 'wizard' | 'guided-overview'} />
+                     </div>
+                   </div>
+                 ) : (
+diff --git a/src/components/VariantSelectMenu/VariantSelectMenu.tsx b/src/components/VariantSelectMenu/VariantSelectMenu.tsx
+index f08ee35..81df901 100644
+--- a/src/components/VariantSelectMenu/VariantSelectMenu.tsx
++++ b/src/components/VariantSelectMenu/VariantSelectMenu.tsx
+@@ -105,7 +105,7 @@ export const VariantSelectMenu: React.FC<VariantSelectMenuProps> = ({
+   ];
+   const effectiveVariantDisplayStyleInline = isMobile ? variantDisplayStyleInlineMobile : variantDisplayStyleInline;
+   const isInlineListLike = inlineVariantsEnabled && listLikeInline.includes(effectiveVariantDisplayStyleInline);
+-  const isInlineWizard = inlineVariantsEnabled && effectiveVariantDisplayStyleInline === 'wizard';
++  const isInlineWizard = inlineVariantsEnabled && ['wizard', 'guided-overview'].includes(effectiveVariantDisplayStyleInline);
+   const isInlineTall = isInlineListLike || isInlineWizard;
+   const usePageScrollStickyList =
+     stickyLayoutActive &&
+@@ -139,7 +139,7 @@ export const VariantSelectMenu: React.FC<VariantSelectMenuProps> = ({
+   /** Render the page controls for the role active in the current responsive mode. */
+   const renderTriggerOrInlineVariants = () => {
+     if (inlineVariantsEnabled) {
+-      if (isInlineWizard) return <div className={inlineTallWrapperClass}><WizardVariants mode="inline" /></div>;
++      if (isInlineWizard) return <div className={inlineTallWrapperClass}><WizardVariants mode="inline" displayMode={effectiveVariantDisplayStyleInline as 'wizard' | 'guided-overview'} /></div>;
+       if (isInlineListLike) {
+         return (
+           <div
+@@ -174,17 +174,17 @@ export const VariantSelectMenu: React.FC<VariantSelectMenuProps> = ({
+         className="ov:z-10"
+       >
+         <div className='ov:w-full ov:h-full ov:flex ov:flex-col ov:absolute ov:top-0 ov:left-0 ov:pointer-events-auto'>
+-          {variantDisplayStyleMobile === 'wizard' ? (
++          {['wizard', 'guided-overview'].includes(variantDisplayStyleMobile) ? (
+             <div className="ov:flex ov:flex-col ov:h-full ov:bg-(--ov25-background-color)">
+-              <VariantsHeader />
++              {variantDisplayStyleMobile === 'wizard' ? <VariantsHeader /> : null}
+               <div className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:overflow-hidden">
+-                <WizardVariants mode="drawer" />
++                <WizardVariants mode="drawer" displayMode={variantDisplayStyleMobile as 'wizard' | 'guided-overview'} />
+               </div>
+             </div>
+           ) : (
+             isSnap2Mode ? <Snap2Wrapper /> : <ProductVariantsWrapper />
+           )}
+-          {variantDisplayStyleMobile !== 'wizard' && (
++          {!['wizard', 'guided-overview'].includes(variantDisplayStyleMobile) && (
+             <div className={`${drawerSize === 'large' || drawerSize === 'small' ? 'ov:fixed ov:bottom-0 ov:left-0 ov:w-full ov:z-20' : ''}`}>
+               <MobileCheckoutButton />
+             </div>
+diff --git a/src/components/VariantSelectMenu/VariantsHeader.tsx b/src/components/VariantSelectMenu/VariantsHeader.tsx
+index 08d6e5c..6bb2500 100644
+--- a/src/components/VariantSelectMenu/VariantsHeader.tsx
++++ b/src/components/VariantSelectMenu/VariantsHeader.tsx
+@@ -13,12 +13,25 @@ export interface VariantsHeaderProps {
+   hideCloseButton?: boolean;
+   /** When set, used as {@link VariantsCloseButton} `onClick` instead of the default sheet close behavior. */
+   onCloseButtonClick?: () => void;
++  /** Omit the compact previous/next controls; the guided-overview wizard owns its navigation. */
++  hideMobileControls?: boolean;
+ }
+ 
+-export const VariantsHeader = ({ hideCloseButton = false, onCloseButtonClick }: VariantsHeaderProps = {}) => {
++export const VariantsHeader = ({ hideCloseButton = false, onCloseButtonClick, hideMobileControls = false }: VariantsHeaderProps = {}) => {
+   const { logoURL, hideLogo, handleNextOption, handlePreviousOption, activeOptionId, allOptions, showOptional, isSnap2Mode, isMobile, currentProduct } = useOV25UI();
+ 
+-  if (isMobile) return <div id="ov25-variants-header-mobile" className='w-full h-1'></div>;
++  if (isMobile) {
++    return (
++      <div
++        id="ov25-variants-header-mobile"
++        className={cn('ov:relative ov:w-full', hideMobileControls ? 'ov:min-h-12' : 'ov:h-1')}
++      >
++        {hideMobileControls && !hideCloseButton && (
++          <VariantsCloseButton onClick={onCloseButtonClick} className="ov:top-3" />
++        )}
++      </div>
++    );
++  }
+ 
+   const currentOption = allOptions.find(opt => opt.id === activeOptionId);
+ 
+@@ -47,7 +60,7 @@ export const VariantsHeader = ({ hideCloseButton = false, onCloseButtonClick }:
+       </div>}
+ 
+       {/* Mobile(ipad size) Controls: Title with separate chevron buttons */}
+-      <div id="ov25-carousel-controls" className={cn(
++      {!hideMobileControls && <div id="ov25-carousel-controls" className={cn(
+         "ov25-mobile-variants-carousel-controls ov:relative ov:flex ov:cursor-pointer ov:items-center ov:justify-between ov:w-full ov:p-4 ov:py-4.5 ov:pt-6",
+         isSnap2Mode ? "ov:lg:hidden" : "ov:md:hidden"
+       )}>
+@@ -74,7 +87,7 @@ export const VariantsHeader = ({ hideCloseButton = false, onCloseButtonClick }:
+         >
+           <ChevronUp strokeWidth={1} className="ov:rotate-90 ov:h-5.5 ov:fill-transparent ov:text-(--ov25-secondary-text-color)" />
+         </button>
+-      </div>
++      </div>}
+     </>
+   );
+-};
+\ No newline at end of file
++};
+diff --git a/src/components/VariantSelectMenu/VariantsOnlySheet.tsx b/src/components/VariantSelectMenu/VariantsOnlySheet.tsx
+index ebb325a..0e56d2c 100644
+--- a/src/components/VariantSelectMenu/VariantsOnlySheet.tsx
++++ b/src/components/VariantSelectMenu/VariantsOnlySheet.tsx
+@@ -173,11 +173,11 @@ export function VariantsOnlySheet() {
+             >
+               <X size={24} className="ov:text-(--ov25-secondary-text-color)" strokeWidth={2} />
+             </button>
+-            {effectiveOverlayStyle === 'wizard' ? (
++            {['wizard', 'guided-overview'].includes(effectiveOverlayStyle) ? (
+               <>
+-                <VariantsHeader hideCloseButton />
++                <VariantsHeader hideCloseButton hideMobileControls={effectiveOverlayStyle === 'guided-overview'} />
+                 <div className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:overflow-hidden">
+-                  <WizardVariants mode="drawer" />
++                  <WizardVariants mode="drawer" displayMode={effectiveOverlayStyle as 'wizard' | 'guided-overview'} />
+                 </div>
+               </>
+             ) : (
+diff --git a/src/components/VariantSelectMenu/WizardVariants.tsx b/src/components/VariantSelectMenu/WizardVariants.tsx
+index 9d8fe8d..c9b6561 100644
+--- a/src/components/VariantSelectMenu/WizardVariants.tsx
++++ b/src/components/VariantSelectMenu/WizardVariants.tsx
+@@ -1,5 +1,5 @@
+ import React, { useState, useEffect, useRef, useCallback } from 'react';
+-import { ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
++import { ChevronDown, ChevronLeft, ChevronRight, Undo2 } from 'lucide-react';
+ import { useOV25UI } from '../../contexts/ov25-ui-context.js';
+ import { VariantsContent } from './VariantsContent.js';
+ import type { Variant } from './ProductVariants.js';
+@@ -23,12 +23,14 @@ const SIZE_BATCH_SIZE = 4;
+ const DROPDOWN_STEP_THRESHOLD = 6;
+ 
+ export type WizardVariantsMode = 'inline' | 'drawer';
++export type WizardVariantsDisplayMode = 'wizard' | 'guided-overview';
+ 
+ export interface WizardVariantsProps {
+   mode: WizardVariantsMode;
++  displayMode?: WizardVariantsDisplayMode;
+ }
+ 
+-export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
++export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode, displayMode = 'wizard' }) => {
+   const {
+     variantPanelOptions,
+     selectedSelections,
+@@ -42,18 +44,26 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
+     addToBasketFunction,
+     disableAddToCart,
+     disableBuyNow,
++    hidePricing,
+     isSnap2Mode,
++    isMobile,
+     activeOptionId,
+     setActiveOptionId,
+     getString,
+   } = useOV25UI();
+ 
+-  const [currentStep, setCurrentStep] = useState(0);
++  const isGuidedOverview = displayMode === 'guided-overview';
++  const [currentStep, setCurrentStep] = useState(() => isGuidedOverview ? variantPanelOptions.length : 0);
++  const previousOptionCountRef = useRef(variantPanelOptions.length);
+ 
+   useEffect(() => {
++    // Guided Overview owns its entry state: opening a sheet must stay on Review even when the
++    // configurator already has an active/default option. Once the user enters an editor,
++    // currentStep is no longer the review index and normal active-option syncing resumes.
++    if (isGuidedOverview && currentStep === variantPanelOptions.length) return;
+     const idx = variantPanelOptions.findIndex(o => o.id === activeOptionId);
+     if (idx >= 0) setCurrentStep(idx);
+-  }, [activeOptionId, variantPanelOptions]);
++  }, [activeOptionId, currentStep, isGuidedOverview, variantPanelOptions]);
+   const [visibleCount, setVisibleCount] = useState<{ [optionId: string]: number }>({});
+   const [isFilterOpen, setIsFilterOpen] = useState<{ [optionId: string]: boolean }>({});
+   const [previousFilteredCounts, setPreviousFilteredCounts] = useState<{ [optionId: string]: number }>({});
+@@ -76,12 +86,37 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
+     }));
+   }, []);
+ 
++  const goToReview = () => {
++    setCurrentStep(variantPanelOptions.length);
++    setActiveOptionId(null);
++  };
++
+   const goNext = () => {
++    if (isGuidedOverview) {
++      const nextStep = isReviewStep
++        ? 0
++        : currentStep < variantPanelOptions.length - 1
++          ? currentStep + 1
++          : variantPanelOptions.length;
++      setCurrentStep(nextStep);
++      setActiveOptionId(variantPanelOptions[nextStep]?.id ?? null);
++      return;
++    }
+     const nextStep = Math.min(currentStep + 1, totalSteps - 1);
+     setCurrentStep(nextStep);
+     setActiveOptionId(nextStep < variantPanelOptions.length ? variantPanelOptions[nextStep].id : null);
+   };
+   const goBack = () => {
++    if (isGuidedOverview) {
++      if (isReviewStep || currentStep === 0) {
++        goToReview();
++        return;
++      }
++      const previousStep = currentStep - 1;
++      setCurrentStep(previousStep);
++      setActiveOptionId(variantPanelOptions[previousStep]?.id ?? null);
++      return;
++    }
+     const prevStep = Math.max(currentStep - 1, 0);
+     setCurrentStep(prevStep);
+     setActiveOptionId(variantPanelOptions[prevStep]?.id ?? null);
+@@ -118,8 +153,14 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
+   }, [variantPanelOptions, applySearchAndFilters, previousFilteredCounts]);
+ 
+   useEffect(() => {
+-    setCurrentStep(s => Math.min(s, Math.max(0, totalSteps - 1)));
+-  }, [totalSteps]);
++    const previousReviewStep = previousOptionCountRef.current;
++    const nextReviewStep = variantPanelOptions.length;
++    setCurrentStep(s => {
++      if (isGuidedOverview && s === previousReviewStep) return nextReviewStep;
++      return Math.min(s, Math.max(0, totalSteps - 1));
++    });
++    previousOptionCountRef.current = variantPanelOptions.length;
++  }, [isGuidedOverview, totalSteps, variantPanelOptions.length]);
+ 
+   useEffect(() => {
+     if (mode !== 'drawer' || !rootRef.current) return;
+@@ -189,20 +230,45 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
+   const hasMore = count < allVariants.length;
+   const isFilterOpenForOption = currentOption ? (isFilterOpen[currentOption.id] || false) : false;
+ 
+-  const useDropdown = totalSteps > DROPDOWN_STEP_THRESHOLD;
++  const useDropdown = !isGuidedOverview && totalSteps > DROPDOWN_STEP_THRESHOLD;
+   const hasAddToBasket = typeof addToBasketFunction === 'function' && !disableAddToCart;
+   const hasBuyNow = typeof buyNowFunction === 'function' && !disableBuyNow;
+-  const hasCheckoutActions = hasAddToBasket || hasBuyNow;
++  const hasCheckoutActions = !hidePricing && (hasAddToBasket || hasBuyNow);
++  const showGuidedOverviewBuyNow = !hidePricing && hasBuyNow;
+   const reviewStepLabel = hasCheckoutActions
+     ? getString('wizardReview', undefined, 'Review')
+     : getString('wizardOverview', undefined, 'Overview');
+   const getStepLabel = (idx: number) =>
+     idx === totalSteps - 1 ? reviewStepLabel : variantPanelOptions[idx]?.name ?? '';
++  const guidedOverviewPreviousStep = isReviewStep
++    ? null
++    : currentStep === 0
++      ? totalSteps - 1
++      : currentStep - 1;
++  const guidedOverviewNextStep = isReviewStep
++    ? 0
++    : currentStep < variantPanelOptions.length - 1
++      ? currentStep + 1
++      : totalSteps - 1;
++  const guidedOverviewPreviousLabel = guidedOverviewPreviousStep == null
++    ? getString('wizardPreviousButtonLabel', {}, 'Prev')
++    : getString(
++        'wizardPreviousStep',
++        { STEP_LABEL: getStepLabel(guidedOverviewPreviousStep) },
++        getStepLabel(guidedOverviewPreviousStep),
++      );
++  const guidedOverviewNextLabel = guidedOverviewNextStep == null
++    ? getString('wizardNextButtonLabel', {}, 'Next')
++    : getString(
++        'wizardNextStep',
++        { STEP_LABEL: getStepLabel(guidedOverviewNextStep) },
++        getStepLabel(guidedOverviewNextStep),
++      );
+   const stepContentClasses = mode === 'inline'
+     ? 'ov:flex ov:flex-col ov:bg-[var(--ov25-background-color)]'
+     : 'ov:flex ov:flex-col ov:bg-[var(--ov25-background-color)]';
+ 
+-  const stepIndicatorBlock = (
++  const standardStepIndicatorBlock = (
+     <div className="ov25-option-header ov:flex ov:flex-col ov:gap-2 ov:px-4 ov:py-3">
+       {useDropdown ? (
+         <div className="ov:relative">
+@@ -275,6 +341,36 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
+     </div>
+   );
+ 
++  const guidedOverviewHeaderBlock = (
++    <div
++      data-ov25-guided-overview-header
++      className="ov25-option-header ov:relative ov:flex ov:items-center ov:justify-center ov:min-h-16 ov:px-12 ov:py-3 ov:border-b ov:border-(--ov25-border-color)"
++    >
++      <h2 className="ov:text-base ov:font-semibold ov:text-(--ov25-secondary-color) ov:text-center">
++        {isReviewStep || !currentOption
++          ? reviewStepLabel
++          : getString(
++              'wizardChooseOption',
++              { OPTION_NAME: currentOption.name },
++              `Choose ${currentOption.name}`,
++            )}
++      </h2>
++      {!isReviewStep && (
++        <button
++          type="button"
++          onClick={goToReview}
++          aria-label={getString('wizardBackToReviewLabel', {}, 'Back to review')}
++          title={getString('wizardBackToReviewLabel', {}, 'Back to review')}
++          className="ov25-guided-overview-back ov:absolute ov:left-3 ov:top-1/2 ov:-translate-y-1/2 ov:flex ov:h-9 ov:w-9 ov:items-center ov:justify-center ov:rounded-full ov:text-(--ov25-secondary-text-color) ov:cursor-pointer ov:hover:bg-(--ov25-hover-color) ov:transition-colors"
++        >
++          <Undo2 size={20} strokeWidth={1.75} aria-hidden />
++        </button>
++      )}
++    </div>
++  );
++
++  const stepIndicatorBlock = isGuidedOverview ? guidedOverviewHeaderBlock : standardStepIndicatorBlock;
++
+   const filterBlock = !isReviewStep && currentOption && currentOption.id !== 'size' && currentOption.id !== 'modules' && (
+     <div className="ov:shrink-0 ov:h-(--ov25-wizard-variants-filter-height) ov:flex ov:items-center">
+       <div className="ov:w-full">
+@@ -289,11 +385,11 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
+   );
+ 
+   const buttonsBlock = totalSteps > 1 && (
+-    <div className={`ov25-checkout-button-wrapper ov:shrink-0 ov:flex ov:items-center ov:justify-between ov:gap-3 ${isReviewStep ? '' : 'ov:px-4 ov:py-2'}`}>
++    <div className={`ov25-checkout-button-wrapper ov25-wizard-button-block ov:shrink-0 ov:flex ov:items-center ov:justify-between ov:gap-3 ${isReviewStep && !isMobile ? '' : 'ov:px-4 ov:py-2'}`}>
+       <button
+         onClick={goBack}
+         disabled={isFirstStep}
+-        className="ov:flex ov:items-center ov:gap-1 ov:px-3 ov:py-2 ov:text-sm ov:text-(--ov25-secondary-text-color) ov:disabled:opacity-30 ov:disabled:cursor-not-allowed ov:hover:bg-(--ov25-hover-color) ov:rounded ov:transition-colors"
++        className="ov25-wizard-button-back ov:flex ov:items-center ov:gap-1 ov:px-3 ov:py-2 ov:text-sm ov:text-(--ov25-secondary-text-color) ov:disabled:opacity-30 ov:disabled:cursor-not-allowed ov:hover:bg-(--ov25-hover-color) ov:rounded ov:transition-colors"
+       >
+         <ChevronLeft size={18} />
+         {getString('wizardBackButtonLabel', {}, 'Back')}
+@@ -303,14 +399,14 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
+           <div className="ov:flex-1 ov:min-w-0" aria-hidden />
+         ) : (
+           <div className="ov:flex-1 ov:min-w-0">
+-            <CheckoutButton />
++            <CheckoutButton embedded={isMobile} />
+           </div>
+         )
+       ) : !isReviewStep ? (
+         <Button
+           onClick={goNext}
+           variant="configure"
+-          className="ov:flex-1 ov:flex ov:items-center ov:justify-center  ov:gap-1 ov:uppercase ov:disabled:cursor-not-allowed"
++          className="ov25-wizard-button-next ov:flex-1 ov:flex ov:items-center ov:justify-center  ov:gap-1 ov:uppercase ov:disabled:cursor-not-allowed"
+         >
+           {getString('wizardNextButtonLabel', {}, 'Next')}
+           <ChevronRight size={18} />
+@@ -319,11 +415,50 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
+     </div>
+   );
+ 
++  const guidedOverviewButtonsBlock = (
++    <div
++      data-ov25-guided-overview-actions
++      data-ov25-guided-overview-has-buy-now={showGuidedOverviewBuyNow ? 'true' : 'false'}
++      className="ov25-checkout-button-wrapper ov25-wizard-button-block ov:shrink-0 ov:grid ov:grid-cols-2 ov:items-stretch ov:gap-2 ov:px-4 ov:py-3 ov:border-t ov:border-(--ov25-border-color) ov:bg-(--ov25-background-color)"
++    >
++      <button
++        type="button"
++        onClick={goBack}
++        disabled={isReviewStep}
++        title={guidedOverviewPreviousLabel}
++        data-ov25-guided-overview-action="previous"
++        className="ov25-wizard-button-back ov:flex ov:items-center ov:justify-center ov:gap-1 ov:min-w-0 ov:px-2 ov:py-2 ov:text-sm ov:uppercase ov:text-(--ov25-secondary-text-color) ov:border ov:border-(--ov25-border-color) ov:rounded-[var(--ov25-cta-border-radius)] ov:cursor-pointer ov:hover:bg-(--ov25-hover-color) ov:disabled:opacity-30 ov:disabled:cursor-not-allowed ov:transition-colors"
++      >
++        <ChevronLeft size={18} />
++        <span className="ov:truncate">{guidedOverviewPreviousLabel}</span>
++      </button>
++      <button
++        type="button"
++        onClick={goNext}
++        disabled={variantPanelOptions.length === 0}
++        title={guidedOverviewNextLabel}
++        data-ov25-guided-overview-action="next"
++        className="ov25-wizard-button-next ov:flex ov:items-center ov:justify-center ov:gap-1 ov:min-w-0 ov:px-2 ov:py-2 ov:text-sm ov:uppercase ov:text-(--ov25-secondary-text-color) ov:border ov:border-(--ov25-border-color) ov:rounded-[var(--ov25-cta-border-radius)] ov:cursor-pointer ov:hover:bg-(--ov25-hover-color) ov:disabled:opacity-30 ov:disabled:cursor-not-allowed ov:transition-colors"
++      >
++        <span className="ov:truncate">{guidedOverviewNextLabel}</span>
++        <ChevronRight size={18} />
++      </button>
++      {showGuidedOverviewBuyNow ? (
++        <div data-ov25-guided-overview-action="buy-now" className="ov:col-span-2 ov:min-w-0 ov:[&_.ov25-checkout-button-wrapper]:h-full ov:[&_button]:h-full">
++          <CheckoutButton embedded />
++        </div>
++      ) : null}
++    </div>
++  );
++
++  const activeButtonsBlock = isGuidedOverview ? guidedOverviewButtonsBlock : buttonsBlock;
++
+   const stepContentOnly = (
+     <>
+       {isReviewStep ? (
+         <div
+           data-ov25-wizard-variants-step-content
++          data-ov25-guided-overview-review={isGuidedOverview ? 'true' : undefined}
+           className={`${stepContentClasses} ov25-variant-group-content`}
+         >
+           <div
+@@ -361,23 +496,27 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
+                   SELECTION_LABEL: value || '—',
+                 };
+                 return (
+-                  <div key={option.id} className="ov:flex ov:items-center ov:gap-3">
++                  <div
++                    key={option.id}
++                    data-ov25-guided-overview-review-row={isGuidedOverview ? option.id : undefined}
++                    className="ov:flex ov:items-center ov:gap-3"
++                  >
+                     <button
+                       type="button"
++                      className="ov25-wizard-button-option ov:flex ov:items-center ov:gap-3 ov:w-full ov:text-left ov:cursor-pointer ov:hover:bg-(--ov25-hover-color) ov:rounded-md ov:p-2 ov:-m-2 ov:transition-colors"
+                       onClick={() => {
+                         setCurrentStep(idx);
+                         setActiveOptionId(variantPanelOptions[idx]?.id ?? null);
+                       }}
+-                      className="ov:flex ov:items-center ov:gap-3 ov:w-full ov:text-left ov:cursor-pointer ov:hover:bg-(--ov25-hover-color) ov:rounded-md ov:p-2 ov:-m-2 ov:transition-colors"
+                     >
+-                      <div className="ov:shrink-0">
++                      <div data-ov25-guided-overview-review-part="thumbnail" className="ov25-wizard-button-option-image ov:shrink-0">
+                         <VariantThumb imageUrl={imageUrl} size="lg" />
+                       </div>
+                       <div className="ov:flex ov:flex-1 ov:min-w-0 ov:justify-between ov:gap-4">
+-                        <dt className="ov:text-(--ov25-secondary-text-color) ov:capitalize ov:shrink-0">
++                        <dt data-ov25-guided-overview-review-part="option" className="ov25-wizard-button-option-name ov:text-(--ov25-secondary-text-color) ov:capitalize ov:shrink-0">
+                           {getString('wizardReviewStepOption', reviewStepStringVars, option.name)}
+                         </dt>
+-                        <dd className="ov:text-(--ov25-secondary-text-color) ov:font-normal ov:text-right ov:truncate">
++                        <dd data-ov25-guided-overview-review-part="selection" className="ov25-wizard-button-option-value ov:text-(--ov25-secondary-text-color) ov:font-normal ov:text-right ov:truncate">
+                           {getString('wizardReviewStepSelection', reviewStepStringVars, value || '—')}
+                         </dd>
+                       </div>
+@@ -389,7 +528,11 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
+             </div>
+           </div>
+         ) : !isReviewStep && currentOption?.id === 'modules' ? (
+-        <div data-ov25-wizard-variants-step-content className={`${stepContentClasses} ov25-variant-group-content`}>
++        <div
++          data-ov25-wizard-variants-step-content
++          data-ov25-guided-overview-editor={isGuidedOverview ? currentOption.id : undefined}
++          className={`${stepContentClasses} ov25-variant-group-content`}
++        >
+           <div
+             data-ov25-wizard-variants-content
+             className="ov:relative ov:w-full ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:overflow-y-auto"
+@@ -398,7 +541,11 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
+           </div>
+         </div>
+         ) : (
+-        <div data-ov25-wizard-variants-step-content className={`${stepContentClasses} ov25-variant-group-content`}>
++        <div
++          data-ov25-wizard-variants-step-content
++          data-ov25-guided-overview-editor={isGuidedOverview ? currentOption?.id : undefined}
++          className={`${stepContentClasses} ov25-variant-group-content`}
++        >
+           <div data-ov25-wizard-variants-content className="ov:relative ov:w-full ov:flex ov:flex-col ov:flex-1 ov:min-h-0">
+             <div className="ov:relative ov:w-full ov:h-full ov:flex ov:flex-col">
+               {filteredOption && allVariants.length === 0 && (
+@@ -408,7 +555,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
+               )}
+               {filteredOption && allVariants.length > 0 && (
+                 <div className="ov-wizard-variants-scroll ov:overflow-y-auto ov:h-full ov:p-4">
+-                  <div className={`ov:grid ov:content-start ov:gap-2 ${currentOption!.id === 'size' ? 'ov25-size-variant-card-grid ov:grid-cols-2!' : 'ov:grid-cols-4!'}`}>
++                  <div className={`ov:grid ov:content-start ov:gap-2 ${currentOption!.id === 'size' ? 'ov25-size-variant-card-grid ov:grid-cols-2!' : 'ov25-variant-card-grid'}`}>
+                     <VariantsContent
+                       variantsToRender={visibleVariants}
+                       VariantCard={currentOption!.id === 'size' ? SizeVariantCard : DefaultVariantCard}
+@@ -452,6 +599,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
+     <div
+       ref={rootRef}
+       data-ov25-wizard-variants-mode={mode}
++      data-ov25-wizard-display-mode={displayMode}
+       className="ov:w-full ov:flex-1 ov:min-h-0 ov:flex ov:flex-col ov:bg-(--ov25-background-color) ov:overflow-hidden"
+       style={mode === 'drawer' && availableHeight != null ? { '--ov25-wizard-variants-available-height': `${availableHeight}px` } as React.CSSProperties : undefined}
+     >
+@@ -459,7 +607,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
+       {mode !== 'inline' && filterBlock}
+       <div className="ov:flex-1 ov:min-h-0 ov:flex ov:flex-col">
+         {stepContentOnly}
+-        {mode !== 'inline' && buttonsBlock}
++        {mode !== 'inline' && activeButtonsBlock}
+       </div>
+     </div>
+   );
+@@ -468,6 +616,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
+     const inlineNode = (
+       <div
+         data-ov25-list-variants-mode="inline"
++        data-ov25-wizard-display-mode={displayMode}
+         className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:h-full ov:overflow-hidden ov:bg-(--ov25-background-color)"
+       >
+         <div className="ov:shrink-0">
+@@ -476,11 +625,15 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode }) => {
+         </div>
+         <div
+           data-ov25-list-variants-content
+-          className="ov:flex-1 ov:min-h-0 ov:overflow-y-auto ov:pt-0 ov:pb-2"
++          className={`ov:flex-1 ov:min-h-0 ov:pt-0 ${
++            isGuidedOverview
++              ? 'ov:overflow-hidden ov:pb-0'
++              : 'ov:overflow-y-auto ov:pb-2'
++          }`}
+         >
+           {stepContentOnly}
+         </div>
+-        {buttonsBlock}
++        {activeButtonsBlock}
+       </div>
+     );
+     return isSnap2Mode ? <Snap2VariantSheetColumn>{inlineNode}</Snap2VariantSheetColumn> : inlineNode;
+diff --git a/src/contexts/ov25-ui-context.tsx b/src/contexts/ov25-ui-context.tsx
+index 9d244e1..96c0000 100644
+--- a/src/contexts/ov25-ui-context.tsx
++++ b/src/contexts/ov25-ui-context.tsx
+@@ -764,7 +764,7 @@ export const OV25UIProvider: React.FC<{
+   const carouselLayout = carouselDisplayModeProp ?? carouselLayoutProp ?? CarouselDisplayMode.Stacked;
+   const carouselLayoutMobile = carouselDisplayModeMobileProp ?? carouselDisplayModeProp ?? carouselLayoutProp ?? CarouselDisplayMode.Stacked;
+   const variantDisplayStyleMobile = variantDisplayStyleMobileProp ?? variantDisplayStyle ?? VariantDisplayMode.Tree;
+-  const listLikeStyles: VariantDisplayMode[] = [VariantDisplayMode.Wizard, VariantDisplayMode.List, VariantDisplayMode.Tabs, VariantDisplayMode.Accordion, VariantDisplayMode.Tree];
++  const listLikeStyles: VariantDisplayMode[] = [VariantDisplayMode.Wizard, VariantDisplayMode.GuidedOverview, VariantDisplayMode.List, VariantDisplayMode.Tabs, VariantDisplayMode.Accordion, VariantDisplayMode.Tree];
+   const isListLike = variantDisplayStyle != null && listLikeStyles.includes(variantDisplayStyle);
+   const isListLikeMobile = variantDisplayStyleMobile != null && listLikeStyles.includes(variantDisplayStyleMobile);
+   const variantDisplayStyleInline: VariantDisplayStyleOverlay = isListLike ? (variantDisplayStyle as VariantDisplayStyleOverlay) : (variantDisplayStyleInlineProp ?? VariantDisplayStyleOverlay.Wizard);
+diff --git a/src/lib/strings/string-keys.ts b/src/lib/strings/string-keys.ts
+index b6ea191..07be9cd 100644
+--- a/src/lib/strings/string-keys.ts
++++ b/src/lib/strings/string-keys.ts
+@@ -116,6 +116,12 @@ export const STRING_REPLACEMENT_DEFINITIONS: StringReplacements = [
+     { name: 'DISCOUNT_AMOUNT', description: 'Formatted discount amount.' },
+     { name: 'DISCOUNT_PERCENTAGE', description: 'Discount percentage.' },
+   ] },
++  { key: 'checkoutPriceLabel', label: 'Checkout button price label', defaultTemplate: '${PRICE}', interpolationValues: [
++    { name: 'PRICE', description: 'Current formatted price.' },
++    { name: 'SUBTOTAL', description: 'Current formatted subtotal.' },
++    { name: 'DISCOUNT_AMOUNT', description: 'Formatted discount amount.' },
++    { name: 'DISCOUNT_PERCENTAGE', description: 'Discount percentage.' },
++  ] },
+   // filters
+   { key: 'filtersLabel', label: 'Filters button label', defaultTemplate: 'Filters', interpolationValues: [] },
+   { key: 'filtersSearchPlaceholder', label: 'Filters search placeholder', defaultTemplate: 'Search', interpolationValues: [] },
+@@ -167,7 +173,12 @@ export const STRING_REPLACEMENT_DEFINITIONS: StringReplacements = [
+ 
+   // wizard 
+   { key: 'wizardBackButtonLabel', label: 'Wizard back button label', defaultTemplate: 'Back', interpolationValues: [] },
++  { key: 'wizardPreviousButtonLabel', label: 'Guided Overview previous button label', defaultTemplate: 'Prev', interpolationValues: [] },
+   { key: 'wizardNextButtonLabel', label: 'Wizard next button label', defaultTemplate: 'Next', interpolationValues: [] },
++  { key: 'wizardBackToReviewLabel', label: 'Guided Overview back to review label', defaultTemplate: 'Back to review', interpolationValues: [] },
++  { key: 'wizardChooseOption', label: 'Guided Overview option title', defaultTemplate: 'Choose ${OPTION_NAME}', interpolationValues: [
++    { name: 'OPTION_NAME', description: 'Option display name.' },
++  ]},
+   {
+     key: 'wizardStepProgress',
+     label: 'Wizard step progress',
+diff --git a/src/types/config-enums.ts b/src/types/config-enums.ts
+index 216efac..87ac1bf 100644
+--- a/src/types/config-enums.ts
++++ b/src/types/config-enums.ts
+@@ -26,6 +26,7 @@ export type CarouselLayout = CarouselDisplayMode;
+ /** Variant display style for mobile and main variant selector. */
+ export const VariantDisplayMode = {
+   Wizard: 'wizard',
++  GuidedOverview: 'guided-overview',
+   List: 'list',
+   Tabs: 'tabs',
+   Accordion: 'accordion',
+@@ -36,6 +37,7 @@ export type VariantDisplayMode = (typeof VariantDisplayMode)[keyof typeof Varian
+ /** Variant display style for inline and overlay variant selectors. */
+ export const VariantDisplayStyleOverlay = {
+   Wizard: 'wizard',
++  GuidedOverview: 'guided-overview',
+   List: 'list',
+   Tabs: 'tabs',
+   Accordion: 'accordion',
+diff --git a/src/types/inject-config.ts b/src/types/inject-config.ts
+index 8b62e79..669db05 100644
+--- a/src/types/inject-config.ts
++++ b/src/types/inject-config.ts
+@@ -59,8 +59,8 @@ export type ConfiguratorConfig = {
+   modules?: ModulesConfig;
+ };
+ 
+-/** Variant UI style: wizard | list | tabs | accordion | tree. */
+-export type VariantDisplayMode = 'wizard' | 'list' | 'tabs' | 'accordion' | 'tree';
++/** Variant UI style. `guided-overview` opens on the review hub and uses focused option editors. */
++export type VariantDisplayMode = 'wizard' | 'guided-overview' | 'list' | 'tabs' | 'accordion' | 'tree';
+ 
+ /** Snap2 / inline-sheet: which horizontal edge the variant settings sheet attaches to. */
+ export type Snap2VariantSheetSide = 'LEFT' | 'RIGHT';
+diff --git a/test/e2e/guided-overview.test.ts b/test/e2e/guided-overview.test.ts
+new file mode 100644
+index 0000000..4459cfd
+--- /dev/null
++++ b/test/e2e/guided-overview.test.ts
+@@ -0,0 +1,238 @@
++import { expect, test, type Locator, type Page } from '@playwright/test';
++
++const FIXTURE = '/tests/gallery-inline-guided-overview.html';
++const SHEET_FIXTURE = '/tests/gallery-sheet-guided-overview.html';
++const RUNTIME_TIMEOUT = 30000;
++const EXPECTED_CONTENT_HEIGHT = '500px';
++
++const ROOT = '[data-ov25-wizard-display-mode="guided-overview"]';
++const HEADER = '[data-ov25-guided-overview-header]';
++const REVIEW = '[data-ov25-guided-overview-review="true"]';
++const REVIEW_ROW = '[data-ov25-guided-overview-review-row]';
++const REVIEW_OPTION = '[data-ov25-guided-overview-review-part="option"]';
++const EDITOR = '[data-ov25-guided-overview-editor]';
++const ACTIONS = '[data-ov25-guided-overview-actions]';
++const PREVIOUS = '[data-ov25-guided-overview-action="previous"]';
++const BUY_NOW = '[data-ov25-guided-overview-action="buy-now"]';
++const NEXT = '[data-ov25-guided-overview-action="next"]';
++
++type GuidedOverviewFixture = {
++  root: Locator;
++  rows: Locator;
++  previous: Locator;
++  next: Locator;
++};
++
++async function loadGuidedOverview(page: Page): Promise<GuidedOverviewFixture> {
++  await page.goto(FIXTURE);
++
++  const root = page.locator(ROOT);
++  const rows = root.locator(REVIEW_ROW);
++  const previous = root.locator(PREVIOUS);
++  const next = root.locator(NEXT);
++
++  await expect(root).toBeVisible({ timeout: RUNTIME_TIMEOUT });
++  await expect
++    .poll(() => rows.count(), { timeout: RUNTIME_TIMEOUT })
++    .toBeGreaterThan(1);
++  await expectReview(root);
++
++  return { root, rows, previous, next };
++}
++
++async function optionNames(rows: Locator): Promise<string[]> {
++  return (await rows.locator(REVIEW_OPTION).allInnerTexts()).map((name) => name.trim());
++}
++
++async function expectReview(root: Locator): Promise<void> {
++  await expect(root.locator(HEADER).getByRole('heading', { level: 2 })).toHaveText('Review');
++  await expect(root.locator(REVIEW)).toBeVisible();
++  await expect(root.locator(EDITOR)).toHaveCount(0);
++}
++
++async function expectEditor(root: Locator, optionName: string): Promise<void> {
++  await expect(root.locator(HEADER).getByRole('heading', { level: 2 })).toHaveText(
++    `Choose ${optionName}`,
++  );
++  await expect(root.locator(EDITOR)).toBeVisible();
++  await expect(root.locator(REVIEW)).toHaveCount(0);
++}
++
++async function expectConfiguredHeight(locator: Locator): Promise<void> {
++  await expect(locator).toHaveCSS('height', EXPECTED_CONTENT_HEIGHT);
++  await expect(locator).toHaveCSS('min-height', EXPECTED_CONTENT_HEIGHT);
++  await expect(locator).toHaveCSS('max-height', EXPECTED_CONTENT_HEIGHT);
++}
++
++async function expectSingleScrollOwner(content: Locator): Promise<void> {
++  await expect(content).toHaveCSS('overflow-y', 'hidden');
++  await expect
++    .poll(() => content.evaluate((element) => element.scrollHeight - element.clientHeight))
++    .toBe(0);
++}
++
++test.describe('Guided Overview — inline variants', () => {
++  test.use({ viewport: { width: 1440, height: 1000 } });
++
++  test('starts on Review with persistent actions and no wizard progress chrome', async ({ page }) => {
++    const { root, rows, previous, next } = await loadGuidedOverview(page);
++    const names = await optionNames(rows);
++
++    await expect(previous).toBeDisabled();
++    await expect(previous).toHaveText(/Prev/i);
++    await expect(next).toBeEnabled();
++    await expect(next).toHaveText(names[0]);
++    await expect(root.locator(ACTIONS)).toHaveAttribute(
++      'data-ov25-guided-overview-has-buy-now',
++      'true',
++    );
++    await expect(root.locator(ACTIONS).getByRole('button')).toHaveCount(4);
++    const checkout = root.locator(BUY_NOW);
++    const buyNow = checkout.locator('#ov25-checkout-button');
++    const addToBasket = checkout.locator('#ov25-add-to-basket-button');
++    await expect(buyNow).toBeVisible();
++    await expect(addToBasket).toBeVisible();
++    const actionPositions = await Promise.all(
++      [previous, next, checkout].map((button) => button.boundingBox()),
++    );
++    const [previousBox, nextBox, checkoutBox] = actionPositions;
++    expect(previousBox).not.toBeNull();
++    expect(nextBox).not.toBeNull();
++    expect(checkoutBox).not.toBeNull();
++    expect(Math.abs(previousBox!.y - nextBox!.y)).toBeLessThanOrEqual(1);
++    expect(checkoutBox!.y).toBeGreaterThan(previousBox!.y + previousBox!.height - 1);
++    expect(checkoutBox!.width).toBeGreaterThan(previousBox!.width + nextBox!.width - 2);
++    await expect(root.locator('[data-ov25-checkout-price-label]').last()).toHaveText(/\S+/, {
++      timeout: RUNTIME_TIMEOUT,
++    });
++    await expect(root.getByText(/Step \d+ of \d+/i)).toHaveCount(0);
++  });
++
++  test('opens an option from Review and the Undo button returns to Review', async ({ page }) => {
++    const { root, rows } = await loadGuidedOverview(page);
++    const names = await optionNames(rows);
++    const targetIndex = 1;
++
++    await rows.nth(targetIndex).getByRole('button').click();
++    await expectEditor(root, names[targetIndex]);
++
++    const backToReview = root.locator('.ov25-guided-overview-back');
++    await expect(backToReview).toHaveAccessibleName('Back to review');
++    await expect(backToReview.locator('.lucide-undo-2')).toBeVisible();
++    await backToReview.click();
++
++    await expectReview(root);
++  });
++
++  test('previous and next navigate between options and Review', async ({ page }) => {
++    const { root, rows, previous, next } = await loadGuidedOverview(page);
++    const names = await optionNames(rows);
++
++    await next.click();
++    await expectEditor(root, names[0]);
++    await expect(previous).toHaveText('Review');
++    await expect(next).toHaveText(names[1]);
++
++    await next.click();
++    await expectEditor(root, names[1]);
++    await expect(previous).toHaveText(names[0]);
++
++    await previous.click();
++    await expectEditor(root, names[0]);
++
++    await previous.click();
++    await expectReview(root);
++    await expect(previous).toBeDisabled();
++  });
++
++  test('Next on the final option leads back to Review', async ({ page }) => {
++    const { root, rows, next } = await loadGuidedOverview(page);
++    const names = await optionNames(rows);
++    const finalIndex = names.length - 1;
++
++    await rows.nth(finalIndex).getByRole('button').click();
++    await expectEditor(root, names[finalIndex]);
++    await expect(next).toBeEnabled();
++    await expect(next).toHaveText('Review');
++
++    await next.click();
++    await expectReview(root);
++  });
++
++  test('the 500px content-height variable sizes Review and ordinary option steps', async ({ page }) => {
++    const { root, rows } = await loadGuidedOverview(page);
++    const names = await optionNames(rows);
++    const content = root.locator('[data-ov25-list-variants-content]');
++    const review = root.locator(REVIEW);
++
++    await expect
++      .poll(() => root.evaluate((element) => getComputedStyle(element)
++        .getPropertyValue('--ov25-wizard-variants-content-height')
++        .trim()))
++      .toBe(EXPECTED_CONTENT_HEIGHT);
++    await expect(content).toHaveCSS('height', EXPECTED_CONTENT_HEIGHT);
++    await expect(content).toHaveCSS('max-height', EXPECTED_CONTENT_HEIGHT);
++    await expectSingleScrollOwner(content);
++    await expectConfiguredHeight(review);
++
++    await rows.first().getByRole('button').click();
++    await expectEditor(root, names[0]);
++
++    await expect(content).toHaveCSS('height', EXPECTED_CONTENT_HEIGHT);
++    await expect(content).toHaveCSS('max-height', EXPECTED_CONTENT_HEIGHT);
++    await expectSingleScrollOwner(content);
++    await expectConfiguredHeight(root.locator(EDITOR));
++  });
++});
++
++test.describe('Guided Overview — sheet controls', () => {
++  test.use({ viewport: { width: 1440, height: 1000 } });
++
++  test('keeps sheet close separate from the Undo return-to-review action', async ({ page }) => {
++    await page.goto(SHEET_FIXTURE);
++
++    const configure = page.getByRole('button', { name: 'Configure', exact: true });
++    await expect(configure).toBeVisible({ timeout: RUNTIME_TIMEOUT });
++    await configure.click();
++
++    const sheet = page
++      .locator('#ov25-variants-shadow-container')
++      .locator('#ov25-configurator-variant-menu-container');
++    const root = sheet.locator(ROOT);
++    const sheetClose = sheet.getByRole('button', { name: 'Close', exact: true });
++
++    await expect(root).toBeVisible({ timeout: RUNTIME_TIMEOUT });
++    await expectReview(root);
++    await expect(sheetClose).toBeVisible();
++    await expect(root.locator('.ov25-guided-overview-back')).toHaveCount(0);
++    const [sheetBox, sheetCloseBox] = await Promise.all([
++      sheet.boundingBox(),
++      sheetClose.boundingBox(),
++    ]);
++    expect(sheetBox).not.toBeNull();
++    expect(sheetCloseBox).not.toBeNull();
++    expect(sheetCloseBox!.x + sheetCloseBox!.width).toBeGreaterThan(
++      sheetBox!.x + sheetBox!.width - 48,
++    );
++    expect(sheetCloseBox!.y).toBeLessThan(sheetBox!.y + 64);
++
++    await root.locator(REVIEW_ROW).first().getByRole('button').click();
++
++    const backToReview = root.locator('.ov25-guided-overview-back');
++    await expect(backToReview).toBeVisible();
++    await expect(backToReview).toHaveAccessibleName('Back to review');
++    await expect(backToReview.locator('.lucide-undo-2')).toBeVisible();
++    await expect(sheetClose).toBeVisible();
++
++    await backToReview.click();
++    await expectReview(root);
++    await expect(sheetClose).toBeVisible();
++
++    await sheetClose.click();
++    await expect
++      .poll(() => sheet.evaluate((element) =>
++        element.getBoundingClientRect().left >= document.documentElement.clientWidth
++      ))
++      .toBe(true);
++  });
++});
+diff --git a/test/e2e/mobile-drawer-stacking.test.ts b/test/e2e/mobile-drawer-stacking.test.ts
+index 78a16af..a041c29 100644
+--- a/test/e2e/mobile-drawer-stacking.test.ts
++++ b/test/e2e/mobile-drawer-stacking.test.ts
+@@ -7,7 +7,7 @@ test('mobile drawer stays above the configurator gallery at its top edge', async
+   page,
+ }) => {
+   await page.setViewportSize(MOBILE);
+-  await page.goto('/tests/single-no-pricing.html');
++  await page.goto('/tests/single-no-pricing.html?profile=standard&display=list');
+ 
+   const configure = page.getByRole('button', { name: 'Configure', exact: true });
+   await expect(configure).toBeVisible({ timeout: RUNTIME_TIMEOUT });
+@@ -82,10 +82,6 @@ test('mobile drawer stays above the configurator gallery at its top edge', async
+   await expect(drawer.getByPlaceholder('Search')).toBeVisible({
+     timeout: RUNTIME_TIMEOUT,
+   });
+-  await expect(drawer.getByText('Leather', { exact: true }).first()).toBeVisible({
+-    timeout: RUNTIME_TIMEOUT,
+-  });
+-
+   const variantCards = drawer.locator('.ov25-default-variant-card');
+   await expect(variantCards.nth(3)).toBeVisible({ timeout: RUNTIME_TIMEOUT });
+ 
+diff --git a/test/e2e/mobile-drawer-stacking.test.ts-snapshots/single-no-pricing-mobile-drawer-boundary-chromium-darwin.png b/test/e2e/mobile-drawer-stacking.test.ts-snapshots/single-no-pricing-mobile-drawer-boundary-chromium-darwin.png
+index 5b82659..752cf0e 100644
+Binary files a/test/e2e/mobile-drawer-stacking.test.ts-snapshots/single-no-pricing-mobile-drawer-boundary-chromium-darwin.png and b/test/e2e/mobile-drawer-stacking.test.ts-snapshots/single-no-pricing-mobile-drawer-boundary-chromium-darwin.png differ
+diff --git a/test/e2e/single-no-pricing.test.ts b/test/e2e/single-no-pricing.test.ts
+new file mode 100644
+index 0000000..bcec221
+--- /dev/null
++++ b/test/e2e/single-no-pricing.test.ts
+@@ -0,0 +1,240 @@
++import { expect, test, type Locator, type Page } from '@playwright/test';
++
++const FIXTURE_PATH = '/tests/single-no-pricing.html';
++const RUNTIME_TIMEOUT = 30_000;
++const MOBILE_VIEWPORT = { width: 375, height: 667 };
++const VARIANT_DISPLAY_MODES = [
++  'wizard',
++  'guided-overview',
++  'list',
++  'tabs',
++  'accordion',
++  'tree',
++] as const;
++const PROFILES = ['standard', 'snap2'] as const;
++
++type VariantDisplayMode = (typeof VARIANT_DISPLAY_MODES)[number];
++type Profile = (typeof PROFILES)[number];
++
++function mobileDrawer(page: Page): Locator {
++  return page
++    .locator('#ov25-mobile-drawer-container')
++    .locator('#ov25-drawer-content');
++}
++
++function modeSurface(page: Page, mode: VariantDisplayMode): Locator {
++  switch (mode) {
++    case 'wizard':
++    case 'guided-overview':
++      return page.locator(`[data-ov25-wizard-display-mode="${mode}"]:visible`).first();
++    case 'tabs':
++      return page.locator('[data-ov25-tabs-container]:visible').first();
++    case 'accordion':
++      return page.locator('[data-ov25-accordion-variants-mode]:visible').first();
++    case 'tree':
++      return page.locator('[data-ov25-tree-variants-mode]:visible').first();
++    case 'list':
++      return page
++        .locator('#ov25-variants-content-wrapper:visible [data-ov25-option-id]:visible')
++        .first();
++  }
++}
++
++async function expectNoPricing(page: Page): Promise<void> {
++  await expect(page.locator('#price')).toHaveCount(0);
++  await expect(page.locator('#ov25-configurator-price-container')).toHaveCount(0);
++  await expect(page.locator('.ov25-configurator-price')).toHaveCount(0);
++  await expect(page.locator('#ov25-price-product-page')).toHaveCount(0);
++  await expect(page.locator('#ov25-savings-amount-product-page')).toHaveCount(0);
++  await expect(page.locator('#ov25-savings-percentage-product-page')).toHaveCount(0);
++  await expect(page.locator('[data-ov25-checkout-price-label]:visible')).toHaveCount(0);
++  await expect(page.locator('#ov25-snap2-checkout-sheet-total-value:visible')).toHaveCount(0);
++  await expect(page.locator('.ov25-snap2-checkout-line-subtotal:visible')).toHaveCount(0);
++  await expect(page.locator('.ov25-snap2-checkout-line-total:visible')).toHaveCount(0);
++}
++
++async function expectNoPurchaseActions(page: Page): Promise<void> {
++  await expect(page.locator('#ov25-checkout-button:visible')).toHaveCount(0);
++  await expect(page.locator('#ov25-add-to-basket-button:visible')).toHaveCount(0);
++  await expect(page.locator('#ov25-snap2-panel-checkout-button')).toHaveCount(0);
++  await expect(page.locator('.ov25-checkout-combo-button:visible')).toHaveCount(0);
++  await expect(page.getByRole('button', { name: /buy now/i })).toHaveCount(0);
++  await expect(page.getByRole('button', { name: /add to (?:basket|cart)/i })).toHaveCount(0);
++}
++
++async function openVariantSurface(
++  page: Page,
++  profile: Profile,
++  mode: VariantDisplayMode,
++): Promise<Locator> {
++  const configureButton = page
++    .getByRole('button', { name: /^Configure(?:\s|$)/i })
++    .filter({ visible: true })
++    .first();
++  await expect(configureButton).toBeVisible({ timeout: RUNTIME_TIMEOUT });
++  await configureButton.click();
++
++  const surface = modeSurface(page, mode);
++  await expect(surface).toBeVisible({ timeout: RUNTIME_TIMEOUT });
++
++  if (profile === 'snap2') {
++    await expect(page.locator('#ov25-snap2-modal-frame')).toBeVisible({
++      timeout: RUNTIME_TIMEOUT,
++    });
++  } else {
++    await expect(page.locator('#ov25-variants-shadow-container')).toBeAttached({
++      timeout: RUNTIME_TIMEOUT,
++    });
++  }
++
++  return surface;
++}
++
++async function openMobileVariantSurface(
++  page: Page,
++  mode: VariantDisplayMode,
++): Promise<{ drawer: Locator; surface: Locator }> {
++  await page.goto(`${FIXTURE_PATH}?profile=standard&display=${mode}`);
++
++  const fixtureControls = page.getByTestId('no-pricing-fixture-controls');
++  await expect(fixtureControls).toHaveAttribute('data-profile', 'standard');
++  await expect(fixtureControls).toHaveAttribute('data-display-mode', mode);
++  await expect(fixtureControls).toHaveAttribute('data-hide-pricing', 'true');
++
++  const configureButton = page
++    .getByRole('button', { name: /^Configure(?:\s|$)/i })
++    .filter({ visible: true })
++    .first();
++  await expect(configureButton).toBeVisible({ timeout: RUNTIME_TIMEOUT });
++  await configureButton.click();
++
++  const surface = modeSurface(page, mode);
++  await expect(surface).toBeVisible({ timeout: RUNTIME_TIMEOUT });
++  const drawer = mobileDrawer(page);
++  await expect(drawer).toBeVisible({ timeout: RUNTIME_TIMEOUT });
++  await expect
++    .poll(
++      () =>
++        drawer.evaluate((element) => {
++          const rect = element.getBoundingClientRect();
++          return { height: Math.round(rect.height), top: Math.round(rect.top) };
++        }),
++      { timeout: RUNTIME_TIMEOUT },
++    )
++    .toEqual({ height: 387, top: 280 });
++
++  return { drawer, surface };
++}
++
++test.describe('Single product — hidePricing across variant display modes', () => {
++  test.use({ viewport: { width: 1440, height: 900 } });
++
++  for (const profile of PROFILES) {
++    for (const mode of VARIANT_DISPLAY_MODES) {
++      test(`${profile} / ${mode}: hides page pricing and purchase actions`, async ({ page }) => {
++        test.setTimeout(90_000);
++        await page.goto(`${FIXTURE_PATH}?profile=${profile}&display=${mode}`);
++
++        const fixtureControls = page.getByTestId('no-pricing-fixture-controls');
++        await expect(fixtureControls).toHaveAttribute('data-profile', profile);
++        await expect(fixtureControls).toHaveAttribute('data-display-mode', mode);
++        await expect(fixtureControls).toHaveAttribute('data-hide-pricing', 'true');
++        if (profile === 'standard') {
++          await expect(page.locator('#ov25-configurator-iframe')).toBeVisible({
++            timeout: RUNTIME_TIMEOUT,
++          });
++        }
++
++        await expectNoPricing(page);
++        await expectNoPurchaseActions(page);
++
++        const surface = await openVariantSurface(page, profile, mode);
++
++        await expectNoPricing(page);
++        await expectNoPurchaseActions(page);
++
++        if (mode === 'guided-overview') {
++          const actions = surface.locator('[data-ov25-guided-overview-actions]');
++          await expect(actions).toHaveAttribute(
++            'data-ov25-guided-overview-has-buy-now',
++            'false',
++          );
++          await expect(
++            actions.locator('[data-ov25-guided-overview-action="buy-now"]'),
++          ).toHaveCount(0);
++
++          const columns = await actions.evaluate((element) =>
++            getComputedStyle(element).gridTemplateColumns
++              .split(/\s+/)
++              .map((width) => Number.parseFloat(width)),
++          );
++          expect(columns).toHaveLength(2);
++          expect(Math.abs(columns[0] - columns[1])).toBeLessThanOrEqual(1);
++        }
++      });
++    }
++  }
++});
++
++test.describe('Single product — hidePricing mobile drawer layout', () => {
++  test.use({ viewport: MOBILE_VIEWPORT });
++
++  for (const mode of ['tabs', 'tree'] as const) {
++    test(`${mode} fills the drawer without reserving hidden checkout space`, async ({ page }) => {
++      const { drawer, surface } = await openMobileVariantSurface(page, mode);
++
++      await expectNoPricing(page);
++      await expectNoPurchaseActions(page);
++
++      const bottomGap = await surface.evaluate((element) => {
++        const drawer = element.closest('#ov25-drawer-content');
++        if (!drawer) throw new Error('Mobile drawer ancestor not found');
++        return Math.round(
++          drawer.getBoundingClientRect().bottom - element.getBoundingClientRect().bottom,
++        );
++      });
++      expect(Math.abs(bottomGap)).toBeLessThanOrEqual(1);
++
++      const reservedPadding = await drawer
++        .locator('#ov25-variants-content-wrapper > div')
++        .evaluateAll((elements) =>
++          elements.map((element) => Number.parseFloat(getComputedStyle(element).paddingBottom)),
++        );
++      expect(reservedPadding.every((padding) => padding <= 8)).toBe(true);
++    });
++  }
++
++  test('guided overview keeps only the viewer-level close button', async ({ page }) => {
++    const { drawer } = await openMobileVariantSurface(page, 'guided-overview');
++
++    await expect(drawer.locator('#ov25-variants-header-mobile')).toHaveCount(0);
++    await expect(drawer.getByRole('button', { name: 'Close', exact: true })).toHaveCount(0);
++    await expect(
++      page.getByRole('button', { name: 'Close', exact: true }).filter({ visible: true }),
++    ).toHaveCount(1);
++  });
++
++  test('wizard keeps Back in the same position on the final overview', async ({ page }) => {
++    const { surface } = await openMobileVariantSurface(page, 'wizard');
++    const back = surface.locator('.ov25-wizard-button-back');
++    const next = surface.locator('.ov25-wizard-button-next');
++    const review = surface.locator('[data-ov25-wizard-variants-step-content] dl');
++
++    await expect(back).toBeVisible();
++    const initialBox = await back.boundingBox();
++    expect(initialBox).not.toBeNull();
++
++    for (let attempt = 0; attempt < 10 && !(await review.isVisible().catch(() => false)); attempt += 1) {
++      await expect(next).toBeVisible();
++      await next.click();
++    }
++
++    await expect(review).toBeVisible();
++    const reviewBox = await back.boundingBox();
++    expect(reviewBox).not.toBeNull();
++    expect(reviewBox!.x).toBeCloseTo(initialBox!.x, 0);
++    expect(reviewBox!.y).toBeCloseTo(initialBox!.y, 0);
++    expect(reviewBox!.width).toBeCloseTo(initialBox!.width, 0);
++    expect(reviewBox!.height).toBeCloseTo(initialBox!.height, 0);
++  });
++});
+diff --git a/test/e2e/variants-per-row.test.ts b/test/e2e/variants-per-row.test.ts
+new file mode 100644
+index 0000000..10ce45b
+--- /dev/null
++++ b/test/e2e/variants-per-row.test.ts
+@@ -0,0 +1,114 @@
++import { expect, test, type Locator, type Page } from '@playwright/test';
++
++const FIXTURE = '/tests/variants-per-row.html';
++const RUNTIME_TIMEOUT = 30_000;
++const GRID = '.ov25-variant-card-grid';
++const VARIANT_DISPLAY_MODES = ['wizard', 'guided-overview', 'list', 'tabs', 'accordion', 'tree'];
++const CONFIGURATOR_DISPLAY_MODES = [
++  'inline',
++  'inline-sticky',
++  'sheet',
++  'modal',
++  'variants-only-sheet',
++  'inline-sheet',
++];
++
++async function revealVariantGrid(page: Page, variantMode: string): Promise<Locator> {
++  if (variantMode === 'guided-overview') {
++    await page.locator('[data-ov25-guided-overview-review-row] button').first().click();
++  } else if (variantMode === 'accordion') {
++    await page.locator('[data-ov25-accordion-variants-mode] button').first().click();
++  } else if (variantMode === 'tree') {
++    await page.locator('[data-ov25-tree-variants-mode] button').first().click();
++  }
++
++  const grid = page.locator(`${GRID}:visible`).first();
++  await expect(grid).toBeVisible({ timeout: RUNTIME_TIMEOUT });
++  await expect.poll(() => grid.locator('.ov25-default-variant-card').count(), {
++    timeout: RUNTIME_TIMEOUT,
++  }).toBeGreaterThan(3);
++  return grid;
++}
++
++async function gridColumnCount(grid: Locator): Promise<number> {
++  return grid.evaluate((element) => {
++    const cards = Array.from(element.querySelectorAll('.ov25-default-variant-card'));
++    if (cards.length === 0) return 0;
++    const firstTop = cards[0].getBoundingClientRect().top;
++    return cards.filter((card) => Math.abs(card.getBoundingClientRect().top - firstTop) <= 1).length;
++  });
++}
++
++test.describe('variants per row fixture', () => {
++  test.use({ viewport: { width: 1440, height: 1000 } });
++
++  for (const variantMode of VARIANT_DISPLAY_MODES) {
++    test(`${variantMode} uses the shared variants-per-row value`, async ({ page }) => {
++      await page.goto(`${FIXTURE}?variants=${variantMode}&configurator=inline&count=4`);
++      const grid = await revealVariantGrid(page, variantMode);
++      const firstThumbnail = grid.locator('.ov25-variant-image-container').first();
++
++      await expect.poll(() => gridColumnCount(grid)).toBe(4);
++      await expect.poll(() => firstThumbnail.evaluate(
++        (element) => element.getBoundingClientRect().width,
++      )).toBe(64);
++
++      await page.getByTestId('variants-per-row-slider').fill('3');
++      await expect(page.getByTestId('variants-per-row-controls')).toHaveAttribute(
++        'data-variants-per-row',
++        '3',
++      );
++      await expect.poll(() => gridColumnCount(grid)).toBe(3);
++      await expect.poll(() => firstThumbnail.evaluate(
++        (element) => element.getBoundingClientRect().width,
++      )).toBeGreaterThan(64);
++    });
++  }
++
++  test('cards and thumbnails fluidly grow and shrink while four columns remain unchanged', async ({ page }) => {
++    await page.goto(`${FIXTURE}?variants=tabs&configurator=inline`);
++    const grid = await revealVariantGrid(page, 'tabs');
++    const firstCard = grid.locator('.ov25-default-variant-card').first();
++    const firstThumbnail = firstCard.locator('.ov25-variant-image-container');
++    const defaultWidth = await firstCard.evaluate((element) => element.getBoundingClientRect().width);
++    const defaultThumbnailSize = await firstThumbnail.evaluate((element) => {
++      const rect = element.getBoundingClientRect();
++      return { width: rect.width, height: rect.height };
++    });
++
++    await expect.poll(() => gridColumnCount(grid)).toBe(4);
++    expect(defaultThumbnailSize.width).toBe(64);
++    expect(defaultThumbnailSize.height).toBe(64);
++
++    await page.getByTestId('variants-per-row-slider').fill('2');
++    await expect.poll(() => grid.evaluate((element) =>
++      getComputedStyle(element).getPropertyValue('--ov25-variants-per-row').trim()
++    )).toBe('2');
++    await expect.poll(() => gridColumnCount(grid)).toBe(2);
++    const twoColumnWidth = await firstCard.evaluate((element) => element.getBoundingClientRect().width);
++    const twoColumnThumbnailWidth = await firstThumbnail.evaluate(
++      (element) => element.getBoundingClientRect().width,
++    );
++
++    await page.getByTestId('variants-per-row-slider').fill('6');
++    await expect.poll(() => gridColumnCount(grid)).toBe(6);
++    const sixColumnWidth = await firstCard.evaluate((element) => element.getBoundingClientRect().width);
++    const sixColumnThumbnailWidth = await firstThumbnail.evaluate(
++      (element) => element.getBoundingClientRect().width,
++    );
++
++    expect(twoColumnWidth).toBeGreaterThan(defaultWidth);
++    expect(sixColumnWidth).toBeLessThan(defaultWidth);
++    expect(twoColumnThumbnailWidth).toBeGreaterThan(defaultThumbnailSize.width);
++    expect(sixColumnThumbnailWidth).toBeLessThan(defaultThumbnailSize.width);
++  });
++
++  for (const configuratorMode of CONFIGURATOR_DISPLAY_MODES) {
++    test(`${configuratorMode} configurator uses the shared grid`, async ({ page }) => {
++      await page.goto(`${FIXTURE}?variants=tabs&configurator=${configuratorMode}&count=5`);
++      const grid = await revealVariantGrid(page, 'tabs');
++
++      await expect.poll(() => gridColumnCount(grid)).toBe(5);
++    });
++  }
++});
+diff --git a/test/unit/checkout-button-price-gating.test.tsx b/test/unit/checkout-button-price-gating.test.tsx
+index 7194ff7..0e3e195 100644
+--- a/test/unit/checkout-button-price-gating.test.tsx
++++ b/test/unit/checkout-button-price-gating.test.tsx
+@@ -21,8 +21,10 @@ function createContext(hasReceivedPrice: boolean, overrides: Record<string, any>
+     isCheckoutPayloadReady: hasReceivedPrice,
+     disableAddToCart: false,
+     disableBuyNow: false,
+-    getString: (_key: string, vars: Record<string, unknown>, fallback: string) =>
+-      `${fallback}${vars.PRICE ? ` ${vars.PRICE}` : ''}`,
++    getString: (key: string, vars: Record<string, unknown>, fallback: string) =>
++      key === 'checkoutBuyNow'
++        ? `${fallback}${vars.PRICE ? ` ${vars.PRICE}` : ''}`
++        : fallback,
+     ...overrides,
+   };
+ }
+@@ -46,6 +48,18 @@ describe('CheckoutButton price gating', () => {
+     expect(screen.getByRole('button').textContent).toContain('£1,299.00');
+   });
+ 
++  it('routes the appended checkout price through string replacements', () => {
++    checkoutContext = createContext(true, {
++      getString: (key: string, vars: Record<string, unknown>, fallback: string) =>
++        key === 'checkoutPriceLabel' ? `Total ${vars.PRICE}` : fallback,
++    });
++
++    render(<CheckoutButton />);
++
++    expect(screen.getByRole('button')).toHaveTextContent('Buy nowTotal £1,299.00');
++    expect(document.querySelector('[data-ov25-checkout-price-label]')).toHaveTextContent('Total £1,299.00');
++  });
++
+   it('blanks interpolated price vars so merchant templates cannot print the zero', () => {
+     // getString here appends ${PRICE} the way a configured "Buy now ${PRICE}" template would.
+     checkoutContext = createContext(false);
+diff --git a/test/unit/configurator-setup-style-hydration.test.ts b/test/unit/configurator-setup-style-hydration.test.ts
+index df8ef56..2ca9b6e 100644
+--- a/test/unit/configurator-setup-style-hydration.test.ts
++++ b/test/unit/configurator-setup-style-hydration.test.ts
+@@ -84,4 +84,19 @@ describe('ConfiguratorSetup initial config style variables', () => {
+     expect(hydrated.style['--ov25-cta-color']).toBe('#405060');
+     expect(hydrated.branding.cssString).toBe('');
+   });
++
++  it('round-trips the unitless variants-per-row style value', () => {
++    const state = buildFormStateFromInitialPayload({});
++    state.typeSettings.standard.style['--ov25-variants-per-row'] = '3';
++
++    const exported = buildSerializableConfig('standard', state.typeSettings.standard);
++    const { apiKey: _apiKey, productLink: _productLink, images: _images, ...savedStandard } = exported;
++    const hydrated = buildFormStateFromInitialPayload({
++      standard: savedStandard,
++    } as Partial<ConfiguratorSetupPayload>).typeSettings.standard;
++
++    expect(exported.branding?.cssString).toContain('--ov25-variants-per-row: 3;');
++    expect(hydrated.style['--ov25-variants-per-row']).toBe('3');
++    expect(hydrated.branding.cssString).toBe('');
++  });
+ });
+diff --git a/test/unit/guided-overview-wizard.test.tsx b/test/unit/guided-overview-wizard.test.tsx
+new file mode 100644
+index 0000000..8a579a4
+--- /dev/null
++++ b/test/unit/guided-overview-wizard.test.tsx
+@@ -0,0 +1,225 @@
++import * as React from 'react';
++import { fireEvent, render, screen } from '@testing-library/react';
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import { WizardVariants } from '../../src/components/VariantSelectMenu/WizardVariants';
++
++let wizardContext: Record<string, any>;
++
++vi.mock('../../src/contexts/ov25-ui-context.js', () => ({
++  useOV25UI: () => wizardContext,
++}));
++
++vi.mock('../../src/components/VariantSelectMenu/VariantsContent.js', () => ({
++  VariantsContent: ({ variantsToRender }: { variantsToRender: Array<{ id: string; name: string }> }) => (
++    <>{variantsToRender.map((variant) => <button key={variant.id}>{variant.name}</button>)}</>
++  ),
++}));
++
++vi.mock('../../src/components/VariantSelectMenu/variant-cards/VariantThumb.js', () => ({
++  VariantThumb: () => <span aria-hidden>thumb</span>,
++}));
++
++vi.mock('../../src/components/VariantSelectMenu/FilterControls.js', () => ({ FilterControls: () => null }));
++vi.mock('../../src/components/VariantSelectMenu/FilterContent.js', () => ({ FilterContent: () => null }));
++vi.mock('../../src/components/VariantSelectMenu/Snap2ModulesOptionBody.js', () => ({ Snap2ModulesOptionBody: () => null }));
++vi.mock('../../src/components/Snap2VariantSheetColumn.js', () => ({ Snap2VariantSheetColumn: ({ children }: React.PropsWithChildren) => children }));
++vi.mock('../../src/components/VariantSelectMenu/VariantsCloseButton.js', () => ({
++  VariantsCloseButton: ({ onClick, ariaLabel, className }: { onClick?: () => void; ariaLabel?: string; className?: string }) => (
++    <button type="button" onClick={onClick} aria-label={ariaLabel ?? 'Close'} className={className}>×</button>
++  ),
++}));
++
++const options = [
++  {
++    id: 'size',
++    name: 'Size',
++    groups: [{ id: 'sizes', name: 'Sizes', selections: [{ id: 'sofa', name: 'Sofa', thumbnail: '' }] }],
++  },
++  {
++    id: 'fabric',
++    name: 'Fabric',
++    groups: [{ id: 'plain', name: 'Plain', selections: [{ id: 'linen', name: 'Linen', thumbnail: '' }] }],
++  },
++];
++
++function createContext() {
++  return {
++    variantPanelOptions: options,
++    selectedSelections: [{ optionId: 'fabric', groupId: 'plain', selectionId: 'linen' }],
++    handleSelectionSelect: vi.fn(),
++    getSelectedValue: vi.fn(() => ''),
++    range: { name: 'Oslo' },
++    products: [{ id: 'sofa' }],
++    currentProductId: 'sofa',
++    applySearchAndFilters: (option: unknown) => option,
++    buyNowFunction: vi.fn(),
++    addToBasketFunction: vi.fn(),
++    setIsVariantsOpen: vi.fn(),
++    formattedPrice: '£1,499.00',
++    formattedSubtotal: '£1,499.00',
++    discount: { percentage: 0, amount: 0, formattedAmount: '£0.00' },
++    hasReceivedPrice: true,
++    isCheckoutPayloadReady: true,
++    disableAddToCart: false,
++    disableBuyNow: false,
++    hidePricing: false,
++    isSnap2Mode: false,
++    activeOptionId: null,
++    setActiveOptionId: vi.fn(),
++    getString: (_key: string, _vars: Record<string, string> | undefined, fallback: string) => fallback,
++  };
++}
++
++describe('guided-overview wizard', () => {
++  beforeEach(() => {
++    vi.stubGlobal('ResizeObserver', class {
++      observe() {}
++      disconnect() {}
++    });
++    vi.stubGlobal('IntersectionObserver', class {
++      observe() {}
++      disconnect() {}
++    });
++    wizardContext = createContext();
++  });
++
++  afterEach(() => {
++    vi.unstubAllGlobals();
++  });
++
++  it('opens on Review with navigation and the standard combo checkout action', () => {
++    render(<WizardVariants mode="drawer" displayMode="guided-overview" />);
++
++    const actions = document.querySelector('[data-ov25-guided-overview-actions]');
++    const buyNowAction = document.querySelector('[data-ov25-guided-overview-action="buy-now"]');
++    expect(screen.getByRole('heading', { name: 'Review' })).toBeInTheDocument();
++    expect(screen.queryByText(/Step \d+ of \d+/)).not.toBeInTheDocument();
++    expect(actions).toHaveAttribute('data-ov25-guided-overview-has-buy-now', 'true');
++    expect(actions).toHaveClass('ov:grid-cols-2');
++    expect(buyNowAction).toHaveClass('ov:col-span-2');
++    expect(screen.getByRole('button', { name: /Prev/i })).toBeDisabled();
++    expect(screen.getByRole('button', { name: 'Buy now' })).toBeInTheDocument();
++    expect(screen.getByRole('button', { name: 'Add to basket' })).toBeInTheDocument();
++    expect(document.querySelector('[data-ov25-checkout-price-label]')).toHaveTextContent('£1,499.00');
++    expect(screen.getByRole('button', { name: 'Size' })).toBeEnabled();
++  });
++
++  it('gives previous and next equal footer columns when pricing is hidden', () => {
++    wizardContext.hidePricing = true;
++
++    render(<WizardVariants mode="drawer" displayMode="guided-overview" />);
++
++    const actions = document.querySelector('[data-ov25-guided-overview-actions]');
++    expect(actions).toHaveAttribute('data-ov25-guided-overview-has-buy-now', 'false');
++    expect(actions).toHaveClass('ov:grid-cols-2');
++    expect(document.querySelector('[data-ov25-guided-overview-action="buy-now"]')).not.toBeInTheDocument();
++    expect(screen.getByRole('button', { name: /Prev/i })).toBeDisabled();
++    expect(screen.getByRole('button', { name: 'Size' })).toBeEnabled();
++  });
++
++  it('stays on Review when a sheet opens with an existing active option', () => {
++    wizardContext = createContext();
++    wizardContext.activeOptionId = 'size';
++
++    render(<WizardVariants mode="drawer" displayMode="guided-overview" />);
++
++    expect(screen.getByRole('heading', { name: 'Review' })).toBeInTheDocument();
++    expect(screen.queryByRole('heading', { name: 'Choose Size' })).not.toBeInTheDocument();
++  });
++
++  it('nests the inline review step inside the constrained variants content panel', () => {
++    render(<WizardVariants mode="inline" displayMode="guided-overview" />);
++
++    const content = document.querySelector('[data-ov25-list-variants-content]');
++    const review = document.querySelector('[data-ov25-guided-overview-review="true"]');
++
++    expect(content).toBeInTheDocument();
++    expect(review).toBeInTheDocument();
++    expect(review?.parentElement).toBe(content);
++  });
++
++  it('opens an option editor and returns it to Review', () => {
++    render(<WizardVariants mode="drawer" displayMode="guided-overview" />);
++
++    fireEvent.click(screen.getByRole('button', { name: /Fabric.*Linen/i }));
++
++    expect(screen.getByRole('heading', { name: 'Choose Fabric' })).toBeInTheDocument();
++    expect(screen.queryByText(/Step \d+ of \d+/)).not.toBeInTheDocument();
++
++    fireEvent.click(screen.getByRole('button', { name: 'Back to review' }));
++
++    expect(screen.getByRole('heading', { name: 'Review' })).toBeInTheDocument();
++  });
++
++  it('cycles from Review through the options and back to Review from the footer', () => {
++    render(<WizardVariants mode="drawer" displayMode="guided-overview" />);
++
++    fireEvent.click(screen.getByRole('button', { name: 'Size' }));
++    expect(screen.getByRole('heading', { name: 'Choose Size' })).toBeInTheDocument();
++    expect(screen.getByRole('button', { name: 'Review' })).toBeEnabled();
++
++    fireEvent.click(screen.getByRole('button', { name: 'Fabric' }));
++    expect(screen.getByRole('heading', { name: 'Choose Fabric' })).toBeInTheDocument();
++    expect(screen.getByRole('button', { name: 'Review' })).toBeEnabled();
++
++    fireEvent.click(screen.getByRole('button', { name: 'Review' }));
++    expect(screen.getByRole('heading', { name: 'Review' })).toBeInTheDocument();
++
++    fireEvent.click(screen.getByRole('button', { name: 'Size' }));
++    expect(screen.getByRole('heading', { name: 'Choose Size' })).toBeInTheDocument();
++    fireEvent.click(screen.getByRole('button', { name: 'Review' }));
++    expect(screen.getByRole('heading', { name: 'Review' })).toBeInTheDocument();
++  });
++
++  it('resolves Guided Overview copy through string replacements', () => {
++    wizardContext.getString = (key: string, vars: Record<string, string> | undefined, fallback: string = '') => {
++      const values = vars ?? {};
++      const replacements: Record<string, string> = {
++        wizardReview: '▽Review cart▽',
++        wizardPreviousButtonLabel: '▽Prev▽',
++        wizardNextButtonLabel: '▽Next▽',
++        wizardBackToReviewLabel: '▽Back to overview▽',
++        wizardChooseOption: `▽Choose ${values.OPTION_NAME}▽`,
++        wizardPreviousStep: `▽${values.STEP_LABEL} previous▽`,
++        wizardNextStep: `▽${values.STEP_LABEL} next▽`,
++        wizardReviewStepOption: `▽${values.OPTION_NAME}▽`,
++        wizardReviewStepSelection: `▽${values.SELECTION_LABEL}▽`,
++      };
++      return replacements[key] ?? fallback;
++    };
++
++    render(<WizardVariants mode="drawer" displayMode="guided-overview" />);
++
++    expect(screen.getByRole('heading', { name: '▽Review cart▽' })).toBeInTheDocument();
++    expect(screen.getByRole('button', { name: /▽Fabric▽.*▽Linen▽/i })).toBeInTheDocument();
++    expect(screen.getByRole('button', { name: '▽Prev▽' })).toBeDisabled();
++    expect(screen.getByRole('button', { name: '▽Size next▽' })).toBeEnabled();
++
++    fireEvent.click(screen.getByRole('button', { name: /▽Fabric▽.*▽Linen▽/i }));
++
++    expect(screen.getByRole('heading', { name: '▽Choose Fabric▽' })).toBeInTheDocument();
++    const backToReview = screen.getByRole('button', { name: '▽Back to overview▽' });
++    expect(backToReview).toBeInTheDocument();
++    expect(backToReview.querySelector('.lucide-undo-2')).toBeInTheDocument();
++  });
++
++  it('exposes stable custom CSS hooks for the root, review, editor, and actions', () => {
++    render(<WizardVariants mode="drawer" displayMode="guided-overview" />);
++
++    expect(document.querySelector('[data-ov25-wizard-display-mode="guided-overview"]')).toBeInTheDocument();
++    expect(document.querySelector('[data-ov25-guided-overview-header]')).toBeInTheDocument();
++    expect(document.querySelector('[data-ov25-guided-overview-review="true"]')).toBeInTheDocument();
++    expect(document.querySelectorAll('[data-ov25-guided-overview-review-row]')).toHaveLength(options.length);
++    expect(document.querySelector('[data-ov25-guided-overview-review-part="thumbnail"]')).toBeInTheDocument();
++    expect(document.querySelector('[data-ov25-guided-overview-review-part="option"]')).toBeInTheDocument();
++    expect(document.querySelector('[data-ov25-guided-overview-review-part="selection"]')).toBeInTheDocument();
++    expect(document.querySelector('[data-ov25-guided-overview-action="previous"]')).toBeInTheDocument();
++    expect(document.querySelector('[data-ov25-guided-overview-action="buy-now"]')).toBeInTheDocument();
++    expect(document.querySelector('[data-ov25-guided-overview-action="next"]')).toBeInTheDocument();
++
++    fireEvent.click(screen.getByRole('button', { name: /Fabric.*Linen/i }));
++
++    expect(document.querySelector('[data-ov25-guided-overview-editor="fabric"]')).toBeInTheDocument();
++    expect(document.querySelector('.ov25-guided-overview-back')).toBeInTheDocument();
++  });
++});
+diff --git a/test/unit/variants-per-row.test.ts b/test/unit/variants-per-row.test.ts
+new file mode 100644
+index 0000000..e54baa6
+--- /dev/null
++++ b/test/unit/variants-per-row.test.ts
+@@ -0,0 +1,71 @@
++import { readFileSync } from 'node:fs';
++import { resolve } from 'node:path';
++import { describe, expect, it } from 'vitest';
++import {
++  ELEMENT_SELECTORS,
++  STYLE_GROUPS,
++  generateVariableCSS,
++} from '../../setup/src/lib/config/configurator-style-variables';
++
++const readProjectFile = (relativePath: string) =>
++  readFileSync(resolve(process.cwd(), relativePath), 'utf8');
++
++describe('variants per row', () => {
++  it('exposes a unitless 1–6 slider in Product Variants & Collections', () => {
++    const variantsGroup = STYLE_GROUPS.find(({ id }) => id === 'variants');
++    const control = variantsGroup?.variables.find(
++      ({ variable }) => variable === '--ov25-variants-per-row',
++    );
++
++    expect(control).toEqual({
++      variable: '--ov25-variants-per-row',
++      label: 'Variants per row',
++      defaultValue: '4',
++      control: 'slider',
++      sliderMin: 1,
++      sliderMax: 6,
++      sliderStep: 1,
++      sliderUnit: '',
++      sliderLabels: ['Fewer', 'More'],
++    });
++    expect(generateVariableCSS({ '--ov25-variants-per-row': '3' })).toContain(
++      '--ov25-variants-per-row: 3;',
++    );
++  });
++
++  it('keeps the existing four-column default and fluid grid tracks', () => {
++    const css = readProjectFile('globals.css');
++
++    expect(css).toContain('--ov25-variants-per-row: 4;');
++    expect(css).toContain(
++      'grid-template-columns: repeat(var(--ov25-variants-per-row), minmax(0, 1fr)) !important;',
++    );
++    expect(css).toContain(
++      'width: min(100%, calc(16rem / var(--ov25-variants-per-row) + 0.5rem));',
++    );
++    expect(css).toContain('.ov25-variant-image-container.ov25-variant-image-container');
++    expect(css).toContain('aspect-ratio: 1;');
++  });
++
++  it('uses the shared grid hook in every variant display-mode renderer', () => {
++    const displayModeRendererSources = [
++      readProjectFile('src/components/VariantSelectMenu/WizardVariants.tsx'),
++      readProjectFile('src/components/VariantSelectMenu/ProductVariantsWrapper.tsx'),
++      readProjectFile('src/components/VariantSelectMenu/GroupedVariantsList.tsx'),
++      readProjectFile('src/components/VariantSelectMenu/DesktopVariants.tsx'),
++      readProjectFile('src/components/VariantSelectMenu/MobileVariants.tsx'),
++    ];
++
++    for (const source of displayModeRendererSources) {
++      expect(source).toContain('ov25-variant-card-grid');
++    }
++  });
++
++  it('exposes the grid as a stable custom-CSS target', () => {
++    expect(ELEMENT_SELECTORS).toContainEqual({
++      selector: '.ov25-variant-card-grid',
++      label: 'Variant card grid',
++      element: 'div',
++    });
++  });
++});

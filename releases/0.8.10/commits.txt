@@ -1,0 +1,8 @@
+0135ba1 (HEAD -> main, origin/main, origin/HEAD) fix(tests) update e2e ledger
+cfc9044 fix(tests) remove the 90s timeout codex added because we are having network issues
+194e970 fix(variants): fix various issues with mobile drawer layouts with guided-overview or hideBuyNow
+f7348fa feat(configurator): configure variants per row, setup integration
+f2ab99c chore(fixtures): remove redundant inline fixture
+7494dc2 test(e2e): expand no-pricing coverage
+941b711 feat(ov25-ui) new 'guided-overview' selection displayMode
+0a732e0 (tag: ov25-setup@0.8.9) chore: release ov25-setup 0.8.9
