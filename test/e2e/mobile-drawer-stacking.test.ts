@@ -7,7 +7,7 @@ test('mobile drawer stays above the configurator gallery at its top edge', async
   page,
 }) => {
   await page.setViewportSize(MOBILE);
-  await page.goto('/tests/single-no-pricing.html');
+  await page.goto('/tests/single-no-pricing.html?profile=standard&display=list');
 
   const configure = page.getByRole('button', { name: 'Configure', exact: true });
   await expect(configure).toBeVisible({ timeout: RUNTIME_TIMEOUT });
@@ -82,10 +82,6 @@ test('mobile drawer stays above the configurator gallery at its top edge', async
   await expect(drawer.getByPlaceholder('Search')).toBeVisible({
     timeout: RUNTIME_TIMEOUT,
   });
-  await expect(drawer.getByText('Leather', { exact: true }).first()).toBeVisible({
-    timeout: RUNTIME_TIMEOUT,
-  });
-
   const variantCards = drawer.locator('.ov25-default-variant-card');
   await expect(variantCards.nth(3)).toBeVisible({ timeout: RUNTIME_TIMEOUT });
 

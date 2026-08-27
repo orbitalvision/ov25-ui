@@ -321,7 +321,7 @@ export function ProductVariantsWrapper({
       </div>
     );
 
-    const needsBottomMarginForButton = isMobile && !isInline;
+    const needsBottomMarginForButton = isMobile && !isInline && !hidePricing;
     const isMobileList = isMobile && !isInline && variantShellOverlayStyle === VariantDisplayStyleOverlay.List;
 
     // When the active option changes, scroll to the active option (list mode only, used for when you have a custom button to open the configurator on an option)

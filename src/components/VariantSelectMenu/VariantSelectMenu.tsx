@@ -176,9 +176,7 @@ export const VariantSelectMenu: React.FC<VariantSelectMenuProps> = ({
         <div className='ov:w-full ov:h-full ov:flex ov:flex-col ov:absolute ov:top-0 ov:left-0 ov:pointer-events-auto'>
           {['wizard', 'guided-overview'].includes(variantDisplayStyleMobile) ? (
             <div className="ov:flex ov:flex-col ov:h-full ov:bg-(--ov25-background-color)">
-              <VariantsHeader
-                hideMobileControls={variantDisplayStyleMobile === 'guided-overview'}
-              />
+              {variantDisplayStyleMobile === 'wizard' ? <VariantsHeader /> : null}
               <div className="ov:flex ov:flex-col ov:flex-1 ov:min-h-0 ov:overflow-hidden">
                 <WizardVariants mode="drawer" displayMode={variantDisplayStyleMobile as 'wizard' | 'guided-overview'} />
               </div>

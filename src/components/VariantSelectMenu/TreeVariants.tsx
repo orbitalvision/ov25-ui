@@ -40,6 +40,7 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
     isVariantsOpen,
     activeOptionId,
     setActiveOptionId,
+    hidePricing,
     getString,
   } = useOV25UI();
 
@@ -159,7 +160,7 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
     setCurrentView(null);
   }, [isTreePanelOpen, activeOptionId, validOptionIds]);
 
-  const scrollContentClass = mode === 'drawer' && isMobile ? 'ov:pb-20' : '';
+  const scrollContentClass = mode === 'drawer' && isMobile && !hidePricing ? 'ov:pb-20' : '';
 
   const getOptionHeaderLabel = useCallback(
     (optionName: string) =>

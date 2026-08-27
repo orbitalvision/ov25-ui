@@ -46,6 +46,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode, displayMod
     disableBuyNow,
     hidePricing,
     isSnap2Mode,
+    isMobile,
     activeOptionId,
     setActiveOptionId,
     getString,
@@ -384,7 +385,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode, displayMod
   );
 
   const buttonsBlock = totalSteps > 1 && (
-    <div className={`ov25-checkout-button-wrapper ov25-wizard-button-block ov:shrink-0 ov:flex ov:items-center ov:justify-between ov:gap-3 ${isReviewStep ? '' : 'ov:px-4 ov:py-2'}`}>
+    <div className={`ov25-checkout-button-wrapper ov25-wizard-button-block ov:shrink-0 ov:flex ov:items-center ov:justify-between ov:gap-3 ${isReviewStep && !isMobile ? '' : 'ov:px-4 ov:py-2'}`}>
       <button
         onClick={goBack}
         disabled={isFirstStep}
@@ -398,7 +399,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode, displayMod
           <div className="ov:flex-1 ov:min-w-0" aria-hidden />
         ) : (
           <div className="ov:flex-1 ov:min-w-0">
-            <CheckoutButton />
+            <CheckoutButton embedded={isMobile} />
           </div>
         )
       ) : !isReviewStep ? (

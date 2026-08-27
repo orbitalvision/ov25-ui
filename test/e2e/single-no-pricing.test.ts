@@ -2,6 +2,7 @@ import { expect, test, type Locator, type Page } from '@playwright/test';
 
 const FIXTURE_PATH = '/tests/single-no-pricing.html';
 const RUNTIME_TIMEOUT = 30_000;
+const MOBILE_VIEWPORT = { width: 375, height: 667 };
 const VARIANT_DISPLAY_MODES = [
   'wizard',
   'guided-overview',
@@ -14,6 +15,12 @@ const PROFILES = ['standard', 'snap2'] as const;
 
 type VariantDisplayMode = (typeof VARIANT_DISPLAY_MODES)[number];
 type Profile = (typeof PROFILES)[number];
+
+function mobileDrawer(page: Page): Locator {
+  return page
+    .locator('#ov25-mobile-drawer-container')
+    .locator('#ov25-drawer-content');
+}
 
 function modeSurface(page: Page, mode: VariantDisplayMode): Locator {
   switch (mode) {
@@ -83,6 +90,42 @@ async function openVariantSurface(
   return surface;
 }
 
+async function openMobileVariantSurface(
+  page: Page,
+  mode: VariantDisplayMode,
+): Promise<{ drawer: Locator; surface: Locator }> {
+  await page.goto(`${FIXTURE_PATH}?profile=standard&display=${mode}`);
+
+  const fixtureControls = page.getByTestId('no-pricing-fixture-controls');
+  await expect(fixtureControls).toHaveAttribute('data-profile', 'standard');
+  await expect(fixtureControls).toHaveAttribute('data-display-mode', mode);
+  await expect(fixtureControls).toHaveAttribute('data-hide-pricing', 'true');
+
+  const configureButton = page
+    .getByRole('button', { name: /^Configure(?:\s|$)/i })
+    .filter({ visible: true })
+    .first();
+  await expect(configureButton).toBeVisible({ timeout: RUNTIME_TIMEOUT });
+  await configureButton.click();
+
+  const surface = modeSurface(page, mode);
+  await expect(surface).toBeVisible({ timeout: RUNTIME_TIMEOUT });
+  const drawer = mobileDrawer(page);
+  await expect(drawer).toBeVisible({ timeout: RUNTIME_TIMEOUT });
+  await expect
+    .poll(
+      () =>
+        drawer.evaluate((element) => {
+          const rect = element.getBoundingClientRect();
+          return { height: Math.round(rect.height), top: Math.round(rect.top) };
+        }),
+      { timeout: RUNTIME_TIMEOUT },
+    )
+    .toEqual({ height: 387, top: 280 });
+
+  return { drawer, surface };
+}
+
 test.describe('Single product — hidePricing across variant display modes', () => {
   test.use({ viewport: { width: 1440, height: 900 } });
 
@@ -131,4 +174,70 @@ test.describe('Single product — hidePricing across variant display modes', () 
       });
     }
   }
+});
+
+test.describe('Single product — hidePricing mobile drawer layout', () => {
+  test.use({ viewport: MOBILE_VIEWPORT });
+
+  for (const mode of ['tabs', 'tree'] as const) {
+    test(`${mode} fills the drawer without reserving hidden checkout space`, async ({ page }) => {
+      test.setTimeout(90_000);
+      const { drawer, surface } = await openMobileVariantSurface(page, mode);
+
+      await expectNoPricing(page);
+      await expectNoPurchaseActions(page);
+
+      const bottomGap = await surface.evaluate((element) => {
+        const drawer = element.closest('#ov25-drawer-content');
+        if (!drawer) throw new Error('Mobile drawer ancestor not found');
+        return Math.round(
+          drawer.getBoundingClientRect().bottom - element.getBoundingClientRect().bottom,
+        );
+      });
+      expect(Math.abs(bottomGap)).toBeLessThanOrEqual(1);
+
+      const reservedPadding = await drawer
+        .locator('#ov25-variants-content-wrapper > div')
+        .evaluateAll((elements) =>
+          elements.map((element) => Number.parseFloat(getComputedStyle(element).paddingBottom)),
+        );
+      expect(reservedPadding.every((padding) => padding <= 8)).toBe(true);
+    });
+  }
+
+  test('guided overview keeps only the viewer-level close button', async ({ page }) => {
+    test.setTimeout(90_000);
+    const { drawer } = await openMobileVariantSurface(page, 'guided-overview');
+
+    await expect(drawer.locator('#ov25-variants-header-mobile')).toHaveCount(0);
+    await expect(drawer.getByRole('button', { name: 'Close', exact: true })).toHaveCount(0);
+    await expect(
+      page.getByRole('button', { name: 'Close', exact: true }).filter({ visible: true }),
+    ).toHaveCount(1);
+  });
+
+  test('wizard keeps Back in the same position on the final overview', async ({ page }) => {
+    test.setTimeout(90_000);
+    const { surface } = await openMobileVariantSurface(page, 'wizard');
+    const back = surface.locator('.ov25-wizard-button-back');
+    const next = surface.locator('.ov25-wizard-button-next');
+    const review = surface.locator('[data-ov25-wizard-variants-step-content] dl');
+
+    await expect(back).toBeVisible();
+    const initialBox = await back.boundingBox();
+    expect(initialBox).not.toBeNull();
+
+    for (let attempt = 0; attempt < 10 && !(await review.isVisible().catch(() => false)); attempt += 1) {
+      await expect(next).toBeVisible();
+      await next.click();
+    }
+
+    await expect(review).toBeVisible();
+    const reviewBox = await back.boundingBox();
+    expect(reviewBox).not.toBeNull();
+    expect(reviewBox!.x).toBeCloseTo(initialBox!.x, 0);
+    expect(reviewBox!.y).toBeCloseTo(initialBox!.y, 0);
+    expect(reviewBox!.width).toBeCloseTo(initialBox!.width, 0);
+    expect(reviewBox!.height).toBeCloseTo(initialBox!.height, 0);
+  });
 });
