@@ -22,8 +22,8 @@ const NO_PRICING_VARIANT_DISPLAY_MODES = Object.freeze([
   'tree',
 ]);
 
-const NO_PRICING_TESTS = Object.freeze(
-  ['standard', 'snap2'].flatMap((profile) =>
+const NO_PRICING_TESTS = Object.freeze([
+  ...['standard', 'snap2'].flatMap((profile) =>
     NO_PRICING_VARIANT_DISPLAY_MODES.map((displayMode) =>
       Object.freeze({
         title: `${profile} / ${displayMode}: hides page pricing and purchase actions`,
@@ -37,7 +37,30 @@ const NO_PRICING_TESTS = Object.freeze(
       }),
     ),
   ),
-);
+  ...['tabs', 'tree'].map((displayMode) =>
+    Object.freeze({
+      title: `${displayMode} fills the drawer without reserving hidden checkout space`,
+      viewport: 'Mobile 375 × 667',
+      mode: `Standard · ${displayMode}`,
+      covers:
+        'flags.hidePricing removes the checkout action and its reserved drawer padding so the variants surface reaches the bottom edge.',
+    }),
+  ),
+  Object.freeze({
+    title: 'guided overview keeps only the viewer-level close button',
+    viewport: 'Mobile 375 × 667',
+    mode: 'Standard · guided-overview',
+    covers:
+      'The mobile drawer omits its duplicate local close control while retaining the viewer-level close button.',
+  }),
+  Object.freeze({
+    title: 'wizard keeps Back in the same position on the final overview',
+    viewport: 'Mobile 375 × 667',
+    mode: 'Standard · wizard',
+    covers:
+      'The Back button keeps the same position and dimensions when the wizard advances to its final review.',
+  }),
+]);
 
 export const E2E_FIXTURE_LEDGER = Object.freeze([
   Object.freeze({
@@ -97,7 +120,7 @@ export const E2E_FIXTURE_LEDGER = Object.freeze([
       reportScreenshots: Object.freeze([]),
       traceScreenshotsOnLedgerRun: false,
       note:
-        'Behavioral coverage verifies the rendered Standard and Snap2 variant surfaces across every public Variants.displayMode. Ledger runs record an action-by-action Playwright trace; there are no committed screenshot baselines or named report screenshots.',
+        'Behavioral coverage verifies the rendered Standard and Snap2 variant surfaces across every public Variants.displayMode, plus mobile drawer spacing and controls for the affected modes. Ledger runs record an action-by-action Playwright trace; there are no committed screenshot baselines or named report screenshots.',
     }),
   }),
 ]);
