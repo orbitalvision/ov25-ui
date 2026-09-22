@@ -50,7 +50,43 @@ const captureFixtureConfig = /** @type {import('ov25-ui').InjectConfiguratorInpu
   flags: { hidePricing: false },
 });
 
+/**
+ * Optional `?layout=` variants for the capture fixture. `shopify-pdp` mirrors a
+ * storefront product page where the viewer sits in a 57% column with a 16:9
+ * slot, which squeezes the configurator to roughly 440x247 on a portrait tablet.
+ *
+ * `layoutProps` shape the page around the gallery slot. `brandingCss` is injected
+ * into the gallery shadow root because the inline gallery's iframe slot is
+ * square by default; a storefront slot at 16:9 needs that override too.
+ */
+const CAPTURE_LAYOUTS = {
+  default: { layoutProps: {} },
+  'shopify-pdp': {
+    layoutProps: { galleryAspectRatio: '16 / 9', galleryColumnWidth: '57%' },
+    brandingCss: `
+      :has(> [id^="ov25-configurator-iframe-container"]) {
+        aspect-ratio: 16 / 9 !important;
+        height: auto !important;
+        min-height: 0 !important;
+        flex: none !important;
+      }
+      [id^="ov25-configurator-iframe-container"],
+      #true-ov25-configurator-iframe-container,
+      #ov25-configurator-iframe {
+        height: 100% !important;
+        max-height: 100% !important;
+      }
+    `,
+  },
+};
+
 function CaptureFixture() {
+  const layoutId = new URLSearchParams(window.location.search).get('layout') || 'default';
+  const { layoutProps, brandingCss } = CAPTURE_LAYOUTS[layoutId] || CAPTURE_LAYOUTS.default;
+  const injectConfig = brandingCss
+    ? { ...captureFixtureConfig, branding: { ...captureFixtureConfig.branding, cssString: brandingCss } }
+    : captureFixtureConfig;
+
   useEffect(() => {
     document.documentElement.dataset.ov25ViewportMatrixReady = 'true';
     return () => {
@@ -62,8 +98,9 @@ function CaptureFixture() {
     <TestPageLayout
       title="Responsive configurator layout"
       description="Stable viewer-and-controls fixture used by the viewport screenshot matrix."
-      injectConfig={captureFixtureConfig}
+      injectConfig={injectConfig}
       showTestBackButton={false}
+      {...layoutProps}
     />
   );
 }
@@ -224,6 +261,8 @@ function MatrixGallery() {
               />
               <datalist id="matrix-target-suggestions">
                 <option value={DEFAULT_VIEWPORT_MATRIX_TARGET} />
+                <option value={`${DEFAULT_VIEWPORT_MATRIX_TARGET}&dimensions=1`} />
+                <option value={`${DEFAULT_VIEWPORT_MATRIX_TARGET}&dimensions=1&layout=shopify-pdp`} />
                 <option value="/tests/gallery-inline-tabs.html" />
                 <option value="/tests/gallery-sheet-list-auto-open.html" />
                 <option value="/tests/snap2-inline.html" />

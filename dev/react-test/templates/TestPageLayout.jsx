@@ -65,6 +65,8 @@ function ProductTabs() {
  * @param {boolean} [props.fullWidthGallery] - When true, gallery column is full width and aside stacks below (single column layout)
  * @param {boolean} [props.wideConfigurator] - When true, removes the app max-width and gives the gallery a fixed-height, full-width slot
  * @param {boolean} [props.configuratorTall] - When true, uses a viewport-height configurator slot capped to a 3:4 portrait width
+ * @param {string} [props.galleryAspectRatio] - CSS aspect-ratio for the gallery slot (e.g. '16 / 9'); the placeholder image is cropped to fit
+ * @param {string} [props.galleryColumnWidth] - Gallery column width from the md breakpoint up (e.g. '57%'); default 55%
  */
 export function TestPageLayout({
   title,
@@ -82,6 +84,8 @@ export function TestPageLayout({
   fullWidthGallery = false,
   wideConfigurator = false,
   configuratorTall = false,
+  galleryAspectRatio,
+  galleryColumnWidth,
 }) {
   useEffect(() => {
     if (!dynamicConfig && configuratorInitialized) return;
@@ -104,12 +108,25 @@ export function TestPageLayout({
     ? 'ov:h-[calc(100svh-180px)] ov:max-h-none'
     : 'ov:h-[560px] ov:max-h-[560px]';
   // 75% of the Tall height (100svh - 180px) keeps the slot at or below 3:4.
-  const galleryColumnStyle = configuratorTall
-    ? { maxWidth: 'calc(75svh - 135px)' }
+  // Both knobs travel as CSS variables on the column + classes on the slot: with
+  // `replace: true` the injector swaps the slot element for a fresh div that keeps
+  // the className but drops inline styles, so an inline aspect-ratio would be lost.
+  const galleryColumnStyle = {
+    ...(configuratorTall ? { maxWidth: 'calc(75svh - 135px)' } : {}),
+    ...(galleryColumnWidth ? { '--ov25-fixture-gallery-col': galleryColumnWidth } : {}),
+    ...(galleryAspectRatio ? { '--ov25-fixture-gallery-aspect': galleryAspectRatio } : {}),
+  };
+  // A fixed aspect ratio reproduces storefront PDPs that give the viewer a 16:9 slot,
+  // so the configurator iframe (which adopts the slot's box) ends up short and wide.
+  const galleryAspectClassName = galleryAspectRatio
+    ? 'ov:aspect-(--ov25-fixture-gallery-aspect) ov:overflow-hidden'
+    : '';
+  const galleryImageStyle = galleryAspectRatio
+    ? { width: '100%', height: '100%', objectFit: 'cover' }
     : undefined;
   const galleryContainerClassName = wideConfigurator || configuratorTall
     ? `configurator-container ov:w-full ${wideConfigurator ? 'ov:max-w-none' : ''} ${configuratorHeightClassName} ov:overflow-hidden`
-    : 'configurator-container ov:w-full';
+    : `configurator-container ov:w-full ${galleryAspectClassName}`.trim();
 
   return (
     <ViewportWrapper>
@@ -126,11 +143,17 @@ export function TestPageLayout({
           }
         >
           <div
-            className={useFullWidthLayout ? 'ov:w-full' : 'ov:w-full ov:md:w-[55%]'}
+            className={
+              useFullWidthLayout
+                ? 'ov:w-full'
+                : galleryColumnWidth
+                  ? 'ov:w-full ov:md:w-(--ov25-fixture-gallery-col)'
+                  : 'ov:w-full ov:md:w-[55%]'
+            }
             style={galleryColumnStyle}
           >
             <div className={galleryContainerClassName}>
-              <img src={sofaImage} alt="Product" />
+              <img src={sofaImage} alt="Product" style={galleryImageStyle} />
             </div>
           </div>
           <div

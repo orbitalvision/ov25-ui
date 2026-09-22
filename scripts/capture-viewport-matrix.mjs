@@ -23,6 +23,9 @@ const DEFAULT_BASE_URL = 'http://localhost:3008';
 const DEFAULT_TIMEOUT_MS = 120_000;
 const DEFAULT_SETTLE_MS = 1_200;
 const CONFIGURATOR_LOADED_LOG = 'OV25 3D Loaded';
+const DIMENSIONS_TOGGLE_SELECTOR = '#ov25-desktop-dimensions-toggle-button';
+// drei <Html> labels mount over the frames after the toggle; give them time to appear.
+const DIMENSIONS_RENDER_DELAY_MS = 800;
 const VARIANTS_READY_SELECTOR = [
   '.ov25-size-variant-card:visible',
   '.ov25-default-variant-card:visible',
@@ -74,6 +77,9 @@ export async function captureViewportMatrix(options = {}) {
   const expectsReadyMarker =
     targetDescriptor.pathname === '/tests/responsive-layout-matrix.html' &&
     targetDescriptor.searchParams.get('capture') === '1';
+  // `?dimensions=1` presses the viewer's Dimensions toggle once the configurator
+  // is ready so the W/H/D labels are in every capture.
+  const showDimensions = targetDescriptor.searchParams.get('dimensions') === '1';
   const targetSlug = createTargetSlug(target);
   const capturedAt = new Date().toISOString();
   const captures = [];
@@ -198,6 +204,11 @@ export async function captureViewportMatrix(options = {}) {
           });
         }
 
+        if (showDimensions) {
+          captureStage = `dimensions toggle: ${DIMENSIONS_TOGGLE_SELECTOR}`;
+          await showDimensionLabels(page, timeoutMs);
+        }
+
         await hideDevelopmentOverlays(page);
         captureStage = 'image decoding';
         await waitForDecodedImages(page, Math.min(timeoutMs, 5_000));
@@ -270,6 +281,22 @@ export async function captureViewportMatrix(options = {}) {
   await writeJsonAtomically(VIEWPORT_MATRIX_MANIFEST_PATH, manifest);
   onProgress({ type: 'complete', manifest });
   return manifest;
+}
+
+async function showDimensionLabels(page, timeoutMs) {
+  const toggle = page.locator(DIMENSIONS_TOGGLE_SELECTOR).first();
+  const visible = await toggle
+    .waitFor({ state: 'visible', timeout: Math.min(timeoutMs, 10_000) })
+    .then(() => true, () => false);
+
+  if (!visible) {
+    throw new Error(
+      'Dimensions toggle did not appear. The fixture product needs dimensionX/Y/Z for the button to render.',
+    );
+  }
+
+  await toggle.click();
+  await page.waitForTimeout(DIMENSIONS_RENDER_DELAY_MS);
 }
 
 async function waitForConfiguratorLoaded(page, timeoutMs) {
@@ -432,6 +459,7 @@ function printHelp() {
 
 Options:
   --target <fixture>   Local fixture path. Default: ${DEFAULT_VIEWPORT_MATRIX_TARGET}
+                       Append ?dimensions=1 to capture with the W/H/D labels shown.
   --base-url <url>    Running fixture server. Default: ${DEFAULT_BASE_URL}
   --settle-ms <ms>    Delay after fixture readiness. Default: ${DEFAULT_SETTLE_MS}
   --timeout-ms <ms>   Navigation/readiness timeout. Default: ${DEFAULT_TIMEOUT_MS}

@@ -4,10 +4,12 @@ import { TestPageLayout } from '../templates/TestPageLayout.jsx';
 import '../src/index.css';
 
 const DEMO_RETAILER_APIKEY = import.meta.env.VITE_DEMO_RETAILER_APIKEY;
+const DIAMOND_FURNITURE_APIKEY = import.meta.env.VITE_DIAMOND_APIKEY;
+const DARLINGS_APIKEY = import.meta.env.VITE_DARLINGS_APIKEY;
 
 const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
-  apiKey: () => DEMO_RETAILER_APIKEY,
-  productLink: () => '217',
+  apiKey: () => DIAMOND_FURNITURE_APIKEY,
+  productLink: () => 'bed-configurator/13',
   selectors: {
     gallery: { selector: '.configurator-container', replace: true },
     variants: '#ov25-controls',
@@ -16,7 +18,7 @@ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
   },
   carousel: { desktop: 'stacked', mobile: 'carousel' },
   configurator: {
-    displayMode: { desktop: 'sheet', mobile: 'drawer' },
+    displayMode: { desktop: 'inline', mobile: 'drawer' },
     triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
     variants: { displayMode: { desktop: 'tree', mobile: 'list' } },
   },
