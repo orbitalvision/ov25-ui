@@ -24,6 +24,7 @@ import {
   AUTO_CUTOUT_THUMBNAILS_MESSAGE,
   autoCutoutAngleByImageUrl,
   composeAutoCutoutGalleryImages,
+  composeGalleryOrder,
   imageBitmapToObjectUrl,
   isAutoCutoutAngle,
   materialThumbnailFromConfiguratorState,
@@ -446,7 +447,8 @@ interface OV25UIContextType {
   carouselMaxImagesMobile?: number;
   carouselAutoCutouts: boolean;
   /** Material shot + live cutouts for the shopper's current build; empty unless auto cutouts are on. */
-  autoCutoutGalleryImages: ProductImageInput[];
+  autoCutoutMaterialImages: ProductImageInput[];
+  autoCutoutImages: ProductImageInput[];
   /** Gallery image URL -> the angle it was captured at, for cutout tiles only. */
   autoCutoutAngleByImage: Map<string, AutoCutoutAngle>;
   /** Orbits the live viewer to a captured angle; `null` restores free orbit. */
@@ -500,6 +502,8 @@ interface OV25UIContextType {
   stickyLayoutSnapshot: StickyLayoutSnapshot | null;
   carouselTarget: HTMLElement | null;
   setStickyOptionHeader: (element: HTMLElement | null) => void;
+  /** Registers the inline-sticky carousel host so its height can be measured. */
+  setStickyCarouselHost: (element: HTMLElement | null) => void;
   useSimpleVariantsSelector: boolean;
   /** Drawer trigger: single Configure button or per-option buttons (ProductOptionsGroup). */
   configuratorTriggerStyle: 'single-button' | 'split-buttons';
@@ -1001,6 +1005,7 @@ export const OV25UIProvider: React.FC<{
   const stickyLayoutControllerRef = useRef<StickyLayoutController | null>(null);
   const carouselTargetControllerRef = useRef<CarouselTargetController | null>(null);
   const stickyOptionHeaderRef = useRef<HTMLElement | null>(null);
+  const stickyCarouselHostRef = useRef<HTMLElement | null>(null);
   const stickyHostRelocatedRef = useRef(false);
   const restoreStickyHostStylesRef = useRef<(() => void) | null>(null);
   const [stickyLayoutSnapshot, setStickyLayoutSnapshot] = useState<StickyLayoutSnapshot | null>(null);
@@ -1074,6 +1079,12 @@ export const OV25UIProvider: React.FC<{
     if (stickyOptionHeaderRef.current === element) return;
     stickyOptionHeaderRef.current = element;
     stickyLayoutControllerRef.current?.setElements({ optionHeader: element });
+  }, []);
+
+  const setStickyCarouselHost = useCallback((element: HTMLElement | null) => {
+    if (stickyCarouselHostRef.current === element) return;
+    stickyCarouselHostRef.current = element;
+    stickyLayoutControllerRef.current?.setElements({ carouselHost: element });
   }, []);
 
   // Mobile inline-sticky variants must remain in document flow. Some storefront themes reuse the
@@ -1163,6 +1174,7 @@ export const OV25UIProvider: React.FC<{
       galleryHost,
       variantsHost,
       optionHeader: stickyOptionHeaderRef.current,
+      carouselHost: stickyCarouselHostRef.current,
       headerSelector,
       ...(isMobile ? { topGapOverride: 0, bottomGapOverride: 0 } : {}),
       onChange: (nextSnapshot) => {
@@ -2923,11 +2935,12 @@ export const OV25UIProvider: React.FC<{
     cutoutFirst,
     includeCutout: !cutoutBacksThreeD,
   })
-  const autoCutoutGalleryImages = composeAutoCutoutGalleryImages({
-    enabled: carouselAutoCutouts,
-    materialThumbnail: materialThumbnailFromConfiguratorState(configuratorState),
-    cutouts: autoCutoutThumbnails,
-  })
+  const { materialImages: autoCutoutMaterialImages, cutoutImages: autoCutoutImages } =
+    composeAutoCutoutGalleryImages({
+      enabled: carouselAutoCutouts,
+      materialThumbnail: materialThumbnailFromConfiguratorState(configuratorState),
+      cutouts: autoCutoutThumbnails,
+    })
   const autoCutoutAngleByImage = useMemo(
     () => autoCutoutAngleByImageUrl(autoCutoutThumbnails),
     [autoCutoutThumbnails],
@@ -2937,11 +2950,26 @@ export const OV25UIProvider: React.FC<{
   const selectAutoCutoutAngle = useCallback((yawDeg: number | null) => {
     sendMessageToIframe(AUTO_CUTOUT_SELECT_ANGLE_MESSAGE, { yawDeg }, uniqueId)
   }, [uniqueId])
-  const allImages = [...autoCutoutGalleryImages, ...(images || []), ...productImages]
-  
+  const { images: allImages, threeDIndex: galleryIndexToUse } = composeGalleryOrder({
+    materialImages: autoCutoutMaterialImages,
+    cutoutImages: autoCutoutImages,
+    galleryImages: [...(images || []), ...productImages],
+    deferThreeD,
+  })
+
   const [galleryIndex, setGalleryIndex] = useState(0);
 
-  const galleryIndexToUse = deferThreeD && allImages.length > 0 ? 1 : 0;
+  /**
+   * `galleryIndex` starts at 0, which used to *be* the 360 tile whenever the viewer was not
+   * deferred. Auto cutouts move the 360 to third place, so that default would now open on the
+   * material shot and leave the viewer hidden. Snap the untouched default across to wherever
+   * the 360 ended up; `deferThreeD` still deliberately wants a still first, so leave it alone.
+   */
+  useEffect(() => {
+    if (deferThreeD) return;
+    setGalleryIndex((current) => (current === 0 ? galleryIndexToUse : current));
+  }, [deferThreeD, galleryIndexToUse]);
+
   const shouldRestoreInlineGalleryToIframe =
     allImages.length > 0 &&
     configuratorDisplayModeUsesInlineVariants(
@@ -3037,7 +3065,8 @@ export const OV25UIProvider: React.FC<{
   carouselMaxImagesDesktop,
   carouselMaxImagesMobile,
   carouselAutoCutouts,
-  autoCutoutGalleryImages,
+  autoCutoutMaterialImages,
+  autoCutoutImages,
   autoCutoutAngleByImage,
   selectAutoCutoutAngle,
   showCarousel: showCarouselForViewport,
@@ -3103,6 +3132,7 @@ export const OV25UIProvider: React.FC<{
     stickyLayoutSnapshot,
     carouselTarget,
     setStickyOptionHeader,
+    setStickyCarouselHost,
     useSimpleVariantsSelector,
     configuratorTriggerStyle: isMobile ? (configuratorTriggerStyleMobileProp ?? configuratorTriggerStyle) : configuratorTriggerStyle,
     variantDisplayStyleMobile,

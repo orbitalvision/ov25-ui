@@ -7,9 +7,9 @@ import '../src/index.css';
 const DEMO_RETAILER_APIKEY = import.meta.env.VITE_DEMO_RETAILER_APIKEY;
 
 /**
- * Host images sit AFTER the auto cutouts, so the strip reads: material shot, four cutouts, then
- * whatever the shop already had. Keeping a couple here is the point of the fixture — it shows the
- * live tiles are prepended rather than replacing the retailer's own photography.
+ * The strip reads: material shot, first host image, 360, four cutouts, then the remaining host
+ * images. Keeping several here is the point of the fixture — it shows the live tiles interleave
+ * with the retailer's own photography rather than replacing it.
  */
 const DEMO_GALLERY_IMAGES = [
   sofaImage,
@@ -83,8 +83,9 @@ function App() {
     <TestPageLayout
       title="Gallery Auto Cutouts"
       description={
-        'Auto cutouts on: the carousel leads with a material shot and four live cutouts (front-left, ' +
-        'front, left-side, rear) of the current build. Change a fabric and the whole set re-renders. ' +
+        'Auto cutouts on: material shot, first host image, 360, then four live cutouts (front-left, ' +
+        'front, left-side, rear) of the current build, then the remaining host images. Change a ' +
+        'fabric and the whole set re-renders. The 360 tile shows no catalogue cutout behind it. ' +
         'Auto cutouts off: only the host images and product metadata images remain.'
       }
       injectConfig={config}

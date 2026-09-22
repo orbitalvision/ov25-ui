@@ -10,6 +10,7 @@ import { VariantsCloseButton } from './VariantSelectMenu/VariantsCloseButton.js'
 import { CONFIGURATOR_IFRAME_BACKGROUND_CSS_VAR } from '../lib/config/iframe-transition-snapshot.js'
 import { getResolvedConfiguratorIframeBackgroundColor } from '../utils/configurator-dom-queries.js'
 import { CarouselDisplayMode } from '../types/config-enums.js'
+import { composeGalleryOrder } from '../lib/auto-cutouts.js'
 
 function cssColorToHex(value: string | null | undefined): string | null {
     const raw = value?.trim();
@@ -138,7 +139,8 @@ export const IframeContainer = () => {
         carouselLayoutMobile,
         showCarousel,
         images: passedImages,
-        autoCutoutGalleryImages,
+        autoCutoutMaterialImages,
+        autoCutoutImages,
         carouselAutoCutouts,
         isProductGalleryStacked: isStacked,
         isVariantsOpen,
@@ -231,7 +233,14 @@ export const IframeContainer = () => {
         cutoutFirst,
         includeCutout: !cutoutBacksThreeD,
     })
-    const images = [...(autoCutoutGalleryImages || []), ...(passedImages || []), ...productImages]
+    // Must match the carousel's strip exactly: galleryIndex indexes the spliced strip,
+    // so a different order here shows the wrong poster.
+    const { images } = composeGalleryOrder({
+        materialImages: autoCutoutMaterialImages || [],
+        cutoutImages: autoCutoutImages || [],
+        galleryImages: [...(passedImages || []), ...productImages],
+        deferThreeD,
+    })
 
     // Any component-specific state remains local
     const [canSeeDimensions, setCanSeeDimensions] = useState(false);

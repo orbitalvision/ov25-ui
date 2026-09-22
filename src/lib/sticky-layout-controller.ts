@@ -13,11 +13,23 @@ export const STICKY_LAYOUT_CSS_PROPERTIES = {
   top: '--ov25-sticky-top',
   availableHeight: '--ov25-sticky-available-height',
   optionHeaderHeight: '--ov25-sticky-option-header-height',
+  carouselHeight: '--ov25-sticky-carousel-height',
   galleryBottom: '--ov25-sticky-gallery-bottom',
   viewportWidth: '--ov25-sticky-viewport-width',
 } as const;
 
 export const DEFAULT_STICKY_GAP = 16;
+/** Must match the `--ov25-sticky-carousel-height` fallback in globals.css. */
+export const DEFAULT_STICKY_CAROUSEL_HEIGHT = 120;
+/**
+ * Ceiling for the measured carousel, as a fraction of the sticky available
+ * height. `stacked` renders a two-column grid of every image, so an unbounded
+ * measurement would subtract the whole viewport from the iframe slot and
+ * collapse the viewer. Past this the carousel scrolls, as it did before.
+ */
+export const STICKY_CAROUSEL_MAX_AVAILABLE_FRACTION = 0.5;
+/** id of the unclamped content root inside the carousel host's shadow root. */
+const STICKY_CAROUSEL_CONTENT_ID = 'ov25-product-carousel';
 export const STICKY_OPTION_HEADER_PINNED_ATTRIBUTE = 'data-ov25-sticky-pinned';
 
 type StickyLayoutCssProperty =
@@ -28,6 +40,7 @@ type StickyLayoutOwnedCssVariables = Record<StickyLayoutCssProperty, string>;
 // Omit the dynamic runtime ones
 export type StickyLayoutCssVariables = Omit<
   StickyLayoutOwnedCssVariables,
+  | (typeof STICKY_LAYOUT_CSS_PROPERTIES)['carouselHeight']
   | (typeof STICKY_LAYOUT_CSS_PROPERTIES)['galleryBottom']
   | (typeof STICKY_LAYOUT_CSS_PROPERTIES)['sizingHeaderOffset']
   | (typeof STICKY_LAYOUT_CSS_PROPERTIES)['viewportWidth']
@@ -352,6 +365,46 @@ function measureElementHeight(
     return 0;
   }
   return normalizePixelValue(element.getBoundingClientRect().height);
+}
+
+/**
+ * Height the carousel strip actually wants.
+ *
+ * The host clamps itself with `max-height: var(--ov25-sticky-carousel-height)`
+ * and scrolls, so its own box always reports the current cap and can never be
+ * used to derive a new one. The portaled content inside its shadow root is
+ * unclamped, so measure that instead — otherwise the measurement is circular.
+ */
+function measureCarouselContentHeight(
+  carouselHost: HTMLElement | null,
+  readStyle: StickyStyleReader,
+): number {
+  if (!carouselHost?.isConnected || carouselHost.hasAttribute('hidden')) return 0;
+  if (hasHiddenState(carouselHost) || hasNonRenderedStyle(carouselHost, readStyle)) {
+    return 0;
+  }
+  const content =
+    carouselHost.shadowRoot?.getElementById(STICKY_CAROUSEL_CONTENT_ID) ?? null;
+  if (!content) return 0;
+  return normalizePixelValue(content.getBoundingClientRect().height);
+}
+
+/**
+ * Clamps the measured strip to the space the gallery can spare. The +1px keeps
+ * the cap just clear of the content: landing exactly on it leaves the overflow
+ * state ambiguous, and the scrollbar appearing narrows the strip, which changes
+ * the thumbnails' height and can oscillate between two measurements.
+ */
+function resolveStickyCarouselHeight(
+  contentHeight: number,
+  availableHeight: number,
+): number {
+  if (contentHeight <= 0) return DEFAULT_STICKY_CAROUSEL_HEIGHT;
+  const ceiling =
+    availableHeight > 0
+      ? availableHeight * STICKY_CAROUSEL_MAX_AVAILABLE_FRACTION
+      : Number.POSITIVE_INFINITY;
+  return normalizePixelValue(Math.min(contentHeight + 1, ceiling));
 }
 
 export type StickyBlockingReason =
@@ -1079,6 +1132,7 @@ export interface StickyLayoutSnapshot {
   topGap: number;
   bottomGap: number;
   optionHeaderHeight: number;
+  carouselHeight: number;
   headerElements: readonly Element[];
   headerStatus: StickyHeaderStatus;
   headerSource: StickyHeaderSource;
@@ -1091,6 +1145,7 @@ export interface StickyLayoutControllerElements {
   galleryHost?: HTMLElement | null;
   variantsHost?: HTMLElement | null;
   optionHeader?: HTMLElement | null;
+  carouselHost?: HTMLElement | null;
 }
 
 export interface StickyLayoutControllerOptions extends StickyLayoutControllerElements {
@@ -1337,6 +1392,7 @@ function sameSnapshot(a: StickyLayoutSnapshot, b: StickyLayoutSnapshot): boolean
     a.topGap === b.topGap &&
     a.bottomGap === b.bottomGap &&
     a.optionHeaderHeight === b.optionHeaderHeight &&
+    a.carouselHeight === b.carouselHeight &&
     a.headerStatus === b.headerStatus &&
     a.headerSource === b.headerSource &&
     a.requiresBodyFallback === b.requiresBodyFallback &&
@@ -1527,6 +1583,7 @@ export function createStickyLayoutController(
   let galleryHost = options.galleryHost ?? null;
   let variantsHost = options.variantsHost ?? null;
   let optionHeader = options.optionHeader ?? null;
+  let carouselHost = options.carouselHost ?? null;
   const galleryFlowAnchorOwner = {};
   let originalGalleryTargetParent = retainedStickyGalleryParent(galleryHost);
   let galleryFlowAnchor = bindStickyGalleryFlowOrigin(
@@ -1561,6 +1618,7 @@ export function createStickyLayoutController(
     topGap: DEFAULT_STICKY_GAP,
     bottomGap: DEFAULT_STICKY_GAP,
     optionHeaderHeight: 0,
+    carouselHeight: DEFAULT_STICKY_CAROUSEL_HEIGHT,
     headerElements: [],
     headerStatus: 'not-found',
     headerSource: 'auto',
@@ -2189,6 +2247,7 @@ export function createStickyLayoutController(
       galleryHost,
       variantsHost,
       optionHeader,
+      carouselHost,
       ...ancestorState.observedBlockers,
       ancestorState.boundary,
       originalGalleryTargetParent,
@@ -2199,6 +2258,12 @@ export function createStickyLayoutController(
       topGap: gaps.top,
       bottomGap: gaps.bottom,
       optionHeaderHeight: measureElementHeight(optionHeader, readStyle),
+      carouselHeight: resolveStickyCarouselHeight(
+        measureCarouselContentHeight(carouselHost, readStyle),
+        normalizePixelValue(
+          (windowObject.innerHeight ?? 0) - sizingHeaderOffset - gaps.top - gaps.bottom,
+        ),
+      ),
       headerElements: [...headerResolution.elements],
       headerStatus: headerResolution.status,
       headerSource: headerResolution.source,
@@ -2220,8 +2285,13 @@ export function createStickyLayoutController(
       [STICKY_LAYOUT_CSS_PROPERTIES.viewportWidth]: toPixels(
         documentObject.documentElement.clientWidth,
       ),
+      [STICKY_LAYOUT_CSS_PROPERTIES.carouselHeight]: toPixels(nextSnapshot.carouselHeight),
     };
-    for (const host of uniqueElements([galleryHost, variantsHost])) {
+    // The carousel host is itself a shadow host, so globals' own `:host` rule
+    // redefines --ov25-sticky-carousel-height *on* that element and beats the
+    // value it would otherwise inherit from the gallery. It has to be written
+    // directly or the measurement never reaches the max-height that uses it.
+    for (const host of uniqueElements([galleryHost, variantsHost, carouselHost])) {
       applyHostVariables(host, variables);
     }
 
@@ -2362,6 +2432,10 @@ export function createStickyLayoutController(
       clearPinnedOptionHeaders();
       optionHeader = elements.optionHeader ?? null;
     }
+    if ('carouselHost' in elements && elements.carouselHost !== carouselHost) {
+      restoreHostVariables(carouselHost);
+      carouselHost = elements.carouselHost ?? null;
+    }
     scheduleMeasure();
   };
 
@@ -2396,6 +2470,7 @@ export function createStickyLayoutController(
     );
     restoreHostVariables(galleryHost);
     if (variantsHost !== galleryHost) restoreHostVariables(variantsHost);
+    restoreHostVariables(carouselHost);
   };
 
   return {

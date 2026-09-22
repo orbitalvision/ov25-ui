@@ -294,6 +294,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
         configuratorClosingProxyRect,
         releaseConfiguratorTransitionProxy,
         stackedGalleryCloseSyncImmediateRef,
+        setStickyCarouselHost,
         isSnap2Mode,
         galleryCarouselFullscreenImage,
         isModalOpen,
@@ -407,6 +408,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
     useLayoutEffect(() => {
         if (!showCarousel || hideEmbeddedCarousel || externalCarouselShadowRoot) {
             setCarouselShadowRoot(null);
+            setStickyCarouselHost(null);
             return;
         }
         const host = carouselHostRef.current;
@@ -422,7 +424,10 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
         }
         shadow.adoptedStyleSheets = stylesheets;
         setCarouselShadowRoot(shadow);
-    }, [showCarousel, hideEmbeddedCarousel, externalCarouselShadowRoot, cssString, galleryShadowRoot]);
+        // Lets the sticky controller measure the strip instead of assuming 120px.
+        setStickyCarouselHost(host);
+        return () => setStickyCarouselHost(null);
+    }, [showCarousel, hideEmbeddedCarousel, externalCarouselShadowRoot, cssString, galleryShadowRoot, setStickyCarouselHost]);
 
     useLayoutEffect(() => {
         const host = galleryHostRef.current;

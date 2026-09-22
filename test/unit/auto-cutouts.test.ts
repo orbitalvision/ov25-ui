@@ -4,6 +4,7 @@ import {
   AUTO_CUTOUT_SIZE,
   autoCutoutAngleByImageUrl,
   composeAutoCutoutGalleryImages,
+  composeGalleryOrder,
   isAutoCutoutAngle,
   materialThumbnailFromConfiguratorState,
 } from '../../src/lib/auto-cutouts';
@@ -116,10 +117,12 @@ describe('auto cutout gallery composition', () => {
         materialThumbnail: 'fabrics/indigo.webp',
         cutouts,
       }),
-    ).toEqual([]);
+    ).toEqual({ materialImages: [], cutoutImages: [] });
   });
 
-  it('leads with the material shot, then the cutouts in reference order', () => {
+  it('returns the material shot and the cutouts separately, in reference order', () => {
+    // They are split because they are not adjacent in the strip: the material shot leads and
+    // the cutouts sit behind the 360 tile.
     expect(
       composeAutoCutoutGalleryImages({
         enabled: true,
@@ -127,7 +130,10 @@ describe('auto cutout gallery composition', () => {
         // Deliberately out of order: the configurator makes no ordering promise.
         cutouts: [...cutouts].reverse(),
       }),
-    ).toEqual(['fabrics/indigo.webp', 'blob:-45', 'blob:0', 'blob:-90', 'blob:180']);
+    ).toEqual({
+      materialImages: ['fabrics/indigo.webp'],
+      cutoutImages: ['blob:-45', 'blob:0', 'blob:-90', 'blob:180'],
+    });
   });
 
   it('holds the cutouts back until the whole set has arrived', () => {
@@ -137,13 +143,126 @@ describe('auto cutout gallery composition', () => {
         materialThumbnail: 'fabrics/indigo.webp',
         cutouts: cutouts.slice(0, 2),
       }),
-    ).toEqual(['fabrics/indigo.webp']);
+    ).toEqual({ materialImages: ['fabrics/indigo.webp'], cutoutImages: [] });
   });
 
   it('works without a material shot', () => {
     expect(
       composeAutoCutoutGalleryImages({ enabled: true, materialThumbnail: null, cutouts }),
-    ).toEqual(['blob:-45', 'blob:0', 'blob:-90', 'blob:180']);
+    ).toEqual({
+      materialImages: [],
+      cutoutImages: ['blob:-45', 'blob:0', 'blob:-90', 'blob:180'],
+    });
+  });
+
+  describe('gallery order', () => {
+    const cutoutImages = ['cut:-45', 'cut:0', 'cut:-90', 'cut:180'];
+    const galleryImages = ['gal:1', 'gal:2', 'gal:3'];
+
+    it('puts the first gallery image between the material shot and the 360', () => {
+      expect(
+        composeGalleryOrder({
+          materialImages: ['material'],
+          cutoutImages,
+          galleryImages,
+          deferThreeD: false,
+        }),
+      ).toEqual({
+        images: ['material', 'gal:1', 'cut:-45', 'cut:0', 'cut:-90', 'cut:180', 'gal:2', 'gal:3'],
+        // The 360 is spliced in at this index, so the full strip reads:
+        // material, gal:1, 360, cutouts x4, remaining gallery images.
+        threeDIndex: 2,
+      });
+    });
+
+    it('ignores deferThreeD once cutouts place the 360 themselves', () => {
+      // deferThreeD only exists to stop the 360 landing first; at index 2 it already cannot.
+      const withDefer = composeGalleryOrder({
+        materialImages: ['material'],
+        cutoutImages,
+        galleryImages,
+        deferThreeD: true,
+      });
+      const withoutDefer = composeGalleryOrder({
+        materialImages: ['material'],
+        cutoutImages,
+        galleryImages,
+        deferThreeD: false,
+      });
+      expect(withDefer).toEqual(withoutDefer);
+    });
+
+    it('closes the gap when there is no material shot', () => {
+      expect(
+        composeGalleryOrder({
+          materialImages: [],
+          cutoutImages,
+          galleryImages,
+          deferThreeD: false,
+        }),
+      ).toEqual({
+        images: ['gal:1', 'cut:-45', 'cut:0', 'cut:-90', 'cut:180', 'gal:2', 'gal:3'],
+        threeDIndex: 1,
+      });
+    });
+
+    it('handles a product with no gallery images', () => {
+      expect(
+        composeGalleryOrder({
+          materialImages: ['material'],
+          cutoutImages,
+          galleryImages: [],
+          deferThreeD: false,
+        }),
+      ).toEqual({
+        images: ['material', 'cut:-45', 'cut:0', 'cut:-90', 'cut:180'],
+        threeDIndex: 1,
+      });
+    });
+
+    it('still leads with the material shot while the cutout set is incomplete', () => {
+      expect(
+        composeGalleryOrder({
+          materialImages: ['material'],
+          cutoutImages: [],
+          galleryImages,
+          deferThreeD: false,
+        }),
+      ).toEqual({ images: ['material', 'gal:1', 'gal:2', 'gal:3'], threeDIndex: 2 });
+    });
+
+    it('leaves the plain gallery untouched when auto cutouts contribute nothing', () => {
+      expect(
+        composeGalleryOrder({
+          materialImages: [],
+          cutoutImages: [],
+          galleryImages,
+          deferThreeD: false,
+        }),
+      ).toEqual({ images: galleryImages, threeDIndex: 0 });
+    });
+
+    it('keeps deferThreeD pushing the 360 to second place without cutouts', () => {
+      expect(
+        composeGalleryOrder({
+          materialImages: [],
+          cutoutImages: [],
+          galleryImages,
+          deferThreeD: true,
+        }),
+      ).toEqual({ images: galleryImages, threeDIndex: 1 });
+    });
+
+    it('keeps the 360 first for an empty gallery even when deferring', () => {
+      expect(
+        composeGalleryOrder({
+          materialImages: [],
+          cutoutImages: [],
+          galleryImages: [],
+          deferThreeD: true,
+        }),
+      ).toEqual({ images: [], threeDIndex: 0 });
+    });
   });
 
   it('only accepts the angles it asked for', () => {

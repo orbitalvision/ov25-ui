@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { useOV25UI } from "../contexts/ov25-ui-context.js"
 import { CarouselDisplayMode } from "../types/config-enums.js"
+import { composeGalleryOrder } from "../lib/auto-cutouts.js"
 import {
   cn,
   getProductCutoutImage,
@@ -36,7 +37,9 @@ export function ProductCarousel() {
     setGalleryIndex,
     error,
     images: passedImages,
-    autoCutoutGalleryImages,
+    autoCutoutMaterialImages,
+    autoCutoutImages,
+    carouselAutoCutouts,
     autoCutoutAngleByImage,
     selectAutoCutoutAngle,
     galleryIndexToUse,
@@ -200,15 +203,24 @@ export function ProductCarousel() {
   const hasCutout = !!(currentProduct?.metadata as any)?.cutoutImage
   const cutoutFirst = hasCutout && (isMobile || !deferThreeD)
   const cutoutBacksThreeD = effectiveCarouselLayout === CarouselDisplayMode.Carousel
-  const cutoutImage = cutoutBacksThreeD
-    ? getProductCutoutImage(currentProduct?.metadata)
-    : null
+  // Auto cutouts render the configured product at four angles of their own, so the static
+  // catalogue cutout behind the 360 tile is both redundant and off-configuration. Leave the
+  // tile as the plain "360°" label instead.
+  const cutoutImage =
+    cutoutBacksThreeD && !carouselAutoCutouts
+      ? getProductCutoutImage(currentProduct?.metadata)
+      : null
   const productImages = getProductGalleryImages(currentProduct?.metadata, {
     cutoutFirst,
     includeCutout: !cutoutBacksThreeD,
   })
   const maxImages = isMobile ? carouselMaxImagesMobile : carouselMaxImagesDesktop
-  const allImages = [...(autoCutoutGalleryImages || []), ...(passedImages || []), ...productImages]
+  const { images: allImages } = composeGalleryOrder({
+    materialImages: autoCutoutMaterialImages || [],
+    cutoutImages: autoCutoutImages || [],
+    galleryImages: [...(passedImages || []), ...productImages],
+    deferThreeD,
+  })
   const images = maxImages != null && maxImages > 0 ? allImages.slice(0, maxImages) : allImages
   const carouselItems: (typeof images[0] | ThreeDPlaceholder)[] = [...images]
   carouselItems.splice(galleryIndexToUse, 0, {

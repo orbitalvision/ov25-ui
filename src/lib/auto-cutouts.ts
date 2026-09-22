@@ -125,22 +125,61 @@ export function autoCutoutAngleByImageUrl(
 }
 
 /**
- * The gallery tiles contributed by auto cutouts, in the reference gallery's order: the material
- * shot first, then the cutouts at {@link AUTO_CUTOUT_ANGLES}. Cutouts are only included once the
- * complete set has arrived, so the strip never shows a half-rendered product.
+ * The gallery tiles contributed by auto cutouts, split so the caller can place them
+ * independently: the material shot leads the strip, but the cutouts sit *after* the 360 tile.
+ * Cutouts are only returned once the complete set has arrived, so the strip never shows a
+ * half-rendered product.
  */
 export function composeAutoCutoutGalleryImages(options: {
   enabled: boolean;
   materialThumbnail: string | null;
   cutouts: readonly AutoCutoutThumbnail[];
-}): string[] {
-  if (!options.enabled) return [];
+}): { materialImages: string[]; cutoutImages: string[] } {
+  if (!options.enabled) return { materialImages: [], cutoutImages: [] };
   const ordered = AUTO_CUTOUT_ANGLES.map(
     (yaw) => options.cutouts.find((cutout) => cutout.yaw === yaw)?.imageUrl ?? null,
   );
   const complete = ordered.every((url): url is string => url !== null);
-  return [
-    ...(options.materialThumbnail ? [options.materialThumbnail] : []),
-    ...(complete ? (ordered as string[]) : []),
-  ];
+  return {
+    materialImages: options.materialThumbnail ? [options.materialThumbnail] : [],
+    cutoutImages: complete ? (ordered as string[]) : [],
+  };
+}
+
+/** A laid-out gallery strip: the images in order, and the slot the 360 tile is spliced into. */
+export interface GalleryOrder<TImage> {
+  images: TImage[];
+  threeDIndex: number;
+}
+
+/**
+ * Lays out the gallery strip.
+ *
+ * With auto cutouts contributing tiles the order is fixed:
+ *   material shot -> first gallery image -> 360 -> cutouts -> remaining gallery images
+ * The 360 sits third so the shopper sees the configured material and a real photograph before
+ * the viewer, while the cutouts stay grouped together behind it.
+ *
+ * With no auto cutout tiles this is the plain gallery, and `deferThreeD` keeps its original
+ * meaning: push the 360 to second place so a still renders first.
+ *
+ * Three call sites (context, carousel, iframe poster) have to agree on this order — `galleryIndex`
+ * is an index into the spliced strip, so any disagreement silently selects the wrong image.
+ */
+export function composeGalleryOrder<TImage>(options: {
+  materialImages: readonly TImage[];
+  cutoutImages: readonly TImage[];
+  galleryImages: readonly TImage[];
+  deferThreeD: boolean;
+}): GalleryOrder<TImage> {
+  const { materialImages, cutoutImages, galleryImages, deferThreeD } = options;
+  if (materialImages.length === 0 && cutoutImages.length === 0) {
+    const images = [...galleryImages];
+    return { images, threeDIndex: deferThreeD && images.length > 0 ? 1 : 0 };
+  }
+  const lead = [...materialImages, ...galleryImages.slice(0, 1)];
+  return {
+    images: [...lead, ...cutoutImages, ...galleryImages.slice(1)],
+    threeDIndex: lead.length,
+  };
 }
