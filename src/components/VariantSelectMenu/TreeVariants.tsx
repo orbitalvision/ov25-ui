@@ -42,6 +42,7 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
     setActiveOptionId,
     hidePricing,
     getString,
+    getSelectedValueForOption,
   } = useOV25UI();
 
   const [currentView, setCurrentView] = useState<string | null>(null);
@@ -164,8 +165,14 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
 
   const getOptionHeaderLabel = useCallback(
     (optionName: string) =>
-      capitalizeWords(getString('optionHeader', { OPTION_NAME: optionName }, optionName)),
-    [getString]
+      capitalizeWords(
+        getString(
+          'optionHeader',
+          { OPTION_NAME: optionName, SELECTED_VARIANT_NAME: getSelectedValueForOption(optionName) },
+          optionName
+        )
+      ),
+    [getString, getSelectedValueForOption]
   );
 
   const backHeader = (title: string) => (

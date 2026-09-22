@@ -610,6 +610,8 @@ interface OV25UIContextType {
   handleNextOption: () => void;
   handlePreviousOption: () => void;
   getSelectedValue: (option: Option | SizeOption) => string;
+  /** Selected value looked up by option id, falling back to option display name. Empty string when nothing is selected yet. */
+  getSelectedValueForOption: (optionIdOrName: string) => string;
   toggleAR: () => void;
   cleanupConfigurator: () => void;
   applySearchAndFilters: (option: Option | SizeOption, optionId: string) => Option | SizeOption;
@@ -2277,6 +2279,17 @@ export const OV25UIProvider: React.FC<{
     return selection?.name || '';
   };
 
+  // Header call sites know an option by id (list/tabs) or by display name
+  // (accordion/tree/snap2), so accept either and resolve to the same value.
+  const getSelectedValueForOption = (optionIdOrName: string) => {
+    const needle = optionIdOrName?.trim().toLowerCase();
+    if (!needle) return '';
+    const option =
+      allOptions.find(o => o.id.toLowerCase() === needle) ??
+      allOptions.find(o => o.name?.trim().toLowerCase() === needle);
+    return option ? getSelectedValue(option) : '';
+  };
+
   // Action handlers
   const handleOptionClick = (optionId: string) => {
     setExpandToOptionIdOnOpen(optionId);
@@ -3173,6 +3186,7 @@ export const OV25UIProvider: React.FC<{
     handleNextOption,
     handlePreviousOption,
     getSelectedValue,
+    getSelectedValueForOption,
     toggleAR: handleToggleAR,
     cleanupConfigurator,
     applySearchAndFilters,

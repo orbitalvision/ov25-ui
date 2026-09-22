@@ -41,6 +41,7 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
     expandToOptionIdOnOpen,
     hidePricing,
     getString,
+    getSelectedValueForOption,
   } = useOV25UI();
 
   const [expandedAccordion, setExpandedAccordion] = useState<string | null>(null);
@@ -152,8 +153,14 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
 
   const getOptionHeaderLabel = useCallback(
     (optionName: string) =>
-      capitalizeWords(getString('optionHeader', { OPTION_NAME: optionName }, optionName)),
-    [getString]
+      capitalizeWords(
+        getString(
+          'optionHeader',
+          { OPTION_NAME: optionName, SELECTED_VARIANT_NAME: getSelectedValueForOption(optionName) },
+          optionName
+        )
+      ),
+    [getString, getSelectedValueForOption]
   );
 
   return (

@@ -59,6 +59,7 @@ export function ProductVariantsWrapper({
         configuratorDisplayModeMobile,
         isSnap2Mode,
         getString,
+        getSelectedValueForOption,
         stickyLayoutActive,
         setStickyOptionHeader,
       } = useOV25UI();
@@ -241,6 +242,7 @@ export function ProductVariantsWrapper({
               : panelOpts.find((o) => o.id === id)?.name ??
                 allOptionsVariants.find((o) => o.optionId === id)?.optionName ??
                 id,
+          SELECTED_VARIANT_NAME: getSelectedValueForOption(id),
         },
         id === 'size'
           ? 'Size'
@@ -253,7 +255,7 @@ export function ProductVariantsWrapper({
       <div className=" ov:pb-6">
         {showHeader && (
           <h3 className={`ov25-option-header ov:sticky ov:top-0  ov:px-4 ov:z-10 ov:bg-(--ov25-background-color) ov:text-lg ov:pb-4 ov:text-(--ov25-secondary-text-color) ${isMobileListSticky ? 'ov:pt-2' : 'ov:pt-0'}`}>
-            {capitalizeWords(getString('optionHeader', { OPTION_NAME: 'Size' }, 'Size'))}
+            {capitalizeWords(getString('optionHeader', { OPTION_NAME: 'Size', SELECTED_VARIANT_NAME: getSelectedValueForOption('size') }, 'Size'))}
           </h3>
         )}
         <div className="ov:bg-(--ov25-background-color) ov:pt-4">
@@ -284,7 +286,11 @@ export function ProductVariantsWrapper({
         {showHeader && (
           <h3 className={`ov25-option-header ov:sticky ov:top-0  ov:px-4 ov:z-10 ov:bg-(--ov25-background-color) ov:text-lg ov:pb-2 ov:md:pb-4 ov:text-(--ov25-secondary-text-color) ${isMobileListSticky ? 'ov:pt-2' : 'ov:pt-0'}`}>
             {capitalizeWords(
-              getString('optionHeader', { OPTION_NAME: optionName }, optionName)
+              getString(
+                'optionHeader',
+                { OPTION_NAME: optionName, SELECTED_VARIANT_NAME: getSelectedValueForOption(optionId) },
+                optionName
+              )
             )}
           </h3>
         )}
