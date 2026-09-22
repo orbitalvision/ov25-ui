@@ -131,6 +131,7 @@ export function buildSerializableConfig(
         settings.carousel.maxImagesDesktop !== settings.carousel.maxImagesMobile
           ? { desktop: settings.carousel.maxImagesDesktop, mobile: settings.carousel.maxImagesMobile }
           : settings.carousel.maxImagesDesktop,
+      ...(settings.carousel.autoCutouts ? { autoCutouts: true } : {}),
     },
     configurator: {
       displayMode: { desktop: displayModeDesktop, mobile: displayModeMobile },

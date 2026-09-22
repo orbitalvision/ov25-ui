@@ -12,6 +12,7 @@ export interface SerializableInjectConfig {
     desktop: string;
     mobile: string;
     maxImages?: number | { desktop: number; mobile: number };
+    autoCutouts?: boolean;
   };
   configurator?: {
     displayMode: { desktop: string; mobile: string };

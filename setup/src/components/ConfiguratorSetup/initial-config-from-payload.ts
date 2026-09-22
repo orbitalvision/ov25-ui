@@ -173,6 +173,7 @@ function mergeSerializableIntoTypeSettings(base: TypeSettings, saved: SavedLayou
         merged.carousel.maxImagesMobile = c.maxImages.mobile;
       }
     }
+    if (typeof c.autoCutouts === 'boolean') merged.carousel.autoCutouts = c.autoCutouts;
   }
 
   if (saved.configurator) {

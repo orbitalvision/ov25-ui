@@ -41,6 +41,11 @@ export type CarouselDisplayMode = 'none' | 'carousel' | 'stacked';
 export type CarouselConfig = ResponsiveValue<CarouselDisplayMode> & {
   /** Max images to show in carousel; excess are cut. Responsive: { desktop, mobile }. */
   maxImages?: number | ResponsiveValue<number>;
+  /**
+   * Prepend live renders of the shopper's current configuration to the gallery: a material shot
+   * plus four product cutouts, refreshed whenever the configuration settles. Angles are fixed.
+   */
+  autoCutouts?: boolean;
 };
 
 export type ConfiguratorDisplayMode =
@@ -360,6 +365,7 @@ export interface LegacyInjectConfiguratorOptions {
 
   carouselDisplayMode?: CarouselDisplayMode;
   carouselDisplayModeMobile?: CarouselDisplayMode;
+  carouselAutoCutouts?: boolean;
 
   configuratorDisplayMode?: 'inline' | 'inline-sticky' | 'sheet' | 'modal' | 'variants-only-sheet' | 'inline-sheet';
   configuratorDisplayModeMobile?: 'inline' | 'inline-sticky' | 'drawer' | 'modal' | 'variants-only-sheet';
@@ -446,6 +452,7 @@ export interface NormalizedInjectConfig {
   carouselDisplayModeMobile: CarouselDisplayMode;
   carouselMaxImagesDesktop?: number;
   carouselMaxImagesMobile?: number;
+  carouselAutoCutouts: boolean;
 
   configuratorDisplayMode: 'inline' | 'inline-sticky' | 'sheet' | 'modal' | 'variants-only-sheet' | 'inline-sheet';
   configuratorDisplayModeMobile: 'inline' | 'inline-sticky' | 'drawer' | 'modal' | 'variants-only-sheet';
@@ -626,6 +633,10 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
   const maxImagesRaw = carousel?.maxImages;
   const carouselMaxImagesDesktop = typeof maxImagesRaw === 'number' ? maxImagesRaw : (typeof maxImagesRaw === 'object' && maxImagesRaw ? maxImagesRaw.desktop : undefined);
   const carouselMaxImagesMobile = typeof maxImagesRaw === 'number' ? maxImagesRaw : (typeof maxImagesRaw === 'object' && maxImagesRaw ? maxImagesRaw.mobile ?? maxImagesRaw.desktop : undefined);
+  // Snap2 has its own embed and does not support live angle thumbnails.
+  const carouselAutoCutouts = isSnap2Inject
+    ? false
+    : (carousel?.autoCutouts ?? c.carouselAutoCutouts ?? false);
 
   const requestedConfigDesktop = configurator?.displayMode?.desktop ?? c.configuratorDisplayMode ?? 'sheet';
   const requestedConfigMobile =
@@ -757,6 +768,7 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
     carouselDisplayModeMobile: carouselDisplayModeMobileResolved,
     carouselMaxImagesDesktop,
     carouselMaxImagesMobile,
+    carouselAutoCutouts,
     configuratorDisplayMode: configDesktop,
     configuratorDisplayModeMobile: configMobile,
     configuratorTriggerStyle: triggerDesktop,

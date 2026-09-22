@@ -36,6 +36,8 @@ export interface TypeSettings {
     mobile: FormCarouselDisplayMode;
     maxImagesDesktop: number;
     maxImagesMobile: number;
+    /** Live renders of the shopper's build (material shot + four cutouts) ahead of the gallery. */
+    autoCutouts: boolean;
   };
   configurator: {
     displayModeDesktop: FormConfiguratorDisplayMode;
@@ -111,7 +113,7 @@ const DEFAULT_STANDARD_SETTINGS: TypeSettings = {
     configureButton: { enabled: false, selector: '[data-ov25-configure-button]', replace: false },
     initialiseMenu: { enabled: false, selector: '#ov25-initialise-menu', replace: true },
   },
-  carousel: { desktop: 'stacked', mobile: 'carousel', maxImagesDesktop: 4, maxImagesMobile: 6 },
+  carousel: { desktop: 'stacked', mobile: 'carousel', maxImagesDesktop: 4, maxImagesMobile: 6, autoCutouts: false },
   configurator: {
     displayModeDesktop: 'sheet',
     displayModeMobile: 'drawer',

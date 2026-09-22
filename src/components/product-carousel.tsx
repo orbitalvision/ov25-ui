@@ -17,6 +17,9 @@ function isThreeDPlaceholder(item: unknown): item is ThreeDPlaceholder {
 
 const DRAG_THRESHOLD_PX = 5
 
+const EMPTY_CUTOUT_ANGLES: ReadonlyMap<string, number> = new Map()
+const noop = () => {}
+
 type PopoverDivProps = React.ComponentPropsWithoutRef<'div'> & {
   popover?: 'auto' | 'manual'
 }
@@ -33,6 +36,9 @@ export function ProductCarousel() {
     setGalleryIndex,
     error,
     images: passedImages,
+    autoCutoutGalleryImages,
+    autoCutoutAngleByImage,
+    selectAutoCutoutAngle,
     galleryIndexToUse,
     carouselLayout,
     carouselLayoutMobile,
@@ -43,6 +49,11 @@ export function ProductCarousel() {
     galleryCarouselFullscreenImage,
     setGalleryCarouselFullscreenImage,
   } = useOV25UI();
+
+  // Hosts can mount this against a partial context (and tests do); treat auto cutouts as absent
+  // rather than letting a missing lookup take the whole carousel down.
+  const cutoutAngleByImage = autoCutoutAngleByImage ?? EMPTY_CUTOUT_ANGLES;
+  const orbitToCutoutAngle = selectAutoCutoutAngle ?? noop;
 
   const effectiveCarouselLayout = isMobile ? carouselLayoutMobile : carouselLayout;
   const carouselDisabled = effectiveCarouselLayout === CarouselDisplayMode.None;
@@ -197,7 +208,7 @@ export function ProductCarousel() {
     includeCutout: !cutoutBacksThreeD,
   })
   const maxImages = isMobile ? carouselMaxImagesMobile : carouselMaxImagesDesktop
-  const allImages = [...(passedImages || []), ...productImages]
+  const allImages = [...(autoCutoutGalleryImages || []), ...(passedImages || []), ...productImages]
   const images = maxImages != null && maxImages > 0 ? allImages.slice(0, maxImages) : allImages
   const carouselItems: (typeof images[0] | ThreeDPlaceholder)[] = [...images]
   carouselItems.splice(galleryIndexToUse, 0, {
@@ -206,6 +217,21 @@ export function ProductCarousel() {
   })
 
   if ((images.length === 0 && !cutoutImage) || error) return null;
+
+  /**
+   * Cutout tiles are angle shortcuts: show the live viewer and orbit it to the captured angle,
+   * rather than swapping in the still. Everything else hands free orbit back.
+   */
+  const selectGalleryItemAt = (index: number, itemSrc: string | null) => {
+    const yaw = itemSrc ? cutoutAngleByImage.get(itemSrc) : undefined
+    if (yaw !== undefined) {
+      setGalleryIndex(galleryIndexToUse)
+      orbitToCutoutAngle(yaw)
+      return
+    }
+    orbitToCutoutAngle(null)
+    setGalleryIndex(index)
+  }
 
   const renderCarouselThumbnail = (item: ThreeDPlaceholder | typeof images[0], index: number) => {
 
@@ -218,7 +244,7 @@ export function ProductCarousel() {
       return (
         <button
           key={index}
-          onClick={() => setGalleryIndex(galleryIndexToUse)}
+          onClick={() => selectGalleryItemAt(galleryIndexToUse, null)}
           data-selected={isSelected ? "true" : "false"}
           className={cn(
             "ov:cursor-pointer ov:relative ov:pl-1 ov:aspect-square ov:w-full ov:flex ov:justify-center ov:items-center ov:overflow-hidden ov:rounded-(--ov25-configurator-iframe-border-radius) ov:bg-white ov:ring-2",
@@ -266,7 +292,7 @@ export function ProductCarousel() {
     return (
       <button
         key={index}
-        onClick={() => setGalleryIndex(galleryIndexForSlot)}
+        onClick={() => selectGalleryItemAt(galleryIndexForSlot, src)}
         data-selected={isSelected ? "true" : "false"}
         className={cn(
           "ov25-gallery-image-button ov:relative ov:aspect-square ov:w-full ov:overflow-hidden ov:rounded-(--ov25-configurator-iframe-border-radius) ov:bg-muted ov:cursor-pointer",
@@ -297,7 +323,7 @@ export function ProductCarousel() {
         <button
           key={index}
           type="button"
-          onClick={() => setGalleryIndex(galleryIndexToUse)}
+          onClick={() => selectGalleryItemAt(galleryIndexToUse, null)}
           className={cn(
             'ov:cursor-pointer ov:relative ov:aspect-3/2 ov:w-full ov:flex ov:justify-center ov:items-center ov:overflow-hidden ov:rounded-(--ov25-configurator-iframe-border-radius) ov:bg-white ov:ring-2',
             isSelected ? 'ov:ring-(--ov25-primary-color)' : 'ov:ring-(--ov25-configurator-view-controls-border-color)'
@@ -322,11 +348,16 @@ export function ProductCarousel() {
         />
       )
     }
+    const cutoutYaw = cutoutAngleByImage.get(src)
     return (
       <button
         key={index}
         type="button"
-        onClick={() => setGalleryCarouselFullscreenImage(fullscreenSrc)}
+        onClick={() =>
+          cutoutYaw === undefined
+            ? setGalleryCarouselFullscreenImage(fullscreenSrc)
+            : selectGalleryItemAt(index, src)
+        }
         className="ov25-gallery-image-button ov:relative ov:aspect-3/2 ov:w-full ov:overflow-hidden ov:rounded-(--ov25-configurator-iframe-border-radius) ov:bg-muted ov:cursor-pointer"
       >
         <img

@@ -3,6 +3,12 @@ import { BED_IFRAME_ALLOW_NONE_QUERY_KEY } from '../lib/config/bed-embed-query.j
 import { findIframeWithUniqueId } from './configurator-dom-queries.js';
 import { getConfiguratorBaseUrl } from './configurator-origin.js';
 import type { ModuleProductImageUrls } from './module-product-image-srcset.js';
+import {
+  AUTO_CUTOUT_ANGLES,
+  AUTO_CUTOUT_ANGLES_QUERY_KEY,
+  AUTO_CUTOUT_SIZE,
+  AUTO_CUTOUT_SIZE_QUERY_KEY,
+} from '../lib/auto-cutouts.js';
 
 export const DINING_IFRAME_SHOW_ATTACHMENT_POINTS_QUERY_KEY = 'showAttachmentPoints';
 export const OV25_IFRAME_HIDE_GESTURE_HINT_QUERY_KEY = 'hideGestureHint';
@@ -451,6 +457,7 @@ export const getIframeSrc = (
   bedAllowNone?: string | null,
   diningShowAttachmentPoints?: boolean | null,
   hideGestureHint?: boolean | null,
+  autoCutouts?: boolean | null,
 ): string => {
   const baseUrl = getConfiguratorBaseUrl();
 
@@ -496,6 +503,18 @@ export const getIframeSrc = (
     merged.set(OV25_IFRAME_HIDE_GESTURE_HINT_QUERY_KEY, 'true');
   } else {
     merged.delete(OV25_IFRAME_HIDE_GESTURE_HINT_QUERY_KEY);
+  }
+
+  // Live angle thumbnails are off unless asked for, and the angles are not configurable — a
+  // host that wants its own set can still pass `cutoutAngles` on `productLink`, which is merged
+  // first and therefore wins.
+  if (autoCutouts === true) {
+    if (!merged.has(AUTO_CUTOUT_ANGLES_QUERY_KEY)) {
+      merged.set(AUTO_CUTOUT_ANGLES_QUERY_KEY, AUTO_CUTOUT_ANGLES.join(','));
+    }
+    if (!merged.has(AUTO_CUTOUT_SIZE_QUERY_KEY)) {
+      merged.set(AUTO_CUTOUT_SIZE_QUERY_KEY, String(AUTO_CUTOUT_SIZE));
+    }
   }
 
   const queryString = merged.toString();

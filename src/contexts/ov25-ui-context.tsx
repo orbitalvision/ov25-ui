@@ -19,6 +19,17 @@ import {
 import { stringSimilarity } from 'string-similarity-js';
 import { launchARWithGLBBlob } from '../utils/launchARWithGLBBlob.js';
 import { getProductCutoutImage, getProductGalleryImages, resolveImageUrl, type ProductImageInput } from '../lib/utils.js';
+import {
+  AUTO_CUTOUT_SELECT_ANGLE_MESSAGE,
+  AUTO_CUTOUT_THUMBNAILS_MESSAGE,
+  autoCutoutAngleByImageUrl,
+  composeAutoCutoutGalleryImages,
+  imageBitmapToObjectUrl,
+  isAutoCutoutAngle,
+  materialThumbnailFromConfiguratorState,
+  type AutoCutoutAngle,
+  type AutoCutoutThumbnail,
+} from '../lib/auto-cutouts.js';
 import type {
   BedPartSizeFilterFlags,
   OnChangePayload,
@@ -433,6 +444,13 @@ interface OV25UIContextType {
   carouselLayoutMobile: CarouselLayout;
   carouselMaxImagesDesktop?: number;
   carouselMaxImagesMobile?: number;
+  carouselAutoCutouts: boolean;
+  /** Material shot + live cutouts for the shopper's current build; empty unless auto cutouts are on. */
+  autoCutoutGalleryImages: ProductImageInput[];
+  /** Gallery image URL -> the angle it was captured at, for cutout tiles only. */
+  autoCutoutAngleByImage: Map<string, AutoCutoutAngle>;
+  /** Orbits the live viewer to a captured angle; `null` restores free orbit. */
+  selectAutoCutoutAngle: (yawDeg: number | null) => void;
   showCarousel: boolean;
   mobileLogoURL?: string;
   uniqueId?: string;
@@ -647,6 +665,7 @@ export const OV25UIProvider: React.FC<{
   carouselDisplayModeMobile?: CarouselDisplayMode,
   carouselMaxImagesDesktop?: number,
   carouselMaxImagesMobile?: number,
+  carouselAutoCutouts?: boolean,
   /** @deprecated Use carouselDisplayMode */
   carouselLayout?: CarouselDisplayMode,
   showCarousel?: boolean,
@@ -723,6 +742,7 @@ export const OV25UIProvider: React.FC<{
   carouselDisplayModeMobile: carouselDisplayModeMobileProp,
   carouselMaxImagesDesktop,
   carouselMaxImagesMobile,
+  carouselAutoCutouts = false,
   carouselLayout: carouselLayoutProp,
   showCarousel = true,
   hasConfigureButton,
@@ -805,6 +825,26 @@ export const OV25UIProvider: React.FC<{
   const currentProductIdRef = useRef<string | undefined>(currentProductId);
   currentProductIdRef.current = currentProductId;
   const [configuratorState, setConfiguratorState] = useState<ConfiguratorState>();
+  // The message listener is installed once; read the live flag through a ref so turning auto
+  // cutouts off mid-session drops incoming sets instead of leaking their bitmaps.
+  const carouselAutoCutoutsRef = useRef(carouselAutoCutouts);
+  carouselAutoCutoutsRef.current = carouselAutoCutouts;
+  // Live angle thumbnails. The configurator sends the COMPLETE set every time the configuration
+  // settles, so each arrival replaces the previous one and revokes its object URLs.
+  const [autoCutoutThumbnails, setAutoCutoutThumbnails] = useState<AutoCutoutThumbnail[]>([]);
+  const autoCutoutThumbnailsRef = useRef<AutoCutoutThumbnail[]>([]);
+  const autoCutoutCaptureVersionRef = useRef(0);
+  const replaceAutoCutoutThumbnails = useCallback((next: AutoCutoutThumbnail[]) => {
+    const previous = autoCutoutThumbnailsRef.current;
+    autoCutoutThumbnailsRef.current = next;
+    setAutoCutoutThumbnails(next);
+    previous.forEach(({ imageUrl }) => URL.revokeObjectURL(imageUrl));
+  }, []);
+  useEffect(() => () => {
+    autoCutoutCaptureVersionRef.current += 1;
+    autoCutoutThumbnailsRef.current.forEach(({ imageUrl }) => URL.revokeObjectURL(imageUrl));
+    autoCutoutThumbnailsRef.current = [];
+  }, []);
   const [selectedSelections, setSelectedSelections] = useState<Array<{
     optionId: string;
     groupId?: string;
@@ -2459,6 +2499,42 @@ export const OV25UIProvider: React.FC<{
         if (type === IFRAME_MSG_TRANSITION_SNAPSHOT || type === IFRAME_MSG_TRANSITION_SNAPSHOT_ERROR) {
           return;
         }
+
+        // Not JSON: the renders arrive as transferred ImageBitmaps alongside their angles.
+        if (type === AUTO_CUTOUT_THUMBNAILS_MESSAGE) {
+          const { bitmaps, yaws } = event.data as { bitmaps?: unknown; yaws?: unknown };
+          const incomingBitmaps = Array.isArray(bitmaps) ? (bitmaps as ImageBitmap[]) : [];
+          const incomingYaws = Array.isArray(yaws) ? (yaws as number[]) : [];
+          if (!carouselAutoCutoutsRef.current) {
+            incomingBitmaps.forEach((bitmap) => bitmap.close());
+            return;
+          }
+          const captureVersion = ++autoCutoutCaptureVersionRef.current;
+          const accepted: Array<{ bitmap: ImageBitmap; yaw: AutoCutoutAngle }> = [];
+          incomingBitmaps.forEach((bitmap, index) => {
+            const yaw = incomingYaws[index];
+            if (isAutoCutoutAngle(yaw)) accepted.push({ bitmap, yaw });
+            else bitmap.close();
+          });
+          void Promise.all(
+            accepted.map(async ({ bitmap, yaw }) => ({
+              imageUrl: await imageBitmapToObjectUrl(bitmap),
+              yaw,
+            })),
+          ).then((converted) => {
+            const next = converted.filter(
+              (thumbnail): thumbnail is AutoCutoutThumbnail => thumbnail.imageUrl !== null,
+            );
+            // A newer set (or teardown) won the race while we were copying pixels out.
+            if (captureVersion !== autoCutoutCaptureVersionRef.current) {
+              next.forEach(({ imageUrl }) => URL.revokeObjectURL(imageUrl));
+              return;
+            }
+            replaceAutoCutoutThumbnails(next);
+          });
+          return;
+        }
+
         
         // AR_GLB_DATA sends raw base64 string, don't parse it
         const data = (type === 'AR_GLB_DATA' || !payload) ? {} : JSON.parse(payload);
@@ -2821,6 +2897,7 @@ export const OV25UIProvider: React.FC<{
     hasConfigureButtonState,
     resetCommerceSnapshots,
     snap2ModulesEmbedInVariantSheet,
+    replaceAutoCutoutThumbnails,
   ]);
 
   const hasCutout = !!(currentProduct?.metadata as any)?.cutoutImage
@@ -2833,7 +2910,21 @@ export const OV25UIProvider: React.FC<{
     cutoutFirst,
     includeCutout: !cutoutBacksThreeD,
   })
-  const allImages = [...(images || []), ...productImages]
+  const autoCutoutGalleryImages = composeAutoCutoutGalleryImages({
+    enabled: carouselAutoCutouts,
+    materialThumbnail: materialThumbnailFromConfiguratorState(configuratorState),
+    cutouts: autoCutoutThumbnails,
+  })
+  const autoCutoutAngleByImage = useMemo(
+    () => autoCutoutAngleByImageUrl(autoCutoutThumbnails),
+    [autoCutoutThumbnails],
+  )
+  // A cutout tile is an angle shortcut inside the 360 viewer, not a still to swap in, so selecting
+  // one orbits the live camera instead. `null` gives the shopper free orbit back.
+  const selectAutoCutoutAngle = useCallback((yawDeg: number | null) => {
+    sendMessageToIframe(AUTO_CUTOUT_SELECT_ANGLE_MESSAGE, { yawDeg }, uniqueId)
+  }, [uniqueId])
+  const allImages = [...autoCutoutGalleryImages, ...(images || []), ...productImages]
   
   const [galleryIndex, setGalleryIndex] = useState(0);
 
@@ -2932,6 +3023,10 @@ export const OV25UIProvider: React.FC<{
   carouselLayoutMobile,
   carouselMaxImagesDesktop,
   carouselMaxImagesMobile,
+  carouselAutoCutouts,
+  autoCutoutGalleryImages,
+  autoCutoutAngleByImage,
+  selectAutoCutoutAngle,
   showCarousel: showCarouselForViewport,
     deferThreeD,
     configuratorGalleryIsDeferred,

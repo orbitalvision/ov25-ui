@@ -8,6 +8,7 @@ const testPages = [
   'configure-button-only',
   'configure-button-modal',
   'single-product-gallery',
+  'gallery-auto-cutouts',
   'configurator-sizing',
   'variants-per-row',
   'responsive-layout-matrix',

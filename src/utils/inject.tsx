@@ -283,6 +283,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     carouselDisplayModeMobile,
     carouselMaxImagesDesktop,
     carouselMaxImagesMobile,
+    carouselAutoCutouts,
     configuratorDisplayMode,
     configuratorDisplayModeMobile,
     configuratorTriggerStyle,
@@ -1056,6 +1057,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
         carouselDisplayModeMobile={carouselDisplayModeMobile}
         carouselMaxImagesDesktop={carouselMaxImagesDesktop}
         carouselMaxImagesMobile={carouselMaxImagesMobile}
+        carouselAutoCutouts={carouselAutoCutouts}
         showCarousel={showCarousel}
         hasConfigureButton={!!configureButtonSelector && !useSimpleVariantsSelector}
         uniqueId={uniqueId}

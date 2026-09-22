@@ -138,6 +138,8 @@ export const IframeContainer = () => {
         carouselLayoutMobile,
         showCarousel,
         images: passedImages,
+        autoCutoutGalleryImages,
+        carouselAutoCutouts,
         isProductGalleryStacked: isStacked,
         isVariantsOpen,
         uniqueId,
@@ -229,7 +231,7 @@ export const IframeContainer = () => {
         cutoutFirst,
         includeCutout: !cutoutBacksThreeD,
     })
-    const images = [...(passedImages || []), ...productImages]
+    const images = [...(autoCutoutGalleryImages || []), ...(passedImages || []), ...productImages]
 
     // Any component-specific state remains local
     const [canSeeDimensions, setCanSeeDimensions] = useState(false);
@@ -253,8 +255,8 @@ export const IframeContainer = () => {
 
     // Use the utility function to get the iframe src
     const iframeSrc = useMemo(() =>
-        getIframeSrc(apiKey, productLink, configurationUuid, hexBgColor, bedAllowNoneQueryValue, diningShowAttachmentPoints, hideGestureHint),
-        [productLink, apiKey, configurationUuid, hexBgColor, bedAllowNoneQueryValue, diningShowAttachmentPoints, hideGestureHint]);
+        getIframeSrc(apiKey, productLink, configurationUuid, hexBgColor, bedAllowNoneQueryValue, diningShowAttachmentPoints, hideGestureHint, carouselAutoCutouts),
+        [productLink, apiKey, configurationUuid, hexBgColor, bedAllowNoneQueryValue, diningShowAttachmentPoints, hideGestureHint, carouselAutoCutouts]);
     const iframeTitle = getConfiguratorIframeTitle({
         productLink,
         isSnap2Mode,

@@ -440,6 +440,15 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
                     />
                   </div>
                 </div>
+                <SwitchRow
+                  label="Auto cutouts"
+                  checked={currentSettings.carousel.autoCutouts}
+                  onCheckedChange={(v) => updateNested('carousel', 'autoCutouts', v)}
+                />
+                <p className="text-[10px] leading-snug text-muted-foreground">
+                  Adds a material shot and four product cutouts of the shopper's current
+                  configuration to the start of the gallery, re-rendered on every selection.
+                </p>
               </div>
             </SettingsSection>
 
