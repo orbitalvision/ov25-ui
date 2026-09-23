@@ -1267,5 +1267,4 @@ html #ov25-configurator-variant-menu-container {
 /* Group totals are visible by default; storefronts can hide them with the custom property. */
 .ov25-group-price {
   display: var(--ov25-group-price-display, inline);
-  margin-inline-start: 0.5em;
 }
