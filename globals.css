@@ -1264,8 +1264,8 @@ html #ov25-configurator-variant-menu-container {
   }
 }
 
-/* Opt-in group totals. Keep out of both layout and the accessibility tree by default. */
+/* Group totals are visible by default; storefronts can hide them with the custom property. */
 .ov25-group-price {
-  display: var(--ov25-group-price-display, none);
+  display: var(--ov25-group-price-display, inline);
   margin-inline-start: 0.5em;
 }
