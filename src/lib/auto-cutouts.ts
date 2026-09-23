@@ -150,6 +150,13 @@ export function composeAutoCutoutGalleryImages(options: {
 export interface GalleryOrder<TImage> {
   images: TImage[];
   threeDIndex: number;
+  /**
+   * Which tile the strip should open on, as an index into the *spliced* strip (the one that
+   * includes the 360). Normally the 360 itself; with `deferThreeD` the first gallery image, so
+   * a real photograph renders before the viewer loads — never the material swatch, which tells
+   * the shopper nothing about the product.
+   */
+  initialIndex: number;
 }
 
 /**
@@ -173,13 +180,19 @@ export function composeGalleryOrder<TImage>(options: {
   deferThreeD: boolean;
 }): GalleryOrder<TImage> {
   const { materialImages, cutoutImages, galleryImages, deferThreeD } = options;
+  // The material shot always leads, so the first gallery image sits just behind it — except
+  // when the product has no gallery images at all, where there is nothing to defer to.
+  const firstGalleryImageIndex = galleryImages.length > 0 ? materialImages.length : 0;
+
   if (materialImages.length === 0 && cutoutImages.length === 0) {
     const images = [...galleryImages];
-    return { images, threeDIndex: deferThreeD && images.length > 0 ? 1 : 0 };
+    const threeDIndex = deferThreeD && images.length > 0 ? 1 : 0;
+    return { images, threeDIndex, initialIndex: deferThreeD ? firstGalleryImageIndex : threeDIndex };
   }
   const lead = [...materialImages, ...galleryImages.slice(0, 1)];
   return {
     images: [...lead, ...cutoutImages, ...galleryImages.slice(1)],
     threeDIndex: lead.length,
+    initialIndex: deferThreeD ? firstGalleryImageIndex : lead.length,
   };
 }

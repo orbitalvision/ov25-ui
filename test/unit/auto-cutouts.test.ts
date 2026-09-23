@@ -172,11 +172,13 @@ describe('auto cutout gallery composition', () => {
         // The 360 is spliced in at this index, so the full strip reads:
         // material, gal:1, 360, cutouts x4, remaining gallery images.
         threeDIndex: 2,
+        initialIndex: 2,
       });
     });
 
-    it('ignores deferThreeD once cutouts place the 360 themselves', () => {
-      // deferThreeD only exists to stop the 360 landing first; at index 2 it already cannot.
+    it('keeps the same layout whether or not the 360 is deferred', () => {
+      // deferThreeD moves which tile opens, not where the 360 sits: at index 2 it already
+      // cannot land first.
       const withDefer = composeGalleryOrder({
         materialImages: ['material'],
         cutoutImages,
@@ -189,7 +191,43 @@ describe('auto cutout gallery composition', () => {
         galleryImages,
         deferThreeD: false,
       });
-      expect(withDefer).toEqual(withoutDefer);
+      expect(withDefer.images).toEqual(withoutDefer.images);
+      expect(withDefer.threeDIndex).toBe(withoutDefer.threeDIndex);
+    });
+
+    it('opens on the first gallery image when deferring, never the material shot', () => {
+      const { initialIndex, images } = composeGalleryOrder({
+        materialImages: ['material'],
+        cutoutImages,
+        galleryImages,
+        deferThreeD: true,
+      });
+      // Index 0 is the material swatch, which tells the shopper nothing about the product.
+      expect(initialIndex).toBe(1);
+      expect(images[initialIndex]).toBe('gal:1');
+    });
+
+    it('opens on the first gallery image when deferring without a material shot', () => {
+      const { initialIndex, images } = composeGalleryOrder({
+        materialImages: [],
+        cutoutImages,
+        galleryImages,
+        deferThreeD: true,
+      });
+      expect(initialIndex).toBe(0);
+      expect(images[initialIndex]).toBe('gal:1');
+    });
+
+    it('falls back to the material shot when deferring with no gallery images', () => {
+      // Nothing to defer to; opening on the 360 would defeat the point of deferring.
+      const { initialIndex, threeDIndex } = composeGalleryOrder({
+        materialImages: ['material'],
+        cutoutImages,
+        galleryImages: [],
+        deferThreeD: true,
+      });
+      expect(initialIndex).toBe(0);
+      expect(initialIndex).not.toBe(threeDIndex);
     });
 
     it('closes the gap when there is no material shot', () => {
@@ -203,6 +241,7 @@ describe('auto cutout gallery composition', () => {
       ).toEqual({
         images: ['gal:1', 'cut:-45', 'cut:0', 'cut:-90', 'cut:180', 'gal:2', 'gal:3'],
         threeDIndex: 1,
+        initialIndex: 1,
       });
     });
 
@@ -217,6 +256,7 @@ describe('auto cutout gallery composition', () => {
       ).toEqual({
         images: ['material', 'cut:-45', 'cut:0', 'cut:-90', 'cut:180'],
         threeDIndex: 1,
+        initialIndex: 1,
       });
     });
 
@@ -228,7 +268,11 @@ describe('auto cutout gallery composition', () => {
           galleryImages,
           deferThreeD: false,
         }),
-      ).toEqual({ images: ['material', 'gal:1', 'gal:2', 'gal:3'], threeDIndex: 2 });
+      ).toEqual({
+        images: ['material', 'gal:1', 'gal:2', 'gal:3'],
+        threeDIndex: 2,
+        initialIndex: 2,
+      });
     });
 
     it('leaves the plain gallery untouched when auto cutouts contribute nothing', () => {
@@ -239,7 +283,7 @@ describe('auto cutout gallery composition', () => {
           galleryImages,
           deferThreeD: false,
         }),
-      ).toEqual({ images: galleryImages, threeDIndex: 0 });
+      ).toEqual({ images: galleryImages, threeDIndex: 0, initialIndex: 0 });
     });
 
     it('keeps deferThreeD pushing the 360 to second place without cutouts', () => {
@@ -250,7 +294,7 @@ describe('auto cutout gallery composition', () => {
           galleryImages,
           deferThreeD: true,
         }),
-      ).toEqual({ images: galleryImages, threeDIndex: 1 });
+      ).toEqual({ images: galleryImages, threeDIndex: 1, initialIndex: 0 });
     });
 
     it('keeps the 360 first for an empty gallery even when deferring', () => {
@@ -261,7 +305,7 @@ describe('auto cutout gallery composition', () => {
           galleryImages: [],
           deferThreeD: true,
         }),
-      ).toEqual({ images: [], threeDIndex: 0 });
+      ).toEqual({ images: [], threeDIndex: 0, initialIndex: 0 });
     });
   });
 

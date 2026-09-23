@@ -2950,7 +2950,11 @@ export const OV25UIProvider: React.FC<{
   const selectAutoCutoutAngle = useCallback((yawDeg: number | null) => {
     sendMessageToIframe(AUTO_CUTOUT_SELECT_ANGLE_MESSAGE, { yawDeg }, uniqueId)
   }, [uniqueId])
-  const { images: allImages, threeDIndex: galleryIndexToUse } = composeGalleryOrder({
+  const {
+    images: allImages,
+    threeDIndex: galleryIndexToUse,
+    initialIndex: initialGalleryIndex,
+  } = composeGalleryOrder({
     materialImages: autoCutoutMaterialImages,
     cutoutImages: autoCutoutImages,
     galleryImages: [...(images || []), ...productImages],
@@ -2960,15 +2964,15 @@ export const OV25UIProvider: React.FC<{
   const [galleryIndex, setGalleryIndex] = useState(0);
 
   /**
-   * `galleryIndex` starts at 0, which used to *be* the 360 tile whenever the viewer was not
-   * deferred. Auto cutouts move the 360 to third place, so that default would now open on the
-   * material shot and leave the viewer hidden. Snap the untouched default across to wherever
-   * the 360 ended up; `deferThreeD` still deliberately wants a still first, so leave it alone.
+   * `galleryIndex` starts at 0, which used to *be* the tile we wanted: the 360, or the first
+   * gallery image when deferring. Auto cutouts push both along — the material shot takes index
+   * 0 — so the raw default would now open on the swatch. Snap the untouched default across to
+   * whatever the strip says it should be. Only index 0 is moved, so once the shopper has picked
+   * a tile their choice stands; the material shot arriving late is what makes this necessary.
    */
   useEffect(() => {
-    if (deferThreeD) return;
-    setGalleryIndex((current) => (current === 0 ? galleryIndexToUse : current));
-  }, [deferThreeD, galleryIndexToUse]);
+    setGalleryIndex((current) => (current === 0 ? initialGalleryIndex : current));
+  }, [initialGalleryIndex]);
 
   const shouldRestoreInlineGalleryToIframe =
     allImages.length > 0 &&
