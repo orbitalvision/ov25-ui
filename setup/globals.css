@@ -16,4 +16,18 @@
   --color-primary: #18181b;
   --color-primary-foreground: #fafafa;
   --radius: 0.5rem;
+
+  /* OV25 app brand, mirrored from OV25 app/(OV25)/application-theme.css. Setup also runs
+     standalone (WooCommerce, dev fixtures) outside .ov-app-theme, so it cannot read OV25's
+     variables and keeps its own copy. Update both together. */
+  --color-ov-ink: #070507;
+  --color-ov-pink: #ff2c8b;
+  --color-ov-pink-mid: #cb2573;
+  --color-ov-pink-deep: #9b1d58;
+}
+
+/* OV25 --ov25-brand-gradient. Literal values rather than var() so the utility still works
+   where Setup's CSS is scoped into a shadow host without a :root. */
+@utility ov25-brand-gradient {
+  background-image: linear-gradient(135deg, #070507 5%, #9b1d58 70%, #ff2c8b 135%);
 }

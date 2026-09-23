@@ -3,6 +3,7 @@ import { Copy, Check, Settings, Paintbrush, Plug, Save } from 'lucide-react';
 import { ScrollArea } from '../../ui/scroll-area';
 import { Label } from '../../ui/label';
 import { Input } from '../../ui/input';
+import { Button } from '../../ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../../ui/dialog';
 import type { PreviewLayoutType } from '../../../lib/config/preview-config';
@@ -211,7 +212,7 @@ function ProductTypeSelector({
               onClick={() => onChange(option.value)}
               className={`min-h-[4.75rem] rounded-lg border px-2 py-2 text-center transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
                 selected
-                  ? 'border-foreground bg-foreground text-background shadow-sm'
+                  ? 'border-transparent ov25-brand-gradient text-white shadow-sm'
                   : 'border-border bg-background text-muted-foreground hover:border-foreground/30 hover:bg-muted/40'
               }`}
             >
@@ -340,14 +341,14 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
         <TabsList className={`w-full h-9 p-1 bg-muted rounded-full grid ${storefrontIntegration ? 'grid-cols-3' : 'grid-cols-2'}`}>
           <TabsTrigger
             value="settings"
-            className="rounded-full text-xs font-semibold text-muted-foreground gap-1.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#26E8FE] data-[state=active]:via-[#808AFF] data-[state=active]:to-[#A41EFE] data-[state=active]:text-white data-[state=active]:shadow-sm"
+            className="rounded-full text-xs font-semibold text-muted-foreground gap-1.5 data-[state=active]:ov25-brand-gradient data-[state=active]:text-white data-[state=active]:shadow-sm"
           >
             <Settings className="h-3.5 w-3.5" />
             Settings
           </TabsTrigger>
           <TabsTrigger
             value="style"
-            className="rounded-full text-xs font-semibold text-muted-foreground gap-1.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#26E8FE] data-[state=active]:via-[#808AFF] data-[state=active]:to-[#A41EFE] data-[state=active]:text-white data-[state=active]:shadow-sm"
+            className="rounded-full text-xs font-semibold text-muted-foreground gap-1.5 data-[state=active]:ov25-brand-gradient data-[state=active]:text-white data-[state=active]:shadow-sm"
           >
             <Paintbrush className="h-3.5 w-3.5" />
             Style
@@ -356,7 +357,7 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
             <TabsTrigger
               value="integration"
               data-ov25-setup-integration-tab
-              className="rounded-full text-xs font-semibold text-muted-foreground gap-1.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#26E8FE] data-[state=active]:via-[#808AFF] data-[state=active]:to-[#A41EFE] data-[state=active]:text-white data-[state=active]:shadow-sm"
+              className="rounded-full text-xs font-semibold text-muted-foreground gap-1.5 data-[state=active]:ov25-brand-gradient data-[state=active]:text-white data-[state=active]:shadow-sm"
             >
               <Plug className="h-3.5 w-3.5" />
               Global
@@ -594,14 +595,10 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
 
       {!hideSaveButton && (
         <div className="shrink-0 pt-3 pb-1">
-          <button
-            type="button"
-            onClick={handleSave}
-            className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-green-400 hover:bg-green-500 text-white font-semibold py-2.5 text-sm transition-colors shadow-sm"
-          >
+          <Button size="lg" onClick={handleSave} className="w-full">
             <Save className="h-4 w-4" />
             Save
-          </button>
+          </Button>
         </div>
       )}
 
@@ -619,7 +616,7 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
                 type="button"
                 onClick={() => setExportMode('current')}
                 className={`px-3 py-1.5 rounded-full transition-colors ${
-                  exportMode === 'current' ? 'bg-foreground text-background shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                  exportMode === 'current' ? 'ov25-brand-gradient text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 {LAYOUT_EXPORT_LABELS[formState.layout]} only
@@ -628,7 +625,7 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
                 type="button"
                 onClick={() => setExportMode('all')}
                 className={`px-3 py-1.5 rounded-full transition-colors ${
-                  exportMode === 'all' ? 'bg-foreground text-background shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                  exportMode === 'all' ? 'ov25-brand-gradient text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 All layouts

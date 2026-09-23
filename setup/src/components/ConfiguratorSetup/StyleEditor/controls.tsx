@@ -62,7 +62,7 @@ export function StyleCornerControl({ variable, value, defaultValue, onChange }: 
             title={preset.label}
             className={cn(
               'w-6 h-6 border transition-all flex items-center justify-center',
-              current === preset.value ? 'border-foreground bg-foreground' : 'border-border bg-muted hover:border-foreground/50',
+              current === preset.value ? 'border-transparent ov25-brand-gradient' : 'border-border bg-muted hover:border-foreground/50',
             )}
             style={{ borderRadius: preset.value === '9999px' ? '9999px' : `${Math.min(parseInt(preset.value), 6)}px` }}
           >
