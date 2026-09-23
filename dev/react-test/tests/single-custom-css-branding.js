@@ -156,7 +156,7 @@ export const SINGLE_CUSTOM_CSS_BRANDING = `
         background: goldenrod;
       }
 
-      /* Standard-product group totals, including named totals in wizard layouts. */
+      /* Standard-product group upgrades; cheapest groups have no price badge. */
       .ov25-group-price {
         --ov25-group-price-display: inline-block;
         background-color: gold;
