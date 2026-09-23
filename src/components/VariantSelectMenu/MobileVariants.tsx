@@ -1,3 +1,4 @@
+import { GroupPrice } from './GroupPrice.js';
 import * as React from 'react'
 import { useState, useMemo } from "react";
 import { Variant, VariantCardProps, VariantGroup } from "./ProductVariants.js";
@@ -129,6 +130,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
     // This keeps components mounted, preventing image reloads when switching groups
     return (
       <div id="ov25-mobile-filter-container" className="ov:relative ov:w-full ov:h-full ov:flex ov:flex-col">
+          {shouldDestructureGroups && <GroupPrice price={(variants as VariantGroup[])[0].priceSummary} groupName={(variants as VariantGroup[])[0].groupName} />}
         {drawerSize !== 'small' && currentOption?.name.toLowerCase() !== 'modules' && (
           <FilterControls 
             isFilterOpen={isFilterOpen}
@@ -159,6 +161,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
                       } ov:flex ov:items-center ov:justify-center ov:text-xs ov:gap-2 ov:whitespace-nowrap`}
                     >
                       <span className="ov:truncate ov:py-1">{capitalizeWords(group.groupName)}</span>
+                      <GroupPrice price={group.priceSummary} />
                     </button>
                   </CarouselItem>
                 ) : null;
@@ -213,6 +216,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
     if (drawerSize === 'small') {
       return (
         <div id="ov25-mobile-filter-container" className="ov:relative ov:w-full ov:h-full ov:flex ov:flex-col">
+          {shouldDestructureGroups && <GroupPrice price={(variants as VariantGroup[])[0].priceSummary} groupName={(variants as VariantGroup[])[0].groupName} />}
           {moduleTypeTabs && currentOption?.name.toLowerCase() === 'modules' && (
             <div className="ov:w-full ov:shrink-0">
               {moduleTypeTabs}
@@ -235,6 +239,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
     } else {
       return (
         <div id="ov25-mobile-filter-container" className="ov:relative ov:w-full ov:h-full ov:flex ov:flex-col">
+          {shouldDestructureGroups && <GroupPrice price={(variants as VariantGroup[])[0].priceSummary} groupName={(variants as VariantGroup[])[0].groupName} />}
           {currentOption?.name.toLowerCase() !== 'modules' && <FilterControls 
             isFilterOpen={isFilterOpen}
             setIsFilterOpen={setIsFilterOpen}

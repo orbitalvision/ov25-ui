@@ -1,3 +1,4 @@
+import { GroupPrice } from './GroupPrice.js';
 import * as React from 'react'
 import { useOV25UI } from "../../contexts/ov25-ui-context.js"
 import { VariantsContent } from "./VariantsContent.js";
@@ -136,6 +137,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
             )}
             {((shouldDestructureGroups || !isGrouped) ? (
               <div id="ov25-desktop-variants-content-ungrouped" className={`ov:grid ov:h-full ov:pb-8 ov:content-start ${isSizeOption ? `ov25-size-variant-card-grid ${getGridColsClass(gridDivide)}` : 'ov25-variant-card-grid'} ${isFilterOpen ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}>
+                {shouldDestructureGroups && <GroupPrice price={(variantsToRender as VariantGroup[])[0].priceSummary} groupName={(variantsToRender as VariantGroup[])[0].groupName} />}
                 <VariantsContent variantsToRender={isGrouped ? (variantsToRender as VariantGroup[])[0].variants : variantsToRender as Variant[]} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
               </div>
             ) : (
@@ -144,7 +146,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
                   variantGroup.variants.length > 0 && (
                     <div key={variantGroup.groupName}>
                       <div className="ov:flex ov:items-center ov:mx-4 ov:justify-between ov:border-t ov:border-gray-200 ">
-                        <h3 className="ov25-group-name ov:text-lg ov:py-2 ov:text-(--ov25-secondary-text-color)">{variantGroup.groupName}</h3>
+                        <h3 className="ov25-group-name ov:text-lg ov:py-2 ov:text-(--ov25-secondary-text-color)">{variantGroup.groupName}<GroupPrice price={variantGroup.priceSummary} /></h3>
                       </div>
                       <div id="ov25-variant-group-content" className={`ov:grid ${isSizeOption ? `ov25-size-variant-card-grid ${getGridColsClass(gridDivide)}` : 'ov25-variant-card-grid'} ov:pb-4`}>
                         <VariantsContent variantsToRender={variantGroup.variants} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />

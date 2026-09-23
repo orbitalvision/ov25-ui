@@ -83,6 +83,16 @@ export const STRING_REPLACEMENT_DEFINITIONS: StringReplacements = [
       { name: 'GROUP_NAME', description: 'Group display name.' },
     ],
   },
+  { key: 'groupPriceTotal', label: 'Group product total', defaultTemplate: '${PRICE} total', interpolationValues: [
+    { name: 'PRICE', description: 'Formatted total product price for this group.' },
+  ] },
+  { key: 'groupPriceFromTotal', label: 'Group minimum product total', defaultTemplate: 'From ${PRICE} total', interpolationValues: [
+    { name: 'PRICE', description: 'Lowest formatted total product price in this group.' },
+  ] },
+  { key: 'groupPriceNamed', label: 'Group total without a separate header', defaultTemplate: '${GROUP_NAME} · ${PRICE_LABEL}', interpolationValues: [
+    { name: 'GROUP_NAME', description: 'Group display name.' },
+    { name: 'PRICE_LABEL', description: 'Resolved total or minimum total label.' },
+  ] },
   // prices
   { key: 'priceLoading', label: 'Price loading label', description: 'Screen-reader label shown while the configurator price loads.', defaultTemplate: 'Loading price', interpolationValues: [] },
   { key: 'priceValue',label: 'Price value', defaultTemplate: '${PRICE}',interpolationValues: [

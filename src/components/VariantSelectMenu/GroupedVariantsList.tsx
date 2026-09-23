@@ -1,3 +1,5 @@
+import { GroupPrice } from './GroupPrice.js';
+import type { GroupPriceSummary } from '../../contexts/ov25-ui-context.js';
 import React from 'react';
 import { Variant, VariantCardProps } from './ProductVariants.js';
 import { VariantsContent } from './VariantsContent.js';
@@ -11,6 +13,7 @@ export const STICKY_GROUP_HEADER_CLASS =
   'ov25-group-header ov:sticky ov:z-[9] ov:bg-[var(--ov25-background-color)] ov:px-4 ov:text-sm ov:pt-4 ov:pb-3 ov:text-[var(--ov25-secondary-text-color)] ov:font-medium';
 
 export interface GroupedVariantsListGroup {
+  priceSummary?: GroupPriceSummary;
   groupName: string;
   variants: Variant[];
 }
@@ -51,8 +54,10 @@ export const GroupedVariantsList: React.FC<GroupedVariantsListProps> = ({
                 {capitalizeWords(
                   getString('groupHeader', { GROUP_NAME: group.groupName }, group.groupName)
                 )}
+                <GroupPrice price={group.priceSummary} />
               </h4>
             )}
+            {!showGroupHeaders && <GroupPrice price={group.priceSummary} groupName={group.groupName} />}
             <div className="ov25-variant-card-grid ov:grid">
               <VariantsContent
                 variantsToRender={group.variants}
