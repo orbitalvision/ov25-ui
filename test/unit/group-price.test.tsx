@@ -13,11 +13,13 @@ afterEach(() => { cleanup(); context.hidePricing = false; context.isSnap2Mode = 
 describe('group product price', () => {
   it('renders the total in the DOM, responds to live updates, and clears unavailable prices', () => {
     const { rerender, container } = render(<GroupPrice price={{ totalPrice: 150000, currency: 'GBP', isFrom: false }} />);
-    expect(screen.getByText('£1,500.00 total')).toHaveClass('ov25-group-price');
-    expect(screen.getByText('£1,500.00 total')).toHaveAttribute('data-price-pence', '150000');
+    expect(screen.getByText('- £1,500.00')).toHaveClass('ov25-group-price');
+    expect(screen.getByText('- £1,500.00')).toHaveAttribute('data-price-pence', '150000');
     rerender(<GroupPrice price={{ totalPrice: 160000, currency: 'GBP', isFrom: true }} />);
-    expect(screen.getByText('From £1,600.00 total')).toHaveAttribute('data-price-from', 'true');
-    expect(context.getString).toHaveBeenLastCalledWith('groupPriceFromTotal', { PRICE: '£1,600.00' }, 'From £1,600.00 total');
+    expect(screen.getByText('- From £1,600.00')).toHaveAttribute('data-price-from', 'true');
+    expect(context.getString).toHaveBeenCalledWith('groupPriceFromTotal', { PRICE: '£1,600.00' }, 'From £1,600.00');
+    rerender(<GroupPrice groupName="Standard" price={{ totalPrice: 70000, currency: 'GBP', isFrom: true }} />);
+    expect(screen.getByText('Standard - From £700.00')).toBeInTheDocument();
     rerender(<GroupPrice />);
     expect(container).toBeEmptyDOMElement();
   });
@@ -32,7 +34,7 @@ describe('group product price', () => {
   it('retains genuine zero totals, supports the configured display symbol and rejects invalid totals', () => {
     context.currencySymbol = '€';
     const { container, rerender } = render(<GroupPrice price={{ totalPrice: 0, currency: 'GBP', isFrom: false }} />);
-    expect(screen.getByText('€0.00 total')).toBeInTheDocument();
+    expect(screen.getByText('- €0.00')).toBeInTheDocument();
     rerender(<GroupPrice price={{ totalPrice: NaN, currency: 'GBP', isFrom: false }} />);
     expect(container).toBeEmptyDOMElement();
   });

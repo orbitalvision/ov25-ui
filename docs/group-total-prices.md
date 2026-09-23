@@ -18,7 +18,7 @@ They are visible by default. To hide them from layout and assistive technology, 
 }
 ```
 
-Use `data-price-pence` and `data-price-from` for styling or inspection. The text uses the existing currency-symbol setting and `groupPriceTotal`, `groupPriceFromTotal`, and `groupPriceNamed` string replacements.
+Use `data-price-pence` and `data-price-from` for styling or inspection. The text uses the existing currency-symbol setting and `groupPriceTotal`, `groupPriceFromTotal`, `groupPriceInline`, and `groupPriceNamed` string replacements.
 
 Only standard products are supported. Bed and Snap2 pricing do not send summaries. OV25 omits groups with unresolved grade references, incomplete required selections, rule cycles, or scene-dependent visibility rules that cannot be safely previewed. Never interpret an absent summary as zero.
 
