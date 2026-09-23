@@ -1038,4 +1038,23 @@ export const SINGLE_CUSTOM_CSS_BRANDING = `
       #ov25-carousel-controls {
         background: lightcoral;
       }
+
+      /* Auto cutout gallery hooks. Each tile kind gets a distinct outline so the hooks are
+         visibly exercised; they must hold in both carousel (mobile) and stacked (desktop). */
+      [data-ov25-gallery-tile="material"] {
+        outline: 3px dashed darkorange;
+        outline-offset: -3px;
+      }
+      [data-ov25-gallery-tile="cutout"] {
+        outline: 3px solid mediumpurple;
+        outline-offset: -3px;
+        background: #f3efff;
+      }
+      [data-ov25-gallery-tile="cutout"][data-ov25-cutout-yaw="180"] {
+        outline-color: crimson;
+      }
+      [data-ov25-gallery-tile="360"] {
+        outline: 3px dotted teal;
+        outline-offset: -3px;
+      }
     `;

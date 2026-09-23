@@ -28,6 +28,10 @@ const injectConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
   // productLink: () => 'snap2/22',
   apiKey: () => (isSnap2Mode ? MAZE_APIKEY : DEMO_RETAILER_APIKEY),
   productLink: () => (isSnap2Mode ? 'snap2/445' : '1313'),
+  // Auto cutouts own no copy of their own, but the compatibility guard requires every feature
+  // here so its effect on replaced strings (gallery order, option headers) stays checkable.
+  // Mobile falls back to desktop, matching the fixture's previous default. Ignored for Snap2.
+  carousel: { desktop: 'stacked', autoCutouts: true },
   selectors: {
     gallery: { selector: '.configurator-container', replace: true },
     ...(isSnap2Mode ? { configureButton: { selector: '#ov25-fullscreen-button', replace: false } } : {}),
@@ -101,7 +105,9 @@ const injectConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
     optionHeader: [
       { trigger: { name: 'OPTION_NAME', value: 'upholstery fabrics' }, template: '▽upholstery fabrics▽' },
       { trigger: { name: 'OPTION_NAME', value: 'trims' }, template: '▽trims▽' },
-      { template: '${OPTION_NAME}▽▽▽' },
+      // SELECTED_VARIANT_NAME is empty until the first selection resolves, so the trailing
+      // separator is expected briefly on load.
+      { template: '${OPTION_NAME} | ${SELECTED_VARIANT_NAME}▽▽▽' },
     ],
     // groups
     groupHeader: [{ template: '▽Option: ${OPTION_NAME} / Group: ${GROUP_NAME}▽' }],

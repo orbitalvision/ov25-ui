@@ -245,6 +245,23 @@ export function ProductCarousel() {
     setGalleryIndex(index)
   }
 
+  /**
+   * Stable styling hooks for merchant `cssString`. Auto cutout tiles are otherwise identical
+   * `.ov25-gallery-image-button`s, so without these a merchant could only target them by
+   * position — and the position moves with the material shot and deferThreeD.
+   *   data-ov25-gallery-tile: "360" | "material" | "cutout" | "image"
+   *   data-ov25-cutout-yaw:   the captured angle, cutout tiles only
+   */
+  const materialImageSet = new Set(autoCutoutMaterialImages || [])
+  const galleryTileAttributes = (item: typeof images[0], src: string) => {
+    const yaw = cutoutAngleByImage.get(src)
+    if (yaw !== undefined) {
+      return { 'data-ov25-gallery-tile': 'cutout', 'data-ov25-cutout-yaw': String(yaw) }
+    }
+    if (materialImageSet.has(item)) return { 'data-ov25-gallery-tile': 'material' }
+    return { 'data-ov25-gallery-tile': 'image' }
+  }
+
   const renderCarouselThumbnail = (item: ThreeDPlaceholder | typeof images[0], index: number) => {
 
     const is3DSlot = isThreeDPlaceholder(item)
@@ -258,6 +275,7 @@ export function ProductCarousel() {
           key={index}
           onClick={() => selectGalleryItemAt(galleryIndexToUse, null)}
           data-selected={isSelected ? "true" : "false"}
+          data-ov25-gallery-tile="360"
           className={cn(
             "ov:cursor-pointer ov:relative ov:pl-1 ov:aspect-square ov:w-full ov:flex ov:justify-center ov:items-center ov:overflow-hidden ov:rounded-(--ov25-configurator-iframe-border-radius) ov:bg-white ov:ring-2",
             isSelected ? "ov:ring-(--ov25-primary-color)" : "ov:ring-(--ov25-configurator-view-controls-border-color)"
@@ -306,6 +324,7 @@ export function ProductCarousel() {
         key={index}
         onClick={() => selectGalleryItemAt(galleryIndexForSlot, src)}
         data-selected={isSelected ? "true" : "false"}
+        {...galleryTileAttributes(item as typeof images[0], src)}
         className={cn(
           "ov25-gallery-image-button ov:relative ov:aspect-square ov:w-full ov:overflow-hidden ov:rounded-(--ov25-configurator-iframe-border-radius) ov:bg-muted ov:cursor-pointer",
           isSelected && "ov:ring-2 ov:ring-(--ov25-primary-color)"
@@ -336,6 +355,7 @@ export function ProductCarousel() {
           key={index}
           type="button"
           onClick={() => selectGalleryItemAt(galleryIndexToUse, null)}
+          data-ov25-gallery-tile="360"
           className={cn(
             'ov:cursor-pointer ov:relative ov:aspect-3/2 ov:w-full ov:flex ov:justify-center ov:items-center ov:overflow-hidden ov:rounded-(--ov25-configurator-iframe-border-radius) ov:bg-white ov:ring-2',
             isSelected ? 'ov:ring-(--ov25-primary-color)' : 'ov:ring-(--ov25-configurator-view-controls-border-color)'
@@ -370,6 +390,7 @@ export function ProductCarousel() {
             ? setGalleryCarouselFullscreenImage(fullscreenSrc)
             : selectGalleryItemAt(index, src)
         }
+        {...galleryTileAttributes(item as typeof images[0], src)}
         className="ov25-gallery-image-button ov:relative ov:aspect-3/2 ov:w-full ov:overflow-hidden ov:rounded-(--ov25-configurator-iframe-border-radius) ov:bg-muted ov:cursor-pointer"
       >
         <img

@@ -20,7 +20,7 @@ const baseConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
     price: { selector: '#price', replace: true },
     name: { selector: '#name', replace: true },
   },
-  carousel: { desktop: 'stacked', mobile: 'carousel' },
+  carousel: { desktop: 'stacked', mobile: 'carousel', autoCutouts: true },
   configurator: {
     displayMode: { desktop: 'sheet', mobile: 'drawer' },
     triggerStyle: { desktop: 'single-button', mobile: 'single-button' },

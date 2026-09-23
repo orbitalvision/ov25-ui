@@ -364,6 +364,63 @@ describe('ProductCarousel', () => {
     unmount();
   });
 
+  it('labels every tile kind with stable styling hooks in both layouts', () => {
+    // Merchant cssString has no other way to tell auto cutout tiles from gallery photos:
+    // they share .ov25-gallery-image-button, and their position shifts with the material shot.
+    const ctx = carouselContext as typeof carouselContext & Record<string, unknown>;
+    const cutouts = ['blob:-45', 'blob:0', 'blob:-90', 'blob:180'];
+    Object.assign(ctx, {
+      carouselAutoCutouts: true,
+      autoCutoutMaterialImages: ['/material.webp'],
+      autoCutoutImages: cutouts,
+      autoCutoutAngleByImage: new Map(cutouts.map((url) => [url, Number(url.slice(5))])),
+      selectAutoCutoutAngle: vi.fn(),
+      // material, first image, then the 360 — see composeGalleryOrder.
+      galleryIndexToUse: 2,
+      deferThreeD: true,
+    });
+
+    const kindsIn = (buttons: Element[]) =>
+      buttons.map((b) => {
+        const el = b as HTMLElement;
+        return el.dataset.ov25CutoutYaw
+          ? `${el.dataset.ov25GalleryTile}:${el.dataset.ov25CutoutYaw}`
+          : el.dataset.ov25GalleryTile;
+      });
+    const expected = [
+      'material', 'image', '360',
+      'cutout:-45', 'cutout:0', 'cutout:-90', 'cutout:180',
+      'image',
+    ];
+
+    try {
+      const { container, rerender } = render(<ProductCarousel />);
+      expect(kindsIn(getThumbnailButtons(container))).toEqual(expected);
+
+      carouselContext.carouselLayout = 'stacked';
+      rerender(<ProductCarousel />);
+      expect(
+        kindsIn(Array.from(container.querySelectorAll('#ov25-product-carousel-controls button'))),
+      ).toEqual(expected);
+    } finally {
+      for (const key of [
+        'carouselAutoCutouts',
+        'autoCutoutMaterialImages',
+        'autoCutoutImages',
+        'autoCutoutAngleByImage',
+        'selectAutoCutoutAngle',
+      ]) {
+        delete ctx[key];
+      }
+    }
+  });
+
+  it('marks ordinary gallery photos as image tiles when auto cutouts are off', () => {
+    const { container } = render(<ProductCarousel />);
+    const kinds = getThumbnailButtons(container).map((b) => b.dataset.ov25GalleryTile);
+    expect(kinds).toEqual(['360', 'image', 'image']);
+  });
+
   it('switches between viewport-specific none and carousel modes without changing hook order', () => {
     carouselContext.carouselLayout = 'none';
     carouselContext.carouselLayoutMobile = 'carousel';
