@@ -1,0 +1,10 @@
+92166cc (HEAD -> main, origin/main, origin/HEAD) fix(tests) drop gesture hint and canvas snapshot from Windrush e2e (gesture-hint replaced with auto rotation)
+c761b36 fix(setup) fix padding on tab content
+220cf43 feat(setup) update to new OV25 colors, fix padding. make button component
+575f974 fix(auto-cutouts) add stable styling hooks, update tests to include new UI (customCss, stringReplacement)
+95fb756 fix(gallery) when using autoCutouts and deferThreeD, defer to first gallery image, not the material shot
+f8f01f9 fix(sticky) measure stacked carousel so inline-sticky can account for it correctly. update auto cutout gallery ordering
+78d17e3 feat(setup) allow replacing selection name into ov25-option-header
+82a7789 feat(setup) auto cutouts toggle, and ov25-ui display of auto cutouts
+aee5d34 feat(tests) various test suite upgrades, viewport matrix, dimensions in viewport matrix
+8228c1c (tag: ov25-setup@0.8.10) chore: release ov25-setup 0.8.10

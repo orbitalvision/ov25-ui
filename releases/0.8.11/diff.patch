@@ -1,0 +1,2812 @@
+diff --git a/dev/react-test/index.html b/dev/react-test/index.html
+index 61cdc01..e1a1e28 100644
+--- a/dev/react-test/index.html
++++ b/dev/react-test/index.html
+@@ -98,6 +98,7 @@
+       <ul class="checklist">
+         <li class="checklist-item" data-id="carousel-defer-threed-indexing"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/carousel-defer-threed-indexing.html?defer3d=0&amp;hostImages=1" >Inline Variants + Carousel  — Shopify + OV25 images</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+         <li class="checklist-item" data-id="single-product-gallery"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/single-product-gallery.html" >Full gallery (sheet + tabs)</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
++        <li class="checklist-item" data-id="gallery-auto-cutouts"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/gallery-auto-cutouts.html" >Auto cutouts (material shot + 4 live cutouts)</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+         <li class="checklist-item" data-id="configurator-sizing"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/configurator-sizing.html" >Configurator sizing</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+         <li class="checklist-item" data-id="variants-per-row"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/variants-per-row.html" >Variants per row</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+         <li class="checklist-item" data-id="cart-thumbnail"><div class="item-row"><div class="check-cell cb-mobile" data-mode="mobile" tabindex="0"></div><div class="check-cell cb-desktop" data-mode="desktop" tabindex="0"></div><a href="tests/cart-thumbnail.html" >Cart thumbnail</a></div><div class="comment-block"><textarea placeholder="Add comment..." rows="2"></textarea><button type="button" class="comment-close" aria-label="Remove comment">×</button></div></li>
+diff --git a/dev/react-test/templates/TestPageLayout.jsx b/dev/react-test/templates/TestPageLayout.jsx
+index a81efae..73c0e6b 100644
+--- a/dev/react-test/templates/TestPageLayout.jsx
++++ b/dev/react-test/templates/TestPageLayout.jsx
+@@ -65,6 +65,8 @@ function ProductTabs() {
+  * @param {boolean} [props.fullWidthGallery] - When true, gallery column is full width and aside stacks below (single column layout)
+  * @param {boolean} [props.wideConfigurator] - When true, removes the app max-width and gives the gallery a fixed-height, full-width slot
+  * @param {boolean} [props.configuratorTall] - When true, uses a viewport-height configurator slot capped to a 3:4 portrait width
++ * @param {string} [props.galleryAspectRatio] - CSS aspect-ratio for the gallery slot (e.g. '16 / 9'); the placeholder image is cropped to fit
++ * @param {string} [props.galleryColumnWidth] - Gallery column width from the md breakpoint up (e.g. '57%'); default 55%
+  */
+ export function TestPageLayout({
+   title,
+@@ -82,6 +84,8 @@ export function TestPageLayout({
+   fullWidthGallery = false,
+   wideConfigurator = false,
+   configuratorTall = false,
++  galleryAspectRatio,
++  galleryColumnWidth,
+ }) {
+   useEffect(() => {
+     if (!dynamicConfig && configuratorInitialized) return;
+@@ -104,12 +108,25 @@ export function TestPageLayout({
+     ? 'ov:h-[calc(100svh-180px)] ov:max-h-none'
+     : 'ov:h-[560px] ov:max-h-[560px]';
+   // 75% of the Tall height (100svh - 180px) keeps the slot at or below 3:4.
+-  const galleryColumnStyle = configuratorTall
+-    ? { maxWidth: 'calc(75svh - 135px)' }
++  // Both knobs travel as CSS variables on the column + classes on the slot: with
++  // `replace: true` the injector swaps the slot element for a fresh div that keeps
++  // the className but drops inline styles, so an inline aspect-ratio would be lost.
++  const galleryColumnStyle = {
++    ...(configuratorTall ? { maxWidth: 'calc(75svh - 135px)' } : {}),
++    ...(galleryColumnWidth ? { '--ov25-fixture-gallery-col': galleryColumnWidth } : {}),
++    ...(galleryAspectRatio ? { '--ov25-fixture-gallery-aspect': galleryAspectRatio } : {}),
++  };
++  // A fixed aspect ratio reproduces storefront PDPs that give the viewer a 16:9 slot,
++  // so the configurator iframe (which adopts the slot's box) ends up short and wide.
++  const galleryAspectClassName = galleryAspectRatio
++    ? 'ov:aspect-(--ov25-fixture-gallery-aspect) ov:overflow-hidden'
++    : '';
++  const galleryImageStyle = galleryAspectRatio
++    ? { width: '100%', height: '100%', objectFit: 'cover' }
+     : undefined;
+   const galleryContainerClassName = wideConfigurator || configuratorTall
+     ? `configurator-container ov:w-full ${wideConfigurator ? 'ov:max-w-none' : ''} ${configuratorHeightClassName} ov:overflow-hidden`
+-    : 'configurator-container ov:w-full';
++    : `configurator-container ov:w-full ${galleryAspectClassName}`.trim();
+ 
+   return (
+     <ViewportWrapper>
+@@ -126,11 +143,17 @@ export function TestPageLayout({
+           }
+         >
+           <div
+-            className={useFullWidthLayout ? 'ov:w-full' : 'ov:w-full ov:md:w-[55%]'}
++            className={
++              useFullWidthLayout
++                ? 'ov:w-full'
++                : galleryColumnWidth
++                  ? 'ov:w-full ov:md:w-(--ov25-fixture-gallery-col)'
++                  : 'ov:w-full ov:md:w-[55%]'
++            }
+             style={galleryColumnStyle}
+           >
+             <div className={galleryContainerClassName}>
+-              <img src={sofaImage} alt="Product" />
++              <img src={sofaImage} alt="Product" style={galleryImageStyle} />
+             </div>
+           </div>
+           <div
+diff --git a/dev/react-test/tests/gallery-auto-cutouts.html b/dev/react-test/tests/gallery-auto-cutouts.html
+new file mode 100644
+index 0000000..350d9fc
+--- /dev/null
++++ b/dev/react-test/tests/gallery-auto-cutouts.html
+@@ -0,0 +1,13 @@
++<!DOCTYPE html>
++<html lang="en">
++  <head>
++    <meta charset="UTF-8" />
++    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
++    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
++    <title>Gallery Auto Cutouts</title>
++  </head>
++  <body>
++    <div id="root"></div>
++    <script type="module" src="./gallery-auto-cutouts.jsx"></script>
++  </body>
++</html>
+diff --git a/dev/react-test/tests/gallery-auto-cutouts.jsx b/dev/react-test/tests/gallery-auto-cutouts.jsx
+new file mode 100644
+index 0000000..c04aaef
+--- /dev/null
++++ b/dev/react-test/tests/gallery-auto-cutouts.jsx
+@@ -0,0 +1,134 @@
++import React from 'react';
++import ReactDOM from 'react-dom/client';
++import { TestPageLayout } from '../templates/TestPageLayout.jsx';
++import sofaImage from '../src/images/sofa.png';
++import '../src/index.css';
++
++const DEMO_RETAILER_APIKEY = import.meta.env.VITE_DEMO_RETAILER_APIKEY;
++
++/**
++ * The strip reads: material shot, first host image, 360, four cutouts, then the remaining host
++ * images. Keeping several here is the point of the fixture — it shows the live tiles interleave
++ * with the retailer's own photography rather than replacing it.
++ */
++const DEMO_GALLERY_IMAGES = [
++  sofaImage,
++  ...Array.from({ length: 2 }, (_, i) => `https://picsum.photos/600/600?random=${i + 70}`),
++];
++
++const qs = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : new URLSearchParams();
++const autoCutouts = qs.get('autoCutouts') !== '0';
++const deferThreeD = qs.get('defer3d') !== '0';
++// maxImages caps the strip; the default here is deliberately generous enough to show the material
++// shot, all four cutouts and the host images at once.
++const maxImages = Number.parseInt(qs.get('maxImages') ?? '', 10) || 8;
++// Stacked opens tiles in a fullscreen lightbox instead of swapping the main stage, so both gallery
++// layouts need checking whenever cutout sizing changes.
++const galleryLayout = qs.get('layout') === 'stacked' ? 'stacked' : 'carousel';
++
++const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
++  apiKey: () => DEMO_RETAILER_APIKEY,
++  productLink: () => '58',
++  images: DEMO_GALLERY_IMAGES,
++  selectors: {
++    gallery: { selector: '.configurator-container', replace: true },
++    variants: '#ov25-controls',
++    price: { selector: '#price', replace: true },
++    name: { selector: '#name', replace: true },
++  },
++  carousel: {
++    desktop: galleryLayout,
++    mobile: 'carousel',
++    maxImages,
++    autoCutouts,
++  },
++  configurator: {
++    displayMode: { desktop: 'inline', mobile: 'inline' },
++    triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
++    variants: { displayMode: { desktop: 'list', mobile: 'list' } },
++  },
++  callbacks: {
++    addToBasket: () => alert('Add to basket'),
++    buyNow: () => alert('Buy now'),
++    buySwatches: () => alert('Add swatches to cart'),
++  },
++  flags: { hidePricing: false, deferThreeD },
++});
++
++function ToggleLinks({ label, param, options }) {
++  const linkClass = (active) =>
++    active ? 'ov:bg-black ov:text-white' : 'ov:bg-gray-200 ov:text-gray-800 ov:hover:bg-gray-300';
++  return (
++    <div className="ov:flex ov:flex-wrap ov:gap-2 ov:text-sm ov:items-center">
++      <span className="ov:text-gray-600">{label}:</span>
++      {options.map((opt) => {
++        const params = new URLSearchParams(window.location.search);
++        params.set(param, opt.value);
++        return (
++          <a
++            key={opt.label}
++            href={`?${params}`}
++            className={`ov:px-2 ov:py-1 ov:rounded ov:no-underline ${linkClass(opt.active)}`}
++          >
++            {opt.label}
++          </a>
++        );
++      })}
++    </div>
++  );
++}
++
++function App() {
++  return (
++    <TestPageLayout
++      title="Gallery Auto Cutouts"
++      description={
++        'Auto cutouts on: material shot, first host image, 360, then four live cutouts (front-left, ' +
++        'front, left-side, rear) of the current build, then the remaining host images. Change a ' +
++        'fabric and the whole set re-renders. The 360 tile shows no catalogue cutout behind it. ' +
++        'Auto cutouts off: only the host images and product metadata images remain.'
++      }
++      injectConfig={config}
++      showProductTabs
++      topContent={
++        <div
++          className="ov:flex ov:flex-wrap ov:gap-4 ov:mb-3 ov:items-center"
++          data-auto-cutouts={autoCutouts ? 'on' : 'off'}
++        >
++          <ToggleLinks
++            label="autoCutouts"
++            param="autoCutouts"
++            options={[
++              { label: 'On', value: '1', active: autoCutouts },
++              { label: 'Off', value: '0', active: !autoCutouts },
++            ]}
++          />
++          <ToggleLinks
++            label="layout"
++            param="layout"
++            options={[
++              { label: 'Carousel', value: 'carousel', active: galleryLayout === 'carousel' },
++              { label: 'Stacked', value: 'stacked', active: galleryLayout === 'stacked' },
++            ]}
++          />
++          <ToggleLinks
++            label="defer3D"
++            param="defer3d"
++            options={[
++              { label: 'On', value: '1', active: deferThreeD },
++              { label: 'Off', value: '0', active: !deferThreeD },
++            ]}
++          />
++        </div>
++      }
++    />
++  );
++}
++
++ReactDOM.createRoot(document.getElementById('root')).render(
++  <React.StrictMode>
++    <App />
++  </React.StrictMode>,
++);
++
++export default App;
+diff --git a/dev/react-test/tests/responsive-layout-matrix.jsx b/dev/react-test/tests/responsive-layout-matrix.jsx
+index 88f8c9e..52029d1 100644
+--- a/dev/react-test/tests/responsive-layout-matrix.jsx
++++ b/dev/react-test/tests/responsive-layout-matrix.jsx
+@@ -50,7 +50,43 @@ const captureFixtureConfig = /** @type {import('ov25-ui').InjectConfiguratorInpu
+   flags: { hidePricing: false },
+ });
+ 
++/**
++ * Optional `?layout=` variants for the capture fixture. `shopify-pdp` mirrors a
++ * storefront product page where the viewer sits in a 57% column with a 16:9
++ * slot, which squeezes the configurator to roughly 440x247 on a portrait tablet.
++ *
++ * `layoutProps` shape the page around the gallery slot. `brandingCss` is injected
++ * into the gallery shadow root because the inline gallery's iframe slot is
++ * square by default; a storefront slot at 16:9 needs that override too.
++ */
++const CAPTURE_LAYOUTS = {
++  default: { layoutProps: {} },
++  'shopify-pdp': {
++    layoutProps: { galleryAspectRatio: '16 / 9', galleryColumnWidth: '57%' },
++    brandingCss: `
++      :has(> [id^="ov25-configurator-iframe-container"]) {
++        aspect-ratio: 16 / 9 !important;
++        height: auto !important;
++        min-height: 0 !important;
++        flex: none !important;
++      }
++      [id^="ov25-configurator-iframe-container"],
++      #true-ov25-configurator-iframe-container,
++      #ov25-configurator-iframe {
++        height: 100% !important;
++        max-height: 100% !important;
++      }
++    `,
++  },
++};
++
+ function CaptureFixture() {
++  const layoutId = new URLSearchParams(window.location.search).get('layout') || 'default';
++  const { layoutProps, brandingCss } = CAPTURE_LAYOUTS[layoutId] || CAPTURE_LAYOUTS.default;
++  const injectConfig = brandingCss
++    ? { ...captureFixtureConfig, branding: { ...captureFixtureConfig.branding, cssString: brandingCss } }
++    : captureFixtureConfig;
++
+   useEffect(() => {
+     document.documentElement.dataset.ov25ViewportMatrixReady = 'true';
+     return () => {
+@@ -62,8 +98,9 @@ function CaptureFixture() {
+     <TestPageLayout
+       title="Responsive configurator layout"
+       description="Stable viewer-and-controls fixture used by the viewport screenshot matrix."
+-      injectConfig={captureFixtureConfig}
++      injectConfig={injectConfig}
+       showTestBackButton={false}
++      {...layoutProps}
+     />
+   );
+ }
+@@ -224,6 +261,8 @@ function MatrixGallery() {
+               />
+               <datalist id="matrix-target-suggestions">
+                 <option value={DEFAULT_VIEWPORT_MATRIX_TARGET} />
++                <option value={`${DEFAULT_VIEWPORT_MATRIX_TARGET}&dimensions=1`} />
++                <option value={`${DEFAULT_VIEWPORT_MATRIX_TARGET}&dimensions=1&layout=shopify-pdp`} />
+                 <option value="/tests/gallery-inline-tabs.html" />
+                 <option value="/tests/gallery-sheet-list-auto-open.html" />
+                 <option value="/tests/snap2-inline.html" />
+diff --git a/dev/react-test/tests/single-custom-css-branding.js b/dev/react-test/tests/single-custom-css-branding.js
+index 24e9673..7f1dd80 100644
+--- a/dev/react-test/tests/single-custom-css-branding.js
++++ b/dev/react-test/tests/single-custom-css-branding.js
+@@ -1038,4 +1038,23 @@ export const SINGLE_CUSTOM_CSS_BRANDING = `
+       #ov25-carousel-controls {
+         background: lightcoral;
+       }
++
++      /* Auto cutout gallery hooks. Each tile kind gets a distinct outline so the hooks are
++         visibly exercised; they must hold in both carousel (mobile) and stacked (desktop). */
++      [data-ov25-gallery-tile="material"] {
++        outline: 3px dashed darkorange;
++        outline-offset: -3px;
++      }
++      [data-ov25-gallery-tile="cutout"] {
++        outline: 3px solid mediumpurple;
++        outline-offset: -3px;
++        background: #f3efff;
++      }
++      [data-ov25-gallery-tile="cutout"][data-ov25-cutout-yaw="180"] {
++        outline-color: crimson;
++      }
++      [data-ov25-gallery-tile="360"] {
++        outline: 3px dotted teal;
++        outline-offset: -3px;
++      }
+     `;
+diff --git a/dev/react-test/tests/single-custom-css.jsx b/dev/react-test/tests/single-custom-css.jsx
+index 9e92215..94361ea 100644
+--- a/dev/react-test/tests/single-custom-css.jsx
++++ b/dev/react-test/tests/single-custom-css.jsx
+@@ -20,7 +20,7 @@ const baseConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
+     price: { selector: '#price', replace: true },
+     name: { selector: '#name', replace: true },
+   },
+-  carousel: { desktop: 'stacked', mobile: 'carousel' },
++  carousel: { desktop: 'stacked', mobile: 'carousel', autoCutouts: true },
+   configurator: {
+     displayMode: { desktop: 'sheet', mobile: 'drawer' },
+     triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
+diff --git a/dev/react-test/tests/single-with-groups.jsx b/dev/react-test/tests/single-with-groups.jsx
+index a2359c3..febc532 100644
+--- a/dev/react-test/tests/single-with-groups.jsx
++++ b/dev/react-test/tests/single-with-groups.jsx
+@@ -4,10 +4,12 @@ import { TestPageLayout } from '../templates/TestPageLayout.jsx';
+ import '../src/index.css';
+ 
+ const DEMO_RETAILER_APIKEY = import.meta.env.VITE_DEMO_RETAILER_APIKEY;
++const DIAMOND_FURNITURE_APIKEY = import.meta.env.VITE_DIAMOND_APIKEY;
++const DARLINGS_APIKEY = import.meta.env.VITE_DARLINGS_APIKEY;
+ 
+ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
+-  apiKey: () => DEMO_RETAILER_APIKEY,
+-  productLink: () => '217',
++  apiKey: () => DIAMOND_FURNITURE_APIKEY,
++  productLink: () => 'bed-configurator/13',
+   selectors: {
+     gallery: { selector: '.configurator-container', replace: true },
+     variants: '#ov25-controls',
+@@ -16,7 +18,7 @@ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
+   },
+   carousel: { desktop: 'stacked', mobile: 'carousel' },
+   configurator: {
+-    displayMode: { desktop: 'sheet', mobile: 'drawer' },
++    displayMode: { desktop: 'inline', mobile: 'drawer' },
+     triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
+     variants: { displayMode: { desktop: 'tree', mobile: 'list' } },
+   },
+diff --git a/dev/react-test/tests/string-replacement.jsx b/dev/react-test/tests/string-replacement.jsx
+index d095e8c..6f35fe4 100644
+--- a/dev/react-test/tests/string-replacement.jsx
++++ b/dev/react-test/tests/string-replacement.jsx
+@@ -28,6 +28,10 @@ const injectConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
+   // productLink: () => 'snap2/22',
+   apiKey: () => (isSnap2Mode ? MAZE_APIKEY : DEMO_RETAILER_APIKEY),
+   productLink: () => (isSnap2Mode ? 'snap2/445' : '1313'),
++  // Auto cutouts own no copy of their own, but the compatibility guard requires every feature
++  // here so its effect on replaced strings (gallery order, option headers) stays checkable.
++  // Mobile falls back to desktop, matching the fixture's previous default. Ignored for Snap2.
++  carousel: { desktop: 'stacked', autoCutouts: true },
+   selectors: {
+     gallery: { selector: '.configurator-container', replace: true },
+     ...(isSnap2Mode ? { configureButton: { selector: '#ov25-fullscreen-button', replace: false } } : {}),
+@@ -101,7 +105,9 @@ const injectConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
+     optionHeader: [
+       { trigger: { name: 'OPTION_NAME', value: 'upholstery fabrics' }, template: '▽upholstery fabrics▽' },
+       { trigger: { name: 'OPTION_NAME', value: 'trims' }, template: '▽trims▽' },
+-      { template: '${OPTION_NAME}▽▽▽' },
++      // SELECTED_VARIANT_NAME is empty until the first selection resolves, so the trailing
++      // separator is expected briefly on load.
++      { template: '${OPTION_NAME} | ${SELECTED_VARIANT_NAME}▽▽▽' },
+     ],
+     // groups
+     groupHeader: [{ template: '▽Option: ${OPTION_NAME} / Group: ${GROUP_NAME}▽' }],
+diff --git a/dev/react-test/vite.config.js b/dev/react-test/vite.config.js
+index ec13e87..a9bf1e9 100644
+--- a/dev/react-test/vite.config.js
++++ b/dev/react-test/vite.config.js
+@@ -8,6 +8,7 @@ const testPages = [
+   'configure-button-only',
+   'configure-button-modal',
+   'single-product-gallery',
++  'gallery-auto-cutouts',
+   'configurator-sizing',
+   'variants-per-row',
+   'responsive-layout-matrix',
+diff --git a/scripts/capture-viewport-matrix.mjs b/scripts/capture-viewport-matrix.mjs
+index 2fd506d..df1268d 100644
+--- a/scripts/capture-viewport-matrix.mjs
++++ b/scripts/capture-viewport-matrix.mjs
+@@ -23,6 +23,9 @@ const DEFAULT_BASE_URL = 'http://localhost:3008';
+ const DEFAULT_TIMEOUT_MS = 120_000;
+ const DEFAULT_SETTLE_MS = 1_200;
+ const CONFIGURATOR_LOADED_LOG = 'OV25 3D Loaded';
++const DIMENSIONS_TOGGLE_SELECTOR = '#ov25-desktop-dimensions-toggle-button';
++// drei <Html> labels mount over the frames after the toggle; give them time to appear.
++const DIMENSIONS_RENDER_DELAY_MS = 800;
+ const VARIANTS_READY_SELECTOR = [
+   '.ov25-size-variant-card:visible',
+   '.ov25-default-variant-card:visible',
+@@ -74,6 +77,9 @@ export async function captureViewportMatrix(options = {}) {
+   const expectsReadyMarker =
+     targetDescriptor.pathname === '/tests/responsive-layout-matrix.html' &&
+     targetDescriptor.searchParams.get('capture') === '1';
++  // `?dimensions=1` presses the viewer's Dimensions toggle once the configurator
++  // is ready so the W/H/D labels are in every capture.
++  const showDimensions = targetDescriptor.searchParams.get('dimensions') === '1';
+   const targetSlug = createTargetSlug(target);
+   const capturedAt = new Date().toISOString();
+   const captures = [];
+@@ -198,6 +204,11 @@ export async function captureViewportMatrix(options = {}) {
+           });
+         }
+ 
++        if (showDimensions) {
++          captureStage = `dimensions toggle: ${DIMENSIONS_TOGGLE_SELECTOR}`;
++          await showDimensionLabels(page, timeoutMs);
++        }
++
+         await hideDevelopmentOverlays(page);
+         captureStage = 'image decoding';
+         await waitForDecodedImages(page, Math.min(timeoutMs, 5_000));
+@@ -272,6 +283,22 @@ export async function captureViewportMatrix(options = {}) {
+   return manifest;
+ }
+ 
++async function showDimensionLabels(page, timeoutMs) {
++  const toggle = page.locator(DIMENSIONS_TOGGLE_SELECTOR).first();
++  const visible = await toggle
++    .waitFor({ state: 'visible', timeout: Math.min(timeoutMs, 10_000) })
++    .then(() => true, () => false);
++
++  if (!visible) {
++    throw new Error(
++      'Dimensions toggle did not appear. The fixture product needs dimensionX/Y/Z for the button to render.',
++    );
++  }
++
++  await toggle.click();
++  await page.waitForTimeout(DIMENSIONS_RENDER_DELAY_MS);
++}
++
+ async function waitForConfiguratorLoaded(page, timeoutMs) {
+   return page
+     .waitForEvent('console', {
+@@ -432,6 +459,7 @@ function printHelp() {
+ 
+ Options:
+   --target <fixture>   Local fixture path. Default: ${DEFAULT_VIEWPORT_MATRIX_TARGET}
++                       Append ?dimensions=1 to capture with the W/H/D labels shown.
+   --base-url <url>    Running fixture server. Default: ${DEFAULT_BASE_URL}
+   --settle-ms <ms>    Delay after fixture readiness. Default: ${DEFAULT_SETTLE_MS}
+   --timeout-ms <ms>   Navigation/readiness timeout. Default: ${DEFAULT_TIMEOUT_MS}
+diff --git a/setup/bun.lock b/setup/bun.lock
+index 7ec3b0d..eda70e8 100644
+--- a/setup/bun.lock
++++ b/setup/bun.lock
+@@ -21,7 +21,7 @@
+         "class-variance-authority": "^0.7.0",
+         "clsx": "^2.1.0",
+         "lucide-react": "^0.540.0",
+-        "ov25-ui": "0.8.9",
++        "ov25-ui": "0.8.10",
+         "react-colorful": "^5.6.1",
+         "tailwind-merge": "^2.2.0",
+       },
+@@ -425,7 +425,7 @@
+ 
+     "object-assign": ["object-assign@4.1.1", "", {}, "sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg=="],
+ 
+-    "ov25-ui": ["ov25-ui@0.8.9", "", { "dependencies": { "@radix-ui/react-dialog": "^1.1.10", "@radix-ui/react-icons": "^1.3.2", "@radix-ui/react-popover": "^1.1.14", "@radix-ui/react-scroll-area": "^1.2.5", "@radix-ui/react-select": "^2.2.2", "@radix-ui/react-slot": "^1.0.2", "@radix-ui/react-tabs": "^1.1.2", "@react-spring/web": "^10.0.3", "@use-gesture/react": "^10.3.1", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "embla-carousel-react": "^8.6.0", "framer-motion": "^11.16.1", "gsap": "^3.13.0", "lucide-react": "^0.503.0", "react-qr-code": "^2.0.15", "sonner": "^1.7.1", "string-similarity-js": "^2.1.4", "tailwind-merge": "^3.2.0" }, "peerDependencies": { "react": "^19", "react-dom": "^19" } }, "sha512-r+9PFPGxtUQ8Guzv41K5Dcmz7CrlNcKsFaGzT9PdRkSz70aRIkVNFeiTPLlypex5dJNnqTxg2IdEdtzvt1h8FA=="],
++    "ov25-ui": ["ov25-ui@0.8.10", "", { "dependencies": { "@radix-ui/react-dialog": "^1.1.10", "@radix-ui/react-icons": "^1.3.2", "@radix-ui/react-popover": "^1.1.14", "@radix-ui/react-scroll-area": "^1.2.5", "@radix-ui/react-select": "^2.2.2", "@radix-ui/react-slot": "^1.0.2", "@radix-ui/react-tabs": "^1.1.2", "@react-spring/web": "^10.0.3", "@use-gesture/react": "^10.3.1", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "embla-carousel-react": "^8.6.0", "framer-motion": "^11.16.1", "gsap": "^3.13.0", "lucide-react": "^0.503.0", "react-qr-code": "^2.0.15", "sonner": "^1.7.1", "string-similarity-js": "^2.1.4", "tailwind-merge": "^3.2.0" }, "peerDependencies": { "react": "^19", "react-dom": "^19" } }, "sha512-CyMtZohaJRWUH4U8ajSYq6RvlPU0VtvDhRq7bZ4Xl0eASXZKY7nV5VcyeMhvBFQLxYIt7w2oHr/LuthQQAJP6Q=="],
+ 
+     "package-json-from-dist": ["package-json-from-dist@1.0.1", "", {}, "sha512-UEZIS3/by4OC8vL3P2dTXRETpebLI2NiI5vIrjaD/5UtrkFX/tNbwjTSRAGC/+7CAo2pIcBaRgWmcBBHcsaCIw=="],
+ 
+diff --git a/setup/globals.css b/setup/globals.css
+index c104033..9f42560 100644
+--- a/setup/globals.css
++++ b/setup/globals.css
+@@ -16,4 +16,18 @@
+   --color-primary: #18181b;
+   --color-primary-foreground: #fafafa;
+   --radius: 0.5rem;
++
++  /* OV25 app brand, mirrored from OV25 app/(OV25)/application-theme.css. Setup also runs
++     standalone (WooCommerce, dev fixtures) outside .ov-app-theme, so it cannot read OV25's
++     variables and keeps its own copy. Update both together. */
++  --color-ov-ink: #070507;
++  --color-ov-pink: #ff2c8b;
++  --color-ov-pink-mid: #cb2573;
++  --color-ov-pink-deep: #9b1d58;
++}
++
++/* OV25 --ov25-brand-gradient. Literal values rather than var() so the utility still works
++   where Setup's CSS is scoped into a shadow host without a :root. */
++@utility ov25-brand-gradient {
++  background-image: linear-gradient(135deg, #070507 5%, #9b1d58 70%, #ff2c8b 135%);
+ }
+diff --git a/setup/package-lock.json b/setup/package-lock.json
+index b0513aa..f7a1c81 100644
+--- a/setup/package-lock.json
++++ b/setup/package-lock.json
+@@ -1,12 +1,12 @@
+ {
+   "name": "ov25-setup",
+-  "version": "0.8.9",
++  "version": "0.8.10",
+   "lockfileVersion": 3,
+   "requires": true,
+   "packages": {
+     "": {
+       "name": "ov25-setup",
+-      "version": "0.8.9",
++      "version": "0.8.10",
+       "dependencies": {
+         "@codemirror/commands": "^6.10.3",
+         "@codemirror/lang-css": "^6.3.1",
+@@ -24,7 +24,7 @@
+         "class-variance-authority": "^0.7.0",
+         "clsx": "^2.1.0",
+         "lucide-react": "^0.540.0",
+-        "ov25-ui": "0.8.9",
++        "ov25-ui": "0.8.10",
+         "react-colorful": "^5.6.1",
+         "tailwind-merge": "^2.2.0"
+       },
+@@ -3116,9 +3116,9 @@
+       }
+     },
+     "node_modules/ov25-ui": {
+-      "version": "0.8.9",
+-      "resolved": "https://registry.npmjs.org/ov25-ui/-/ov25-ui-0.8.9.tgz",
+-      "integrity": "sha512-r+9PFPGxtUQ8Guzv41K5Dcmz7CrlNcKsFaGzT9PdRkSz70aRIkVNFeiTPLlypex5dJNnqTxg2IdEdtzvt1h8FA==",
++      "version": "0.8.10",
++      "resolved": "https://registry.npmjs.org/ov25-ui/-/ov25-ui-0.8.10.tgz",
++      "integrity": "sha512-CyMtZohaJRWUH4U8ajSYq6RvlPU0VtvDhRq7bZ4Xl0eASXZKY7nV5VcyeMhvBFQLxYIt7w2oHr/LuthQQAJP6Q==",
+       "license": "MIT",
+       "dependencies": {
+         "@radix-ui/react-dialog": "^1.1.10",
+diff --git a/setup/package.json b/setup/package.json
+index 5611c20..3ac4263 100644
+--- a/setup/package.json
++++ b/setup/package.json
+@@ -1,6 +1,6 @@
+ {
+   "name": "ov25-setup",
+-  "version": "0.8.9",
++  "version": "0.8.10",
+   "description": "OV25 Configurator Setup visual editor component",
+   "repository": {
+     "type": "git",
+@@ -53,7 +53,7 @@
+     "class-variance-authority": "^0.7.0",
+     "clsx": "^2.1.0",
+     "lucide-react": "^0.540.0",
+-    "ov25-ui": "0.8.9",
++    "ov25-ui": "0.8.10",
+     "react-colorful": "^5.6.1",
+     "tailwind-merge": "^2.2.0"
+   },
+diff --git a/setup/src/components/ConfiguratorSetup/ConfigPanel/index.tsx b/setup/src/components/ConfiguratorSetup/ConfigPanel/index.tsx
+index f0f086c..979ae69 100644
+--- a/setup/src/components/ConfiguratorSetup/ConfigPanel/index.tsx
++++ b/setup/src/components/ConfiguratorSetup/ConfigPanel/index.tsx
+@@ -3,6 +3,7 @@ import { Copy, Check, Settings, Paintbrush, Plug, Save } from 'lucide-react';
+ import { ScrollArea } from '../../ui/scroll-area';
+ import { Label } from '../../ui/label';
+ import { Input } from '../../ui/input';
++import { Button } from '../../ui/button';
+ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../ui/tabs';
+ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../../ui/dialog';
+ import type { PreviewLayoutType } from '../../../lib/config/preview-config';
+@@ -211,7 +212,7 @@ function ProductTypeSelector({
+               onClick={() => onChange(option.value)}
+               className={`min-h-[4.75rem] rounded-lg border px-2 py-2 text-center transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
+                 selected
+-                  ? 'border-foreground bg-foreground text-background shadow-sm'
++                  ? 'border-transparent ov25-brand-gradient text-white shadow-sm'
+                   : 'border-border bg-background text-muted-foreground hover:border-foreground/30 hover:bg-muted/40'
+               }`}
+             >
+@@ -340,14 +341,14 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
+         <TabsList className={`w-full h-9 p-1 bg-muted rounded-full grid ${storefrontIntegration ? 'grid-cols-3' : 'grid-cols-2'}`}>
+           <TabsTrigger
+             value="settings"
+-            className="rounded-full text-xs font-semibold text-muted-foreground gap-1.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#26E8FE] data-[state=active]:via-[#808AFF] data-[state=active]:to-[#A41EFE] data-[state=active]:text-white data-[state=active]:shadow-sm"
++            className="rounded-full text-xs font-semibold text-muted-foreground gap-1.5 data-[state=active]:ov25-brand-gradient data-[state=active]:text-white data-[state=active]:shadow-sm"
+           >
+             <Settings className="h-3.5 w-3.5" />
+             Settings
+           </TabsTrigger>
+           <TabsTrigger
+             value="style"
+-            className="rounded-full text-xs font-semibold text-muted-foreground gap-1.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#26E8FE] data-[state=active]:via-[#808AFF] data-[state=active]:to-[#A41EFE] data-[state=active]:text-white data-[state=active]:shadow-sm"
++            className="rounded-full text-xs font-semibold text-muted-foreground gap-1.5 data-[state=active]:ov25-brand-gradient data-[state=active]:text-white data-[state=active]:shadow-sm"
+           >
+             <Paintbrush className="h-3.5 w-3.5" />
+             Style
+@@ -356,7 +357,7 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
+             <TabsTrigger
+               value="integration"
+               data-ov25-setup-integration-tab
+-              className="rounded-full text-xs font-semibold text-muted-foreground gap-1.5 data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#26E8FE] data-[state=active]:via-[#808AFF] data-[state=active]:to-[#A41EFE] data-[state=active]:text-white data-[state=active]:shadow-sm"
++              className="rounded-full text-xs font-semibold text-muted-foreground gap-1.5 data-[state=active]:ov25-brand-gradient data-[state=active]:text-white data-[state=active]:shadow-sm"
+             >
+               <Plug className="h-3.5 w-3.5" />
+               Global
+@@ -367,7 +368,7 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
+ 
+       <TabsContent value="settings" className="mt-0 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+         <ScrollArea className="h-full min-h-0 min-w-0">
+-          <div className="min-w-0 max-w-full space-y-3 py-3 pr-4">
++          <div className="min-w-0 max-w-full space-y-3 py-3">
+             <SettingsSection
+               id="display-layout"
+               title="Display & layout"
+@@ -440,6 +441,15 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
+                     />
+                   </div>
+                 </div>
++                <SwitchRow
++                  label="Auto cutouts"
++                  checked={currentSettings.carousel.autoCutouts}
++                  onCheckedChange={(v) => updateNested('carousel', 'autoCutouts', v)}
++                />
++                <p className="text-[10px] leading-snug text-muted-foreground">
++                  Adds a material shot and four product cutouts of the shopper's current
++                  configuration to the start of the gallery, re-rendered on every selection.
++                </p>
+               </div>
+             </SettingsSection>
+ 
+@@ -585,14 +595,10 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
+ 
+       {!hideSaveButton && (
+         <div className="shrink-0 pt-3 pb-1">
+-          <button
+-            type="button"
+-            onClick={handleSave}
+-            className="w-full inline-flex items-center justify-center gap-2 rounded-full bg-green-400 hover:bg-green-500 text-white font-semibold py-2.5 text-sm transition-colors shadow-sm"
+-          >
++          <Button size="lg" onClick={handleSave} className="w-full">
+             <Save className="h-4 w-4" />
+             Save
+-          </button>
++          </Button>
+         </div>
+       )}
+ 
+@@ -610,7 +616,7 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
+                 type="button"
+                 onClick={() => setExportMode('current')}
+                 className={`px-3 py-1.5 rounded-full transition-colors ${
+-                  exportMode === 'current' ? 'bg-foreground text-background shadow-sm' : 'text-muted-foreground hover:text-foreground'
++                  exportMode === 'current' ? 'ov25-brand-gradient text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                 }`}
+               >
+                 {LAYOUT_EXPORT_LABELS[formState.layout]} only
+@@ -619,7 +625,7 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
+                 type="button"
+                 onClick={() => setExportMode('all')}
+                 className={`px-3 py-1.5 rounded-full transition-colors ${
+-                  exportMode === 'all' ? 'bg-foreground text-background shadow-sm' : 'text-muted-foreground hover:text-foreground'
++                  exportMode === 'all' ? 'ov25-brand-gradient text-white shadow-sm' : 'text-muted-foreground hover:text-foreground'
+                 }`}
+               >
+                 All layouts
+diff --git a/setup/src/components/ConfiguratorSetup/StorefrontIntegrationPanel/index.tsx b/setup/src/components/ConfiguratorSetup/StorefrontIntegrationPanel/index.tsx
+index 10cc9cf..b67e9ca 100644
+--- a/setup/src/components/ConfiguratorSetup/StorefrontIntegrationPanel/index.tsx
++++ b/setup/src/components/ConfiguratorSetup/StorefrontIntegrationPanel/index.tsx
+@@ -112,7 +112,7 @@ function IntegrationField({
+ 
+ function ReadyIntegrationPanel({ config }: { config: StorefrontIntegrationReadyConfig }) {
+   return (
+-    <div className="min-w-0 max-w-full space-y-3 py-3 pr-4">
++    <div className="min-w-0 max-w-full space-y-3 py-3">
+       <section className="min-w-0 rounded-xl border border-border bg-background p-3.5">
+         <div className="flex min-w-0 items-start gap-2.5">
+           <div className="mt-0.5 rounded-md bg-muted p-1.5 text-muted-foreground">
+@@ -167,7 +167,7 @@ export function StorefrontIntegrationPanel({ config }: StorefrontIntegrationPane
+   return (
+     <ScrollArea className="h-full min-h-0 min-w-0" data-ov25-setup-integration-panel>
+       {config.status === 'loading' && (
+-        <div className="py-8 pr-4 text-center" role="status" aria-busy="true">
++        <div className="py-8 text-center" role="status" aria-busy="true">
+           <Plug className="mx-auto h-5 w-5 text-muted-foreground" />
+           <p className="mt-2 text-xs font-medium text-foreground">
+             {config.platformLabel ? `Loading ${config.platformLabel}` : 'Loading integration settings'}
+@@ -179,7 +179,7 @@ export function StorefrontIntegrationPanel({ config }: StorefrontIntegrationPane
+       )}
+ 
+       {config.status === 'error' && (
+-        <div className="py-8 pr-4 text-center" role="alert">
++        <div className="py-8 text-center" role="alert">
+           <AlertCircle className="mx-auto h-5 w-5 text-destructive" />
+           <p className="mt-2 text-xs font-semibold text-foreground">
+             {config.platformLabel ? `${config.platformLabel} could not be loaded` : 'Integration settings could not be loaded'}
+diff --git a/setup/src/components/ConfiguratorSetup/StyleEditor/controls.tsx b/setup/src/components/ConfiguratorSetup/StyleEditor/controls.tsx
+index 9b7b26c..7107ee7 100644
+--- a/setup/src/components/ConfiguratorSetup/StyleEditor/controls.tsx
++++ b/setup/src/components/ConfiguratorSetup/StyleEditor/controls.tsx
+@@ -62,7 +62,7 @@ export function StyleCornerControl({ variable, value, defaultValue, onChange }:
+             title={preset.label}
+             className={cn(
+               'w-6 h-6 border transition-all flex items-center justify-center',
+-              current === preset.value ? 'border-foreground bg-foreground' : 'border-border bg-muted hover:border-foreground/50',
++              current === preset.value ? 'border-transparent ov25-brand-gradient' : 'border-border bg-muted hover:border-foreground/50',
+             )}
+             style={{ borderRadius: preset.value === '9999px' ? '9999px' : `${Math.min(parseInt(preset.value), 6)}px` }}
+           >
+diff --git a/setup/src/components/ConfiguratorSetup/StyleEditor/index.tsx b/setup/src/components/ConfiguratorSetup/StyleEditor/index.tsx
+index f21b6b6..dcaf912 100644
+--- a/setup/src/components/ConfiguratorSetup/StyleEditor/index.tsx
++++ b/setup/src/components/ConfiguratorSetup/StyleEditor/index.tsx
+@@ -85,7 +85,7 @@ export function StylePanel({ currentSettings, updateSettings, updateNested }: St
+   return (
+     <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+       <ScrollArea className="min-h-0 flex-1 min-w-0">
+-      <div className="min-w-0 max-w-full space-y-6 py-2 pr-4">
++      <div className="min-w-0 max-w-full space-y-6 py-2">
+         <section
+           className="min-w-0 rounded-xl border border-border bg-muted/20 p-3.5"
+           data-ov25-setup-section="brand-identity"
+diff --git a/setup/src/components/ConfiguratorSetup/initial-config-from-payload.ts b/setup/src/components/ConfiguratorSetup/initial-config-from-payload.ts
+index 6cbc4a3..b16e79c 100644
+--- a/setup/src/components/ConfiguratorSetup/initial-config-from-payload.ts
++++ b/setup/src/components/ConfiguratorSetup/initial-config-from-payload.ts
+@@ -173,6 +173,7 @@ function mergeSerializableIntoTypeSettings(base: TypeSettings, saved: SavedLayou
+         merged.carousel.maxImagesMobile = c.maxImages.mobile;
+       }
+     }
++    if (typeof c.autoCutouts === 'boolean') merged.carousel.autoCutouts = c.autoCutouts;
+   }
+ 
+   if (saved.configurator) {
+diff --git a/setup/src/components/ConfiguratorSetup/preview-config-serializable.ts b/setup/src/components/ConfiguratorSetup/preview-config-serializable.ts
+index 9db47c8..b3591cb 100644
+--- a/setup/src/components/ConfiguratorSetup/preview-config-serializable.ts
++++ b/setup/src/components/ConfiguratorSetup/preview-config-serializable.ts
+@@ -12,6 +12,7 @@ export interface SerializableInjectConfig {
+     desktop: string;
+     mobile: string;
+     maxImages?: number | { desktop: number; mobile: number };
++    autoCutouts?: boolean;
+   };
+   configurator?: {
+     displayMode: { desktop: string; mobile: string };
+diff --git a/setup/src/components/ConfiguratorSetup/serialize-config.ts b/setup/src/components/ConfiguratorSetup/serialize-config.ts
+index ad54b9d..984206d 100644
+--- a/setup/src/components/ConfiguratorSetup/serialize-config.ts
++++ b/setup/src/components/ConfiguratorSetup/serialize-config.ts
+@@ -131,6 +131,7 @@ export function buildSerializableConfig(
+         settings.carousel.maxImagesDesktop !== settings.carousel.maxImagesMobile
+           ? { desktop: settings.carousel.maxImagesDesktop, mobile: settings.carousel.maxImagesMobile }
+           : settings.carousel.maxImagesDesktop,
++      ...(settings.carousel.autoCutouts ? { autoCutouts: true } : {}),
+     },
+     configurator: {
+       displayMode: { desktop: displayModeDesktop, mobile: displayModeMobile },
+diff --git a/setup/src/components/ConfiguratorSetup/types.ts b/setup/src/components/ConfiguratorSetup/types.ts
+index 78ee4ba..06702cd 100644
+--- a/setup/src/components/ConfiguratorSetup/types.ts
++++ b/setup/src/components/ConfiguratorSetup/types.ts
+@@ -36,6 +36,8 @@ export interface TypeSettings {
+     mobile: FormCarouselDisplayMode;
+     maxImagesDesktop: number;
+     maxImagesMobile: number;
++    /** Live renders of the shopper's build (material shot + four cutouts) ahead of the gallery. */
++    autoCutouts: boolean;
+   };
+   configurator: {
+     displayModeDesktop: FormConfiguratorDisplayMode;
+@@ -111,7 +113,7 @@ const DEFAULT_STANDARD_SETTINGS: TypeSettings = {
+     configureButton: { enabled: false, selector: '[data-ov25-configure-button]', replace: false },
+     initialiseMenu: { enabled: false, selector: '#ov25-initialise-menu', replace: true },
+   },
+-  carousel: { desktop: 'stacked', mobile: 'carousel', maxImagesDesktop: 4, maxImagesMobile: 6 },
++  carousel: { desktop: 'stacked', mobile: 'carousel', maxImagesDesktop: 4, maxImagesMobile: 6, autoCutouts: false },
+   configurator: {
+     displayModeDesktop: 'sheet',
+     displayModeMobile: 'drawer',
+diff --git a/setup/src/components/ui/button.tsx b/setup/src/components/ui/button.tsx
+new file mode 100644
+index 0000000..353fbaa
+--- /dev/null
++++ b/setup/src/components/ui/button.tsx
+@@ -0,0 +1,44 @@
++import * as React from 'react';
++import { cva, type VariantProps } from 'class-variance-authority';
++import { cn } from '../../lib/utils';
++
++/**
++ * Setup's shared button, in the OV25 app palette.
++ *   default  – solid OV25 pink, for the primary action (Save).
++ *   brand    – the OV25 brand gradient, for selected/active states.
++ *   outline / ghost / destructive – secondary actions.
++ */
++const buttonVariants = cva(
++  'inline-flex items-center justify-center gap-2 whitespace-nowrap font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ov-pink focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
++  {
++    variants: {
++      variant: {
++        default: 'bg-ov-pink text-white shadow-sm hover:bg-ov-pink-mid',
++        brand: 'ov25-brand-gradient text-white shadow-sm hover:opacity-90',
++        outline: 'border border-border bg-background text-foreground hover:bg-muted',
++        ghost: 'text-muted-foreground hover:bg-muted hover:text-foreground',
++        destructive: 'bg-destructive text-white shadow-sm hover:bg-destructive/90',
++      },
++      size: {
++        default: 'h-9 px-4 text-sm rounded-full',
++        sm: 'h-7 px-3 text-xs rounded-full',
++        lg: 'py-2.5 px-4 text-sm rounded-full',
++        icon: 'h-8 w-8 rounded-full',
++      },
++    },
++    defaultVariants: { variant: 'default', size: 'default' },
++  },
++);
++
++export interface ButtonProps
++  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
++    VariantProps<typeof buttonVariants> {}
++
++const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
++  ({ className, variant, size, type = 'button', ...props }, ref) => (
++    <button ref={ref} type={type} className={cn(buttonVariants({ variant, size }), className)} {...props} />
++  ),
++);
++Button.displayName = 'Button';
++
++export { Button, buttonVariants };
+diff --git a/setup/src/components/ui/slider.tsx b/setup/src/components/ui/slider.tsx
+index 022e6fa..0959c0e 100644
+--- a/setup/src/components/ui/slider.tsx
++++ b/setup/src/components/ui/slider.tsx
+@@ -12,9 +12,9 @@ const Slider = React.forwardRef<
+     {...props}
+   >
+     <SliderPrimitive.Track className="relative h-1 w-full grow overflow-hidden rounded-full bg-gray-300/50 backdrop-blur-md">
+-      <SliderPrimitive.Range className="absolute h-full bg-gradient-to-r from-[#26E8FE] via-[#808AFF] to-[#A41EFE]" />
++      <SliderPrimitive.Range className="absolute h-full ov25-brand-gradient" />
+     </SliderPrimitive.Track>
+-    <SliderPrimitive.Thumb className="cursor-pointer block h-4 w-4 rounded-full border border-primary/50 bg-background shadow transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50" />
++    <SliderPrimitive.Thumb className="cursor-pointer block h-4 w-4 rounded-full border border-ov-pink/50 bg-background shadow transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50" />
+   </SliderPrimitive.Root>
+ ));
+ Slider.displayName = SliderPrimitive.Root.displayName;
+diff --git a/setup/src/components/ui/switch.tsx b/setup/src/components/ui/switch.tsx
+index 12cc18d..20836a0 100644
+--- a/setup/src/components/ui/switch.tsx
++++ b/setup/src/components/ui/switch.tsx
+@@ -8,7 +8,7 @@ const Switch = React.forwardRef<
+ >(({ className, ...props }, ref) => (
+   <SwitchPrimitives.Root
+     className={cn(
+-      'peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-green-400 data-[state=unchecked]:!bg-input',
++      'peer inline-flex h-5 w-9 shrink-0 cursor-pointer items-center rounded-full border-2 border-transparent shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:ov25-brand-gradient data-[state=unchecked]:!bg-input',
+       className,
+     )}
+     {...props}
+diff --git a/src/components/IframeContainer.tsx b/src/components/IframeContainer.tsx
+index 01d4060..f196534 100644
+--- a/src/components/IframeContainer.tsx
++++ b/src/components/IframeContainer.tsx
+@@ -10,6 +10,7 @@ import { VariantsCloseButton } from './VariantSelectMenu/VariantsCloseButton.js'
+ import { CONFIGURATOR_IFRAME_BACKGROUND_CSS_VAR } from '../lib/config/iframe-transition-snapshot.js'
+ import { getResolvedConfiguratorIframeBackgroundColor } from '../utils/configurator-dom-queries.js'
+ import { CarouselDisplayMode } from '../types/config-enums.js'
++import { composeGalleryOrder } from '../lib/auto-cutouts.js'
+ 
+ function cssColorToHex(value: string | null | undefined): string | null {
+     const raw = value?.trim();
+@@ -138,6 +139,9 @@ export const IframeContainer = () => {
+         carouselLayoutMobile,
+         showCarousel,
+         images: passedImages,
++        autoCutoutMaterialImages,
++        autoCutoutImages,
++        carouselAutoCutouts,
+         isProductGalleryStacked: isStacked,
+         isVariantsOpen,
+         uniqueId,
+@@ -229,7 +233,14 @@ export const IframeContainer = () => {
+         cutoutFirst,
+         includeCutout: !cutoutBacksThreeD,
+     })
+-    const images = [...(passedImages || []), ...productImages]
++    // Must match the carousel's strip exactly: galleryIndex indexes the spliced strip,
++    // so a different order here shows the wrong poster.
++    const { images } = composeGalleryOrder({
++        materialImages: autoCutoutMaterialImages || [],
++        cutoutImages: autoCutoutImages || [],
++        galleryImages: [...(passedImages || []), ...productImages],
++        deferThreeD,
++    })
+ 
+     // Any component-specific state remains local
+     const [canSeeDimensions, setCanSeeDimensions] = useState(false);
+@@ -253,8 +264,8 @@ export const IframeContainer = () => {
+ 
+     // Use the utility function to get the iframe src
+     const iframeSrc = useMemo(() =>
+-        getIframeSrc(apiKey, productLink, configurationUuid, hexBgColor, bedAllowNoneQueryValue, diningShowAttachmentPoints, hideGestureHint),
+-        [productLink, apiKey, configurationUuid, hexBgColor, bedAllowNoneQueryValue, diningShowAttachmentPoints, hideGestureHint]);
++        getIframeSrc(apiKey, productLink, configurationUuid, hexBgColor, bedAllowNoneQueryValue, diningShowAttachmentPoints, hideGestureHint, carouselAutoCutouts),
++        [productLink, apiKey, configurationUuid, hexBgColor, bedAllowNoneQueryValue, diningShowAttachmentPoints, hideGestureHint, carouselAutoCutouts]);
+     const iframeTitle = getConfiguratorIframeTitle({
+         productLink,
+         isSnap2Mode,
+diff --git a/src/components/VariantSelectMenu/AccordionVariants.tsx b/src/components/VariantSelectMenu/AccordionVariants.tsx
+index 39ef85e..89a7b71 100644
+--- a/src/components/VariantSelectMenu/AccordionVariants.tsx
++++ b/src/components/VariantSelectMenu/AccordionVariants.tsx
+@@ -41,6 +41,7 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
+     expandToOptionIdOnOpen,
+     hidePricing,
+     getString,
++    getSelectedValueForOption,
+   } = useOV25UI();
+ 
+   const [expandedAccordion, setExpandedAccordion] = useState<string | null>(null);
+@@ -152,8 +153,14 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
+ 
+   const getOptionHeaderLabel = useCallback(
+     (optionName: string) =>
+-      capitalizeWords(getString('optionHeader', { OPTION_NAME: optionName }, optionName)),
+-    [getString]
++      capitalizeWords(
++        getString(
++          'optionHeader',
++          { OPTION_NAME: optionName, SELECTED_VARIANT_NAME: getSelectedValueForOption(optionName) },
++          optionName
++        )
++      ),
++    [getString, getSelectedValueForOption]
+   );
+ 
+   return (
+diff --git a/src/components/VariantSelectMenu/ProductVariantsWrapper.tsx b/src/components/VariantSelectMenu/ProductVariantsWrapper.tsx
+index 1f4b969..7d34dd9 100644
+--- a/src/components/VariantSelectMenu/ProductVariantsWrapper.tsx
++++ b/src/components/VariantSelectMenu/ProductVariantsWrapper.tsx
+@@ -59,6 +59,7 @@ export function ProductVariantsWrapper({
+         configuratorDisplayModeMobile,
+         isSnap2Mode,
+         getString,
++        getSelectedValueForOption,
+         stickyLayoutActive,
+         setStickyOptionHeader,
+       } = useOV25UI();
+@@ -241,6 +242,7 @@ export function ProductVariantsWrapper({
+               : panelOpts.find((o) => o.id === id)?.name ??
+                 allOptionsVariants.find((o) => o.optionId === id)?.optionName ??
+                 id,
++          SELECTED_VARIANT_NAME: getSelectedValueForOption(id),
+         },
+         id === 'size'
+           ? 'Size'
+@@ -253,7 +255,7 @@ export function ProductVariantsWrapper({
+       <div className=" ov:pb-6">
+         {showHeader && (
+           <h3 className={`ov25-option-header ov:sticky ov:top-0  ov:px-4 ov:z-10 ov:bg-(--ov25-background-color) ov:text-lg ov:pb-4 ov:text-(--ov25-secondary-text-color) ${isMobileListSticky ? 'ov:pt-2' : 'ov:pt-0'}`}>
+-            {capitalizeWords(getString('optionHeader', { OPTION_NAME: 'Size' }, 'Size'))}
++            {capitalizeWords(getString('optionHeader', { OPTION_NAME: 'Size', SELECTED_VARIANT_NAME: getSelectedValueForOption('size') }, 'Size'))}
+           </h3>
+         )}
+         <div className="ov:bg-(--ov25-background-color) ov:pt-4">
+@@ -284,7 +286,11 @@ export function ProductVariantsWrapper({
+         {showHeader && (
+           <h3 className={`ov25-option-header ov:sticky ov:top-0  ov:px-4 ov:z-10 ov:bg-(--ov25-background-color) ov:text-lg ov:pb-2 ov:md:pb-4 ov:text-(--ov25-secondary-text-color) ${isMobileListSticky ? 'ov:pt-2' : 'ov:pt-0'}`}>
+             {capitalizeWords(
+-              getString('optionHeader', { OPTION_NAME: optionName }, optionName)
++              getString(
++                'optionHeader',
++                { OPTION_NAME: optionName, SELECTED_VARIANT_NAME: getSelectedValueForOption(optionId) },
++                optionName
++              )
+             )}
+           </h3>
+         )}
+diff --git a/src/components/VariantSelectMenu/Snap2Wrapper.tsx b/src/components/VariantSelectMenu/Snap2Wrapper.tsx
+index 829cc10..f587199 100644
+--- a/src/components/VariantSelectMenu/Snap2Wrapper.tsx
++++ b/src/components/VariantSelectMenu/Snap2Wrapper.tsx
+@@ -93,7 +93,7 @@ function Snap2PiecesOptionsLayout({
+   isInline = false,
+   embeddedInVariantsOnlySheet = false,
+ }: Snap2PiecesOptionsLayoutProps) {
+-  const { activeOptionId, setActiveOptionId, variantPanelOptions, snap2ModulesEmbedInVariantSheet, getString } =
++  const { activeOptionId, setActiveOptionId, variantPanelOptions, snap2ModulesEmbedInVariantSheet, getString, getSelectedValueForOption } =
+     useOV25UI();
+   const [segment, setSegment] = useState<'pieces' | 'options'>('options');
+   const tabsIndicatorRef = useRef<HTMLDivElement>(null);
+@@ -197,7 +197,7 @@ function Snap2PiecesOptionsLayout({
+           data-ov25-snap2-primary-segment-tab="pieces"
+           data-selected={segment === 'pieces' ? 'true' : 'false'}
+         >
+-          {getString('optionHeader', { OPTION_NAME: 'Pieces' }, 'Pieces')}
++          {getString('optionHeader', { OPTION_NAME: 'Pieces', SELECTED_VARIANT_NAME: getSelectedValueForOption('Pieces') }, 'Pieces')}
+         </button>
+         <button
+           ref={optionsTabRef}
+@@ -209,7 +209,7 @@ function Snap2PiecesOptionsLayout({
+           data-ov25-snap2-primary-segment-tab="options"
+           data-selected={segment === 'options' ? 'true' : 'false'}
+         >
+-          {getString('optionHeader', { OPTION_NAME: 'Finish' }, 'Finish')}
++          {getString('optionHeader', { OPTION_NAME: 'Finish', SELECTED_VARIANT_NAME: getSelectedValueForOption('Finish') }, 'Finish')}
+         </button>
+         </div>
+       </div>
+diff --git a/src/components/VariantSelectMenu/TreeVariants.tsx b/src/components/VariantSelectMenu/TreeVariants.tsx
+index b1b979c..48c5f6c 100644
+--- a/src/components/VariantSelectMenu/TreeVariants.tsx
++++ b/src/components/VariantSelectMenu/TreeVariants.tsx
+@@ -42,6 +42,7 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
+     setActiveOptionId,
+     hidePricing,
+     getString,
++    getSelectedValueForOption,
+   } = useOV25UI();
+ 
+   const [currentView, setCurrentView] = useState<string | null>(null);
+@@ -164,8 +165,14 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
+ 
+   const getOptionHeaderLabel = useCallback(
+     (optionName: string) =>
+-      capitalizeWords(getString('optionHeader', { OPTION_NAME: optionName }, optionName)),
+-    [getString]
++      capitalizeWords(
++        getString(
++          'optionHeader',
++          { OPTION_NAME: optionName, SELECTED_VARIANT_NAME: getSelectedValueForOption(optionName) },
++          optionName
++        )
++      ),
++    [getString, getSelectedValueForOption]
+   );
+ 
+   const backHeader = (title: string) => (
+diff --git a/src/components/product-carousel.tsx b/src/components/product-carousel.tsx
+index 21c005e..d34b561 100644
+--- a/src/components/product-carousel.tsx
++++ b/src/components/product-carousel.tsx
+@@ -1,6 +1,7 @@
+ import * as React from 'react'
+ import { useOV25UI } from "../contexts/ov25-ui-context.js"
+ import { CarouselDisplayMode } from "../types/config-enums.js"
++import { composeGalleryOrder } from "../lib/auto-cutouts.js"
+ import {
+   cn,
+   getProductCutoutImage,
+@@ -17,6 +18,9 @@ function isThreeDPlaceholder(item: unknown): item is ThreeDPlaceholder {
+ 
+ const DRAG_THRESHOLD_PX = 5
+ 
++const EMPTY_CUTOUT_ANGLES: ReadonlyMap<string, number> = new Map()
++const noop = () => {}
++
+ type PopoverDivProps = React.ComponentPropsWithoutRef<'div'> & {
+   popover?: 'auto' | 'manual'
+ }
+@@ -33,6 +37,11 @@ export function ProductCarousel() {
+     setGalleryIndex,
+     error,
+     images: passedImages,
++    autoCutoutMaterialImages,
++    autoCutoutImages,
++    carouselAutoCutouts,
++    autoCutoutAngleByImage,
++    selectAutoCutoutAngle,
+     galleryIndexToUse,
+     carouselLayout,
+     carouselLayoutMobile,
+@@ -44,6 +53,11 @@ export function ProductCarousel() {
+     setGalleryCarouselFullscreenImage,
+   } = useOV25UI();
+ 
++  // Hosts can mount this against a partial context (and tests do); treat auto cutouts as absent
++  // rather than letting a missing lookup take the whole carousel down.
++  const cutoutAngleByImage = autoCutoutAngleByImage ?? EMPTY_CUTOUT_ANGLES;
++  const orbitToCutoutAngle = selectAutoCutoutAngle ?? noop;
++
+   const effectiveCarouselLayout = isMobile ? carouselLayoutMobile : carouselLayout;
+   const carouselDisabled = effectiveCarouselLayout === CarouselDisplayMode.None;
+   const useStackedLayout = effectiveCarouselLayout === 'stacked';
+@@ -189,15 +203,24 @@ export function ProductCarousel() {
+   const hasCutout = !!(currentProduct?.metadata as any)?.cutoutImage
+   const cutoutFirst = hasCutout && (isMobile || !deferThreeD)
+   const cutoutBacksThreeD = effectiveCarouselLayout === CarouselDisplayMode.Carousel
+-  const cutoutImage = cutoutBacksThreeD
+-    ? getProductCutoutImage(currentProduct?.metadata)
+-    : null
++  // Auto cutouts render the configured product at four angles of their own, so the static
++  // catalogue cutout behind the 360 tile is both redundant and off-configuration. Leave the
++  // tile as the plain "360°" label instead.
++  const cutoutImage =
++    cutoutBacksThreeD && !carouselAutoCutouts
++      ? getProductCutoutImage(currentProduct?.metadata)
++      : null
+   const productImages = getProductGalleryImages(currentProduct?.metadata, {
+     cutoutFirst,
+     includeCutout: !cutoutBacksThreeD,
+   })
+   const maxImages = isMobile ? carouselMaxImagesMobile : carouselMaxImagesDesktop
+-  const allImages = [...(passedImages || []), ...productImages]
++  const { images: allImages } = composeGalleryOrder({
++    materialImages: autoCutoutMaterialImages || [],
++    cutoutImages: autoCutoutImages || [],
++    galleryImages: [...(passedImages || []), ...productImages],
++    deferThreeD,
++  })
+   const images = maxImages != null && maxImages > 0 ? allImages.slice(0, maxImages) : allImages
+   const carouselItems: (typeof images[0] | ThreeDPlaceholder)[] = [...images]
+   carouselItems.splice(galleryIndexToUse, 0, {
+@@ -207,6 +230,38 @@ export function ProductCarousel() {
+ 
+   if ((images.length === 0 && !cutoutImage) || error) return null;
+ 
++  /**
++   * Cutout tiles are angle shortcuts: show the live viewer and orbit it to the captured angle,
++   * rather than swapping in the still. Everything else hands free orbit back.
++   */
++  const selectGalleryItemAt = (index: number, itemSrc: string | null) => {
++    const yaw = itemSrc ? cutoutAngleByImage.get(itemSrc) : undefined
++    if (yaw !== undefined) {
++      setGalleryIndex(galleryIndexToUse)
++      orbitToCutoutAngle(yaw)
++      return
++    }
++    orbitToCutoutAngle(null)
++    setGalleryIndex(index)
++  }
++
++  /**
++   * Stable styling hooks for merchant `cssString`. Auto cutout tiles are otherwise identical
++   * `.ov25-gallery-image-button`s, so without these a merchant could only target them by
++   * position — and the position moves with the material shot and deferThreeD.
++   *   data-ov25-gallery-tile: "360" | "material" | "cutout" | "image"
++   *   data-ov25-cutout-yaw:   the captured angle, cutout tiles only
++   */
++  const materialImageSet = new Set(autoCutoutMaterialImages || [])
++  const galleryTileAttributes = (item: typeof images[0], src: string) => {
++    const yaw = cutoutAngleByImage.get(src)
++    if (yaw !== undefined) {
++      return { 'data-ov25-gallery-tile': 'cutout', 'data-ov25-cutout-yaw': String(yaw) }
++    }
++    if (materialImageSet.has(item)) return { 'data-ov25-gallery-tile': 'material' }
++    return { 'data-ov25-gallery-tile': 'image' }
++  }
++
+   const renderCarouselThumbnail = (item: ThreeDPlaceholder | typeof images[0], index: number) => {
+ 
+     const is3DSlot = isThreeDPlaceholder(item)
+@@ -218,8 +273,9 @@ export function ProductCarousel() {
+       return (
+         <button
+           key={index}
+-          onClick={() => setGalleryIndex(galleryIndexToUse)}
++          onClick={() => selectGalleryItemAt(galleryIndexToUse, null)}
+           data-selected={isSelected ? "true" : "false"}
++          data-ov25-gallery-tile="360"
+           className={cn(
+             "ov:cursor-pointer ov:relative ov:pl-1 ov:aspect-square ov:w-full ov:flex ov:justify-center ov:items-center ov:overflow-hidden ov:rounded-(--ov25-configurator-iframe-border-radius) ov:bg-white ov:ring-2",
+             isSelected ? "ov:ring-(--ov25-primary-color)" : "ov:ring-(--ov25-configurator-view-controls-border-color)"
+@@ -266,8 +322,9 @@ export function ProductCarousel() {
+     return (
+       <button
+         key={index}
+-        onClick={() => setGalleryIndex(galleryIndexForSlot)}
++        onClick={() => selectGalleryItemAt(galleryIndexForSlot, src)}
+         data-selected={isSelected ? "true" : "false"}
++        {...galleryTileAttributes(item as typeof images[0], src)}
+         className={cn(
+           "ov25-gallery-image-button ov:relative ov:aspect-square ov:w-full ov:overflow-hidden ov:rounded-(--ov25-configurator-iframe-border-radius) ov:bg-muted ov:cursor-pointer",
+           isSelected && "ov:ring-2 ov:ring-(--ov25-primary-color)"
+@@ -297,7 +354,8 @@ export function ProductCarousel() {
+         <button
+           key={index}
+           type="button"
+-          onClick={() => setGalleryIndex(galleryIndexToUse)}
++          onClick={() => selectGalleryItemAt(galleryIndexToUse, null)}
++          data-ov25-gallery-tile="360"
+           className={cn(
+             'ov:cursor-pointer ov:relative ov:aspect-3/2 ov:w-full ov:flex ov:justify-center ov:items-center ov:overflow-hidden ov:rounded-(--ov25-configurator-iframe-border-radius) ov:bg-white ov:ring-2',
+             isSelected ? 'ov:ring-(--ov25-primary-color)' : 'ov:ring-(--ov25-configurator-view-controls-border-color)'
+@@ -322,11 +380,17 @@ export function ProductCarousel() {
+         />
+       )
+     }
++    const cutoutYaw = cutoutAngleByImage.get(src)
+     return (
+       <button
+         key={index}
+         type="button"
+-        onClick={() => setGalleryCarouselFullscreenImage(fullscreenSrc)}
++        onClick={() =>
++          cutoutYaw === undefined
++            ? setGalleryCarouselFullscreenImage(fullscreenSrc)
++            : selectGalleryItemAt(index, src)
++        }
++        {...galleryTileAttributes(item as typeof images[0], src)}
+         className="ov25-gallery-image-button ov:relative ov:aspect-3/2 ov:w-full ov:overflow-hidden ov:rounded-(--ov25-configurator-iframe-border-radius) ov:bg-muted ov:cursor-pointer"
+       >
+         <img
+diff --git a/src/components/product-gallery.tsx b/src/components/product-gallery.tsx
+index fbc207d..b68d806 100644
+--- a/src/components/product-gallery.tsx
++++ b/src/components/product-gallery.tsx
+@@ -294,6 +294,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
+         configuratorClosingProxyRect,
+         releaseConfiguratorTransitionProxy,
+         stackedGalleryCloseSyncImmediateRef,
++        setStickyCarouselHost,
+         isSnap2Mode,
+         galleryCarouselFullscreenImage,
+         isModalOpen,
+@@ -407,6 +408,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
+     useLayoutEffect(() => {
+         if (!showCarousel || hideEmbeddedCarousel || externalCarouselShadowRoot) {
+             setCarouselShadowRoot(null);
++            setStickyCarouselHost(null);
+             return;
+         }
+         const host = carouselHostRef.current;
+@@ -422,7 +424,10 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
+         }
+         shadow.adoptedStyleSheets = stylesheets;
+         setCarouselShadowRoot(shadow);
+-    }, [showCarousel, hideEmbeddedCarousel, externalCarouselShadowRoot, cssString, galleryShadowRoot]);
++        // Lets the sticky controller measure the strip instead of assuming 120px.
++        setStickyCarouselHost(host);
++        return () => setStickyCarouselHost(null);
++    }, [showCarousel, hideEmbeddedCarousel, externalCarouselShadowRoot, cssString, galleryShadowRoot, setStickyCarouselHost]);
+ 
+     useLayoutEffect(() => {
+         const host = galleryHostRef.current;
+diff --git a/src/contexts/ov25-ui-context.tsx b/src/contexts/ov25-ui-context.tsx
+index 96c0000..1e3e983 100644
+--- a/src/contexts/ov25-ui-context.tsx
++++ b/src/contexts/ov25-ui-context.tsx
+@@ -19,6 +19,18 @@ import {
+ import { stringSimilarity } from 'string-similarity-js';
+ import { launchARWithGLBBlob } from '../utils/launchARWithGLBBlob.js';
+ import { getProductCutoutImage, getProductGalleryImages, resolveImageUrl, type ProductImageInput } from '../lib/utils.js';
++import {
++  AUTO_CUTOUT_SELECT_ANGLE_MESSAGE,
++  AUTO_CUTOUT_THUMBNAILS_MESSAGE,
++  autoCutoutAngleByImageUrl,
++  composeAutoCutoutGalleryImages,
++  composeGalleryOrder,
++  imageBitmapToObjectUrl,
++  isAutoCutoutAngle,
++  materialThumbnailFromConfiguratorState,
++  type AutoCutoutAngle,
++  type AutoCutoutThumbnail,
++} from '../lib/auto-cutouts.js';
+ import type {
+   BedPartSizeFilterFlags,
+   OnChangePayload,
+@@ -433,6 +445,14 @@ interface OV25UIContextType {
+   carouselLayoutMobile: CarouselLayout;
+   carouselMaxImagesDesktop?: number;
+   carouselMaxImagesMobile?: number;
++  carouselAutoCutouts: boolean;
++  /** Material shot + live cutouts for the shopper's current build; empty unless auto cutouts are on. */
++  autoCutoutMaterialImages: ProductImageInput[];
++  autoCutoutImages: ProductImageInput[];
++  /** Gallery image URL -> the angle it was captured at, for cutout tiles only. */
++  autoCutoutAngleByImage: Map<string, AutoCutoutAngle>;
++  /** Orbits the live viewer to a captured angle; `null` restores free orbit. */
++  selectAutoCutoutAngle: (yawDeg: number | null) => void;
+   showCarousel: boolean;
+   mobileLogoURL?: string;
+   uniqueId?: string;
+@@ -482,6 +502,8 @@ interface OV25UIContextType {
+   stickyLayoutSnapshot: StickyLayoutSnapshot | null;
+   carouselTarget: HTMLElement | null;
+   setStickyOptionHeader: (element: HTMLElement | null) => void;
++  /** Registers the inline-sticky carousel host so its height can be measured. */
++  setStickyCarouselHost: (element: HTMLElement | null) => void;
+   useSimpleVariantsSelector: boolean;
+   /** Drawer trigger: single Configure button or per-option buttons (ProductOptionsGroup). */
+   configuratorTriggerStyle: 'single-button' | 'split-buttons';
+@@ -592,6 +614,8 @@ interface OV25UIContextType {
+   handleNextOption: () => void;
+   handlePreviousOption: () => void;
+   getSelectedValue: (option: Option | SizeOption) => string;
++  /** Selected value looked up by option id, falling back to option display name. Empty string when nothing is selected yet. */
++  getSelectedValueForOption: (optionIdOrName: string) => string;
+   toggleAR: () => void;
+   cleanupConfigurator: () => void;
+   applySearchAndFilters: (option: Option | SizeOption, optionId: string) => Option | SizeOption;
+@@ -647,6 +671,7 @@ export const OV25UIProvider: React.FC<{
+   carouselDisplayModeMobile?: CarouselDisplayMode,
+   carouselMaxImagesDesktop?: number,
+   carouselMaxImagesMobile?: number,
++  carouselAutoCutouts?: boolean,
+   /** @deprecated Use carouselDisplayMode */
+   carouselLayout?: CarouselDisplayMode,
+   showCarousel?: boolean,
+@@ -723,6 +748,7 @@ export const OV25UIProvider: React.FC<{
+   carouselDisplayModeMobile: carouselDisplayModeMobileProp,
+   carouselMaxImagesDesktop,
+   carouselMaxImagesMobile,
++  carouselAutoCutouts = false,
+   carouselLayout: carouselLayoutProp,
+   showCarousel = true,
+   hasConfigureButton,
+@@ -805,6 +831,26 @@ export const OV25UIProvider: React.FC<{
+   const currentProductIdRef = useRef<string | undefined>(currentProductId);
+   currentProductIdRef.current = currentProductId;
+   const [configuratorState, setConfiguratorState] = useState<ConfiguratorState>();
++  // The message listener is installed once; read the live flag through a ref so turning auto
++  // cutouts off mid-session drops incoming sets instead of leaking their bitmaps.
++  const carouselAutoCutoutsRef = useRef(carouselAutoCutouts);
++  carouselAutoCutoutsRef.current = carouselAutoCutouts;
++  // Live angle thumbnails. The configurator sends the COMPLETE set every time the configuration
++  // settles, so each arrival replaces the previous one and revokes its object URLs.
++  const [autoCutoutThumbnails, setAutoCutoutThumbnails] = useState<AutoCutoutThumbnail[]>([]);
++  const autoCutoutThumbnailsRef = useRef<AutoCutoutThumbnail[]>([]);
++  const autoCutoutCaptureVersionRef = useRef(0);
++  const replaceAutoCutoutThumbnails = useCallback((next: AutoCutoutThumbnail[]) => {
++    const previous = autoCutoutThumbnailsRef.current;
++    autoCutoutThumbnailsRef.current = next;
++    setAutoCutoutThumbnails(next);
++    previous.forEach(({ imageUrl }) => URL.revokeObjectURL(imageUrl));
++  }, []);
++  useEffect(() => () => {
++    autoCutoutCaptureVersionRef.current += 1;
++    autoCutoutThumbnailsRef.current.forEach(({ imageUrl }) => URL.revokeObjectURL(imageUrl));
++    autoCutoutThumbnailsRef.current = [];
++  }, []);
+   const [selectedSelections, setSelectedSelections] = useState<Array<{
+     optionId: string;
+     groupId?: string;
+@@ -959,6 +1005,7 @@ export const OV25UIProvider: React.FC<{
+   const stickyLayoutControllerRef = useRef<StickyLayoutController | null>(null);
+   const carouselTargetControllerRef = useRef<CarouselTargetController | null>(null);
+   const stickyOptionHeaderRef = useRef<HTMLElement | null>(null);
++  const stickyCarouselHostRef = useRef<HTMLElement | null>(null);
+   const stickyHostRelocatedRef = useRef(false);
+   const restoreStickyHostStylesRef = useRef<(() => void) | null>(null);
+   const [stickyLayoutSnapshot, setStickyLayoutSnapshot] = useState<StickyLayoutSnapshot | null>(null);
+@@ -1034,6 +1081,12 @@ export const OV25UIProvider: React.FC<{
+     stickyLayoutControllerRef.current?.setElements({ optionHeader: element });
+   }, []);
+ 
++  const setStickyCarouselHost = useCallback((element: HTMLElement | null) => {
++    if (stickyCarouselHostRef.current === element) return;
++    stickyCarouselHostRef.current = element;
++    stickyLayoutControllerRef.current?.setElements({ carouselHost: element });
++  }, []);
++
+   // Mobile inline-sticky variants must remain in document flow. Some storefront themes reuse the
+   // variants target as a fixed bottom sheet; because OV25 mounts its ShadowRoot directly on that
+   // target, the merchant rule otherwise turns the released page-scroll list into a viewport overlay.
+@@ -1121,6 +1174,7 @@ export const OV25UIProvider: React.FC<{
+       galleryHost,
+       variantsHost,
+       optionHeader: stickyOptionHeaderRef.current,
++      carouselHost: stickyCarouselHostRef.current,
+       headerSelector,
+       ...(isMobile ? { topGapOverride: 0, bottomGapOverride: 0 } : {}),
+       onChange: (nextSnapshot) => {
+@@ -2237,6 +2291,17 @@ export const OV25UIProvider: React.FC<{
+     return selection?.name || '';
+   };
+ 
++  // Header call sites know an option by id (list/tabs) or by display name
++  // (accordion/tree/snap2), so accept either and resolve to the same value.
++  const getSelectedValueForOption = (optionIdOrName: string) => {
++    const needle = optionIdOrName?.trim().toLowerCase();
++    if (!needle) return '';
++    const option =
++      allOptions.find(o => o.id.toLowerCase() === needle) ??
++      allOptions.find(o => o.name?.trim().toLowerCase() === needle);
++    return option ? getSelectedValue(option) : '';
++  };
++
+   // Action handlers
+   const handleOptionClick = (optionId: string) => {
+     setExpandToOptionIdOnOpen(optionId);
+@@ -2459,6 +2524,42 @@ export const OV25UIProvider: React.FC<{
+         if (type === IFRAME_MSG_TRANSITION_SNAPSHOT || type === IFRAME_MSG_TRANSITION_SNAPSHOT_ERROR) {
+           return;
+         }
++
++        // Not JSON: the renders arrive as transferred ImageBitmaps alongside their angles.
++        if (type === AUTO_CUTOUT_THUMBNAILS_MESSAGE) {
++          const { bitmaps, yaws } = event.data as { bitmaps?: unknown; yaws?: unknown };
++          const incomingBitmaps = Array.isArray(bitmaps) ? (bitmaps as ImageBitmap[]) : [];
++          const incomingYaws = Array.isArray(yaws) ? (yaws as number[]) : [];
++          if (!carouselAutoCutoutsRef.current) {
++            incomingBitmaps.forEach((bitmap) => bitmap.close());
++            return;
++          }
++          const captureVersion = ++autoCutoutCaptureVersionRef.current;
++          const accepted: Array<{ bitmap: ImageBitmap; yaw: AutoCutoutAngle }> = [];
++          incomingBitmaps.forEach((bitmap, index) => {
++            const yaw = incomingYaws[index];
++            if (isAutoCutoutAngle(yaw)) accepted.push({ bitmap, yaw });
++            else bitmap.close();
++          });
++          void Promise.all(
++            accepted.map(async ({ bitmap, yaw }) => ({
++              imageUrl: await imageBitmapToObjectUrl(bitmap),
++              yaw,
++            })),
++          ).then((converted) => {
++            const next = converted.filter(
++              (thumbnail): thumbnail is AutoCutoutThumbnail => thumbnail.imageUrl !== null,
++            );
++            // A newer set (or teardown) won the race while we were copying pixels out.
++            if (captureVersion !== autoCutoutCaptureVersionRef.current) {
++              next.forEach(({ imageUrl }) => URL.revokeObjectURL(imageUrl));
++              return;
++            }
++            replaceAutoCutoutThumbnails(next);
++          });
++          return;
++        }
++
+         
+         // AR_GLB_DATA sends raw base64 string, don't parse it
+         const data = (type === 'AR_GLB_DATA' || !payload) ? {} : JSON.parse(payload);
+@@ -2821,6 +2922,7 @@ export const OV25UIProvider: React.FC<{
+     hasConfigureButtonState,
+     resetCommerceSnapshots,
+     snap2ModulesEmbedInVariantSheet,
++    replaceAutoCutoutThumbnails,
+   ]);
+ 
+   const hasCutout = !!(currentProduct?.metadata as any)?.cutoutImage
+@@ -2833,11 +2935,45 @@ export const OV25UIProvider: React.FC<{
+     cutoutFirst,
+     includeCutout: !cutoutBacksThreeD,
+   })
+-  const allImages = [...(images || []), ...productImages]
+-  
++  const { materialImages: autoCutoutMaterialImages, cutoutImages: autoCutoutImages } =
++    composeAutoCutoutGalleryImages({
++      enabled: carouselAutoCutouts,
++      materialThumbnail: materialThumbnailFromConfiguratorState(configuratorState),
++      cutouts: autoCutoutThumbnails,
++    })
++  const autoCutoutAngleByImage = useMemo(
++    () => autoCutoutAngleByImageUrl(autoCutoutThumbnails),
++    [autoCutoutThumbnails],
++  )
++  // A cutout tile is an angle shortcut inside the 360 viewer, not a still to swap in, so selecting
++  // one orbits the live camera instead. `null` gives the shopper free orbit back.
++  const selectAutoCutoutAngle = useCallback((yawDeg: number | null) => {
++    sendMessageToIframe(AUTO_CUTOUT_SELECT_ANGLE_MESSAGE, { yawDeg }, uniqueId)
++  }, [uniqueId])
++  const {
++    images: allImages,
++    threeDIndex: galleryIndexToUse,
++    initialIndex: initialGalleryIndex,
++  } = composeGalleryOrder({
++    materialImages: autoCutoutMaterialImages,
++    cutoutImages: autoCutoutImages,
++    galleryImages: [...(images || []), ...productImages],
++    deferThreeD,
++  })
++
+   const [galleryIndex, setGalleryIndex] = useState(0);
+ 
+-  const galleryIndexToUse = deferThreeD && allImages.length > 0 ? 1 : 0;
++  /**
++   * `galleryIndex` starts at 0, which used to *be* the tile we wanted: the 360, or the first
++   * gallery image when deferring. Auto cutouts push both along — the material shot takes index
++   * 0 — so the raw default would now open on the swatch. Snap the untouched default across to
++   * whatever the strip says it should be. Only index 0 is moved, so once the shopper has picked
++   * a tile their choice stands; the material shot arriving late is what makes this necessary.
++   */
++  useEffect(() => {
++    setGalleryIndex((current) => (current === 0 ? initialGalleryIndex : current));
++  }, [initialGalleryIndex]);
++
+   const shouldRestoreInlineGalleryToIframe =
+     allImages.length > 0 &&
+     configuratorDisplayModeUsesInlineVariants(
+@@ -2932,6 +3068,11 @@ export const OV25UIProvider: React.FC<{
+   carouselLayoutMobile,
+   carouselMaxImagesDesktop,
+   carouselMaxImagesMobile,
++  carouselAutoCutouts,
++  autoCutoutMaterialImages,
++  autoCutoutImages,
++  autoCutoutAngleByImage,
++  selectAutoCutoutAngle,
+   showCarousel: showCarouselForViewport,
+     deferThreeD,
+     configuratorGalleryIsDeferred,
+@@ -2995,6 +3136,7 @@ export const OV25UIProvider: React.FC<{
+     stickyLayoutSnapshot,
+     carouselTarget,
+     setStickyOptionHeader,
++    setStickyCarouselHost,
+     useSimpleVariantsSelector,
+     configuratorTriggerStyle: isMobile ? (configuratorTriggerStyleMobileProp ?? configuratorTriggerStyle) : configuratorTriggerStyle,
+     variantDisplayStyleMobile,
+@@ -3078,6 +3220,7 @@ export const OV25UIProvider: React.FC<{
+     handleNextOption,
+     handlePreviousOption,
+     getSelectedValue,
++    getSelectedValueForOption,
+     toggleAR: handleToggleAR,
+     cleanupConfigurator,
+     applySearchAndFilters,
+diff --git a/src/lib/auto-cutouts.ts b/src/lib/auto-cutouts.ts
+new file mode 100644
+index 0000000..8ea29b0
+--- /dev/null
++++ b/src/lib/auto-cutouts.ts
+@@ -0,0 +1,198 @@
++/**
++ * Auto cutouts — live angle thumbnails in the product gallery.
++ *
++ * With the feature on, the iframe URL carries `cutoutAngles`/`cutoutSize`, and the configurator
++ * posts a complete `CUTOUT_THUMBNAILS` set (transferred `ImageBitmap`s, no JSON payload) every
++ * time the shopper's configuration settles. We convert each bitmap to an object URL and prepend
++ * the resulting tiles to the gallery, so the carousel always shows the build in front of the
++ * shopper rather than catalogue photography.
++ *
++ * The angles and their order are fixed on purpose: this mirrors the Darlings of Chelsea gallery
++ * (material shot first, then front-left, front, left-side, rear), which is the reference
++ * implementation the feature was modelled on. Integrators get a toggle, not a dial.
++ */
++
++/** Absolute yaw degrees. 0 faces the front, negative walks left, 180 is the back. */
++export const AUTO_CUTOUT_ANGLES = [-45, 0, -90, 180] as const;
++
++export type AutoCutoutAngle = (typeof AUTO_CUTOUT_ANGLES)[number];
++
++/** Square px per render. The configurator clamps to 150–550. */
++export const AUTO_CUTOUT_SIZE = 320;
++
++export const AUTO_CUTOUT_ANGLES_QUERY_KEY = 'cutoutAngles';
++export const AUTO_CUTOUT_SIZE_QUERY_KEY = 'cutoutSize';
++
++export const AUTO_CUTOUT_THUMBNAILS_MESSAGE = 'CUTOUT_THUMBNAILS';
++
++/**
++ * Swings the live viewer to a captured angle. `yawDeg: null` hands control back: free orbit is
++ * restored and the camera returns to wherever the shopper had left it.
++ */
++export const AUTO_CUTOUT_SELECT_ANGLE_MESSAGE = 'SELECT_CUTOUT_ANGLE';
++
++export interface AutoCutoutThumbnail {
++  /** Object URL — the caller owns it and must revoke it when replacing the set. */
++  imageUrl: string;
++  yaw: AutoCutoutAngle;
++}
++
++export function isAutoCutoutAngle(value: unknown): value is AutoCutoutAngle {
++  return (
++    typeof value === 'number' &&
++    Number.isFinite(value) &&
++    (AUTO_CUTOUT_ANGLES as readonly number[]).includes(value)
++  );
++}
++
++/**
++ * Copy an `ImageBitmap` into an object URL and close it. The bitmaps are transferred to this
++ * page, so leaving them open leaks GPU-backed memory with every option the shopper tries.
++ */
++export async function imageBitmapToObjectUrl(bitmap: ImageBitmap): Promise<string | null> {
++  try {
++    const canvas = document.createElement('canvas');
++    canvas.width = bitmap.width;
++    canvas.height = bitmap.height;
++    const context = canvas.getContext('2d');
++    if (!context) return null;
++    context.drawImage(bitmap, 0, 0);
++    const blob = await new Promise<Blob | null>((resolve) =>
++      canvas.toBlob(resolve, 'image/png'),
++    );
++    return blob ? URL.createObjectURL(blob) : null;
++  } catch (error) {
++    console.warn('[ov25-ui] could not prepare auto cutout thumbnail', error);
++    return null;
++  } finally {
++    try {
++      bitmap.close();
++    } catch {
++      // Already closed, or closing is unsupported — nothing to release.
++    }
++  }
++}
++
++interface MaterialSelectionState {
++  options?: Array<{
++    id: string;
++    name: string;
++    groups: Array<{ id: string; selections: Array<{ id: string; thumbnail?: string | null }> }>;
++  }>;
++  selectedSelections?: Array<{ optionId: string; groupId?: string; selectionId: string }>;
++}
++
++/**
++ * The shopper's current material, used for the gallery's material shot. Matches the first
++ * fabric/material-named option, which is the same rule the reference gallery uses — products
++ * without one simply get no material tile.
++ */
++export function materialThumbnailFromConfiguratorState(
++  state: MaterialSelectionState | null | undefined,
++): string | null {
++  const options = state?.options;
++  const selectedSelections = state?.selectedSelections;
++  if (!Array.isArray(options) || !Array.isArray(selectedSelections)) return null;
++
++  const materialOption = options.find((option) => /fabric|material/i.test(option?.name ?? ''));
++  if (!materialOption) return null;
++
++  const selected = selectedSelections.find(
++    (selection) => String(selection.optionId) === String(materialOption.id),
++  );
++  if (!selected) return null;
++
++  const groups = Array.isArray(materialOption.groups) ? materialOption.groups : [];
++  const group =
++    groups.find((candidate) => String(candidate.id) === String(selected.groupId)) ?? null;
++  const searchIn = group ? [group] : groups;
++  for (const candidate of searchIn) {
++    const match = (candidate.selections || []).find(
++      (selection) => String(selection.id) === String(selected.selectionId),
++    );
++    if (match?.thumbnail) return match.thumbnail;
++  }
++  return null;
++}
++
++/**
++ * Lets a gallery tile be recognised as a cutout and resolved back to the angle it was rendered at.
++ */
++export function autoCutoutAngleByImageUrl(
++  cutouts: readonly AutoCutoutThumbnail[],
++): Map<string, AutoCutoutAngle> {
++  return new Map(cutouts.map(({ imageUrl, yaw }) => [imageUrl, yaw]));
++}
++
++/**
++ * The gallery tiles contributed by auto cutouts, split so the caller can place them
++ * independently: the material shot leads the strip, but the cutouts sit *after* the 360 tile.
++ * Cutouts are only returned once the complete set has arrived, so the strip never shows a
++ * half-rendered product.
++ */
++export function composeAutoCutoutGalleryImages(options: {
++  enabled: boolean;
++  materialThumbnail: string | null;
++  cutouts: readonly AutoCutoutThumbnail[];
++}): { materialImages: string[]; cutoutImages: string[] } {
++  if (!options.enabled) return { materialImages: [], cutoutImages: [] };
++  const ordered = AUTO_CUTOUT_ANGLES.map(
++    (yaw) => options.cutouts.find((cutout) => cutout.yaw === yaw)?.imageUrl ?? null,
++  );
++  const complete = ordered.every((url): url is string => url !== null);
++  return {
++    materialImages: options.materialThumbnail ? [options.materialThumbnail] : [],
++    cutoutImages: complete ? (ordered as string[]) : [],
++  };
++}
++
++/** A laid-out gallery strip: the images in order, and the slot the 360 tile is spliced into. */
++export interface GalleryOrder<TImage> {
++  images: TImage[];
++  threeDIndex: number;
++  /**
++   * Which tile the strip should open on, as an index into the *spliced* strip (the one that
++   * includes the 360). Normally the 360 itself; with `deferThreeD` the first gallery image, so
++   * a real photograph renders before the viewer loads — never the material swatch, which tells
++   * the shopper nothing about the product.
++   */
++  initialIndex: number;
++}
++
++/**
++ * Lays out the gallery strip.
++ *
++ * With auto cutouts contributing tiles the order is fixed:
++ *   material shot -> first gallery image -> 360 -> cutouts -> remaining gallery images
++ * The 360 sits third so the shopper sees the configured material and a real photograph before
++ * the viewer, while the cutouts stay grouped together behind it.
++ *
++ * With no auto cutout tiles this is the plain gallery, and `deferThreeD` keeps its original
++ * meaning: push the 360 to second place so a still renders first.
++ *
++ * Three call sites (context, carousel, iframe poster) have to agree on this order — `galleryIndex`
++ * is an index into the spliced strip, so any disagreement silently selects the wrong image.
++ */
++export function composeGalleryOrder<TImage>(options: {
++  materialImages: readonly TImage[];
++  cutoutImages: readonly TImage[];
++  galleryImages: readonly TImage[];
++  deferThreeD: boolean;
++}): GalleryOrder<TImage> {
++  const { materialImages, cutoutImages, galleryImages, deferThreeD } = options;
++  // The material shot always leads, so the first gallery image sits just behind it — except
++  // when the product has no gallery images at all, where there is nothing to defer to.
++  const firstGalleryImageIndex = galleryImages.length > 0 ? materialImages.length : 0;
++
++  if (materialImages.length === 0 && cutoutImages.length === 0) {
++    const images = [...galleryImages];
++    const threeDIndex = deferThreeD && images.length > 0 ? 1 : 0;
++    return { images, threeDIndex, initialIndex: deferThreeD ? firstGalleryImageIndex : threeDIndex };
++  }
++  const lead = [...materialImages, ...galleryImages.slice(0, 1)];
++  return {
++    images: [...lead, ...cutoutImages, ...galleryImages.slice(1)],
++    threeDIndex: lead.length,
++    initialIndex: deferThreeD ? firstGalleryImageIndex : lead.length,
++  };
++}
+diff --git a/src/lib/sticky-layout-controller.ts b/src/lib/sticky-layout-controller.ts
+index b07e492..f02bbc3 100644
+--- a/src/lib/sticky-layout-controller.ts
++++ b/src/lib/sticky-layout-controller.ts
+@@ -13,11 +13,23 @@ export const STICKY_LAYOUT_CSS_PROPERTIES = {
+   top: '--ov25-sticky-top',
+   availableHeight: '--ov25-sticky-available-height',
+   optionHeaderHeight: '--ov25-sticky-option-header-height',
++  carouselHeight: '--ov25-sticky-carousel-height',
+   galleryBottom: '--ov25-sticky-gallery-bottom',
+   viewportWidth: '--ov25-sticky-viewport-width',
+ } as const;
+ 
+ export const DEFAULT_STICKY_GAP = 16;
++/** Must match the `--ov25-sticky-carousel-height` fallback in globals.css. */
++export const DEFAULT_STICKY_CAROUSEL_HEIGHT = 120;
++/**
++ * Ceiling for the measured carousel, as a fraction of the sticky available
++ * height. `stacked` renders a two-column grid of every image, so an unbounded
++ * measurement would subtract the whole viewport from the iframe slot and
++ * collapse the viewer. Past this the carousel scrolls, as it did before.
++ */
++export const STICKY_CAROUSEL_MAX_AVAILABLE_FRACTION = 0.5;
++/** id of the unclamped content root inside the carousel host's shadow root. */
++const STICKY_CAROUSEL_CONTENT_ID = 'ov25-product-carousel';
+ export const STICKY_OPTION_HEADER_PINNED_ATTRIBUTE = 'data-ov25-sticky-pinned';
+ 
+ type StickyLayoutCssProperty =
+@@ -28,6 +40,7 @@ type StickyLayoutOwnedCssVariables = Record<StickyLayoutCssProperty, string>;
+ // Omit the dynamic runtime ones
+ export type StickyLayoutCssVariables = Omit<
+   StickyLayoutOwnedCssVariables,
++  | (typeof STICKY_LAYOUT_CSS_PROPERTIES)['carouselHeight']
+   | (typeof STICKY_LAYOUT_CSS_PROPERTIES)['galleryBottom']
+   | (typeof STICKY_LAYOUT_CSS_PROPERTIES)['sizingHeaderOffset']
+   | (typeof STICKY_LAYOUT_CSS_PROPERTIES)['viewportWidth']
+@@ -354,6 +367,46 @@ function measureElementHeight(
+   return normalizePixelValue(element.getBoundingClientRect().height);
+ }
+ 
++/**
++ * Height the carousel strip actually wants.
++ *
++ * The host clamps itself with `max-height: var(--ov25-sticky-carousel-height)`
++ * and scrolls, so its own box always reports the current cap and can never be
++ * used to derive a new one. The portaled content inside its shadow root is
++ * unclamped, so measure that instead — otherwise the measurement is circular.
++ */
++function measureCarouselContentHeight(
++  carouselHost: HTMLElement | null,
++  readStyle: StickyStyleReader,
++): number {
++  if (!carouselHost?.isConnected || carouselHost.hasAttribute('hidden')) return 0;
++  if (hasHiddenState(carouselHost) || hasNonRenderedStyle(carouselHost, readStyle)) {
++    return 0;
++  }
++  const content =
++    carouselHost.shadowRoot?.getElementById(STICKY_CAROUSEL_CONTENT_ID) ?? null;
++  if (!content) return 0;
++  return normalizePixelValue(content.getBoundingClientRect().height);
++}
++
++/**
++ * Clamps the measured strip to the space the gallery can spare. The +1px keeps
++ * the cap just clear of the content: landing exactly on it leaves the overflow
++ * state ambiguous, and the scrollbar appearing narrows the strip, which changes
++ * the thumbnails' height and can oscillate between two measurements.
++ */
++function resolveStickyCarouselHeight(
++  contentHeight: number,
++  availableHeight: number,
++): number {
++  if (contentHeight <= 0) return DEFAULT_STICKY_CAROUSEL_HEIGHT;
++  const ceiling =
++    availableHeight > 0
++      ? availableHeight * STICKY_CAROUSEL_MAX_AVAILABLE_FRACTION
++      : Number.POSITIVE_INFINITY;
++  return normalizePixelValue(Math.min(contentHeight + 1, ceiling));
++}
++
+ export type StickyBlockingReason =
+   | 'vertical-scroll-container'
+   | 'vertical-overflow-clipping'
+@@ -1079,6 +1132,7 @@ export interface StickyLayoutSnapshot {
+   topGap: number;
+   bottomGap: number;
+   optionHeaderHeight: number;
++  carouselHeight: number;
+   headerElements: readonly Element[];
+   headerStatus: StickyHeaderStatus;
+   headerSource: StickyHeaderSource;
+@@ -1091,6 +1145,7 @@ export interface StickyLayoutControllerElements {
+   galleryHost?: HTMLElement | null;
+   variantsHost?: HTMLElement | null;
+   optionHeader?: HTMLElement | null;
++  carouselHost?: HTMLElement | null;
+ }
+ 
+ export interface StickyLayoutControllerOptions extends StickyLayoutControllerElements {
+@@ -1337,6 +1392,7 @@ function sameSnapshot(a: StickyLayoutSnapshot, b: StickyLayoutSnapshot): boolean
+     a.topGap === b.topGap &&
+     a.bottomGap === b.bottomGap &&
+     a.optionHeaderHeight === b.optionHeaderHeight &&
++    a.carouselHeight === b.carouselHeight &&
+     a.headerStatus === b.headerStatus &&
+     a.headerSource === b.headerSource &&
+     a.requiresBodyFallback === b.requiresBodyFallback &&
+@@ -1527,6 +1583,7 @@ export function createStickyLayoutController(
+   let galleryHost = options.galleryHost ?? null;
+   let variantsHost = options.variantsHost ?? null;
+   let optionHeader = options.optionHeader ?? null;
++  let carouselHost = options.carouselHost ?? null;
+   const galleryFlowAnchorOwner = {};
+   let originalGalleryTargetParent = retainedStickyGalleryParent(galleryHost);
+   let galleryFlowAnchor = bindStickyGalleryFlowOrigin(
+@@ -1561,6 +1618,7 @@ export function createStickyLayoutController(
+     topGap: DEFAULT_STICKY_GAP,
+     bottomGap: DEFAULT_STICKY_GAP,
+     optionHeaderHeight: 0,
++    carouselHeight: DEFAULT_STICKY_CAROUSEL_HEIGHT,
+     headerElements: [],
+     headerStatus: 'not-found',
+     headerSource: 'auto',
+@@ -2189,6 +2247,7 @@ export function createStickyLayoutController(
+       galleryHost,
+       variantsHost,
+       optionHeader,
++      carouselHost,
+       ...ancestorState.observedBlockers,
+       ancestorState.boundary,
+       originalGalleryTargetParent,
+@@ -2199,6 +2258,12 @@ export function createStickyLayoutController(
+       topGap: gaps.top,
+       bottomGap: gaps.bottom,
+       optionHeaderHeight: measureElementHeight(optionHeader, readStyle),
++      carouselHeight: resolveStickyCarouselHeight(
++        measureCarouselContentHeight(carouselHost, readStyle),
++        normalizePixelValue(
++          (windowObject.innerHeight ?? 0) - sizingHeaderOffset - gaps.top - gaps.bottom,
++        ),
++      ),
+       headerElements: [...headerResolution.elements],
+       headerStatus: headerResolution.status,
+       headerSource: headerResolution.source,
+@@ -2220,8 +2285,13 @@ export function createStickyLayoutController(
+       [STICKY_LAYOUT_CSS_PROPERTIES.viewportWidth]: toPixels(
+         documentObject.documentElement.clientWidth,
+       ),
++      [STICKY_LAYOUT_CSS_PROPERTIES.carouselHeight]: toPixels(nextSnapshot.carouselHeight),
+     };
+-    for (const host of uniqueElements([galleryHost, variantsHost])) {
++    // The carousel host is itself a shadow host, so globals' own `:host` rule
++    // redefines --ov25-sticky-carousel-height *on* that element and beats the
++    // value it would otherwise inherit from the gallery. It has to be written
++    // directly or the measurement never reaches the max-height that uses it.
++    for (const host of uniqueElements([galleryHost, variantsHost, carouselHost])) {
+       applyHostVariables(host, variables);
+     }
+ 
+@@ -2362,6 +2432,10 @@ export function createStickyLayoutController(
+       clearPinnedOptionHeaders();
+       optionHeader = elements.optionHeader ?? null;
+     }
++    if ('carouselHost' in elements && elements.carouselHost !== carouselHost) {
++      restoreHostVariables(carouselHost);
++      carouselHost = elements.carouselHost ?? null;
++    }
+     scheduleMeasure();
+   };
+ 
+@@ -2396,6 +2470,7 @@ export function createStickyLayoutController(
+     );
+     restoreHostVariables(galleryHost);
+     if (variantsHost !== galleryHost) restoreHostVariables(variantsHost);
++    restoreHostVariables(carouselHost);
+   };
+ 
+   return {
+diff --git a/src/lib/strings/string-keys.ts b/src/lib/strings/string-keys.ts
+index 07be9cd..8076ad3 100644
+--- a/src/lib/strings/string-keys.ts
++++ b/src/lib/strings/string-keys.ts
+@@ -65,7 +65,15 @@ export const STRING_REPLACEMENT_DEFINITIONS: StringReplacements = [
+   { key: 'selectionDetailsAddToSwatchbook', label: 'Selection details add swatch button', defaultTemplate: 'Add to swatchbook', interpolationValues: [] },
+   { key: 'selectionDetailsRemoveFromSwatchbook', label: 'Selection details remove swatch button', defaultTemplate: 'Remove from swatchbook', interpolationValues: [] },
+   { key: 'selectionDetailsClose', label: 'Selection details close label', defaultTemplate: 'Close', interpolationValues: [] },
+-  { key: 'optionHeader', label: 'Option header', defaultTemplate: '${OPTION_NAME}', interpolationValues: [{ name: 'OPTION_NAME', description: 'Option display name.' }] },
++  {
++    key: 'optionHeader',
++    label: 'Option header',
++    defaultTemplate: '${OPTION_NAME}',
++    interpolationValues: [
++      { name: 'OPTION_NAME', description: 'Option display name.' },
++      { name: 'SELECTED_VARIANT_NAME', description: 'Name of the currently selected variant for this option. Empty until a selection resolves.' },
++    ],
++  },
+   {
+     key: 'groupHeader',
+     label: 'Group header',
+diff --git a/src/types/inject-config.ts b/src/types/inject-config.ts
+index 669db05..1591e69 100644
+--- a/src/types/inject-config.ts
++++ b/src/types/inject-config.ts
+@@ -41,6 +41,11 @@ export type CarouselDisplayMode = 'none' | 'carousel' | 'stacked';
+ export type CarouselConfig = ResponsiveValue<CarouselDisplayMode> & {
+   /** Max images to show in carousel; excess are cut. Responsive: { desktop, mobile }. */
+   maxImages?: number | ResponsiveValue<number>;
++  /**
++   * Prepend live renders of the shopper's current configuration to the gallery: a material shot
++   * plus four product cutouts, refreshed whenever the configuration settles. Angles are fixed.
++   */
++  autoCutouts?: boolean;
+ };
+ 
+ export type ConfiguratorDisplayMode =
+@@ -360,6 +365,7 @@ export interface LegacyInjectConfiguratorOptions {
+ 
+   carouselDisplayMode?: CarouselDisplayMode;
+   carouselDisplayModeMobile?: CarouselDisplayMode;
++  carouselAutoCutouts?: boolean;
+ 
+   configuratorDisplayMode?: 'inline' | 'inline-sticky' | 'sheet' | 'modal' | 'variants-only-sheet' | 'inline-sheet';
+   configuratorDisplayModeMobile?: 'inline' | 'inline-sticky' | 'drawer' | 'modal' | 'variants-only-sheet';
+@@ -446,6 +452,7 @@ export interface NormalizedInjectConfig {
+   carouselDisplayModeMobile: CarouselDisplayMode;
+   carouselMaxImagesDesktop?: number;
+   carouselMaxImagesMobile?: number;
++  carouselAutoCutouts: boolean;
+ 
+   configuratorDisplayMode: 'inline' | 'inline-sticky' | 'sheet' | 'modal' | 'variants-only-sheet' | 'inline-sheet';
+   configuratorDisplayModeMobile: 'inline' | 'inline-sticky' | 'drawer' | 'modal' | 'variants-only-sheet';
+@@ -626,6 +633,10 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
+   const maxImagesRaw = carousel?.maxImages;
+   const carouselMaxImagesDesktop = typeof maxImagesRaw === 'number' ? maxImagesRaw : (typeof maxImagesRaw === 'object' && maxImagesRaw ? maxImagesRaw.desktop : undefined);
+   const carouselMaxImagesMobile = typeof maxImagesRaw === 'number' ? maxImagesRaw : (typeof maxImagesRaw === 'object' && maxImagesRaw ? maxImagesRaw.mobile ?? maxImagesRaw.desktop : undefined);
++  // Snap2 has its own embed and does not support live angle thumbnails.
++  const carouselAutoCutouts = isSnap2Inject
++    ? false
++    : (carousel?.autoCutouts ?? c.carouselAutoCutouts ?? false);
+ 
+   const requestedConfigDesktop = configurator?.displayMode?.desktop ?? c.configuratorDisplayMode ?? 'sheet';
+   const requestedConfigMobile =
+@@ -757,6 +768,7 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
+     carouselDisplayModeMobile: carouselDisplayModeMobileResolved,
+     carouselMaxImagesDesktop,
+     carouselMaxImagesMobile,
++    carouselAutoCutouts,
+     configuratorDisplayMode: configDesktop,
+     configuratorDisplayModeMobile: configMobile,
+     configuratorTriggerStyle: triggerDesktop,
+diff --git a/src/utils/configurator-utils.ts b/src/utils/configurator-utils.ts
+index 7a40196..451ab93 100644
+--- a/src/utils/configurator-utils.ts
++++ b/src/utils/configurator-utils.ts
+@@ -3,6 +3,12 @@ import { BED_IFRAME_ALLOW_NONE_QUERY_KEY } from '../lib/config/bed-embed-query.j
+ import { findIframeWithUniqueId } from './configurator-dom-queries.js';
+ import { getConfiguratorBaseUrl } from './configurator-origin.js';
+ import type { ModuleProductImageUrls } from './module-product-image-srcset.js';
++import {
++  AUTO_CUTOUT_ANGLES,
++  AUTO_CUTOUT_ANGLES_QUERY_KEY,
++  AUTO_CUTOUT_SIZE,
++  AUTO_CUTOUT_SIZE_QUERY_KEY,
++} from '../lib/auto-cutouts.js';
+ 
+ export const DINING_IFRAME_SHOW_ATTACHMENT_POINTS_QUERY_KEY = 'showAttachmentPoints';
+ export const OV25_IFRAME_HIDE_GESTURE_HINT_QUERY_KEY = 'hideGestureHint';
+@@ -451,6 +457,7 @@ export const getIframeSrc = (
+   bedAllowNone?: string | null,
+   diningShowAttachmentPoints?: boolean | null,
+   hideGestureHint?: boolean | null,
++  autoCutouts?: boolean | null,
+ ): string => {
+   const baseUrl = getConfiguratorBaseUrl();
+ 
+@@ -498,6 +505,18 @@ export const getIframeSrc = (
+     merged.delete(OV25_IFRAME_HIDE_GESTURE_HINT_QUERY_KEY);
+   }
+ 
++  // Live angle thumbnails are off unless asked for, and the angles are not configurable — a
++  // host that wants its own set can still pass `cutoutAngles` on `productLink`, which is merged
++  // first and therefore wins.
++  if (autoCutouts === true) {
++    if (!merged.has(AUTO_CUTOUT_ANGLES_QUERY_KEY)) {
++      merged.set(AUTO_CUTOUT_ANGLES_QUERY_KEY, AUTO_CUTOUT_ANGLES.join(','));
++    }
++    if (!merged.has(AUTO_CUTOUT_SIZE_QUERY_KEY)) {
++      merged.set(AUTO_CUTOUT_SIZE_QUERY_KEY, String(AUTO_CUTOUT_SIZE));
++    }
++  }
++
+   const queryString = merged.toString();
+   const linkWithParams = queryString ? `${pathPart}?${queryString}` : pathPart;
+ 
+diff --git a/src/utils/inject.tsx b/src/utils/inject.tsx
+index c78517f..f959e25 100644
+--- a/src/utils/inject.tsx
++++ b/src/utils/inject.tsx
+@@ -283,6 +283,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
+     carouselDisplayModeMobile,
+     carouselMaxImagesDesktop,
+     carouselMaxImagesMobile,
++    carouselAutoCutouts,
+     configuratorDisplayMode,
+     configuratorDisplayModeMobile,
+     configuratorTriggerStyle,
+@@ -1056,6 +1057,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
+         carouselDisplayModeMobile={carouselDisplayModeMobile}
+         carouselMaxImagesDesktop={carouselMaxImagesDesktop}
+         carouselMaxImagesMobile={carouselMaxImagesMobile}
++        carouselAutoCutouts={carouselAutoCutouts}
+         showCarousel={showCarousel}
+         hasConfigureButton={!!configureButtonSelector && !useSimpleVariantsSelector}
+         uniqueId={uniqueId}
+diff --git a/test/e2e/single-no-variants.test.ts b/test/e2e/single-no-variants.test.ts
+index 0d08722..1601887 100644
+--- a/test/e2e/single-no-variants.test.ts
++++ b/test/e2e/single-no-variants.test.ts
+@@ -68,42 +68,15 @@ visualTest.use({ viewport: { width: 1280, height: 800 } });
+ 
+ visualTest.describe('Windrush - Loveseat visual render', () => {
+ 
+-    visualTest('renders the initial model', async ({ page }) => {
++    // The configurator replaced its gesture hint with an idle auto-rotate, so there is no hint to
++    // wait for and the model never holds still for a pixel baseline. Readiness comes from the
++    // `OV25 3D Loaded` console signal in loadFixture plus a settled canvas size; the dimensions
++    // below are the product-specific assertions worth keeping.
++    visualTest('loads the model and reports its dimensions', async ({ page }) => {
+         visualTest.setTimeout(240000);
+-        const { iframeElement, iframe } = await loadFixture(page);
++        const { iframe } = await loadFixture(page);
+         await waitForStableResponsiveCanvas(page);
+ 
+-        const gestureHint = iframe.locator('#ov25-gesture-hint');
+-        await expect(gestureHint).toBeVisible({ timeout: CANVAS_READY_TIMEOUT });
+-
+-        const clickTarget = await iframeElement.boundingBox();
+-        expect(clickTarget).not.toBeNull();
+-        if (!clickTarget) throw new Error('Configurator iframe has no visible bounding box');
+-        await page.mouse.click(
+-            clickTarget.x + clickTarget.width / 2,
+-            clickTarget.y + clickTarget.height / 2,
+-        );
+-
+-        await expect(gestureHint).not.toBeVisible({ timeout: RUNTIME_TIMEOUT });
+-        await waitForStableResponsiveCanvas(page);
+-
+-        // Keep Next.js development tooling out of the product-rendering baseline.
+-        const nextDevPortal = iframe.locator('nextjs-portal');
+-        if (await nextDevPortal.count() === 1) {
+-            await nextDevPortal.evaluate((element) => {
+-                (element as HTMLElement).style.display = 'none';
+-            });
+-        }
+-
+-        const screenshotTarget = await iframeElement.boundingBox();
+-        expect(screenshotTarget).not.toBeNull();
+-        if (!screenshotTarget) throw new Error('Configurator iframe has no screenshot region');
+-        const renderedIframeRegion = await page.screenshot({
+-            animations: 'disabled',
+-            clip: screenshotTarget,
+-        });
+-        expect(renderedIframeRegion).toMatchSnapshot('single-no-variants-initial-canvas.png', { maxDiffPixelRatio: 0.01 });
+-
+         const dimensionsButton = page.locator('#ov25-desktop-dimensions-toggle-button');
+         await expect(dimensionsButton).toBeVisible({ timeout: RUNTIME_TIMEOUT });
+         await dimensionsButton.click({ timeout: RUNTIME_TIMEOUT });
+diff --git a/test/e2e/single-no-variants.test.ts-snapshots/single-no-variants-initial-canvas-chromium-darwin.png b/test/e2e/single-no-variants.test.ts-snapshots/single-no-variants-initial-canvas-chromium-darwin.png
+deleted file mode 100644
+index 059d6de..0000000
+Binary files a/test/e2e/single-no-variants.test.ts-snapshots/single-no-variants-initial-canvas-chromium-darwin.png and /dev/null differ
+diff --git a/test/unit/auto-cutouts.test.ts b/test/unit/auto-cutouts.test.ts
+new file mode 100644
+index 0000000..a11bb96
+--- /dev/null
++++ b/test/unit/auto-cutouts.test.ts
+@@ -0,0 +1,356 @@
++import { afterEach, describe, expect, it } from 'vitest';
++import {
++  AUTO_CUTOUT_ANGLES,
++  AUTO_CUTOUT_SIZE,
++  autoCutoutAngleByImageUrl,
++  composeAutoCutoutGalleryImages,
++  composeGalleryOrder,
++  isAutoCutoutAngle,
++  materialThumbnailFromConfiguratorState,
++} from '../../src/lib/auto-cutouts';
++import {
++  normalizeInjectConfig,
++  type InjectConfiguratorOptions,
++} from '../../src/types/inject-config';
++import { getIframeSrc } from '../../src/utils/configurator-utils';
++
++function groupedConfig(
++  carousel?: InjectConfiguratorOptions['carousel'],
++  productLink = '58',
++): InjectConfiguratorOptions {
++  return {
++    apiKey: 'key',
++    productLink,
++    selectors: {},
++    callbacks: {
++      addToBasket: () => {},
++      buyNow: () => {},
++      buySwatches: () => {},
++    },
++    carousel,
++  };
++}
++
++const MATERIAL_STATE = {
++  options: [
++    {
++      id: 'opt-legs',
++      name: 'Legs',
++      groups: [{ id: 'g-legs', selections: [{ id: 'oak', thumbnail: 'legs/oak.webp' }] }],
++    },
++    {
++      id: 'opt-fabric',
++      name: 'Fabrics',
++      groups: [
++        {
++          id: 'g-weaves',
++          selections: [
++            { id: 'pearl', thumbnail: 'fabrics/pearl.webp' },
++            { id: 'indigo', thumbnail: 'fabrics/indigo.webp' },
++          ],
++        },
++      ],
++    },
++  ],
++  selectedSelections: [
++    { optionId: 'opt-legs', groupId: 'g-legs', selectionId: 'oak' },
++    { optionId: 'opt-fabric', groupId: 'g-weaves', selectionId: 'indigo' },
++  ],
++};
++
++describe('auto cutouts config contract', () => {
++  afterEach(() => {
++    window.history.replaceState({}, '', '/');
++  });
++
++  it('is off unless the grouped carousel flag asks for it', () => {
++    expect(normalizeInjectConfig(groupedConfig()).carouselAutoCutouts).toBe(false);
++    expect(
++      normalizeInjectConfig(groupedConfig({ desktop: 'carousel', autoCutouts: false }))
++        .carouselAutoCutouts,
++    ).toBe(false);
++    expect(
++      normalizeInjectConfig(groupedConfig({ desktop: 'carousel', autoCutouts: true }))
++        .carouselAutoCutouts,
++    ).toBe(true);
++  });
++
++  it('stays off for Snap2, which has its own embed', () => {
++    expect(
++      normalizeInjectConfig(
++        groupedConfig({ desktop: 'carousel', autoCutouts: true }, 'snap2/292'),
++      ).carouselAutoCutouts,
++    ).toBe(false);
++  });
++
++  it('adds the fixed angle set and size to the iframe URL when enabled', () => {
++    const url = new URL(getIframeSrc('key', '58', null, null, null, null, null, true));
++
++    expect(url.searchParams.get('cutoutAngles')).toBe('-45,0,-90,180');
++    expect(url.searchParams.get('cutoutSize')).toBe(String(AUTO_CUTOUT_SIZE));
++  });
++
++  it.each([false, undefined])('omits both params when %s', (autoCutouts) => {
++    const url = new URL(getIframeSrc('key', '58', null, null, null, null, null, autoCutouts));
++
++    expect(url.searchParams.has('cutoutAngles')).toBe(false);
++    expect(url.searchParams.has('cutoutSize')).toBe(false);
++  });
++
++  it('leaves an explicit productLink angle set alone', () => {
++    const url = new URL(
++      getIframeSrc('key', '58?cutoutAngles=0&cutoutSize=200', null, null, null, null, null, true),
++    );
++
++    expect(url.searchParams.get('cutoutAngles')).toBe('0');
++    expect(url.searchParams.get('cutoutSize')).toBe('200');
++  });
++});
++
++describe('auto cutout gallery composition', () => {
++  const cutouts = AUTO_CUTOUT_ANGLES.map((yaw) => ({ imageUrl: `blob:${yaw}`, yaw }));
++
++  it('contributes nothing while disabled', () => {
++    expect(
++      composeAutoCutoutGalleryImages({
++        enabled: false,
++        materialThumbnail: 'fabrics/indigo.webp',
++        cutouts,
++      }),
++    ).toEqual({ materialImages: [], cutoutImages: [] });
++  });
++
++  it('returns the material shot and the cutouts separately, in reference order', () => {
++    // They are split because they are not adjacent in the strip: the material shot leads and
++    // the cutouts sit behind the 360 tile.
++    expect(
++      composeAutoCutoutGalleryImages({
++        enabled: true,
++        materialThumbnail: 'fabrics/indigo.webp',
++        // Deliberately out of order: the configurator makes no ordering promise.
++        cutouts: [...cutouts].reverse(),
++      }),
++    ).toEqual({
++      materialImages: ['fabrics/indigo.webp'],
++      cutoutImages: ['blob:-45', 'blob:0', 'blob:-90', 'blob:180'],
++    });
++  });
++
++  it('holds the cutouts back until the whole set has arrived', () => {
++    expect(
++      composeAutoCutoutGalleryImages({
++        enabled: true,
++        materialThumbnail: 'fabrics/indigo.webp',
++        cutouts: cutouts.slice(0, 2),
++      }),
++    ).toEqual({ materialImages: ['fabrics/indigo.webp'], cutoutImages: [] });
++  });
++
++  it('works without a material shot', () => {
++    expect(
++      composeAutoCutoutGalleryImages({ enabled: true, materialThumbnail: null, cutouts }),
++    ).toEqual({
++      materialImages: [],
++      cutoutImages: ['blob:-45', 'blob:0', 'blob:-90', 'blob:180'],
++    });
++  });
++
++  describe('gallery order', () => {
++    const cutoutImages = ['cut:-45', 'cut:0', 'cut:-90', 'cut:180'];
++    const galleryImages = ['gal:1', 'gal:2', 'gal:3'];
++
++    it('puts the first gallery image between the material shot and the 360', () => {
++      expect(
++        composeGalleryOrder({
++          materialImages: ['material'],
++          cutoutImages,
++          galleryImages,
++          deferThreeD: false,
++        }),
++      ).toEqual({
++        images: ['material', 'gal:1', 'cut:-45', 'cut:0', 'cut:-90', 'cut:180', 'gal:2', 'gal:3'],
++        // The 360 is spliced in at this index, so the full strip reads:
++        // material, gal:1, 360, cutouts x4, remaining gallery images.
++        threeDIndex: 2,
++        initialIndex: 2,
++      });
++    });
++
++    it('keeps the same layout whether or not the 360 is deferred', () => {
++      // deferThreeD moves which tile opens, not where the 360 sits: at index 2 it already
++      // cannot land first.
++      const withDefer = composeGalleryOrder({
++        materialImages: ['material'],
++        cutoutImages,
++        galleryImages,
++        deferThreeD: true,
++      });
++      const withoutDefer = composeGalleryOrder({
++        materialImages: ['material'],
++        cutoutImages,
++        galleryImages,
++        deferThreeD: false,
++      });
++      expect(withDefer.images).toEqual(withoutDefer.images);
++      expect(withDefer.threeDIndex).toBe(withoutDefer.threeDIndex);
++    });
++
++    it('opens on the first gallery image when deferring, never the material shot', () => {
++      const { initialIndex, images } = composeGalleryOrder({
++        materialImages: ['material'],
++        cutoutImages,
++        galleryImages,
++        deferThreeD: true,
++      });
++      // Index 0 is the material swatch, which tells the shopper nothing about the product.
++      expect(initialIndex).toBe(1);
++      expect(images[initialIndex]).toBe('gal:1');
++    });
++
++    it('opens on the first gallery image when deferring without a material shot', () => {
++      const { initialIndex, images } = composeGalleryOrder({
++        materialImages: [],
++        cutoutImages,
++        galleryImages,
++        deferThreeD: true,
++      });
++      expect(initialIndex).toBe(0);
++      expect(images[initialIndex]).toBe('gal:1');
++    });
++
++    it('falls back to the material shot when deferring with no gallery images', () => {
++      // Nothing to defer to; opening on the 360 would defeat the point of deferring.
++      const { initialIndex, threeDIndex } = composeGalleryOrder({
++        materialImages: ['material'],
++        cutoutImages,
++        galleryImages: [],
++        deferThreeD: true,
++      });
++      expect(initialIndex).toBe(0);
++      expect(initialIndex).not.toBe(threeDIndex);
++    });
++
++    it('closes the gap when there is no material shot', () => {
++      expect(
++        composeGalleryOrder({
++          materialImages: [],
++          cutoutImages,
++          galleryImages,
++          deferThreeD: false,
++        }),
++      ).toEqual({
++        images: ['gal:1', 'cut:-45', 'cut:0', 'cut:-90', 'cut:180', 'gal:2', 'gal:3'],
++        threeDIndex: 1,
++        initialIndex: 1,
++      });
++    });
++
++    it('handles a product with no gallery images', () => {
++      expect(
++        composeGalleryOrder({
++          materialImages: ['material'],
++          cutoutImages,
++          galleryImages: [],
++          deferThreeD: false,
++        }),
++      ).toEqual({
++        images: ['material', 'cut:-45', 'cut:0', 'cut:-90', 'cut:180'],
++        threeDIndex: 1,
++        initialIndex: 1,
++      });
++    });
++
++    it('still leads with the material shot while the cutout set is incomplete', () => {
++      expect(
++        composeGalleryOrder({
++          materialImages: ['material'],
++          cutoutImages: [],
++          galleryImages,
++          deferThreeD: false,
++        }),
++      ).toEqual({
++        images: ['material', 'gal:1', 'gal:2', 'gal:3'],
++        threeDIndex: 2,
++        initialIndex: 2,
++      });
++    });
++
++    it('leaves the plain gallery untouched when auto cutouts contribute nothing', () => {
++      expect(
++        composeGalleryOrder({
++          materialImages: [],
++          cutoutImages: [],
++          galleryImages,
++          deferThreeD: false,
++        }),
++      ).toEqual({ images: galleryImages, threeDIndex: 0, initialIndex: 0 });
++    });
++
++    it('keeps deferThreeD pushing the 360 to second place without cutouts', () => {
++      expect(
++        composeGalleryOrder({
++          materialImages: [],
++          cutoutImages: [],
++          galleryImages,
++          deferThreeD: true,
++        }),
++      ).toEqual({ images: galleryImages, threeDIndex: 1, initialIndex: 0 });
++    });
++
++    it('keeps the 360 first for an empty gallery even when deferring', () => {
++      expect(
++        composeGalleryOrder({
++          materialImages: [],
++          cutoutImages: [],
++          galleryImages: [],
++          deferThreeD: true,
++        }),
++      ).toEqual({ images: [], threeDIndex: 0, initialIndex: 0 });
++    });
++  });
++
++  it('only accepts the angles it asked for', () => {
++    expect(isAutoCutoutAngle(-45)).toBe(true);
++    expect(isAutoCutoutAngle(45)).toBe(false);
++    expect(isAutoCutoutAngle(Number.NaN)).toBe(false);
++    expect(isAutoCutoutAngle('0')).toBe(false);
++  });
++});
++
++describe('material shot selection', () => {
++  it('reads the selected fabric thumbnail', () => {
++    expect(materialThumbnailFromConfiguratorState(MATERIAL_STATE)).toBe('fabrics/indigo.webp');
++  });
++
++  it('returns null when the product has no fabric or material option', () => {
++    expect(
++      materialThumbnailFromConfiguratorState({
++        options: [MATERIAL_STATE.options[0]],
++        selectedSelections: [MATERIAL_STATE.selectedSelections[0]],
++      }),
++    ).toBeNull();
++  });
++
++  it('returns null for missing or empty state', () => {
++    expect(materialThumbnailFromConfiguratorState(null)).toBeNull();
++    expect(materialThumbnailFromConfiguratorState(undefined)).toBeNull();
++    expect(materialThumbnailFromConfiguratorState({})).toBeNull();
++  });
++});
++
++describe('auto cutout angle lookup', () => {
++  it('resolves a tile back to the angle it was captured at', () => {
++    const cutouts = AUTO_CUTOUT_ANGLES.map((yaw) => ({ imageUrl: `blob:${yaw}`, yaw }));
++    const byUrl = autoCutoutAngleByImageUrl(cutouts);
++
++    expect(byUrl.get('blob:-45')).toBe(-45);
++    expect(byUrl.get('blob:180')).toBe(180);
++    // The material shot and the shop's own photography are stills, not angles.
++    expect(byUrl.has('fabrics/indigo.webp')).toBe(false);
++    expect(byUrl.size).toBe(AUTO_CUTOUT_ANGLES.length);
++  });
++
++  it('is empty before any set has arrived', () => {
++    expect(autoCutoutAngleByImageUrl([]).size).toBe(0);
++  });
++});
+diff --git a/test/unit/configurator-setup-auto-cutouts.test.ts b/test/unit/configurator-setup-auto-cutouts.test.ts
+new file mode 100644
+index 0000000..f3ac67e
+--- /dev/null
++++ b/test/unit/configurator-setup-auto-cutouts.test.ts
+@@ -0,0 +1,47 @@
++import { describe, expect, it } from 'vitest';
++import {
++  buildFormStateFromInitialPayload,
++  type ConfiguratorSetupPayload,
++} from '../../setup/src/components/ConfiguratorSetup/initial-config-from-payload';
++import { buildSerializableConfig } from '../../setup/src/components/ConfiguratorSetup/serialize-config';
++import { DEFAULT_TYPE_SETTINGS } from '../../setup/src/components/ConfiguratorSetup/types';
++
++describe('ConfiguratorSetup auto cutouts toggle', () => {
++  it('defaults to off', () => {
++    expect(DEFAULT_TYPE_SETTINGS.standard.carousel.autoCutouts).toBe(false);
++    expect(
++      buildSerializableConfig('standard', DEFAULT_TYPE_SETTINGS.standard).carousel?.autoCutouts,
++    ).toBeUndefined();
++  });
++
++  it('serializes the flag into the carousel config when switched on', () => {
++    const settings = {
++      ...DEFAULT_TYPE_SETTINGS.standard,
++      carousel: { ...DEFAULT_TYPE_SETTINGS.standard.carousel, autoCutouts: true },
++    };
++
++    expect(buildSerializableConfig('standard', settings).carousel?.autoCutouts).toBe(true);
++  });
++
++  it('round-trips a saved payload back into the form', () => {
++    const payload = {
++      standard: {
++        carousel: { desktop: 'carousel', mobile: 'carousel', autoCutouts: true },
++      },
++    } as unknown as Partial<ConfiguratorSetupPayload>;
++
++    const state = buildFormStateFromInitialPayload(payload);
++
++    expect(state.typeSettings.standard.carousel.autoCutouts).toBe(true);
++  });
++
++  it('leaves a legacy payload without the flag switched off', () => {
++    const payload = {
++      standard: { carousel: { desktop: 'carousel', mobile: 'carousel' } },
++    } as unknown as Partial<ConfiguratorSetupPayload>;
++
++    const state = buildFormStateFromInitialPayload(payload);
++
++    expect(state.typeSettings.standard.carousel.autoCutouts).toBe(false);
++  });
++});
+diff --git a/test/unit/option-header-selected-variant.test.ts b/test/unit/option-header-selected-variant.test.ts
+new file mode 100644
+index 0000000..e41b1a0
+--- /dev/null
++++ b/test/unit/option-header-selected-variant.test.ts
+@@ -0,0 +1,55 @@
++import { describe, expect, it } from 'vitest';
++import { resolveStringReplacement } from '../../src/lib/strings/resolve-string-replacement';
++import { STRING_REPLACEMENT_DEFINITIONS } from '../../src/lib/strings/string-keys';
++
++const optionHeader = () => {
++  const def = STRING_REPLACEMENT_DEFINITIONS.find((d) => d.key === 'optionHeader');
++  if (!def) throw new Error('optionHeader definition missing');
++  return def;
++};
++
++describe('optionHeader SELECTED_VARIANT_NAME', () => {
++  it('exposes the token so the setup editor offers it', () => {
++    const names = optionHeader().interpolationValues.map((iv) => iv.name);
++    expect(names).toContain('OPTION_NAME');
++    expect(names).toContain('SELECTED_VARIANT_NAME');
++  });
++
++  it('keeps ${OPTION_NAME} as the default template so existing configs are unchanged', () => {
++    expect(optionHeader().defaultTemplate).toBe('${OPTION_NAME}');
++  });
++
++  it('interpolates the selected variant alongside the option name', () => {
++    const result = resolveStringReplacement({
++      fallback: 'Fabrics',
++      rules: [{ template: '${OPTION_NAME} | ${SELECTED_VARIANT_NAME}' }],
++      vars: { OPTION_NAME: 'Fabrics', SELECTED_VARIANT_NAME: 'Zelda Oyster' },
++    });
++    expect(result).toBe('Fabrics | Zelda Oyster');
++  });
++
++  // Nothing is selected on first paint, and the interpolator turns an absent
++  // var into ''. A template with a separator therefore renders a dangling
++  // "Fabrics | " until the selection resolves — documented, not a bug.
++  it('renders an empty string for the token before a selection resolves', () => {
++    const result = resolveStringReplacement({
++      fallback: 'Fabrics',
++      rules: [{ template: '${OPTION_NAME} | ${SELECTED_VARIANT_NAME}' }],
++      vars: { OPTION_NAME: 'Fabrics', SELECTED_VARIANT_NAME: '' },
++    });
++    expect(result).toBe('Fabrics | ');
++  });
++
++  it('can drive a trigger rule, so one option can be styled differently', () => {
++    const rules = [
++      { template: '${OPTION_NAME}' },
++      { trigger: { name: 'SELECTED_VARIANT_NAME', value: 'none' }, template: 'Choose a ${OPTION_NAME}' },
++    ];
++    expect(
++      resolveStringReplacement({ fallback: 'x', rules, vars: { OPTION_NAME: 'Legs', SELECTED_VARIANT_NAME: 'None' } })
++    ).toBe('Choose a Legs');
++    expect(
++      resolveStringReplacement({ fallback: 'x', rules, vars: { OPTION_NAME: 'Legs', SELECTED_VARIANT_NAME: 'Oak' } })
++    ).toBe('Legs');
++  });
++});
+diff --git a/test/unit/product-carousel.test.tsx b/test/unit/product-carousel.test.tsx
+index 2a1ab21..1e99f5c 100644
+--- a/test/unit/product-carousel.test.tsx
++++ b/test/unit/product-carousel.test.tsx
+@@ -364,6 +364,63 @@ describe('ProductCarousel', () => {
+     unmount();
+   });
+ 
++  it('labels every tile kind with stable styling hooks in both layouts', () => {
++    // Merchant cssString has no other way to tell auto cutout tiles from gallery photos:
++    // they share .ov25-gallery-image-button, and their position shifts with the material shot.
++    const ctx = carouselContext as typeof carouselContext & Record<string, unknown>;
++    const cutouts = ['blob:-45', 'blob:0', 'blob:-90', 'blob:180'];
++    Object.assign(ctx, {
++      carouselAutoCutouts: true,
++      autoCutoutMaterialImages: ['/material.webp'],
++      autoCutoutImages: cutouts,
++      autoCutoutAngleByImage: new Map(cutouts.map((url) => [url, Number(url.slice(5))])),
++      selectAutoCutoutAngle: vi.fn(),
++      // material, first image, then the 360 — see composeGalleryOrder.
++      galleryIndexToUse: 2,
++      deferThreeD: true,
++    });
++
++    const kindsIn = (buttons: Element[]) =>
++      buttons.map((b) => {
++        const el = b as HTMLElement;
++        return el.dataset.ov25CutoutYaw
++          ? `${el.dataset.ov25GalleryTile}:${el.dataset.ov25CutoutYaw}`
++          : el.dataset.ov25GalleryTile;
++      });
++    const expected = [
++      'material', 'image', '360',
++      'cutout:-45', 'cutout:0', 'cutout:-90', 'cutout:180',
++      'image',
++    ];
++
++    try {
++      const { container, rerender } = render(<ProductCarousel />);
++      expect(kindsIn(getThumbnailButtons(container))).toEqual(expected);
++
++      carouselContext.carouselLayout = 'stacked';
++      rerender(<ProductCarousel />);
++      expect(
++        kindsIn(Array.from(container.querySelectorAll('#ov25-product-carousel-controls button'))),
++      ).toEqual(expected);
++    } finally {
++      for (const key of [
++        'carouselAutoCutouts',
++        'autoCutoutMaterialImages',
++        'autoCutoutImages',
++        'autoCutoutAngleByImage',
++        'selectAutoCutoutAngle',
++      ]) {
++        delete ctx[key];
++      }
++    }
++  });
++
++  it('marks ordinary gallery photos as image tiles when auto cutouts are off', () => {
++    const { container } = render(<ProductCarousel />);
++    const kinds = getThumbnailButtons(container).map((b) => b.dataset.ov25GalleryTile);
++    expect(kinds).toEqual(['360', 'image', 'image']);
++  });
++
+   it('switches between viewport-specific none and carousel modes without changing hook order', () => {
+     carouselContext.carouselLayout = 'none';
+     carouselContext.carouselLayoutMobile = 'carousel';
+diff --git a/test/unit/sticky-carousel-height.test.ts b/test/unit/sticky-carousel-height.test.ts
+new file mode 100644
+index 0000000..834f413
+--- /dev/null
++++ b/test/unit/sticky-carousel-height.test.ts
+@@ -0,0 +1,144 @@
++import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
++import {
++  createStickyLayoutController,
++  DEFAULT_STICKY_CAROUSEL_HEIGHT,
++  STICKY_CAROUSEL_MAX_AVAILABLE_FRACTION,
++} from '../../src/lib/sticky-layout-controller';
++
++const CAROUSEL_VAR = '--ov25-sticky-carousel-height';
++
++function domRect(top: number, height: number, width = 1200, left = 0): DOMRect {
++  return {
++    x: left, y: top, top, left, width, height,
++    right: left + width, bottom: top + height, toJSON: () => ({}),
++  } as DOMRect;
++}
++
++function setRect(element: Element, top: number, height: number, width = 1200, left = 0) {
++  return vi.spyOn(element, 'getBoundingClientRect').mockReturnValue(domRect(top, height, width, left));
++}
++
++class ObserverMock {
++  readonly observe = vi.fn();
++  readonly unobserve = vi.fn();
++  readonly disconnect = vi.fn();
++  readonly takeRecords = vi.fn(() => []);
++  constructor(readonly callback: unknown) {}
++}
++
++describe('sticky carousel height measurement', () => {
++  let frames: Map<number, FrameRequestCallback>;
++  let nextFrameId: number;
++
++  beforeEach(() => {
++    document.body.innerHTML = '';
++    frames = new Map();
++    nextFrameId = 1;
++    Object.defineProperty(window, 'requestAnimationFrame', {
++      configurable: true,
++      value: vi.fn((cb: FrameRequestCallback) => { const id = nextFrameId++; frames.set(id, cb); return id; }),
++    });
++    Object.defineProperty(window, 'cancelAnimationFrame', {
++      configurable: true, value: vi.fn((id: number) => frames.delete(id)),
++    });
++    Object.defineProperty(window, 'ResizeObserver', { configurable: true, value: ObserverMock });
++    Object.defineProperty(window, 'MutationObserver', { configurable: true, value: ObserverMock });
++    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 800 });
++  });
++
++  afterEach(() => {
++    vi.restoreAllMocks();
++    delete (window as Window & { ResizeObserver?: unknown }).ResizeObserver;
++    delete (window as Window & { MutationObserver?: unknown }).MutationObserver;
++    document.body.innerHTML = '';
++  });
++
++  function flushFrame() {
++    const pending = [...frames.entries()];
++    frames.clear();
++    for (const [, cb] of pending) cb(performance.now());
++  }
++
++  /** Mirrors production: the carousel host is itself an open shadow host whose
++   *  content root is the thing that carries the real, unclamped height. */
++  function installLayout(contentHeight: number | null, clampedHostHeight = 120) {
++    document.body.innerHTML = `
++      <section id="product">
++        <div id="gallery"></div>
++        <div id="carousel"></div>
++        <div id="variants"></div>
++      </section>
++    `;
++    const gallery = document.getElementById('gallery')!;
++    const variants = document.getElementById('variants')!;
++    const carousel = document.getElementById('carousel')! as HTMLElement;
++    setRect(gallery, 100, 400, 520, 80);
++    setRect(variants, 100, 700, 520, 640);
++    // The host reports its clamped box — using it would be circular.
++    setRect(carousel, 520, clampedHostHeight, 520, 80);
++
++    if (contentHeight !== null) {
++      const shadow = carousel.attachShadow({ mode: 'open' });
++      const content = document.createElement('div');
++      content.id = 'ov25-product-carousel';
++      shadow.appendChild(content);
++      setRect(content, 520, contentHeight, 520, 80);
++    }
++    return { gallery, variants, carousel };
++  }
++
++  function run(layout: ReturnType<typeof installLayout>) {
++    const controller = createStickyLayoutController({
++      document,
++      galleryHost: layout.gallery,
++      variantsHost: layout.variants,
++      carouselHost: layout.carousel,
++      onDiagnostic: () => {},
++    });
++    controller.start();
++    flushFrame();
++    return controller;
++  }
++
++  it('measures the unclamped content, not the clamped host box', () => {
++    const layout = installLayout(169, 120);
++    const controller = run(layout);
++    // 169 content + 1px clearance — never the 120px the host box reports.
++    expect(controller.getSnapshot().carouselHeight).toBe(170);
++    expect(layout.gallery.style.getPropertyValue(CAROUSEL_VAR)).toBe('170px');
++    controller.destroy();
++  });
++
++  it('writes the variable onto the carousel host itself', () => {
++    // globals.css sets this var in its own `:host` block, which lands ON the
++    // carousel element and beats inheritance from the gallery. Writing it to
++    // an ancestor alone would never reach the max-height that consumes it.
++    const layout = installLayout(169);
++    const controller = run(layout);
++    expect(layout.carousel.style.getPropertyValue(CAROUSEL_VAR)).toBe('170px');
++    controller.destroy();
++  });
++
++  it('clamps a stacked grid to half the available height', () => {
++    // innerHeight 800 - 16 top - 16 bottom = 768 available.
++    const available = 800 - 16 - 16;
++    const ceiling = available * STICKY_CAROUSEL_MAX_AVAILABLE_FRACTION;
++    const controller = run(installLayout(2000));
++    expect(controller.getSnapshot().carouselHeight).toBe(ceiling);
++    controller.destroy();
++  });
++
++  it('falls back to the globals.css default when there is no carousel content', () => {
++    const controller = run(installLayout(null));
++    expect(controller.getSnapshot().carouselHeight).toBe(DEFAULT_STICKY_CAROUSEL_HEIGHT);
++    controller.destroy();
++  });
++
++  it('restores the host variable on destroy', () => {
++    const layout = installLayout(169);
++    const controller = run(layout);
++    expect(layout.carousel.style.getPropertyValue(CAROUSEL_VAR)).toBe('170px');
++    controller.destroy();
++    expect(layout.carousel.style.getPropertyValue(CAROUSEL_VAR)).toBe('');
++  });
++});
