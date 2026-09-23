@@ -68,41 +68,14 @@ visualTest.use({ viewport: { width: 1280, height: 800 } });
 
 visualTest.describe('Windrush - Loveseat visual render', () => {
 
-    visualTest('renders the initial model', async ({ page }) => {
+    // The configurator replaced its gesture hint with an idle auto-rotate, so there is no hint to
+    // wait for and the model never holds still for a pixel baseline. Readiness comes from the
+    // `OV25 3D Loaded` console signal in loadFixture plus a settled canvas size; the dimensions
+    // below are the product-specific assertions worth keeping.
+    visualTest('loads the model and reports its dimensions', async ({ page }) => {
         visualTest.setTimeout(240000);
-        const { iframeElement, iframe } = await loadFixture(page);
+        const { iframe } = await loadFixture(page);
         await waitForStableResponsiveCanvas(page);
-
-        const gestureHint = iframe.locator('#ov25-gesture-hint');
-        await expect(gestureHint).toBeVisible({ timeout: CANVAS_READY_TIMEOUT });
-
-        const clickTarget = await iframeElement.boundingBox();
-        expect(clickTarget).not.toBeNull();
-        if (!clickTarget) throw new Error('Configurator iframe has no visible bounding box');
-        await page.mouse.click(
-            clickTarget.x + clickTarget.width / 2,
-            clickTarget.y + clickTarget.height / 2,
-        );
-
-        await expect(gestureHint).not.toBeVisible({ timeout: RUNTIME_TIMEOUT });
-        await waitForStableResponsiveCanvas(page);
-
-        // Keep Next.js development tooling out of the product-rendering baseline.
-        const nextDevPortal = iframe.locator('nextjs-portal');
-        if (await nextDevPortal.count() === 1) {
-            await nextDevPortal.evaluate((element) => {
-                (element as HTMLElement).style.display = 'none';
-            });
-        }
-
-        const screenshotTarget = await iframeElement.boundingBox();
-        expect(screenshotTarget).not.toBeNull();
-        if (!screenshotTarget) throw new Error('Configurator iframe has no screenshot region');
-        const renderedIframeRegion = await page.screenshot({
-            animations: 'disabled',
-            clip: screenshotTarget,
-        });
-        expect(renderedIframeRegion).toMatchSnapshot('single-no-variants-initial-canvas.png', { maxDiffPixelRatio: 0.01 });
 
         const dimensionsButton = page.locator('#ov25-desktop-dimensions-toggle-button');
         await expect(dimensionsButton).toBeVisible({ timeout: RUNTIME_TIMEOUT });
