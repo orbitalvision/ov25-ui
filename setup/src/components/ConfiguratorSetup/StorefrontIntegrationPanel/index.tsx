@@ -112,7 +112,7 @@ function IntegrationField({
 
 function ReadyIntegrationPanel({ config }: { config: StorefrontIntegrationReadyConfig }) {
   return (
-    <div className="min-w-0 max-w-full space-y-3 py-3 pr-4">
+    <div className="min-w-0 max-w-full space-y-3 py-3">
       <section className="min-w-0 rounded-xl border border-border bg-background p-3.5">
         <div className="flex min-w-0 items-start gap-2.5">
           <div className="mt-0.5 rounded-md bg-muted p-1.5 text-muted-foreground">
@@ -167,7 +167,7 @@ export function StorefrontIntegrationPanel({ config }: StorefrontIntegrationPane
   return (
     <ScrollArea className="h-full min-h-0 min-w-0" data-ov25-setup-integration-panel>
       {config.status === 'loading' && (
-        <div className="py-8 pr-4 text-center" role="status" aria-busy="true">
+        <div className="py-8 text-center" role="status" aria-busy="true">
           <Plug className="mx-auto h-5 w-5 text-muted-foreground" />
           <p className="mt-2 text-xs font-medium text-foreground">
             {config.platformLabel ? `Loading ${config.platformLabel}` : 'Loading integration settings'}
@@ -179,7 +179,7 @@ export function StorefrontIntegrationPanel({ config }: StorefrontIntegrationPane
       )}
 
       {config.status === 'error' && (
-        <div className="py-8 pr-4 text-center" role="alert">
+        <div className="py-8 text-center" role="alert">
           <AlertCircle className="mx-auto h-5 w-5 text-destructive" />
           <p className="mt-2 text-xs font-semibold text-foreground">
             {config.platformLabel ? `${config.platformLabel} could not be loaded` : 'Integration settings could not be loaded'}

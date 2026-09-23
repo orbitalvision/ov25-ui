@@ -368,7 +368,7 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
 
       <TabsContent value="settings" className="mt-0 flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <ScrollArea className="h-full min-h-0 min-w-0">
-          <div className="min-w-0 max-w-full space-y-3 py-3 pr-4">
+          <div className="min-w-0 max-w-full space-y-3 py-3">
             <SettingsSection
               id="display-layout"
               title="Display & layout"

@@ -85,7 +85,7 @@ export function StylePanel({ currentSettings, updateSettings, updateNested }: St
   return (
     <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
       <ScrollArea className="min-h-0 flex-1 min-w-0">
-      <div className="min-w-0 max-w-full space-y-6 py-2 pr-4">
+      <div className="min-w-0 max-w-full space-y-6 py-2">
         <section
           className="min-w-0 rounded-xl border border-border bg-muted/20 p-3.5"
           data-ov25-setup-section="brand-identity"
