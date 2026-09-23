@@ -207,7 +207,9 @@ Developer-facing. Include:
 - migration notes;
 - expected tests before deploy;
 - follow-up tasks that should not block release;
-- next step: user reviews artifacts, then manually runs `npm run release:test` if approved.
+- next step: user reviews artifacts, then manually runs `npm run release:test` if approved; once
+  approved and green, the user releases with `npm run release:deploy -- --release <version> --push`
+  (the one-command default in `docs/release-runbook.md` Step 4).
 
 ### client-email.md
 
