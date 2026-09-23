@@ -6,10 +6,11 @@ import '../src/index.css';
 const DEMO_RETAILER_APIKEY = import.meta.env.VITE_DEMO_RETAILER_APIKEY;
 const DIAMOND_FURNITURE_APIKEY = import.meta.env.VITE_DIAMOND_APIKEY;
 const DARLINGS_APIKEY = import.meta.env.VITE_DARLINGS_APIKEY;
+const DEV_RETAILER_APIKEY = import.meta.env.VITE_DEV_RETAILER_APIKEY;
 
 const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
-  apiKey: () => DIAMOND_FURNITURE_APIKEY,
-  productLink: () => 'bed-configurator/13',
+  apiKey: () => DEV_RETAILER_APIKEY,
+  productLink: () => '1682',
   selectors: {
     gallery: { selector: '.configurator-container', replace: true },
     variants: '#ov25-controls',
