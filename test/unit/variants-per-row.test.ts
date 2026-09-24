@@ -47,9 +47,8 @@ describe('variants per row', () => {
     expect(css).toContain('aspect-ratio: 1;');
   });
 
-  it('uses the shared grid hook in every variant display-mode renderer', () => {
+  it('uses the shared grid hook in direct renderers and delegates wizard groups to it', () => {
     const displayModeRendererSources = [
-      readProjectFile('src/components/VariantSelectMenu/WizardVariants.tsx'),
       readProjectFile('src/components/VariantSelectMenu/ProductVariantsWrapper.tsx'),
       readProjectFile('src/components/VariantSelectMenu/GroupedVariantsList.tsx'),
       readProjectFile('src/components/VariantSelectMenu/DesktopVariants.tsx'),
@@ -59,6 +58,11 @@ describe('variants per row', () => {
     for (const source of displayModeRendererSources) {
       expect(source).toContain('ov25-variant-card-grid');
     }
+
+    // Wizard uses the grouped renderer; the grid hook belongs to that component.
+    // wizard-group-price.test.tsx also verifies the rendered group/grid structure.
+    expect(readProjectFile('src/components/VariantSelectMenu/WizardVariants.tsx'))
+      .toContain('<GroupedVariantsList');
   });
 
   it('exposes the grid as a stable custom-CSS target', () => {
