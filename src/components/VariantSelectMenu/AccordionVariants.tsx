@@ -22,9 +22,10 @@ export type AccordionVariantsMode = 'inline' | 'drawer';
 
 export interface AccordionVariantsProps {
   mode: AccordionVariantsMode;
+  reserveCheckoutSpace?: boolean;
 }
 
-export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) => {
+export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode, reserveCheckoutSpace }) => {
   const {
     sizeOption,
     handleSelectionSelect,
@@ -178,7 +179,7 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
           />
           {expandedAccordion === 'size' && (
             <div
-              className={`ov:min-h-0 ov:max-h-full ov:overflow-y-auto  ov:pt-4 ov:pb-4 ${mode === 'drawer' && isMobile && !hidePricing ? 'ov:pb-20' : ''}`}
+              className={`ov:min-h-0 ov:max-h-full ov:overflow-y-auto  ov:pt-4 ov:pb-4 ${(reserveCheckoutSpace ?? (mode === 'drawer' && isMobile && !hidePricing)) ? 'ov:pb-20' : ''}`}
               {...(mode === 'inline' ? { 'data-ov25-list-variants-content': true as const } : {})}
             >
               <div className={`ov25-size-variant-card-grid ov:grid ${getGridColsClass(2)}`}>
@@ -214,7 +215,7 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
                 )}
                 <div className="ov:relative ov:min-h-0 ov:flex-1 ov:flex ov:flex-col ov:pb-4">
                   <div
-                    className={`ov:min-h-0 ov:flex-1 ${mode === 'drawer' && isMobile && !hidePricing ? 'ov:pb-20' : ''} ${optionId !== 'modules' && isFilterOpen[optionId] ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}
+                    className={`ov:min-h-0 ov:flex-1 ${(reserveCheckoutSpace ?? (mode === 'drawer' && isMobile && !hidePricing)) ? 'ov:pb-20' : ''} ${optionId !== 'modules' && isFilterOpen[optionId] ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}
                     {...(mode === 'inline' ? { 'data-ov25-list-variants-content': true as const } : {})}
                   >
                     {optionId === 'modules' ? (

@@ -19,9 +19,9 @@ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
   },
   carousel: { desktop: 'stacked', mobile: 'carousel' },
   configurator: {
-    displayMode: { desktop: 'inline', mobile: 'drawer' },
+    displayMode: { desktop: 'variants-only-sheet', mobile: 'drawer' },
     triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
-    variants: { displayMode: { desktop: 'tree', mobile: 'list' } },
+    variants: { displayMode: { desktop: 'list', mobile: 'list' } },
   },
   callbacks: {
     addToBasket: () => alert('Add to basket function called'),

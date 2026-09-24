@@ -17,6 +17,7 @@ import {
 import { VariantDisplayStyleOverlay } from '../../types/config-enums.js';
 import { FilterControls } from './FilterControls.js';
 import { FilterContent } from './FilterContent.js';
+import { GroupPrice } from './GroupPrice.js';
 export type DrawerSizes = 'closed' | 'small' | 'large';
 
 const capitalizeWords = (str: string) =>
@@ -255,7 +256,7 @@ export function ProductVariantsWrapper({
     const renderSizeSection = (showHeader = true, isMobileListSticky = false) => (
       <div className=" ov:pb-6">
         {showHeader && (
-          <h3 className={`ov25-option-header ov:sticky ov:top-0  ov:px-4 ov:z-10 ov:bg-(--ov25-background-color) ov:text-lg ov:pb-4 ov:text-(--ov25-secondary-text-color) ${isMobileListSticky ? 'ov:pt-2' : 'ov:pt-0'}`}>
+          <h3 className={`ov25-option-header ov25-sticky-header ov:sticky ov:top-0  ov:px-4 ov:z-10 ov:bg-(--ov25-background-color) ov:text-lg ov:pb-4 ov:text-(--ov25-secondary-text-color) ${isMobileListSticky ? 'ov:pt-2' : 'ov:pt-0'}`}>
             {capitalizeWords(getString('optionHeader', { OPTION_NAME: 'Size', SELECTED_VARIANT_NAME: getSelectedValueForOption('size') }, 'Size'))}
           </h3>
         )}
@@ -285,7 +286,7 @@ export function ProductVariantsWrapper({
     const renderOptionSection = ({ optionId, optionName, variants }: { optionId: string; optionName: string; variants: any[] }, showHeader = true, isMobileListSticky = false, showFilter = true) => (
       <div key={optionId} className=" ov:pb-6">
         {showHeader && (
-          <h3 className={`ov25-option-header ov:sticky ov:top-0  ov:px-4 ov:z-10 ov:bg-(--ov25-background-color) ov:text-lg ov:pb-2 ov:md:pb-4 ov:text-(--ov25-secondary-text-color) ${isMobileListSticky ? 'ov:pt-2' : 'ov:pt-0'}`}>
+          <h3 className={`ov25-option-header ov25-sticky-header ov:sticky ov:top-0  ov:px-4 ov:z-10 ov:bg-(--ov25-background-color) ov:text-lg ov:pb-2 ov:md:pb-4 ov:text-(--ov25-secondary-text-color) ${isMobileListSticky ? 'ov:pt-2' : 'ov:pt-0'}`}>
             {capitalizeWords(
               getString(
                 'optionHeader',
@@ -301,12 +302,14 @@ export function ProductVariantsWrapper({
             group.variants.length > 0 ? (
               <div key={group.groupName} className="ov:mb-4">
                 {variants.length > 1 && (
-                  <h4 className={`ov25-group-header ov:sticky ov:z-9 ov:bg-(--ov25-background-color) ov:px-4 ov:text-sm ov:pt-6 ov:pb-3 ov:text-(--ov25-secondary-text-color) ov:font-medium ${showHeader ? 'ov:top-10' : 'ov:top-0'}`}>
+                  <h4 className={`ov25-group-header ov25-sticky-header ov:sticky ov:z-9 ov:bg-(--ov25-background-color) ov:px-4 ov:text-sm ov:pt-6 ov:pb-3 ov:text-(--ov25-secondary-text-color) ov:font-medium ${showHeader ? 'ov:top-10' : 'ov:top-0'}`}>
                     {capitalizeWords(
                       getString('groupHeader', { GROUP_NAME: group.groupName }, group.groupName)
                     )}
+                    <GroupPrice price={group.priceSummary} />
                   </h4>
                 )}
+                {variants.length === 1 && <GroupPrice price={group.priceSummary} groupName={group.groupName} />}
                 <div className="ov25-variant-group-content ov:bg-(--ov25-background-color) ov:pt-4">
                   <div className="ov25-variant-card-grid ov:grid">
                     <VariantsContent
@@ -328,7 +331,10 @@ export function ProductVariantsWrapper({
       </div>
     );
 
-    const needsBottomMarginForButton = isMobile && !isInline && !hidePricing;
+    // Only the mobile drawer overlays its checkout bar on the variants. Sheets
+    // and modals reserve a separate footer row, so padding would count it twice.
+    const needsBottomMarginForButton = isMobile && !isInline && !hidePricing &&
+      !embeddedInVariantsOnlySheet && configuratorDisplayModeMobile !== 'modal';
     const isMobileList = isMobile && !isInline && variantShellOverlayStyle === VariantDisplayStyleOverlay.List;
 
     // When the active option changes, scroll to the active option (list mode only, used for when you have a custom button to open the configurator on an option)
@@ -506,9 +512,9 @@ export function ProductVariantsWrapper({
       variantShellOverlayStyle === VariantDisplayStyleOverlay.Tabs
         ? tabsContent
         : useTree
-          ? <TreeVariants mode={isInline ? 'inline' : 'drawer'} />
+          ? <TreeVariants mode={isInline ? 'inline' : 'drawer'} reserveCheckoutSpace={needsBottomMarginForButton} />
           : useAccordion
-            ? <AccordionVariants mode={isInline ? 'inline' : 'drawer'} />
+            ? <AccordionVariants mode={isInline ? 'inline' : 'drawer'} reserveCheckoutSpace={needsBottomMarginForButton} />
             : (
                 <div>
                   {showSize && (
@@ -527,7 +533,7 @@ export function ProductVariantsWrapper({
     const isListModeFilterOpen = variantShellOverlayStyle === VariantDisplayStyleOverlay.List && !!isFilterOpen[listFilterKey];
     const contentScrollClass = (useAccordion || useTree || isTabs) ? 'ov:overflow-hidden' : isListModeFilterOpen ? 'ov:overflow-hidden' : 'ov:overflow-y-auto';
     const contentPaddingClass = (useAccordion || useTree || isTabs)
-      ? (needsBottomMarginForButton ? 'ov:pb-16' : '')
+      ? ''
       : (needsBottomMarginForButton ? 'ov:pt-0 ov:pb-20' : 'ov:pt-0 ov:pb-2');
 
     if (isListLike) {

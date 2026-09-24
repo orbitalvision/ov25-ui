@@ -609,6 +609,18 @@ html {
   overflow: visible !important;
 }
 
+/* Paint across fractional-pixel seams without changing each layout's sticky offset.
+   Use ::after: inline-sticky list headers already reserve ::before for the top gap. */
+.ov25-sticky-header::after {
+  content: '';
+  position: absolute;
+  inset-inline: 0;
+  bottom: 100%;
+  height: 1px;
+  background: inherit;
+  pointer-events: none;
+}
+
 .ov25-inline-sticky-list-mobile {
   isolation: isolate;
 }

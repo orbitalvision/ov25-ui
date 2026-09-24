@@ -23,9 +23,10 @@ export type TreeVariantsMode = 'inline' | 'drawer';
 
 export interface TreeVariantsProps {
   mode: TreeVariantsMode;
+  reserveCheckoutSpace?: boolean;
 }
 
-export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
+export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode, reserveCheckoutSpace }) => {
   const {
     sizeOption,
     handleSelectionSelect,
@@ -162,7 +163,7 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
     setCurrentView(null);
   }, [isTreePanelOpen, activeOptionId, validOptionIds]);
 
-  const scrollContentClass = mode === 'drawer' && isMobile && !hidePricing ? 'ov:pb-20' : '';
+  const scrollContentClass = (reserveCheckoutSpace ?? (mode === 'drawer' && isMobile && !hidePricing)) ? 'ov:pb-20' : '';
 
   const getOptionHeaderLabel = useCallback(
     (optionName: string) =>

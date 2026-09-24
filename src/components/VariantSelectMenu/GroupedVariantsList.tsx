@@ -10,7 +10,7 @@ const capitalizeWords = (str: string) =>
 
 /** Sticky group header class shared by Tree, Wizard, and list views. */
 export const STICKY_GROUP_HEADER_CLASS =
-  'ov25-group-header ov:sticky ov:z-[9] ov:bg-[var(--ov25-background-color)] ov:px-4 ov:text-sm ov:pt-4 ov:pb-3 ov:text-[var(--ov25-secondary-text-color)] ov:font-medium';
+  'ov25-group-header ov25-sticky-header ov:sticky ov:z-[9] ov:bg-[var(--ov25-background-color)] ov:px-4 ov:text-sm ov:pt-4 ov:pb-3 ov:text-[var(--ov25-secondary-text-color)] ov:font-medium';
 
 export interface GroupedVariantsListGroup {
   priceSummary?: GroupPriceSummary;

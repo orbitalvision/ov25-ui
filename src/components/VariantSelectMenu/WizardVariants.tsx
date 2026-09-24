@@ -1,4 +1,4 @@
-import { GroupPrice } from './GroupPrice.js';
+import { GroupedVariantsList } from './GroupedVariantsList.js';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ChevronDown, ChevronLeft, ChevronRight, Undo2 } from 'lucide-react';
 import { useOV25UI } from '../../contexts/ov25-ui-context.js';
@@ -555,14 +555,27 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode, displayMod
                 </div>
               )}
               {filteredOption && allVariants.length > 0 && (
-                <div className="ov-wizard-variants-scroll ov:overflow-y-auto ov:h-full ov:p-4">
-                  {filteredOption.groups?.map(group => 'priceSummary' in group && (
-                    <GroupPrice key={group.id} price={group.priceSummary} groupName={'name' in group ? group.name : undefined} />
-                  ))}
-                  <div className={`ov:grid ov:content-start ov:gap-2 ${currentOption!.id === 'size' ? 'ov25-size-variant-card-grid ov:grid-cols-2!' : 'ov25-variant-card-grid'}`}>
-                    <VariantsContent
-                      variantsToRender={visibleVariants}
-                      VariantCard={currentOption!.id === 'size' ? SizeVariantCard : DefaultVariantCard}
+                <div className={`ov-wizard-variants-scroll ov:overflow-y-auto ov:h-full ${currentOption!.id === 'size' ? 'ov:p-4' : 'ov:px-4 ov:pb-4'}`}>
+                  {currentOption!.id === 'size' ? (
+                    <div className="ov:grid ov:content-start ov:gap-2 ov25-size-variant-card-grid ov:grid-cols-2!">
+                      <VariantsContent
+                        variantsToRender={visibleVariants}
+                        VariantCard={SizeVariantCard}
+                        isMobile={false}
+                        onSelect={(variant) => handleSelectionSelect(variant as any, currentOption!.id)}
+                        showImage
+                        showDimensions={false}
+                      />
+                    </div>
+                  ) : (
+                    <GroupedVariantsList
+                      groups={(filteredOption.groups ?? []).map(group => ({
+                        groupName: 'name' in group ? group.name : '',
+                        priceSummary: 'priceSummary' in group ? group.priceSummary : undefined,
+                        variants: visibleVariants.filter(variant => variant.groupId === group.id),
+                      }))}
+                      showGroupHeaders
+                      VariantCard={DefaultVariantCard}
                       isMobile={false}
                       onSelect={(variant) => handleSelectionSelect(
                         variant.selection
@@ -570,10 +583,8 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode, displayMod
                           : variant as any,
                         currentOption!.id,
                       )}
-                      showImage={currentOption!.id === 'size' ? true : undefined}
-                      showDimensions={currentOption!.id === 'size' ? false : undefined}
                     />
-                  </div>
+                  )}
                   {hasMore && (
                     <div
                       ref={(el) => { sentinelRefs.current[currentOption!.id] = el; }}
