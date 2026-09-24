@@ -1,0 +1,1270 @@
+diff --git a/.codex/skills/ov25-release-review/SKILL.md b/.codex/skills/ov25-release-review/SKILL.md
+index 6091ec7..3dfc027 100644
+--- a/.codex/skills/ov25-release-review/SKILL.md
++++ b/.codex/skills/ov25-release-review/SKILL.md
+@@ -207,7 +207,9 @@ Developer-facing. Include:
+ - migration notes;
+ - expected tests before deploy;
+ - follow-up tasks that should not block release;
+-- next step: user reviews artifacts, then manually runs `npm run release:test` if approved.
++- next step: user reviews artifacts, then manually runs `npm run release:test` if approved; once
++  approved and green, the user releases with `npm run release:deploy -- --release <version> --push`
++  (the one-command default in `docs/release-runbook.md` Step 4).
+ 
+ ### client-email.md
+ 
+diff --git a/dev/react-test/tests/single-custom-css-branding.js b/dev/react-test/tests/single-custom-css-branding.js
+index 7f1dd80..77aed8f 100644
+--- a/dev/react-test/tests/single-custom-css-branding.js
++++ b/dev/react-test/tests/single-custom-css-branding.js
+@@ -156,6 +156,22 @@ export const SINGLE_CUSTOM_CSS_BRANDING = `
+         background: goldenrod;
+       }
+ 
++      /* Standard-product group upgrades; cheapest groups have no price badge. */
++      .ov25-group-price {
++        --ov25-group-price-display: inline-block;
++        background-color: gold;
++        color: navy;
++        border: 2px solid navy;
++        border-radius: 999px;
++        padding: 2px 8px;
++        font-weight: 700;
++      }
++
++      .ov25-group-price[data-price-from="true"] {
++        background-color: lightcyan;
++        border-style: dashed;
++      }
++
+       .ov25-variant-group-content {
+         background: darkblue;
+       }
+diff --git a/dev/react-test/tests/single-custom-css.jsx b/dev/react-test/tests/single-custom-css.jsx
+index 94361ea..89a29c0 100644
+--- a/dev/react-test/tests/single-custom-css.jsx
++++ b/dev/react-test/tests/single-custom-css.jsx
+@@ -78,7 +78,7 @@ function App() {
+   return (
+     <TestPageLayout
+       title="Single Product – Custom CSS"
+-      description="Variant controls—including Guided Overview—dimensions, and every Selection Details display mode styled with custom CSS."
++      description="Variant controls—including Guided Overview—group price headings, dimensions, and every Selection Details display mode styled with custom CSS."
+       injectConfig={config}
+       topContent={
+         <div className="ov:flex ov:flex-col ov:gap-2 ov:mb-3 ov:text-sm">
+diff --git a/dev/react-test/tests/single-with-groups.jsx b/dev/react-test/tests/single-with-groups.jsx
+index febc532..b8d8664 100644
+--- a/dev/react-test/tests/single-with-groups.jsx
++++ b/dev/react-test/tests/single-with-groups.jsx
+@@ -6,10 +6,11 @@ import '../src/index.css';
+ const DEMO_RETAILER_APIKEY = import.meta.env.VITE_DEMO_RETAILER_APIKEY;
+ const DIAMOND_FURNITURE_APIKEY = import.meta.env.VITE_DIAMOND_APIKEY;
+ const DARLINGS_APIKEY = import.meta.env.VITE_DARLINGS_APIKEY;
++const DEV_RETAILER_APIKEY = import.meta.env.VITE_DEV_RETAILER_APIKEY;
+ 
+ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
+-  apiKey: () => DIAMOND_FURNITURE_APIKEY,
+-  productLink: () => 'bed-configurator/13',
++  apiKey: () => DEV_RETAILER_APIKEY,
++  productLink: () => '1682',
+   selectors: {
+     gallery: { selector: '.configurator-container', replace: true },
+     variants: '#ov25-controls',
+@@ -18,15 +19,18 @@ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
+   },
+   carousel: { desktop: 'stacked', mobile: 'carousel' },
+   configurator: {
+-    displayMode: { desktop: 'inline', mobile: 'drawer' },
++    displayMode: { desktop: 'variants-only-sheet', mobile: 'drawer' },
+     triggerStyle: { desktop: 'single-button', mobile: 'single-button' },
+-    variants: { displayMode: { desktop: 'tree', mobile: 'list' } },
++    variants: { displayMode: { desktop: 'list', mobile: 'list' } },
+   },
+   callbacks: {
+     addToBasket: () => alert('Add to basket function called'),
+     buyNow: () => alert('Buy now function called'),
+     buySwatches: () => alert('Add swatches to cart'),
+   },
++  branding: {
++    cssString: `.ov25-group-price { --ov25-group-price-display: inline; }`,
++  },
+   flags: { hidePricing: false },
+ });
+ 
+diff --git a/dev/react-test/tests/string-replacement.jsx b/dev/react-test/tests/string-replacement.jsx
+index 6f35fe4..481b220 100644
+--- a/dev/react-test/tests/string-replacement.jsx
++++ b/dev/react-test/tests/string-replacement.jsx
+@@ -111,6 +111,10 @@ const injectConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
+     ],
+     // groups
+     groupHeader: [{ template: '▽Option: ${OPTION_NAME} / Group: ${GROUP_NAME}▽' }],
++    groupPriceTotal: [{ template: '▽Group upgrade: ${PRICE}▽' }],
++    groupPriceFromTotal: [{ template: '▽Group upgrade from: ${PRICE}▽' }],
++    groupPriceInline: [{ template: ' - ▽${PRICE_LABEL}▽' }],
++    groupPriceNamed: [{ template: '▽${GROUP_NAME} / ${PRICE_LABEL}▽' }],
+     // filters
+     filtersLabel: [{ template: '▽Open filters for ${OPTION_NAME}▽' }],
+     filtersSearchPlaceholder: [{ template: '▽Search options▽' }],
+diff --git a/docs/group-total-prices.md b/docs/group-total-prices.md
+new file mode 100644
+index 0000000..9e8503e
+--- /dev/null
++++ b/docs/group-total-prices.md
+@@ -0,0 +1,29 @@
++# Standard-product group upgrade prices
++
++OV25 can send `priceSummary` on groups in `CONFIGURATOR_STATE`:
++
++```ts
++{ totalPrice: 150000, upgradePrice: 5000, currency: 'GBP', isFrom: false }
++```
++
++`totalPrice` is the resulting whole-product price in pence, with the shopper's other choices retained (or replaced by configuration rules), including current grade overrides, shared-grade charging, discounts and rounding. `upgradePrice` is the difference from the cheapest available group minimum **within the same option**, rounded to displayed pence. The current/default selection does not set the baseline. Every grouping mode uses this comparison. The ungraded Other bucket in price-grade grouping is excluded and never shows a price. `isFrom` means available selections in that group produce different totals.
++
++For example, Standard at £100 and Luxury at £150 produce “Standard” and “Luxury - +£50.00”. Tied cheapest groups show no price, including groups whose minimum matches the baseline but whose other selections cost more. Higher groups with varying totals show “From +£…”. The baseline updates with selections, availability, discounts and conditional pricing.
++
++An unknown available group could be the cheapest. In that case OV25 omits `upgradePrice` for the entire option; the UI shows no amounts rather than guessing. Older producer payloads without `upgradePrice` also show no amount.
++
++The runtime renders `.ov25-group-price` beside existing group headings or controls in list, tree and accordion layouts. Wizard and single-group layouts without headings retain named price elements. Prices update with configurator state. A zero or absent upgrade means no price element; an old summary is not retained. `hidePricing` and Snap2 suppress these elements.
++
++They remain in the DOM but are hidden by default. To show them, add this to the configurator's custom styling (inside its shadow root when applicable):
++
++```css
++.ov25-group-price {
++  --ov25-group-price-display: inline;
++}
++```
++
++Use `data-price-pence` (upgrade), `data-total-price-pence` (full total), and `data-price-from` for styling or inspection. The text uses the existing currency-symbol setting and `groupPriceTotal`, `groupPriceFromTotal`, `groupPriceInline`, and `groupPriceNamed` string replacements.
++
++Only standard products are supported. Bed and Snap2 pricing do not send summaries. OV25 omits groups with unresolved grade references, incomplete required selections, rule cycles, or scene-dependent visibility rules that cannot be safely previewed. Never interpret an absent summary as zero.
++
++Deployment requires the matching OV25 producer and this UI build. Either side can ship first; older clients continue to display totals, while this UI requires the new upgrade field before displaying a price. Deploy this UI first if avoiding old total labels during rollout is important. This change does not publish a package. Once both sides are deployed, enable group prices using the CSS above.
+diff --git a/docs/release-runbook.md b/docs/release-runbook.md
+index 065a9f4..c1e2c74 100644
+--- a/docs/release-runbook.md
++++ b/docs/release-runbook.md
+@@ -31,7 +31,7 @@ approved source commits are stable. Run:
+ OV25_E2E_NEW_HEADLESS=true npm run release:test -- --release <version>
+ ```
+ 
+-This runs type checking, unit tests, browser/component tests, the React 19 package build, the setup
++This runs type checking, unit tests, browser/component tests, the React 19 package build, the isolated React 18 package build, the setup
+ frozen install/build, the react-test build, and Playwright. Review
+ `releases/<version>/test-summary.md` after it completes.
+ 
+@@ -40,27 +40,28 @@ mode only when a specific failure cannot be diagnosed or verified headlessly. No
+ before starting a headed run, explain why it is necessary, and limit it to the smallest relevant
+ test scope.
+ 
+-### Required React 18 Preflight
++### Automatic React 18 Preflight
+ 
+-`release:test` currently does **not** install React 18 typings or run the exact
+-`ov25-ui-react18` publish build. This missed React 18 JSX incompatibilities in both the `0.8.0` and
+-`0.8.1` publishes. Before creating tags, run the exact React 18 build in an isolated temporary
+-worktree so the main workspace's package metadata, lockfile, and dependencies remain untouched:
++`release:test` runs the exact `npm run build:react18` command in a unique temporary source copy
++and records its result as **Build ov25-ui-react18 (isolated)**. A failure fails the release test gate.
++This also runs when `--skip-e2e` is supplied.
+ 
+-```bash
+-git worktree add --detach /tmp/ov25-ui-react18-release-check HEAD
+-cd /tmp/ov25-ui-react18-release-check
+-npm run build:react18
+-cd -
+-git worktree remove --force /tmp/ov25-ui-react18-release-check
+-```
++The copy includes current tracked files and non-ignored new files, so uncommitted source changes
++are checked alongside the other tests. Deleted files stay deleted. Ignored dependencies, build
++output, and local environment files are excluded; symlinks and other non-regular entries are
++rejected to prevent writes escaping the copy. Run with the repository's supported Node/npm/Bun
++toolchain and registry access: the React 18 build installs its own dependencies.
+ 
+-Use the repository's supported Node/npm toolchain if the system npm differs. Do not run
+-`build:react18` directly in a workspace that must remain clean: the script temporarily rewrites
+-package metadata and installs a React 18 dependency tree.
++Package metadata, lockfiles, dependencies, and output from this build stay in the temporary copy,
++which is removed on normal success or failure. No Git worktree is registered. An abrupt process
++termination may leave an `ov25-ui-react18-check-*` directory in the system temporary directory.
++The main workspace retains its React 19 build for subsequent fixture tests.
+ 
+-Automation follow-up: integrate this isolated React 18 build into `release:test` so this manual
+-step can eventually be removed.
++No separate manual React 18 worktree check is required. To rerun only this preflight for diagnosis:
++
++```bash
++node scripts/release/react18-preflight.js
++```
+ 
+ If any test or stabilization check fails, fix the source, commit and push the fix, then rerun all of
+ Step 1. Do not proceed with a partially tested source state.
+@@ -105,63 +106,62 @@ Any code change after Step 1 completes or after artifacts are generated requires
+ rerunning the complete test and stabilization sequence, refreezing the tested scope in Step 2, and
+ regenerating the Step 3 artifacts.
+ 
+-## 4. Prepare Release Commits And Tags
++## 4. Release And Publish
+ 
+-Run without `--push` first:
++Once the artifacts are approved and Step 1 is green at the reviewed head, run the whole release in
++one command:
+ 
+ ```bash
+-npm run release:deploy -- --release <version>
++npm run release:deploy -- --release <version> --push
+ ```
+ 
+-The first phase updates the `ov25-ui` version and root npm lockfile, updates `CHANGELOG.md`, commits
+-the reviewed release artifacts, and creates these local annotated tags:
++This is the default path. It:
+ 
+-```text
+-ov25-ui@<version>
+-ov25-ui-react18@<version>
+-```
++1. updates the `ov25-ui` version, root npm lockfile, and `CHANGELOG.md`, commits the approved release
++   artifacts, and creates annotated `ov25-ui@<version>` and `ov25-ui-react18@<version>` tags;
++2. pushes the release commit and both tags, which start the UI and React 18 publish workflows;
++3. waits until `ov25-ui@<version>` is available on npm;
++4. finalizes Setup: updates `ov25-setup` and its exact `ov25-ui` dependency, regenerates both
++   `setup/package-lock.json` and `setup/bun.lock` from the published package, verifies the Bun lock
++   with a frozen install, builds Setup against that exact package, and commits all three Setup files;
++5. pushes the Setup commit, then creates and pushes `ov25-setup@<version>`;
++6. dispatches the OV25 dependency update workflow (skip with `--skip-ov25-dispatch`).
+ 
+-Review the release commit, tag targets, package metadata, and working-tree status before pushing.
+-Then push exactly what the script prints:
++Before the Setup commit it fetches the current branch and refuses to proceed if the remote moved
++beyond the reviewed local release while npm was publishing, or if Setup source changed after the UI
++release tag. Lock generation happens in a temporary directory, so a transient registry failure does
++not leave partial tracked files.
+ 
+-```bash
+-git push origin main
+-git push origin ov25-ui@<version> ov25-ui-react18@<version>
+-```
++The Setup phase has to wait for npm because Bun's lockfile records the published tarball integrity,
++which does not exist until the `ov25-ui` workflow publishes. Never replace only the version text in
++`setup/bun.lock`; that can silently keep Setup pinned to the previous package.
++
++### Resuming
+ 
+-Wait until `ov25-ui@<version>` is available on npm, then finalize Setup:
++If the run stops after the UI tags are pushed (for example npm is slow to publish), resume with:
+ 
+ ```bash
+-npm run release:deploy -- --release <version> --finalize-setup
++npm run release:deploy -- --release <version> --finalize-setup --push
+ ```
+ 
+-This second phase updates `ov25-setup` and its exact `ov25-ui` dependency, regenerates both
+-`setup/package-lock.json` and `setup/bun.lock` from the published package, verifies the Bun lock with
+-a frozen install, builds Setup against that exact package, commits all three Setup files, and
+-creates `ov25-setup@<version>`. Lock generation happens in a temporary directory so a transient
+-registry failure does not leave partial tracked files. Review the commit and tag, then push exactly
+-what the script prints:
++An already-created Setup commit or matching unpushed local tag is validated and reused, so this
++never creates a duplicate commit or tag.
++
++### Manual path (only when you need to inspect the local release commit first)
++
++Running without `--push` stops after each phase and prints the `git push` commands instead of
++running them:
+ 
+ ```bash
+-git push origin main
+-git push origin ov25-setup@<version>
++npm run release:deploy -- --release <version>
+ ```
+ 
+-The split is required because Bun's lockfile records the published tarball integrity, which does not
+-exist before the `ov25-ui` workflow publishes the new version. Never replace only the version text
+-in `setup/bun.lock`; that can silently keep Setup pinned to the previous package.
+-
+-Alternatively, `release:deploy -- --release <version> --push` performs both phases: it pushes the UI
+-commit and tags, waits for `ov25-ui@<version>` on npm, refreshes and commits the Setup lockfiles,
+-then pushes the Setup commit/tag and dispatches the OV25 dependency workflow. Before the Setup
+-commit it fetches the current branch and refuses to proceed if the remote moved beyond the reviewed
+-local release while npm was publishing, or if Setup source changed after the UI release tag. If the
+-process stops after the UI tags publish, resume safely with `--finalize-setup --push`; an
+-already-created Setup commit or matching unpushed local tag is validated and reused without
+-requiring a duplicate commit or tag.
+-
+-A fully manual branch/tag push does not dispatch OV25; run the workflow separately after pushing the
+-Setup tag.
++It then needs `git push origin main`, `git push origin ov25-ui@<version> ov25-ui-react18@<version>`,
++waiting for npm, `release:deploy -- --release <version> --finalize-setup`, another
++`git push origin main`, and `git push origin ov25-setup@<version>`. **Each tag must be pushed
++explicitly**: the publish workflows are triggered only by tag pushes, and `git push origin main`
++does not push tags. Nothing watches npm for a new `ov25-ui`; the Setup workflow runs only when its tag
++is pushed. The manual path also does not dispatch OV25, so run Step 6 by hand.
+ 
+ ## 5. Package Publication
+ 
+diff --git a/globals.css b/globals.css
+index c94eb00..9ee20e9 100644
+--- a/globals.css
++++ b/globals.css
+@@ -609,6 +609,18 @@ html {
+   overflow: visible !important;
+ }
+ 
++/* Paint across fractional-pixel seams without changing each layout's sticky offset.
++   Use ::after: inline-sticky list headers already reserve ::before for the top gap. */
++.ov25-sticky-header::after {
++  content: '';
++  position: absolute;
++  inset-inline: 0;
++  bottom: 100%;
++  height: 1px;
++  background: inherit;
++  pointer-events: none;
++}
++
+ .ov25-inline-sticky-list-mobile {
+   isolation: isolate;
+ }
+@@ -1263,3 +1275,8 @@ html #ov25-configurator-variant-menu-container {
+     animation: none;
+   }
+ }
++
++/* Group totals are visible by default; storefronts can hide them with the custom property. */
++.ov25-group-price {
++  display: var(--ov25-group-price-display, none);
++}
+diff --git a/scripts/release/react18-preflight.js b/scripts/release/react18-preflight.js
+new file mode 100644
+index 0000000..d583d05
+--- /dev/null
++++ b/scripts/release/react18-preflight.js
+@@ -0,0 +1,41 @@
++import { execFileSync } from 'node:child_process';
++import fs from 'node:fs';
++import os from 'node:os';
++import path from 'node:path';
++import { fileURLToPath } from 'node:url';
++import { rootDir, run } from './common.js';
++
++export function buildReact18Isolated({ sourceDir = rootDir, runBuild = run } = {}) {
++  const temporaryDir = fs.mkdtempSync(path.join(os.tmpdir(), 'ov25-ui-react18-check-'));
++  try {
++    // Copy working-tree contents, including new source files, rather than stale HEAD.
++    // Git's ignore rules exclude installed dependencies, build output and local env files.
++    const files = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '-z'], {
++      cwd: sourceDir,
++      encoding: 'utf8',
++      maxBuffer: 80 * 1024 * 1024,
++    }).split('\0').filter(Boolean);
++    for (const relativePath of new Set(files)) {
++      const source = path.join(sourceDir, relativePath);
++      if (!fs.existsSync(source)) continue; // Respect working-tree deletions.
++      const stat = fs.lstatSync(source);
++      // A link could let the dependency install or build write outside the copy.
++      if (!stat.isFile()) throw new Error(`React 18 snapshot requires a regular file: ${relativePath}`);
++      const destination = path.join(temporaryDir, relativePath);
++      fs.mkdirSync(path.dirname(destination), { recursive: true });
++      fs.copyFileSync(source, destination);
++    }
++    runBuild('npm', ['run', 'build:react18'], { cwd: temporaryDir });
++  } finally {
++    fs.rmSync(temporaryDir, { recursive: true, force: true });
++  }
++}
++
++if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
++  try {
++    buildReact18Isolated();
++  } catch (error) {
++    console.error(error.message);
++    process.exitCode = 1;
++  }
++}
+diff --git a/scripts/release/test.js b/scripts/release/test.js
+index f847acf..44bc5db 100644
+--- a/scripts/release/test.js
++++ b/scripts/release/test.js
+@@ -128,6 +128,9 @@ function main() {
+     runBunScript(summary, 'Unit tests', 'test:unit');
+     runBunScript(summary, 'Browser/component tests', 'test:browser:ci');
+     runBunScript(summary, 'Build ov25-ui', 'build');
++    runLogged(summary, 'Build ov25-ui-react18 (isolated)', process.execPath, [
++      path.join(rootDir, 'scripts/release/react18-preflight.js'),
++    ]);
+ 
+     if (fs.existsSync(path.join(rootDir, 'setup/package.json'))) {
+       runBunInstall(summary, 'Install ov25-setup dependencies', { cwd: path.join(rootDir, 'setup') });
+diff --git a/setup/bun.lock b/setup/bun.lock
+index eda70e8..93080a3 100644
+--- a/setup/bun.lock
++++ b/setup/bun.lock
+@@ -21,7 +21,7 @@
+         "class-variance-authority": "^0.7.0",
+         "clsx": "^2.1.0",
+         "lucide-react": "^0.540.0",
+-        "ov25-ui": "0.8.10",
++        "ov25-ui": "0.8.11",
+         "react-colorful": "^5.6.1",
+         "tailwind-merge": "^2.2.0",
+       },
+@@ -425,7 +425,7 @@
+ 
+     "object-assign": ["object-assign@4.1.1", "", {}, "sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg=="],
+ 
+-    "ov25-ui": ["ov25-ui@0.8.10", "", { "dependencies": { "@radix-ui/react-dialog": "^1.1.10", "@radix-ui/react-icons": "^1.3.2", "@radix-ui/react-popover": "^1.1.14", "@radix-ui/react-scroll-area": "^1.2.5", "@radix-ui/react-select": "^2.2.2", "@radix-ui/react-slot": "^1.0.2", "@radix-ui/react-tabs": "^1.1.2", "@react-spring/web": "^10.0.3", "@use-gesture/react": "^10.3.1", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "embla-carousel-react": "^8.6.0", "framer-motion": "^11.16.1", "gsap": "^3.13.0", "lucide-react": "^0.503.0", "react-qr-code": "^2.0.15", "sonner": "^1.7.1", "string-similarity-js": "^2.1.4", "tailwind-merge": "^3.2.0" }, "peerDependencies": { "react": "^19", "react-dom": "^19" } }, "sha512-CyMtZohaJRWUH4U8ajSYq6RvlPU0VtvDhRq7bZ4Xl0eASXZKY7nV5VcyeMhvBFQLxYIt7w2oHr/LuthQQAJP6Q=="],
++    "ov25-ui": ["ov25-ui@0.8.11", "", { "dependencies": { "@radix-ui/react-dialog": "^1.1.10", "@radix-ui/react-icons": "^1.3.2", "@radix-ui/react-popover": "^1.1.14", "@radix-ui/react-scroll-area": "^1.2.5", "@radix-ui/react-select": "^2.2.2", "@radix-ui/react-slot": "^1.0.2", "@radix-ui/react-tabs": "^1.1.2", "@react-spring/web": "^10.0.3", "@use-gesture/react": "^10.3.1", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "embla-carousel-react": "^8.6.0", "framer-motion": "^11.16.1", "gsap": "^3.13.0", "lucide-react": "^0.503.0", "react-qr-code": "^2.0.15", "sonner": "^1.7.1", "string-similarity-js": "^2.1.4", "tailwind-merge": "^3.2.0" }, "peerDependencies": { "react": "^19", "react-dom": "^19" } }, "sha512-QxyjuzS47KsN+0akiRbiUAdXWO41htqsKJ5nAm6ORAn4fMyDCd1H7lDg3xtw6e5+xcleZP62IpHDWVD14evOgA=="],
+ 
+     "package-json-from-dist": ["package-json-from-dist@1.0.1", "", {}, "sha512-UEZIS3/by4OC8vL3P2dTXRETpebLI2NiI5vIrjaD/5UtrkFX/tNbwjTSRAGC/+7CAo2pIcBaRgWmcBBHcsaCIw=="],
+ 
+diff --git a/setup/package-lock.json b/setup/package-lock.json
+index f7a1c81..99f8482 100644
+--- a/setup/package-lock.json
++++ b/setup/package-lock.json
+@@ -1,12 +1,12 @@
+ {
+   "name": "ov25-setup",
+-  "version": "0.8.10",
++  "version": "0.8.11",
+   "lockfileVersion": 3,
+   "requires": true,
+   "packages": {
+     "": {
+       "name": "ov25-setup",
+-      "version": "0.8.10",
++      "version": "0.8.11",
+       "dependencies": {
+         "@codemirror/commands": "^6.10.3",
+         "@codemirror/lang-css": "^6.3.1",
+@@ -24,7 +24,7 @@
+         "class-variance-authority": "^0.7.0",
+         "clsx": "^2.1.0",
+         "lucide-react": "^0.540.0",
+-        "ov25-ui": "0.8.10",
++        "ov25-ui": "0.8.11",
+         "react-colorful": "^5.6.1",
+         "tailwind-merge": "^2.2.0"
+       },
+@@ -3116,9 +3116,9 @@
+       }
+     },
+     "node_modules/ov25-ui": {
+-      "version": "0.8.10",
+-      "resolved": "https://registry.npmjs.org/ov25-ui/-/ov25-ui-0.8.10.tgz",
+-      "integrity": "sha512-CyMtZohaJRWUH4U8ajSYq6RvlPU0VtvDhRq7bZ4Xl0eASXZKY7nV5VcyeMhvBFQLxYIt7w2oHr/LuthQQAJP6Q==",
++      "version": "0.8.11",
++      "resolved": "https://registry.npmjs.org/ov25-ui/-/ov25-ui-0.8.11.tgz",
++      "integrity": "sha512-QxyjuzS47KsN+0akiRbiUAdXWO41htqsKJ5nAm6ORAn4fMyDCd1H7lDg3xtw6e5+xcleZP62IpHDWVD14evOgA==",
+       "license": "MIT",
+       "dependencies": {
+         "@radix-ui/react-dialog": "^1.1.10",
+diff --git a/setup/package.json b/setup/package.json
+index 3ac4263..e194ab4 100644
+--- a/setup/package.json
++++ b/setup/package.json
+@@ -1,6 +1,6 @@
+ {
+   "name": "ov25-setup",
+-  "version": "0.8.10",
++  "version": "0.8.11",
+   "description": "OV25 Configurator Setup visual editor component",
+   "repository": {
+     "type": "git",
+@@ -53,7 +53,7 @@
+     "class-variance-authority": "^0.7.0",
+     "clsx": "^2.1.0",
+     "lucide-react": "^0.540.0",
+-    "ov25-ui": "0.8.10",
++    "ov25-ui": "0.8.11",
+     "react-colorful": "^5.6.1",
+     "tailwind-merge": "^2.2.0"
+   },
+diff --git a/src/components/VariantSelectMenu/AccordionVariants.tsx b/src/components/VariantSelectMenu/AccordionVariants.tsx
+index 89a7b71..1bfeafc 100644
+--- a/src/components/VariantSelectMenu/AccordionVariants.tsx
++++ b/src/components/VariantSelectMenu/AccordionVariants.tsx
+@@ -22,9 +22,10 @@ export type AccordionVariantsMode = 'inline' | 'drawer';
+ 
+ export interface AccordionVariantsProps {
+   mode: AccordionVariantsMode;
++  reserveCheckoutSpace?: boolean;
+ }
+ 
+-export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) => {
++export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode, reserveCheckoutSpace }) => {
+   const {
+     sizeOption,
+     handleSelectionSelect,
+@@ -107,6 +108,7 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
+             ?.filter(group => 'name' in group && group.name)
+             ?.map(group => ({
+               groupName: 'name' in group ? group.name : 'Default Group',
++                priceSummary: 'priceSummary' in group ? group.priceSummary : undefined,
+               variants: group?.selections?.map(selection => ({
+                 id: selection?.id,
+                 groupId: group?.id,
+@@ -177,7 +179,7 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
+           />
+           {expandedAccordion === 'size' && (
+             <div
+-              className={`ov:min-h-0 ov:max-h-full ov:overflow-y-auto  ov:pt-4 ov:pb-4 ${mode === 'drawer' && isMobile && !hidePricing ? 'ov:pb-20' : ''}`}
++              className={`ov:min-h-0 ov:max-h-full ov:overflow-y-auto  ov:pt-4 ov:pb-4 ${(reserveCheckoutSpace ?? (mode === 'drawer' && isMobile && !hidePricing)) ? 'ov:pb-20' : ''}`}
+               {...(mode === 'inline' ? { 'data-ov25-list-variants-content': true as const } : {})}
+             >
+               <div className={`ov25-size-variant-card-grid ov:grid ${getGridColsClass(2)}`}>
+@@ -213,7 +215,7 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode }) =>
+                 )}
+                 <div className="ov:relative ov:min-h-0 ov:flex-1 ov:flex ov:flex-col ov:pb-4">
+                   <div
+-                    className={`ov:min-h-0 ov:flex-1 ${mode === 'drawer' && isMobile && !hidePricing ? 'ov:pb-20' : ''} ${optionId !== 'modules' && isFilterOpen[optionId] ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}
++                    className={`ov:min-h-0 ov:flex-1 ${(reserveCheckoutSpace ?? (mode === 'drawer' && isMobile && !hidePricing)) ? 'ov:pb-20' : ''} ${optionId !== 'modules' && isFilterOpen[optionId] ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}
+                     {...(mode === 'inline' ? { 'data-ov25-list-variants-content': true as const } : {})}
+                   >
+                     {optionId === 'modules' ? (
+diff --git a/src/components/VariantSelectMenu/DesktopVariants.tsx b/src/components/VariantSelectMenu/DesktopVariants.tsx
+index a0f2642..c081161 100644
+--- a/src/components/VariantSelectMenu/DesktopVariants.tsx
++++ b/src/components/VariantSelectMenu/DesktopVariants.tsx
+@@ -1,3 +1,4 @@
++import { GroupPrice } from './GroupPrice.js';
+ import * as React from 'react'
+ import { useOV25UI } from "../../contexts/ov25-ui-context.js"
+ import { VariantsContent } from "./VariantsContent.js";
+@@ -136,6 +137,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
+             )}
+             {((shouldDestructureGroups || !isGrouped) ? (
+               <div id="ov25-desktop-variants-content-ungrouped" className={`ov:grid ov:h-full ov:pb-8 ov:content-start ${isSizeOption ? `ov25-size-variant-card-grid ${getGridColsClass(gridDivide)}` : 'ov25-variant-card-grid'} ${isFilterOpen ? 'ov:overflow-hidden' : 'ov:overflow-y-auto'}`}>
++                {shouldDestructureGroups && <GroupPrice price={(variantsToRender as VariantGroup[])[0].priceSummary} groupName={(variantsToRender as VariantGroup[])[0].groupName} />}
+                 <VariantsContent variantsToRender={isGrouped ? (variantsToRender as VariantGroup[])[0].variants : variantsToRender as Variant[]} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
+               </div>
+             ) : (
+@@ -144,7 +146,7 @@ export const DesktopVariants = ({ variants, VariantCard, isMobile, onSelect, gri
+                   variantGroup.variants.length > 0 && (
+                     <div key={variantGroup.groupName}>
+                       <div className="ov:flex ov:items-center ov:mx-4 ov:justify-between ov:border-t ov:border-gray-200 ">
+-                        <h3 className="ov25-group-name ov:text-lg ov:py-2 ov:text-(--ov25-secondary-text-color)">{variantGroup.groupName}</h3>
++                        <h3 className="ov25-group-name ov:text-lg ov:py-2 ov:text-(--ov25-secondary-text-color)">{variantGroup.groupName}<GroupPrice price={variantGroup.priceSummary} /></h3>
+                       </div>
+                       <div id="ov25-variant-group-content" className={`ov:grid ${isSizeOption ? `ov25-size-variant-card-grid ${getGridColsClass(gridDivide)}` : 'ov25-variant-card-grid'} ov:pb-4`}>
+                         <VariantsContent variantsToRender={variantGroup.variants} VariantCard={VariantCard} isMobile={isMobile} onSelect={onSelect} />
+diff --git a/src/components/VariantSelectMenu/GroupPrice.tsx b/src/components/VariantSelectMenu/GroupPrice.tsx
+new file mode 100644
+index 0000000..35f578e
+--- /dev/null
++++ b/src/components/VariantSelectMenu/GroupPrice.tsx
+@@ -0,0 +1,19 @@
++import React from 'react';
++import { useOV25UI, type GroupPriceSummary } from '../../contexts/ov25-ui-context.js';
++
++/** Shows the upgrade from the cheapest available group; cheapest groups have no price label. */
++export function GroupPrice({ price, groupName }: { price?: GroupPriceSummary; groupName?: string }) {
++  const { getString, currencySymbol, hidePricing, isSnap2Mode } = useOV25UI();
++  if (hidePricing || isSnap2Mode || !price || typeof price.upgradePrice !== 'number' || !Number.isFinite(price.upgradePrice) || price.upgradePrice <= 0) return null;
++  const formatted = '+' + new Intl.NumberFormat('en-GB', { style: 'currency', currency: price.currency })
++    .format(price.upgradePrice / 100).replace('£', currencySymbol || '£');
++  const label = price.isFrom
++    ? getString('groupPriceFromTotal', { PRICE: formatted }, `From ${formatted}`)
++    : getString('groupPriceTotal', { PRICE: formatted }, `${formatted}`);
++  return (
++    <span className="ov25-group-price" data-price-pence={price.upgradePrice} data-total-price-pence={price.totalPrice} data-price-from={price.isFrom ? 'true' : 'false'}>
++      {groupName ? getString('groupPriceNamed', { GROUP_NAME: groupName, PRICE_LABEL: label }, `${groupName} - ${label}`)
++        : getString('groupPriceInline', { PRICE_LABEL: label }, ` - ${label}`)}
++    </span>
++  );
++}
+diff --git a/src/components/VariantSelectMenu/GroupedVariantsList.tsx b/src/components/VariantSelectMenu/GroupedVariantsList.tsx
+index 0716002..4a91950 100644
+--- a/src/components/VariantSelectMenu/GroupedVariantsList.tsx
++++ b/src/components/VariantSelectMenu/GroupedVariantsList.tsx
+@@ -1,3 +1,5 @@
++import { GroupPrice } from './GroupPrice.js';
++import type { GroupPriceSummary } from '../../contexts/ov25-ui-context.js';
+ import React from 'react';
+ import { Variant, VariantCardProps } from './ProductVariants.js';
+ import { VariantsContent } from './VariantsContent.js';
+@@ -8,9 +10,10 @@ const capitalizeWords = (str: string) =>
+ 
+ /** Sticky group header class shared by Tree, Wizard, and list views. */
+ export const STICKY_GROUP_HEADER_CLASS =
+-  'ov25-group-header ov:sticky ov:z-[9] ov:bg-[var(--ov25-background-color)] ov:px-4 ov:text-sm ov:pt-4 ov:pb-3 ov:text-[var(--ov25-secondary-text-color)] ov:font-medium';
++  'ov25-group-header ov25-sticky-header ov:sticky ov:z-[9] ov:bg-[var(--ov25-background-color)] ov:px-4 ov:text-sm ov:pt-4 ov:pb-3 ov:text-[var(--ov25-secondary-text-color)] ov:font-medium';
+ 
+ export interface GroupedVariantsListGroup {
++  priceSummary?: GroupPriceSummary;
+   groupName: string;
+   variants: Variant[];
+ }
+@@ -51,8 +54,10 @@ export const GroupedVariantsList: React.FC<GroupedVariantsListProps> = ({
+                 {capitalizeWords(
+                   getString('groupHeader', { GROUP_NAME: group.groupName }, group.groupName)
+                 )}
++                <GroupPrice price={group.priceSummary} />
+               </h4>
+             )}
++            {!showGroupHeaders && <GroupPrice price={group.priceSummary} groupName={group.groupName} />}
+             <div className="ov25-variant-card-grid ov:grid">
+               <VariantsContent
+                 variantsToRender={group.variants}
+diff --git a/src/components/VariantSelectMenu/MobileVariants.tsx b/src/components/VariantSelectMenu/MobileVariants.tsx
+index 98c8659..c1316a4 100644
+--- a/src/components/VariantSelectMenu/MobileVariants.tsx
++++ b/src/components/VariantSelectMenu/MobileVariants.tsx
+@@ -1,3 +1,4 @@
++import { GroupPrice } from './GroupPrice.js';
+ import * as React from 'react'
+ import { useState, useMemo } from "react";
+ import { Variant, VariantCardProps, VariantGroup } from "./ProductVariants.js";
+@@ -129,6 +130,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
+     // This keeps components mounted, preventing image reloads when switching groups
+     return (
+       <div id="ov25-mobile-filter-container" className="ov:relative ov:w-full ov:h-full ov:flex ov:flex-col">
++          {shouldDestructureGroups && <GroupPrice price={(variants as VariantGroup[])[0].priceSummary} groupName={(variants as VariantGroup[])[0].groupName} />}
+         {drawerSize !== 'small' && currentOption?.name.toLowerCase() !== 'modules' && (
+           <FilterControls 
+             isFilterOpen={isFilterOpen}
+@@ -159,6 +161,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
+                       } ov:flex ov:items-center ov:justify-center ov:text-xs ov:gap-2 ov:whitespace-nowrap`}
+                     >
+                       <span className="ov:truncate ov:py-1">{capitalizeWords(group.groupName)}</span>
++                      <GroupPrice price={group.priceSummary} />
+                     </button>
+                   </CarouselItem>
+                 ) : null;
+@@ -213,6 +216,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
+     if (drawerSize === 'small') {
+       return (
+         <div id="ov25-mobile-filter-container" className="ov:relative ov:w-full ov:h-full ov:flex ov:flex-col">
++          {shouldDestructureGroups && <GroupPrice price={(variants as VariantGroup[])[0].priceSummary} groupName={(variants as VariantGroup[])[0].groupName} />}
+           {moduleTypeTabs && currentOption?.name.toLowerCase() === 'modules' && (
+             <div className="ov:w-full ov:shrink-0">
+               {moduleTypeTabs}
+@@ -235,6 +239,7 @@ const MobileVariantsContent = React.memo(({ variants, VariantCard, isMobile, onS
+     } else {
+       return (
+         <div id="ov25-mobile-filter-container" className="ov:relative ov:w-full ov:h-full ov:flex ov:flex-col">
++          {shouldDestructureGroups && <GroupPrice price={(variants as VariantGroup[])[0].priceSummary} groupName={(variants as VariantGroup[])[0].groupName} />}
+           {currentOption?.name.toLowerCase() !== 'modules' && <FilterControls 
+             isFilterOpen={isFilterOpen}
+             setIsFilterOpen={setIsFilterOpen}
+diff --git a/src/components/VariantSelectMenu/ProductVariants.tsx b/src/components/VariantSelectMenu/ProductVariants.tsx
+index d57aad1..511bbc0 100644
+--- a/src/components/VariantSelectMenu/ProductVariants.tsx
++++ b/src/components/VariantSelectMenu/ProductVariants.tsx
+@@ -1,3 +1,4 @@
++import type { GroupPriceSummary } from '../../contexts/ov25-ui-context.js';
+ import * as React from 'react'
+ import { DefaultVariantCard } from "./variant-cards/DefaultVariantCard.js"
+ import { cn } from "../../lib/utils.js"
+@@ -30,6 +31,7 @@ export type DrawerSizes = 'closed' | 'small' | 'large'
+ 
+ 
+ export interface VariantGroup {
++  priceSummary?: GroupPriceSummary;
+   groupName: string
+   variants: Variant[]
+ }
+diff --git a/src/components/VariantSelectMenu/ProductVariantsWrapper.tsx b/src/components/VariantSelectMenu/ProductVariantsWrapper.tsx
+index 7d34dd9..cf83229 100644
+--- a/src/components/VariantSelectMenu/ProductVariantsWrapper.tsx
++++ b/src/components/VariantSelectMenu/ProductVariantsWrapper.tsx
+@@ -17,6 +17,7 @@ import {
+ import { VariantDisplayStyleOverlay } from '../../types/config-enums.js';
+ import { FilterControls } from './FilterControls.js';
+ import { FilterContent } from './FilterContent.js';
++import { GroupPrice } from './GroupPrice.js';
+ export type DrawerSizes = 'closed' | 'small' | 'large';
+ 
+ const capitalizeWords = (str: string) =>
+@@ -140,6 +141,7 @@ export function ProductVariantsWrapper({
+               ?.filter(group => 'name' in group && group.name) // Only include groups with names
+               ?.map(group => ({
+                 groupName: 'name' in group ? group.name : 'Default Group',
++                priceSummary: 'priceSummary' in group ? group.priceSummary : undefined,
+                 variants: group?.selections?.map(selection => ({
+                   id: selection?.id,
+                   groupId: group?.id,
+@@ -254,7 +256,7 @@ export function ProductVariantsWrapper({
+     const renderSizeSection = (showHeader = true, isMobileListSticky = false) => (
+       <div className=" ov:pb-6">
+         {showHeader && (
+-          <h3 className={`ov25-option-header ov:sticky ov:top-0  ov:px-4 ov:z-10 ov:bg-(--ov25-background-color) ov:text-lg ov:pb-4 ov:text-(--ov25-secondary-text-color) ${isMobileListSticky ? 'ov:pt-2' : 'ov:pt-0'}`}>
++          <h3 className={`ov25-option-header ov25-sticky-header ov:sticky ov:top-0  ov:px-4 ov:z-10 ov:bg-(--ov25-background-color) ov:text-lg ov:pb-4 ov:text-(--ov25-secondary-text-color) ${isMobileListSticky ? 'ov:pt-2' : 'ov:pt-0'}`}>
+             {capitalizeWords(getString('optionHeader', { OPTION_NAME: 'Size', SELECTED_VARIANT_NAME: getSelectedValueForOption('size') }, 'Size'))}
+           </h3>
+         )}
+@@ -284,7 +286,7 @@ export function ProductVariantsWrapper({
+     const renderOptionSection = ({ optionId, optionName, variants }: { optionId: string; optionName: string; variants: any[] }, showHeader = true, isMobileListSticky = false, showFilter = true) => (
+       <div key={optionId} className=" ov:pb-6">
+         {showHeader && (
+-          <h3 className={`ov25-option-header ov:sticky ov:top-0  ov:px-4 ov:z-10 ov:bg-(--ov25-background-color) ov:text-lg ov:pb-2 ov:md:pb-4 ov:text-(--ov25-secondary-text-color) ${isMobileListSticky ? 'ov:pt-2' : 'ov:pt-0'}`}>
++          <h3 className={`ov25-option-header ov25-sticky-header ov:sticky ov:top-0  ov:px-4 ov:z-10 ov:bg-(--ov25-background-color) ov:text-lg ov:pb-2 ov:md:pb-4 ov:text-(--ov25-secondary-text-color) ${isMobileListSticky ? 'ov:pt-2' : 'ov:pt-0'}`}>
+             {capitalizeWords(
+               getString(
+                 'optionHeader',
+@@ -300,12 +302,14 @@ export function ProductVariantsWrapper({
+             group.variants.length > 0 ? (
+               <div key={group.groupName} className="ov:mb-4">
+                 {variants.length > 1 && (
+-                  <h4 className={`ov25-group-header ov:sticky ov:z-9 ov:bg-(--ov25-background-color) ov:px-4 ov:text-sm ov:pt-6 ov:pb-3 ov:text-(--ov25-secondary-text-color) ov:font-medium ${showHeader ? 'ov:top-10' : 'ov:top-0'}`}>
++                  <h4 className={`ov25-group-header ov25-sticky-header ov:sticky ov:z-9 ov:bg-(--ov25-background-color) ov:px-4 ov:text-sm ov:pt-6 ov:pb-3 ov:text-(--ov25-secondary-text-color) ov:font-medium ${showHeader ? 'ov:top-10' : 'ov:top-0'}`}>
+                     {capitalizeWords(
+                       getString('groupHeader', { GROUP_NAME: group.groupName }, group.groupName)
+                     )}
++                    <GroupPrice price={group.priceSummary} />
+                   </h4>
+                 )}
++                {variants.length === 1 && <GroupPrice price={group.priceSummary} groupName={group.groupName} />}
+                 <div className="ov25-variant-group-content ov:bg-(--ov25-background-color) ov:pt-4">
+                   <div className="ov25-variant-card-grid ov:grid">
+                     <VariantsContent
+@@ -327,7 +331,10 @@ export function ProductVariantsWrapper({
+       </div>
+     );
+ 
+-    const needsBottomMarginForButton = isMobile && !isInline && !hidePricing;
++    // Only the mobile drawer overlays its checkout bar on the variants. Sheets
++    // and modals reserve a separate footer row, so padding would count it twice.
++    const needsBottomMarginForButton = isMobile && !isInline && !hidePricing &&
++      !embeddedInVariantsOnlySheet && configuratorDisplayModeMobile !== 'modal';
+     const isMobileList = isMobile && !isInline && variantShellOverlayStyle === VariantDisplayStyleOverlay.List;
+ 
+     // When the active option changes, scroll to the active option (list mode only, used for when you have a custom button to open the configurator on an option)
+@@ -505,9 +512,9 @@ export function ProductVariantsWrapper({
+       variantShellOverlayStyle === VariantDisplayStyleOverlay.Tabs
+         ? tabsContent
+         : useTree
+-          ? <TreeVariants mode={isInline ? 'inline' : 'drawer'} />
++          ? <TreeVariants mode={isInline ? 'inline' : 'drawer'} reserveCheckoutSpace={needsBottomMarginForButton} />
+           : useAccordion
+-            ? <AccordionVariants mode={isInline ? 'inline' : 'drawer'} />
++            ? <AccordionVariants mode={isInline ? 'inline' : 'drawer'} reserveCheckoutSpace={needsBottomMarginForButton} />
+             : (
+                 <div>
+                   {showSize && (
+@@ -526,7 +533,7 @@ export function ProductVariantsWrapper({
+     const isListModeFilterOpen = variantShellOverlayStyle === VariantDisplayStyleOverlay.List && !!isFilterOpen[listFilterKey];
+     const contentScrollClass = (useAccordion || useTree || isTabs) ? 'ov:overflow-hidden' : isListModeFilterOpen ? 'ov:overflow-hidden' : 'ov:overflow-y-auto';
+     const contentPaddingClass = (useAccordion || useTree || isTabs)
+-      ? (needsBottomMarginForButton ? 'ov:pb-16' : '')
++      ? ''
+       : (needsBottomMarginForButton ? 'ov:pt-0 ov:pb-20' : 'ov:pt-0 ov:pb-2');
+ 
+     if (isListLike) {
+diff --git a/src/components/VariantSelectMenu/TreeVariants.tsx b/src/components/VariantSelectMenu/TreeVariants.tsx
+index 48c5f6c..ef68344 100644
+--- a/src/components/VariantSelectMenu/TreeVariants.tsx
++++ b/src/components/VariantSelectMenu/TreeVariants.tsx
+@@ -23,9 +23,10 @@ export type TreeVariantsMode = 'inline' | 'drawer';
+ 
+ export interface TreeVariantsProps {
+   mode: TreeVariantsMode;
++  reserveCheckoutSpace?: boolean;
+ }
+ 
+-export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
++export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode, reserveCheckoutSpace }) => {
+   const {
+     sizeOption,
+     handleSelectionSelect,
+@@ -117,6 +118,7 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
+             ?.filter(group => 'name' in group && group.name)
+             ?.map(group => ({
+               groupName: 'name' in group ? group.name : 'Default Group',
++                priceSummary: 'priceSummary' in group ? group.priceSummary : undefined,
+               variants: group?.selections?.map(selection => ({
+                 id: selection?.id,
+                 groupId: group?.id,
+@@ -161,7 +163,7 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
+     setCurrentView(null);
+   }, [isTreePanelOpen, activeOptionId, validOptionIds]);
+ 
+-  const scrollContentClass = mode === 'drawer' && isMobile && !hidePricing ? 'ov:pb-20' : '';
++  const scrollContentClass = (reserveCheckoutSpace ?? (mode === 'drawer' && isMobile && !hidePricing)) ? 'ov:pb-20' : '';
+ 
+   const getOptionHeaderLabel = useCallback(
+     (optionName: string) =>
+diff --git a/src/components/VariantSelectMenu/WizardVariants.tsx b/src/components/VariantSelectMenu/WizardVariants.tsx
+index c9b6561..499a755 100644
+--- a/src/components/VariantSelectMenu/WizardVariants.tsx
++++ b/src/components/VariantSelectMenu/WizardVariants.tsx
+@@ -1,3 +1,4 @@
++import { GroupedVariantsList } from './GroupedVariantsList.js';
+ import React, { useState, useEffect, useRef, useCallback } from 'react';
+ import { ChevronDown, ChevronLeft, ChevronRight, Undo2 } from 'lucide-react';
+ import { useOV25UI } from '../../contexts/ov25-ui-context.js';
+@@ -554,11 +555,27 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode, displayMod
+                 </div>
+               )}
+               {filteredOption && allVariants.length > 0 && (
+-                <div className="ov-wizard-variants-scroll ov:overflow-y-auto ov:h-full ov:p-4">
+-                  <div className={`ov:grid ov:content-start ov:gap-2 ${currentOption!.id === 'size' ? 'ov25-size-variant-card-grid ov:grid-cols-2!' : 'ov25-variant-card-grid'}`}>
+-                    <VariantsContent
+-                      variantsToRender={visibleVariants}
+-                      VariantCard={currentOption!.id === 'size' ? SizeVariantCard : DefaultVariantCard}
++                <div className={`ov-wizard-variants-scroll ov:overflow-y-auto ov:h-full ${currentOption!.id === 'size' ? 'ov:p-4' : 'ov:px-4 ov:pb-4'}`}>
++                  {currentOption!.id === 'size' ? (
++                    <div className="ov:grid ov:content-start ov:gap-2 ov25-size-variant-card-grid ov:grid-cols-2!">
++                      <VariantsContent
++                        variantsToRender={visibleVariants}
++                        VariantCard={SizeVariantCard}
++                        isMobile={false}
++                        onSelect={(variant) => handleSelectionSelect(variant as any, currentOption!.id)}
++                        showImage
++                        showDimensions={false}
++                      />
++                    </div>
++                  ) : (
++                    <GroupedVariantsList
++                      groups={(filteredOption.groups ?? []).map(group => ({
++                        groupName: 'name' in group ? group.name : '',
++                        priceSummary: 'priceSummary' in group ? group.priceSummary : undefined,
++                        variants: visibleVariants.filter(variant => variant.groupId === group.id),
++                      }))}
++                      showGroupHeaders
++                      VariantCard={DefaultVariantCard}
+                       isMobile={false}
+                       onSelect={(variant) => handleSelectionSelect(
+                         variant.selection
+@@ -566,10 +583,8 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode, displayMod
+                           : variant as any,
+                         currentOption!.id,
+                       )}
+-                      showImage={currentOption!.id === 'size' ? true : undefined}
+-                      showDimensions={currentOption!.id === 'size' ? false : undefined}
+                     />
+-                  </div>
++                  )}
+                   {hasMore && (
+                     <div
+                       ref={(el) => { sentinelRefs.current[currentOption!.id] = el; }}
+diff --git a/src/contexts/ov25-ui-context.tsx b/src/contexts/ov25-ui-context.tsx
+index 1e3e983..ef3c5f4 100644
+--- a/src/contexts/ov25-ui-context.tsx
++++ b/src/contexts/ov25-ui-context.tsx
+@@ -202,7 +202,17 @@ export interface Selection {
+   metadata?: { bedSize?: string };
+ }
+ 
++export interface GroupPriceSummary {
++  /** Whole configured-product total in pence, including discounts and rounding. */
++  totalPrice: number;
++  /** Pence above the cheapest available group in this option; absent if the baseline is unknown. */
++  upgradePrice?: number;
++  currency: 'GBP';
++  isFrom: boolean;
++}
++
+ export interface Group {
++  priceSummary?: GroupPriceSummary;
+   id: string;
+   name: string;
+   selections: Selection[];
+diff --git a/src/lib/strings/string-keys.ts b/src/lib/strings/string-keys.ts
+index 8076ad3..23b660f 100644
+--- a/src/lib/strings/string-keys.ts
++++ b/src/lib/strings/string-keys.ts
+@@ -83,6 +83,19 @@ export const STRING_REPLACEMENT_DEFINITIONS: StringReplacements = [
+       { name: 'GROUP_NAME', description: 'Group display name.' },
+     ],
+   },
++  { key: 'groupPriceTotal', label: 'Group upgrade price', defaultTemplate: '${PRICE}', interpolationValues: [
++    { name: 'PRICE', description: 'Formatted upgrade from the cheapest group, including the plus sign.' },
++  ] },
++  { key: 'groupPriceFromTotal', label: 'Group minimum upgrade price', defaultTemplate: 'From ${PRICE}', interpolationValues: [
++    { name: 'PRICE', description: 'Lowest formatted upgrade in this group, including the plus sign.' },
++  ] },
++  { key: 'groupPriceInline', label: 'Group price after a heading', defaultTemplate: ' - ${PRICE_LABEL}', interpolationValues: [
++    { name: 'PRICE_LABEL', description: 'Resolved upgrade or minimum upgrade label.' },
++  ] },
++  { key: 'groupPriceNamed', label: 'Group upgrade without a separate header', defaultTemplate: '${GROUP_NAME} - ${PRICE_LABEL}', interpolationValues: [
++    { name: 'GROUP_NAME', description: 'Group display name.' },
++    { name: 'PRICE_LABEL', description: 'Resolved upgrade or minimum upgrade label.' },
++  ] },
+   // prices
+   { key: 'priceLoading', label: 'Price loading label', description: 'Screen-reader label shown while the configurator price loads.', defaultTemplate: 'Loading price', interpolationValues: [] },
+   { key: 'priceValue',label: 'Price value', defaultTemplate: '${PRICE}',interpolationValues: [
+diff --git a/test/e2e/selection-details.test.ts b/test/e2e/selection-details.test.ts
+index 229bae7..f8bcb4d 100644
+--- a/test/e2e/selection-details.test.ts
++++ b/test/e2e/selection-details.test.ts
+@@ -717,6 +717,8 @@ test.describe('selection detail interactions', () => {
+ test('desktop tooltip previews after its CSS hover delay and applies directly from its card', async ({
+   page,
+ }) => {
++    const clockStart = new Date('2026-01-01T00:00:00Z');
++    await page.clock.install({ time: clockStart });
+     await page.goto(
+       fixtureUrl(PRODUCT_FIXTURES.tooltip, {
+         configuratorMode: 'inline',
+@@ -729,14 +731,21 @@ test('desktop tooltip previews after its CSS hover delay and applies directly fr
+     await trigger.evaluate((element) => {
+       element.style.setProperty('--ov25-selection-details-tooltip-hover-delay', '120ms');
+     });
++    // Control the hover timer: browser round trips under parallel load can exceed
++    // the entire delay before a wall-clock negative assertion reaches the page.
++    await page.clock.pauseAt(new Date(clockStart.getTime() + 60_000));
+     await trigger.hover();
+-    await page.waitForTimeout(40);
++    await page.clock.runFor(40);
+     await expectDetailsClosed(page);
+     await page.mouse.move(1, 1);
+-    await page.waitForTimeout(140);
++    await page.clock.runFor(140);
+     await expectDetailsClosed(page);
+ 
+     await trigger.hover();
++    await page.clock.runFor(119);
++    await expectDetailsClosed(page);
++    await page.clock.runFor(1);
++    await page.clock.resume();
+     const surface = page.locator(`${DETAILS_SURFACE}:visible`);
+     await expect(surface).toBeVisible({ timeout: RUNTIME_TIMEOUT });
+     await expect(surface).toHaveAttribute('data-pinned', 'false');
+diff --git a/test/unit/group-price.test.tsx b/test/unit/group-price.test.tsx
+new file mode 100644
+index 0000000..afbc16e
+--- /dev/null
++++ b/test/unit/group-price.test.tsx
+@@ -0,0 +1,45 @@
++import React from 'react';
++import { afterEach, describe, expect, it, vi } from 'vitest';
++import { cleanup, render, screen } from '@testing-library/react';
++import { GroupPrice } from '../../src/components/VariantSelectMenu/GroupPrice';
++
++const context = vi.hoisted(() => ({
++  hidePricing: false, isSnap2Mode: false, currencySymbol: '£',
++  getString: vi.fn((_key: string, _vars: unknown, fallback: string) => fallback),
++}));
++vi.mock('../../src/contexts/ov25-ui-context.js', () => ({ useOV25UI: () => context }));
++afterEach(() => { cleanup(); context.hidePricing = false; context.isSnap2Mode = false; context.currencySymbol = '£'; });
++
++describe('group product price', () => {
++  it('renders the total in the DOM, responds to live updates, and clears unavailable prices', () => {
++    const { rerender, container } = render(<GroupPrice price={{ totalPrice: 150000, upgradePrice: 5000, currency: 'GBP', isFrom: false }} />);
++    expect(screen.getByText('- +£50.00')).toHaveClass('ov25-group-price');
++    expect(screen.getByText('- +£50.00')).toHaveAttribute('data-price-pence', '5000');
++    rerender(<GroupPrice price={{ totalPrice: 160000, upgradePrice: 6000, currency: 'GBP', isFrom: true }} />);
++    expect(screen.getByText('- From +£60.00')).toHaveAttribute('data-price-from', 'true');
++    expect(context.getString).toHaveBeenCalledWith('groupPriceFromTotal', { PRICE: '+£60.00' }, 'From +£60.00');
++    rerender(<GroupPrice groupName="Standard" price={{ totalPrice: 70000, upgradePrice: 2000, currency: 'GBP', isFrom: true }} />);
++    expect(screen.getByText('Standard - From +£20.00')).toBeInTheDocument();
++    rerender(<GroupPrice />);
++    expect(container).toBeEmptyDOMElement();
++  });
++  it('honours hidePricing and excludes Snap2 even when given a price', () => {
++    context.hidePricing = true;
++    const { container, rerender } = render(<GroupPrice price={{ totalPrice: 150000, upgradePrice: 5000, currency: 'GBP', isFrom: false }} />);
++    expect(container).toBeEmptyDOMElement();
++    context.hidePricing = false; context.isSnap2Mode = true;
++    rerender(<GroupPrice price={{ totalPrice: 150000, upgradePrice: 5000, currency: 'GBP', isFrom: false }} />);
++    expect(container).toBeEmptyDOMElement();
++  });
++  it('hides the cheapest groups and unknown baselines, and supports the currency display symbol', () => {
++    context.currencySymbol = '€';
++    const { container, rerender } = render(<GroupPrice price={{ totalPrice: 10000, upgradePrice: 0, currency: 'GBP', isFrom: false }} />);
++    expect(container).toBeEmptyDOMElement();
++    rerender(<GroupPrice price={{ totalPrice: 15000, upgradePrice: 5000, currency: 'GBP', isFrom: false }} />);
++    expect(screen.getByText('- +€50.00')).toHaveAttribute('data-total-price-pence', '15000');
++    rerender(<GroupPrice price={{ totalPrice: 15000, currency: 'GBP', isFrom: false }} />);
++    expect(container).toBeEmptyDOMElement();
++    rerender(<GroupPrice price={{ totalPrice: 15000, upgradePrice: NaN, currency: 'GBP', isFrom: false }} />);
++    expect(container).toBeEmptyDOMElement();
++  });
++});
+diff --git a/test/unit/product-variants-group-price.test.tsx b/test/unit/product-variants-group-price.test.tsx
+new file mode 100644
+index 0000000..f940056
+--- /dev/null
++++ b/test/unit/product-variants-group-price.test.tsx
+@@ -0,0 +1,96 @@
++import React from 'react';
++import { afterEach, beforeEach, expect, it, vi } from 'vitest';
++import { cleanup, render, screen } from '@testing-library/react';
++import { ProductVariantsWrapper } from '../../src/components/VariantSelectMenu/ProductVariantsWrapper.js';
++
++const state = vi.hoisted(() => ({ context: {} as any }));
++vi.mock('../../src/contexts/ov25-ui-context.js', () => ({ useOV25UI: () => state.context }));
++vi.mock('../../src/components/VariantSelectMenu/ProductVariants.js', () => ({ ProductVariants: () => null }));
++vi.mock('../../src/components/VariantSelectMenu/AccordionVariants.js', () => ({ AccordionVariants: ({ reserveCheckoutSpace }: any) => <div data-checkout-reserved={String(reserveCheckoutSpace)} /> }));
++vi.mock('../../src/components/VariantSelectMenu/TreeVariants.js', () => ({ TreeVariants: ({ reserveCheckoutSpace }: any) => <div data-checkout-reserved={String(reserveCheckoutSpace)} /> }));
++vi.mock('../../src/components/VariantSelectMenu/VariantsHeader.js', () => ({ VariantsHeader: () => null }));
++vi.mock('../../src/components/VariantSelectMenu/VariantsContent.js', () => ({ VariantsContent: () => null }));
++vi.mock('../../src/components/VariantSelectMenu/variant-cards/SizeVariantCard.js', () => ({ SizeVariantCard: () => null }));
++vi.mock('../../src/components/VariantSelectMenu/variant-cards/DefaultVariantCard.js', () => ({ DefaultVariantCard: () => null }));
++vi.mock('../../src/components/VariantSelectMenu/CheckoutButton.js', () => ({ CheckoutButton: () => null }));
++vi.mock('../../src/components/VariantSelectMenu/FilterControls.js', () => ({ FilterControls: () => null }));
++vi.mock('../../src/components/VariantSelectMenu/FilterContent.js', () => ({ FilterContent: () => null }));
++vi.mock('../../src/components/VariantSelectMenu/DesktopVariants.js', () => ({ getGridColsClass: () => '' }));
++
++function groups(upgradePrice = 5000) {
++  return [
++    { id: 'standard', name: 'Standard', priceSummary: { totalPrice: 10000, upgradePrice: 0, currency: 'GBP', isFrom: false }, selections: [{ id: 'a', name: 'A' }] },
++    { id: 'luxury', name: 'Luxury', priceSummary: { totalPrice: 10000 + upgradePrice, upgradePrice, currency: 'GBP', isFrom: true }, selections: [{ id: 'b', name: 'B' }] },
++  ];
++}
++
++beforeEach(() => {
++  vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} });
++  state.context = {
++    isMobile: true, drawerSize: 'large', isVariantsOpen: true, activeOptionId: undefined,
++    variantPanelOptions: [{ id: 'fabric', name: 'Fabric', groups: groups() }],
++    selectedSelections: [], products: [], availableProductFilters: {}, searchQueries: {},
++    applySearchAndFilters: (option: unknown) => option,
++    variantDisplayStyleMobile: 'list', variantDisplayStyleOverlay: 'list',
++    variantDisplayStyleInline: 'list', variantDisplayStyleInlineMobile: 'list',
++    hidePricing: false, isSnap2Mode: false, currencySymbol: '£',
++    getString: (_key: string, _vars: unknown, fallback: string) => fallback,
++    getSelectedValueForOption: () => '', setStickyOptionHeader: vi.fn(),
++  };
++});
++afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
++
++it.each([
++  ['list', true, false], ['tabs', true, false],
++  ['list', true, true], ['tabs', true, true],
++  ['list', false, false], ['tabs', false, false],
++  ['list', false, true], ['tabs', false, true],
++])('renders live group prices in %s (mobile=%s, inline=%s)', (style, isMobile, isInline) => {
++  Object.assign(state.context, {
++    isMobile, variantDisplayStyleMobile: style, variantDisplayStyleOverlay: style,
++    variantDisplayStyleInline: style, variantDisplayStyleInlineMobile: style,
++  });
++  const { rerender, container } = render(<ProductVariantsWrapper isInline={isInline as boolean} />);
++  const heading = screen.getByRole('heading', { name: /Luxury\s*- From \+£50\.00/ });
++  expect(heading).toHaveClass('ov25-sticky-header');
++  for (const optionHeader of container.querySelectorAll('.ov25-option-header')) {
++    expect(optionHeader).toHaveClass('ov25-sticky-header');
++  }
++  expect(heading.querySelector('.ov25-group-price')).toHaveAttribute('data-price-pence', '5000');
++  expect(screen.getByRole('heading', { name: 'Standard', exact: true }).querySelector('.ov25-group-price')).toBeNull();
++
++  state.context.variantPanelOptions = [{ id: 'fabric', name: 'Fabric', groups: groups(7500) }];
++  rerender(<ProductVariantsWrapper isInline={isInline as boolean} />);
++  expect(screen.getByRole('heading', { name: /Luxury\s*- From \+£75\.00/ })).toBeInTheDocument();
++
++  state.context.variantPanelOptions = [{ id: 'fabric', name: 'Fabric', groups: groups().map(({ priceSummary, ...group }) => group) }];
++  rerender(<ProductVariantsWrapper isInline={isInline as boolean} />);
++  expect(container.querySelector('.ov25-group-price')).toBeNull();
++});
++
++it('retains a named price when filtering leaves one group without a heading', () => {
++  state.context.variantPanelOptions[0].groups = groups().slice(1);
++  const { container, rerender } = render(<ProductVariantsWrapper />);
++  expect(container.querySelector('h4')).toBeNull();
++  expect(screen.getByText('Luxury - From +£50.00')).toHaveClass('ov25-group-price');
++  state.context.hidePricing = true;
++  rerender(<ProductVariantsWrapper />);
++  expect(container.querySelector('.ov25-group-price')).toBeNull();
++  state.context.hidePricing = false;
++  state.context.isSnap2Mode = true;
++  rerender(<ProductVariantsWrapper />);
++  expect(container.querySelector('.ov25-group-price')).toBeNull();
++});
++
++it.each(['list', 'tabs', 'tree', 'accordion'])('reserves checkout space only for the mobile drawer in %s', (style) => {
++  state.context.variantDisplayStyleMobile = style;
++  state.context.configuratorDisplayModeMobile = 'drawer';
++  const { container, rerender } = render(<ProductVariantsWrapper />);
++  const checkoutPadding = '[class~="ov:pb-16"], [class~="ov:pb-20"], [data-checkout-reserved="true"]';
++  expect(container.querySelector(checkoutPadding)).not.toBeNull();
++  rerender(<ProductVariantsWrapper embeddedInVariantsOnlySheet />);
++  expect(container.querySelector(checkoutPadding)).toBeNull();
++  state.context.configuratorDisplayModeMobile = 'modal';
++  rerender(<ProductVariantsWrapper />);
++  expect(container.querySelector(checkoutPadding)).toBeNull();
++});
+diff --git a/test/unit/release-react18-preflight.test.ts b/test/unit/release-react18-preflight.test.ts
+new file mode 100644
+index 0000000..7f0be72
+--- /dev/null
++++ b/test/unit/release-react18-preflight.test.ts
+@@ -0,0 +1,66 @@
++// @vitest-environment node
++import { execFileSync } from 'node:child_process';
++import fs from 'node:fs';
++import os from 'node:os';
++import path from 'node:path';
++import { afterEach, expect, it } from 'vitest';
++import { buildReact18Isolated } from '../../scripts/release/react18-preflight.js';
++
++const directories: string[] = [];
++afterEach(() => {
++  for (const directory of directories.splice(0)) fs.rmSync(directory, { recursive: true, force: true });
++});
++
++function fixture() {
++  const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'react18-preflight-test-'));
++  directories.push(directory);
++  execFileSync('git', ['init', '-q', directory]);
++  fs.writeFileSync(path.join(directory, '.gitignore'), 'node_modules\ndist\n.env\n');
++  fs.writeFileSync(path.join(directory, 'package.json'), '{"name":"original"}');
++  fs.writeFileSync(path.join(directory, 'deleted.ts'), 'deleted');
++  execFileSync('git', ['add', '.'], { cwd: directory });
++  fs.rmSync(path.join(directory, 'deleted.ts'));
++  fs.writeFileSync(path.join(directory, 'package.json'), '{"name":"working-copy"}');
++  fs.writeFileSync(path.join(directory, 'new.ts'), 'new source');
++  for (const ignored of ['node_modules', 'dist']) {
++    fs.mkdirSync(path.join(directory, ignored));
++    fs.writeFileSync(path.join(directory, ignored, 'keep'), 'original');
++  }
++  fs.writeFileSync(path.join(directory, '.env'), 'local-only');
++  return directory;
++}
++
++it.each([false, true])('isolates current source and cleans up (build fails: %s)', (fails) => {
++  const sourceDir = fixture();
++  let snapshot = '';
++  const build = () => buildReact18Isolated({ sourceDir, runBuild: (command, args, { cwd }) => {
++    snapshot = cwd;
++    expect(command).toBe('npm');
++    expect(args).toEqual(['run', 'build:react18']);
++    expect(fs.readFileSync(path.join(cwd, 'package.json'), 'utf8')).toContain('working-copy');
++    expect(fs.readFileSync(path.join(cwd, 'new.ts'), 'utf8')).toBe('new source');
++    for (const excluded of ['.git', 'node_modules', 'dist', '.env', 'deleted.ts']) {
++      expect(fs.existsSync(path.join(cwd, excluded))).toBe(false);
++    }
++    fs.writeFileSync(path.join(cwd, 'package.json'), 'mutated');
++    fs.writeFileSync(path.join(cwd, 'package-lock.json'), 'mutated');
++    if (fails) throw new Error('build failed');
++  } });
++  if (fails) expect(build).toThrow('build failed');
++  else build();
++  expect(snapshot).not.toBe('');
++  expect(fs.existsSync(snapshot)).toBe(false);
++  expect(fs.readFileSync(path.join(sourceDir, 'package.json'), 'utf8')).toContain('working-copy');
++  expect(fs.existsSync(path.join(sourceDir, 'package-lock.json'))).toBe(false);
++  expect(fs.readFileSync(path.join(sourceDir, 'node_modules/keep'), 'utf8')).toBe('original');
++});
++
++it('rejects symlinks before the build can write outside the snapshot', () => {
++  const sourceDir = fixture();
++  fs.symlinkSync(path.join(sourceDir, 'package.json'), path.join(sourceDir, 'linked.json'));
++  let buildStarted = false;
++  expect(() => buildReact18Isolated({ sourceDir, runBuild: () => { buildStarted = true; } }))
++    .toThrow('React 18 snapshot requires a regular file: linked.json');
++  expect(buildStarted).toBe(false);
++  expect(fs.readFileSync(path.join(sourceDir, 'package.json'), 'utf8')).toContain('working-copy');
++});
+diff --git a/test/unit/variants-per-row.test.ts b/test/unit/variants-per-row.test.ts
+index e54baa6..e3cb543 100644
+--- a/test/unit/variants-per-row.test.ts
++++ b/test/unit/variants-per-row.test.ts
+@@ -47,9 +47,8 @@ describe('variants per row', () => {
+     expect(css).toContain('aspect-ratio: 1;');
+   });
+ 
+-  it('uses the shared grid hook in every variant display-mode renderer', () => {
++  it('uses the shared grid hook in direct renderers and delegates wizard groups to it', () => {
+     const displayModeRendererSources = [
+-      readProjectFile('src/components/VariantSelectMenu/WizardVariants.tsx'),
+       readProjectFile('src/components/VariantSelectMenu/ProductVariantsWrapper.tsx'),
+       readProjectFile('src/components/VariantSelectMenu/GroupedVariantsList.tsx'),
+       readProjectFile('src/components/VariantSelectMenu/DesktopVariants.tsx'),
+@@ -59,6 +58,11 @@ describe('variants per row', () => {
+     for (const source of displayModeRendererSources) {
+       expect(source).toContain('ov25-variant-card-grid');
+     }
++
++    // Wizard uses the grouped renderer; the grid hook belongs to that component.
++    // wizard-group-price.test.tsx also verifies the rendered group/grid structure.
++    expect(readProjectFile('src/components/VariantSelectMenu/WizardVariants.tsx'))
++      .toContain('<GroupedVariantsList');
+   });
+ 
+   it('exposes the grid as a stable custom-CSS target', () => {
+diff --git a/test/unit/wizard-group-price.test.tsx b/test/unit/wizard-group-price.test.tsx
+new file mode 100644
+index 0000000..9e128d0
+--- /dev/null
++++ b/test/unit/wizard-group-price.test.tsx
+@@ -0,0 +1,88 @@
++import React from 'react';
++import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
++import { afterEach, beforeEach, expect, it, vi } from 'vitest';
++import { WizardVariants } from '../../src/components/VariantSelectMenu/WizardVariants.js';
++
++const state = vi.hoisted(() => ({ context: {} as any, loadMore: undefined as undefined | ((entries: any[]) => void) }));
++vi.mock('../../src/contexts/ov25-ui-context.js', () => ({ useOV25UI: () => state.context }));
++vi.mock('../../src/components/VariantSelectMenu/variant-cards/DefaultVariantCard.js', () => ({
++  DefaultVariantCard: ({ variant, index, onSelect }: any) => <button data-card-index={index} onClick={() => onSelect(variant)}>{variant.name}</button>,
++}));
++vi.mock('../../src/components/VariantSelectMenu/variant-cards/SizeVariantCard.js', () => ({ SizeVariantCard: () => null }));
++vi.mock('../../src/components/VariantSelectMenu/variant-cards/VariantThumb.js', () => ({ VariantThumb: () => null }));
++vi.mock('../../src/components/VariantSelectMenu/FilterControls.js', () => ({ FilterControls: () => null }));
++vi.mock('../../src/components/VariantSelectMenu/FilterContent.js', () => ({ FilterContent: () => null }));
++vi.mock('../../src/components/VariantSelectMenu/Snap2ModulesOptionBody.js', () => ({ Snap2ModulesOptionBody: () => null }));
++vi.mock('../../src/components/VariantSelectMenu/CheckoutButton.js', () => ({ CheckoutButton: () => null }));
++vi.mock('../../src/components/Snap2VariantSheetColumn.js', () => ({ Snap2VariantSheetColumn: ({ children }: React.PropsWithChildren) => children }));
++
++function group(id: string, upgradePrice: number, count = 1) {
++  return { id, name: id, priceSummary: { totalPrice: 10000 + upgradePrice, upgradePrice, currency: 'GBP', isFrom: false },
++    selections: Array.from({ length: count }, (_, i) => ({ id: `${id}-${i}`, name: `${id} card ${i}`, thumbnail: '' })) };
++}
++
++beforeEach(() => {
++  vi.stubGlobal('ResizeObserver', class { observe() {} disconnect() {} });
++  vi.stubGlobal('IntersectionObserver', class {
++    constructor(callback: (entries: any[]) => void) { state.loadMore = callback; }
++    observe() {} disconnect() {}
++  });
++  state.context = {
++    variantPanelOptions: [{ id: 'fabric', name: 'Fabric', groups: [group('Standard', 0), group('Leather', 10000), group('Luxury', 20000)] }],
++    selectedSelections: [], products: [], activeOptionId: null, setActiveOptionId: vi.fn(),
++    handleSelectionSelect: vi.fn(), getSelectedValue: () => '',
++    applySearchAndFilters: (option: unknown) => option, hidePricing: false, isSnap2Mode: false,
++    currencySymbol: '£', getString: (_key: string, _vars: unknown, fallback: string) => fallback,
++  };
++});
++afterEach(() => { cleanup(); vi.unstubAllGlobals(); state.loadMore = undefined; });
++
++it.each([
++  ['wizard', true], ['wizard', false], ['guided-overview', true], ['guided-overview', false],
++] as const)('shows sticky named groups with optional prices (%s, mobile=%s)', (displayMode, isMobile) => {
++  state.context.isMobile = isMobile;
++  const { container, rerender } = render(<WizardVariants mode="drawer" displayMode={displayMode} />);
++  if (displayMode === 'guided-overview') {
++    fireEvent.click(container.querySelector('[data-ov25-guided-overview-action="next"]')!);
++  }
++  const headings = screen.getAllByRole('heading', { level: 4 });
++  expect(headings.map(node => node.textContent)).toEqual(['Standard', 'Leather - +£100.00', 'Luxury - +£200.00']);
++  for (const heading of headings) {
++    expect(heading).toHaveClass('ov25-group-header', 'ov25-sticky-header', 'ov:sticky', 'ov:top-0');
++    expect(heading.nextElementSibling).toHaveClass('ov25-variant-card-grid');
++  }
++  expect(headings[2].nextElementSibling).toHaveTextContent('Luxury card 0');
++  fireEvent.click(screen.getByRole('button', { name: 'Luxury card 0' }));
++  expect(state.context.handleSelectionSelect).toHaveBeenCalledWith(expect.objectContaining({ id: 'Luxury-0', groupId: 'Luxury' }), 'fabric');
++  state.context.hidePricing = true;
++  rerender(<WizardVariants mode="drawer" displayMode={displayMode} />);
++  expect(screen.getAllByRole('heading', { level: 4 }).map(node => node.textContent)).toEqual(['Standard', 'Leather', 'Luxury']);
++  expect(container.querySelector('.ov25-group-price')).toBeNull();
++});
++
++it('omits labels for groups outside the visible batch and empty filtered groups', () => {
++  state.context.variantPanelOptions[0].groups = [group('Standard', 0, 12), group('Empty', 5000, 0), group('Luxury', 20000)];
++  const { container } = render(<WizardVariants mode="inline" />);
++  expect(container.querySelectorAll('.ov25-variant-card-grid button')).toHaveLength(12);
++  expect(container.querySelector('.ov25-group-price')).toBeNull();
++  act(() => state.loadMore?.([{ isIntersecting: true }]));
++  expect(container.querySelectorAll('.ov25-group-price')).toHaveLength(1);
++  expect(screen.getByRole('heading', { name: /Luxury.*£200/ }).nextElementSibling).toHaveTextContent('Luxury card 0');
++  expect(screen.queryByRole('heading', { name: 'Empty' })).toBeNull();
++});
++
++it('keeps one label when a group spans multiple batches', () => {
++  state.context.variantPanelOptions[0].groups = [group('Luxury', 20000, 15)];
++  const { container } = render(<WizardVariants mode="inline" />);
++  expect(container.querySelectorAll('.ov25-group-price')).toHaveLength(1);
++  act(() => state.loadMore?.([{ isIntersecting: true }]));
++  expect(container.querySelectorAll('.ov25-variant-card-grid button')).toHaveLength(15);
++  expect(container.querySelectorAll('.ov25-group-price')).toHaveLength(1);
++});
++
++it('uses the registered group header replacement when no prices are available', () => {
++  state.context.variantPanelOptions[0].groups = [group('Standard', 0)];
++  state.context.getString = (key: string, vars: any, fallback: string) => key === 'groupHeader' ? `Collection: ${vars.GROUP_NAME}` : fallback;
++  render(<WizardVariants mode="inline" />);
++  expect(screen.getByRole('heading', { name: 'Collection: Standard' })).toHaveClass('ov25-group-header');
++});

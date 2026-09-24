@@ -1,0 +1,15 @@
+ba02776 (HEAD -> main, origin/main, origin/HEAD) fix (tests)
+c8201c1 fix: group headers, prices and checkout spacing
+dba7276 test: stabilize tooltip hover timing
+2939cac feat(release) add react18 build to release:test script
+ee3fd3c Merge pull request #7 from orbitalvision/feature/group-total-prices
+134bb07 (origin/feature/group-total-prices, feature/group-total-prices) fix: hide group prices by default
+b4a04f4 feat: show upgrades above cheapest group
+2be86b6 fix(tests) dev retailer for tests
+c729e45 css
+1e3cf36 fix(skill) runbook and skill update
+e30f7a4 fix: separate group names and prices with hyphens
+98b221e test: demonstrate group price customisation
+db0a22b fix: show group prices by default
+672268f feat: add hidden group product totals
+caaf7cd (tag: ov25-setup@0.8.11) chore: release ov25-setup 0.8.11
