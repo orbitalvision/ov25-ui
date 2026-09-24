@@ -28,6 +28,9 @@ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
     buyNow: () => alert('Buy now function called'),
     buySwatches: () => alert('Add swatches to cart'),
   },
+  branding: {
+    cssString: `.ov25-group-price { --ov25-group-price-display: inline; }`,
+  },
   flags: { hidePricing: false },
 });
 
