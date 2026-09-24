@@ -717,6 +717,8 @@ test.describe('selection detail interactions', () => {
 test('desktop tooltip previews after its CSS hover delay and applies directly from its card', async ({
   page,
 }) => {
+    const clockStart = new Date('2026-01-01T00:00:00Z');
+    await page.clock.install({ time: clockStart });
     await page.goto(
       fixtureUrl(PRODUCT_FIXTURES.tooltip, {
         configuratorMode: 'inline',
@@ -729,14 +731,21 @@ test('desktop tooltip previews after its CSS hover delay and applies directly fr
     await trigger.evaluate((element) => {
       element.style.setProperty('--ov25-selection-details-tooltip-hover-delay', '120ms');
     });
+    // Control the hover timer: browser round trips under parallel load can exceed
+    // the entire delay before a wall-clock negative assertion reaches the page.
+    await page.clock.pauseAt(new Date(clockStart.getTime() + 60_000));
     await trigger.hover();
-    await page.waitForTimeout(40);
+    await page.clock.runFor(40);
     await expectDetailsClosed(page);
     await page.mouse.move(1, 1);
-    await page.waitForTimeout(140);
+    await page.clock.runFor(140);
     await expectDetailsClosed(page);
 
     await trigger.hover();
+    await page.clock.runFor(119);
+    await expectDetailsClosed(page);
+    await page.clock.runFor(1);
+    await page.clock.resume();
     const surface = page.locator(`${DETAILS_SURFACE}:visible`);
     await expect(surface).toBeVisible({ timeout: RUNTIME_TIMEOUT });
     await expect(surface).toHaveAttribute('data-pinned', 'false');
