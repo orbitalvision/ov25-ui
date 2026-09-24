@@ -111,6 +111,10 @@ const injectConfig = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
     ],
     // groups
     groupHeader: [{ template: '▽Option: ${OPTION_NAME} / Group: ${GROUP_NAME}▽' }],
+    groupPriceTotal: [{ template: '▽Group upgrade: ${PRICE}▽' }],
+    groupPriceFromTotal: [{ template: '▽Group upgrade from: ${PRICE}▽' }],
+    groupPriceInline: [{ template: ' - ▽${PRICE_LABEL}▽' }],
+    groupPriceNamed: [{ template: '▽${GROUP_NAME} / ${PRICE_LABEL}▽' }],
     // filters
     filtersLabel: [{ template: '▽Open filters for ${OPTION_NAME}▽' }],
     filtersSearchPlaceholder: [{ template: '▽Search options▽' }],

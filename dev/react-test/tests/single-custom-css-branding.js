@@ -156,6 +156,22 @@ export const SINGLE_CUSTOM_CSS_BRANDING = `
         background: goldenrod;
       }
 
+      /* Standard-product group upgrades; cheapest groups have no price badge. */
+      .ov25-group-price {
+        --ov25-group-price-display: inline-block;
+        background-color: gold;
+        color: navy;
+        border: 2px solid navy;
+        border-radius: 999px;
+        padding: 2px 8px;
+        font-weight: 700;
+      }
+
+      .ov25-group-price[data-price-from="true"] {
+        background-color: lightcyan;
+        border-style: dashed;
+      }
+
       .ov25-variant-group-content {
         background: darkblue;
       }

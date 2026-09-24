@@ -117,6 +117,7 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode }) => {
             ?.filter(group => 'name' in group && group.name)
             ?.map(group => ({
               groupName: 'name' in group ? group.name : 'Default Group',
+                priceSummary: 'priceSummary' in group ? group.priceSummary : undefined,
               variants: group?.selections?.map(selection => ({
                 id: selection?.id,
                 groupId: group?.id,

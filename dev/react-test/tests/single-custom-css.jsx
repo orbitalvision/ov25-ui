@@ -78,7 +78,7 @@ function App() {
   return (
     <TestPageLayout
       title="Single Product – Custom CSS"
-      description="Variant controls—including Guided Overview—dimensions, and every Selection Details display mode styled with custom CSS."
+      description="Variant controls—including Guided Overview—group price headings, dimensions, and every Selection Details display mode styled with custom CSS."
       injectConfig={config}
       topContent={
         <div className="ov:flex ov:flex-col ov:gap-2 ov:mb-3 ov:text-sm">

@@ -1,3 +1,4 @@
+import { GroupPrice } from './GroupPrice.js';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ChevronDown, ChevronLeft, ChevronRight, Undo2 } from 'lucide-react';
 import { useOV25UI } from '../../contexts/ov25-ui-context.js';
@@ -555,6 +556,9 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode, displayMod
               )}
               {filteredOption && allVariants.length > 0 && (
                 <div className="ov-wizard-variants-scroll ov:overflow-y-auto ov:h-full ov:p-4">
+                  {filteredOption.groups?.map(group => 'priceSummary' in group && (
+                    <GroupPrice key={group.id} price={group.priceSummary} groupName={'name' in group ? group.name : undefined} />
+                  ))}
                   <div className={`ov:grid ov:content-start ov:gap-2 ${currentOption!.id === 'size' ? 'ov25-size-variant-card-grid ov:grid-cols-2!' : 'ov25-variant-card-grid'}`}>
                     <VariantsContent
                       variantsToRender={visibleVariants}

@@ -1,3 +1,4 @@
+import type { GroupPriceSummary } from '../../contexts/ov25-ui-context.js';
 import * as React from 'react'
 import { DefaultVariantCard } from "./variant-cards/DefaultVariantCard.js"
 import { cn } from "../../lib/utils.js"
@@ -30,6 +31,7 @@ export type DrawerSizes = 'closed' | 'small' | 'large'
 
 
 export interface VariantGroup {
+  priceSummary?: GroupPriceSummary;
   groupName: string
   variants: Variant[]
 }

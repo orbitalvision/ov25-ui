@@ -202,7 +202,17 @@ export interface Selection {
   metadata?: { bedSize?: string };
 }
 
+export interface GroupPriceSummary {
+  /** Whole configured-product total in pence, including discounts and rounding. */
+  totalPrice: number;
+  /** Pence above the cheapest available group in this option; absent if the baseline is unknown. */
+  upgradePrice?: number;
+  currency: 'GBP';
+  isFrom: boolean;
+}
+
 export interface Group {
+  priceSummary?: GroupPriceSummary;
   id: string;
   name: string;
   selections: Selection[];
