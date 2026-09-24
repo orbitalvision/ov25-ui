@@ -31,7 +31,7 @@ approved source commits are stable. Run:
 OV25_E2E_NEW_HEADLESS=true npm run release:test -- --release <version>
 ```
 
-This runs type checking, unit tests, browser/component tests, the React 19 package build, the setup
+This runs type checking, unit tests, browser/component tests, the React 19 package build, the isolated React 18 package build, the setup
 frozen install/build, the react-test build, and Playwright. Review
 `releases/<version>/test-summary.md` after it completes.
 
@@ -40,27 +40,28 @@ mode only when a specific failure cannot be diagnosed or verified headlessly. No
 before starting a headed run, explain why it is necessary, and limit it to the smallest relevant
 test scope.
 
-### Required React 18 Preflight
+### Automatic React 18 Preflight
 
-`release:test` currently does **not** install React 18 typings or run the exact
-`ov25-ui-react18` publish build. This missed React 18 JSX incompatibilities in both the `0.8.0` and
-`0.8.1` publishes. Before creating tags, run the exact React 18 build in an isolated temporary
-worktree so the main workspace's package metadata, lockfile, and dependencies remain untouched:
+`release:test` runs the exact `npm run build:react18` command in a unique temporary source copy
+and records its result as **Build ov25-ui-react18 (isolated)**. A failure fails the release test gate.
+This also runs when `--skip-e2e` is supplied.
+
+The copy includes current tracked files and non-ignored new files, so uncommitted source changes
+are checked alongside the other tests. Deleted files stay deleted. Ignored dependencies, build
+output, and local environment files are excluded; symlinks and other non-regular entries are
+rejected to prevent writes escaping the copy. Run with the repository's supported Node/npm/Bun
+toolchain and registry access: the React 18 build installs its own dependencies.
+
+Package metadata, lockfiles, dependencies, and output from this build stay in the temporary copy,
+which is removed on normal success or failure. No Git worktree is registered. An abrupt process
+termination may leave an `ov25-ui-react18-check-*` directory in the system temporary directory.
+The main workspace retains its React 19 build for subsequent fixture tests.
+
+No separate manual React 18 worktree check is required. To rerun only this preflight for diagnosis:
 
 ```bash
-git worktree add --detach /tmp/ov25-ui-react18-release-check HEAD
-cd /tmp/ov25-ui-react18-release-check
-npm run build:react18
-cd -
-git worktree remove --force /tmp/ov25-ui-react18-release-check
+node scripts/release/react18-preflight.js
 ```
-
-Use the repository's supported Node/npm toolchain if the system npm differs. Do not run
-`build:react18` directly in a workspace that must remain clean: the script temporarily rewrites
-package metadata and installs a React 18 dependency tree.
-
-Automation follow-up: integrate this isolated React 18 build into `release:test` so this manual
-step can eventually be removed.
 
 If any test or stabilization check fails, fix the source, commit and push the fix, then rerun all of
 Step 1. Do not proceed with a partially tested source state.

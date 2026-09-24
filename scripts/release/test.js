@@ -128,6 +128,9 @@ function main() {
     runBunScript(summary, 'Unit tests', 'test:unit');
     runBunScript(summary, 'Browser/component tests', 'test:browser:ci');
     runBunScript(summary, 'Build ov25-ui', 'build');
+    runLogged(summary, 'Build ov25-ui-react18 (isolated)', process.execPath, [
+      path.join(rootDir, 'scripts/release/react18-preflight.js'),
+    ]);
 
     if (fs.existsSync(path.join(rootDir, 'setup/package.json'))) {
       runBunInstall(summary, 'Install ov25-setup dependencies', { cwd: path.join(rootDir, 'setup') });
