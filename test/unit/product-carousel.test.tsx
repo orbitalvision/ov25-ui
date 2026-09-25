@@ -388,7 +388,7 @@ describe('ProductCarousel', () => {
           : el.dataset.ov25GalleryTile;
       });
     const expected = [
-      'material', 'image', '360',
+      'material', 'image',
       'cutout:-45', 'cutout:0', 'cutout:-90', 'cutout:180',
       'image',
     ];
@@ -397,13 +397,30 @@ describe('ProductCarousel', () => {
       const { container, rerender } = render(<ProductCarousel />);
       expect(kindsIn(getThumbnailButtons(container))).toEqual(expected);
 
+      expect(container.querySelector('[data-ov25-gallery-tile="360"]')).toBeNull();
+      fireEvent.click(getThumbnailButtons(container)[2]);
+      expect(setGalleryIndex).toHaveBeenLastCalledWith(2);
+      expect(ctx.selectAutoCutoutAngle).toHaveBeenLastCalledWith(-45);
+      fireEvent.click(getThumbnailButtons(container)[6]);
+      expect(setGalleryIndex).toHaveBeenLastCalledWith(7);
+
       carouselContext.carouselLayout = 'stacked';
       rerender(<ProductCarousel />);
       expect(
         kindsIn(Array.from(container.querySelectorAll('#ov25-product-carousel-controls button'))),
       ).toEqual(expected);
+
+      carouselContext.carouselLayout = 'carousel';
+      Object.assign(ctx, { carouselMaxImagesDesktop: 2 });
+      rerender(<ProductCarousel />);
+      expect(container.querySelector('[data-ov25-gallery-tile="360"]')).not.toBeNull();
+
+      Object.assign(ctx, { carouselMaxImagesDesktop: undefined, autoCutoutImages: [] });
+      rerender(<ProductCarousel />);
+      expect(container.querySelector('[data-ov25-gallery-tile="360"]')).not.toBeNull();
     } finally {
       for (const key of [
+        'carouselMaxImagesDesktop',
         'carouselAutoCutouts',
         'autoCutoutMaterialImages',
         'autoCutoutImages',

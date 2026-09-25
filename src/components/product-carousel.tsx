@@ -222,6 +222,11 @@ export function ProductCarousel() {
     deferThreeD,
   })
   const images = maxImages != null && maxImages > 0 ? allImages.slice(0, maxImages) : allImages
+  const hideThreeDTile = !!carouselAutoCutouts && images.some(
+    (image) => (autoCutoutImages || []).includes(image) && !!resolveImageUrl(image, 'carousel'),
+  )
+  // Keep the 3D slot in the index model even when its tile is hidden so gallery selection
+  // and cutout angle shortcuts still address the same slots as the viewer.
   const carouselItems: (typeof images[0] | ThreeDPlaceholder)[] = [...images]
   carouselItems.splice(galleryIndexToUse, 0, {
     is3D: true,
@@ -346,7 +351,7 @@ export function ProductCarousel() {
   const renderStackedThumbnail = (item: typeof images[0] | ThreeDPlaceholder, index: number) => {
     const is3DSlot = isThreeDPlaceholder(item)
     if (is3DSlot) {
-      if (!deferThreeD) {
+      if (!deferThreeD || hideThreeDTile) {
         return null
       }
       const isSelected = galleryIndex === galleryIndexToUse
@@ -411,6 +416,7 @@ export function ProductCarousel() {
           <div ref={scrollRef} onMouseDown={handleMouseDown} onClickCapture={handleClickCapture} className="ov25-thumbnail-scroll ov:overflow-x-auto ov:overflow-y-hidden ov:w-full ov:scroll-smooth ov:@container ov:p-1 ov:cursor-grab ov:select-none">
             <div className="ov:flex ov:flex-nowrap ov:gap-2">
               {carouselItems.map((item: any, index: number) => (
+                hideThreeDTile && isThreeDPlaceholder(item) ? null :
                 <div key={index} className="ov:flex-1 ov:min-w-[calc((100cqw-2.5rem)/6)] ov:md:min-w-[calc((100cqw-2.5rem)/8)] ov:lg:min-w-[calc((100cqw-2.5rem)/12)]">
                   {renderCarouselThumbnail(item, index)}
                 </div>
