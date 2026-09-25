@@ -9,6 +9,11 @@ export default defineConfig({
   testDir: './test/e2e',
   /* Run tests in files in parallel */
   fullyParallel: false,
+  /* One retry absorbs the timing flakes that parallel workers cause (a different test fails each
+     full run and passes alone). A test that passes on retry is reported as "flaky", not hidden,
+     and still exits green; a real regression fails both attempts. The retry also records a trace
+     (see `trace` below), so a flake leaves something to debug. */
+  retries: 1,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: [['html', { open: 'never' }]],
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
