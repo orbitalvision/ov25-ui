@@ -1,0 +1,4 @@
+426e387 (HEAD -> main, origin/main, origin/HEAD) chore(tests) allow each e2e test one retry
+7e1f5d6 fix(sticky) measure travel against the gallery's real containing block
+f3f8f94 feat(gallery) when auto cutouts, 3D slot should be hidden
+696ca70 (tag: ov25-setup@0.8.12) chore: release ov25-setup 0.8.12

@@ -1,0 +1,344 @@
+diff --git a/playwright.config.ts b/playwright.config.ts
+index 7a4ee47..0cbdb04 100644
+--- a/playwright.config.ts
++++ b/playwright.config.ts
+@@ -9,6 +9,11 @@ export default defineConfig({
+   testDir: './test/e2e',
+   /* Run tests in files in parallel */
+   fullyParallel: false,
++  /* One retry absorbs the timing flakes that parallel workers cause (a different test fails each
++     full run and passes alone). A test that passes on retry is reported as "flaky", not hidden,
++     and still exits green; a real regression fails both attempts. The retry also records a trace
++     (see `trace` below), so a flake leaves something to debug. */
++  retries: 1,
+   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
+   reporter: [['html', { open: 'never' }]],
+   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
+diff --git a/setup/bun.lock b/setup/bun.lock
+index 93080a3..e1831f7 100644
+--- a/setup/bun.lock
++++ b/setup/bun.lock
+@@ -21,7 +21,7 @@
+         "class-variance-authority": "^0.7.0",
+         "clsx": "^2.1.0",
+         "lucide-react": "^0.540.0",
+-        "ov25-ui": "0.8.11",
++        "ov25-ui": "0.8.12",
+         "react-colorful": "^5.6.1",
+         "tailwind-merge": "^2.2.0",
+       },
+@@ -425,7 +425,7 @@
+ 
+     "object-assign": ["object-assign@4.1.1", "", {}, "sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg=="],
+ 
+-    "ov25-ui": ["ov25-ui@0.8.11", "", { "dependencies": { "@radix-ui/react-dialog": "^1.1.10", "@radix-ui/react-icons": "^1.3.2", "@radix-ui/react-popover": "^1.1.14", "@radix-ui/react-scroll-area": "^1.2.5", "@radix-ui/react-select": "^2.2.2", "@radix-ui/react-slot": "^1.0.2", "@radix-ui/react-tabs": "^1.1.2", "@react-spring/web": "^10.0.3", "@use-gesture/react": "^10.3.1", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "embla-carousel-react": "^8.6.0", "framer-motion": "^11.16.1", "gsap": "^3.13.0", "lucide-react": "^0.503.0", "react-qr-code": "^2.0.15", "sonner": "^1.7.1", "string-similarity-js": "^2.1.4", "tailwind-merge": "^3.2.0" }, "peerDependencies": { "react": "^19", "react-dom": "^19" } }, "sha512-QxyjuzS47KsN+0akiRbiUAdXWO41htqsKJ5nAm6ORAn4fMyDCd1H7lDg3xtw6e5+xcleZP62IpHDWVD14evOgA=="],
++    "ov25-ui": ["ov25-ui@0.8.12", "", { "dependencies": { "@radix-ui/react-dialog": "^1.1.10", "@radix-ui/react-icons": "^1.3.2", "@radix-ui/react-popover": "^1.1.14", "@radix-ui/react-scroll-area": "^1.2.5", "@radix-ui/react-select": "^2.2.2", "@radix-ui/react-slot": "^1.0.2", "@radix-ui/react-tabs": "^1.1.2", "@react-spring/web": "^10.0.3", "@use-gesture/react": "^10.3.1", "class-variance-authority": "^0.7.1", "clsx": "^2.1.1", "embla-carousel-react": "^8.6.0", "framer-motion": "^11.16.1", "gsap": "^3.13.0", "lucide-react": "^0.503.0", "react-qr-code": "^2.0.15", "sonner": "^1.7.1", "string-similarity-js": "^2.1.4", "tailwind-merge": "^3.2.0" }, "peerDependencies": { "react": "^19", "react-dom": "^19" } }, "sha512-7zh8/SYByiiHCC5Tz3f9ztKrOfl10M04LsEqS3OLKBg68Iy7XyS0Z2aURoIzzlESHru/thRTWnJ+3ZWzOkO0Pg=="],
+ 
+     "package-json-from-dist": ["package-json-from-dist@1.0.1", "", {}, "sha512-UEZIS3/by4OC8vL3P2dTXRETpebLI2NiI5vIrjaD/5UtrkFX/tNbwjTSRAGC/+7CAo2pIcBaRgWmcBBHcsaCIw=="],
+ 
+diff --git a/setup/package-lock.json b/setup/package-lock.json
+index 99f8482..b58a330 100644
+--- a/setup/package-lock.json
++++ b/setup/package-lock.json
+@@ -1,12 +1,12 @@
+ {
+   "name": "ov25-setup",
+-  "version": "0.8.11",
++  "version": "0.8.12",
+   "lockfileVersion": 3,
+   "requires": true,
+   "packages": {
+     "": {
+       "name": "ov25-setup",
+-      "version": "0.8.11",
++      "version": "0.8.12",
+       "dependencies": {
+         "@codemirror/commands": "^6.10.3",
+         "@codemirror/lang-css": "^6.3.1",
+@@ -24,7 +24,7 @@
+         "class-variance-authority": "^0.7.0",
+         "clsx": "^2.1.0",
+         "lucide-react": "^0.540.0",
+-        "ov25-ui": "0.8.11",
++        "ov25-ui": "0.8.12",
+         "react-colorful": "^5.6.1",
+         "tailwind-merge": "^2.2.0"
+       },
+@@ -3116,9 +3116,9 @@
+       }
+     },
+     "node_modules/ov25-ui": {
+-      "version": "0.8.11",
+-      "resolved": "https://registry.npmjs.org/ov25-ui/-/ov25-ui-0.8.11.tgz",
+-      "integrity": "sha512-QxyjuzS47KsN+0akiRbiUAdXWO41htqsKJ5nAm6ORAn4fMyDCd1H7lDg3xtw6e5+xcleZP62IpHDWVD14evOgA==",
++      "version": "0.8.12",
++      "resolved": "https://registry.npmjs.org/ov25-ui/-/ov25-ui-0.8.12.tgz",
++      "integrity": "sha512-7zh8/SYByiiHCC5Tz3f9ztKrOfl10M04LsEqS3OLKBg68Iy7XyS0Z2aURoIzzlESHru/thRTWnJ+3ZWzOkO0Pg==",
+       "license": "MIT",
+       "dependencies": {
+         "@radix-ui/react-dialog": "^1.1.10",
+diff --git a/setup/package.json b/setup/package.json
+index e194ab4..db90bb4 100644
+--- a/setup/package.json
++++ b/setup/package.json
+@@ -1,6 +1,6 @@
+ {
+   "name": "ov25-setup",
+-  "version": "0.8.11",
++  "version": "0.8.12",
+   "description": "OV25 Configurator Setup visual editor component",
+   "repository": {
+     "type": "git",
+@@ -53,7 +53,7 @@
+     "class-variance-authority": "^0.7.0",
+     "clsx": "^2.1.0",
+     "lucide-react": "^0.540.0",
+-    "ov25-ui": "0.8.11",
++    "ov25-ui": "0.8.12",
+     "react-colorful": "^5.6.1",
+     "tailwind-merge": "^2.2.0"
+   },
+diff --git a/src/components/product-carousel.tsx b/src/components/product-carousel.tsx
+index d34b561..80496c4 100644
+--- a/src/components/product-carousel.tsx
++++ b/src/components/product-carousel.tsx
+@@ -222,6 +222,11 @@ export function ProductCarousel() {
+     deferThreeD,
+   })
+   const images = maxImages != null && maxImages > 0 ? allImages.slice(0, maxImages) : allImages
++  const hideThreeDTile = !!carouselAutoCutouts && images.some(
++    (image) => (autoCutoutImages || []).includes(image) && !!resolveImageUrl(image, 'carousel'),
++  )
++  // Keep the 3D slot in the index model even when its tile is hidden so gallery selection
++  // and cutout angle shortcuts still address the same slots as the viewer.
+   const carouselItems: (typeof images[0] | ThreeDPlaceholder)[] = [...images]
+   carouselItems.splice(galleryIndexToUse, 0, {
+     is3D: true,
+@@ -346,7 +351,7 @@ export function ProductCarousel() {
+   const renderStackedThumbnail = (item: typeof images[0] | ThreeDPlaceholder, index: number) => {
+     const is3DSlot = isThreeDPlaceholder(item)
+     if (is3DSlot) {
+-      if (!deferThreeD) {
++      if (!deferThreeD || hideThreeDTile) {
+         return null
+       }
+       const isSelected = galleryIndex === galleryIndexToUse
+@@ -411,6 +416,7 @@ export function ProductCarousel() {
+           <div ref={scrollRef} onMouseDown={handleMouseDown} onClickCapture={handleClickCapture} className="ov25-thumbnail-scroll ov:overflow-x-auto ov:overflow-y-hidden ov:w-full ov:scroll-smooth ov:@container ov:p-1 ov:cursor-grab ov:select-none">
+             <div className="ov:flex ov:flex-nowrap ov:gap-2">
+               {carouselItems.map((item: any, index: number) => (
++                hideThreeDTile && isThreeDPlaceholder(item) ? null :
+                 <div key={index} className="ov:flex-1 ov:min-w-[calc((100cqw-2.5rem)/6)] ov:md:min-w-[calc((100cqw-2.5rem)/8)] ov:lg:min-w-[calc((100cqw-2.5rem)/12)]">
+                   {renderCarouselThumbnail(item, index)}
+                 </div>
+diff --git a/src/lib/sticky-layout-controller.ts b/src/lib/sticky-layout-controller.ts
+index f02bbc3..f1bebb0 100644
+--- a/src/lib/sticky-layout-controller.ts
++++ b/src/lib/sticky-layout-controller.ts
+@@ -1008,6 +1008,27 @@ export function measureStickyTravel(
+   };
+ }
+ 
++/**
++ * The box that actually limits a sticky child's travel: the nearest ancestor that generates a
++ * block container. `display: inline` and `display: contents` ancestors generate no such box, so
++ * sticky resolves against something further up. Themes commonly wrap galleries in custom elements
++ * (`<product-media>`, `<is-land>`) that default to `display: inline` and measure 0px tall;
++ * measuring travel against one of those reports "enough room" whatever the real containing block
++ * allows, and the fallback never runs.
++ */
++export function resolveStickyContainingBlock(
++  element: HTMLElement | null,
++  readStyle: StickyStyleReader = defaultStyleReader,
++): HTMLElement | null {
++  let current = element;
++  while (current && current !== current.ownerDocument.body) {
++    const display = (readStyle(current)?.display ?? '').trim().toLowerCase();
++    if (display !== 'inline' && display !== 'contents') return current;
++    current = current.parentElement;
++  }
++  return current;
++}
++
+ function isBroadPageBoundary(element: HTMLElement): boolean {
+   return element.matches('main, footer, [role="main"], [role="contentinfo"]');
+ }
+@@ -1851,9 +1872,13 @@ export function createStickyLayoutController(
+       }
+     }
+ 
+-    // Native sticky also needs enough vertical travel inside the gallery's original parent. Use
+-    // the retained flow anchor because the live host may already be inside the body fallback.
+-    const galleryTravelBoundary = originalGalleryTargetParent;
++    // Native sticky also needs enough vertical travel inside the gallery's containing block. Use
++    // the retained flow anchor because the live host may already be inside the body fallback, and
++    // resolve past inline/contents wrappers, which have no box of their own to measure.
++    const galleryTravelBoundary = resolveStickyContainingBlock(
++      originalGalleryTargetParent,
++      readStyle,
++    );
+     const galleryTravelBoundarySupportsStretch = Boolean(
+       galleryTravelBoundary &&
+       isGalleryColumnStretchEligible(galleryTravelBoundary, readStyle),
+diff --git a/test/unit/product-carousel.test.tsx b/test/unit/product-carousel.test.tsx
+index 1e99f5c..f392a57 100644
+--- a/test/unit/product-carousel.test.tsx
++++ b/test/unit/product-carousel.test.tsx
+@@ -388,7 +388,7 @@ describe('ProductCarousel', () => {
+           : el.dataset.ov25GalleryTile;
+       });
+     const expected = [
+-      'material', 'image', '360',
++      'material', 'image',
+       'cutout:-45', 'cutout:0', 'cutout:-90', 'cutout:180',
+       'image',
+     ];
+@@ -397,13 +397,30 @@ describe('ProductCarousel', () => {
+       const { container, rerender } = render(<ProductCarousel />);
+       expect(kindsIn(getThumbnailButtons(container))).toEqual(expected);
+ 
++      expect(container.querySelector('[data-ov25-gallery-tile="360"]')).toBeNull();
++      fireEvent.click(getThumbnailButtons(container)[2]);
++      expect(setGalleryIndex).toHaveBeenLastCalledWith(2);
++      expect(ctx.selectAutoCutoutAngle).toHaveBeenLastCalledWith(-45);
++      fireEvent.click(getThumbnailButtons(container)[6]);
++      expect(setGalleryIndex).toHaveBeenLastCalledWith(7);
++
+       carouselContext.carouselLayout = 'stacked';
+       rerender(<ProductCarousel />);
+       expect(
+         kindsIn(Array.from(container.querySelectorAll('#ov25-product-carousel-controls button'))),
+       ).toEqual(expected);
++
++      carouselContext.carouselLayout = 'carousel';
++      Object.assign(ctx, { carouselMaxImagesDesktop: 2 });
++      rerender(<ProductCarousel />);
++      expect(container.querySelector('[data-ov25-gallery-tile="360"]')).not.toBeNull();
++
++      Object.assign(ctx, { carouselMaxImagesDesktop: undefined, autoCutoutImages: [] });
++      rerender(<ProductCarousel />);
++      expect(container.querySelector('[data-ov25-gallery-tile="360"]')).not.toBeNull();
+     } finally {
+       for (const key of [
++        'carouselMaxImagesDesktop',
+         'carouselAutoCutouts',
+         'autoCutoutMaterialImages',
+         'autoCutoutImages',
+diff --git a/test/unit/sticky-containing-block.test.ts b/test/unit/sticky-containing-block.test.ts
+new file mode 100644
+index 0000000..50c4cb0
+--- /dev/null
++++ b/test/unit/sticky-containing-block.test.ts
+@@ -0,0 +1,44 @@
++import { afterEach, describe, expect, it } from 'vitest';
++import { resolveStickyContainingBlock } from '../../src/lib/sticky-layout-controller';
++
++describe('resolveStickyContainingBlock', () => {
++  afterEach(() => {
++    document.body.innerHTML = '';
++  });
++
++  it('returns a block ancestor unchanged', () => {
++    document.body.innerHTML = '<div id="block"><div id="gallery"></div></div>';
++    const block = document.getElementById('block')!;
++    expect(resolveStickyContainingBlock(block)).toBe(block);
++  });
++
++  it('skips inline and display:contents wrappers to the first real box', () => {
++    // Mirrors theme markup: <div block> > <is-land contents> > <product-media inline> > gallery.
++    document.body.innerHTML = `
++      <div id="block">
++        <is-land id="island" style="display: contents">
++          <product-media id="media" style="display: inline"><div id="gallery"></div></product-media>
++        </is-land>
++      </div>`;
++    expect(resolveStickyContainingBlock(document.getElementById('media'))).toBe(
++      document.getElementById('block'),
++    );
++  });
++
++  it('treats inline-block, flex and grid wrappers as real boxes', () => {
++    for (const display of ['inline-block', 'flex', 'grid', 'block']) {
++      document.body.innerHTML = `<div id="wrap" style="display: ${display}"><div id="gallery"></div></div>`;
++      const wrap = document.getElementById('wrap')!;
++      expect(resolveStickyContainingBlock(wrap)).toBe(wrap);
++    }
++  });
++
++  it('stops at body rather than walking to the document root', () => {
++    document.body.innerHTML = '<span id="inline" style="display: inline"><div id="gallery"></div></span>';
++    expect(resolveStickyContainingBlock(document.getElementById('inline'))).toBe(document.body);
++  });
++
++  it('passes through a missing parent', () => {
++    expect(resolveStickyContainingBlock(null)).toBeNull();
++  });
++});
+diff --git a/test/unit/sticky-layout-controller.test.ts b/test/unit/sticky-layout-controller.test.ts
+index 42e2457..2c7a981 100644
+--- a/test/unit/sticky-layout-controller.test.ts
++++ b/test/unit/sticky-layout-controller.test.ts
+@@ -1251,6 +1251,63 @@ describe('sticky layout controller lifecycle', () => {
+     controller.destroy();
+   });
+ 
++  it('measures travel against the real containing block, not an inline wrapper around the gallery', () => {
++    // Arighi Bianchi's mobile PDP: the gallery target sits inside <product-media>, a custom element
++    // left at display:inline (a 0px box), inside a block container the theme sizes to exactly the
++    // gallery's height with aspect-ratio. Sticky resolves against that block container, so there
++    // is no room to travel. Measuring the inline wrapper instead reported enough room.
++    document.body.innerHTML = `
++      <main>
++        <section id="product">
++          <div id="grid">
++            <div id="media-container">
++              <product-media id="product-media" style="display: inline"><div id="gallery"></div></product-media>
++            </div>
++            <div id="info"><div id="variants"></div></div>
++          </div>
++        </section>
++        <section id="following"></section>
++      </main>
++    `;
++    const product = document.getElementById('product')!;
++    const grid = document.getElementById('grid')!;
++    const mediaContainer = document.getElementById('media-container')!;
++    const productMedia = document.getElementById('product-media')!;
++    const gallery = document.getElementById('gallery')!;
++    const variants = document.getElementById('variants')!;
++    gallery.innerHTML = '<div id="ov-25-configurator-gallery-container"></div>';
++    setRect(product, 106, 1322, 375);
++    setRect(grid, 106, 1322, 375);
++    setRect(mediaContainer, 106, 375, 375);
++    setRect(productMedia, 106, 0, 0);
++    setRect(gallery, 106, 375, 375);
++    setRect(variants, 883, 520, 375);
++    const controller = createStickyLayoutController({
++      document,
++      galleryHost: gallery,
++      variantsHost: variants,
++      onDiagnostic: () => {},
++    });
++
++    controller.start();
++    flushFrame();
++
++    expect(controller.getSnapshot()).toMatchObject({
++      requiresBodyFallback: true,
++      ancestorBlockers: expect.arrayContaining([
++        expect.objectContaining({
++          element: mediaContainer,
++          reasons: expect.arrayContaining(['insufficient-sticky-travel']),
++        }),
++      ]),
++    });
++    // The inline wrapper itself is never treated as the boundary.
++    expect(
++      controller.getSnapshot().ancestorBlockers.some((blocker) => blocker.element === productMedia),
++    ).toBe(false);
++    controller.destroy();
++  });
++
+   it('uses a product boundary when the common grid cannot reach sticky top', () => {
+     document.body.innerHTML = `
+       <main>

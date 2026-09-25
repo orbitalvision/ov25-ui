@@ -1,0 +1,10 @@
+playwright.config.ts                       |  5 +++
+ setup/bun.lock                             |  4 +--
+ setup/package-lock.json                    | 12 +++----
+ setup/package.json                         |  4 +--
+ src/components/product-carousel.tsx        |  8 ++++-
+ src/lib/sticky-layout-controller.ts        | 31 ++++++++++++++--
+ test/unit/product-carousel.test.tsx        | 19 +++++++++-
+ test/unit/sticky-containing-block.test.ts  | 44 +++++++++++++++++++++++
+ test/unit/sticky-layout-controller.test.ts | 57 ++++++++++++++++++++++++++++++
+ 9 files changed, 169 insertions(+), 15 deletions(-)

@@ -1,0 +1,9 @@
+playwright.config.ts
+setup/bun.lock
+setup/package-lock.json
+setup/package.json
+src/components/product-carousel.tsx
+src/lib/sticky-layout-controller.ts
+test/unit/product-carousel.test.tsx
+test/unit/sticky-containing-block.test.ts
+test/unit/sticky-layout-controller.test.ts
