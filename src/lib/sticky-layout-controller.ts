@@ -1008,6 +1008,27 @@ export function measureStickyTravel(
   };
 }
 
+/**
+ * The box that actually limits a sticky child's travel: the nearest ancestor that generates a
+ * block container. `display: inline` and `display: contents` ancestors generate no such box, so
+ * sticky resolves against something further up. Themes commonly wrap galleries in custom elements
+ * (`<product-media>`, `<is-land>`) that default to `display: inline` and measure 0px tall;
+ * measuring travel against one of those reports "enough room" whatever the real containing block
+ * allows, and the fallback never runs.
+ */
+export function resolveStickyContainingBlock(
+  element: HTMLElement | null,
+  readStyle: StickyStyleReader = defaultStyleReader,
+): HTMLElement | null {
+  let current = element;
+  while (current && current !== current.ownerDocument.body) {
+    const display = (readStyle(current)?.display ?? '').trim().toLowerCase();
+    if (display !== 'inline' && display !== 'contents') return current;
+    current = current.parentElement;
+  }
+  return current;
+}
+
 function isBroadPageBoundary(element: HTMLElement): boolean {
   return element.matches('main, footer, [role="main"], [role="contentinfo"]');
 }
@@ -1851,9 +1872,13 @@ export function createStickyLayoutController(
       }
     }
 
-    // Native sticky also needs enough vertical travel inside the gallery's original parent. Use
-    // the retained flow anchor because the live host may already be inside the body fallback.
-    const galleryTravelBoundary = originalGalleryTargetParent;
+    // Native sticky also needs enough vertical travel inside the gallery's containing block. Use
+    // the retained flow anchor because the live host may already be inside the body fallback, and
+    // resolve past inline/contents wrappers, which have no box of their own to measure.
+    const galleryTravelBoundary = resolveStickyContainingBlock(
+      originalGalleryTargetParent,
+      readStyle,
+    );
     const galleryTravelBoundarySupportsStretch = Boolean(
       galleryTravelBoundary &&
       isGalleryColumnStretchEligible(galleryTravelBoundary, readStyle),

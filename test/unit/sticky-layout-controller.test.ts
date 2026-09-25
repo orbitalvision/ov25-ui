@@ -1251,6 +1251,63 @@ describe('sticky layout controller lifecycle', () => {
     controller.destroy();
   });
 
+  it('measures travel against the real containing block, not an inline wrapper around the gallery', () => {
+    // Arighi Bianchi's mobile PDP: the gallery target sits inside <product-media>, a custom element
+    // left at display:inline (a 0px box), inside a block container the theme sizes to exactly the
+    // gallery's height with aspect-ratio. Sticky resolves against that block container, so there
+    // is no room to travel. Measuring the inline wrapper instead reported enough room.
+    document.body.innerHTML = `
+      <main>
+        <section id="product">
+          <div id="grid">
+            <div id="media-container">
+              <product-media id="product-media" style="display: inline"><div id="gallery"></div></product-media>
+            </div>
+            <div id="info"><div id="variants"></div></div>
+          </div>
+        </section>
+        <section id="following"></section>
+      </main>
+    `;
+    const product = document.getElementById('product')!;
+    const grid = document.getElementById('grid')!;
+    const mediaContainer = document.getElementById('media-container')!;
+    const productMedia = document.getElementById('product-media')!;
+    const gallery = document.getElementById('gallery')!;
+    const variants = document.getElementById('variants')!;
+    gallery.innerHTML = '<div id="ov-25-configurator-gallery-container"></div>';
+    setRect(product, 106, 1322, 375);
+    setRect(grid, 106, 1322, 375);
+    setRect(mediaContainer, 106, 375, 375);
+    setRect(productMedia, 106, 0, 0);
+    setRect(gallery, 106, 375, 375);
+    setRect(variants, 883, 520, 375);
+    const controller = createStickyLayoutController({
+      document,
+      galleryHost: gallery,
+      variantsHost: variants,
+      onDiagnostic: () => {},
+    });
+
+    controller.start();
+    flushFrame();
+
+    expect(controller.getSnapshot()).toMatchObject({
+      requiresBodyFallback: true,
+      ancestorBlockers: expect.arrayContaining([
+        expect.objectContaining({
+          element: mediaContainer,
+          reasons: expect.arrayContaining(['insufficient-sticky-travel']),
+        }),
+      ]),
+    });
+    // The inline wrapper itself is never treated as the boundary.
+    expect(
+      controller.getSnapshot().ancestorBlockers.some((blocker) => blocker.element === productMedia),
+    ).toBe(false);
+    controller.destroy();
+  });
+
   it('uses a product boundary when the common grid cannot reach sticky top', () => {
     document.body.innerHTML = `
       <main>
