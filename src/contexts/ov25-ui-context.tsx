@@ -674,6 +674,8 @@ export const OV25UIProvider: React.FC<{
   hideAr?: boolean,
   hideGestureHint?: boolean,
   forceMobile?: boolean,
+  /** Set by injection when flags.autoOpen applies; each new value opens this configurator once. */
+  autoOpenRequestId?: number,
   logoURL?: string,
   hideLogo?: boolean,
   isProductGalleryStacked: boolean,
@@ -751,6 +753,7 @@ export const OV25UIProvider: React.FC<{
   hideAr = false,
   hideGestureHint = false,
   forceMobile = false,
+  autoOpenRequestId,
   logoURL,
   hideLogo = false,
   isProductGalleryStacked,
@@ -2469,6 +2472,18 @@ export const OV25UIProvider: React.FC<{
   if (configureHandlerWindowRef) {
     configureHandlerWindowRef.current = openConfiguratorOrSnap2;
   }
+
+  // flags.autoOpen opens this configurator once per injection, unless the viewport shows it inline:
+  // opening an inline configurator shows nothing, yet would pop the drawer open after a resize.
+  const usesInlineVariantControlsRef = useRef(effectiveUseInlineVariantControls);
+  usesInlineVariantControlsRef.current = effectiveUseInlineVariantControls;
+  useEffect(() => {
+    if (!autoOpenRequestId) return;
+    const timer = window.setTimeout(() => {
+      if (!usesInlineVariantControlsRef.current) configureHandlerRef.current?.();
+    }, 200);
+    return () => window.clearTimeout(timer);
+  }, [autoOpenRequestId]);
 
   const openRef = (window as any).ov25OpenConfiguratorRef;
   const closeRef = (window as any).ov25CloseConfiguratorRef;

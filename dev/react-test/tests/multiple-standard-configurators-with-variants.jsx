@@ -6,6 +6,9 @@ import '../src/index.css';
 
 const DEMO_RETAILER_APIKEY = import.meta.env.VITE_DEMO_RETAILER_APIKEY;
 
+// ?autoOpen=1 or ?autoOpen=2 sets flags.autoOpen on that configurator only.
+const autoOpenConfigurator = new URLSearchParams(window.location.search).get('autoOpen');
+
 let configuratorInitialized = false;
 
 const initializeConfigurator = () => {
@@ -26,6 +29,7 @@ const initializeConfigurator = () => {
         buyNow: () => console.log('Buy now - Range 1'),
         buySwatches: () => console.log('Add swatches to cart - Range 1'),
       },
+      flags: { autoOpen: autoOpenConfigurator === '1' },
     },
     {
       apiKey: () => DEMO_RETAILER_APIKEY,
@@ -41,6 +45,7 @@ const initializeConfigurator = () => {
         buyNow: () => console.log('Buy now - Range 2'),
         buySwatches: () => console.log('Add swatches to cart - Range 2'),
       },
+      flags: { autoOpen: autoOpenConfigurator === '2' },
     },
   ]));
 
@@ -56,7 +61,7 @@ function App() {
     <div className="app">
       <TestBackButton />
       <h1>Multiple Standard Configurators with Variants</h1>
-      <p className="subtitle">Testing multiple standard configurators on the same page with variants</p>
+      <p className="subtitle">Testing multiple standard configurators on the same page with variants. Add ?autoOpen=1 or ?autoOpen=2 to auto-open one of them.</p>
       <div className="configurators-grid">
         <div className="configurator-card">
           <h3>Range 1 - Ashley Manor Ponti</h3>

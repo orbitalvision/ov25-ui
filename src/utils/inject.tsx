@@ -146,6 +146,9 @@ const getProductLinkFromQueryParams = (): string | null => {
 // Track if we've consumed the query param configuration_uuid (only use on first load)
 let hasConsumedQueryConfigUuid = false;
 
+// Each injection that asks for flags.autoOpen gets a new id, so its provider opens once per injection.
+let autoOpenRequestCount = 0;
+
 import {
   ConfiguratorDisplayMode,
   CarouselDisplayMode,
@@ -1051,6 +1054,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
         disableAddToCart={disableAddToCart}
         disableBuyNow={disableBuyNow}
         forceMobile={forceMobile}
+        autoOpenRequestId={autoOpenRequestId}
         hideGestureHint={hideGestureHint}
         isProductGalleryStacked={isProductGalleryStacked}
         carouselDisplayMode={carouselDisplayMode}
@@ -1109,13 +1113,15 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     !configuratorDisplayModeUsesInlineVariants(configuratorDisplayMode) ||
     !configuratorDisplayModeUsesInlineVariants(configuratorDisplayModeMobile);
   const canAutoOpenFromConfig = autoOpen && usesSheetOrDrawer && (configureButtonSelector || variantsSelector);
+  // The provider opens itself for flags.autoOpen: the shared window handler belongs to whichever
+  // configurator rendered last, and only the provider knows whether the viewport it loaded at shows
+  // the configurator inline.
+  const autoOpenRequestId = canAutoOpenFromConfig ? ++autoOpenRequestCount : undefined;
 
   let shouldAutoOpen = false;
   let queryConfigUuid: string | null = null;
 
-  if (canAutoOpenFromConfig) {
-    shouldAutoOpen = true;
-  } else if (configureButtonSelector && !hasConsumedQueryConfigUuid) {
+  if (!canAutoOpenFromConfig && configureButtonSelector && !hasConsumedQueryConfigUuid) {
     queryConfigUuid = getConfigurationUuidFromQueryParams();
     const queryProductLink = getProductLinkFromQueryParams();
     const resolvedProductLinkForAutoOpen = resolveStringOrFunction(productLink);
@@ -1132,8 +1138,8 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
     ensureLoaded();
   }
 
-  // Auto-open configurator when autoOpen is true (non-inline) or configuration_uuid in query params
-  if (shouldAutoOpen && (queryConfigUuid || canAutoOpenFromConfig)) {
+  // Auto-open configurator when configuration_uuid is in the query params
+  if (shouldAutoOpen && queryConfigUuid) {
     const attemptAutoOpen = (attempts = 0) => {
       const handlerRef = (window as any).ov25ConfigureHandlerRef;
       if (handlerRef?.current) {
@@ -1285,13 +1291,8 @@ function runMultipleConfiguratorLogic(configs: InjectConfiguratorInput[]) {
     });
     activeConfiguratorIndex = configuratorIndexToInitialize;
 
-    const initNorm = normalizeInjectConfig(configuratorToInitialize);
-    const usesSheetOrDrawer =
-      !configuratorDisplayModeUsesInlineVariants(initNorm.configuratorDisplayMode) ||
-      !configuratorDisplayModeUsesInlineVariants(initNorm.configuratorDisplayModeMobile);
-    const shouldAutoOpenMulti = queryConfigUuid || (initNorm.autoOpen && usesSheetOrDrawer);
-
-    if (shouldAutoOpenMulti) {
+    // flags.autoOpen is handled by the provider injected above; only a shared configuration link opens here.
+    if (queryConfigUuid) {
       // Wait for the handler to be set up, then auto-open
       const attemptAutoOpen = (attempts = 0) => {
         const handlerRef = (window as any).ov25ConfigureHandlerRef;
