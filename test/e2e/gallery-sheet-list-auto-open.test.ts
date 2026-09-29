@@ -104,10 +104,17 @@ async function expectMobileDrawerOpen(page: Page) {
     .toBeGreaterThan(0);
 }
 
-test('mobile drawer still auto-opens', async ({ page }) => {
+test('mobile drawer auto-opens, closes, and reopens from Configure', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto(FIXTURE);
 
+  await expectMobileDrawerOpen(page);
+
+  await page.getByRole('button', { name: 'Close', exact: true }).filter({ visible: true }).click();
+  await expect(mobileDrawer(page)).toBeHidden({ timeout: RUNTIME_TIMEOUT });
+  await expectPageScrollUnlocked(page);
+
+  await page.getByRole('button', { name: 'Configure', exact: true }).click();
   await expectMobileDrawerOpen(page);
 });
 
