@@ -283,7 +283,10 @@ export type FlagsConfig = {
   showOptional?: boolean;
   /** Force mobile layout for testing (e.g. in device frame). */
   forceMobile?: boolean;
-  /** Auto-open configurator modal on load. Only applies when not using inline display mode. Default false. */
+  /**
+   * Open the configurator (sheet, drawer, modal or variants-only sheet) once on load. Skipped when the
+   * viewport the page loads at shows the configurator inline. Default false.
+   */
   autoOpen?: boolean;
   /**
    * Display symbol for formatted prices from the iframe (OV25 emits GBP/`£`). Replaces `£` in `CURRENT_PRICE`

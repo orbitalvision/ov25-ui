@@ -123,4 +123,52 @@ export const E2E_FIXTURE_LEDGER = Object.freeze([
         'Behavioral coverage verifies the rendered Standard and Snap2 variant surfaces across every public Variants.displayMode, plus mobile drawer spacing and controls for the affected modes. Ledger runs record an action-by-action Playwright trace; there are no committed screenshot baselines or named report screenshots.',
     }),
   }),
+  Object.freeze({
+    id: 'gallery-sheet-list-auto-open',
+    title: 'Sheet auto-open',
+    fixturePath: '/tests/gallery-sheet-list-auto-open.html',
+    fixtureDocumentTitle: 'Gallery - Sheet + List Auto-open',
+    sourceFiles: Object.freeze([
+      'dev/react-test/tests/gallery-sheet-list-auto-open.html',
+      'dev/react-test/tests/gallery-sheet-list-auto-open.jsx',
+    ]),
+    specFiles: Object.freeze(['test/e2e/gallery-sheet-list-auto-open.test.ts']),
+    tests: Object.freeze([
+      Object.freeze({
+        title: 'desktop sheet auto-opens, closes, and reopens from Configure',
+        viewport: 'Desktop 1280 × 900',
+        mode: 'Sheet · list',
+        covers:
+          'flags.autoOpen slides the sheet into the viewport on load and locks page scroll; Close moves it off-screen and unlocks scroll; Configure reopens it.',
+      }),
+      Object.freeze({
+        title: 'mobile drawer auto-opens, closes, and reopens from Configure',
+        viewport: 'Mobile 390 × 844',
+        mode: 'Drawer · list',
+        covers:
+          'flags.autoOpen opens the drawer on load and locks page scroll; the viewer Close button collapses it and unlocks scroll; Configure reopens it.',
+      }),
+      Object.freeze({
+        title: 'mobile drawer auto-opens when desktop shows the configurator inline',
+        viewport: 'Mobile 390 × 844',
+        mode: 'Desktop inline · drawer',
+        covers:
+          'With ?desktopMode=inline, a page loaded on mobile still auto-opens the drawer and locks page scroll.',
+      }),
+      Object.freeze({
+        title: 'desktop inline configurator stays closed through a resize to the mobile drawer',
+        viewport: 'Desktop 1280 × 900 → Mobile 390 × 844',
+        mode: 'Desktop inline · drawer',
+        covers:
+          'With ?desktopMode=inline, a desktop load renders the inline variants without locking scroll, and resizing to mobile leaves the drawer closed with scroll unlocked.',
+      }),
+    ]),
+    visualArtifacts: Object.freeze({
+      baselineScreenshots: Object.freeze([]),
+      reportScreenshots: Object.freeze([]),
+      traceScreenshotsOnLedgerRun: false,
+      note:
+        'Behavioral coverage verifies the sheet and drawer open on load, close, and reopen, and that a desktop-inline configuration auto-opens only on mobile. Ledger runs record an action-by-action Playwright trace; there are no committed screenshot baselines or named report screenshots.',
+    }),
+  }),
 ]);
