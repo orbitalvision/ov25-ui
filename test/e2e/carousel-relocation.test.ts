@@ -47,6 +47,31 @@ async function expectSingleExternalCarousel(page: Page, viewport: ViewportName) 
   })).toEqual({ count: 2, hasCustomCss: true });
 }
 
+function relocatedTile(page: Page, viewport: ViewportName, tile: '360' | 'image') {
+  return carouselTarget(page, viewport)
+    .locator(`#ov25-product-carousel button[data-ov25-gallery-tile="${tile}"]`)
+    .first();
+}
+
+function desktopSheet(page: Page) {
+  return page
+    .locator('#ov25-variants-shadow-container')
+    .locator('#ov25-configurator-variant-menu-container');
+}
+
+function mobileDrawer(page: Page) {
+  return page
+    .locator('#ov25-mobile-drawer-container')
+    .locator('#ov25-drawer-content');
+}
+
+async function desktopSheetIsOnScreen(page: Page): Promise<boolean> {
+  return desktopSheet(page).evaluate((element) => {
+    const rect = element.getBoundingClientRect();
+    return rect.width > 0 && rect.left >= 0 && rect.right <= window.innerWidth;
+  });
+}
+
 for (const viewport of ['desktop', 'mobile'] as const) {
   test(`relocates an ordinary ${viewport} carousel to its viewport target`, async ({ page }) => {
     await page.setViewportSize(VIEWPORTS[viewport]);
@@ -56,6 +81,61 @@ for (const viewport of ['desktop', 'mobile'] as const) {
       timeout: RUNTIME_TIMEOUT,
     });
     await expectSingleExternalCarousel(page, viewport);
+  });
+
+  test(`${viewport} carousel thumbnails switch the gallery between an image and the 3D view`, async ({ page }) => {
+    await page.setViewportSize(VIEWPORTS[viewport]);
+    await page.goto(FIXTURE);
+    await expectSingleExternalCarousel(page, viewport);
+
+    const threeDTile = relocatedTile(page, viewport, '360');
+    const imageTile = relocatedTile(page, viewport, 'image');
+    // The first host image (the sofa) follows the 3D tile at gallery index 1.
+    const galleryImage = page.locator('#ov-25-configurator-product-image-1');
+
+    await expect(threeDTile).toHaveAttribute('data-selected', 'true');
+    await imageTile.click();
+    await expect(imageTile).toHaveAttribute('data-selected', 'true');
+    await expect(threeDTile).toHaveAttribute('data-selected', 'false');
+    await expect(galleryImage).toBeVisible();
+    await expect(galleryImage).toHaveAttribute('src', /sofa/);
+
+    await threeDTile.click();
+    await expect(threeDTile).toHaveAttribute('data-selected', 'true');
+    await expect(galleryImage).toHaveCount(0);
+    await expect(page.locator('#ov25-configurator-iframe')).toBeVisible();
+  });
+
+  test(`${viewport} carousel stays in its target while the configurator opens and closes`, async ({ page }) => {
+    await page.setViewportSize(VIEWPORTS[viewport]);
+    await page.goto(FIXTURE);
+    await expectSingleExternalCarousel(page, viewport);
+    await page.locator('#ov25-configurator-iframe').evaluate((iframe) => {
+      iframe.setAttribute('data-carousel-relocation-identity', 'preserved-while-configuring');
+    });
+
+    await page.getByRole('button', { name: 'Configure', exact: true }).click();
+    if (viewport === 'desktop') {
+      await expect.poll(() => desktopSheetIsOnScreen(page), { timeout: RUNTIME_TIMEOUT }).toBe(true);
+    } else {
+      await expect(mobileDrawer(page)).toBeVisible({ timeout: RUNTIME_TIMEOUT });
+    }
+    await expectSingleExternalCarousel(page, viewport);
+
+    const close = viewport === 'desktop'
+      ? desktopSheet(page).getByRole('button', { name: 'Close', exact: true })
+      : page.getByRole('button', { name: 'Close', exact: true }).filter({ visible: true });
+    await close.click();
+    if (viewport === 'desktop') {
+      await expect.poll(() => desktopSheetIsOnScreen(page), { timeout: RUNTIME_TIMEOUT }).toBe(false);
+    } else {
+      await expect(mobileDrawer(page)).toBeHidden({ timeout: RUNTIME_TIMEOUT });
+    }
+    await expectSingleExternalCarousel(page, viewport);
+    await expect(page.locator('#ov25-configurator-iframe')).toHaveAttribute(
+      'data-carousel-relocation-identity',
+      'preserved-while-configuring',
+    );
   });
 }
 
