@@ -62,6 +62,60 @@ const NO_PRICING_TESTS = Object.freeze([
   }),
 ]);
 
+const VARIANTS_PER_ROW_TESTS = Object.freeze(
+  [
+    {
+      name: 'desktop',
+      viewport: 'Desktop 1440 × 1000',
+      surfaces: {
+        inline: 'Inline',
+        'inline-sticky': 'Inline-sticky',
+        sheet: 'Sheet',
+        modal: 'Modal',
+        'variants-only-sheet': 'Variants-only sheet',
+        'inline-sheet': 'Inline-sheet',
+      },
+    },
+    {
+      name: 'mobile',
+      viewport: 'Mobile 390 × 844',
+      surfaces: {
+        inline: 'Inline',
+        'inline-sticky': 'Inline-sticky',
+        sheet: 'Drawer (sheet preset)',
+        modal: 'Modal',
+        'variants-only-sheet': 'Variants-only sheet',
+        'inline-sheet': 'Drawer (inline-sheet preset)',
+      },
+    },
+  ].flatMap(({ name, viewport, surfaces }) => [
+    ...['wizard', 'guided-overview', 'list', 'tabs', 'accordion', 'tree'].map((variantMode) =>
+      Object.freeze({
+        title: `${name} ${variantMode} uses the shared variants-per-row value`,
+        viewport,
+        mode: `Inline · ${variantMode}`,
+        covers:
+          'With --ov25-variants-per-row at 4 the grid shows four columns and 64px thumbnails; moving the slider to 3 gives three columns and larger thumbnails.',
+      }),
+    ),
+    Object.freeze({
+      title: `${name} cards and thumbnails fluidly grow and shrink while four columns remain unchanged`,
+      viewport,
+      mode: 'Inline · tabs',
+      covers:
+        'From the default four columns, two columns widen the cards and thumbnails and six columns narrow them, with the grid picking up the slider value.',
+    }),
+    ...Object.entries(surfaces).map(([configuratorMode, surface]) =>
+      Object.freeze({
+        title: `${name} ${configuratorMode} configurator uses the shared grid`,
+        viewport,
+        mode: `${surface} · tabs`,
+        covers: `With count=5, the tabs grid inside the ${surface.toLowerCase()} shows five columns.`,
+      }),
+    ),
+  ]),
+);
+
 export const E2E_FIXTURE_LEDGER = Object.freeze([
   Object.freeze({
     id: 'hidden-logo',
@@ -169,6 +223,25 @@ export const E2E_FIXTURE_LEDGER = Object.freeze([
       traceScreenshotsOnLedgerRun: false,
       note:
         'Behavioral coverage verifies the sheet and drawer open on load, close, and reopen, and that a desktop-inline configuration auto-opens only on mobile. Ledger runs record an action-by-action Playwright trace; there are no committed screenshot baselines or named report screenshots.',
+    }),
+  }),
+  Object.freeze({
+    id: 'variants-per-row',
+    title: 'Variants per row',
+    fixturePath: '/tests/variants-per-row.html',
+    fixtureDocumentTitle: 'Variants Per Row',
+    sourceFiles: Object.freeze([
+      'dev/react-test/tests/variants-per-row.html',
+      'dev/react-test/tests/variants-per-row.jsx',
+    ]),
+    specFiles: Object.freeze(['test/e2e/variants-per-row.test.ts']),
+    tests: VARIANTS_PER_ROW_TESTS,
+    visualArtifacts: Object.freeze({
+      baselineScreenshots: Object.freeze([]),
+      reportScreenshots: Object.freeze([]),
+      traceScreenshotsOnLedgerRun: false,
+      note:
+        'Behavioral coverage verifies the shared column count and fluid card and thumbnail sizing across every Variants.displayMode and every configurator display mode, at desktop and mobile widths. Ledger runs record an action-by-action Playwright trace; there are no committed screenshot baselines or named report screenshots.',
     }),
   }),
 ]);
