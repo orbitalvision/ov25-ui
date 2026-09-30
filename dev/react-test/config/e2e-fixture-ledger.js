@@ -13,6 +13,42 @@ export const HIDDEN_LOGO_REPORT_SCREENSHOTS = Object.freeze({
   mobileRangeDrawerHideLogoEnabled: 'mobile-range-drawer-logo-free-hide-enabled.png',
 });
 
+const CAROUSEL_RELOCATION_TESTS = Object.freeze([
+  ...[
+    { name: 'desktop', viewport: 'Desktop 1280 × 900', surface: 'sheet' },
+    { name: 'mobile', viewport: 'Mobile 390 × 844', surface: 'drawer' },
+  ].flatMap(({ name, viewport, surface }) => [
+    Object.freeze({
+      title: `relocates an ordinary ${name} carousel to its viewport target`,
+      viewport,
+      mode: `Carousel · ${surface}`,
+      covers:
+        `The only carousel renders inside the page's ${name} target instead of under the gallery, with the branding cssString adopted in its shadow root, while the other target stays empty.`,
+    }),
+    Object.freeze({
+      title: `${name} carousel thumbnails switch the gallery between an image and the 3D view`,
+      viewport,
+      mode: `Carousel · ${surface}`,
+      covers:
+        'Clicking the relocated first image tile selects it and shows that image in the main gallery; clicking the 360° tile selects it again and brings back the 3D view.',
+    }),
+    Object.freeze({
+      title: `${name} carousel stays in its target while the configurator opens and closes`,
+      viewport,
+      mode: `Carousel · ${surface}`,
+      covers:
+        `Opening and closing the ${surface} leaves exactly one carousel in the ${name} target and keeps the same 3D iframe element.`,
+    }),
+  ]),
+  Object.freeze({
+    title: 'switches viewport targets without duplicate carousels or iframe reload',
+    viewport: 'Desktop 1280 × 900 → Mobile 390 × 844 → Desktop',
+    mode: 'Carousel · sheet / drawer',
+    covers:
+      'Resizing moves the single carousel between the desktop and mobile targets without duplicates, and the 3D iframe element survives every switch.',
+  }),
+]);
+
 const NO_PRICING_VARIANT_DISPLAY_MODES = Object.freeze([
   'wizard',
   'guided-overview',
@@ -156,6 +192,25 @@ export const E2E_FIXTURE_LEDGER = Object.freeze([
       traceScreenshotsOnLedgerRun: true,
       note:
         'Each ledger run attaches named PNG screenshots for the tested states and records an action-by-action Playwright trace. Each mobile state has a fixture-controls image showing the active hideLogo toggle and a matching Range drawer image; the drawer is logo-free because mobile has no visible logo header by design. These are review artifacts; there are no committed golden visual-regression baselines.',
+    }),
+  }),
+  Object.freeze({
+    id: 'carousel-relocation',
+    title: 'Carousel relocation',
+    fixturePath: '/tests/carousel-relocation.html',
+    fixtureDocumentTitle: 'Carousel relocation',
+    sourceFiles: Object.freeze([
+      'dev/react-test/tests/carousel-relocation.html',
+      'dev/react-test/tests/carousel-relocation.jsx',
+    ]),
+    specFiles: Object.freeze(['test/e2e/carousel-relocation.test.ts']),
+    tests: CAROUSEL_RELOCATION_TESTS,
+    visualArtifacts: Object.freeze({
+      baselineScreenshots: Object.freeze([]),
+      reportScreenshots: Object.freeze([]),
+      traceScreenshotsOnLedgerRun: false,
+      note:
+        'Behavioral coverage verifies the carousel lands in the target for each viewport, drives the gallery from there, and stays put through the sheet or drawer and viewport switches. Ledger runs record an action-by-action Playwright trace; there are no committed screenshot baselines or named report screenshots.',
     }),
   }),
   Object.freeze({
