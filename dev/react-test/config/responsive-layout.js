@@ -13,6 +13,11 @@ export const SNAP2_CLOSE_PRESET_IDS = Object.freeze([
   'tablet-standard-portrait',
 ]);
 
+/** The Snap2 close presets that use the mobile drawer: the phone and the portrait tablet. */
+export const SNAP2_DRAWER_PRESET_IDS = Object.freeze(
+  SNAP2_CLOSE_PRESET_IDS.filter((id) => expectedResponsiveLayout(responsivePreset(id), 'snap2') === 'mobile'),
+);
+
 /** Screenshot states each responsive test attaches, by how the fixture shows its configurator. */
 export const RESPONSIVE_SCREENSHOT_STATES = Object.freeze({
   configure: Object.freeze(['page', 'open']),

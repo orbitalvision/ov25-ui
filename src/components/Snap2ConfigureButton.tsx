@@ -13,6 +13,10 @@ import { closeModuleSelectMenu, DRAWER_HEIGHT_RATIO, IFRAME_HEIGHT_RATIO } from 
 import { createPortal } from 'react-dom';
 import { ConfigureButton } from './ConfigureButton.js';
 import { Ov25ShadowHost } from './Ov25ShadowHost.js';
+import {
+  BODY_MOBILE_GALLERY_Z_INDEX,
+  BODY_SNAP2_MOBILE_MODULE_PICKER_Z_INDEX,
+} from '../lib/config/layers.js';
 
 export const Snap2ConfigureUI: React.FC = () => {
   const { isVariantsOpen, isModalOpen, setIsModalOpen, setIsVariantsOpen, isMobile, allOptions, activeOptionId, setActiveOptionId, setShareDialogTrigger, shareDialogTrigger, isSnap2Mode, drawerSize, setDrawerSize, configuratorState, skipNextDrawerCloseRef, setCompatibleModules, setConfiguratorState, setPreloading, preloading, iframeResetKey, resetIframe, configuratorDisplayMode, configuratorDisplayModeMobile, initialiseMenuUsesExternalSelector } = useOV25UI();
@@ -95,11 +99,13 @@ export const Snap2ConfigureUI: React.FC = () => {
   return (
     <>
       {isMobile && shouldRenderIframe && !snap2MobileInline && !snap2MobileModal && createPortal(
+        // This full-screen host takes touches wherever it is on top, so it must sit below the drawer
+        // and dialogs. The z-indexes inside it only order the viewer and its controls within the host.
         <Ov25ShadowHost
           style={{
             position: 'fixed',
             inset: 0,
-            zIndex: 2147483644,
+            zIndex: BODY_MOBILE_GALLERY_Z_INDEX,
             width: '100%',
             height: '100%',
             pointerEvents: !isVariantsOpen || showModuleSelect ? 'none' : 'auto',
@@ -135,7 +141,7 @@ export const Snap2ConfigureUI: React.FC = () => {
           style={{
             position: 'fixed',
             inset: 0,
-            zIndex: 2147483645,
+            zIndex: BODY_SNAP2_MOBILE_MODULE_PICKER_Z_INDEX,
             width: '100%',
             height: '100%',
             pointerEvents: 'auto',
