@@ -1,11 +1,12 @@
 #!/usr/bin/env node
 
 import { spawn, spawnSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { setTimeout as delay } from 'node:timers/promises';
 import { E2E_FIXTURE_LEDGER } from '../dev/react-test/config/e2e-fixture-ledger.js';
+import { buildScreenshotGallery } from './build-e2e-screenshot-gallery.mjs';
 
 const ROOT_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const REACT_TEST_DIR = path.join(ROOT_DIR, 'dev/react-test');
@@ -16,6 +17,7 @@ const KNOWN_FLAGS = new Set([
   '--help',
   '--list',
   '--no-open',
+  '--update-visuals',
   '--validate',
 ]);
 
@@ -40,6 +42,9 @@ async function main() {
 
   for (const flag of flags) {
     if (!KNOWN_FLAGS.has(flag)) throw runnerError(`Unknown option: ${flag}`);
+  }
+  if (flags.has('--update-visuals') && flags.has('--headed')) {
+    throw runnerError('Pixel baselines are recorded headless; drop --headed when using --update-visuals.');
   }
 
   if (flags.has('--help')) {
@@ -68,8 +73,11 @@ async function main() {
   }
 
   validateLocalInstall();
-  const validationStatus = runLedgerValidation();
-  if (validationStatus !== 0) return validationStatus;
+  // Re-recording may be what creates a missing baseline, so only normal runs validate the ledger first.
+  if (!flags.has('--update-visuals')) {
+    const validationStatus = runLedgerValidation();
+    if (validationStatus !== 0) return validationStatus;
+  }
 
   const distIsMissing = !existsSync(path.join(ROOT_DIR, 'dist/index.js'));
   if (flags.has('--build') || distIsMissing) {
@@ -99,15 +107,18 @@ async function main() {
       '--config',
       'playwright.config.ts',
       '--reporter',
-      'html',
+      'html,json',
       '--trace',
       'on',
     ];
     if (flags.has('--headed')) playwrightArgs.push('--headed', '--workers', '1');
+    // Only the @visual tests compare pixels, so re-recording runs just those.
+    if (flags.has('--update-visuals')) playwrightArgs.push('--grep', '@visual', '--update-snapshots');
 
     const reportDirectory = path.join('playwright-report', 'fixtures', fixtureId);
+    clearPreviousRun();
     console.log(
-      `\nRunning E2E coverage for: ${selectedFixtures.map((fixture) => fixture.title).join(', ')}\n`,
+      `\n${flags.has('--update-visuals') ? 'Re-recording pixel baselines' : 'Running E2E coverage'} for: ${selectedFixtures.map((fixture) => fixture.title).join(', ')}\n`,
     );
     const testStatus = runSync(localBin(ROOT_DIR, 'playwright'), playwrightArgs, {
       env: {
@@ -116,11 +127,16 @@ async function main() {
         PLAYWRIGHT_HTML_OPEN: 'never',
         PLAYWRIGHT_HTML_OUTPUT_DIR: reportDirectory,
         PLAYWRIGHT_HTML_TITLE: `OV25 fixture E2E — ${fixtureId}`,
+        // The screenshot gallery is built from the JSON reporter's copy of the results.
+        PLAYWRIGHT_JSON_OUTPUT_FILE: path.join(ROOT_DIR, reportDirectory, 'results.json'),
       },
     });
 
     stopOwnedServer();
+    const gallery = writeScreenshotGallery(path.join(ROOT_DIR, reportDirectory));
+    removeRawTestOutput();
     if (!flags.has('--no-open')) {
+      if (gallery) openInBrowser(gallery.galleryPath);
       console.log('\nOpening the Playwright HTML report. Press Ctrl+C when you are finished.\n');
       runSync(localBin(ROOT_DIR, 'playwright'), [
         'show-report',
@@ -135,6 +151,51 @@ async function main() {
   } finally {
     stopOwnedServer();
   }
+}
+
+/**
+ * Only the latest run is kept: a run replaces every earlier report, including a plain
+ * `playwright test` report, and starts without Playwright's raw output from the last run.
+ */
+function clearPreviousRun() {
+  rmSync(path.join(ROOT_DIR, 'playwright-report'), { recursive: true, force: true });
+  rmSync(path.join(ROOT_DIR, 'test-results'), { recursive: true, force: true });
+}
+
+/**
+ * The report holds its own copy of every attachment and trace, and the gallery has copied its
+ * screenshots, so the raw output is deleted. `.last-run.json` stays so `--last-failed` still works.
+ */
+function removeRawTestOutput() {
+  const outputDirectory = path.join(ROOT_DIR, 'test-results');
+  if (!existsSync(outputDirectory)) return;
+  for (const entry of readdirSync(outputDirectory)) {
+    if (entry !== '.last-run.json') rmSync(path.join(outputDirectory, entry), { recursive: true, force: true });
+  }
+}
+
+function writeScreenshotGallery(reportDirectory) {
+  try {
+    const gallery = buildScreenshotGallery(reportDirectory);
+    console.log(
+      `\nScreenshot gallery: ${path.relative(ROOT_DIR, gallery.galleryPath)} (${gallery.screenshotCount} screenshots from ${gallery.testCount} tests)`,
+    );
+    return gallery;
+  } catch (error) {
+    console.warn(`\nCould not build the screenshot gallery: ${error instanceof Error ? error.message : String(error)}`);
+    return null;
+  }
+}
+
+function openInBrowser(filePath) {
+  const [command, commandArgs] =
+    process.platform === 'darwin'
+      ? ['open', [filePath]]
+      : process.platform === 'win32'
+        ? ['cmd', ['/c', 'start', '', filePath]]
+        : ['xdg-open', [filePath]];
+  const result = spawnSync(command, commandArgs, { stdio: 'ignore', shell: false });
+  if (result.error) console.warn(`Could not open ${filePath}: ${result.error.message}`);
 }
 
 function runLedgerValidation() {
@@ -274,7 +335,7 @@ function printFixtures() {
 }
 
 function printUsage() {
-  console.log(`\nUsage:\n  node scripts/run-fixture-e2e.mjs <fixture-id|all> [options]\n\nOptions:\n  --build     Rebuild ov25-ui before running the fixture\n  --headed    Show the browser while tests run\n  --no-open   Write the HTML report without opening it\n  --validate  Validate the ledger without running fixtures\n  --list      List fixture IDs\n`);
+  console.log(`\nUsage:\n  node scripts/run-fixture-e2e.mjs <fixture-id|all> [options]\n\nOptions:\n  --build     Rebuild ov25-ui before running the fixture\n  --headed    Show the browser while tests run\n  --no-open   Write the HTML report and screenshot gallery without opening them\n  --update-visuals  Re-record the pixel baselines (tests tagged @visual) after an intended visual change\n  --validate  Validate the ledger without running fixtures\n  --list      List fixture IDs\n\nEvery run also writes screenshots.html next to its report: every captured screenshot on one page.\nOnly the latest report is kept: each run deletes earlier reports and Playwright's raw test output.\nRebuild the gallery for the current report with: node scripts/build-e2e-screenshot-gallery.mjs\n`);
 }
 
 function runnerError(message, exitCode = 1) {

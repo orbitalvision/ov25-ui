@@ -25,6 +25,17 @@ export const VIEWPORT_PRESETS = Object.freeze([
     isMobile: false,
   },
   {
+    id: 'desktop-ultrawide',
+    label: 'Ultrawide desktop',
+    device: '34-inch ultrawide display',
+    group: 'desktop',
+    width: 3440,
+    height: 1440,
+    orientation: 'landscape',
+    hasTouch: false,
+    isMobile: false,
+  },
+  {
     id: 'phone-compact-portrait',
     label: 'Compact phone',
     device: 'iPhone SE class',

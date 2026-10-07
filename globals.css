@@ -770,6 +770,21 @@ html {
         height: auto;
     }
 }
+
+/*
+ * On a phone held sideways, a full-width square 3D view would be taller than the screen, and once
+ * it filled the screen the canvas would take every swipe, so the page could not be scrolled to the
+ * controls below it. Keep the in-page view square but never taller than the screen; the width it
+ * gives up stays page content that can be swiped. A lifted view (sheet, drawer or modal open) is
+ * positioned by its surface and keeps its own size, and the sticky layout sizes its slot itself.
+ */
+@media (max-height: 500px) and (orientation: landscape) {
+    .ov25-configurator-iframe-slot:not(.ov25-inline-sticky-iframe-slot) {
+        max-width: 100svh;
+        margin-inline: auto;
+    }
+}
+
 #ov25-configurator-iframe-container[data-stacked="true"],
 [id^="ov25-configurator-iframe-container-"][data-stacked="true"] {
     aspect-ratio: 1 / 1;

@@ -65,7 +65,7 @@ function App() {
       <p className="ov:mb-5 ov:text-[#525252]">
         Ordinary sheet and drawer modes with viewport-specific client-owned carousel destinations.
       </p>
-      <div className="ov:grid ov:grid-cols-1 ov:md:grid-cols-[minmax(0,3fr)_minmax(280px,2fr)] ov:gap-8">
+      <div className="ov:grid ov:grid-cols-1 ov:md:grid-cols-[minmax(0,3fr)_minmax(280px,2fr)] ov:landscape:grid-cols-[minmax(0,3fr)_minmax(280px,2fr)] ov:gap-8">
         <section data-carousel-source-column>
           <h2 className="ov:text-sm ov:font-semibold ov:mb-2">Gallery source</h2>
           <div id="carousel-relocation-gallery" className="configurator-container ov:w-full">

@@ -1,4 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
+import { defineResponsiveLayoutTests } from './support/responsive-layout';
 
 const FIXTURE = '/tests/variants-per-row.html';
 const RUNTIME_TIMEOUT = 30_000;
@@ -118,3 +119,13 @@ for (const [viewportName, viewport] of Object.entries(VIEWPORTS)) {
     }
   });
 }
+
+// The fixture's defaults: an inline configurator with tabs and four variants per row.
+defineResponsiveLayoutTests({
+  path: FIXTURE,
+  opens: 'inline',
+  check: async (page) => {
+    const grid = await revealVariantGrid(page, 'tabs');
+    await expect.poll(() => gridColumnCount(grid)).toBe(4);
+  },
+});

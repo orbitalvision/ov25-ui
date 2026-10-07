@@ -621,7 +621,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
                   stickyLayoutActive && "ov25-inline-sticky-iframe-slot",
                   galleryUsesColumnFlexFill
                     ? "ov:flex-1 ov:min-h-0 ov:flex ov:flex-col"
-                    : "ov:aspect-square"
+                    : "ov25-configurator-iframe-slot ov:aspect-square"
                 )}
             >
                 <div id="ov25-configurator-background-color" className={cn(

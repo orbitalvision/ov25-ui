@@ -1,6 +1,26 @@
+import { fileURLToPath } from 'node:url';
 import { expect, test, type Page } from '@playwright/test';
+import {
+  PIXEL_BASELINE_PRESET_IDS,
+  expectedResponsiveLayout,
+  presetSize,
+  responsivePreset,
+} from '../../dev/react-test/config/responsive-layout.js';
+import {
+  PIXEL_BASELINES_ENABLED,
+  PIXEL_BASELINES_SKIP_REASON,
+  defineResponsiveLayoutTests,
+  expectConfiguratorLoaded,
+  presetContext,
+  watchConfiguratorLoad,
+  type Layout,
+} from './support/responsive-layout';
 
 const FIXTURE = '/tests/carousel-relocation.html';
+// Stands in for the fixture's picsum.photos images, which are random on every request.
+const LOCAL_GALLERY_IMAGE = fileURLToPath(
+  new URL('../../dev/react-test/src/images/sofa.png', import.meta.url),
+);
 const RUNTIME_TIMEOUT = 20000;
 const VIEWPORTS = {
   desktop: { width: 1280, height: 900 },
@@ -158,3 +178,44 @@ test('switches viewport targets without duplicate carousels or iframe reload', a
     );
   }
 });
+
+defineResponsiveLayoutTests({
+  path: FIXTURE,
+  opens: 'configure',
+  check: (page, layout) => expectSingleExternalCarousel(page, layout),
+});
+
+for (const presetId of PIXEL_BASELINE_PRESET_IDS) {
+  const preset = responsivePreset(presetId);
+
+  test.describe(() => {
+    test.use(presetContext(preset));
+
+    test(`carousel strip matches its baseline at ${preset.id} (${presetSize(preset)})`, { tag: '@visual' }, async ({ page }) => {
+      test.skip(!PIXEL_BASELINES_ENABLED, PIXEL_BASELINES_SKIP_REASON);
+      await page.route('https://picsum.photos/**', (route) => route.fulfill({ path: LOCAL_GALLERY_IMAGE }));
+      const load = watchConfiguratorLoad(page);
+      await page.goto(FIXTURE);
+      const layout = expectedResponsiveLayout(preset) as Layout;
+      await expectSingleExternalCarousel(page, layout);
+      await expectConfiguratorLoaded(page, load);
+
+      const strip = carouselTarget(page, layout).locator(':scope > [data-ov25-external-carousel="true"]');
+      await expect
+        .poll(
+          () =>
+            strip.locator('img').evaluateAll((images) =>
+              images.every((image) => (image as HTMLImageElement).complete && (image as HTMLImageElement).naturalWidth > 0),
+            ),
+          { timeout: RUNTIME_TIMEOUT },
+        )
+        .toBe(true);
+      await expect(strip).toHaveScreenshot(`carousel-strip-${preset.id}.png`, {
+        animations: 'disabled',
+        // The 360° tile previews the live product.
+        mask: [strip.locator('[data-ov25-gallery-tile="360"]')],
+        maxDiffPixelRatio: 0.01,
+      });
+    });
+  });
+}

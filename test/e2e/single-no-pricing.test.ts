@@ -1,4 +1,22 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
+import {
+  SNAP2_CLOSE_PRESET_IDS,
+  expectedResponsiveLayout,
+  presetSize,
+  responsivePreset,
+} from '../../dev/react-test/config/responsive-layout.js';
+import {
+  configureButton,
+  configuratorSurface,
+  defineResponsiveLayoutTests,
+  expectConfiguratorLoaded,
+  expectInsideViewport,
+  expectVariantControls,
+  presetContext,
+  snap2Builder,
+  watchConfiguratorLoad,
+  type Layout,
+} from './support/responsive-layout';
 
 const FIXTURE_PATH = '/tests/single-no-pricing.html';
 const RUNTIME_TIMEOUT = 30_000;
@@ -238,3 +256,55 @@ test.describe('Single product — hidePricing mobile drawer layout', () => {
     expect(reviewBox!.height).toBeCloseTo(initialBox!.height, 0);
   });
 });
+
+for (const profile of PROFILES) {
+  defineResponsiveLayoutTests({
+    path: `${FIXTURE_PATH}?profile=${profile}&display=tree`,
+    opens: 'configure',
+    product: profile,
+    variant: profile,
+    check: async (page) => {
+      await expectNoPricing(page);
+      await expectNoPurchaseActions(page);
+    },
+  });
+}
+
+// Since the 0.8.0 layer refactor (layers.ts), the full-screen Snap2 mobile 3D layer that
+// Snap2ConfigureButton portals to the body keeps a hard-coded z-index of 2147483644: above the
+// drawer portal (2147483643) and tied with the dialog, so it takes taps meant for No.
+const SNAP2_SAVE_DIALOG_BUG =
+  'Known bug: the Snap2 mobile 3D layer sits above the drawer and covers the save dialog, so a tap on No dismisses the dialog and the builder stays open.';
+
+for (const presetId of SNAP2_CLOSE_PRESET_IDS) {
+  const preset = responsivePreset(presetId);
+
+  test.describe(() => {
+    test.use(presetContext(preset));
+
+    test(`snap2 builder closes through the save dialog at ${preset.id} (${presetSize(preset)})`, async ({ page }) => {
+      const layout = expectedResponsiveLayout(preset, 'snap2') as Layout;
+      const load = watchConfiguratorLoad(page);
+      await page.goto(`${FIXTURE_PATH}?profile=snap2&display=tree`);
+      await configureButton(page).click({ timeout: RUNTIME_TIMEOUT });
+      await expectInsideViewport(configuratorSurface(page, 'snap2', layout));
+      await expectConfiguratorLoaded(page, load);
+      await expectVariantControls(page, 'snap2');
+
+      // On desktop the settings panel covers the builder's own close button, so it closes first.
+      await page.getByRole('button', { name: 'Close', exact: true }).filter({ visible: true }).first().click();
+      if (layout === 'desktop') {
+        await page.getByRole('button', { name: 'Close modal', exact: true }).click();
+      }
+      const saveDialog = page.getByRole('dialog').filter({ hasText: 'Save Your Configuration' });
+      await expect(saveDialog).toBeVisible({ timeout: RUNTIME_TIMEOUT });
+      // Everything above works on every layout; only the dialog's own buttons are unreachable on mobile.
+      test.fail(layout === 'mobile', SNAP2_SAVE_DIALOG_BUG);
+      await saveDialog.getByRole('button', { name: 'No', exact: true }).click({ timeout: 5_000 });
+
+      await expect(snap2Builder(page)).toBeHidden({ timeout: RUNTIME_TIMEOUT });
+      await expect(mobileDrawer(page)).toBeHidden();
+      await expect(configureButton(page)).toBeVisible();
+    });
+  });
+}

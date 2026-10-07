@@ -1,0 +1,5 @@
+/* Applied only while taking checkout bar screenshots: the mobile bar floats over the variant list,
+   so without a backdrop the live swatches behind it show through its padding. */
+.ov25-checkout-button-wrapper {
+  background: var(--ov25-background-color, #fff) !important;
+}

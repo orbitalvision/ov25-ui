@@ -126,7 +126,15 @@ export function validateE2EFixtureLedger() {
 
 function collectPlaywrightTests(specFiles) {
   const playwrightBin = localBin(ROOT_DIR, 'playwright');
-  const { FORCE_COLOR: _forceColor, ...baseEnv } = process.env;
+  // The runner sets the JSON reporter's output file for the test run; this collection must keep
+  // its JSON on stdout.
+  const {
+    FORCE_COLOR: _forceColor,
+    PLAYWRIGHT_JSON_OUTPUT_FILE: _jsonFile,
+    PLAYWRIGHT_JSON_OUTPUT_DIR: _jsonDir,
+    PLAYWRIGHT_JSON_OUTPUT_NAME: _jsonName,
+    ...baseEnv
+  } = process.env;
   const result = spawnSync(
     playwrightBin,
     ['test', ...specFiles, '--config', 'playwright.config.ts', '--list', '--reporter=json'],

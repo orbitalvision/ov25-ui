@@ -1,5 +1,6 @@
 import { expect, test, type Locator, type Page, type TestInfo } from '@playwright/test';
 import { HIDDEN_LOGO_REPORT_SCREENSHOTS } from '../../dev/react-test/config/e2e-fixture-ledger.js';
+import { defineResponsiveLayoutTests } from './support/responsive-layout';
 
 const FIXTURE_PATH = '/tests/hidden-logo.html';
 const RUNTIME_TIMEOUT = 20_000;
@@ -387,3 +388,5 @@ test.describe('Hidden logo (branding.hideLogo)', () => {
     );
   });
 });
+
+defineResponsiveLayoutTests({ path: FIXTURE_PATH, opens: 'configure' });

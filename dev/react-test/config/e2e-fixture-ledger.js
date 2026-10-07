@@ -1,6 +1,53 @@
+import {
+  PIXEL_BASELINE_PRESET_IDS,
+  SNAP2_CLOSE_PRESET_IDS,
+  expectedResponsiveLayout,
+  presetSize,
+  presetViewportLabel,
+  responsiveLayoutLedgerTests,
+  responsivePreset,
+  responsiveScreenshotNames,
+} from './responsive-layout.js';
+
 export const E2E_FIXTURE_LEDGER_VERSION = 1;
 
 export const E2E_FIXTURE_RUNNER_COMMAND = 'node scripts/run-fixture-e2e.mjs';
+
+const RESPONSIVE_NOTE =
+  'The responsive layout tests attach a screenshot of each state at every viewport preset, including touch and mobile emulation for phones and tablets; page screenshots are taken with the gallery scrolled into view.';
+
+/** Ledger rows for the @visual tests titled `${subject} matches its baseline at <preset> (<size>)`. */
+function pixelBaselineTests(subject, covers) {
+  return PIXEL_BASELINE_PRESET_IDS.map((id) => {
+    const preset = responsivePreset(id);
+    return Object.freeze({
+      title: `${subject} matches its baseline at ${preset.id} (${presetSize(preset)})`,
+      viewport: presetViewportLabel(preset),
+      mode: 'Pixel baseline · headless',
+      covers,
+    });
+  });
+}
+
+/** Committed baselines for `toHaveScreenshot(`${name}-<preset>.png`)` in a spec. */
+function pixelBaselineFiles(specFile, name) {
+  return PIXEL_BASELINE_PRESET_IDS.map((id) => `${specFile}-snapshots/${name}-${id}-chromium-darwin.png`);
+}
+
+const SNAP2_CLOSE_TESTS = Object.freeze(
+  SNAP2_CLOSE_PRESET_IDS.map((id) => {
+    const preset = responsivePreset(id);
+    const onDesktop = expectedResponsiveLayout(preset, 'snap2') === 'desktop';
+    return Object.freeze({
+      title: `snap2 builder closes through the save dialog at ${preset.id} (${presetSize(preset)})`,
+      viewport: presetViewportLabel(preset),
+      mode: `Snap2 · ${onDesktop ? 'desktop builder' : 'mobile drawer'}`,
+      covers: onDesktop
+        ? 'Closing the settings panel and then the builder shows the save dialog; No closes the builder and brings back Configure.'
+        : 'The builder opens, loads and shows the save dialog on close; tapping No is expected to fail for a known bug (the Snap2 mobile 3D layer sits above the drawer and covers the dialog, so a tap on No dismisses the dialog and the builder stays open). Playwright reports the test as unexpectedly passing once the bug is fixed.',
+    });
+  }),
+);
 
 export const HIDDEN_LOGO_REPORT_SCREENSHOTS = Object.freeze({
   desktopRangeLogoHidden: 'desktop-range-logo-hidden.png',
@@ -185,13 +232,17 @@ export const E2E_FIXTURE_LEDGER = Object.freeze([
         covers:
           'Mobile renders no logo-bearing header by design; its empty marker remains mounted, desktop header/logo nodes stay absent, and the iframe and price survive Range/Snap2 and hideLogo toggles.',
       }),
+      ...responsiveLayoutLedgerTests({ opens: 'configure' }),
     ]),
     visualArtifacts: Object.freeze({
       baselineScreenshots: Object.freeze([]),
-      reportScreenshots: Object.freeze(Object.values(HIDDEN_LOGO_REPORT_SCREENSHOTS)),
+      reportScreenshots: Object.freeze([
+        ...Object.values(HIDDEN_LOGO_REPORT_SCREENSHOTS),
+        ...responsiveScreenshotNames({ opens: 'configure' }),
+      ]),
       traceScreenshotsOnLedgerRun: true,
       note:
-        'Each ledger run attaches named PNG screenshots for the tested states and records an action-by-action Playwright trace. Each mobile state has a fixture-controls image showing the active hideLogo toggle and a matching Range drawer image; the drawer is logo-free because mobile has no visible logo header by design. These are review artifacts; there are no committed golden visual-regression baselines.',
+        `Each ledger run attaches named PNG screenshots for the tested states and records an action-by-action Playwright trace. Each mobile state has a fixture-controls image showing the active hideLogo toggle and a matching Range drawer image; the drawer is logo-free because mobile has no visible logo header by design. These are review artifacts; there are no committed golden visual-regression baselines. ${RESPONSIVE_NOTE}`,
     }),
   }),
   Object.freeze({
@@ -204,13 +255,22 @@ export const E2E_FIXTURE_LEDGER = Object.freeze([
       'dev/react-test/tests/carousel-relocation.jsx',
     ]),
     specFiles: Object.freeze(['test/e2e/carousel-relocation.test.ts']),
-    tests: CAROUSEL_RELOCATION_TESTS,
+    tests: Object.freeze([
+      ...CAROUSEL_RELOCATION_TESTS,
+      ...responsiveLayoutLedgerTests({ opens: 'configure' }),
+      ...pixelBaselineTests(
+        'carousel strip',
+        'The relocated carousel strip matches its committed image, with the remote fixture images served from a local file and the live 360° tile masked.',
+      ),
+    ]),
     visualArtifacts: Object.freeze({
-      baselineScreenshots: Object.freeze([]),
-      reportScreenshots: Object.freeze([]),
+      baselineScreenshots: Object.freeze(
+        pixelBaselineFiles('test/e2e/carousel-relocation.test.ts', 'carousel-strip'),
+      ),
+      reportScreenshots: Object.freeze(responsiveScreenshotNames({ opens: 'configure' })),
       traceScreenshotsOnLedgerRun: false,
       note:
-        'Behavioral coverage verifies the carousel lands in the target for each viewport, drives the gallery from there, and stays put through the sheet or drawer and viewport switches. Ledger runs record an action-by-action Playwright trace; there are no committed screenshot baselines or named report screenshots.',
+        `Behavioral coverage verifies the carousel lands in the target for each viewport, drives the gallery from there, and stays put through the sheet or drawer and viewport switches, and the responsive tests check it lands in the right target at every preset. ${RESPONSIVE_NOTE} The carousel strip is also compared against committed pixel baselines in headless runs. Ledger runs record an action-by-action Playwright trace.`,
     }),
   }),
   Object.freeze({
@@ -223,13 +283,23 @@ export const E2E_FIXTURE_LEDGER = Object.freeze([
       'dev/react-test/tests/single-no-pricing.jsx',
     ]),
     specFiles: Object.freeze(['test/e2e/single-no-pricing.test.ts']),
-    tests: NO_PRICING_TESTS,
+    tests: Object.freeze([
+      ...NO_PRICING_TESTS,
+      ...['standard', 'snap2'].flatMap((profile) =>
+        responsiveLayoutLedgerTests({ opens: 'configure', product: profile, variant: profile }),
+      ),
+      ...SNAP2_CLOSE_TESTS,
+    ]),
     visualArtifacts: Object.freeze({
       baselineScreenshots: Object.freeze([]),
-      reportScreenshots: Object.freeze([]),
+      reportScreenshots: Object.freeze(
+        ['standard', 'snap2'].flatMap((profile) =>
+          responsiveScreenshotNames({ opens: 'configure', variant: profile }),
+        ),
+      ),
       traceScreenshotsOnLedgerRun: false,
       note:
-        'Behavioral coverage verifies the rendered Standard and Snap2 variant surfaces across every public Variants.displayMode, plus mobile drawer spacing and controls for the affected modes. Ledger runs record an action-by-action Playwright trace; there are no committed screenshot baselines or named report screenshots.',
+        `Behavioral coverage verifies the rendered Standard and Snap2 variant surfaces across every public Variants.displayMode, plus mobile drawer spacing and controls for the affected modes. The responsive tests check pricing and purchase actions stay hidden at every preset, including the Snap2 portrait-tablet rule. ${RESPONSIVE_NOTE} Ledger runs record an action-by-action Playwright trace; there are no committed screenshot baselines.`,
     }),
   }),
   Object.freeze({
@@ -271,13 +341,20 @@ export const E2E_FIXTURE_LEDGER = Object.freeze([
         covers:
           'With ?desktopMode=inline, a desktop load renders the inline variants without locking scroll, and resizing to mobile leaves the drawer closed with scroll unlocked.',
       }),
+      ...responsiveLayoutLedgerTests({ opens: 'on-load' }),
+      ...pixelBaselineTests(
+        'checkout bar',
+        'The checkout bar in the auto-opened sheet or drawer matches its committed image, with the live price masked and an opaque backdrop so the swatches behind the mobile bar stay out of the image.',
+      ),
     ]),
     visualArtifacts: Object.freeze({
-      baselineScreenshots: Object.freeze([]),
-      reportScreenshots: Object.freeze([]),
+      baselineScreenshots: Object.freeze(
+        pixelBaselineFiles('test/e2e/gallery-sheet-list-auto-open.test.ts', 'checkout-bar'),
+      ),
+      reportScreenshots: Object.freeze(responsiveScreenshotNames({ opens: 'on-load' })),
       traceScreenshotsOnLedgerRun: false,
       note:
-        'Behavioral coverage verifies the sheet and drawer open on load, close, and reopen, and that a desktop-inline configuration auto-opens only on mobile. Ledger runs record an action-by-action Playwright trace; there are no committed screenshot baselines or named report screenshots.',
+        `Behavioral coverage verifies the sheet and drawer open on load, close, and reopen, and that a desktop-inline configuration auto-opens only on mobile. ${RESPONSIVE_NOTE} The checkout bar is also compared against committed pixel baselines in headless runs. Ledger runs record an action-by-action Playwright trace.`,
     }),
   }),
   Object.freeze({
@@ -290,13 +367,16 @@ export const E2E_FIXTURE_LEDGER = Object.freeze([
       'dev/react-test/tests/variants-per-row.jsx',
     ]),
     specFiles: Object.freeze(['test/e2e/variants-per-row.test.ts']),
-    tests: VARIANTS_PER_ROW_TESTS,
+    tests: Object.freeze([
+      ...VARIANTS_PER_ROW_TESTS,
+      ...responsiveLayoutLedgerTests({ opens: 'inline' }),
+    ]),
     visualArtifacts: Object.freeze({
       baselineScreenshots: Object.freeze([]),
-      reportScreenshots: Object.freeze([]),
+      reportScreenshots: Object.freeze(responsiveScreenshotNames({ opens: 'inline' })),
       traceScreenshotsOnLedgerRun: false,
       note:
-        'Behavioral coverage verifies the shared column count and fluid card and thumbnail sizing across every Variants.displayMode and every configurator display mode, at desktop and mobile widths. Ledger runs record an action-by-action Playwright trace; there are no committed screenshot baselines or named report screenshots.',
+        `Behavioral coverage verifies the shared column count and fluid card and thumbnail sizing across every Variants.displayMode and every configurator display mode, at desktop and mobile widths, and the responsive tests check the default grid keeps four columns at every preset. ${RESPONSIVE_NOTE} Ledger runs record an action-by-action Playwright trace; there are no committed screenshot baselines.`,
     }),
   }),
 ]);

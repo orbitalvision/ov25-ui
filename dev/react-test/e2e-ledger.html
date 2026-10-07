@@ -72,7 +72,7 @@
           <code id="run-all-command"></code>
           <button id="copy-all-command" type="button">Copy command</button>
         </div>
-        <p class="command-note">Run from the <code>ov25-ui</code> repository root. The command uses the current <code>dist</code> build, starts the fixture server when needed, captures trace screenshots, and opens Playwright’s HTML report. Add <code>--build</code> when you also want to rebuild the library first.</p>
+        <p class="command-note">Run from the <code>ov25-ui</code> repository root. The command uses the current <code>dist</code> build, starts the fixture server when needed, captures trace screenshots, and opens Playwright’s HTML report. Add <code>--build</code> when you also want to rebuild the library first. Each run also writes <code>screenshots.html</code> next to its report, with every captured screenshot on one page. Only the latest report is kept: each run deletes earlier reports and Playwright’s raw test output. After an intended visual change, <code>npm run test:e2e:update-visuals</code> re-records the pixel baselines.</p>
       </section>
       <section id="ledger" class="ledger" aria-live="polite"></section>
     </main>

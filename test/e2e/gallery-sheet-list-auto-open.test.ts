@@ -1,7 +1,28 @@
+import { fileURLToPath } from 'node:url';
 import { expect, test, type Locator, type Page } from '@playwright/test';
+import {
+  PIXEL_BASELINE_PRESET_IDS,
+  expectedResponsiveLayout,
+  presetSize,
+  responsivePreset,
+} from '../../dev/react-test/config/responsive-layout.js';
+import {
+  PIXEL_BASELINES_ENABLED,
+  PIXEL_BASELINES_SKIP_REASON,
+  configuratorSurface,
+  defineResponsiveLayoutTests,
+  expectConfiguratorLoaded,
+  expectInsideViewport,
+  presetContext,
+  watchConfiguratorLoad,
+  type Layout,
+} from './support/responsive-layout';
 
 const FIXTURE = '/tests/gallery-sheet-list-auto-open.html';
 const RUNTIME_TIMEOUT = 20000;
+const OPAQUE_CHECKOUT_BAR_CSS = fileURLToPath(
+  new URL('./support/opaque-checkout-bar.css', import.meta.url),
+);
 
 async function expectPageScrollLocked(page: Page) {
   await expect.poll(
@@ -141,3 +162,32 @@ test('desktop inline configurator stays closed through a resize to the mobile dr
   await expect(mobileDrawer(page)).toBeHidden();
   await expectPageScrollUnlocked(page);
 });
+
+defineResponsiveLayoutTests({ path: FIXTURE, opens: 'on-load' });
+
+for (const presetId of PIXEL_BASELINE_PRESET_IDS) {
+  const preset = responsivePreset(presetId);
+
+  test.describe(() => {
+    test.use(presetContext(preset));
+
+    test(`checkout bar matches its baseline at ${preset.id} (${presetSize(preset)})`, { tag: '@visual' }, async ({ page }) => {
+      test.skip(!PIXEL_BASELINES_ENABLED, PIXEL_BASELINES_SKIP_REASON);
+      const load = watchConfiguratorLoad(page);
+      await page.goto(FIXTURE);
+      const surface = configuratorSurface(page, 'standard', expectedResponsiveLayout(preset) as Layout);
+      await expectInsideViewport(surface);
+      await expectConfiguratorLoaded(page, load);
+
+      const bar = surface.locator('.ov25-checkout-button-wrapper').filter({ visible: true }).first();
+      await expect(bar.locator('#ov25-checkout-button')).toBeEnabled({ timeout: RUNTIME_TIMEOUT });
+      await expect(bar).toHaveScreenshot(`checkout-bar-${preset.id}.png`, {
+        animations: 'disabled',
+        // The price comes from live product data.
+        mask: [bar.locator('[data-ov25-checkout-price-label]')],
+        stylePath: OPAQUE_CHECKOUT_BAR_CSS,
+        maxDiffPixelRatio: 0.01,
+      });
+    });
+  });
+}

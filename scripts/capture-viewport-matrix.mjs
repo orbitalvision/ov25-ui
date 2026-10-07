@@ -7,6 +7,14 @@ import {
   DEFAULT_VIEWPORT_MATRIX_TARGET,
   VIEWPORT_PRESETS,
 } from '../dev/react-test/config/viewport-presets.js';
+import {
+  CONFIGURATOR_LOADED_LOG,
+  VARIANTS_READY_SELECTOR,
+  hideDevelopmentOverlays,
+  waitForConfiguratorLoaded,
+  waitForDecodedImages,
+  waitForStableLayout,
+} from './lib/configurator-readiness.mjs';
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const PROJECT_ROOT = path.resolve(SCRIPT_DIR, '..');
@@ -22,17 +30,9 @@ export const VIEWPORT_MATRIX_MANIFEST_PATH = path.join(
 const DEFAULT_BASE_URL = 'http://localhost:3008';
 const DEFAULT_TIMEOUT_MS = 120_000;
 const DEFAULT_SETTLE_MS = 1_200;
-const CONFIGURATOR_LOADED_LOG = 'OV25 3D Loaded';
 const DIMENSIONS_TOGGLE_SELECTOR = '#ov25-desktop-dimensions-toggle-button';
 // drei <Html> labels mount over the frames after the toggle; give them time to appear.
 const DIMENSIONS_RENDER_DELAY_MS = 800;
-const VARIANTS_READY_SELECTOR = [
-  '.ov25-size-variant-card:visible',
-  '.ov25-default-variant-card:visible',
-  '[data-ov25-variant-option]:visible',
-  '[data-ov25-tree-variants-mode] .ov25-option-header:visible',
-  '[data-ov25-accordion-variants-mode] .ov25-option-header:visible',
-].join(', ');
 
 export async function readViewportMatrixManifest() {
   try {
@@ -299,29 +299,6 @@ async function showDimensionLabels(page, timeoutMs) {
   await page.waitForTimeout(DIMENSIONS_RENDER_DELAY_MS);
 }
 
-async function waitForConfiguratorLoaded(page, timeoutMs) {
-  return page
-    .waitForEvent('console', {
-      predicate: (message) => message.text().includes(CONFIGURATOR_LOADED_LOG),
-      timeout: timeoutMs,
-    })
-    .then(
-      () => ({ ok: true }),
-      (error) => ({ ok: false, error }),
-    );
-}
-
-async function hideDevelopmentOverlays(page) {
-  for (const frame of page.frames()) {
-    await frame
-      .locator('nextjs-portal')
-      .evaluateAll((portals) => {
-        for (const portal of portals) portal.style.setProperty('display', 'none', 'important');
-      })
-      .catch(() => {});
-  }
-}
-
 function sanitizeDiagnosticText(value) {
   return String(value)
     .replace(/(\/configurator\/)[^/?#\s]+/gi, '$1<redacted>')
@@ -351,90 +328,6 @@ async function writeJsonAtomically(filePath, value) {
   const temporaryPath = `${filePath}.tmp`;
   await fs.writeFile(temporaryPath, `${JSON.stringify(value, null, 2)}\n`, 'utf8');
   await fs.rename(temporaryPath, filePath);
-}
-
-async function waitForDecodedImages(page, timeoutMs) {
-  await page.evaluate(async (maximumWaitMs) => {
-    const roots = [document];
-    const seen = new Set();
-
-    for (let index = 0; index < roots.length; index += 1) {
-      roots[index].querySelectorAll?.('*').forEach((element) => {
-        if (element.shadowRoot && !seen.has(element.shadowRoot)) {
-          seen.add(element.shadowRoot);
-          roots.push(element.shadowRoot);
-        }
-      });
-    }
-
-    const images = roots.flatMap((root) => Array.from(root.querySelectorAll?.('img') ?? []));
-    const decodeImages = Promise.allSettled(
-      images.map(async (image) => {
-        if (!image.complete) {
-          await new Promise((resolve) => {
-            image.addEventListener('load', resolve, { once: true });
-            image.addEventListener('error', resolve, { once: true });
-          });
-        }
-        await image.decode?.().catch(() => {});
-      }),
-    );
-
-    await Promise.race([
-      decodeImages,
-      new Promise((resolve) => window.setTimeout(resolve, maximumWaitMs)),
-    ]);
-  }, timeoutMs);
-}
-
-async function waitForStableLayout(page, timeoutMs) {
-  await page.evaluate(async (maximumWaitMs) => {
-    const startedAt = performance.now();
-    let stableSamples = 0;
-    let previousSignature = '';
-
-    const findDeep = (selector) => {
-      const roots = [document];
-      const seen = new Set();
-      for (let index = 0; index < roots.length; index += 1) {
-        const match = roots[index].querySelector?.(selector);
-        if (match) return match;
-        roots[index].querySelectorAll?.('*').forEach((element) => {
-          if (element.shadowRoot && !seen.has(element.shadowRoot)) {
-            seen.add(element.shadowRoot);
-            roots.push(element.shadowRoot);
-          }
-        });
-      }
-      return null;
-    };
-
-    while (performance.now() - startedAt < maximumWaitMs && stableSamples < 4) {
-      const body = document.body.getBoundingClientRect();
-      const iframe = findDeep('#ov25-configurator-iframe')?.getBoundingClientRect();
-      const signature = JSON.stringify({
-        viewport: [window.innerWidth, window.innerHeight],
-        document: [
-          Math.round(body.width),
-          Math.round(body.height),
-          document.documentElement.scrollWidth,
-          document.documentElement.scrollHeight,
-        ],
-        iframe: iframe
-          ? [
-              Math.round(iframe.x),
-              Math.round(iframe.y),
-              Math.round(iframe.width),
-              Math.round(iframe.height),
-            ]
-          : null,
-      });
-
-      stableSamples = signature === previousSignature ? stableSamples + 1 : 0;
-      previousSignature = signature;
-      await new Promise((resolve) => window.setTimeout(resolve, 120));
-    }
-  }, timeoutMs);
 }
 
 function parseCliArgs(argv) {

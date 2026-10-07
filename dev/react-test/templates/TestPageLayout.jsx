@@ -66,7 +66,7 @@ function ProductTabs() {
  * @param {boolean} [props.wideConfigurator] - When true, removes the app max-width and gives the gallery a fixed-height, full-width slot
  * @param {boolean} [props.configuratorTall] - When true, uses a viewport-height configurator slot capped to a 3:4 portrait width
  * @param {string} [props.galleryAspectRatio] - CSS aspect-ratio for the gallery slot (e.g. '16 / 9'); the placeholder image is cropped to fit
- * @param {string} [props.galleryColumnWidth] - Gallery column width from the md breakpoint up (e.g. '57%'); default 55%
+ * @param {string} [props.galleryColumnWidth] - Gallery column width from the md breakpoint up and on landscape viewports (e.g. '57%'); default 55%
  */
 export function TestPageLayout({
   title,
@@ -139,7 +139,9 @@ export function TestPageLayout({
           className={
             useFullWidthLayout
               ? 'ov:flex ov:flex-col ov:items-stretch ov:gap-4'
-              : 'ov:flex ov:flex-col ov:md:flex-row ov:md:items-start'
+              // Two columns from md up and on any landscape viewport, so a phone held sideways keeps
+              // the square gallery within the screen with the aside beside it.
+              : 'ov:flex ov:flex-col ov:md:flex-row ov:md:items-start ov:landscape:flex-row ov:landscape:items-start'
           }
         >
           <div
@@ -147,8 +149,8 @@ export function TestPageLayout({
               useFullWidthLayout
                 ? 'ov:w-full'
                 : galleryColumnWidth
-                  ? 'ov:w-full ov:md:w-(--ov25-fixture-gallery-col)'
-                  : 'ov:w-full ov:md:w-[55%]'
+                  ? 'ov:w-full ov:md:w-(--ov25-fixture-gallery-col) ov:landscape:w-(--ov25-fixture-gallery-col)'
+                  : 'ov:w-full ov:md:w-[55%] ov:landscape:w-[55%]'
             }
             style={galleryColumnStyle}
           >
@@ -161,7 +163,7 @@ export function TestPageLayout({
             className={
               useFullWidthLayout
                 ? 'ov:w-full ov:h-full'
-                : 'ov:w-full ov:md:w-[35%] ov:h-full ov:md:mt-0 ov:md:ml-4'
+                : 'ov:w-full ov:md:w-[35%] ov:h-full ov:md:mt-0 ov:md:ml-4 ov:landscape:w-[35%] ov:landscape:mt-0 ov:landscape:ml-4'
             }
           >
             <div id="price-name" className="ov:w-full">
