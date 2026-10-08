@@ -1,3 +1,4 @@
+import { loadBrandingFonts } from './branding-fonts.js';
 // inject.ts
 import React, { ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -222,6 +223,7 @@ export function injectConfigurator(opts: InjectConfiguratorInput | InjectConfigu
 function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions?: InjectInternalOptions) {
   const skipConfigureButton = internalOptions?.skipConfigureButton ?? false;
   const n = normalizeInjectConfig(opts);
+  void loadBrandingFonts(n.fonts);
   const resolvedProductLinkForDining =
     typeof n.productLink === 'function' ? n.productLink() : n.productLink;
   const diningMatch = String(resolvedProductLinkForDining ?? '').match(/^dining-configurator\/([^/?#]+)/);
@@ -246,6 +248,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
         mobileLogoURL: n.mobileLogoURL,
         styleImages: n.diningStyleImages,
         cssString: n.cssString,
+        fonts: n.fonts,
         hideLogo: n.hideLogo,
       },
       flags: {

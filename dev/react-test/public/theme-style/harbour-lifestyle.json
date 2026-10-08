@@ -1,0 +1,258 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "id": "harbour-lifestyle",
+    "label": "Harbour Lifestyle",
+    "kind": "local-theme",
+    "fingerprint": "df29b0bbabe82c4090b73cc5c9d9d2be85366d8e924b1ec2cb017c1d5392e9b2",
+    "files": [
+      "config/settings_data.json",
+      "config/settings_schema.json",
+      "templates/product.json",
+      "assets/bundle.theme.css",
+      "assets/bundle.product.configurator.css",
+      "assets/bundle.product.css",
+      "assets/bundle.product.product-v2.css",
+      "assets/dividebuy-style.css",
+      "layout/theme.liquid"
+    ]
+  },
+  "summary": "Harbour Lifestyle: configured theme colours with observed typography. Review the palette and button samples before applying.",
+  "style": {
+    "--ov25-background-color": "#ffffff",
+    "--ov25-secondary-background-color": "#f9f9f9",
+    "--ov25-text-color": "#282828",
+    "--ov25-secondary-text-color": "#282828",
+    "--ov25-border-color": "#282828",
+    "--ov25-border-color-secondary": "#282828",
+    "--ov25-highlight-color": "#282828",
+    "--ov25-hover-color": "#f9f9f9",
+    "--ov25-primary-color": "#ffffff",
+    "--ov25-button-text-color": "#282828",
+    "--ov25-button-border-color": "#282828",
+    "--ov25-button-hover-background-color": "#f9f9f9",
+    "--ov25-button-hover-text-color": "#282828",
+    "--ov25-button-border-width": "1px",
+    "--ov25-button-border-radius": "0px",
+    "--ov25-cta-color": "#f0d2d1",
+    "--ov25-cta-text-color": "#282828",
+    "--ov25-cta-color-hover": "#282828",
+    "--ov25-cta-text-color-hover": "#ffffff",
+    "--ov25-cta-color-light": "#f9f9f9",
+    "--ov25-cta-text-color-disabled": "#282828",
+    "--ov25-cta-border-color": "#f0d2d1",
+    "--ov25-cta-border-width": "1px",
+    "--ov25-cta-border-radius": "0px",
+    "--ov25-selected-background-color": "#282828",
+    "--ov25-selected-text-color": "#ffffff",
+    "--ov25-selected-border-color": "#282828",
+    "--ov25-input-background-color": "#ffffff",
+    "--ov25-input-text-color": "#282828",
+    "--ov25-input-border-color": "#282828",
+    "--ov25-input-placeholder-color": "#282828",
+    "--ov25-focus-ring-color": "#282828",
+    "--ov25-overlay-button-color": "#ffffff",
+    "--ov25-overlay-button-hover-color": "#f9f9f9",
+    "--ov25-configurator-view-controls-text-color": "#282828",
+    "--ov25-configurator-view-controls-border-color": "#282828",
+    "--ov25-configurator-iframe-background-color": "#f9f9f9",
+    "--ov25-configurator-title-text-color": "#282828",
+    "--ov25-configurator-price-text-color": "#282828",
+    "--ov25-compare-price-text-color": "#282828",
+    "--ov25-link-color": "#282828",
+    "--ov25-backdrop-color": "#000000",
+    "--ov25-backdrop-opacity": "0.45",
+    "--ov25-360-font-family": "GillSansNovaBook,sans-serif",
+    "--ov25-heading-font-family": "GillSansNovaBook,sans-serif",
+    "--ov25-button-font-family": "GillSansNovaBook,sans-serif",
+    "--ov25-body-font-weight": "400",
+    "--ov25-heading-font-weight": "400",
+    "--ov25-button-font-weight": "400",
+    "--ov25-button-letter-spacing": "0em",
+    "--ov25-button-text-transform": "none",
+    "--ov25-configurator-qr-code-popup-background-color": "#f9f9f9",
+    "--ov25-configurator-qr-code-popup-border-color": "#282828",
+    "--ov25-configurator-qr-code-popup-title-text-color": "#282828",
+    "--ov25-configurator-qr-code-popup-description-text-color": "#282828"
+  },
+  "fonts": [
+    {
+      "family": "GillSansNovaBook",
+      "url": "http://127.0.0.1:3008/theme-style/fonts/harbour-lifestyle/GillSansNovaBook.static.woff2",
+      "weight": "400",
+      "style": "normal"
+    }
+  ],
+  "palette": [
+    {
+      "role": "Background",
+      "color": "#ffffff",
+      "source": "config/settings_data.json"
+    },
+    {
+      "role": "Soft surface",
+      "color": "#f9f9f9",
+      "source": "config/settings_data.json"
+    },
+    {
+      "role": "Text",
+      "color": "#282828",
+      "source": "config/settings_data.json"
+    },
+    {
+      "role": "Action",
+      "color": "#f0d2d1",
+      "source": "config/settings_data.json"
+    },
+    {
+      "role": "Accent",
+      "color": "#f0d2d1",
+      "source": "config/settings_data.json"
+    }
+  ],
+  "warnings": [
+    "assets/bundle.theme.css was limited to 262144 bytes.",
+    "Source-only preview: no AI model was called. Colours use explicit local theme settings; ambiguous styling uses review defaults.",
+    "Button shape, focus, selected and disabled states are suggested review defaults; confirm them against the client design."
+  ],
+  "generatedAt": "2026-10-05T14:31:03.029Z",
+  "method": "source",
+  "placement": {
+    "schemaVersion": 1,
+    "source": {
+      "id": "harbour-lifestyle",
+      "label": "Harbour Lifestyle",
+      "kind": "local-theme",
+      "fingerprint": "981802cbe892534112eabd7c6f10b23d6aae6eb06133d363ff2d0512b3dba1cc",
+      "files": [
+        "templates/product.product-v2.json",
+        "layout/theme.liquid",
+        "sections/main-product.liquid",
+        "sections/header.liquid",
+        "snippets/product-image-gallery.liquid",
+        "snippets/block-product-buy-buttons.liquid",
+        "snippets/block-product-price.liquid",
+        "snippets/block-product-sibling-variant-picker.liquid",
+        "snippets/ov25-viewer-config.liquid",
+        "snippets/block-product-swatch-list-button.liquid",
+        "snippets/block-product-tab-color-swatch.liquid",
+        "snippets/block-product-title.liquid",
+        "snippets/variant-picker.liquid",
+        "snippets/product-form-delivery-logic.liquid",
+        "snippets/sibling-variant-picker-popup-product.liquid",
+        "snippets/sibling-variant-picker-popup-swatch.liquid",
+        "snippets/variant-dropdown.liquid",
+        "snippets/variant-pills.liquid",
+        "snippets/variant-swatches.liquid",
+        "snippets/back-in-stock-helper.liquid",
+        "snippets/block-assembly-service-details.liquid",
+        "snippets/block-divider.liquid",
+        "snippets/block-explore-banner.liquid",
+        "snippets/block-gift-card-denominations.liquid",
+        "snippets/block-option-configurator.liquid",
+        "snippets/autoadd-child-product-form-props.liquid",
+        "snippets/block-payment-info.liquid",
+        "snippets/block-product-badges.liquid",
+        "snippets/block-product-color-siblings.liquid",
+        "snippets/block-product-description.liquid",
+        "snippets/block-product-dimensions.liquid",
+        "snippets/block-product-highlights.liquid",
+        "snippets/block-product-important-message.liquid",
+        "snippets/block-product-points.liquid",
+        "snippets/block-product-product-list.liquid",
+        "snippets/block-product-quantity-warning.liquid",
+        "snippets/block-product-reviews.liquid",
+        "snippets/block-product-showroom-button.liquid",
+        "snippets/block-product-size-siblings.liquid",
+        "snippets/block-product-sizes.liquid",
+        "snippets/block-product-sku.liquid",
+        "snippets/block-product-slider.liquid",
+        "snippets/block-product-sticky-atc.liquid",
+        "snippets/block-product-stock-info.liquid",
+        "snippets/block-product-tab-customize-product.liquid",
+        "snippets/block-product-tab-delivery.liquid",
+        "snippets/block-product-tab-guarantee.liquid",
+        "snippets/block-product-tab-made-in-uk.liquid"
+      ]
+    },
+    "method": "source",
+    "generatedAt": "2026-10-05T14:31:03.030Z",
+    "warnings": [
+      "Source evidence only: Liquid conditions, app blocks, JavaScript changes, visibility and selector match counts have not been verified in a rendered product page. Review before applying.",
+      "Inspected product.product-v2.json; other product templates may use different targets.",
+      "The selected template uses app blocks whose markup is not present in the downloaded theme. Their selectors cannot be inferred from app names.",
+      "Source budget reached; some referenced markup was not inspected.",
+      "Deterministic local source review; no AI model was called.",
+      "No source-backed proposal for: configureButton, desktopCarouselSelector, mobileCarouselSelector. Existing choices should be kept or selected manually."
+    ],
+    "targets": [
+      {
+        "key": "gallery",
+        "selector": ".cb-product-gallery",
+        "confidence": "low",
+        "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
+        "sourceFiles": [
+          "snippets/product-image-gallery.liquid"
+        ]
+      },
+      {
+        "key": "variants",
+        "selector": ".size-variant-list",
+        "confidence": "low",
+        "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
+        "sourceFiles": [
+          "snippets/block-product-size-siblings.liquid"
+        ]
+      },
+      {
+        "key": "price",
+        "selector": ".cb-block-product-price",
+        "confidence": "low",
+        "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
+        "sourceFiles": [
+          "snippets/block-product-price.liquid"
+        ]
+      },
+      {
+        "key": "name",
+        "selector": ".cb-block-product-title",
+        "confidence": "medium",
+        "reason": "Observed semantic markup hook. Liquid conditions and rendered match counts remain unverified.",
+        "sourceFiles": [
+          "snippets/block-product-title.liquid"
+        ]
+      },
+      {
+        "key": "swatches",
+        "selector": ".cb-variant-swatches",
+        "confidence": "medium",
+        "reason": "Observed semantic markup hook. Liquid conditions and rendered match counts remain unverified.",
+        "sourceFiles": [
+          "snippets/variant-picker.liquid"
+        ]
+      },
+      {
+        "key": "headerSelector",
+        "selector": "header",
+        "confidence": "medium",
+        "reason": "Observed semantic markup hook. Liquid conditions and rendered match counts remain unverified.",
+        "sourceFiles": [
+          "sections/header.liquid"
+        ]
+      },
+      {
+        "key": "addToCartFormSelector",
+        "selector": "form[data-type=\"add-to-cart-form\"]",
+        "confidence": "low",
+        "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
+        "sourceFiles": [
+          "snippets/block-product-buy-buttons.liquid",
+          "snippets/block-assembly-service-details.liquid",
+          "snippets/block-option-configurator.liquid",
+          "snippets/block-product-product-list.liquid",
+          "snippets/block-product-sticky-atc.liquid"
+        ]
+      }
+    ]
+  }
+}

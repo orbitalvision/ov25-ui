@@ -31,3 +31,46 @@
 @utility ov25-brand-gradient {
   background-image: linear-gradient(135deg, #070507 5%, #9b1d58 70%, #ff2c8b 135%);
 }
+
+/* Container-based layout also works inside narrow Shopify/WooCommerce hosts. */
+.ov25-setup { container-type: inline-size; display: flex; flex-direction: column; min-width: 0; overflow: hidden; color: #18181b; background: #fff; }
+.ov25-setup-layout { display: flex; flex: 1; flex-direction: column; min-height: 0; overflow: auto; }
+.ov25-setup-sidebar { display: flex; flex-direction: column; flex-shrink: 0; min-width: 0; min-height: 620px; height: auto; padding: 20px; order: 0; }
+.ov25-setup-sidebar:has([data-ov25-setup-config-panel]) { height: 750px; }
+.ov25-setup-preview { flex: 1; flex-shrink: 0; min-width: 0; min-height: 520px; padding: 16px; order: 1; background: #f7f7f6; }
+.ov25-setup button:focus-visible { outline: 2px solid #9b1d58; outline-offset: 3px; }
+@container (min-width: 850px) {
+  .ov25-setup-layout { flex-direction: row; overflow: hidden; }
+  .ov25-setup-sidebar { width: 410px; min-height: 0; height: 100%; order: 1; border-left: 1px solid #e4e4e7; }
+  .ov25-setup-sidebar:has([data-ov25-setup-config-panel]) { height: 100%; }
+  .ov25-setup-preview { min-height: 0; order: 0; }
+}
+.ov25-setup-no-preview .ov25-setup-sidebar { width: 100%; flex: 1; min-height: 0; height: 100%; border-left: 0; }
+
+/* The first two steps use the whole setup surface. The viewer mounts only after them. */
+.ov25-setup-onboarding { display: flex; flex: 1; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; }
+.ov25-setup-onboarding[data-ov25-setup-step="picker"] {
+  width: 100%;
+  max-width: 1280px;
+  margin-inline: auto;
+}
+.ov25-setup-onboarding-header { display: flex; flex-shrink: 0; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px 24px; padding: 20px 28px; border-bottom: 1px solid #e4e4e7; }
+.ov25-setup-steps { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin: 0; padding: 0; list-style: none; }
+.ov25-setup-steps li { display: flex; align-items: center; gap: 8px; color: #71717a; font-size: 12px; }
+.ov25-setup-steps li > span { display: grid; place-items: center; width: 24px; height: 24px; flex-shrink: 0; border: 1px solid #e4e4e7; border-radius: 50%; font-size: 11px; }
+.ov25-setup-steps li[aria-current="step"] { color: #18181b; font-weight: 600; }
+.ov25-setup-steps li[aria-current="step"] > span { border-color: #9b1d58; background: #9b1d58; color: white; }
+.ov25-setup-product-type-compact { display: flex; align-items: center; gap: 12px; font-size: 12px; }
+.ov25-setup-product-type-compact > span { color: #71717a; }
+.ov25-setup-product-type-compact > div { display: flex; gap: 4px; padding: 4px; border-radius: 12px; background: #f4f4f5; }
+.ov25-setup-product-type-compact button { min-height: 36px; padding: 8px 14px; border: 0; border-radius: 8px; background: transparent; color: #71717a; font-weight: 500; cursor: pointer; }
+.ov25-setup-product-type-compact button[aria-pressed="true"] { background: white; color: #18181b; box-shadow: 0 1px 4px #18181b14; }
+.ov25-setup-theme-content { flex: 1; min-height: 0; overflow: auto; }
+@container (max-width: 619px) {
+  .ov25-setup-onboarding-header { padding: 16px; gap: 16px; }
+  .ov25-setup-steps { gap: 10px; }
+  .ov25-setup-steps li { gap: 6px; font-size: 11px; }
+  .ov25-setup-steps li > span { width: 20px; height: 20px; }
+  .ov25-setup-product-type-compact { width: 100%; justify-content: space-between; }
+  .ov25-setup-product-type-compact button { min-height: 40px; }
+}

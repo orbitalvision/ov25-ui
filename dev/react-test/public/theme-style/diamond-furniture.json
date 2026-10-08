@@ -1,0 +1,211 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "id": "diamond-furniture",
+    "label": "Diamond Furniture",
+    "kind": "local-theme",
+    "fingerprint": "383774955d430cf12023807827c8578ea59bf093b227db79b0fa2c61402385b4",
+    "files": [
+      "config/settings_data.json",
+      "config/settings_schema.json",
+      "assets/owl.theme.default.css",
+      "assets/theme.css",
+      "assets/custom-style.css",
+      "assets/font-settings.css",
+      "assets/variable-products-load.css",
+      "assets/variable-products.css",
+      "assets/variable-products.css.liquid"
+    ]
+  },
+  "summary": "Diamond Furniture: observed theme colours with system fallback typography. Review the palette and button samples before applying.",
+  "style": {
+    "--ov25-background-color": "#ffffff",
+    "--ov25-secondary-background-color": "#f1ede6",
+    "--ov25-text-color": "#3c2d30",
+    "--ov25-secondary-text-color": "#3c2d30",
+    "--ov25-border-color": "#3c2d30",
+    "--ov25-border-color-secondary": "#3c2d30",
+    "--ov25-highlight-color": "#3c2d30",
+    "--ov25-hover-color": "#f1ede6",
+    "--ov25-primary-color": "#ffffff",
+    "--ov25-button-text-color": "#3c2d30",
+    "--ov25-button-border-color": "#3c2d30",
+    "--ov25-button-hover-background-color": "#f1ede6",
+    "--ov25-button-hover-text-color": "#3c2d30",
+    "--ov25-button-border-width": "1px",
+    "--ov25-button-border-radius": "5px",
+    "--ov25-cta-color": "#3c2d30",
+    "--ov25-cta-text-color": "#ffffff",
+    "--ov25-cta-color-hover": "#3c2d30",
+    "--ov25-cta-text-color-hover": "#ffffff",
+    "--ov25-cta-color-light": "#f1ede6",
+    "--ov25-cta-text-color-disabled": "#3c2d30",
+    "--ov25-cta-border-color": "#3c2d30",
+    "--ov25-cta-border-width": "1px",
+    "--ov25-cta-border-radius": "5px",
+    "--ov25-selected-background-color": "#3c2d30",
+    "--ov25-selected-text-color": "#ffffff",
+    "--ov25-selected-border-color": "#3c2d30",
+    "--ov25-input-background-color": "#ffffff",
+    "--ov25-input-text-color": "#3c2d30",
+    "--ov25-input-border-color": "#3c2d30",
+    "--ov25-input-placeholder-color": "#3c2d30",
+    "--ov25-focus-ring-color": "#3c2d30",
+    "--ov25-overlay-button-color": "#ffffff",
+    "--ov25-overlay-button-hover-color": "#f1ede6",
+    "--ov25-configurator-view-controls-text-color": "#3c2d30",
+    "--ov25-configurator-view-controls-border-color": "#3c2d30",
+    "--ov25-configurator-iframe-background-color": "#f1ede6",
+    "--ov25-configurator-title-text-color": "#3c2d30",
+    "--ov25-configurator-price-text-color": "#3c2d30",
+    "--ov25-compare-price-text-color": "#3c2d30",
+    "--ov25-link-color": "#3c2d30",
+    "--ov25-backdrop-color": "#000000",
+    "--ov25-backdrop-opacity": "0.45",
+    "--ov25-360-font-family": "system-ui, sans-serif",
+    "--ov25-heading-font-family": "system-ui, sans-serif",
+    "--ov25-button-font-family": "system-ui, sans-serif",
+    "--ov25-body-font-weight": "400",
+    "--ov25-heading-font-weight": "400",
+    "--ov25-button-font-weight": "400",
+    "--ov25-button-letter-spacing": "0em",
+    "--ov25-button-text-transform": "none",
+    "--ov25-configurator-qr-code-popup-background-color": "#f1ede6",
+    "--ov25-configurator-qr-code-popup-border-color": "#3c2d30",
+    "--ov25-configurator-qr-code-popup-title-text-color": "#3c2d30",
+    "--ov25-configurator-qr-code-popup-description-text-color": "#3c2d30"
+  },
+  "fonts": [],
+  "palette": [
+    {
+      "role": "Background",
+      "color": "#ffffff",
+      "source": "config/settings_data.json"
+    },
+    {
+      "role": "Soft surface",
+      "color": "#f1ede6",
+      "source": "config/settings_data.json"
+    },
+    {
+      "role": "Text",
+      "color": "#3c2d30",
+      "source": "config/settings_data.json"
+    },
+    {
+      "role": "Action",
+      "color": "#3c2d30",
+      "source": "config/settings_data.json"
+    },
+    {
+      "role": "Accent",
+      "color": "#8b634e",
+      "source": "config/settings_data.json"
+    }
+  ],
+  "warnings": [
+    "assets/theme.css was limited to 262144 bytes.",
+    "Source-only preview: no AI model was called. Colours use explicit local theme settings or global/button CSS; ambiguous styling uses review defaults.",
+    "Unspecified button shape, focus, selected and disabled states are suggested review defaults; confirm them against the client design.",
+    "Shopify font handles were not resolved or downloaded; this preview uses system typography."
+  ],
+  "generatedAt": "2026-10-07T13:36:36.783Z",
+  "method": "source",
+  "placement": {
+    "schemaVersion": 1,
+    "source": {
+      "id": "diamond-furniture",
+      "label": "Diamond Furniture",
+      "kind": "local-theme",
+      "fingerprint": "8d730cd253423dd0b43fd9b153cdb3a0fcf7dbed69458b46c39fffd50b963b64",
+      "files": [
+        "templates/product.json",
+        "layout/theme.liquid",
+        "sections/product.liquid",
+        "sections/header-scrolling-bar.liquid",
+        "sections/header.liquid",
+        "snippets/product-title-price.liquid",
+        "snippets/product-variant-options.liquid",
+        "snippets/icon-arrow-small-down.liquid",
+        "snippets/icon-media-model.liquid",
+        "snippets/icon-media-video.liquid",
+        "snippets/icons.liquid",
+        "snippets/image-fill.liquid",
+        "snippets/image-fit.liquid",
+        "snippets/media.liquid",
+        "snippets/product-buttons.liquid",
+        "snippets/product-info.liquid",
+        "snippets/product-quantity.liquid",
+        "snippets/product-siblings.liquid",
+        "snippets/product-size-and-remaining.liquid",
+        "snippets/product-subscription.liquid",
+        "snippets/product-tabs.liquid",
+        "snippets/share.liquid",
+        "snippets/upsell-product.liquid",
+        "snippets/zoom-pswp.liquid",
+        "snippets/animated-icon.liquid",
+        "snippets/cart-drawer.liquid",
+        "snippets/icon-account.liquid",
+        "snippets/icon-arrow-down.liquid",
+        "snippets/icon-cart.liquid",
+        "snippets/icon-close.liquid",
+        "snippets/icon-nav.liquid",
+        "snippets/icon-search.liquid",
+        "snippets/nav-item-mobile.liquid",
+        "snippets/header-block.liquid",
+        "snippets/nav-item.liquid",
+        "snippets/search-predictive.liquid",
+        "snippets/select-currency.liquid",
+        "snippets/select-locale.liquid",
+        "snippets/product-rating.liquid",
+        "snippets/icon-animal-paw.liquid",
+        "snippets/icon-animal.liquid",
+        "snippets/icon-award.liquid",
+        "snippets/icon-basket-like.liquid",
+        "snippets/icon-basket-return.liquid",
+        "snippets/icon-cart-check.liquid",
+        "snippets/icon-cart-message.liquid",
+        "snippets/icon-chat.liquid",
+        "snippets/icon-close-small.liquid"
+      ]
+    },
+    "method": "source",
+    "generatedAt": "2026-10-07T13:36:36.784Z",
+    "warnings": [
+      "Source evidence only: Liquid conditions, app blocks, JavaScript changes, visibility and selector match counts have not been verified in a rendered product page. Review before applying.",
+      "Inspected templates/product.json; other product templates may use different targets.",
+      "Source budget reached; some referenced markup was not inspected.",
+      "Deterministic source review; no AI model was called.",
+      "No source-backed proposal for: gallery, name, swatches, configureButton, desktopCarouselSelector, mobileCarouselSelector, addToCartFormSelector. Existing choices should be kept or selected manually."
+    ],
+    "targets": [
+      {
+        "key": "variants",
+        "selector": ".product__block__variants",
+        "confidence": "low",
+        "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
+        "sourceFiles": [
+          "snippets/product-variant-options.liquid"
+        ]
+      },
+      {
+        "key": "price",
+        "selector": "#was-price-metafieldText",
+        "confidence": "low",
+        "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
+        "sourceFiles": [
+          "snippets/product-title-price.liquid"
+        ]
+      },
+      {
+        "key": "headerSelector",
+        "selector": "header",
+        "confidence": "medium",
+        "reason": "Observed semantic markup hook. Liquid conditions and rendered match counts remain unverified.",
+        "sourceFiles": [
+          "sections/header.liquid"
+        ]
+      }
+    ]
+  }
+}

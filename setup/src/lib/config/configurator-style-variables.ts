@@ -3,13 +3,14 @@
  * for the configurator setup visual style editor.
  */
 
-export type StyleControlType = 'color' | 'corner' | 'slider' | 'font';
+export type StyleControlType = 'color' | 'corner' | 'slider' | 'font' | 'select';
 
 export interface StyleVariable {
   variable: string;
   label: string;
   defaultValue: string;
   control: StyleControlType;
+  options?: readonly { value: string; label: string }[];
   sliderMin?: number;
   sliderMax?: number;
   sliderStep?: number;
@@ -62,6 +63,7 @@ export const STYLE_GROUPS: StyleGroup[] = [
       { variable: '--ov25-configurator-iframe-border-radius', label: 'Gallery corners', defaultValue: '1rem', control: 'corner' },
       { variable: '--ov25-gallery-gap', label: 'Carousel spacing', defaultValue: '0.5rem', control: 'slider', sliderMin: 0, sliderMax: 2, sliderStep: 0.125, sliderUnit: 'rem', sliderLabels: ['None', 'Wide'] },
       { variable: '--ov25-overlay-button-color', label: 'Overlay button fill', defaultValue: '#ffffff', control: 'color' },
+      { variable: '--ov25-overlay-button-hover-color', label: 'Overlay hover fill', defaultValue: '#ffffff', control: 'color' },
       { variable: '--ov25-configurator-view-controls-text-color', label: 'Overlay icon color', defaultValue: '#000000', control: 'color' },
       { variable: '--ov25-configurator-view-controls-border-color', label: 'Overlay border', defaultValue: '#E5E5E5', control: 'color' },
       { variable: '--ov25-configurator-view-controls-border-radius', label: 'Overlay button shape', defaultValue: '9999px', control: 'corner' },
@@ -81,6 +83,9 @@ export const STYLE_GROUPS: StyleGroup[] = [
       { variable: '--ov25-button-text-color', label: 'Collection text color', defaultValue: '#000000', control: 'color' },
       { variable: '--ov25-button-hover-background-color', label: 'Collection hover fill', defaultValue: '#fafafa', control: 'color' },
       { variable: '--ov25-button-hover-text-color', label: 'Collection hover text', defaultValue: '#000000', control: 'color' },
+      { variable: '--ov25-selected-background-color', label: 'Selected tab fill', defaultValue: '#000000', control: 'color' },
+      { variable: '--ov25-selected-text-color', label: 'Selected tab text', defaultValue: '#ffffff', control: 'color' },
+      { variable: '--ov25-selected-border-color', label: 'Selected tab border', defaultValue: '#000000', control: 'color' },
       { variable: '--ov25-variants-per-row', label: 'Variants per row', defaultValue: '4', control: 'slider', sliderMin: 1, sliderMax: 6, sliderStep: 1, sliderUnit: '', sliderLabels: ['Fewer', 'More'] },
       { variable: '--ov25-wizard-variants-content-height', label: 'Variant panel height', defaultValue: '600px', control: 'slider', sliderMin: 200, sliderMax: 1200, sliderStep: 50, sliderUnit: 'px', sliderLabels: ['Short', 'Tall'] },
     ],
@@ -93,6 +98,9 @@ export const STYLE_GROUPS: StyleGroup[] = [
       { variable: '--ov25-cta-color', label: 'Action button color', defaultValue: '#22c55e', control: 'color' },
       { variable: '--ov25-cta-color-hover', label: 'Action hover color', defaultValue: '#16a34a', control: 'color' },
       { variable: '--ov25-cta-color-light', label: 'Action disabled tint', defaultValue: '#4ade80', control: 'color' },
+      { variable: '--ov25-cta-text-color-disabled', label: 'Action disabled text', defaultValue: '#ffffff', control: 'color' },
+      { variable: '--ov25-cta-border-color', label: 'Action border color', defaultValue: '#22c55e', control: 'color' },
+      { variable: '--ov25-cta-border-width', label: 'Action border width', defaultValue: '0px', control: 'slider', sliderMin: 0, sliderMax: 4, sliderStep: 0.5, sliderUnit: 'px' },
       { variable: '--ov25-cta-border-radius', label: 'Action button corners', defaultValue: '9999px', control: 'corner' },
       { variable: '--ov25-cta-text-color', label: 'Action text color', defaultValue: '#ffffff', control: 'color' },
       { variable: '--ov25-cta-text-color-hover', label: 'Action text color (hover)', defaultValue: '#ffffff', control: 'color' },
@@ -110,6 +118,12 @@ export const STYLE_GROUPS: StyleGroup[] = [
       { variable: '--ov25-border-color', label: 'Light border', defaultValue: '#E5E5E5', control: 'color' },
       { variable: '--ov25-border-color-secondary', label: 'Dark border', defaultValue: '#282828', control: 'color' },
       { variable: '--ov25-hover-color', label: 'Hover tint', defaultValue: '#fafafa', control: 'color' },
+      { variable: '--ov25-input-background-color', label: 'Input background', defaultValue: '#ffffff', control: 'color' },
+      { variable: '--ov25-input-text-color', label: 'Input text', defaultValue: '#000000', control: 'color' },
+      { variable: '--ov25-input-border-color', label: 'Input border', defaultValue: '#E5E5E5', control: 'color' },
+      { variable: '--ov25-input-placeholder-color', label: 'Input placeholder', defaultValue: '#767676', control: 'color' },
+      { variable: '--ov25-focus-ring-color', label: 'Keyboard focus ring', defaultValue: '#000000', control: 'color' },
+      { variable: '--ov25-link-color', label: 'Link color', defaultValue: '#000000', control: 'color' },
       { variable: '--ov25-destructive', label: 'Error / delete', defaultValue: '#ef4444', control: 'color' },
     ],
   },
@@ -118,13 +132,21 @@ export const STYLE_GROUPS: StyleGroup[] = [
     label: 'Typography',
     description: 'Font family, sizes, and product title/price colors',
     variables: [
-      { variable: '--ov25-360-font-family', label: 'Font', defaultValue: "'IBM Plex Sans', sans-serif", control: 'font' },
+      { variable: '--ov25-360-font-family', label: 'Body font', defaultValue: "'IBM Plex Sans', sans-serif", control: 'font' },
+      { variable: '--ov25-heading-font-family', label: 'Heading font', defaultValue: "'IBM Plex Sans', sans-serif", control: 'font' },
+      { variable: '--ov25-button-font-family', label: 'Button font', defaultValue: "'IBM Plex Sans', sans-serif", control: 'font' },
+      { variable: '--ov25-body-font-weight', label: 'Body weight', defaultValue: '400', control: 'slider', sliderMin: 100, sliderMax: 900, sliderStep: 100, sliderUnit: '' },
+      { variable: '--ov25-heading-font-weight', label: 'Heading weight', defaultValue: '400', control: 'slider', sliderMin: 100, sliderMax: 900, sliderStep: 100, sliderUnit: '' },
+      { variable: '--ov25-button-font-weight', label: 'Button weight', defaultValue: '500', control: 'slider', sliderMin: 100, sliderMax: 900, sliderStep: 100, sliderUnit: '' },
+      { variable: '--ov25-button-letter-spacing', label: 'Button letter spacing', defaultValue: '0em', control: 'slider', sliderMin: -0.05, sliderMax: 0.3, sliderStep: 0.01, sliderUnit: 'em' },
+      { variable: '--ov25-button-text-transform', label: 'Button case', defaultValue: 'uppercase', control: 'select', options: [{ value: 'none', label: 'Original' }, { value: 'uppercase', label: 'UPPERCASE' }, { value: 'lowercase', label: 'lowercase' }, { value: 'capitalize', label: 'Title Case' }] },
       { variable: '--ov25-text-xs-size', label: 'Text XS', defaultValue: '0.75em', control: 'slider', sliderMin: 0.5, sliderMax: 1.5, sliderStep: 0.05, sliderUnit: 'em', sliderLabels: ['Smaller', 'Larger'] },
       { variable: '--ov25-text-sm-size', label: 'Text SM', defaultValue: '0.875em', control: 'slider', sliderMin: 0.5, sliderMax: 1.5, sliderStep: 0.05, sliderUnit: 'em', sliderLabels: ['Smaller', 'Larger'] },
       { variable: '--ov25-text-base-size', label: 'Text base', defaultValue: '1em', control: 'slider', sliderMin: 0.5, sliderMax: 2, sliderStep: 0.05, sliderUnit: 'em', sliderLabels: ['Smaller', 'Larger'] },
       { variable: '--ov25-text-lg-size', label: 'Text LG', defaultValue: '1.125em', control: 'slider', sliderMin: 0.5, sliderMax: 2, sliderStep: 0.05, sliderUnit: 'em', sliderLabels: ['Smaller', 'Larger'] },
       { variable: '--ov25-text-xl-size', label: 'Text XL', defaultValue: '1.25em', control: 'slider', sliderMin: 0.5, sliderMax: 2.5, sliderStep: 0.05, sliderUnit: 'em', sliderLabels: ['Smaller', 'Larger'] },
       { variable: '--ov25-configurator-title-text-color', label: 'Product name color', defaultValue: '#000000', control: 'color' },
+      { variable: '--ov25-compare-price-text-color', label: 'Original / compare price', defaultValue: '#ef4444', control: 'color' },
       { variable: '--ov25-configurator-price-text-color', label: 'Price color', defaultValue: '#000000', control: 'color' },
     ],
   },
@@ -146,6 +168,8 @@ export const STYLE_GROUPS: StyleGroup[] = [
       { variable: '--ov25-inline-list-aside-min-height', label: 'Aside min height', defaultValue: '1000px', control: 'slider', sliderMin: 200, sliderMax: 1500, sliderStep: 50, sliderUnit: 'px', sliderLabels: ['Short', 'Tall'] },
       { variable: '--ov25-inline-list-aside-min-height-mobile', label: 'Aside min height (mobile)', defaultValue: '100px', control: 'slider', sliderMin: 50, sliderMax: 500, sliderStep: 25, sliderUnit: 'px', sliderLabels: ['Short', 'Tall'] },
       { variable: '--ov25-inline-list-aside-max-height-mobile', label: 'Aside max height (mobile)', defaultValue: '600px', control: 'slider', sliderMin: 200, sliderMax: 1000, sliderStep: 50, sliderUnit: 'px', sliderLabels: ['Short', 'Tall'] },
+      { variable: '--ov25-backdrop-color', label: 'Modal backdrop', defaultValue: '#000000', control: 'color' },
+      { variable: '--ov25-backdrop-opacity', label: 'Backdrop opacity', defaultValue: '0.5', control: 'slider', sliderMin: 0, sliderMax: 1, sliderStep: 0.05, sliderUnit: '', sliderLabels: ['Clear', 'Opaque'] },
       { variable: '--ov25-configurator-qr-code-popup-background-color', label: 'QR popup background', defaultValue: '#f6f6f6', control: 'color' },
       { variable: '--ov25-configurator-qr-code-popup-border-color', label: 'QR popup border', defaultValue: '#282828', control: 'color' },
       { variable: '--ov25-configurator-qr-code-popup-title-text-color', label: 'QR popup title color', defaultValue: '#000000', control: 'color' },

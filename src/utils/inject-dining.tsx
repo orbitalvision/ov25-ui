@@ -1,3 +1,4 @@
+import { loadBrandingFonts, prepareBrandingFontCSS } from './branding-fonts.js';
 /**
  * injectDiningConfigurator — entry point for merchants to embed a dining
  * set builder on their product pages.
@@ -186,7 +187,8 @@ export function injectDiningConfigurator(opts: InjectDiningConfiguratorOptions):
     uniqueId,
   } = opts;
 
-  const cssString = branding?.cssString;
+  void loadBrandingFonts(branding?.fonts);
+  const cssString = prepareBrandingFontCSS(branding?.cssString, branding?.fonts);
   const forceMobile = flags?.forceMobile ?? false;
   const resolvedDisplayMode = resolveResponsiveDiningDisplayMode(displayMode, forceMobile);
 

@@ -1,3 +1,4 @@
+import { buildThemeStyleRules } from './theme-style-rules.js';
 // Shared stylesheet and helpers for Shadow DOM roots (used by inject and IframeContainer).
 
 import cssText from '../../globals.css?inline';
@@ -20,6 +21,6 @@ export function createuserCustomCssStylesheet(cssVariables: string): CSSStyleShe
     throw new Error('createuserCustomCssStylesheet() requires constructable stylesheets (browser only)');
   }
   const sheet = new CSSStyleSheet();
-  sheet.replaceSync(cssVariables);
+  sheet.replaceSync([buildThemeStyleRules(cssVariables), cssVariables].filter(Boolean).join('\n'));
   return sheet;
 }

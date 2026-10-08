@@ -11,6 +11,7 @@ import { formStringReplacementsToSerializable } from '../../../lib/string-replac
 import type { TypeSettings } from '../types';
 import { SectionHeader, SectionDivider, SwitchRow } from '../shared-ui';
 import { StyleControl } from './controls';
+import { FontSourcesEditor } from './FontSourcesEditor';
 import { ElementRuleBuilder } from './ElementRuleBuilder';
 import { StringReplacementsEditor } from './StringReplacementsEditor';
 
@@ -41,16 +42,18 @@ export function StylePanel({ currentSettings, updateSettings, updateNested }: St
   const hasOverrides = useMemo(() => {
     return (
       Object.keys(currentSettings.style).length > 0 ||
+      Boolean(currentSettings.branding.fonts?.length) ||
       Object.keys(currentSettings.elementStyles).length > 0 ||
       formStringReplacementsToSerializable(currentSettings.stringReplacements) != null
     );
-  }, [currentSettings.style, currentSettings.elementStyles, currentSettings.stringReplacements]);
+  }, [currentSettings.style, currentSettings.elementStyles, currentSettings.stringReplacements, currentSettings.branding.fonts]);
 
   const handleResetAll = useCallback(() => {
     updateSettings('style', {});
     updateSettings('elementStyles', {});
     updateSettings('stringReplacements', {});
-  }, [updateSettings]);
+    updateNested('branding', 'fonts', []);
+  }, [updateSettings, updateNested]);
 
   const handleStyleChange = useCallback((variable: string, value: string) => {
     if (!value) {
@@ -173,10 +176,22 @@ export function StylePanel({ currentSettings, updateSettings, updateNested }: St
                     </p>
                   </div>
                 )}
+                {group.id === 'typography' && (
+                  <FontSourcesEditor
+                    fonts={currentSettings.branding.fonts}
+                    onChange={fonts => updateNested('branding', 'fonts', fonts)}
+                  />
+                )}
                 {variantControls.map((v) => (
                   <div key={v.variable} className="space-y-2.5">
                     <StyleControl
                       variable={v}
+                      fontOptions={currentSettings.branding.fonts?.map(font => ({
+                        value: currentSettings.style[v.variable]?.split(',')[0].replace(/['"]/g, '').trim() === font.family
+                          ? currentSettings.style[v.variable]
+                          : `'${font.family}', sans-serif`,
+                        label: font.family,
+                      }))}
                       value={currentSettings.style[v.variable]}
                       onChange={(val) => handleStyleChange(v.variable, val)}
                     />

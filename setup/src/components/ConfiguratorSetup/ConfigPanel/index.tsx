@@ -30,6 +30,8 @@ interface ConfigPanelProps {
   onSave?: (payload: ConfiguratorSetupPayload) => void;
   hideSaveButton?: boolean;
   storefrontIntegration?: StorefrontIntegrationConfig;
+  hideProductType?: boolean;
+  saveDisabled?: boolean;
 }
 
 const LAYOUT_OPTIONS: { value: PreviewLayoutType; label: string; description: string }[] = [
@@ -185,13 +187,23 @@ function Snap2PositionRow({
 
 type ExportMode = 'current' | 'all';
 
-function ProductTypeSelector({
+export function ProductTypeSelector({
   layout,
   onChange,
+  compact = false,
 }: {
   layout: PreviewLayoutType;
   onChange: (layout: PreviewLayoutType) => void;
+  compact?: boolean;
 }) {
+  if (compact) return <div className="ov25-setup-product-type-compact" role="group" aria-label="Product type">
+    <span>Product type</span>
+    <div>{LAYOUT_OPTIONS.map((option) => <button
+      key={option.value} type="button" aria-pressed={layout === option.value}
+      aria-label={`${option.label} ${option.description}`} title={option.description}
+      onClick={() => onChange(option.value)}
+    >{option.label}</button>)}</div>
+  </div>;
   return (
     <section
       className="shrink-0 border-b border-border pb-4"
@@ -288,10 +300,7 @@ function SelectorControl({
   );
 }
 
-export function ConfigPanel({ formState, currentSettings, setLayout, updateSettings, updateNested, getExportJson, onSave, hideSaveButton, storefrontIntegration }: ConfigPanelProps) {
-  const [saveModalOpen, setSaveModalOpen] = useState(false);
-  const [exportMode, setExportMode] = useState<ExportMode>('current');
-  const [modalCopied, setModalCopied] = useState(false);
+export function ConfigPanel({ formState, currentSettings, setLayout, updateSettings, updateNested, getExportJson, onSave, hideSaveButton, storefrontIntegration, hideProductType, saveDisabled }: ConfigPanelProps) {
   const isSnap2 = formState.layout === 'snap2';
   const isBed = formState.layout === 'bedConfigurator';
   const showSnap2DesktopPositionControls = isSnap2 && currentSettings.configurator.displayModeDesktop === 'modal';
@@ -305,32 +314,10 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
     updateNested('selectors', key, { ...currentSettings.selectors[key], selector });
   };
 
-  const getExportString = useCallback(() => {
-    const json = getExportJson(exportMode);
-    return JSON.stringify(json, null, 2);
-  }, [getExportJson, exportMode]);
-
-  const handleSave = useCallback(async () => {
-    if (onSave) {
-      const json = getExportJson('all') as ConfiguratorSetupPayload;
-      onSave(json);
-      return;
-    }
-    const text = getExportString();
-    await navigator.clipboard.writeText(text);
-    setSaveModalOpen(true);
-  }, [getExportString, getExportJson, onSave]);
-
-  const handleModalCopy = useCallback(async () => {
-    const text = getExportString();
-    await navigator.clipboard.writeText(text);
-    setModalCopied(true);
-    setTimeout(() => setModalCopied(false), 2000);
-  }, [getExportString]);
 
   return (
     <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden" data-ov25-setup-config-panel>
-      <ProductTypeSelector layout={formState.layout} onChange={setLayout} />
+      {!hideProductType && <ProductTypeSelector layout={formState.layout} onChange={setLayout} />}
 
       <Tabs
         defaultValue="settings"
@@ -426,7 +413,7 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
                       type="number"
                       min={1}
                       value={currentSettings.carousel.maxImagesDesktop}
-                      onChange={(e) => updateNested('carousel', 'maxImagesDesktop', parseInt(e.target.value) || 4)}
+                      onChange={(e) => updateNested('carousel', 'maxImagesDesktop', parseInt(e.target.value) || 10)}
                       className="h-7 text-xs"
                     />
                   </div>
@@ -436,7 +423,7 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
                       type="number"
                       min={1}
                       value={currentSettings.carousel.maxImagesMobile}
-                      onChange={(e) => updateNested('carousel', 'maxImagesMobile', parseInt(e.target.value) || 6)}
+                      onChange={(e) => updateNested('carousel', 'maxImagesMobile', parseInt(e.target.value) || 10)}
                       className="h-7 text-xs"
                     />
                   </div>
@@ -593,9 +580,43 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
         </TabsContent>
       )}
 
+      <SetupSaveControls formState={formState} getExportJson={getExportJson} onSave={onSave} hideSaveButton={hideSaveButton} saveDisabled={saveDisabled} />
+    </Tabs>
+    </div>
+  );
+}
+
+export function SetupSaveControls({ formState, getExportJson, onSave, hideSaveButton, saveDisabled }: Pick<ConfigPanelProps, 'formState' | 'getExportJson' | 'onSave' | 'hideSaveButton' | 'saveDisabled'>) {
+  const [saveModalOpen, setSaveModalOpen] = useState(false);
+  const [exportMode, setExportMode] = useState<ExportMode>('current');
+  const [modalCopied, setModalCopied] = useState(false);
+  const getExportString = useCallback(() => {
+    const json = getExportJson(exportMode);
+    return JSON.stringify(json, null, 2);
+  }, [getExportJson, exportMode]);
+
+  const handleSave = useCallback(async () => {
+    if (onSave) {
+      const json = getExportJson('all') as ConfiguratorSetupPayload;
+      onSave(json);
+      return;
+    }
+    const text = getExportString();
+    await navigator.clipboard.writeText(text);
+    setSaveModalOpen(true);
+  }, [getExportString, getExportJson, onSave]);
+
+  const handleModalCopy = useCallback(async () => {
+    const text = getExportString();
+    await navigator.clipboard.writeText(text);
+    setModalCopied(true);
+    setTimeout(() => setModalCopied(false), 2000);
+  }, [getExportString]);
+
+  return <>
       {!hideSaveButton && (
         <div className="shrink-0 pt-3 pb-1">
-          <Button size="lg" onClick={handleSave} className="w-full">
+          <Button size="lg" onClick={handleSave} disabled={saveDisabled} className="w-full">
             <Save className="h-4 w-4" />
             Save
           </Button>
@@ -652,7 +673,5 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
           </p>
         </DialogContent>
       </Dialog>
-    </Tabs>
-    </div>
-  );
+  </>;
 }

@@ -20,6 +20,9 @@ import {
   buildSerializableConfig,
 } from './serialize-config';
 import type { ConfiguratorSetupSerializableOverrides } from './serialize-config';
+import { PRESET_CATALOGUE_VERSION, applySetupPreset, presentationFingerprint, type SetupPresetId } from './presets';
+import { applyThemeStyleProposal, type ThemeStyleProposal } from './theme-style';
+import { applySelectorDiscoveryProposal } from './selector-discovery';
 
 export type { ConfiguratorSetupPayload };
 
@@ -27,6 +30,8 @@ const STORAGE_KEY = 'ov25-configurator-setup';
 const EXPORT_MESSAGE_TYPE = 'OV25_CONFIGURATOR_SETTINGS';
 
 export interface ConfiguratorSetupOverrides extends ConfiguratorSetupSerializableOverrides {
+  /** Host-owned identity for drafts whose initial JSON may be identical across targets. */
+  draftKey?: string;
   previewBaseUrl?: string;
   initialConfig?: ConfiguratorSetupPayload;
   onSave?: (payload: ConfiguratorSetupPayload) => void;
@@ -97,8 +102,9 @@ function hashString(value: string): string {
   return (hash >>> 0).toString(36);
 }
 
-function draftStorageKey(initialConfigKey: string, hasServerConfig: boolean): string {
-  return hasServerConfig ? `${STORAGE_KEY}:draft:${hashString(initialConfigKey)}` : STORAGE_KEY;
+function draftStorageKey(initialConfigKey: string, hasServerConfig: boolean, scope?: string): string {
+  const base = scope ? `${STORAGE_KEY}:scope:${hashString(scope)}` : STORAGE_KEY;
+  return hasServerConfig ? `${base}:draft:${hashString(initialConfigKey)}` : base;
 }
 
 function readSavedState(storageKey: string): ConfiguratorSetupFormState | null {
@@ -109,6 +115,9 @@ function readSavedState(storageKey: string): ConfiguratorSetupFormState | null {
     const parsed = JSON.parse(raw);
     return {
       layout: parsed.layout ?? DEFAULT_FORM_STATE.layout,
+      setupProgress: parsed.setupProgress ?? {
+        standard: { configured: true }, snap2: { configured: true }, bedConfigurator: { configured: true },
+      },
       typeSettings: {
         // The presence of a stored form state makes omitted layouts legacy.
         // Merge an empty object so new feature defaults are not silently
@@ -154,22 +163,35 @@ export function useConfiguratorSetup(overrides?: ConfiguratorSetupOverrides) {
     }
   }, [initialConfigKey]);
   const storageKey = useMemo(
-    () => draftStorageKey(initialConfigKey, serverWins),
-    [initialConfigKey, serverWins],
+    () => draftStorageKey(initialConfigKey, serverWins, overrides?.draftKey),
+    [initialConfigKey, serverWins, overrides?.draftKey],
   );
   const [formState, setFormState] = useState<ConfiguratorSetupFormState>(DEFAULT_FORM_STATE);
   const [hasHydrated, setHasHydrated] = useState(false);
   const [hydratedStorageKey, setHydratedStorageKey] = useState<string | null>(null);
+  const [initialSettings, setInitialSettings] = useState<ConfiguratorSetupFormState['typeSettings']>();
 
   useEffect(() => {
     const parsed: Partial<ConfiguratorSetupPayload> | undefined =
       initialConfigKey === 'null' ? undefined : (JSON.parse(initialConfigKey) as Partial<ConfiguratorSetupPayload>);
     const savedDraft = readSavedState(storageKey);
-    if (hasMeaningfulInitialConfig(parsed)) {
-      setFormState(savedDraft ?? buildFormStateFromInitialPayload(parsed));
-    } else {
-      setFormState(savedDraft ?? DEFAULT_FORM_STATE);
-    }
+    const base = buildFormStateFromInitialPayload(parsed);
+    base.setupProgress = hasMeaningfulInitialConfig(parsed)
+      ? { standard: { configured: true }, snap2: { configured: true }, bedConfigurator: { configured: true } }
+      : {};
+    // An autosaved draft is not evidence of previously deployed support. Otherwise
+    // reopening an unsupported edit would bypass compatibility validation.
+    setInitialSettings(hasMeaningfulInitialConfig(parsed) ? base.typeSettings : undefined);
+    setFormState((previous) => {
+      if (savedDraft) return savedDraft;
+      // Hosts commonly echo a successful save through initialConfig. Keep known
+      // provenance when that response represents exactly this draft.
+      if (hasMeaningfulInitialConfig(parsed) && previous.setupProgress && Object.values(previous.setupProgress).some((entry) => entry?.configured) &&
+        JSON.stringify(buildConfiguratorSetupPayload(previous)) === JSON.stringify(buildConfiguratorSetupPayload(base))) {
+        return { ...base, layout: previous.layout, setupProgress: previous.setupProgress };
+      }
+      return base;
+    });
     setHydratedStorageKey(storageKey);
     setHasHydrated(true);
   }, [initialConfigKey, storageKey]);
@@ -188,6 +210,7 @@ export function useConfiguratorSetup(overrides?: ConfiguratorSetupOverrides) {
   const updateSettings = useCallback(<K extends keyof TypeSettings>(key: K, value: TypeSettings[K]) => {
     setFormState((prev) => ({
       ...prev,
+      setupProgress: { ...prev.setupProgress, [prev.layout]: { ...prev.setupProgress?.[prev.layout], configured: true } },
       typeSettings: {
         ...prev.typeSettings,
         [prev.layout]: { ...prev.typeSettings[prev.layout], [key]: value },
@@ -201,6 +224,7 @@ export function useConfiguratorSetup(overrides?: ConfiguratorSetupOverrides) {
         const ts = prev.typeSettings[prev.layout];
         return {
           ...prev,
+          setupProgress: { ...prev.setupProgress, [prev.layout]: { ...prev.setupProgress?.[prev.layout], configured: true } },
           typeSettings: {
             ...prev.typeSettings,
             [prev.layout]: { ...ts, [section]: { ...(ts[section] as object), [key]: value } },
@@ -210,6 +234,45 @@ export function useConfiguratorSetup(overrides?: ConfiguratorSetupOverrides) {
     },
     [],
   );
+
+  const applyPreset = useCallback((id: SetupPresetId, reviewTheme = false) => {
+    setFormState((prev) => {
+      const previousProgress = prev.setupProgress?.[prev.layout];
+      const next = applySetupPreset(prev.layout, id, previousProgress?.configured ? prev.typeSettings[prev.layout] : undefined, !!previousProgress?.themeStyle);
+      return {
+        ...prev,
+        typeSettings: { ...prev.typeSettings, [prev.layout]: next },
+        setupProgress: { ...prev.setupProgress, [prev.layout]: {
+          configured: true, presetId: id, presetVersion: PRESET_CATALOGUE_VERSION,
+          presentationFingerprint: presentationFingerprint(next),
+          themeStep: reviewTheme ? 'pending' : 'complete',
+          themeStyle: previousProgress?.themeStyle,
+        } },
+      };
+    });
+  }, []);
+
+  const applyThemeStyle = useCallback((layout: PreviewLayoutType, proposal: ThemeStyleProposal) => {
+    setFormState((prev) => ({
+      ...prev,
+      typeSettings: { ...prev.typeSettings, [layout]: applyThemeStyleProposal(
+        proposal.placement ? applySelectorDiscoveryProposal(prev.typeSettings[layout], proposal.placement) : prev.typeSettings[layout], proposal,
+      ) },
+      setupProgress: { ...prev.setupProgress, [layout]: {
+        ...prev.setupProgress?.[layout], configured: true, themeStep: 'complete',
+        themeStyle: { sourceId: proposal.source.id, label: proposal.source.label, fingerprint: proposal.source.fingerprint },
+      } },
+    }));
+  }, []);
+
+  const completeThemeStep = useCallback(() => {
+    setFormState((prev) => ({
+      ...prev,
+      setupProgress: { ...prev.setupProgress, [prev.layout]: {
+        ...prev.setupProgress?.[prev.layout], configured: true, themeStep: 'complete',
+      } },
+    }));
+  }, []);
 
   const serializableConfig = useMemo(
     () => buildSerializableConfig(formState.layout, currentSettings, overrides),
@@ -247,5 +310,11 @@ export function useConfiguratorSetup(overrides?: ConfiguratorSetupOverrides) {
     serializableConfig,
     exportSettings,
     getExportJson,
+    applyPreset,
+    applyThemeStyle,
+    completeThemeStep,
+    initialSettings,
+    hydrationKey: storageKey,
+    hasHydrated: hasHydrated && hydratedStorageKey === storageKey,
   };
 }

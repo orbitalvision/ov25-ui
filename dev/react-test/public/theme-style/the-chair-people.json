@@ -1,0 +1,226 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "id": "the-chair-people",
+    "label": "The Chair People (local export)",
+    "kind": "local-theme",
+    "fingerprint": "1bbd342e8cccc497a08480f2283c198ad60cb2d4bd61c0fdb8ad2734f64f2be3",
+    "files": [
+      "config/settings_data.json",
+      "config/settings_schema.json",
+      "templates/product.json",
+      "assets/base.css",
+      "assets/main-page.css",
+      "assets/main-password.css",
+      "assets/component-card-product-slider.css",
+      "assets/component-card-product.css",
+      "assets/component-product-as-seen-on.css",
+      "assets/component-product-badges.css",
+      "assets/component-product-recommendations.css",
+      "assets/section-highlighted-product.css",
+      "assets/section-product.css"
+    ]
+  },
+  "summary": "The Chair People (local export): product colour scheme scheme-1 with system fallback typography. Review the palette and button samples before applying.",
+  "style": {
+    "--ov25-background-color": "#ffffff",
+    "--ov25-secondary-background-color": "#ffffff",
+    "--ov25-text-color": "#111111",
+    "--ov25-secondary-text-color": "#65706e",
+    "--ov25-border-color": "#ebebeb",
+    "--ov25-border-color-secondary": "#111111",
+    "--ov25-highlight-color": "#111111",
+    "--ov25-hover-color": "#ffffff",
+    "--ov25-primary-color": "#ffffff",
+    "--ov25-button-text-color": "#111111",
+    "--ov25-button-border-color": "#ebebeb",
+    "--ov25-button-hover-background-color": "#ffffff",
+    "--ov25-button-hover-text-color": "#111111",
+    "--ov25-button-border-width": "1px",
+    "--ov25-button-border-radius": "0px",
+    "--ov25-cta-color": "#111111",
+    "--ov25-cta-text-color": "#ffffff",
+    "--ov25-cta-color-hover": "#111111",
+    "--ov25-cta-text-color-hover": "#ffffff",
+    "--ov25-cta-color-light": "#ffffff",
+    "--ov25-cta-text-color-disabled": "#111111",
+    "--ov25-cta-border-color": "#111111",
+    "--ov25-cta-border-width": "1px",
+    "--ov25-cta-border-radius": "0px",
+    "--ov25-selected-background-color": "#111111",
+    "--ov25-selected-text-color": "#ffffff",
+    "--ov25-selected-border-color": "#111111",
+    "--ov25-input-background-color": "#ffffff",
+    "--ov25-input-text-color": "#111111",
+    "--ov25-input-border-color": "#ebebeb",
+    "--ov25-input-placeholder-color": "#111111",
+    "--ov25-focus-ring-color": "#111111",
+    "--ov25-overlay-button-color": "#ffffff",
+    "--ov25-overlay-button-hover-color": "#ffffff",
+    "--ov25-configurator-view-controls-text-color": "#111111",
+    "--ov25-configurator-view-controls-border-color": "#ebebeb",
+    "--ov25-configurator-iframe-background-color": "#ffffff",
+    "--ov25-configurator-title-text-color": "#111111",
+    "--ov25-configurator-price-text-color": "#111111",
+    "--ov25-compare-price-text-color": "#111111",
+    "--ov25-link-color": "#111111",
+    "--ov25-backdrop-color": "#000000",
+    "--ov25-backdrop-opacity": "0.45",
+    "--ov25-360-font-family": "system-ui, sans-serif",
+    "--ov25-heading-font-family": "system-ui, sans-serif",
+    "--ov25-button-font-family": "system-ui, sans-serif",
+    "--ov25-body-font-weight": "400",
+    "--ov25-heading-font-weight": "400",
+    "--ov25-button-font-weight": "400",
+    "--ov25-button-letter-spacing": "0em",
+    "--ov25-button-text-transform": "none",
+    "--ov25-configurator-qr-code-popup-background-color": "#ffffff",
+    "--ov25-configurator-qr-code-popup-border-color": "#ebebeb",
+    "--ov25-configurator-qr-code-popup-title-text-color": "#111111",
+    "--ov25-configurator-qr-code-popup-description-text-color": "#111111"
+  },
+  "fonts": [],
+  "palette": [
+    {
+      "role": "Background",
+      "color": "#ffffff",
+      "source": "config/settings_data.json"
+    },
+    {
+      "role": "Soft surface",
+      "color": "#ffffff",
+      "source": "config/settings_data.json"
+    },
+    {
+      "role": "Text",
+      "color": "#111111",
+      "source": "config/settings_data.json"
+    },
+    {
+      "role": "Action",
+      "color": "#111111",
+      "source": "config/settings_data.json"
+    },
+    {
+      "role": "Accent",
+      "color": "#65706e",
+      "source": "config/settings_data.json"
+    }
+  ],
+  "warnings": [
+    "Source-only preview: no AI model was called. Colours use explicit local theme settings or global/button CSS; ambiguous styling uses review defaults.",
+    "Unspecified button shape, focus, selected and disabled states are suggested review defaults; confirm them against the client design.",
+    "Shopify font handles were not resolved or downloaded; this preview uses system typography.",
+    "The configured button radius is outside the supported range; square buttons are a review default."
+  ],
+  "generatedAt": "2026-10-07T13:36:37.053Z",
+  "method": "source",
+  "placement": {
+    "schemaVersion": 1,
+    "source": {
+      "id": "the-chair-people",
+      "label": "The Chair People (local export)",
+      "kind": "local-theme",
+      "fingerprint": "5e6f455ae6f679891def490152d74fd2259d54e3933f25dc14cefe56f8b9a962",
+      "files": [
+        "templates/product.json",
+        "layout/theme.liquid",
+        "sections/main-product.liquid",
+        "sections/header-group.json",
+        "snippets/main-product__info-blocks.liquid",
+        "snippets/main-product__media-gallery.liquid",
+        "sections/header.liquid",
+        "snippets/main-product__buy-buttons.liquid",
+        "snippets/main-product__purchase-options.liquid",
+        "snippets/main-product__tab-item.liquid",
+        "snippets/main-product__variant-picker.liquid",
+        "snippets/product-media-card.liquid",
+        "snippets/main-product__variant-options.liquid",
+        "snippets/price.liquid",
+        "snippets/swatch.liquid",
+        "snippets/breadcrumbs.liquid",
+        "snippets/button.liquid",
+        "snippets/icon.liquid",
+        "snippets/image.liquid",
+        "snippets/product-goback.liquid",
+        "sections/announcement-bar.liquid",
+        "snippets/product-badges.liquid",
+        "snippets/product-groups.liquid",
+        "snippets/product-recommendations.liquid",
+        "snippets/text-truncator.liquid",
+        "snippets/instance-swiper.liquid",
+        "snippets/product-as-seen-on.liquid",
+        "snippets/cart-counter.liquid",
+        "snippets/country-drawer.liquid",
+        "snippets/css.liquid",
+        "snippets/navigation-drawer.liquid",
+        "snippets/search-drawer.liquid",
+        "snippets/countdown-timer.liquid",
+        "snippets/gift-card-recipient-form.liquid",
+        "snippets/loading-spinner.liquid",
+        "snippets/select-input.liquid",
+        "snippets/external-video.liquid",
+        "snippets/social-media.liquid",
+        "snippets/search.liquid",
+        "snippets/product-option.liquid",
+        "snippets/text-input.liquid"
+      ]
+    },
+    "method": "source",
+    "generatedAt": "2026-10-07T13:36:37.054Z",
+    "warnings": [
+      "Source evidence only: Liquid conditions, app blocks, JavaScript changes, visibility and selector match counts have not been verified in a rendered product page. Review before applying.",
+      "Inspected templates/product.json; other product templates may use different targets.",
+      "The selected template uses app blocks whose markup is not present in the theme source. Their selectors cannot be inferred from app names.",
+      "Deterministic source review; no AI model was called.",
+      "No source-backed proposal for: name, swatches, configureButton, desktopCarouselSelector, mobileCarouselSelector. Existing choices should be kept or selected manually."
+    ],
+    "targets": [
+      {
+        "key": "gallery",
+        "selector": ".product__gallery-opener",
+        "confidence": "low",
+        "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
+        "sourceFiles": [
+          "snippets/product-media-card.liquid"
+        ]
+      },
+      {
+        "key": "variants",
+        "selector": ".product__media-item--variant",
+        "confidence": "low",
+        "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
+        "sourceFiles": [
+          "snippets/product-media-card.liquid"
+        ]
+      },
+      {
+        "key": "price",
+        "selector": ".product__price--info",
+        "confidence": "low",
+        "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
+        "sourceFiles": [
+          "snippets/main-product__info-blocks.liquid"
+        ]
+      },
+      {
+        "key": "headerSelector",
+        "selector": "#header",
+        "confidence": "low",
+        "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
+        "sourceFiles": [
+          "sections/header.liquid"
+        ]
+      },
+      {
+        "key": "addToCartFormSelector",
+        "selector": "form[data-type=\"add-to-cart-form\"]",
+        "confidence": "medium",
+        "reason": "Observed semantic markup hook. Liquid conditions and rendered match counts remain unverified.",
+        "sourceFiles": [
+          "snippets/main-product__buy-buttons.liquid"
+        ]
+      }
+    ]
+  }
+}

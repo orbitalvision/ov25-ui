@@ -1,0 +1,63 @@
+.ov25-preset-picker {
+  container: ov25-presets / size;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.ov25-preset-scroll {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  padding: 24px 28px 20px;
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+
+.ov25-preset-header { flex-shrink: 0; margin-bottom: 22px; }
+.ov25-preset-eyebrow { margin: 0; color: #71717a; font-size: 10px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+.ov25-preset-header h2 { margin: 8px 0 0; color: #18181b; font-size: clamp(24px, 3.2cqi, 30px); font-weight: 600; letter-spacing: -.04em; line-height: 1.2; }
+.ov25-preset-intro { max-width: 68ch; margin: 10px 0 0; color: #71717a; font-size: 14px; line-height: 1.6; }
+.ov25-preset-grid { display: grid; flex: 1; grid-template-columns: minmax(0, 1fr); gap: 16px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.ov25-preset-option { position: relative; display: flex; min-width: 0; cursor: pointer; }
+.ov25-preset-card { display: flex; flex: 1; flex-direction: column; min-width: 0; overflow: hidden; border: 1px solid #e4e4e7; border-radius: 14px; background: #fff; text-align: left; }
+.ov25-preset-media { display: flex; flex: 1; align-items: center; justify-content: center; min-width: 0; padding: 12px; background: #f5f5f4; }
+.ov25-preset-thumbnail { display: block; width: 100%; height: clamp(140px, 16cqi, 184px); }
+.ov25-preset-copy { display: block; padding: 15px 18px 17px; }
+.ov25-preset-name { display: flex; align-items: center; justify-content: space-between; gap: 12px; color: #18181b; font-size: 17px; font-weight: 600; line-height: 1.4; }
+.ov25-preset-check { display: inline-flex; flex-shrink: 0; align-items: center; justify-content: center; width: 23px; height: 23px; border: 1px solid #dedee3; border-radius: 50%; }
+.ov25-preset-description { display: block; max-width: 60ch; margin-top: 6px; color: #71717a; font-size: 13px; line-height: 1.55; }
+.ov25-preset-radio:checked + .ov25-preset-card { border-color: #9b1d58; box-shadow: inset 0 0 0 1px #9b1d58; }
+.ov25-preset-radio:checked + .ov25-preset-card .ov25-preset-check { border-color: #9b1d58; color: #fff; background: #9b1d58; }
+.ov25-preset-radio:focus-visible + .ov25-preset-card { outline: 2px solid #9b1d58; outline-offset: 3px; }
+.ov25-preset-footer { display: flex; flex-shrink: 0; align-items: center; justify-content: flex-end; gap: 10px; padding: 16px 28px 20px; border-top: 1px solid #e4e4e7; background: #fff; }
+.ov25-preset-footer .ov25-preset-apply { min-width: 190px; }
+
+@container ov25-presets (min-width: 620px) {
+  .ov25-preset-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-rows: 1fr; }
+  .ov25-preset-media { padding: 8px 12px; }
+  .ov25-preset-thumbnail { height: clamp(110px, 17cqb, 184px); }
+  .ov25-preset-copy { padding-top: 13px; padding-bottom: 15px; }
+}
+
+@container ov25-presets (max-width: 619px) {
+  .ov25-preset-scroll { padding-left: 16px; padding-right: 16px; }
+  .ov25-preset-footer { padding: 16px; }
+}
+
+@container ov25-presets (max-width: 400px) {
+  .ov25-preset-scroll { padding-top: 20px; }
+  .ov25-preset-header { margin-bottom: 18px; }
+  .ov25-preset-copy { padding: 14px; }
+  .ov25-preset-footer { flex-wrap: wrap; }
+  .ov25-preset-footer > button { flex: 1; }
+  .ov25-preset-footer .ov25-preset-apply { min-width: 150px; }
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .ov25-preset-option:hover .ov25-preset-card { border-color: #a1a1aa; }
+  .ov25-preset-option:hover .ov25-preset-radio:checked + .ov25-preset-card { border-color: #9b1d58; }
+}

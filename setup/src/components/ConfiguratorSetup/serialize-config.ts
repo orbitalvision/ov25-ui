@@ -18,10 +18,13 @@ import { formStringReplacementsToSerializable } from '../../lib/string-replaceme
 export type { ConfiguratorSetupPayload };
 
 export type ConfiguratorSetupPreviewOverride = string | Partial<Record<PreviewLayoutType, string>>;
+export type ConfiguratorSetupPreviewImages = Partial<Record<PreviewLayoutType, string[]>>;
 
 export interface ConfiguratorSetupSerializableOverrides {
   apiKey?: ConfiguratorSetupPreviewOverride;
   productLink?: ConfiguratorSetupPreviewOverride;
+  /** Images for the host-selected demo products; never included in saved settings. */
+  previewImages?: ConfiguratorSetupPreviewImages;
 }
 
 function parseVariantHideOptionsCsv(csv: string): string[] {
@@ -42,8 +45,8 @@ function toElementSelector(
   return s.replace ? { selector: s.selector.trim(), replace: true } : s.selector.trim();
 }
 
-const DEMO_IMAGE_COUNT = 9;
-const DEMO_IMAGES = Array.from({ length: DEMO_IMAGE_COUNT }, (_, i) => `https://picsum.photos/800/800?random=${i + 1}`);
+const DEMO_IMAGES = ['sofa-front.png', 'sofa-left-angle.png', 'sofa-right-angle.png']
+  .map((name) => `https://app.ov25.ai/images/ai-tutorial/products/${name}`);
 
 function resolvePreviewOverride(
   override: ConfiguratorSetupPreviewOverride | undefined,
@@ -73,11 +76,12 @@ export function buildSerializableConfig(
   overrides?: ConfiguratorSetupSerializableOverrides,
 ): SerializableInjectConfig {
   let productLink = resolvePreviewOverride(overrides?.productLink, layout, PREVIEW_PRODUCT_LINKS[layout]);
-  if (layout === 'snap2' && settings.snap2UseStartingConfig) {
+  const apiKey = resolvePreviewOverride(overrides?.apiKey, layout, DEFAULT_PREVIEW_API_KEY);
+  const usesDemoProduct = productLink === PREVIEW_PRODUCT_LINKS[layout] && apiKey === DEFAULT_PREVIEW_API_KEY;
+  if (layout === 'snap2' && settings.snap2UseStartingConfig && usesDemoProduct) {
     const sep = productLink.includes('?') ? '&' : '?';
     productLink = `${productLink}${sep}configuration_uuid=${encodeURIComponent(SNAP2_PREVIEW_STARTING_CONFIG_UUID)}`;
   }
-  const apiKey = resolvePreviewOverride(overrides?.apiKey, layout, DEFAULT_PREVIEW_API_KEY);
   const parsedHideOptions = parseVariantHideOptionsCsv(settings.configurator.variantHideOptionsCsv);
   const isSnap2 = layout === 'snap2';
   const displayModeDesktop = isSnap2
@@ -177,7 +181,9 @@ export function buildSerializableConfig(
       forceMobile: settings.flags.forceMobile,
       autoOpen: settings.flags.autoOpen,
     },
-    images: DEMO_IMAGES,
+    // Custom products must not inherit the sofa/bed fixture imagery. Their
+    // gallery can use host-provided images and the product's own auto cutouts.
+    images: overrides?.previewImages?.[layout] ?? (!usesDemoProduct || layout === 'snap2' ? [] : layout === 'bedConfigurator' ? ['https://app.ov25.ai/bed-config.jpg'] : DEMO_IMAGES),
   };
 
   const variableCSS = generateVariableCSS(settings.style);
@@ -189,12 +195,14 @@ export function buildSerializableConfig(
     combinedCSS ||
     settings.branding.logoURL ||
     settings.branding.mobileLogoURL ||
-    settings.branding.hideLogo
+    settings.branding.hideLogo ||
+    settings.branding.fonts?.length
   ) {
     config.branding = {};
     if (settings.branding.logoURL) config.branding.logoURL = settings.branding.logoURL;
     if (settings.branding.mobileLogoURL) config.branding.mobileLogoURL = settings.branding.mobileLogoURL;
     if (combinedCSS) config.branding.cssString = combinedCSS;
+    if (settings.branding.fonts?.length) config.branding.fonts = settings.branding.fonts.map(font => ({...font}));
     if (settings.branding.hideLogo) config.branding.hideLogo = true;
   }
 

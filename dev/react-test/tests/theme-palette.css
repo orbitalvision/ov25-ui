@@ -1,0 +1,27 @@
+html, body, #root { margin: 0; min-height: 100%; }
+body { background: #f3f2ee; color: #242620; font-family: Inter, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+button, input, select { font: inherit; }
+.theme-demo { max-width: 1240px; margin: 0 auto; padding: 42px 36px 24px; }
+.theme-demo-header { display: flex; justify-content: space-between; align-items: end; gap: 28px; margin-bottom: 30px; }
+.theme-demo-eyebrow { color: #777a6b; font-size: 10px; letter-spacing: .16em; font-weight: 700; }
+.theme-demo-header h1 { margin: 14px 0 10px; font-size: clamp(26px, 3vw, 38px); font-weight: 500; letter-spacing: -.04em; line-height: 1.1; }
+.theme-demo-header p { margin: 0; font-size: 14px; color: #74776c; }
+.theme-demo-source { display: flex; flex-direction: column; gap: 8px; font-size: 11px; color: #74776c; }
+.theme-demo-source select { border: 1px solid #d9dacf; background: #fafaf6; color: #242620; border-radius: 8px; padding: 11px 32px 11px 12px; font-size: 13px; min-width: 200px; }
+.theme-demo-nav { display: flex; gap: 6px; align-items: center; padding: 0 0 14px; }
+.theme-demo-nav button { color: #74776c; background: transparent; padding: 8px 13px; border: 0; border-radius: 7px; font-size: 12px; cursor: pointer; }
+.theme-demo-nav button[aria-pressed=true] { background: #242620; color: white; }
+.theme-demo-nav span { margin-left: auto; font-size: 11px; color: #74776c; }
+.theme-demo-board { background: white; border: 1px solid #dedfd6; border-radius: 18px; overflow: hidden; box-shadow: 0 8px 32px #24262005; }
+.theme-demo-message { padding: 90px 24px; text-align: center; font-size: 14px; }
+.theme-demo-setup { overflow: hidden; border-radius: 14px; border: 1px solid #dedfd6; }
+.theme-demo-setup-inner { height: 820px; }
+.theme-demo-footer { margin-top: 18px; font-size: 11px; color: #74776c; line-height: 1.6; }
+.theme-demo button:focus-visible, .theme-demo select:focus-visible { outline: 2px solid #565e48; outline-offset: 4px; }
+@media (max-width: 700px) {
+  .theme-demo { padding: 22px 12px; }
+  .theme-demo-header { flex-direction: column; align-items: stretch; gap: 20px; }
+  .theme-demo-nav { flex-wrap: wrap; }
+  .theme-demo-nav span { flex-basis: 100%; margin: 7px 0 0; }
+  .theme-demo-source select { width: 100%; }
+}
