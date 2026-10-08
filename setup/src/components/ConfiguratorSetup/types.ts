@@ -1,5 +1,5 @@
 import type { LayoutType } from '../../lib/config/preview-config';
-import type { StringReplacementsConfig } from 'ov25-ui';
+import type { BrandingFont, StringReplacementsConfig } from 'ov25-ui';
 
 export type PreviewLayoutType = LayoutType;
 
@@ -72,6 +72,7 @@ export interface TypeSettings {
     mobileLogoURL: string;
     cssString: string;
     hideLogo: boolean;
+    fonts?: BrandingFont[];
   };
   style: Record<string, string>;
   elementStyles: Record<string, Record<string, string>>;
@@ -95,6 +96,17 @@ export interface TypeSettings {
 export interface ConfiguratorSetupFormState {
   layout: PreviewLayoutType;
   typeSettings: Record<PreviewLayoutType, TypeSettings>;
+  /** Local editor provenance only. Never included in exported runtime JSON. */
+  setupProgress?: Partial<Record<PreviewLayoutType, {
+    configured: boolean;
+    presetId?: 'classic' | 'in-page' | 'guided' | 'overview';
+    presetVersion?: number;
+    presentationFingerprint?: string;
+    /** Resume the optional colour step after a refresh; absent on older drafts. */
+    themeStep?: 'pending' | 'complete';
+    /** Editor metadata only; matched colours and subsequent edits survive preset changes. */
+    themeStyle?: { sourceId: string; label: string; fingerprint: string };
+  }>>;
 }
 
 export const DEFAULT_SELECTOR_STATE: SelectorFormState = {
@@ -113,7 +125,7 @@ const DEFAULT_STANDARD_SETTINGS: TypeSettings = {
     configureButton: { enabled: false, selector: '[data-ov25-configure-button]', replace: false },
     initialiseMenu: { enabled: false, selector: '#ov25-initialise-menu', replace: true },
   },
-  carousel: { desktop: 'stacked', mobile: 'carousel', maxImagesDesktop: 4, maxImagesMobile: 6, autoCutouts: false },
+  carousel: { desktop: 'stacked', mobile: 'carousel', maxImagesDesktop: 10, maxImagesMobile: 10, autoCutouts: false },
   configurator: {
     displayModeDesktop: 'sheet',
     displayModeMobile: 'drawer',

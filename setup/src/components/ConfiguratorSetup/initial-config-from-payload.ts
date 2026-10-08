@@ -270,6 +270,7 @@ function mergeSerializableIntoTypeSettings(base: TypeSettings, saved: SavedLayou
     merged.branding = { ...merged.branding };
     if (saved.branding.logoURL !== undefined) merged.branding.logoURL = saved.branding.logoURL ?? '';
     if (saved.branding.mobileLogoURL !== undefined) merged.branding.mobileLogoURL = saved.branding.mobileLogoURL ?? '';
+    if (Array.isArray(saved.branding.fonts)) merged.branding.fonts = saved.branding.fonts.map(font => ({...font}));
     if (saved.branding.hideLogo !== undefined) merged.branding.hideLogo = Boolean(saved.branding.hideLogo);
     if (saved.branding.cssString !== undefined) {
       const { style: pulled, rest } = pullRootVariablesFromCss(saved.branding.cssString);

@@ -1,0 +1,14 @@
+{
+  "id": "moy-furniture",
+  "label": "Moy Furniture",
+  "layout": "standard",
+  "model": "gemini-3.1-flash-lite",
+  "template": "templates/product.json",
+  "fingerprint": "c21eee21b50623790f7f93a374b5d689a383abc9dad12334d72f9b76f433e279",
+  "candidates": 23,
+  "candidatesWithContext": 19,
+  "outlines": 26,
+  "modelInputBytes": 21130,
+  "elapsedMs": 2247,
+  "status": "complete"
+}

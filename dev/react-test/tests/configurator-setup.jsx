@@ -63,6 +63,9 @@ const SAVED_CONFIG = {
 };
 
 function App() {
+  const params = new URLSearchParams(window.location.search);
+  const fresh = params.has('fresh');
+  const demoDefaults = params.has('demoDefaults');
   const [integrationValues, setIntegrationValues] = React.useState({
     headerSelector: '.shopify-section-header',
     desktopCarouselSelector: '.product-gallery--desktop',
@@ -74,15 +77,16 @@ function App() {
   return (
     <ConfiguratorSetup
       useLocalPreview
-      apiKey={{
+      previewBaseUrl={new URLSearchParams(window.location.search).get('previewBaseUrl') || undefined}
+      apiKey={demoDefaults ? undefined : {
         standard: DEMO_RETAILER_APIKEY,
         snap2: WHITEMEADOW_APIKEY,
         bedConfigurator: DIAMOND_APIKEY,
       }}
-      productLink={{
+      productLink={demoDefaults ? undefined : {
         snap2: 'snap2/119',
       }}
-      initialConfig={SAVED_CONFIG}
+      initialConfig={fresh ? undefined : SAVED_CONFIG}
       storefrontIntegration={{
         status: 'ready',
         platformLabel: 'Shopify integration',

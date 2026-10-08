@@ -1,4 +1,4 @@
-import type { StringReplacementsConfig } from 'ov25-ui';
+import type { BrandingFont, StringReplacementsConfig } from 'ov25-ui';
 
 /**
  * Serializable config for postMessage - no functions, only plain data.
@@ -32,7 +32,7 @@ export interface SerializableInjectConfig {
     };
   };
   flags?: Record<string, boolean>;
-  branding?: { logoURL?: string; mobileLogoURL?: string; cssString?: string; hideLogo?: boolean };
+  branding?: { logoURL?: string; mobileLogoURL?: string; cssString?: string; hideLogo?: boolean; fonts?: BrandingFont[] };
   /** OV25 bed iframe `bedAllowNone` (see main package `InjectConfiguratorOptions.bed`). */
   bed?: {
     allowNone: { headboard: boolean; base: boolean; mattress: boolean };

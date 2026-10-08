@@ -1,0 +1,316 @@
+{
+  "status": "local_export_evidence_only_not_live_verified",
+  "savedMetafieldSelectorsFound": false,
+  "selectorConfigurationSource": "shopify-plugin/extensions/ov25-configurator/blocks/ov25_configurator.liquid:29-38",
+  "selectorConfigurationNote": "Plugin reads OV25 query selectors from shop metafields. Downloaded theme exports do not include their values. App block mounts below are inferred from the current local plugin block source, not proven deployed versions.",
+  "themes": [
+    {
+      "id": "harbour-lifestyle",
+      "label": "Harbour Lifestyle",
+      "sourceRoot": "client-mono/Harbour Lifestyle/theme",
+      "savedSelectors": {},
+      "productTemplateScopes": [
+        "templates/product.json",
+        "templates/product.product-v2.json"
+      ],
+      "markupEvidence": [
+        {
+          "field": "gallery",
+          "selector": ".cb-product-gallery-container",
+          "source": "snippets/product-image-gallery.liquid:141"
+        },
+        {
+          "field": "gallery",
+          "selector": ".cb-product-gallery",
+          "source": "snippets/product-image-gallery.liquid:142"
+        },
+        {
+          "field": "name",
+          "selector": ".cb-block-product-title",
+          "source": "snippets/block-product-title.liquid:11"
+        },
+        {
+          "field": "price",
+          "selector": ".cb-block-product-price",
+          "source": "snippets/block-product-price.liquid:11"
+        }
+      ],
+      "appBlockEvidence": [],
+      "scopeNote": "No OV25 app embed/block references found in catalog export; only bespoke Harbour gallery/viewer code."
+    },
+    {
+      "id": "arighi-bianchi",
+      "label": "Arighi Bianchi",
+      "sourceRoot": "client-mono/Arighi Bianci/site v2/theme_export__www-arighibianchi-co-uk-orbital-copy-sofas-beds-pdp__22SEP2026-1140am",
+      "savedSelectors": {},
+      "productTemplateScopes": [
+        "templates/product.orbital.json",
+        "templates/product.json"
+      ],
+      "markupEvidence": [
+        {
+          "field": "gallery",
+          "selector": ".product-media-container",
+          "source": "sections/product.liquid:17"
+        },
+        {
+          "field": "gallery",
+          "selector": ".productView-images",
+          "source": "snippets/main-product-media.liquid:58"
+        }
+      ],
+      "appBlockEvidence": [
+        {
+          "field": "name",
+          "selector": "#ov25-configurator-name-container",
+          "source": "templates/product.orbital.json/sections/main/blocks/ov25_ov25_configurator_name_xANyiw",
+          "pluginSource": "shopify-plugin/extensions/ov25-configurator/blocks/ov25_configurator_name.liquid"
+        },
+        {
+          "field": "price",
+          "selector": "#ov25-configurator-price-container",
+          "source": "templates/product.orbital.json/sections/main/blocks/ov25_ov25_configurator_price_pzaJHL",
+          "pluginSource": "shopify-plugin/extensions/ov25-configurator/blocks/ov25_configurator_price.liquid"
+        },
+        {
+          "field": "variants",
+          "selector": "#ov25-configurator-controls-container",
+          "source": "templates/product.orbital.json/sections/main/blocks/ov25_ov25_configurator_controls_aVNimN",
+          "pluginSource": "shopify-plugin/extensions/ov25-configurator/blocks/ov25_configurator_controls.liquid"
+        },
+        {
+          "field": "variants",
+          "selector": "#ov25-configurator-controls-container",
+          "source": "templates/product.json/sections/main/blocks/ov25_ov25_configurator_controls_7BPbbG",
+          "pluginSource": "shopify-plugin/extensions/ov25-configurator/blocks/ov25_configurator_controls.liquid"
+        }
+      ]
+    },
+    {
+      "id": "all-about-tweed",
+      "label": "All About Tweed",
+      "sourceRoot": "ov25-ui/artifacts/theme-style-sources/all-about-tweed",
+      "savedSelectors": {},
+      "productTemplateScopes": [
+        "templates/product.ov25_product.json"
+      ],
+      "markupEvidence": [
+        {
+          "field": "name",
+          "selector": ".product-single__title",
+          "source": "snippets/product-template.liquid:116"
+        },
+        {
+          "field": "price",
+          "selector": ".product__price",
+          "source": "snippets/product-template.liquid:213"
+        }
+      ],
+      "appBlockEvidence": [
+        {
+          "field": "variants",
+          "selector": "#ov25-configurator-controls-container",
+          "source": "templates/product.ov25_product.json/sections/main/blocks/ov25_ov25_configurator_controls_dBnUGQ",
+          "pluginSource": "shopify-plugin/extensions/ov25-configurator/blocks/ov25_configurator_controls.liquid"
+        }
+      ]
+    },
+    {
+      "id": "recline-online",
+      "label": "Recline Online",
+      "sourceRoot": "ov25-ui/artifacts/theme-style-sources/recline-online",
+      "savedSelectors": {},
+      "productTemplateScopes": [
+        "templates/product.configurable.json",
+        "templates/product.configurable_range.json"
+      ],
+      "markupEvidence": [
+        {
+          "field": "gallery",
+          "selector": "#ov25-configurator-placeholder",
+          "source": "snippets/product-media-gallery.liquid:81"
+        },
+        {
+          "field": "variants",
+          "selector": "#ov25-controls",
+          "source": "snippets/product-ov25-variant-picker.liquid:22"
+        },
+        {
+          "field": "configureButton",
+          "selector": "#ov25-configure-button",
+          "source": "snippets/product-ov25-variant-picker.liquid:16"
+        }
+      ],
+      "appBlockEvidence": []
+    },
+    {
+      "id": "moy-furniture",
+      "label": "Moy Furniture",
+      "sourceRoot": "ov25-ui/artifacts/theme-style-sources/moy-furniture",
+      "savedSelectors": {},
+      "productTemplateScopes": [
+        "templates/product.ov25-product.json",
+        "templates/product.ov25-snap2-product.json"
+      ],
+      "markupEvidence": [
+        {
+          "field": "gallery",
+          "selector": ".product__media-wrapper",
+          "source": "sections/main-product.liquid:80"
+        },
+        {
+          "field": "gallery",
+          "selector": ".configurator-container",
+          "source": "sections/main-product-ov25-snap2.liquid:333"
+        },
+        {
+          "field": "configureButton",
+          "selector": "[data-ov25-configure-button]",
+          "source": "templates/product.ov25-product.json"
+        }
+      ],
+      "appBlockEvidence": [
+        {
+          "field": "variants",
+          "selector": "#ov25-configurator-controls-container",
+          "source": "templates/product.ov25-product.json/sections/main/blocks/ov25_ov25_configurator_controls_X7HcTd",
+          "pluginSource": "shopify-plugin/extensions/ov25-configurator/blocks/ov25_configurator_controls.liquid"
+        },
+        {
+          "field": "variants",
+          "selector": "#ov25-configurator-controls-container",
+          "source": "templates/product.ov25-snap2-product.json/sections/main/blocks/ov25_ov25_configurator_controls_X7HcTd",
+          "pluginSource": "shopify-plugin/extensions/ov25-configurator/blocks/ov25_configurator_controls.liquid"
+        }
+      ],
+      "scopeNote": "Snap2 uses a dedicated .configurator-container; standard template uses the normal main-product section."
+    },
+    {
+      "id": "orla-kiely",
+      "label": "Orla Kiely Furniture",
+      "sourceRoot": "ov25-ui/artifacts/theme-style-sources/orla-kiely",
+      "savedSelectors": {},
+      "productTemplateScopes": [
+        "templates/product.liquid",
+        "templates/product.standard.liquid",
+        "templates/product.plain.liquid"
+      ],
+      "markupEvidence": [
+        {
+          "field": "name",
+          "selector": ".product-detail__title",
+          "source": "sections/product-template.liquid:27"
+        },
+        {
+          "field": "price",
+          "selector": ".product-detail__price",
+          "source": "sections/product-template.liquid:31"
+        }
+      ],
+      "appBlockEvidence": [],
+      "outsideCatalogPatch": {
+        "source": "client-mono/Orla Kiely/ov25_template.liquid:310-329",
+        "selectors": {
+          "variants": "#ov25-configurator-controls-container"
+        },
+        "note": "This OV25-patched section exists separately from the older catalog export and is not part of the catalog theme scan."
+      }
+    },
+    {
+      "id": "diamond-furniture",
+      "label": "Diamond Furniture",
+      "sourceRoot": "ov25-ui/artifacts/theme-style-sources/diamond-furniture",
+      "savedSelectors": {},
+      "productTemplateScopes": [
+        "templates/product.ov25-products.json"
+      ],
+      "markupEvidence": [
+        {
+          "field": "gallery",
+          "selector": ".product__media__wrapper",
+          "source": "sections/product.liquid:89"
+        }
+      ],
+      "appBlockEvidence": [
+        {
+          "field": "name",
+          "selector": "#ov25-configurator-name-container",
+          "source": "templates/product.ov25-products.json/sections/main/blocks/ov25_ov25_configurator_name_fYRYW8",
+          "pluginSource": "shopify-plugin/extensions/ov25-configurator/blocks/ov25_configurator_name.liquid"
+        },
+        {
+          "field": "price",
+          "selector": "#ov25-configurator-price-container",
+          "source": "templates/product.ov25-products.json/sections/main/blocks/ov25_ov25_configurator_price_FH9AYK",
+          "pluginSource": "shopify-plugin/extensions/ov25-configurator/blocks/ov25_configurator_price.liquid"
+        }
+      ]
+    },
+    {
+      "id": "diamond-furniture-design",
+      "label": "Diamond Furniture Design (B2B)",
+      "sourceRoot": "ov25-ui/artifacts/theme-style-sources/diamond-furniture-design",
+      "savedSelectors": {},
+      "productTemplateScopes": [
+        "templates/product.ov25_chair.json"
+      ],
+      "markupEvidence": [
+        {
+          "field": "gallery",
+          "selector": ".product__media__wrapper",
+          "source": "sections/product.liquid:139"
+        }
+      ],
+      "appBlockEvidence": [
+        {
+          "field": "price",
+          "selector": "#ov25-configurator-price-container",
+          "source": "templates/product.ov25_chair.json/sections/main/blocks/ov25_ov25_configurator_price_LXXJdE",
+          "pluginSource": "shopify-plugin/extensions/ov25-configurator/blocks/ov25_configurator_price.liquid"
+        },
+        {
+          "field": "variants",
+          "selector": "#ov25-configurator-controls-container",
+          "source": "templates/product.ov25_chair.json/sections/main/blocks/ov25_ov25_configurator_controls_GnUWie",
+          "pluginSource": "shopify-plugin/extensions/ov25-configurator/blocks/ov25_configurator_controls.liquid"
+        }
+      ]
+    },
+    {
+      "id": "the-chair-people",
+      "label": "The Chair People (local export)",
+      "sourceRoot": "ov25-ui/artifacts/theme-style-sources/the-chair-people",
+      "savedSelectors": {},
+      "productTemplateScopes": [
+        "templates/product.json",
+        "templates/product.ov25_default_product_copy.json"
+      ],
+      "markupEvidence": [
+        {
+          "field": "gallery",
+          "selector": ".product-grid__item--media-wrapper",
+          "source": "sections/main-product.liquid:105"
+        },
+        {
+          "field": "gallery",
+          "selector": ".main-product__media",
+          "source": "snippets/main-product__media-gallery.liquid:335"
+        }
+      ],
+      "appBlockEvidence": [
+        {
+          "field": "price",
+          "selector": "#ov25-configurator-price-container",
+          "source": "templates/product.json/sections/main/blocks/ov25_ov25_configurator_price_AAYGcF",
+          "pluginSource": "shopify-plugin/extensions/ov25-configurator/blocks/ov25_configurator_price.liquid"
+        },
+        {
+          "field": "price",
+          "selector": "#ov25-configurator-price-container",
+          "source": "templates/product.ov25_default_product_copy.json/sections/main/blocks/ov25_ov25_configurator_price_AAYGcF",
+          "pluginSource": "shopify-plugin/extensions/ov25-configurator/blocks/ov25_configurator_price.liquid"
+        }
+      ]
+    }
+  ]
+}

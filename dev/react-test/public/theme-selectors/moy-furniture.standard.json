@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "id": "moy-furniture",
+    "label": "Moy Furniture",
+    "kind": "local-theme",
+    "fingerprint": "c21eee21b50623790f7f93a374b5d689a383abc9dad12334d72f9b76f433e279",
+    "files": [
+      "templates/product.json",
+      "layout/theme.liquid",
+      "sections/main-product.liquid",
+      "sections/header-group.json",
+      "snippets/product-media-gallery.liquid",
+      "snippets/product-media-modal.liquid",
+      "sections/header.liquid",
+      "snippets/product-media.liquid",
+      "snippets/header-drawer.liquid",
+      "snippets/header-dropdown-menu.liquid",
+      "snippets/header-mega-menu.liquid",
+      "snippets/header-search.liquid",
+      "snippets/buy-buttons.liquid",
+      "snippets/custom-product-variant-picker.liquid",
+      "snippets/price.liquid",
+      "snippets/product-variant-picker.liquid",
+      "snippets/custom-product-variant-options.liquid",
+      "snippets/product-variant-options.liquid",
+      "snippets/swatch.liquid",
+      "snippets/swatch-input.liquid",
+      "snippets/breadcrumbs.liquid",
+      "snippets/card-product.liquid",
+      "snippets/icon-accordion.liquid",
+      "snippets/icon-with-text.liquid",
+      "snippets/share-button.liquid",
+      "snippets/product-thumbnail.liquid",
+      "snippets/announcement-bar.liquid",
+      "snippets/cart-notification.liquid",
+      "snippets/country-localization.liquid",
+      "snippets/google-rating.liquid",
+      "snippets/language-localization.liquid",
+      "snippets/loading-spinner.liquid",
+      "snippets/btn-icon-arrow.liquid",
+      "snippets/gift-card-recipient-form.liquid",
+      "snippets/quantity-input.liquid",
+      "snippets/menu-image-custom.liquid",
+      "snippets/megamenu-image-custom.liquid",
+      "snippets/progress-bar.liquid"
+    ]
+  },
+  "method": "ai",
+  "generatedAt": "2026-10-07T14:31:20.827Z",
+  "warnings": [
+    "Source evidence only: Liquid conditions, app blocks, JavaScript changes, visibility and selector match counts have not been verified in a rendered product page. Review before applying.",
+    "Inspected templates/product.json; other product templates may use different targets.",
+    "The selected template uses app blocks whose markup is not present in the theme source. Their selectors cannot be inferred from app names.",
+    "Structural context budget reached; only a bounded sample of candidate occurrences was retained.",
+    "4 source candidates have no safely parsed structural outline; surrounding markup is unavailable for those choices.",
+    "Some structural outlines are partial because of source limits, Liquid or incomplete markup; they are not rendered DOM trees.",
+    "Multiple price candidates were identified; candidate-2 was selected as the most representative container.",
+    "Candidate-23 was ignored in favor of candidate-1 for the headerSelector as they target the same element.",
+    "No source-backed proposal for: name, swatches, configureButton, desktopCarouselSelector, mobileCarouselSelector. Existing choices should be kept or selected manually."
+  ],
+  "targets": [
+    {
+      "key": "headerSelector",
+      "selector": ".header",
+      "confidence": "medium",
+      "reason": "The header element is a standard semantic container for the site header.",
+      "sourceFiles": [
+        "sections/header.liquid"
+      ]
+    },
+    {
+      "key": "price",
+      "selector": ".price",
+      "confidence": "medium",
+      "reason": "The .price class is a standard container for product pricing information.",
+      "sourceFiles": [
+        "snippets/price.liquid"
+      ]
+    },
+    {
+      "key": "gallery",
+      "selector": ".product-media-container",
+      "confidence": "medium",
+      "reason": "The .product-media-container is a standard container for product media.",
+      "sourceFiles": [
+        "snippets/product-thumbnail.liquid"
+      ]
+    },
+    {
+      "key": "variants",
+      "selector": ".variant-option-item",
+      "confidence": "medium",
+      "reason": "The .variant-option-item is a dedicated container for individual variant options.",
+      "sourceFiles": [
+        "snippets/custom-product-variant-options.liquid"
+      ]
+    },
+    {
+      "key": "addToCartFormSelector",
+      "selector": "form[data-type=\"add-to-cart-form\"]",
+      "confidence": "medium",
+      "reason": "The form with data-type='add-to-cart-form' is the explicit target for the add-to-cart action.",
+      "sourceFiles": [
+        "snippets/buy-buttons.liquid",
+        "snippets/card-product.liquid"
+      ]
+    }
+  ]
+}

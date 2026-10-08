@@ -1,0 +1,219 @@
+{
+  "schemaVersion": 1,
+  "source": {
+    "id": "moy-furniture",
+    "label": "Moy Furniture",
+    "kind": "local-theme",
+    "fingerprint": "322a93abd77059766f0b404afb8d78d96cfad31202fbfc7ca6ae15f5569a4fe2",
+    "files": [
+      "config/settings_data.json",
+      "config/settings_schema.json",
+      "templates/product.json",
+      "assets/base.css",
+      "assets/section-main-product.css",
+      "assets/component-complementary-products.css",
+      "assets/component-product-model.css",
+      "assets/component-product-variant-picker.css",
+      "layout/theme.liquid"
+    ]
+  },
+  "summary": "Moy Furniture: product colour scheme scheme-1 with system fallback typography. Review the palette and button samples before applying.",
+  "style": {
+    "--ov25-background-color": "#ffffff",
+    "--ov25-secondary-background-color": "#ffffff",
+    "--ov25-text-color": "#121212",
+    "--ov25-secondary-text-color": "#121212",
+    "--ov25-border-color": "#121212",
+    "--ov25-border-color-secondary": "#121212",
+    "--ov25-highlight-color": "#121212",
+    "--ov25-hover-color": "#ffffff",
+    "--ov25-primary-color": "#ffffff",
+    "--ov25-button-text-color": "#121212",
+    "--ov25-button-border-color": "#121212",
+    "--ov25-button-hover-background-color": "#ffffff",
+    "--ov25-button-hover-text-color": "#121212",
+    "--ov25-button-border-width": "1px",
+    "--ov25-button-border-radius": "0px",
+    "--ov25-cta-color": "#121212",
+    "--ov25-cta-text-color": "#ffffff",
+    "--ov25-cta-color-hover": "#121212",
+    "--ov25-cta-text-color-hover": "#ffffff",
+    "--ov25-cta-color-light": "#ffffff",
+    "--ov25-cta-text-color-disabled": "#121212",
+    "--ov25-cta-border-color": "#121212",
+    "--ov25-cta-border-width": "1px",
+    "--ov25-cta-border-radius": "0px",
+    "--ov25-selected-background-color": "#121212",
+    "--ov25-selected-text-color": "#ffffff",
+    "--ov25-selected-border-color": "#121212",
+    "--ov25-input-background-color": "#ffffff",
+    "--ov25-input-text-color": "#121212",
+    "--ov25-input-border-color": "#121212",
+    "--ov25-input-placeholder-color": "#121212",
+    "--ov25-focus-ring-color": "#121212",
+    "--ov25-overlay-button-color": "#ffffff",
+    "--ov25-overlay-button-hover-color": "#ffffff",
+    "--ov25-configurator-view-controls-text-color": "#121212",
+    "--ov25-configurator-view-controls-border-color": "#121212",
+    "--ov25-configurator-iframe-background-color": "#ffffff",
+    "--ov25-configurator-title-text-color": "#121212",
+    "--ov25-configurator-price-text-color": "#121212",
+    "--ov25-compare-price-text-color": "#121212",
+    "--ov25-link-color": "#121212",
+    "--ov25-backdrop-color": "#000000",
+    "--ov25-backdrop-opacity": "0.45",
+    "--ov25-360-font-family": "system-ui, sans-serif",
+    "--ov25-heading-font-family": "system-ui, sans-serif",
+    "--ov25-button-font-family": "system-ui, sans-serif",
+    "--ov25-body-font-weight": "400",
+    "--ov25-heading-font-weight": "400",
+    "--ov25-button-font-weight": "400",
+    "--ov25-button-letter-spacing": "0em",
+    "--ov25-button-text-transform": "none",
+    "--ov25-configurator-qr-code-popup-background-color": "#ffffff",
+    "--ov25-configurator-qr-code-popup-border-color": "#121212",
+    "--ov25-configurator-qr-code-popup-title-text-color": "#121212",
+    "--ov25-configurator-qr-code-popup-description-text-color": "#121212"
+  },
+  "fonts": [],
+  "palette": [
+    {
+      "role": "Background",
+      "color": "#ffffff",
+      "source": "config/settings_data.json"
+    },
+    {
+      "role": "Soft surface",
+      "color": "#ffffff",
+      "source": "config/settings_data.json"
+    },
+    {
+      "role": "Text",
+      "color": "#121212",
+      "source": "config/settings_data.json"
+    },
+    {
+      "role": "Action",
+      "color": "#121212",
+      "source": "config/settings_data.json"
+    },
+    {
+      "role": "Accent",
+      "color": "#121212",
+      "source": "config/settings_data.json"
+    }
+  ],
+  "warnings": [
+    "Source-only preview: no AI model was called. Colours use explicit local theme settings or global/button CSS; ambiguous styling uses review defaults.",
+    "Unspecified button shape, focus, selected and disabled states are suggested review defaults; confirm them against the client design.",
+    "Shopify font handles were not resolved or downloaded; this preview uses system typography."
+  ],
+  "generatedAt": "2026-10-07T13:36:36.408Z",
+  "method": "source",
+  "placement": {
+    "schemaVersion": 1,
+    "source": {
+      "id": "moy-furniture",
+      "label": "Moy Furniture",
+      "kind": "local-theme",
+      "fingerprint": "554a93b4fd0bcc635b12567fdf826bc45010deed24e09a152f7a410b4a39ba29",
+      "files": [
+        "templates/product.json",
+        "layout/theme.liquid",
+        "sections/main-product.liquid",
+        "sections/header-group.json",
+        "snippets/product-media-gallery.liquid",
+        "snippets/product-media-modal.liquid",
+        "sections/header.liquid",
+        "snippets/product-media.liquid",
+        "snippets/header-drawer.liquid",
+        "snippets/header-dropdown-menu.liquid",
+        "snippets/header-mega-menu.liquid",
+        "snippets/header-search.liquid",
+        "snippets/buy-buttons.liquid",
+        "snippets/custom-product-variant-picker.liquid",
+        "snippets/price.liquid",
+        "snippets/product-variant-picker.liquid",
+        "snippets/custom-product-variant-options.liquid",
+        "snippets/product-variant-options.liquid",
+        "snippets/swatch.liquid",
+        "snippets/swatch-input.liquid",
+        "snippets/breadcrumbs.liquid",
+        "snippets/card-product.liquid",
+        "snippets/icon-accordion.liquid",
+        "snippets/icon-with-text.liquid",
+        "snippets/share-button.liquid",
+        "snippets/product-thumbnail.liquid",
+        "snippets/announcement-bar.liquid",
+        "snippets/cart-notification.liquid",
+        "snippets/country-localization.liquid",
+        "snippets/google-rating.liquid",
+        "snippets/language-localization.liquid",
+        "snippets/loading-spinner.liquid",
+        "snippets/btn-icon-arrow.liquid",
+        "snippets/gift-card-recipient-form.liquid",
+        "snippets/quantity-input.liquid",
+        "snippets/menu-image-custom.liquid",
+        "snippets/megamenu-image-custom.liquid",
+        "snippets/progress-bar.liquid"
+      ]
+    },
+    "method": "source",
+    "generatedAt": "2026-10-07T13:36:36.409Z",
+    "warnings": [
+      "Source evidence only: Liquid conditions, app blocks, JavaScript changes, visibility and selector match counts have not been verified in a rendered product page. Review before applying.",
+      "Inspected templates/product.json; other product templates may use different targets.",
+      "The selected template uses app blocks whose markup is not present in the theme source. Their selectors cannot be inferred from app names.",
+      "Deterministic source review; no AI model was called.",
+      "No source-backed proposal for: name, swatches, configureButton, desktopCarouselSelector, mobileCarouselSelector. Existing choices should be kept or selected manually."
+    ],
+    "targets": [
+      {
+        "key": "gallery",
+        "selector": ".quick-add__product-media",
+        "confidence": "low",
+        "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
+        "sourceFiles": [
+          "snippets/card-product.liquid"
+        ]
+      },
+      {
+        "key": "variants",
+        "selector": ".product__media-item--variant",
+        "confidence": "low",
+        "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
+        "sourceFiles": [
+          "snippets/product-media.liquid"
+        ]
+      },
+      {
+        "key": "price",
+        "selector": ".price",
+        "confidence": "low",
+        "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
+        "sourceFiles": [
+          "snippets/price.liquid"
+        ]
+      },
+      {
+        "key": "headerSelector",
+        "selector": "header",
+        "confidence": "low",
+        "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
+        "sourceFiles": [
+          "sections/header.liquid"
+        ]
+      },
+      {
+        "key": "addToCartFormSelector",
+        "selector": "form[data-type=\"add-to-cart-form\"]",
+        "confidence": "low",
+        "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
+        "sourceFiles": [
+          "snippets/buy-buttons.liquid",
+          "snippets/card-product.liquid"
+        ]
+      }
+    ]
+  }
+}

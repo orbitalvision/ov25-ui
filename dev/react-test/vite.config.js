@@ -77,6 +77,7 @@ const testPages = [
   'carousel-relocation',
   'gallery-no-carousel',
   'configurator-setup',
+  'theme-palette',
 ];
 
 const testInputs = Object.fromEntries(
@@ -125,6 +126,7 @@ export default defineConfig({
   envDir: path.resolve(__dirname, '../..'),
   plugins: [tailwindcss(), react(), watchLinkedPackagesReload(), viewportMatrixPlugin()],
   resolve: {
+    dedupe: ['react', 'react-dom'],
     alias: {
       'ov25-ui': path.resolve(__dirname, '../../dist'),
       'ov25-setup': path.resolve(__dirname, '../../setup'),
