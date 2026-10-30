@@ -564,6 +564,8 @@ html {
 }
 
 :host(.ov25-inline-sticky-gallery-root-mobile) {
+  /* The entire pinned gallery, including thumbnail gaps, must occlude scrolling content. */
+  background-color: var(--ov25-background-color, #fff);
   display: flex;
   flex-direction: column;
   width: 100%;

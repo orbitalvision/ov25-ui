@@ -607,11 +607,15 @@ export function createStickyHostRelocation(
       ? documentObject.documentElement.clientWidth
       : geometry.fixedWidth;
     const relocationHeight = desktopHeight ?? geometry.fixedHeight;
-    // Popover removes the merchant border and leaves normal flow, so lock its measured natural
-    // height. The body track keeps auto height so browser layout can respond to structural resizes.
-    const relocationHeightLock =
-      desktopHeight === null || strategy === 'popover' ? relocationHeight : null;
+    // Mobile content changes height after loading (and when its carousel changes). Locking the
+    // initial skeleton height leaves both a tall spacer and an invisible hit target over controls.
+    // Keep it content-sized; the host ResizeObserver updates the flow placeholder below.
+    const mobileAutoHeight = host.getAttribute('data-ov25-inline-sticky-mobile') === 'true';
+    // Desktop Popover keeps its cached natural height; the desktop body track remains auto-sized.
+    const relocationHeightLock = !mobileAutoHeight &&
+      (desktopHeight === null || strategy === 'popover') ? relocationHeight : null;
     applyCommonStyles(relocationWidth, relocationHeightLock);
+    if (mobileAutoHeight) setRelocationStyle('height', 'auto');
     if (strategy === 'body-layer') {
       applyBodyLayerTrack(
         geometry,
