@@ -42,6 +42,7 @@ const testPages = [
   'selection-details-tooltip-sheet',
   'selection-details-modal',
   'selection-details-fullscreen',
+  'selection-details-sticky-top-layer',
   'product-list',
   'multiple-configurators',
   'multiple-standard-configurators',

@@ -11,6 +11,10 @@ import {
   BODY_STICKY_FULLSCREEN_PORTAL_Z_INDEX,
   BODY_STICKY_PORTAL_Z_INDEX,
 } from '../lib/config/layers.js';
+import {
+  notifyStickyHostEnteredTopLayer,
+  notifyStickyHostLeftTopLayer,
+} from '../lib/top-layer-overlays.js';
 
 export type StickyHostRelocationMode = 'normal' | 'fixed' | 'absolute-end';
 
@@ -298,6 +302,7 @@ export function createStickyHostRelocation(
         // It may already have been closed by external code; attribute/style restoration still applies.
       }
       popoverShown = false;
+      notifyStickyHostLeftTopLayer(host);
     }
 
     if (strategy === 'body-layer' && layer?.contains(host)) {
@@ -437,6 +442,8 @@ export function createStickyHostRelocation(
         popoverHost.showPopover();
         popoverShown = true;
         strategy = 'popover';
+        // Re-show OV25 overlay portals after the host so they stay painted above it.
+        notifyStickyHostEnteredTopLayer(host);
         return true;
       } catch {
         rollbackPreparedRelocation();

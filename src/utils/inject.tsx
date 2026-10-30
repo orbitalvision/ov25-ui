@@ -35,6 +35,7 @@ import {
   BODY_TOASTER_PORTAL_Z_INDEX,
   BODY_TOASTER_SURFACE_Z_INDEX,
 } from '../lib/config/layers.js';
+import { registerTopLayerPortal } from '../lib/top-layer-overlays.js';
 
 // Import sonner CSS as string
 import sonnerCssText from 'sonner/dist/styles.css?inline';
@@ -678,6 +679,23 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
 
     // Keep toaster last among static body portals; moving the host preserves its ShadowRoot.
     document.body.appendChild(toasterContainer);
+
+    // A relocated sticky gallery can sit in the browser top layer, where no z-index can beat it.
+    // These portals follow it into the top layer while they render content, in tier order.
+    registerTopLayerPortal(popoverPortalContainer, popoverPortalShadowRoot, BODY_POPOVER_PORTAL_Z_INDEX);
+    if (modalPortalShadowRoot) {
+      registerTopLayerPortal(
+        modalPortalShadowRoot.host as HTMLElement,
+        modalPortalShadowRoot,
+        BODY_MODAL_PORTAL_Z_INDEX,
+      );
+    }
+    registerTopLayerPortal(
+      selectionDetailsPortalContainer,
+      selectionDetailsPortalShadowRoot,
+      BODY_SELECTION_DETAILS_PORTAL_Z_INDEX,
+    );
+    registerTopLayerPortal(toasterContainer, toasterPortalShadowRoot, BODY_TOASTER_PORTAL_Z_INDEX);
 
     const hasGallerySelector = !!getSelector(effectiveGallerySelector);
     const useDeferredGallery =
