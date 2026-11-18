@@ -20,6 +20,7 @@ export interface GroupedVariantsListGroup {
 
 export interface GroupedVariantsListProps {
   groups: GroupedVariantsListGroup[];
+  optionName: string;
   VariantCard: React.ComponentType<VariantCardProps>;
   isMobile: boolean;
   onSelect: (variant: Variant) => void;
@@ -33,6 +34,7 @@ export interface GroupedVariantsListProps {
 
 export const GroupedVariantsList: React.FC<GroupedVariantsListProps> = ({
   groups,
+  optionName,
   VariantCard,
   isMobile,
   onSelect,
@@ -52,7 +54,7 @@ export const GroupedVariantsList: React.FC<GroupedVariantsListProps> = ({
             {showGroupHeaders && (
               <h4 className={`${STICKY_GROUP_HEADER_CLASS} ${stickyTopClass}`}>
                 {capitalizeWords(
-                  getString('groupHeader', { GROUP_NAME: group.groupName }, group.groupName)
+                  getString('groupHeader', { OPTION_NAME: optionName, GROUP_NAME: group.groupName }, group.groupName)
                 )}
                 <GroupPrice price={group.priceSummary} />
               </h4>

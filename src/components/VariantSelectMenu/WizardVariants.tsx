@@ -569,6 +569,7 @@ export const WizardVariants: React.FC<WizardVariantsProps> = ({ mode, displayMod
                     </div>
                   ) : (
                     <GroupedVariantsList
+                      optionName={currentOption!.name}
                       groups={(filteredOption.groups ?? []).map(group => ({
                         groupName: 'name' in group ? group.name : '',
                         priceSummary: 'priceSummary' in group ? group.priceSummary : undefined,

@@ -2,6 +2,7 @@ import React from 'react';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { WizardVariants } from '../../src/components/VariantSelectMenu/WizardVariants.js';
+import { resolveStringReplacement } from '../../src/lib/strings/resolve-string-replacement.js';
 
 const state = vi.hoisted(() => ({ context: {} as any, loadMore: undefined as undefined | ((entries: any[]) => void) }));
 vi.mock('../../src/contexts/ov25-ui-context.js', () => ({ useOV25UI: () => state.context }));
@@ -82,7 +83,9 @@ it('keeps one label when a group spans multiple batches', () => {
 
 it('uses the registered group header replacement when no prices are available', () => {
   state.context.variantPanelOptions[0].groups = [group('Standard', 0)];
-  state.context.getString = (key: string, vars: any, fallback: string) => key === 'groupHeader' ? `Collection: ${vars.GROUP_NAME}` : fallback;
+  state.context.getString = (key: string, vars: any, fallback: string) => key === 'groupHeader'
+    ? resolveStringReplacement({ rules: [{ template: 'Option: ${OPTION_NAME} / Group: ${GROUP_NAME}' }], vars, fallback })
+    : fallback;
   render(<WizardVariants mode="inline" />);
-  expect(screen.getByRole('heading', { name: 'Collection: Standard' })).toHaveClass('ov25-group-header');
+  expect(screen.getByRole('heading', { name: 'Option: Fabric / Group: Standard' })).toHaveClass('ov25-group-header');
 });
