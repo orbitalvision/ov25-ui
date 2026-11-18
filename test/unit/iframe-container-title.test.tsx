@@ -54,6 +54,21 @@ describe('IframeContainer title', () => {
     iframeContext = createContext();
   });
 
+  it('delays navigation until positioned and retains the same iframe through drawer transitions', () => {
+    const { container, rerender } = render(<IframeContainer ready={false} />);
+    const iframe = getRealIframe(container)!;
+    expect(iframe).not.toHaveAttribute('src');
+    rerender(<IframeContainer ready />);
+    const src = iframe.getAttribute('src');
+    expect(src).toBeTruthy();
+    for (const open of [true, false, true, false]) {
+      iframeContext.isDrawerOrDialogOpen = open;
+      rerender(<IframeContainer ready />);
+      expect(getRealIframe(container)).toBe(iframe);
+      expect(iframe).toHaveAttribute('src', src!);
+    }
+  });
+
   it('titles a loaded single-product configurator from the current product', () => {
     iframeContext = createContext({
       productLink: '/product/58?configuration=abc#viewer',

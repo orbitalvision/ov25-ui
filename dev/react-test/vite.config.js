@@ -10,6 +10,7 @@ const testPages = [
   'single-product-gallery',
   'gallery-auto-cutouts',
   'configurator-sizing',
+  'iframe-resize',
   'variants-per-row',
   'responsive-layout-matrix',
   'split-variant-triggers',

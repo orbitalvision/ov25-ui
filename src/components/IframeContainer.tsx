@@ -121,7 +121,7 @@ export function getConfiguratorIframeTitle({
 }
 
 
-export const IframeContainer = () => {
+export const IframeContainer = ({ ready = true }: { ready?: boolean } = {}) => {
     // Get all required data from context
     const {
         iframeRef,
@@ -307,7 +307,7 @@ export const IframeContainer = () => {
                 ref={iframeRef}
                 id={uniqueId ? `ov25-configurator-iframe-${uniqueId}` : "ov25-configurator-iframe"}
                 title={iframeTitle}
-                src={iframeSrc}
+                src={ready ? iframeSrc : undefined}
                 className={`ov:w-full ov:bg-transparent ov:h-full ${iframeRadiusClass} ov:transform-gpu ov:backface-hidden ${galleryIndex === galleryIndexToUse ? 'ov:block' : 'ov:ov25-controls-hidden'}`}
                 allow="camera; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; xr-spatial-tracking; fullscreen"
 

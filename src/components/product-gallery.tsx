@@ -27,6 +27,7 @@ import {
   isHTMLElementInOwnerDocument,
 } from "../lib/carousel-target-controller.js"
 import { IframeContainer } from "./IframeContainer.js"
+import { useStackedGalleryPositioning } from "../hooks/useStackedGalleryPositioning.js"
 import { ProductCarousel } from "./product-carousel.js"
 import { ArPreviewQRCodeDialog } from "./ar-preview-qr-code-dialog.js"
 import InitialiseMenu from "./VariantSelectMenu/InitialiseMenu.js"
@@ -482,53 +483,14 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
     
 
 
-    // Position the true iframe container to match the normal container
-    useEffect(() => {
-        // Only run positioning logic when gallery is stacked
-       if(!isProductGalleryStacked) return;
-        
-        let frameId: number;
-        
-        const positionIframeContainer = () => {
-            const originalContainer = findElementByIdInShadowOrRegularDOM(uniqueId ? `ov25-configurator-iframe-container-${uniqueId}` : 'ov25-configurator-iframe-container');
-            const trueContainer = findElementByIdInShadowOrRegularDOM('true-ov25-configurator-iframe-container');
-            
-            if (originalContainer && trueContainer && !isDrawerOrDialogOpen) {
-                const rect = originalContainer.getBoundingClientRect();
-                
-                trueContainer.style.position = 'fixed';
-                trueContainer.style.top = `${rect.top}px`;
-                trueContainer.style.left = `${rect.left}px`;
-                trueContainer.style.width = `${rect.width}px`;
-                trueContainer.style.height = `${rect.height}px`;
-                trueContainer.style.zIndex = '3';
-            }
-            
-            frameId = requestAnimationFrame(positionIframeContainer);
-        };
-        
-        // When drawer closes: instant iframe restore sets stackedGalleryCloseSyncImmediateRef in useIframePositioning.
-        // Legacy animated iframe close still waits for the slide to finish.
-        if (!isDrawerOrDialogOpen) {
-            const skipDelay = stackedGalleryCloseSyncImmediateRef.current;
-            if (skipDelay) {
-                stackedGalleryCloseSyncImmediateRef.current = false;
-            }
-            const delayMs = skipDelay ? 0 : 500;
-            const timeoutId = setTimeout(() => {
-                frameId = requestAnimationFrame(positionIframeContainer);
-            }, delayMs);
-            
-            return () => {
-                clearTimeout(timeoutId);
-                cancelAnimationFrame(frameId);
-            };
-        }
-        
-        return () => {
-            cancelAnimationFrame(frameId);
-        };
-    }, [isDrawerOrDialogOpen, isProductGalleryStacked, uniqueId, stackedGalleryCloseSyncImmediateRef]);
+    const stackedIframeReady = useStackedGalleryPositioning({
+        enabled: isProductGalleryStacked,
+        isOpen: isDrawerOrDialogOpen,
+        anchored: false,
+        shadowRoot: galleryShadowRoot,
+        slotRef: containerRef,
+        instantCloseRef: stackedGalleryCloseSyncImmediateRef,
+    });
 
     useEffect(() => {
         if (
@@ -665,7 +627,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
               createPortal(<ProductCarousel />, externalCarouselShadowRoot)}
         </div>
         {isProductGalleryStacked && galleryShadowRoot && createPortal(
-           <IframeContainer  />,
+           <IframeContainer ready={stackedIframeReady} />,
             galleryShadowRoot
         )}
         <ArPreviewQRCodeDialog arPreviewLink={arPreviewLink} setArPreviewLink={setArPreviewLink} />
