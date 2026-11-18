@@ -3,12 +3,11 @@ import ReactDOM from 'react-dom/client';
 import { TestPageLayout } from '../templates/TestPageLayout.jsx';
 import '../src/index.css';
 
-const COUCH_AND_CO_APIKEY = import.meta.env.VITE_COUCH_AND_CO_APIKEY;
-const DEMO_RETAILER_APIKEY = import.meta.env.VITE_DEMO_RETAILER_APIKEY;
+const DEV_RETAILER_APIKEY = import.meta.env.VITE_DEV_RETAILER_APIKEY;
 
 const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
-  apiKey: () => DEMO_RETAILER_APIKEY,
-  productLink: () => '3251',
+  apiKey: () => DEV_RETAILER_APIKEY,
+  productLink: () => '10178',
   selectors: {
     gallery: { selector: '.configurator-container', replace: true },
     variants: '#ov25-controls',
