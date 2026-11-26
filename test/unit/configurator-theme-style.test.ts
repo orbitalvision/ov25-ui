@@ -1,6 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { readFileSync } from 'node:fs';
-import { URL as NodeURL } from 'node:url';
 import { getPresetSettings, applySetupPreset } from '../../setup/src/components/ConfiguratorSetup/presets';
 import { LEGACY_SETUP_FEATURES, unsupportedSetupFeatures } from '../../setup/src/components/ConfiguratorSetup/compatibility';
 import { applyThemeStyleProposal, compatibleThemeStyleProposal, ensureOverlayThemeContrast, validateThemeStyleProposal, THEME_STYLE_FEATURE, THEME_FONTS_FEATURE, type ThemeStyleProposal } from '../../setup/src/components/ConfiguratorSetup/theme-style';
@@ -16,6 +14,32 @@ const proposal: ThemeStyleProposal = {
   style: { '--ov25-background-color': '#fffaf0', '--ov25-cta-color': '#302e25', '--ov25-selected-background-color': '#eeeadd', '--ov25-360-font-family': "'Client Sans', sans-serif" },
   fonts: [{ family: 'Client Sans', url: 'https://cdn.example.com/font.woff2', weight: '400' }],
   palette: [{ role: 'Background', color: '#fffaf0', source: 'settings_data.json' }], warnings: [],
+};
+
+/** The style variables one real theme match returned, with neutral values: the widest proposal seen so far. */
+const FULL_STYLE: Record<string, string> = {
+  '--ov25-background-color': '#ffffff', '--ov25-secondary-background-color': '#f3f3f3', '--ov25-text-color': '#111111',
+  '--ov25-secondary-text-color': '#707070', '--ov25-border-color': '#111111', '--ov25-border-color-secondary': '#cccccc',
+  '--ov25-highlight-color': '#3366cc', '--ov25-hover-color': '#808080', '--ov25-primary-color': '#111111',
+  '--ov25-button-text-color': '#3366cc', '--ov25-button-border-color': '#111111', '--ov25-button-hover-background-color': '#3366cc',
+  '--ov25-button-hover-text-color': '#ffffff', '--ov25-button-border-width': '1px', '--ov25-button-border-radius': '0px',
+  '--ov25-cta-color': '#111111', '--ov25-cta-text-color': '#ffffff', '--ov25-cta-color-hover': '#808080',
+  '--ov25-cta-text-color-hover': '#ffffff', '--ov25-cta-color-light': '#333333', '--ov25-cta-text-color-disabled': '#808080',
+  '--ov25-cta-border-color': '#111111', '--ov25-cta-border-width': '0px', '--ov25-cta-border-radius': '0px',
+  '--ov25-selected-background-color': '#3366cc', '--ov25-selected-text-color': '#ffffff', '--ov25-selected-border-color': '#3366cc',
+  '--ov25-input-background-color': '#ffffff', '--ov25-input-text-color': '#111111', '--ov25-input-border-color': '#111111',
+  '--ov25-input-placeholder-color': '#707070', '--ov25-focus-ring-color': '#111111', '--ov25-overlay-button-color': '#111111',
+  '--ov25-overlay-button-hover-color': '#3366cc', '--ov25-configurator-view-controls-text-color': '#ffffff',
+  '--ov25-configurator-view-controls-border-color': '#111111', '--ov25-configurator-iframe-background-color': '#ffffff',
+  '--ov25-configurator-title-text-color': '#111111', '--ov25-configurator-price-text-color': '#111111',
+  '--ov25-compare-price-text-color': '#707070', '--ov25-link-color': '#111111', '--ov25-backdrop-color': '#000000',
+  '--ov25-backdrop-opacity': '0.5', '--ov25-360-font-family': 'sans-serif', '--ov25-heading-font-family': 'sans-serif',
+  '--ov25-button-font-family': 'sans-serif', '--ov25-body-font-weight': '400', '--ov25-heading-font-weight': '400',
+  '--ov25-button-font-weight': '700', '--ov25-button-letter-spacing': '0.05em', '--ov25-button-text-transform': 'uppercase',
+  '--ov25-configurator-qr-code-popup-background-color': '#ffffff', '--ov25-configurator-qr-code-popup-border-color': '#111111',
+  '--ov25-configurator-qr-code-popup-title-text-color': '#111111', '--ov25-configurator-qr-code-popup-description-text-color': '#111111',
+  '--ov25-destructive': '#ff0000', '--ov25-configurator-iframe-border-radius': '0px',
+  '--ov25-configurator-view-controls-border-radius': '0px', '--ov25-variant-thumb-border-radius': '0px',
 };
 
 describe('theme styling contract', () => {
@@ -47,10 +71,17 @@ describe('theme styling contract', () => {
     expect(() => validateThemeStyleProposal({ ...proposal, source: { ...proposal.source, files: [...files, 'assets/overflow.css'] } })).toThrow('invalid palette');
   });
 
-  it.each(['moy-furniture.json', 'ai/moy-furniture.json'])('accepts the expanded local Moy fixture %s at the setup boundary', file => {
-    const saved = JSON.parse(readFileSync(new NodeURL(`../../dev/react-test/public/theme-style/${file}`, import.meta.url), 'utf8')) as ThemeStyleProposal;
-    expect(saved.source.files.length).toBeGreaterThan(24);
-    expect(validateThemeStyleProposal(saved).source).toEqual(saved.source);
+  it.each(['source', 'ai'] as const)('accepts a full-size %s proposal read from more than 24 theme files', method => {
+    const files = Array.from({ length: 34 }, (_, index) => `assets/section-${index}.css`);
+    const full: ThemeStyleProposal = {
+      ...proposal, method, style: FULL_STYLE, fonts: [], source: { ...proposal.source, files },
+      warnings: ['Theme fonts were not downloaded.'],
+      animations: [{ target: 'cta', effect: 'fade', durationMs: 450, easing: 'ease', source: files[0] }],
+    };
+    const validated = validateThemeStyleProposal(full);
+    expect(validated.source).toEqual(full.source);
+    expect(validated.style).toEqual(FULL_STYLE);
+    expect(validated.animations).toEqual(full.animations);
   });
 
   it('validates semantic controls and rejects arbitrary CSS, selectors, layout controls and unsafe font URLs', () => {
