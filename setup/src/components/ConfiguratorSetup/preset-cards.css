@@ -1,0 +1,43 @@
+ .ov25-cards-container { container: ov25-cards / inline-size; min-width: 0; }
+.ov25-cards-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px; margin: 0; padding: 0; border: 0; min-width: 0; }
+.ov25-cards-sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
+.ov25-card-option { display: block; min-width: 0; cursor: pointer; }
+.ov25-card { display: block; height: 100%; text-align: left; overflow: hidden; background: #fff; border: 1px solid #e3e4e1; border-radius: 13px; box-shadow: 0 3px 12px #22222206; transition: border-color 150ms ease, box-shadow 150ms ease; }
+.ov25-card-option:hover .ov25-card { border-color: #8d8d8b; }
+.ov25-card-radio:checked + .ov25-card { border-color: #262626; box-shadow: 0 0 0 1px #262626; }
+.ov25-card-radio:focus-visible + .ov25-card { outline: 2px solid #9b1d58; outline-offset: 3px; }
+.ov25-card-copy { display: block; position: relative; }
+.ov25-card-copy strong { display: block; color: #292b30; font-family: Manrope, sans-serif; letter-spacing: -.025em; }
+.ov25-card-description { display: block; color: #898b90; font-size: 11px; line-height: 1.5; margin: 7px 0 0; }
+.ov25-card-mark { position: absolute; display: grid; place-items: center; width: 20px; height: 20px; border: 1px solid #d9d9d7; border-radius: 50%; color: white; }
+.ov25-card-radio:checked + .ov25-card .ov25-card-mark { background: #ed2780; border-color: #ed2780; }
+.ov25-card-illustration { display: grid; place-items: center; height: 185px; background: #f5f3f0; padding: 18px; }
+.ov25-card-classic { background: #f1edf1; }
+.ov25-card-guided { background: #f0f1ed; }
+.ov25-card-overview { background: #efefed; }
+.ov25-card-browser { width: 100%; max-width: 205px; height: 132px; background: white; border: 1px solid #e7e4e1; border-radius: 7px; box-shadow: 0 6px 16px #3730350b; overflow: hidden; }
+.ov25-card-browser-bar { display: flex; gap: 3px; align-items: center; height: 15px; border-bottom: 1px solid #f0eeec; padding: 0 7px; }
+.ov25-card-browser-bar i { width: 3px; height: 3px; border-radius: 50%; background: #dcd9d6; }
+.ov25-card-scene { height: calc(100% - 15px); display: flex; gap: 8px; padding: 12px; position: relative; }
+.ov25-card-object { flex: 1; position: relative; border-radius: 4px; background: #f6f4f1; overflow: hidden; }
+.ov25-card-object > div { position: absolute; width: 65%; height: 25px; left: 17%; bottom: 35%; border-radius: 8px 8px 4px 4px; background: #c8b8a8; box-shadow: 0 3px 0 #b5a494; }
+.ov25-card-object > div:before { content: ''; position: absolute; left: 5%; right: 5%; top: -12px; height: 20px; border-radius: 8px 8px 4px 4px; background: #d8cbbf; }
+.ov25-card-object > span { display: block; width: 70%; height: 4px; position: absolute; bottom: 15%; left: 15%; border-radius: 50%; background: #ded7cf; }
+.ov25-card-panel { width: 36%; display: grid; align-content: start; gap: 6px; padding: 7px 2px; }
+.ov25-card-panel b, .ov25-card-panel i, .ov25-card-panel em, .ov25-card-dialog b, .ov25-card-dialog i, .ov25-card-dialog em { display: block; border-radius: 3px; background: #e9e7e4; height: 6px; }
+.ov25-card-panel b { width: 80%; height: 7px; background: #d6d2cd; }
+.ov25-card-panel i { height: 11px; }
+.ov25-card-panel em, .ov25-card-dialog em { height: 10px; background: #d989ae; }
+.ov25-card-classic .ov25-card-panel i { display: none; }
+.ov25-card-classic .ov25-card-panel em { margin-top: 15px; }
+.ov25-card-dialog { position: absolute; top: 25px; left: 22%; width: 60%; height: 70px; background: white; border: 1px solid #deddd9; box-shadow: 0 4px 15px #0002; border-radius: 5px; padding: 9px; display: grid; gap: 5px; }
+.ov25-card-dialog i { display: inline-block; }
+.ov25-card-overview-grid { position: absolute; display: grid; grid-template-columns: 1fr 1fr; gap: 4px; right: 15px; top: 24px; width: 60px; }
+.ov25-card-overview-grid i { height: 25px; border-radius: 3px; background: #e5e3de; }
+.ov25-card-copy { min-height: 112px; padding: 19px; }
+.ov25-card-copy strong { font-size: 14px; padding-right: 22px; }
+.ov25-card-copy p { font-size: 11px; }
+.ov25-card-copy .ov25-card-mark { top: 17px; right: 17px; }
+
+@container ov25-cards (max-width: 1000px) { .ov25-cards-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@container ov25-cards (max-width: 430px) { .ov25-cards-grid { grid-template-columns: minmax(0, 1fr); } .ov25-card { display: grid; grid-template-columns: 135px 1fr; } .ov25-card-illustration { height: 130px; padding: 10px; } .ov25-card-browser { height: 95px; } .ov25-card-copy { min-height: 0; padding: 17px; } }

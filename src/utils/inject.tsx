@@ -1,3 +1,4 @@
+import { loadBrandingFonts } from './branding-fonts.js';
 // inject.ts
 import React, { ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -34,6 +35,7 @@ import {
   BODY_TOASTER_PORTAL_Z_INDEX,
   BODY_TOASTER_SURFACE_Z_INDEX,
 } from '../lib/config/layers.js';
+import { registerTopLayerPortal } from '../lib/top-layer-overlays.js';
 
 // Import sonner CSS as string
 import sonnerCssText from 'sonner/dist/styles.css?inline';
@@ -222,6 +224,7 @@ export function injectConfigurator(opts: InjectConfiguratorInput | InjectConfigu
 function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions?: InjectInternalOptions) {
   const skipConfigureButton = internalOptions?.skipConfigureButton ?? false;
   const n = normalizeInjectConfig(opts);
+  void loadBrandingFonts(n.fonts);
   const resolvedProductLinkForDining =
     typeof n.productLink === 'function' ? n.productLink() : n.productLink;
   const diningMatch = String(resolvedProductLinkForDining ?? '').match(/^dining-configurator\/([^/?#]+)/);
@@ -246,6 +249,7 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
         mobileLogoURL: n.mobileLogoURL,
         styleImages: n.diningStyleImages,
         cssString: n.cssString,
+        fonts: n.fonts,
         hideLogo: n.hideLogo,
       },
       flags: {
@@ -675,6 +679,23 @@ function injectSingleConfigurator(opts: InjectConfiguratorInput, internalOptions
 
     // Keep toaster last among static body portals; moving the host preserves its ShadowRoot.
     document.body.appendChild(toasterContainer);
+
+    // A relocated sticky gallery can sit in the browser top layer, where no z-index can beat it.
+    // These portals follow it into the top layer while they render content, in tier order.
+    registerTopLayerPortal(popoverPortalContainer, popoverPortalShadowRoot, BODY_POPOVER_PORTAL_Z_INDEX);
+    if (modalPortalShadowRoot) {
+      registerTopLayerPortal(
+        modalPortalShadowRoot.host as HTMLElement,
+        modalPortalShadowRoot,
+        BODY_MODAL_PORTAL_Z_INDEX,
+      );
+    }
+    registerTopLayerPortal(
+      selectionDetailsPortalContainer,
+      selectionDetailsPortalShadowRoot,
+      BODY_SELECTION_DETAILS_PORTAL_Z_INDEX,
+    );
+    registerTopLayerPortal(toasterContainer, toasterPortalShadowRoot, BODY_TOASTER_PORTAL_Z_INDEX);
 
     const hasGallerySelector = !!getSelector(effectiveGallerySelector);
     const useDeferredGallery =

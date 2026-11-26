@@ -1,4 +1,4 @@
-import type { StringReplacementsConfig } from 'ov25-ui';
+import type { BrandingFont, StringReplacementsConfig } from 'ov25-ui';
 
 /**
  * Serializable config for postMessage - no functions, only plain data.
@@ -8,6 +8,8 @@ export interface SerializableInjectConfig {
   apiKey: string;
   productLink: string;
   selectors: Record<string, string | { selector: string; replace: boolean }>;
+  /** Saved setup JSON only: per-theme placement overrides, resolved by plugins that support them. */
+  themeSelectors?: Record<string, Record<string, string | { selector: string; replace: boolean }>>;
   carousel?: {
     desktop: string;
     mobile: string;
@@ -32,7 +34,7 @@ export interface SerializableInjectConfig {
     };
   };
   flags?: Record<string, boolean>;
-  branding?: { logoURL?: string; mobileLogoURL?: string; cssString?: string; hideLogo?: boolean };
+  branding?: { logoURL?: string; mobileLogoURL?: string; cssString?: string; hideLogo?: boolean; fonts?: BrandingFont[] };
   /** OV25 bed iframe `bedAllowNone` (see main package `InjectConfiguratorOptions.bed`). */
   bed?: {
     allowNone: { headboard: boolean; base: boolean; mattress: boolean };

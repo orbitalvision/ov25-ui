@@ -13,7 +13,7 @@ export const ArPreviewQRCodeDialog = ({ arPreviewLink, setArPreviewLink }: { arP
                 </DialogHeader>
                 {arPreviewLink !== null && <QRCode id="ov25-qr-code" className="ov:w-full ov:h-full" value={arPreviewLink} />}
                 <DialogFooter>
-                    <p className="ov:text-xs ov:text-(--ov25-configurator-qr-code-popup-link-text-color)">{arPreviewLink}</p>
+                    <p id="ov25-ar-preview-link" className="ov:text-xs ov:text-(--ov25-configurator-qr-code-popup-link-text-color)">{arPreviewLink}</p>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

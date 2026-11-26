@@ -58,6 +58,7 @@ function ProductTabs() {
  * @param {React.ReactNode} [props.topContent]
  * @param {React.ReactNode} [props.bottomContent]
  * @param {React.ReactNode} [props.asideSlot]
+ * @param {React.ReactNode} [props.asideBottomSlot] - Rendered in the aside after the controls and swatches (e.g. long product copy that gives a sticky gallery room to travel)
  * @param {boolean} [props.renderControls]
  * @param {boolean} [props.renderSwatches]
  * @param {boolean} [props.dynamicConfig] - When true, re-initializes when injectConfig changes
@@ -77,6 +78,7 @@ export function TestPageLayout({
   topContent,
   bottomContent,
   asideSlot,
+  asideBottomSlot,
   renderControls = true,
   renderSwatches = true,
   dynamicConfig = false,
@@ -173,6 +175,7 @@ export function TestPageLayout({
             {asideSlot}
             {renderControls && <div id="ov25-controls" />}
             {renderSwatches && <div id="ov25-swatches" />}
+            {asideBottomSlot}
           </div>
         </div>
         {showProductTabs && <ProductTabs />}

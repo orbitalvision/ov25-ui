@@ -629,7 +629,7 @@ interface OV25UIContextType {
   toggleAR: () => void;
   cleanupConfigurator: () => void;
   applySearchAndFilters: (option: Option | SizeOption, optionId: string) => Option | SizeOption;
-  /** Open the variant configurator (closes swatch book, opens variants drawer). Optionally pass an option name (case insensitive) to open on that option. */
+  /** Close the swatch book and show the variant controls. Optionally focus an option by name (case insensitive). */
   openConfigurator: (optionName?: string) => void;
   /** Open configurator or Snap2 modal based on product type. For useSimpleVariantsSelector single button. */
   openConfiguratorOrSnap2: () => void;
@@ -1348,8 +1348,10 @@ export const OV25UIProvider: React.FC<{
     requiresBodyFallback: stickyLayoutSnapshot?.requiresBodyFallback ?? false,
     stickyTop: (stickyLayoutSnapshot?.headerOffset ?? 0) + stickyTopGap,
     occlusionTop: stickyLayoutSnapshot?.headerOffset ?? 0,
+    headerElements: stickyLayoutSnapshot?.headerElements,
     boundary: stickyLayoutSnapshot?.fallbackBoundary ?? null,
-    overlayOpen: isDrawerOrDialogOpen || isModalOpen,
+    // The sticky Popover's top layer otherwise sits above the swatch book's body portal.
+    overlayOpen: isDrawerOrDialogOpen || isModalOpen || isSwatchBookOpen,
     fullscreenOpen: galleryCarouselFullscreenImage != null,
     layerKey: uniqueId ?? 'default',
     fullViewportWidth: isMobile,
@@ -2408,7 +2410,7 @@ export const OV25UIProvider: React.FC<{
     setIsModalOpen,
   ]);
 
-  /** Open variant configurator: close swatch book, open variants drawer. Optional optionName uses fuzzy match; fallback to first option. */
+  /** Return to the variants and optionally focus a named option (falling back to the first). */
   const openConfigurator = useCallback((optionName?: string) => {
     setIsSwatchBookOpen(false);
     if (allOptions.length > 0) {
@@ -2428,8 +2430,11 @@ export const OV25UIProvider: React.FC<{
     } else {
       setExpandToOptionIdOnOpen(null);
     }
-    setIsVariantsOpen(true);
-  }, [allOptions, setIsSwatchBookOpen, setActiveOptionId, setIsVariantsOpen]);
+    // Standard inline variants are already visible. Snap2 also uses this state for its settings sheet.
+    if (!effectiveUseInlineVariantControls || isSnap2Mode) {
+      setIsVariantsOpen(true);
+    }
+  }, [allOptions, effectiveUseInlineVariantControls, isSnap2Mode, setIsSwatchBookOpen, setActiveOptionId, setIsVariantsOpen]);
 
   /** Close variant configurator drawer. Exposed for custom buttons. */
   const closeConfigurator = useCallback(() => {

@@ -223,6 +223,7 @@ export const AccordionVariants: React.FC<AccordionVariantsProps> = ({ mode, rese
                     ) : (
                       <GroupedVariantsList
                         groups={variants}
+                        optionName={optionName}
                         VariantCard={DefaultVariantCard}
                         isMobile={isMobile}
                         onSelect={handleVariantSelect}

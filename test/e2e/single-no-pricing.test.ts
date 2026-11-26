@@ -1,6 +1,7 @@
 import { expect, test, type Locator, type Page } from '@playwright/test';
 import {
   SNAP2_CLOSE_PRESET_IDS,
+  SNAP2_DRAWER_PRESET_IDS,
   expectedResponsiveLayout,
   presetSize,
   responsivePreset,
@@ -270,12 +271,6 @@ for (const profile of PROFILES) {
   });
 }
 
-// Since the 0.8.0 layer refactor (layers.ts), the full-screen Snap2 mobile 3D layer that
-// Snap2ConfigureButton portals to the body keeps a hard-coded z-index of 2147483644: above the
-// drawer portal (2147483643) and tied with the dialog, so it takes taps meant for No.
-const SNAP2_SAVE_DIALOG_BUG =
-  'Known bug: the Snap2 mobile 3D layer sits above the drawer and covers the save dialog, so a tap on No dismisses the dialog and the builder stays open.';
-
 for (const presetId of SNAP2_CLOSE_PRESET_IDS) {
   const preset = responsivePreset(presetId);
 
@@ -298,13 +293,77 @@ for (const presetId of SNAP2_CLOSE_PRESET_IDS) {
       }
       const saveDialog = page.getByRole('dialog').filter({ hasText: 'Save Your Configuration' });
       await expect(saveDialog).toBeVisible({ timeout: RUNTIME_TIMEOUT });
-      // Everything above works on every layout; only the dialog's own buttons are unreachable on mobile.
-      test.fail(layout === 'mobile', SNAP2_SAVE_DIALOG_BUG);
-      await saveDialog.getByRole('button', { name: 'No', exact: true }).click({ timeout: 5_000 });
+      // Tap on touch layouts: the full-screen Snap2 viewer once sat above the dialog and took the tap.
+      const no = saveDialog.getByRole('button', { name: 'No', exact: true });
+      if (layout === 'mobile') await no.tap({ timeout: 5_000 });
+      else await no.click({ timeout: 5_000 });
 
       await expect(snap2Builder(page)).toBeHidden({ timeout: RUNTIME_TIMEOUT });
       await expect(mobileDrawer(page)).toBeHidden();
       await expect(configureButton(page)).toBeVisible();
     });
   });
+}
+
+for (const presetId of SNAP2_DRAWER_PRESET_IDS) {
+  const preset = responsivePreset(presetId);
+
+  test.describe(() => {
+    test.use(presetContext(preset));
+
+    test(`snap2 drawer takes taps and touch scrolling at ${preset.id} (${presetSize(preset)})`, async ({ page, context }) => {
+      const load = watchConfiguratorLoad(page);
+      await page.goto(`${FIXTURE_PATH}?profile=snap2&display=tree`);
+      await configureButton(page).click({ timeout: RUNTIME_TIMEOUT });
+      await expectInsideViewport(configuratorSurface(page, 'snap2', 'mobile'));
+      await expectConfiguratorLoaded(page, load);
+      await expectVariantControls(page, 'snap2');
+
+      // The 3D view keeps its touches above the drawer.
+      await page.locator('#ov25-configurator-iframe').tap({ trial: true, timeout: RUNTIME_TIMEOUT });
+
+      // Playwright only taps an element that is on top at the tap point, so this fails if the
+      // full-screen viewer covers the drawer again.
+      const finishTab = page.locator('#ov25-drawer-content [data-ov25-snap2-primary-segment-tab="options"]');
+      await finishTab.tap({ timeout: 5_000 });
+      await expect(finishTab).toHaveAttribute('aria-selected', 'true');
+
+      const finishList = await markDrawerScroller(page);
+      const box = await finishList.boundingBox();
+      if (!box) throw new Error('The finish list has no box to swipe');
+      const cdp = await context.newCDPSession(page);
+      await cdp.send('Input.synthesizeScrollGesture', {
+        x: Math.round(box.x + box.width / 2),
+        y: Math.round(box.y + box.height * 0.75),
+        yDistance: -Math.round(box.height * 0.5),
+        gestureSourceType: 'touch',
+        speed: 800,
+      });
+      await expect
+        .poll(() => finishList.evaluate((element) => element.scrollTop), {
+          message: 'a touch swipe over the finish list scrolls it',
+        })
+        .toBeGreaterThan(0);
+    });
+  });
+}
+
+/** Marks the drawer's scrolling list once it overflows, so the test can swipe it and read its scroll position. */
+async function markDrawerScroller(page: Page): Promise<Locator> {
+  const drawerContent = page.locator('#ov25-drawer-content');
+  await expect
+    .poll(
+      () =>
+        drawerContent.evaluate((root) => {
+          const scroller = [...root.querySelectorAll<HTMLElement>('*')].find((element) => {
+            const { overflowY } = getComputedStyle(element);
+            return /auto|scroll/.test(overflowY) && element.clientHeight > 0 && element.scrollHeight > element.clientHeight + 1;
+          });
+          scroller?.setAttribute('data-e2e-drawer-scroller', 'true');
+          return scroller ? scroller.scrollHeight - scroller.clientHeight : 0;
+        }),
+      { timeout: RUNTIME_TIMEOUT, message: 'the drawer shows a list long enough to scroll' },
+    )
+    .toBeGreaterThan(100);
+  return drawerContent.locator('[data-e2e-drawer-scroller="true"]').first();
 }

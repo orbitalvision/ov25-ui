@@ -2,6 +2,7 @@ import React from 'react';
 import { afterEach, beforeEach, expect, it, vi } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
 import { ProductVariantsWrapper } from '../../src/components/VariantSelectMenu/ProductVariantsWrapper.js';
+import { resolveStringReplacement } from '../../src/lib/strings/resolve-string-replacement.js';
 
 const state = vi.hoisted(() => ({ context: {} as any }));
 vi.mock('../../src/contexts/ov25-ui-context.js', () => ({ useOV25UI: () => state.context }));
@@ -39,6 +40,15 @@ beforeEach(() => {
   };
 });
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); });
+
+it.each(['list', 'tabs'])('interpolates the option and group names in %s headers', (style) => {
+  state.context.variantDisplayStyleMobile = style;
+  state.context.getString = (key: string, vars: any, fallback: string) => key === 'groupHeader'
+    ? resolveStringReplacement({ rules: [{ template: 'Option: ${OPTION_NAME} / Group: ${GROUP_NAME}' }], vars, fallback })
+    : fallback;
+  render(<ProductVariantsWrapper />);
+  expect(screen.getByRole('heading', { name: 'Option: Fabric / Group: Standard' })).toBeInTheDocument();
+});
 
 it.each([
   ['list', true, false], ['tabs', true, false],

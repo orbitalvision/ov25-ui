@@ -6,10 +6,14 @@ import '../src/index.css';
 
 const DIAMOND_APIKEY = import.meta.env.VITE_DIAMOND_APIKEY;
 const selectionDetails = readOptionalSelectionDetailsQuery();
+// Optional overrides for viewing another bed: ?bed=<bed configurator id>&apiKey=<org api key>
+const query = new URLSearchParams(window.location.search);
+const BED_ID = query.get('bed') || '3';
+const APIKEY = query.get('apiKey') || DIAMOND_APIKEY;
 
 const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
-  apiKey: () => DIAMOND_APIKEY,
-  productLink: () => '/bed-configurator/3',
+  apiKey: () => APIKEY,
+  productLink: () => `/bed-configurator/${BED_ID}`,
   selectors: {
     gallery: { selector: '.configurator-container', replace: true },
     configureButton: { selector: '#ov25-fullscreen-button', replace: false },
@@ -40,7 +44,7 @@ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
   },
   flags: { hidePricing: false },
   bed: {
-    allowNone: { headboard: false, base: true, mattress: true },
+    allowNone: { headboard: false, base: false, mattress: false },
     filterSelectionsByCurrentSize: { headboard: false, base: true, mattress: true },
   },
   cssString:`

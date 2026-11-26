@@ -211,6 +211,7 @@ export const VariantSelectMenu: React.FC<VariantSelectMenuProps> = ({
         ref={containerRef}
         id="ov25-configurator-variant-menu-container"
         data-ov25-inline-sticky-list-container={usePageScrollStickyList ? 'true' : undefined}
+        data-ov25-mobile-page-flow={usePageScrollStickyList && isMobile && !isSnap2Mode ? 'true' : undefined}
         className="ov:relative ov:h-full ov:flex ov:flex-col ov:font-(family-name:--ov25-font-family)"
       >
         {holdVariantsPanelForSnap2Initialise ? (

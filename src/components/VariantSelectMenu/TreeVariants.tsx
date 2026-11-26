@@ -256,6 +256,7 @@ export const TreeVariants: React.FC<TreeVariantsProps> = ({ mode, reserveCheckou
           >
             <GroupedVariantsList
               groups={opt.variants}
+              optionName={opt.optionName}
               VariantCard={DefaultVariantCard}
               isMobile={isMobile}
               onSelect={handleVariantSelect}

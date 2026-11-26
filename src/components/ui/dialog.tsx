@@ -26,6 +26,7 @@ const DialogOverlay = React.forwardRef<
 >(({ className, style, ...props }, ref) => (
   // Keep dialog overlays below toaster body portal/surface.
   <DialogPrimitive.Overlay
+    data-ov25-themed-backdrop
     ref={ref}
     className={cn(
       "ov:fixed ov:inset-0 ov:bg-black/80  data-[state=open]:ov:animate-in data-[state=closed]:ov:animate-out data-[state=closed]:ov:fade-out-0 data-[state=open]:ov:fade-in-0",

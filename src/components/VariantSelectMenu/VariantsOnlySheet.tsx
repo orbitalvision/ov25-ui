@@ -140,6 +140,7 @@ export function VariantsOnlySheet() {
     <div data-clarity-mask="true" className="ov:fixed ov:inset-0 ov:z-2147483644">
       <div
         ref={backdropRef}
+        data-ov25-themed-backdrop
         role="button"
         tabIndex={0}
         onClick={handleClose}

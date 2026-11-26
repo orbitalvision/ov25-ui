@@ -1515,6 +1515,7 @@ test.describe('Standard product inline-sticky display mode', () => {
     for (const mode of ['inline', 'inline-sheet'] as const) {
       await page.goto(
         `/tests/inline-sticky-desktop-no-header.html?desktopMode=${mode}&mobileMode=inline&replacementStyle=hazardous`,
+        { waitUntil: 'domcontentloaded' },
       );
 
       const host = page.locator('#ov25-sticky-gallery');
@@ -3223,6 +3224,44 @@ test.describe('Standard product inline-sticky display mode', () => {
     ).toBe(true);
   });
 
+  test('mobile gallery keeps a stable inset under a header that scrolls in normal flow', async ({ page }) => {
+    await page.setViewportSize(MOBILE_VIEWPORT);
+    await page.goto('/tests/inline-sticky-desktop-fixed-header.html');
+    const host = await waitForStickyGallery(page);
+    const header = page.locator('.fixture-fixed-header');
+    // Colorblock declares position: sticky with no vertical inset.
+    await header.evaluate(el => Object.assign((el as HTMLElement).style, { position: 'sticky', top: 'auto' }));
+    await expect(host).toHaveCSS('top', '0px');
+    await page.evaluate(() => window.scrollTo(0, 40));
+    await expect.poll(() => header.evaluate(el => el.getBoundingClientRect().bottom)).toBeGreaterThan(0);
+    await expect(host).toHaveCSS('top', '0px');
+    // If the theme pins the header later, its visible height must be respected.
+    await header.evaluate(el => (el as HTMLElement).style.top = '0px');
+    const height = await header.evaluate(el => el.getBoundingClientRect().height);
+    await expect(host).toHaveCSS('top', `${height}px`);
+  });
+
+  test('mobile header motion updates the gallery and headings without publishing the offset on all controls', async ({ page }) => {
+    await page.setViewportSize(MOBILE_VIEWPORT);
+    await page.goto('/tests/inline-sticky-desktop-fixed-header.html');
+    const gallery = await waitForStickyGallery(page);
+    const header = page.locator('.fixture-fixed-header');
+    const heading = page.locator('.ov25-inline-sticky-list-mobile .ov25-option-header').first();
+    await expect(heading).toBeVisible({ timeout: RUNTIME_TIMEOUT });
+    const height = await header.evaluate(el => el.getBoundingClientRect().height);
+    const readOffsets = () => heading.evaluate(el => ({
+      heading: Number.parseFloat(getComputedStyle(el).getPropertyValue('--ov25-sticky-header-offset')),
+      controls: ((el.getRootNode() as ShadowRoot).host as HTMLElement).style.getPropertyValue('--ov25-sticky-header-offset'),
+    }));
+    await expect.poll(readOffsets).toEqual({ heading: height, controls: '' });
+    await header.evaluate(el => (el as HTMLElement).style.transform = 'translateY(-100%)');
+    await expect.poll(readOffsets).toEqual({ heading: 0, controls: '' });
+    await expect(gallery).toHaveCSS('top', '0px');
+    await header.evaluate(el => (el as HTMLElement).style.removeProperty('transform'));
+    await expect.poll(readOffsets).toEqual({ heading: height, controls: '' });
+    await expect(gallery).toHaveCSS('top', `${height}px`);
+  });
+
   for (const scenario of RESPONSIVE_SCENARIOS) {
     test(`supports mobile external-carousel sticky layout with ${scenario.label}`, async ({
       page,
@@ -3230,6 +3269,28 @@ test.describe('Standard product inline-sticky display mode', () => {
       await expectResponsiveMobileScenario(page, scenario);
     });
   }
+
+  test('uses natural block flow for mobile page-scrolling controls and restores desktop flex', async ({ page }) => {
+    await page.setViewportSize(MOBILE_VIEWPORT);
+    await page.goto(RESPONSIVE_FIXTURE_PATH);
+    await waitForStickyGallery(page);
+    const menu = page.locator('[data-ov25-mobile-page-flow="true"]');
+    await expect(menu).toBeVisible({ timeout: RUNTIME_TIMEOUT });
+    const wrappers = [
+      menu,
+      menu.locator(':scope > [data-ov25-inline-sticky-list-wrapper="true"]'),
+      menu.locator('.ov25-inline-sticky-list-mobile'),
+      menu.locator('.ov25-inline-sticky-list-mobile > #ov25-variants-content-wrapper'),
+    ];
+    for (const wrapper of wrappers) await expect(wrapper).toHaveCSS('display', 'block');
+    const list = menu.locator('.ov25-inline-sticky-list-mobile');
+    const height = await list.evaluate(el => el.getBoundingClientRect().height);
+    await page.evaluate(() => window.scrollTo(0, 800));
+    await expect.poll(() => list.evaluate(el => el.getBoundingClientRect().height)).toBe(height);
+    await page.setViewportSize(DESKTOP_VIEWPORT);
+    await expect(page.locator('[data-ov25-mobile-page-flow="true"]')).toHaveCount(0);
+    await expect(page.locator('[data-ov25-inline-sticky-list-container="true"]')).toHaveCSS('display', 'flex');
+  });
 
   test('keeps ordinary mobile inline lists internally scrollable', async ({ page }) => {
     await page.setViewportSize(MOBILE_VIEWPORT);
@@ -3242,7 +3303,7 @@ test.describe('Standard product inline-sticky display mode', () => {
     await expectMobileVariantsUseInternalScroll(page);
   });
 
-  test('keeps the mobile stacked gallery iframe path square', async ({ page }) => {
+  test('anchors the mobile stacked viewer to its square slot during scrolling', async ({ page }) => {
     await page.setViewportSize(MOBILE_VIEWPORT);
     await page.goto(`${RESPONSIVE_FIXTURE_PATH}?stackedGallery=1`);
 
@@ -3261,6 +3322,21 @@ test.describe('Standard product inline-sticky display mode', () => {
     ).toHaveCount(0);
     await expect(trueContainer).toHaveCount(1);
     await expect(page.locator('#ov25-configurator-iframe')).toHaveCount(1);
+    await expect(trueContainer).toHaveCSS('position', 'absolute');
+    const slot = await outerContainer.elementHandle();
+    if (!slot) throw new Error('Missing viewer slot');
+    // Measure synchronously with the scroll, before a JS frame could reposition the viewer.
+    const maxError = await trueContainer.evaluate((viewer, slot) => {
+      const errors: number[] = [];
+      for (const y of [0, 300, document.documentElement.scrollHeight, 100, 0]) {
+        window.scrollTo({ top: y, behavior: 'instant' });
+        const rect = viewer.getBoundingClientRect();
+        const target = slot.getBoundingClientRect();
+        errors.push(Math.abs(target.top - rect.top), Math.abs(target.bottom - rect.bottom));
+      }
+      return Math.max(...errors);
+    }, slot);
+    expect(maxError).toBeLessThanOrEqual(1);
     await expectViewerCornerMode(page, 'square');
   });
 

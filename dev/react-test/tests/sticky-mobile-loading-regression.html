@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Mobile sticky loading regression</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font:16px Arial;background:#fff}header{height:60px;position:fixed;top:0;inset-inline:0;background:white;z-index:10;padding:18px;border-bottom:1px solid #ddd}main{padding-top:60px}#product{position:relative;min-height:1800px}#host{position:relative;top:-1px;display:flex;flex-direction:column;align-self:flex-start;min-height:0;max-height:784px;height:auto;width:100%;margin:0}#details{padding:16px}button{padding:12px;border:1px solid #333;background:white;border-radius:5px}#swatches{display:flex;gap:12px;margin-top:20px}.swatch{width:90px;height:90px;background:#ded1bc}#cookie{position:fixed;bottom:0;left:0;right:0;z-index:2147483647;padding:18px;background:#242424;color:white}#cookie button{margin-top:8px}#result{display:block;margin-top:12px;color:#555}#cookie[hidden]{display:none}
+</style></head>
+<body><header>OV25 mobile sizing reproduction</header><main><section id="product"><div id="host" data-ov25-inline-sticky-mobile="true"><div class="ov25-inline-sticky-gallery-root-mobile"></div></div><div id="details"><h1>Example product</h1><p id="price">£0.00</p><button id="reload">Replay loading → ready</button><button id="show-cookie">Show cookie banner</button><output id="result">Loading…</output><div id="swatches"><button class="swatch" id="fabric">Choose fabric</button><button class="swatch">Another fabric</button></div><p>Scrolling text must not show through the pinned thumbnails, and controls below the gallery must remain clickable.</p></div></section></main><aside id="cookie" hidden>Cookie consent test. This intentionally reproduces the separate merchant-overlay issue.<br><button id="dismiss-cookie">Decline cookies</button></aside>
+<script type="module">
+import {createStickyHostRelocation} from '../../../src/hooks/useStickyHostRelocation.ts';
+import galleryCss from '../../../globals.css?inline';
+const host=document.querySelector('#host'),root=host.firstElementChild,shadow=root.attachShadow({mode:'open'});
+shadow.innerHTML=`<style>${galleryCss}\n:host{--ov25-background-color:#fff;--ov25-sticky-available-height:784px} .frame{height:395px;overflow:hidden;background:#fafafa;display:grid;place-items:center}img{width:85%;height:100%;object-fit:contain}.thumbs{height:60px;display:flex;align-items:center;gap:10px;padding:5px;background:transparent}.thumbs span{width:48px;height:48px;background:#d9d4cb}.loading{height:784px!important}</style><div class="frame loading"><img src="../src/images/sofa.png" alt="Example sofa"></div><div class="thumbs" hidden><span></span><span></span><span></span><span></span></div>`;
+const controller=createStickyHostRelocation({host,document,window,layerKey:'mobile-loading-regression'});
+controller.update({enabled:true,stickyTop:60,boundary:document.querySelector('#product'),fullViewportWidth:true});
+const frame=shadow.querySelector('.frame'),thumbs=shadow.querySelector('.thumbs');
+function ready(){frame.classList.remove('loading');thumbs.hidden=false;document.querySelector('#result').textContent='Ready — gallery and spacer should both be 455px.';}
+setTimeout(ready,800);
+document.querySelector('#reload').onclick=()=>{frame.classList.add('loading');thumbs.hidden=true;setTimeout(ready,800);};
+document.querySelector('#fabric').onclick=e=>{e.currentTarget.textContent='Fabric selected';};
+document.querySelector('#show-cookie').onclick=()=>document.querySelector('#cookie').hidden=false;
+document.querySelector('#dismiss-cookie').onclick=()=>document.querySelector('#cookie').hidden=true;
+window.addEventListener('pagehide',()=>controller.destroy(),{once:true});
+</script></body></html>

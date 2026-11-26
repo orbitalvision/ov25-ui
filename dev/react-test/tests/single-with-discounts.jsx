@@ -12,6 +12,7 @@ const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
     gallery: { selector: '.configurator-container', replace: true },
     variants: '#ov25-controls',
     price: { selector: '#price', replace: true },
+    name: { selector: '#name', replace: true },
   },
   carousel: { desktop: 'stacked', mobile: 'carousel' },
   configurator: {

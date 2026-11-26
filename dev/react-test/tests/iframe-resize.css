@@ -1,0 +1,94 @@
+:root { font-family: system-ui, sans-serif; color: #20352e; background: #f5f5f0; font-synthesis: none; }
+* { box-sizing: border-box; }
+body { margin: 0; padding-bottom: 100px; }
+button, input { font: inherit; }
+button { cursor: pointer; padding: 11px 16px; border: 1px solid #c5ccc6; border-radius: 8px; background: white; color: inherit; }
+button:hover { background: #eef2ec; }
+button[aria-pressed="true"] { color: white; background: #234b3b; border-color: #234b3b; }
+:focus-visible { outline: 3px solid #579680; outline-offset: 3px; }
+a { color: inherit; }
+main { max-width: 1160px; padding: 32px; margin: auto; }
+header { max-width: 740px; }
+.eyebrow { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #63776c; margin: 24px 0 8px; }
+h1 { font-size: clamp(28px, 4vw, 44px); letter-spacing: -.04em; line-height: 1.1; margin: 0 0 16px; font-weight: 600; }
+h2 { font-size: 22px; letter-spacing: -.02em; margin: 0 0 16px; }
+h3 { font-size: 16px; margin: 0 0 8px; }
+p, li { line-height: 1.65; }
+.intro { color: #5b6a61; font-size: 16px; }
+.moves { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0; }
+.moves a { display: inline-block; padding: 11px 16px; border: 1px solid #c5ccc6; border-radius: 8px; background: white; text-decoration: none; }
+.moves a[aria-current="page"] { color: white; background: #234b3b; border-color: #234b3b; }
+.initial-framing main { max-width: 1310px; }
+.framing-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 30px; margin: 28px 0; }
+.framing-grid > section { min-width: 0; }
+#framing-plain { display: block; width: 100%; aspect-ratio: 1; border: 0; background: white; }
+#framing-gallery { position: relative; z-index: 1; background: white; }
+#framing-measurements { max-height: 220px; overflow: auto; font-size: 12px; }
+[hidden], #status[hidden] { display: none !important; }
+@media (max-width: 900px) { .framing-grid { grid-template-columns: minmax(0, 1fr); } }
+.source { border: 1px solid #d7dcd5; padding: 14px 18px; border-radius: 10px; margin-bottom: 28px; background: #fafbf8; }
+summary { cursor: pointer; font-weight: 600; }
+form label { display: block; font-size: 13px; margin: 20px 0 8px; }
+.source-row { display: flex; gap: 8px; }
+input { min-width: 0; flex: 1; border: 1px solid #c5ccc6; border-radius: 6px; padding: 10px; background: white; }
+form p { font-size: 12px; color: #607266; margin-bottom: 0; }
+#source-error { color: #a02828; }
+.page-grid { display: grid; grid-template-columns: minmax(0, 560px) minmax(240px, 1fr); gap: 48px; align-items: start; }
+.slot { width: 100%; display: grid; place-items: center; background: #e9ede6; border-radius: 12px; color: #657768; text-align: center; }
+.slot[data-shape="square"] { aspect-ratio: 1; }
+.slot[data-shape="landscape"] { aspect-ratio: 16 / 9; }
+.caption { color: #64776a; font-size: 12px; }
+.instructions { padding-top: 20px; color: #53665a; font-size: 14px; }
+.instructions h2 { color: #20352e; }
+ol { padding-left: 20px; }
+li { padding-bottom: 9px; }
+/* The desktop gallery fills half the page with a viewport-height budget, as
+   observed on Orla Kiely. This deliberately changes aspect on width-only resizes. */
+.fluid-section { width: calc(100vw - 100px); position: relative; left: 50%; transform: translateX(-50%); margin-top: 100px; }
+.fluid-heading { max-width: 900px; }
+.fluid-layout { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+.fluid-gallery { width: var(--fluid-gallery-width, 100%); min-width: 0; }
+#fluid-slot { height: clamp(320px, 72vh, 800px); }
+.fluid-details { padding: 24px 40px; color: #53665a; font-size: 14px; }
+.fluid-width-control { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; font-size: 14px; }
+.fluid-width-control input { flex: 0 1 260px; padding: 0; accent-color: #234b3b; }
+.fluid-width-control output { min-width: 4ch; font-variant-numeric: tabular-nums; }
+@media (max-width: 900px) {
+  .fluid-section { width: 100vw; }
+  .fluid-heading { padding: 0 16px; }
+  .fluid-layout { grid-template-columns: minmax(0, 1fr); }
+  #fluid-slot { height: auto; aspect-ratio: 3 / 2; border-radius: 0; }
+  .fluid-details { padding: 24px 16px; }
+}
+.lower-section { margin-top: 100px; max-width: 820px; }
+#frame-layer { position: fixed; z-index: 30; overflow: hidden; border-radius: 12px; background: #f9f9f9; }
+#frame-layer iframe { display: block; width: 100%; height: 100%; border: 0; }
+#overlay { position: fixed; inset: 0; z-index: 20; background: #18291d80; }
+#overlay:not([hidden]) { display: flex; }
+#panel { background: #fafbf8; padding: 24px; overflow: auto; overscroll-behavior: contain; }
+#panel .eyebrow { margin-top: 0; }
+.panel-heading { display: flex; justify-content: space-between; gap: 20px; align-items: start; }
+.panel-heading h2 { font-size: 22px; margin: 0; }
+.panel-heading button { flex-shrink: 0; }
+#overlay[data-place="sheet"] { justify-content: flex-end; }
+#overlay[data-place="sheet"] #panel { width: min(620px, 100%); height: 100%; padding-bottom: 110px; }
+#overlay[data-place="modal"] { align-items: center; justify-content: center; padding: 24px 24px 100px; }
+#overlay[data-place="modal"] #panel { width: 1000px; max-width: 100%; max-height: 100%; border-radius: 18px; }
+.panel-notes { padding: 24px 0; color: #5b6a61; font-size: 14px; }
+#status { position: fixed; bottom: 0; left: 0; right: 0; z-index: 40; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px 30px; padding: 16px 20px; background: #172c22; color: #cad6cc; font-size: 12px; font-variant-numeric: tabular-nums; }
+#status strong { color: white; margin-left: 5px; }
+@media (max-width: 700px) {
+  main { padding: 22px 16px; }
+  .page-grid { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .instructions { padding-top: 0; }
+  .lower-section { margin-top: 60px; }
+  .moves { gap: 7px; }
+  button { padding: 10px 12px; font-size: 13px; }
+  .source-row { flex-direction: column; }
+  #panel { padding: 20px 16px; }
+  #overlay[data-place="sheet"] { align-items: flex-end; padding-bottom: 76px; }
+  #overlay[data-place="sheet"] #panel { height: 75%; padding-bottom: 24px; border-radius: 18px 18px 0 0; }
+  #overlay[data-place="modal"] { padding: 16px 12px 92px; }
+  .panel-heading h2 { font-size: 19px; }
+  #status { gap: 8px 16px; padding: 12px; font-size: 11px; }
+}

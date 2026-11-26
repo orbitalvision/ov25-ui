@@ -644,7 +644,7 @@ describe('sticky outer-host relocation', () => {
     controller.destroy();
   });
 
-  it('preserves natural desktop height under the available cap without changing mobile sizing', () => {
+  it('preserves natural desktop height under the available cap and leaves mobile content auto-sized', () => {
     const layout = installLayout();
     layout.host.setAttribute('data-ov25-inline-sticky-mobile', 'false');
     layout.host.style.setProperty('height', 'auto', 'important');
@@ -761,7 +761,7 @@ describe('sticky outer-host relocation', () => {
       '[data-ov25-sticky-placeholder="mobile-size"]',
     )!;
     expect(mobileController.getMode()).toBe('fixed');
-    expect(layout.host.style.getPropertyValue('height')).toBe('320px');
+    expect(layout.host.style.getPropertyValue('height')).toBe('auto');
     expect(mobilePlaceholder.style.height).toBe('320px');
     expect(layout.host.querySelector('iframe')).toBe(originalIframe);
 

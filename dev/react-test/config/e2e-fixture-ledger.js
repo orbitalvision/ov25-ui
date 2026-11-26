@@ -1,6 +1,7 @@
 import {
   PIXEL_BASELINE_PRESET_IDS,
   SNAP2_CLOSE_PRESET_IDS,
+  SNAP2_DRAWER_PRESET_IDS,
   expectedResponsiveLayout,
   presetSize,
   presetViewportLabel,
@@ -44,7 +45,20 @@ const SNAP2_CLOSE_TESTS = Object.freeze(
       mode: `Snap2 · ${onDesktop ? 'desktop builder' : 'mobile drawer'}`,
       covers: onDesktop
         ? 'Closing the settings panel and then the builder shows the save dialog; No closes the builder and brings back Configure.'
-        : 'The builder opens, loads and shows the save dialog on close; tapping No is expected to fail for a known bug (the Snap2 mobile 3D layer sits above the drawer and covers the dialog, so a tap on No dismisses the dialog and the builder stays open). Playwright reports the test as unexpectedly passing once the bug is fixed.',
+        : 'The builder opens, loads and shows the save dialog on close; a real tap on No reaches the dialog above the full-screen 3D view, closes the builder and brings back Configure.',
+    });
+  }),
+);
+
+const SNAP2_DRAWER_TOUCH_TESTS = Object.freeze(
+  SNAP2_DRAWER_PRESET_IDS.map((id) => {
+    const preset = responsivePreset(id);
+    return Object.freeze({
+      title: `snap2 drawer takes taps and touch scrolling at ${preset.id} (${presetSize(preset)})`,
+      viewport: presetViewportLabel(preset),
+      mode: 'Snap2 · mobile drawer',
+      covers:
+        'With the builder loaded, the 3D view still takes touches above the drawer, a tap selects the Finish tab, and a touch swipe scrolls the finish list. The full-screen 3D view used to sit above the drawer and take every touch.',
     });
   }),
 );
@@ -289,6 +303,7 @@ export const E2E_FIXTURE_LEDGER = Object.freeze([
         responsiveLayoutLedgerTests({ opens: 'configure', product: profile, variant: profile }),
       ),
       ...SNAP2_CLOSE_TESTS,
+      ...SNAP2_DRAWER_TOUCH_TESTS,
     ]),
     visualArtifacts: Object.freeze({
       baselineScreenshots: Object.freeze([]),

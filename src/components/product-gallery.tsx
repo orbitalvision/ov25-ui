@@ -27,6 +27,7 @@ import {
   isHTMLElementInOwnerDocument,
 } from "../lib/carousel-target-controller.js"
 import { IframeContainer } from "./IframeContainer.js"
+import { useStackedGalleryPositioning } from "../hooks/useStackedGalleryPositioning.js"
 import { ProductCarousel } from "./product-carousel.js"
 import { ArPreviewQRCodeDialog } from "./ar-preview-qr-code-dialog.js"
 import InitialiseMenu from "./VariantSelectMenu/InitialiseMenu.js"
@@ -306,6 +307,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
 
     const isModalMode = isMobile ? configuratorDisplayModeMobile === 'modal' : configuratorDisplayMode === 'modal';
     const stickyMobileGallery = stickyLayoutActive && isMobile;
+    const anchorStackedViewer = stickyMobileGallery && isProductGalleryStacked && !isDrawerOrDialogOpen;
     const snap2MobileDrawerOpen =
       isSnap2Mode &&
       isMobile &&
@@ -482,53 +484,43 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
     
 
 
-    // Position the true iframe container to match the normal container
-    useEffect(() => {
-        // Only run positioning logic when gallery is stacked
-       if(!isProductGalleryStacked) return;
-        
-        let frameId: number;
-        
-        const positionIframeContainer = () => {
-            const originalContainer = findElementByIdInShadowOrRegularDOM(uniqueId ? `ov25-configurator-iframe-container-${uniqueId}` : 'ov25-configurator-iframe-container');
-            const trueContainer = findElementByIdInShadowOrRegularDOM('true-ov25-configurator-iframe-container');
-            
-            if (originalContainer && trueContainer && !isDrawerOrDialogOpen) {
-                const rect = originalContainer.getBoundingClientRect();
-                
-                trueContainer.style.position = 'fixed';
-                trueContainer.style.top = `${rect.top}px`;
-                trueContainer.style.left = `${rect.left}px`;
-                trueContainer.style.width = `${rect.width}px`;
-                trueContainer.style.height = `${rect.height}px`;
-                trueContainer.style.zIndex = '3';
-            }
-            
-            frameId = requestAnimationFrame(positionIframeContainer);
+    // The portaled viewer and its thumbnail strip must scroll on the same layer.
+    // Only measure the slot on resize. Scrolling changes screen coordinates but
+    // leaves the slot's position relative to the shadow host unchanged.
+    useLayoutEffect(() => {
+        if (!anchorStackedViewer || !galleryShadowRoot) return;
+        const host = galleryHostRef.current;
+        const slot = containerRef.current;
+        if (!host || !slot) return;
+
+        const measureSlot = () => {
+            const box = slot.getBoundingClientRect();
+            const origin = host.getBoundingClientRect();
+            host.style.setProperty('--ov25-viewer-slot-top', `${box.top - origin.top - host.clientTop}px`);
+            host.style.setProperty('--ov25-viewer-slot-left', `${box.left - origin.left - host.clientLeft}px`);
+            host.style.setProperty('--ov25-viewer-slot-width', `${box.width}px`);
+            host.style.setProperty('--ov25-viewer-slot-height', `${box.height}px`);
         };
-        
-        // When drawer closes: instant iframe restore sets stackedGalleryCloseSyncImmediateRef in useIframePositioning.
-        // Legacy animated iframe close still waits for the slide to finish.
-        if (!isDrawerOrDialogOpen) {
-            const skipDelay = stackedGalleryCloseSyncImmediateRef.current;
-            if (skipDelay) {
-                stackedGalleryCloseSyncImmediateRef.current = false;
-            }
-            const delayMs = skipDelay ? 0 : 500;
-            const timeoutId = setTimeout(() => {
-                frameId = requestAnimationFrame(positionIframeContainer);
-            }, delayMs);
-            
-            return () => {
-                clearTimeout(timeoutId);
-                cancelAnimationFrame(frameId);
-            };
-        }
-        
+        measureSlot();
+        const observer = new ResizeObserver(measureSlot);
+        observer.observe(slot);
+        observer.observe(host);
         return () => {
-            cancelAnimationFrame(frameId);
+            observer.disconnect();
+            for (const key of ['top', 'left', 'width', 'height']) {
+                host.style.removeProperty(`--ov25-viewer-slot-${key}`);
+            }
         };
-    }, [isDrawerOrDialogOpen, isProductGalleryStacked, uniqueId, stackedGalleryCloseSyncImmediateRef]);
+    }, [anchorStackedViewer, galleryShadowRoot]);
+
+    const stackedIframeReady = useStackedGalleryPositioning({
+        enabled: isProductGalleryStacked,
+        isOpen: isDrawerOrDialogOpen,
+        anchored: anchorStackedViewer,
+        shadowRoot: galleryShadowRoot,
+        slotRef: containerRef,
+        instantCloseRef: stackedGalleryCloseSyncImmediateRef,
+    });
 
     useEffect(() => {
         if (
@@ -665,7 +657,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
               createPortal(<ProductCarousel />, externalCarouselShadowRoot)}
         </div>
         {isProductGalleryStacked && galleryShadowRoot && createPortal(
-           <IframeContainer  />,
+           <IframeContainer ready={stackedIframeReady} />,
             galleryShadowRoot
         )}
         <ArPreviewQRCodeDialog arPreviewLink={arPreviewLink} setArPreviewLink={setArPreviewLink} />
@@ -682,6 +674,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
           stickyLayoutActive && "ov25-inline-sticky-gallery-root",
           stickyDesktopGallery && "ov25-inline-sticky-gallery-root-desktop",
           stickyMobileGallery && "ov25-inline-sticky-gallery-root-mobile",
+          anchorStackedViewer && "ov25-inline-sticky-anchored-viewer",
           galleryUsesColumnFlexFill &&
             "ov:flex ov:flex-1 ov:flex-col ov:min-h-0 ov:h-full ov:max-h-full ov:overflow-hidden",
         )}

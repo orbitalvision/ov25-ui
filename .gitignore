@@ -14,3 +14,6 @@ review-screenshots/
 .pnpm-store
 /.worktrees/
 /.vitest-attachments/
+
+# Local investigation output (profiles); not shipped
+/outputs/

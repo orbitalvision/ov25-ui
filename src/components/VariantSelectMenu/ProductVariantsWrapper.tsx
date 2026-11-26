@@ -304,7 +304,7 @@ export function ProductVariantsWrapper({
                 {variants.length > 1 && (
                   <h4 className={`ov25-group-header ov25-sticky-header ov:sticky ov:z-9 ov:bg-(--ov25-background-color) ov:px-4 ov:text-sm ov:pt-6 ov:pb-3 ov:text-(--ov25-secondary-text-color) ov:font-medium ${showHeader ? 'ov:top-10' : 'ov:top-0'}`}>
                     {capitalizeWords(
-                      getString('groupHeader', { GROUP_NAME: group.groupName }, group.groupName)
+                      getString('groupHeader', { OPTION_NAME: optionName, GROUP_NAME: group.groupName }, group.groupName)
                     )}
                     <GroupPrice price={group.priceSummary} />
                   </h4>

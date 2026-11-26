@@ -1,5 +1,5 @@
 import type { LayoutType } from '../../lib/config/preview-config';
-import type { StringReplacementsConfig } from 'ov25-ui';
+import type { BrandingFont, StringReplacementsConfig } from 'ov25-ui';
 
 export type PreviewLayoutType = LayoutType;
 
@@ -21,7 +21,15 @@ export interface SelectorFormState {
   replace: boolean;
 }
 
+/** Per-theme placement overrides keyed by numeric Shopify theme id; only differing slots. */
+export type ThemeSelectorOverrides = Record<string, Partial<Record<keyof TypeSettings['selectors'], SelectorFormState>>>;
+
 export interface TypeSettings {
+  /**
+   * Overrides for themes other than the live one. `selectors` stays the live theme's values,
+   * so storefronts on plugin versions without theme lookup keep working.
+   */
+  themeSelectors?: ThemeSelectorOverrides;
   selectors: {
     gallery: SelectorFormState;
     price: SelectorFormState;
@@ -72,6 +80,7 @@ export interface TypeSettings {
     mobileLogoURL: string;
     cssString: string;
     hideLogo: boolean;
+    fonts?: BrandingFont[];
   };
   style: Record<string, string>;
   elementStyles: Record<string, Record<string, string>>;
@@ -95,6 +104,17 @@ export interface TypeSettings {
 export interface ConfiguratorSetupFormState {
   layout: PreviewLayoutType;
   typeSettings: Record<PreviewLayoutType, TypeSettings>;
+  /** Local editor provenance only. Never included in exported runtime JSON. */
+  setupProgress?: Partial<Record<PreviewLayoutType, {
+    configured: boolean;
+    presetId?: 'classic' | 'in-page' | 'guided' | 'overview';
+    presetVersion?: number;
+    presentationFingerprint?: string;
+    /** Resume the optional colour step after a refresh; absent on older drafts. */
+    themeStep?: 'pending' | 'complete';
+    /** Editor metadata only; matched colours and subsequent edits survive preset changes. */
+    themeStyle?: { sourceId: string; label: string; fingerprint: string };
+  }>>;
 }
 
 export const DEFAULT_SELECTOR_STATE: SelectorFormState = {
@@ -113,7 +133,7 @@ const DEFAULT_STANDARD_SETTINGS: TypeSettings = {
     configureButton: { enabled: false, selector: '[data-ov25-configure-button]', replace: false },
     initialiseMenu: { enabled: false, selector: '#ov25-initialise-menu', replace: true },
   },
-  carousel: { desktop: 'stacked', mobile: 'carousel', maxImagesDesktop: 4, maxImagesMobile: 6, autoCutouts: false },
+  carousel: { desktop: 'stacked', mobile: 'carousel', maxImagesDesktop: 10, maxImagesMobile: 10, autoCutouts: false },
   configurator: {
     displayModeDesktop: 'sheet',
     displayModeMobile: 'drawer',
@@ -151,13 +171,14 @@ const DEFAULT_SNAP2_SETTINGS: TypeSettings = {
   },
 };
 
-/** Single-product bed flow: same shell as standard, with configure trigger and bed preview selectors. */
+/**
+ * Single-product bed flow: same shell and placements as standard. Its configure button used to default on, pointing
+ * at `#ov25-fullscreen-button` (an id only the dev test pages provide); it's off like Standard's, and the options
+ * slot carries the trigger in sheet, drawer and modal layouts. Settings saved with a button keep it.
+ */
 const DEFAULT_BED_CONFIGURATOR_SETTINGS: TypeSettings = {
   ...DEFAULT_STANDARD_SETTINGS,
-  selectors: {
-    ...DEFAULT_STANDARD_SETTINGS.selectors,
-    configureButton: { enabled: true, selector: '#ov25-fullscreen-button', replace: false },
-  },
+  selectors: { ...DEFAULT_STANDARD_SETTINGS.selectors },
   branding: {
     ...DEFAULT_STANDARD_SETTINGS.branding,
     cssString: 'ov25-selection-thumbnail: bg-white;',

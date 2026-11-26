@@ -85,3 +85,9 @@ const OV25UI = {
 };
 
 export default OV25UI; 
+
+export type { BrandingFont } from './types/inject-config.js';
+export { loadBrandingFonts, prepareBrandingFontCSS, brandingFontAliases } from './utils/branding-fonts.js';
+
+/** Build tooling uses this explicit marker to avoid advertising styling on older bundled UI artifacts. */
+export const OV25_RUNTIME_STYLE_FEATURES = Object.freeze(['styling:theme-v1', 'branding:fonts-v1'] as const);

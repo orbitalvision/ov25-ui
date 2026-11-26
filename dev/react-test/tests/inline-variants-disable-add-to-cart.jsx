@@ -88,7 +88,7 @@ function App() {
             type="button"
             className={`ov:rounded-md ov:border ov:px-3 ov:py-1.5 ov:text-sm ${
               profile === 'standard'
-                ? 'ov:border-[#1a1a1a] ov:bg-[#1a1a1a] ov:text-black'
+                ? 'ov:border-[#1a1a1a] ov:bg-[#1a1a1a] ov:text-white'
                 : 'ov:border-gray-300 ov:bg-white ov:text-[#1a1a1a]'
             }`}
             onClick={() => setProfile('standard')}
@@ -99,7 +99,7 @@ function App() {
             type="button"
             className={`ov:rounded-md ov:border ov:px-3 ov:py-1.5 ov:text-sm ${
               profile === 'snap2'
-                ? 'ov:border-[#1a1a1a] ov:bg-[#1a1a1a] ov:text-black'
+                ? 'ov:border-[#1a1a1a] ov:bg-[#1a1a1a] ov:text-white'
                 : 'ov:border-gray-300 ov:bg-white ov:text-[#1a1a1a]'
             }`}
             onClick={() => setProfile('snap2')}

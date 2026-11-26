@@ -5,7 +5,7 @@ import { Ov25ShadowHost } from './Ov25ShadowHost.js';
 
 
 const Price: React.FC = () => {
-  const { formattedPrice, formattedSubtotal, discount, hasReceivedPrice, getString } = useOV25UI();
+  const { formattedPrice, formattedSubtotal, discount, hasReceivedPrice, getString, isSnap2Mode, isMobile, configuratorDisplayMode, configuratorDisplayModeMobile } = useOV25UI();
   const priceText = getString(
     'priceValue',
     {
@@ -47,6 +47,15 @@ const Price: React.FC = () => {
     `${discount.percentage}%`,
   );
   const loadingText = getString('priceLoading', {}, 'Loading price');
+  // Snap2 in a dialog only creates its viewer when it is opened, so no price can arrive before then (mobile drawers
+  // preload the viewer; desktop dialogs and mobile modals don't). A skeleton would spin for good on a page nobody has
+  // opened the configurator on, so the price slot stays empty until there is a price to show.
+  const viewerWaitsForOpen = isSnap2Mode && (isMobile
+    ? configuratorDisplayModeMobile === 'modal'
+    : configuratorDisplayMode !== 'inline' && configuratorDisplayMode !== 'inline-sheet');
+  if (!hasReceivedPrice && viewerWaitsForOpen) {
+    return <Ov25ShadowHost id="ov25-configurator-price-container" style={{ display: 'none' }}>{null}</Ov25ShadowHost>;
+  }
   // Until the configurator reports a price, every price field is a placeholder zero. Rendering it
   // would read as a genuine "0.00" in the slot where the theme's own price used to be, so show the
   // same skeleton the Shopify price block paints before this component takes over.

@@ -1,3 +1,4 @@
+import type { BrandingFont } from './inject-config.js';
 /**
  * Configuration types for injectDiningConfigurator().
  */
@@ -35,6 +36,7 @@ export interface DiningCallbacksConfig {
 export interface DiningBrandingConfig {
   /** Custom CSS to inject into shadow roots */
   cssString?: string;
+  fonts?: BrandingFont[];
   /** Logo URL for branding */
   logoURL?: string;
   /** Optional mobile logo URL for branding */

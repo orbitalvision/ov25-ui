@@ -154,7 +154,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
           <button onClick={toggleAnimation} className={cn(
             'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:items-center ov:justify-center',
             'ov:rounded-[var(--ov25-configurator-view-controls-border-radius)]',
-            'ov:shadow-sm ov:bg-[var(--ov25-overlay-button-color)]',
+            'ov25-gallery-overlay-button ov:shadow-sm ov:bg-[var(--ov25-overlay-button-color)]',
           )}>
               <Rotate3D strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1"/>
               {!isMobile && (
@@ -174,7 +174,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
           {!controlsHidden && !isSnap2Mode && <button id="ov25-share-button" onClick={handleShare} className={cn(
             'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:items-center ov:justify-center',
             'ov:border ov:rounded-(--ov25-configurator-view-controls-border-radius) ov:border-(--ov25-configurator-view-controls-border-color)',
-            'ov:shadow-sm ov:bg-(--ov25-overlay-button-color)',
+            'ov25-gallery-overlay-button ov:shadow-sm ov:bg-(--ov25-overlay-button-color)',
           )}>
             <Upload strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" color="var(--ov25-configurator-view-controls-text-color)"/>
             {!isMobile && (
@@ -185,7 +185,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
             <button id="ov25-animation-toggle-button" onClick={() => toggleAnimation(uniqueId)} className={cn(
               'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:items-center ov:justify-center',
               'ov:rounded-(--ov25-configurator-view-controls-border-radius) ov:border-(--ov25-configurator-view-controls-border-color)',
-              'ov:shadow-sm ov:bg-(--ov25-overlay-button-color)',
+              'ov25-gallery-overlay-button ov:shadow-sm ov:bg-(--ov25-overlay-button-color)',
             )}>
               <Rotate3D strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" color="var(--ov25-configurator-view-controls-text-color)" />
               {!isMobile && (
@@ -198,7 +198,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
             <button id="ov25-desktop-dimensions-toggle-button" onClick={handleToggleDimensions} className={cn(
               'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:items-center ov:justify-center',
               'ov:border ov:rounded-(--ov25-configurator-view-controls-border-radius) ov:border-(--ov25-configurator-view-controls-border-color)',
-              'ov:shadow-sm ov:bg-(--ov25-overlay-button-color)',
+              'ov25-gallery-overlay-button ov:shadow-sm ov:bg-(--ov25-overlay-button-color)',
             )}>
               <DimensionsIcon className="ov:w-[19px] ov:h-[19px] p-1" color="var(--ov25-configurator-view-controls-text-color)" />
               {!isMobile && (
@@ -217,7 +217,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
                     className={cn(
                       'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:items-center ov:justify-center',
                       'ov:border ov:rounded-(--ov25-configurator-view-controls-border-radius) ov:border-(--ov25-configurator-view-controls-border-color)',
-                      'ov:shadow-sm ov:bg-(--ov25-overlay-button-color)',
+                      'ov25-gallery-overlay-button ov:shadow-sm ov:bg-(--ov25-overlay-button-color)',
                     )}
                   >
                     <Camera strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" />
@@ -275,7 +275,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
                     className={cn(
                       'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:items-center ov:justify-center',
                       'ov:border ov:rounded-(--ov25-configurator-view-controls-border-radius) ov:border-(--ov25-configurator-view-controls-border-color)',
-                      'ov:shadow-sm ov:bg-(--ov25-overlay-button-color)',
+                      'ov25-gallery-overlay-button ov:shadow-sm ov:bg-(--ov25-overlay-button-color)',
                     )}
                   >
                     <Lightbulb strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" color="var(--ov25-configurator-view-controls-text-color)" />
@@ -315,7 +315,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
             <button id="ov25-ar-toggle-button" onClick={toggleAR} className={cn(
               'ov:cursor-pointer ov:pointer-events-auto ov:flex ov:gap-2.5 ov:p-2 ov:items-center ov:justify-center',
               'ov:border ov:rounded-(--ov25-configurator-view-controls-border-radius) ov:border-(--ov25-configurator-view-controls-border-color)',
-              'ov:shadow-sm ov:bg-(--ov25-overlay-button-color)',
+              'ov25-gallery-overlay-button ov:shadow-sm ov:bg-(--ov25-overlay-button-color)',
             )}>
               <ArIcon className="ov:w-[19px] ov:h-[19px] p-1" color="var(--ov25-configurator-view-controls-text-color)" />
               {!isMobile && (
@@ -331,7 +331,7 @@ const ConfiguratorViewControls: React.FC<ConfiguratorViewControlsProps> = () => 
           <button id="ov25-desktop-fullscreen-button" className={cn(
             'ov:cursor-pointer ov:aspect-square ov:p-2 ov:pointer-events-auto ov:flex ov:gap-2.5 ov:ml-auto ov:items-center ov:justify-center',
             'ov:border ov:rounded-(--ov25-configurator-view-controls-border-radius) ov:border-(--ov25-configurator-view-controls-border-color)',
-            'ov:shadow-sm ov:bg-(--ov25-overlay-button-color)',
+            'ov25-gallery-overlay-button ov:shadow-sm ov:bg-(--ov25-overlay-button-color)',
           )}
             onClick={() => toggleFullscreen(uniqueId)}>
             <ExpandIcon strokeWidth={1} className="ov:w-[19px] ov:h-[19px] p-1" color="var(--ov25-configurator-view-controls-text-color)" />

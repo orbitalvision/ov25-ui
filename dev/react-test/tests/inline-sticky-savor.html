@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Savor · Sticky gallery and cookie consent</title>
+  <style>
+    * { box-sizing: border-box }
+    body { margin: 0; font: 16px system-ui; color: #292c28; background: #faf9f5 }
+    .intro, #options, footer, aside { padding: 20px }
+    .intro { background: #e5e2da }
+    #product { display: grid; grid-template-columns: 1fr 1fr }
+    .product-information__media { align-self: auto }
+    #gallery { position: sticky; top: 16px; width: 100% }
+    iframe { display: block; width: 100%; height: min(62vh, 500px); border: 0 }
+    #options { min-height: 180vh }
+    footer { min-height: 110vh; background: #d7e1d6 }
+    aside { position: fixed; z-index: 100; bottom: 0; left: 0; width: min(440px,100%); background: #242822; color: white }
+    button { padding: 10px 16px; cursor: pointer }
+    @media (min-width: 768px) {
+      body { overflow: hidden }
+      aside { top: 44vh; bottom: auto }
+      .page-wrapper { height: 100dvh; overflow: auto }
+    }
+    @media (max-width: 767px) {
+      #product { grid-template-columns: 1fr; row-gap: 24px }
+      aside { min-height: 43vh }
+    }
+  </style>
+</head>
+<body>
+  <main class="page-wrapper">
+    <div class="intro">Savor regression fixture · Scroll through the product, then past its details.</div>
+    <section id="product" class="product-information__grid">
+      <div class="product-information__media">
+        <div id="gallery">
+          <iframe title="Local product viewer" srcdoc='<body style="margin:0;display:grid;place-items:center;height:100vh;background:#eeeae3"><img alt="Sofa" style="width:90%;height:90%;object-fit:contain" src="../src/images/sofa.png"></body>'></iframe>
+        </div>
+      </div>
+      <div id="options"><h1>Two-seat sofa</h1><p>£1,250</p><p>Product options scroll past the pinned gallery.</p></div>
+    </section>
+    <footer>End of product · The gallery should have scrolled away.</footer>
+  </main>
+  <aside aria-label="Cookie consent">
+    <button>Decline cookies</button><p>Choose whether to allow optional cookies.</p>
+  </aside>
+  <script type="module">
+    import { createStickyHostRelocation } from '../../../src/hooks/useStickyHostRelocation.ts';
+    import { createStickyLayoutController } from '../../../src/lib/sticky-layout-controller.ts';
+
+    const host = document.querySelector('#gallery');
+    const mobile = matchMedia('(max-width: 767px)');
+    const markMobile = () => { host.dataset.ov25InlineStickyMobile = String(mobile.matches) };
+    markMobile();
+    mobile.addEventListener('change', markMobile);
+    if (new URLSearchParams(location.search).has('negative-margin')) {
+      host.style.marginTop = '-60px';
+    }
+    if (new URLSearchParams(location.search).has('loading')) {
+      document.querySelector('#options').style.minHeight = '0';
+      host.style.marginTop = '-60px';
+    }
+    if (new URLSearchParams(location.search).has('flow-header')) {
+      const header = document.createElement('header');
+      header.dataset.flowHeader = 'true';
+      Object.assign(header.style, {
+        position: new URLSearchParams(location.search).has('fixed-header') ? 'fixed' : 'absolute', top: '0', left: '0', width: '100%', height: '60px', zIndex: '5',
+      });
+      document.body.prepend(header);
+    }
+    const relocation = createStickyHostRelocation({ host, document });
+    const layout = createStickyLayoutController({
+      document,
+      galleryHost: host,
+      variantsHost: document.querySelector('#options'),
+      headerSelector: new URLSearchParams(location.search).has('flow-header') ? '[data-flow-header]' : undefined,
+      onChange(snapshot) {
+        relocation.update({
+          enabled: snapshot.requiresBodyFallback,
+          boundary: snapshot.fallbackBoundary,
+          stickyTop: snapshot.headerOffset + snapshot.topGap,
+          occlusionTop: snapshot.headerOffset,
+          headerElements: snapshot.headerElements,
+          fullViewportWidth: mobile.matches,
+        });
+      },
+    });
+    layout.start();
+    const banner = document.querySelector('aside');
+    banner.querySelector('button').onclick = () => { banner.hidden = true };
+    window.addEventListener('pagehide', () => { relocation.destroy(); layout.destroy() }, { once: true });
+  </script>
+</body>
+</html>

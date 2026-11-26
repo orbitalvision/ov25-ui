@@ -178,7 +178,7 @@ export const ConfiguratorModal: React.FC<ConfiguratorModalProps> = ({
   }
 
   return createPortal(
-    <div
+    <div data-ov25-themed-backdrop
       ref={modalRef}
       className={cn(
         'ov:fixed ov:inset-0 ov:z-2147483646 ov:bg-black/50 ov:flex ov:items-start ov:justify-center',

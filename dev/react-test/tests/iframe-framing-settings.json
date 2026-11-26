@@ -1,0 +1,34 @@
+{
+  "carousel": {
+    "mobile": "carousel",
+    "desktop": "carousel",
+    "maxImages": 10,
+    "autoCutouts": true
+  },
+  "configurator": {
+    "triggerStyle": {
+      "mobile": "single-button",
+      "desktop": "single-button"
+    },
+    "displayMode": {
+      "mobile": "inline-sticky",
+      "desktop": "inline-sticky"
+    },
+    "variants": {
+      "useSimpleVariantsSelector": true,
+      "displayMode": {
+        "mobile": "list",
+        "desktop": "list"
+      },
+      "selectionDetails": {
+        "displayMode": {
+          "mobile": "fullscreen",
+          "desktop": "tooltip"
+        }
+      }
+    }
+  },
+  "branding": {
+    "cssString": ":host {\n  --ov25-configurator-iframe-background-color: #FFFFFF;\n  --ov25-overlay-button-color: #FFFFFF;\n  --ov25-configurator-view-controls-text-color: #000000;\n  --ov25-configurator-view-controls-border-color: #121212;\n  --ov25-highlight-color: #121212;\n  --ov25-primary-color: #121212;\n  --ov25-button-border-color: #121212;\n  --ov25-button-text-color: #FFFFFF;\n  --ov25-button-hover-background-color: #000000;\n  --ov25-button-hover-text-color: #FFFFFF;\n  --ov25-cta-color: #121212;\n  --ov25-cta-color-hover: #000000;\n  --ov25-cta-color-light: #F3F3F3;\n  --ov25-cta-text-color: #FFFFFF;\n  --ov25-cta-text-color-hover: #FFFFFF;\n  --ov25-background-color: #FFFFFF;\n  --ov25-secondary-background-color: #F3F3F3;\n  --ov25-text-color: #121212;\n  --ov25-secondary-text-color: #121212;\n  --ov25-border-color: #121212;\n  --ov25-border-color-secondary: #121212;\n  --ov25-hover-color: #000000;\n  --ov25-destructive: #FF0000;\n  --ov25-configurator-title-text-color: #121212;\n  --ov25-configurator-price-text-color: #121212;\n  --ov25-configurator-qr-code-popup-background-color: #FFFFFF;\n  --ov25-configurator-qr-code-popup-border-color: #121212;\n  --ov25-configurator-qr-code-popup-title-text-color: #121212;\n  --ov25-configurator-qr-code-popup-description-text-color: #121212;\n  --ov25-configurator-iframe-border-radius: 0px;\n  --ov25-configurator-view-controls-border-radius: 0px;\n  --ov25-variant-thumb-border-radius: 40px;\n  --ov25-button-border-radius: 0px;\n  --ov25-cta-border-radius: 0px;\n  --ov25-360-font-family: sans-serif;\n  --ov25-button-border-width: 1px;\n  --ov25-variant-thumb-ring-mode: solid;\n}\n\n/* OV25 theme button animations v1: [{\"target\":\"cta\",\"effect\":\"fade\",\"durationMs\":200,\"easing\":\"ease\",\"source\":\"assets/base.css\"}] */\n:is(.ov25-cta:not(.ov25-checkout-combo-button *), .ov25-checkout-combo-button):not(:disabled):not([aria-disabled=\"true\"]):not(:has(button:disabled, [aria-disabled=\"true\"])) { background-color: var(--ov25-cta-color, #22c55e); color: var(--ov25-cta-text-color, #ffffff); transition-property: background-color, color, border-color; transition-duration: 200ms; transition-timing-function: ease; }\n@media (hover: hover) and (pointer: fine) {\n  :is(.ov25-cta:not(.ov25-checkout-combo-button *), .ov25-checkout-combo-button):not(:disabled):not([aria-disabled=\"true\"]):not(:has(button:disabled, [aria-disabled=\"true\"])):hover { background-color: var(--ov25-cta-color-hover, #16a34a); color: var(--ov25-cta-text-color-hover, #ffffff); }\n}\n:is(.ov25-cta:not(.ov25-checkout-combo-button *), .ov25-checkout-combo-button):not(:disabled):not([aria-disabled=\"true\"]):not(:has(button:disabled, [aria-disabled=\"true\"])):is(:focus-visible, :has(:focus-visible)) { background-color: var(--ov25-cta-color-hover, #16a34a); color: var(--ov25-cta-text-color-hover, #ffffff); }\n@media (prefers-reduced-motion: reduce) {\n  :is(.ov25-cta:not(.ov25-checkout-combo-button *), .ov25-checkout-combo-button):not(:disabled):not([aria-disabled=\"true\"]):not(:has(button:disabled, [aria-disabled=\"true\"])) { transition-duration: 0ms; }\n}\n.ov25-checkout-combo-button:not(:has(button:disabled, [aria-disabled=\"true\"])) .ov25-cta { background-color: transparent; color: inherit; }\n/* End OV25 theme button animations */\n\n/* Storefront assistant */\n#ov25-filter-controls-search {\n  --ov25-hover-color: #fafafa;\n}"
+  }
+}

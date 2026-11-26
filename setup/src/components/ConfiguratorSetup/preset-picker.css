@@ -1,0 +1,39 @@
+.ov25-preset-picker {
+  container: ov25-presets / size;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.ov25-preset-scroll {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  padding: 24px 28px 20px;
+  overflow: auto;
+  scrollbar-gutter: stable;
+}
+
+.ov25-preset-header { flex-shrink: 0; margin-bottom: 22px; }
+.ov25-preset-eyebrow { margin: 0; color: #71717a; font-size: 10px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; }
+.ov25-preset-header h2 { margin: 8px 0 0; color: #18181b; font-size: clamp(24px, 3.2cqi, 30px); font-weight: 600; letter-spacing: -.04em; line-height: 1.2; }
+.ov25-preset-intro { max-width: 68ch; margin: 10px 0 0; color: #71717a; font-size: 14px; line-height: 1.6; }
+.ov25-preset-footer { display: flex; flex-shrink: 0; align-items: center; justify-content: flex-end; gap: 10px; padding: 16px 28px 20px; border-top: 1px solid #e4e4e7; background: #fff; }
+.ov25-preset-footer .ov25-preset-apply { min-width: 190px; }
+
+@container ov25-presets (max-width: 619px) {
+  .ov25-preset-scroll { padding-left: 16px; padding-right: 16px; }
+  .ov25-preset-footer { padding: 16px; }
+}
+
+@container ov25-presets (max-width: 400px) {
+  .ov25-preset-scroll { padding-top: 20px; }
+  .ov25-preset-header { margin-bottom: 18px; }
+  .ov25-preset-footer { flex-wrap: wrap; }
+  .ov25-preset-footer > button { flex: 1; }
+  .ov25-preset-footer .ov25-preset-apply { min-width: 150px; }
+}
+

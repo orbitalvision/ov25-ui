@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Iframe resize and initial framing</title>
+    <link rel="stylesheet" href="./iframe-resize.css" />
+  </head>
+  <body>
+    <main id="page">
+      <header>
+        <a href="/">← Test suite</a>
+        <p class="eyebrow">OV25 · camera test</p>
+        <h1>One iframe. Different spaces.</h1>
+        <p class="intro">Rotate and zoom the model, then move it between the page, a sheet, a modal and a fluid-width product gallery. The canvas should fill each space, keeping the sofa’s perspective consistent while showing more scene around the original view.</p>
+      </header>
+
+      <nav class="moves test-modes" aria-label="Test scenario">
+        <a href="?test=resize" data-test="resize">Resize and relocation</a>
+        <a href="?test=framing" data-test="framing">Initial framing</a>
+      </nav>
+
+      <section id="framing-tests" hidden aria-labelledby="framing-title">
+        <h2 id="framing-title">Initial framing · current OV25 UI</h2>
+        <p>Compare the same product in a square iframe and the local UI. The model should fill the viewer naturally on first load, without stretching. The UI must position its viewer before navigating the iframe, rather than starting at a temporary 3:1 size.</p>
+        <nav class="moves" aria-label="Framing layout">
+          <a href="?test=framing&mode=sticky" data-layout="sticky">Inline sticky · preview layout</a>
+          <a href="?test=framing&mode=sheet" data-layout="sheet">Sheet / mobile drawer</a>
+          <a href="?test=framing&mode=carousel" data-layout="carousel">Inline carousel</a>
+          <a href="?test=framing&mode=stacked" data-layout="stacked">Stacked gallery</a>
+        </nav>
+        <div class="framing-grid">
+          <section>
+            <h3>Plain iframe · square from the start</h3>
+            <iframe id="framing-plain" title="Plain configurator framing reference" allow="fullscreen; xr-spatial-tracking"></iframe>
+          </section>
+          <section>
+            <h3 id="framing-label">Local OV25 UI</h3>
+            <div id="framing-gallery"></div>
+            <div id="framing-name"></div>
+            <div id="framing-price"></div>
+            <div id="framing-variants"></div>
+          </section>
+        </div>
+        <details class="source" open>
+          <summary>Framing diagnostics</summary>
+          <p>Open and close Configure, try fullscreen, then resize the window. The UI iframe should retain its document. Dimensions below include initial sizing and later transitions; reload to check a fresh start.</p>
+          <pre id="framing-measurements"></pre>
+        </details>
+      </section>
+
+      <div id="resize-tests">
+      <nav class="moves" aria-label="Viewer location">
+        <button data-place="page" aria-pressed="true">Page · square</button>
+        <button data-place="sheet" aria-pressed="false">Open sheet</button>
+        <button data-place="modal" aria-pressed="false">Open modal</button>
+        <button data-place="lower" aria-pressed="false">Lower on page</button>
+        <button data-place="fluid" aria-pressed="false">Fluid width · Orla Kiely</button>
+      </nav>
+
+      <details class="source">
+        <summary>Iframe source</summary>
+        <form id="source-form">
+          <label for="source-url">Public configurator iframe URL</label>
+          <div class="source-row">
+            <input id="source-url" type="url" required spellcheck="false" autocomplete="off" />
+            <button type="submit">Load URL</button>
+          </div>
+          <p>Paste a local or preview URL to test an unreleased OV25 build. Only Load URL navigates the iframe; the move buttons never change its source. You can also supply <code>?src=</code> with an encoded iframe URL.</p>
+          <p>To keep the demo product and use a local server, open this fixture with <code>?origin=http://localhost:3030/configurator</code>. Match the hostname used to start Next.js.</p>
+          <p id="source-error" role="alert" hidden></p>
+        </form>
+      </details>
+
+      <section class="page-grid" aria-label="Product page">
+        <div>
+          <div class="slot" id="page-slot" data-shape="square"><span>Viewer moved to another space</span></div>
+          <p class="caption">Product gallery · 1:1</p>
+        </div>
+        <aside class="instructions">
+          <h2>Try a round trip</h2>
+          <ol>
+            <li>Wait for the scene to load.</li>
+            <li>Rotate the model and change its zoom.</li>
+            <li>Open the sheet, then the modal.</li>
+            <li>Return to the square page view.</li>
+          </ol>
+          <p>Check that the model scales uniformly after each move and can render across the entire canvas. Zoom in and check that no internal blank strips cut off the model. The document-load count should stay at <strong>1</strong>.</p>
+          <p>Resize the browser too. On mobile, the sheet opens from the bottom. The iframe keeps the same DOM parent and is positioned over each placeholder, as in Harbour.</p>
+        </aside>
+      </section>
+
+      <section class="fluid-section" aria-labelledby="fluid-title">
+        <div class="fluid-heading">
+          <p class="eyebrow">Available width · Orla Kiely case</p>
+          <h2 id="fluid-title">Fluid gallery beside product details</h2>
+          <p>Move the viewer here, then narrow and widen the browser. On desktop the gallery takes half the available page width while its height follows the viewport height. The aspect ratio changes as the window width changes.</p>
+          <p>Below 900px the columns stack and the gallery keeps a 3:2 ratio, matching the mobile layout observed on Orla Kiely.</p>
+          <nav class="moves" aria-label="Fluid viewer location">
+            <button data-place="fluid">Move to fluid gallery</button>
+            <button data-place="page">Return to square gallery</button>
+            <button data-place="sheet">Open sheet</button>
+            <button data-place="modal">Open modal</button>
+          </nav>
+          <label class="fluid-width-control" for="fluid-width">Available gallery width
+            <input id="fluid-width" type="range" min="40" max="100" value="100" />
+            <output id="fluid-width-value" for="fluid-width">100%</output>
+          </label>
+          <p class="caption">The slider simulates a narrower parent column. On desktop its height stays fixed; on mobile width and height change together. The same iframe stays loaded throughout.</p>
+        </div>
+        <div class="fluid-layout">
+          <div class="fluid-gallery">
+            <div class="slot" id="fluid-slot"><span>Move the viewer to this gallery</span></div>
+            <p class="caption">Desktop: flexible width, stable height · Mobile: 3:2</p>
+          </div>
+          <aside class="fluid-details">
+            <h3>Product details column</h3>
+            <p>This column reserves the other half of the desktop layout. Narrowing the window leaves less horizontal space for the sofa.</p>
+            <p>Rotate and zoom first. The canvas should fill the whole gallery. Resizing keeps the original view’s proportions and reveals more scene in the extra area without moving the camera. Zoom in: the sofa should render right to the outer edges, with no blank strips inside the gallery. Widening back to the original size should restore the same framing.</p>
+            <p>For the original behaviour, use an OV25 build without the resize PR through the Iframe source form above.</p>
+          </aside>
+        </div>
+      </section>
+
+      <section class="lower-section">
+        <p class="eyebrow">Second page position</p>
+        <h2>A wider view further down</h2>
+        <div class="slot" id="lower-slot" data-shape="landscape"><span>Move the viewer here</span></div>
+        <nav class="moves" aria-label="Lower viewer location">
+          <button data-place="lower">Move here</button>
+          <button data-place="page">Return to gallery</button>
+          <button data-place="sheet">Open sheet</button>
+          <button data-place="modal">Open modal</button>
+        </nav>
+      </section>
+      </div>
+    </main>
+
+    <div id="overlay" hidden>
+      <section id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-title" tabindex="-1">
+        <div class="panel-heading">
+          <div><p class="eyebrow" id="panel-kind">Sheet</p><h2 id="panel-title">Same scene, new space</h2></div>
+          <button id="close-panel" aria-label="Close and return to page">Close</button>
+        </div>
+        <nav class="moves" aria-label="Move from panel">
+          <button data-place="page">Back to page</button>
+          <button data-place="sheet">Sheet</button>
+          <button data-place="modal">Modal</button>
+        </nav>
+        <div class="slot" id="panel-slot" data-shape="landscape"></div>
+        <p class="caption">16:9 · rotate or zoom here, then return to the square gallery.</p>
+        <div class="panel-notes">
+          <h3>What to watch</h3>
+          <p>The original view should scale immediately inside a full-size canvas, without moving the camera. Extra space must remain renderable when zooming or panning. Repeated moves should retain your viewing angle and relative zoom.</p>
+          <p>No selections, camera reset messages or reloads are sent by this fixture.</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- This layer and its iframe never leave this parent. Moving a live iframe
+         with appendChild/React portals can destroy its browsing context. -->
+    <div id="frame-layer"></div>
+    <footer id="status" aria-label="Viewer diagnostics">
+      <span>Location <strong id="location">Page</strong></span>
+      <span>Viewport <strong id="dimensions">—</strong></span>
+      <span>Document loads <strong id="load-count">0</strong></span>
+      <span id="scene-status" role="status">Waiting for iframe</span>
+    </footer>
+    <script type="module" src="./iframe-resize.js"></script>
+  </body>
+</html>

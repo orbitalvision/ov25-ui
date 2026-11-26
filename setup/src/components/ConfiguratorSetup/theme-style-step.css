@@ -1,0 +1,74 @@
+/* Match my site. Guided setup shows three steps (match, check the preview, save); other hosts show step 1 and a footer. */
+.ov25-theme-step {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  container-type: inline-size;
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 100%;
+  width: 100%;
+  padding: clamp(16px, 2%, 22px);
+  color: #252622;
+}
+.ov25-theme-step p, .ov25-theme-step h3 { margin: 0; }
+
+.ov25-theme-flow { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
+.ov25-theme-flow-step {
+  display: grid; grid-template-columns: 36px minmax(0, 1fr) auto; align-items: center; gap: 8px 18px;
+  padding: 22px 4px; border-bottom: 1px solid #ecebe6;
+}
+.ov25-theme-flow-step:first-child { padding-top: 6px; }
+.ov25-theme-flow-step:last-child { border-bottom: 0; }
+.ov25-theme-flow-num {
+  display: inline-flex; align-items: center; justify-content: center; align-self: start;
+  width: 32px; height: 32px; margin-top: 1px; border: 1px solid #dddcd5; border-radius: 99px;
+  color: #77796f; background: #fff; font-size: 13px; font-weight: 600;
+}
+.ov25-theme-flow-step[data-state='current'] .ov25-theme-flow-num { border-color: #1b1b18; color: #fff; background: #1b1b18; }
+.ov25-theme-flow-step[data-state='done'] .ov25-theme-flow-num { border-color: #2f7d4f; color: #fff; background: #2f7d4f; }
+.ov25-theme-flow-body { display: grid; gap: 4px; min-width: 0; }
+.ov25-theme-flow-body h3 { font-size: 17px; font-weight: 600; letter-spacing: -.02em; line-height: 1.3; }
+.ov25-theme-flow-step[data-state='todo'] .ov25-theme-flow-body h3 { color: #5c5d56; }
+/* Guided, before the preview has been opened: later steps are shown as a roadmap, without their buttons. */
+.ov25-theme-flow-step[data-state='locked'] .ov25-theme-flow-num { color: #a3a49c; border-color: #e7e6e0; }
+.ov25-theme-flow-step[data-state='locked'] .ov25-theme-flow-body h3 { color: #a3a49c; }
+.ov25-theme-flow-step[data-state='locked'] .ov25-theme-flow-note { color: #a3a49c; }
+.ov25-theme-step .ov25-theme-flow-actions[hidden], .ov25-theme-step .ov25-theme-flow-actions > [hidden] { display: none; }
+.ov25-theme-flow-optional { margin-left: 6px; padding: 2px 7px; border-radius: 99px; color: #77796f; background: #f1f0eb; font-size: 11px; font-weight: 500; letter-spacing: 0; vertical-align: 2px; }
+.ov25-theme-flow-note { max-width: 62ch; color: #77796f; font-size: 13px; line-height: 1.55; }
+.ov25-theme-flow-preview-product { margin-top: 4px; color: #5c5d56; font-size: 13px; line-height: 1.5; }
+.ov25-theme-step-error { color: #a13941; font-size: 13px; line-height: 1.5; }
+.ov25-theme-step-undo { padding: 0; border: 0; background: none; color: #252622; font: inherit; font-weight: 600; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+
+.ov25-theme-flow-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 10px; }
+.ov25-theme-flow-actions button { min-height: 44px; }
+.ov25-theme-step-match { min-width: 170px; }
+.ov25-theme-step-theme { display: flex; align-items: center; gap: 10px; }
+.ov25-theme-step-theme label { color: #5c5d56; font-size: 13px; font-weight: 600; }
+.ov25-theme-step-theme .ov25-theme-step-theme-trigger { width: 230px; min-width: 0; }
+.ov25-theme-step-theme .ov25-theme-step-theme-trigger > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* Guided site preview button: only the button shows; its error text wraps under the row. */
+.ov25-theme-flow-actions [data-ov25-setup-live-preview] { display: contents; }
+.ov25-theme-flow-actions [data-ov25-setup-live-preview] > button:first-child { width: auto; }
+/* `contain: inline-size` stops a long message widening the button column (and squashing the text beside it); it wraps under the buttons instead. */
+.ov25-theme-flow-actions [data-ov25-setup-live-preview] > :not(button:first-child, [data-ov25-setup-preview-row]) { flex: 1 1 100%; order: 10; margin: 0; text-align: right; contain: inline-size; }
+/* With "View on phone", both buttons sit in the actions row like the other step buttons. */
+.ov25-theme-flow-actions [data-ov25-setup-preview-row] { display: contents; }
+.ov25-theme-flow-actions > div:not([data-ov25-setup-live-preview]):empty { display: none; }
+
+.ov25-theme-step-footer { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: auto; padding-top: 16px; border-top: 1px solid #e7e7e2; }
+.ov25-theme-step-footer > button { min-height: 44px; }
+
+@container (max-width: 760px) {
+  .ov25-theme-flow-step { grid-template-columns: 36px minmax(0, 1fr); }
+  .ov25-theme-flow-actions { grid-column: 2; justify-content: flex-start; }
+}
+
+/* Guided: shown only when the automatic match couldn't finish. */
+.ov25-theme-step-auto-note { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px; margin-bottom: 14px; }
+.ov25-theme-step-auto-note .ov25-theme-step-error { margin: 0; flex: 1 1 240px; }
+
+/* The host-provided conversation fills Automatic setup without a second set of steps. */
+.ov25-theme-step.is-chat-page { padding: 0; min-height: 0; height: 100%; container-type: normal; }
+.ov25-theme-step.is-chat-page > .ov25-theme-step-auto-note { flex-shrink: 0; padding: 12px 20px 0; }

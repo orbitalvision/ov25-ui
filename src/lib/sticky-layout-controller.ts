@@ -30,6 +30,15 @@ export const DEFAULT_STICKY_CAROUSEL_HEIGHT = 120;
 export const STICKY_CAROUSEL_MAX_AVAILABLE_FRACTION = 0.5;
 /** id of the unclamped content root inside the carousel host's shadow root. */
 const STICKY_CAROUSEL_CONTENT_ID = 'ov25-product-carousel';
+// The relocation controller and layout controller share ownership of this
+// wrapper. A pinned wrapper must not also be stretched as a gallery column.
+const nativeStickyGalleryWrappers = new WeakSet<HTMLElement>();
+
+export function setNativeStickyGalleryWrapperActive(wrapper: HTMLElement, active: boolean): void {
+  if (active) nativeStickyGalleryWrappers.add(wrapper);
+  else nativeStickyGalleryWrappers.delete(wrapper);
+}
+
 export const STICKY_OPTION_HEADER_PINNED_ATTRIBUTE = 'data-ov25-sticky-pinned';
 
 type StickyLayoutCssProperty =
@@ -354,6 +363,20 @@ export function measureStickyHeaderOffset(
     readStyle,
   });
   return getLargestVisibleHeaderBottom(resolution.elements, viewportHeight, readStyle);
+}
+
+// Two elements in the same ordinary flow move together until the gallery pins.
+// An active sticky inset, out-of-flow positioning or a separate scrollport
+// breaks that assumption (including when it belongs to a header's ancestor).
+function verticalFlowRoot(element: Element | null, readStyle: StickyStyleReader): Element | null {
+  for (let current = element; current; current = elementOrShadowHostParent(current)) {
+    const style = readStyle(current);
+    if (!style || style.position === 'fixed' || style.position === 'absolute' ||
+        (style.position === 'sticky' && (style.top !== 'auto' || style.bottom !== 'auto')) ||
+        /^(auto|scroll|hidden|overlay)$/.test(style.overflowY) ||
+        (style.transform && style.transform !== 'none')) return current;
+  }
+  return null;
 }
 
 function measureElementHeight(
@@ -1347,7 +1370,7 @@ export function observeStickyHostNaturalDocumentTop(
   };
 }
 
-function applyCssVariables(host: HTMLElement, variables: StickyLayoutOwnedCssVariables): void {
+function applyCssVariables(host: HTMLElement, variables: Partial<StickyLayoutOwnedCssVariables>): void {
   for (const [property, value] of Object.entries(variables)) {
     if (host.style.getPropertyValue(property) !== value) {
       host.style.setProperty(property, value);
@@ -1634,6 +1657,7 @@ export function createStickyLayoutController(
   let relinquishedGalleryColumnStretch: HTMLElement | null = null;
   const pinnedOptionHeaders = new Set<HTMLElement>();
   const hostCssSnapshots = new Map<HTMLElement, StickyHostCssSnapshot>();
+  const mobileHeadingOffsets = new Map<HTMLElement, InlineStyleValue[]>();
   let snapshot: StickyLayoutSnapshot = {
     headerOffset: 0,
     topGap: DEFAULT_STICKY_GAP,
@@ -1813,12 +1837,47 @@ export function createStickyLayoutController(
 
   const applyHostVariables = (
     host: HTMLElement,
-    variables: StickyLayoutOwnedCssVariables,
+    variables: Partial<StickyLayoutOwnedCssVariables>,
+    scopedProperties: StickyLayoutCssProperty[] = [],
   ): void => {
     if (!hostCssSnapshots.has(host)) {
       hostCssSnapshots.set(host, captureHostCssVariables(host));
     }
     applyCssVariables(host, variables);
+    // A desktop -> mobile transition may leave a previously published value.
+    // Restore the original value once, without writing it again on each scroll.
+    for (const property of scopedProperties) {
+      const previous = hostCssSnapshots.get(host)!.get(property)!;
+      if (host.style.getPropertyValue(property) !== previous.value ||
+          host.style.getPropertyPriority(property) !== previous.priority) {
+        restoreInlineStyle(host, { property, ...previous });
+      }
+    }
+  };
+
+  const getMobileHeadingList = (): Element | null | undefined => {
+    const variantsRoot = variantsHost?.shadowRoot ?? variantsHost;
+    return optionHeader?.closest('.ov25-inline-sticky-list-mobile') ??
+      variantsRoot?.querySelector('.ov25-inline-sticky-list-mobile');
+  };
+
+  const syncMobileHeadingOffsets = (variables: Partial<StickyLayoutOwnedCssVariables> | null): void => {
+    const list = getMobileHeadingList();
+    const headers = new Set(variables === null ? [] : Array.from(
+      list?.querySelectorAll<HTMLElement>('.ov25-option-header, .ov25-group-header') ?? [],
+    ));
+    for (const [header, previous] of mobileHeadingOffsets) {
+      if (!headers.has(header)) {
+        previous.forEach(entry => restoreInlineStyle(header, entry));
+        mobileHeadingOffsets.delete(header);
+      }
+    }
+    for (const header of headers) {
+      if (!mobileHeadingOffsets.has(header)) {
+        mobileHeadingOffsets.set(header, Object.keys(variables!).map(property => readInlineStyle(header, property)));
+      }
+      applyCssVariables(header, variables!);
+    }
   };
 
   const restoreHostVariables = (host: HTMLElement | null): void => {
@@ -1982,6 +2041,7 @@ export function createStickyLayoutController(
       galleryTravelBoundary &&
       !isDocumentFallbackBoundary(galleryTravelBoundary) &&
       galleryTravel?.insufficient &&
+      !nativeStickyGalleryWrappers.has(galleryTravelBoundary) &&
       !galleryColumnStretchRepair &&
       !hasExternalGalleryBlocker &&
       relinquishedGalleryColumnStretch !== galleryTravelBoundary
@@ -2166,8 +2226,19 @@ export function createStickyLayoutController(
 
     // Keep body relocation constrained to the product layout so the fixed gallery stops and
     // scrolls away at the end of the product rather than remaining fixed across the whole page.
-    const needsFallback = galleryNeedsFallback;
-    let boundary = findCommonStickyBoundary(hosts);
+    // Once the wrapper itself is sticky, its geometry no longer describes the
+    // gallery's original containing block. Keep that mode and product boundary
+    // stable while it scrolls out of view. Relocation independently checks
+    // wrapper eligibility and releases it if the theme structure changes.
+    const nativeWrapperBoundary =
+      galleryTravelBoundary &&
+      nativeStickyGalleryWrappers.has(galleryTravelBoundary) &&
+      snapshot.fallbackBoundary?.isConnected &&
+      galleryTravelBoundary.parentElement === snapshot.fallbackBoundary
+        ? snapshot.fallbackBoundary
+        : null;
+    const needsFallback = galleryNeedsFallback || nativeWrapperBoundary !== null;
+    let boundary = nativeWrapperBoundary ?? findCommonStickyBoundary(hosts);
     if (
       needsFallback &&
       !boundary &&
@@ -2195,7 +2266,7 @@ export function createStickyLayoutController(
           ),
         );
     // Walk outward when the nearest product boundary is too short to provide the required travel.
-    if (needsFallback && boundary && galleryHost) {
+    if (needsFallback && boundary && galleryHost && !nativeWrapperBoundary) {
       boundary = findSufficientStickyBoundary(
         boundary,
         galleryHost,
@@ -2312,13 +2383,61 @@ export function createStickyLayoutController(
       ),
       [STICKY_LAYOUT_CSS_PROPERTIES.carouselHeight]: toPixels(nextSnapshot.carouselHeight),
     };
+    let galleryVariables = variables;
+    const mobileGallery = galleryHost?.getAttribute('data-ov25-inline-sticky-mobile') === 'true' ? galleryHost : null;
+    if (mobileGallery && headerOffset > 0 && galleryFlowAnchor) {
+      const flowTop = galleryFlowAnchor.parent.getBoundingClientRect().top + galleryFlowAnchor.offsetTop;
+      const galleryRoot = verticalFlowRoot(mobileGallery.parentElement, readStyle);
+      // The page already carries the gallery up underneath a scrolling header.
+      // Updating its CSS sticky inset every frame makes touch scrolling stutter.
+      const followsHeaders = flowTop >= headerOffset && headerResolution.elements.every(header =>
+        Boolean(header.compareDocumentPosition(mobileGallery) & Node.DOCUMENT_POSITION_FOLLOWING) &&
+        !header.contains(mobileGallery) && verticalFlowRoot(header, readStyle) === galleryRoot,
+      );
+      if (followsHeaders) {
+        galleryVariables = { ...variables, [STICKY_LAYOUT_CSS_PROPERTIES.top]: toPixels(gaps.top) };
+      }
+    }
     // The carousel host is itself a shadow host, so globals' own `:host` rule
     // redefines --ov25-sticky-carousel-height *on* that element and beats the
     // value it would otherwise inherit from the gallery. It has to be written
     // directly or the measurement never reaches the max-height that uses it.
     for (const host of uniqueElements([galleryHost, variantsHost, carouselHost])) {
-      applyHostVariables(host, variables);
+      const hostVariables = host === galleryHost ? galleryVariables : variables;
+      if (mobileGallery) {
+        // Updating an inherited offset on these large subtrees makes Safari
+        // recalculate every variant's styles during scroll, delaying the iframe too.
+        const { [STICKY_LAYOUT_CSS_PROPERTIES.galleryBottom]: _galleryBottom, ...stableVariables } = hostVariables;
+        if (host === variantsHost && host !== galleryHost && host !== carouselHost && getMobileHeadingList()) {
+          // Only the list headings consume the live header offset in this path.
+          // Keep gallery/carousel geometry live, without invalidating every card's
+          // inherited styles whenever the storefront header moves.
+          const { [STICKY_LAYOUT_CSS_PROPERTIES.headerOffset]: _headerOffset, ...controlsVariables } = stableVariables;
+          applyHostVariables(host, controlsVariables, [STICKY_LAYOUT_CSS_PROPERTIES.headerOffset]);
+        } else {
+          applyHostVariables(host, stableVariables);
+        }
+      } else {
+        applyHostVariables(host, hostVariables);
+      }
     }
+    let mobileHeadingOffset = mobileGallery ? variables[STICKY_LAYOUT_CSS_PROPERTIES.galleryBottom] : null;
+    const nativeWrapper = mobileGallery?.parentElement;
+    if (mobileGallery && nativeWrapper && nativeStickyGalleryWrappers.has(nativeWrapper)) {
+      const nativeTop = Number.parseFloat(readStyle(nativeWrapper)?.top ?? '');
+      if (Number.isFinite(nativeTop)) {
+        // Native sticky already moves the gallery into and out of its slot.
+        // Headings need its pinned bottom, not a new inset on every scroll frame.
+        mobileHeadingOffset = toViewportPixels(mobileGallery.getBoundingClientRect().height + nativeTop);
+      }
+    }
+    syncMobileHeadingOffsets(mobileHeadingOffset === null ? null : {
+      [STICKY_LAYOUT_CSS_PROPERTIES.galleryBottom]: mobileHeadingOffset,
+      [STICKY_LAYOUT_CSS_PROPERTIES.headerOffset]: variables[STICKY_LAYOUT_CSS_PROPERTIES.headerOffset],
+      // Custom properties containing var() are resolved where they are declared.
+      // Redeclare top here so it uses the heading's live, scoped header offset.
+      [STICKY_LAYOUT_CSS_PROPERTIES.top]: variables[STICKY_LAYOUT_CSS_PROPERTIES.top],
+    });
 
     const changed = !hasMeasured || !sameSnapshot(snapshot, nextSnapshot);
     hasMeasured = true;
@@ -2480,6 +2599,7 @@ export function createStickyLayoutController(
     motionHeaderElements = [];
     activeHeaderMotions.clear();
     clearPinnedOptionHeaders();
+    syncMobileHeadingOffsets(null);
     documentObject.removeEventListener('scroll', onViewportScroll, { capture: true });
     windowObject.removeEventListener('scroll', onViewportScroll);
     windowObject.removeEventListener('resize', onViewportResize);

@@ -54,6 +54,30 @@ describe('IframeContainer title', () => {
     iframeContext = createContext();
   });
 
+  it('uses the applied background instead of the first colour declaration in setup JSON', () => {
+    iframeContext = createContext({ cssString: ':host { --ov25-configurator-iframe-background-color: white } :host { --ov25-configurator-iframe-background-color: #FBFFF2 }' });
+    const { container, rerender } = render(<><div id="ov25-configurator-background-color" style={{ backgroundColor: '#FBFFF2' }} /><IframeContainer /></>);
+    expect(new URL(getRealIframe(container)!.src).searchParams.get('hexBgColor')).toBe('fbfff2');
+    iframeContext = { ...iframeContext, cssString: ':host { --ov25-configurator-iframe-background-color: #abcdef !important }' };
+    rerender(<><div id="ov25-configurator-background-color" style={{ backgroundColor: '#abcdef' }} /><IframeContainer /></>);
+    expect(new URL(getRealIframe(container)!.src).searchParams.get('hexBgColor')).toBe('abcdef');
+  });
+
+  it('delays navigation until positioned and retains the same iframe through drawer transitions', () => {
+    const { container, rerender } = render(<IframeContainer ready={false} />);
+    const iframe = getRealIframe(container)!;
+    expect(iframe).not.toHaveAttribute('src');
+    rerender(<IframeContainer ready />);
+    const src = iframe.getAttribute('src');
+    expect(src).toBeTruthy();
+    for (const open of [true, false, true, false]) {
+      iframeContext.isDrawerOrDialogOpen = open;
+      rerender(<IframeContainer ready />);
+      expect(getRealIframe(container)).toBe(iframe);
+      expect(iframe).toHaveAttribute('src', src!);
+    }
+  });
+
   it('titles a loaded single-product configurator from the current product', () => {
     iframeContext = createContext({
       productLink: '/product/58?configuration=abc#viewer',

@@ -1,3 +1,4 @@
+import { normalizeBrandingFonts, prepareBrandingFontCSS } from '../utils/branding-fonts.js';
 import type { Swatch, SwatchRulesData } from '../contexts/ov25-ui-context.js';
 import type { BedAllowNonePartsInput } from '../lib/config/bed-embed-query.js';
 import { serializeBedAllowNoneQueryValue } from '../lib/config/bed-embed-query.js';
@@ -265,10 +266,20 @@ export interface CallbacksConfig {
   onChange?: (payload: OnChangePayload) => void;
 }
 
+/** An observed font file; runtime loads an isolated family in the containing document. */
+export interface BrandingFont {
+  family: string;
+  url: string;
+  weight?: string;
+  style?: 'normal' | 'italic' | 'oblique';
+  unicodeRange?: string;
+}
+
 export type BrandingConfig = {
   logoURL?: string;
   mobileLogoURL?: string;
   cssString?: string;
+  fonts?: BrandingFont[];
   hideLogo?: boolean;
 };
 
@@ -387,6 +398,7 @@ export interface LegacyInjectConfiguratorOptions {
   logoURL?: string;
   mobileLogoURL?: string;
   cssString?: string;
+  fonts?: BrandingFont[];
   hideLogo?: boolean;
 
   hidePricing?: boolean;
@@ -478,6 +490,7 @@ export interface NormalizedInjectConfig {
   logoURL?: string;
   mobileLogoURL?: string;
   cssString?: string;
+  fonts?: BrandingFont[];
   hideLogo: boolean;
 
   hidePricing?: boolean;
@@ -701,7 +714,8 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
 
   const logoURL = branding?.logoURL ?? c.logoURL;
   const mobileLogoURL = branding?.mobileLogoURL ?? c.mobileLogoURL;
-  const cssString = branding?.cssString ?? c.cssString;
+  const fonts = normalizeBrandingFonts(branding?.fonts ?? c.fonts);
+  const cssString = prepareBrandingFontCSS(branding?.cssString ?? c.cssString, fonts);
   const hideLogo = Boolean(branding?.hideLogo ?? c.hideLogo);
 
   const hidePricing = flags?.hidePricing ?? c.hidePricing;
@@ -789,6 +803,7 @@ export function normalizeInjectConfig(opts: InjectConfiguratorInput): Normalized
     logoURL,
     mobileLogoURL,
     cssString,
+    ...(fonts.length ? {fonts} : {}),
     hideLogo,
     hidePricing,
     disableAddToCart,

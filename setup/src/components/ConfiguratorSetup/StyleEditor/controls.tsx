@@ -34,7 +34,7 @@ const VARIANT_OUTLINE_GRADIENT = 'linear-gradient(90deg, #26E8FE 0%, #808AFF 50%
 
 export function StyleColorControl({ variable, value, defaultValue, onChange }: { variable: StyleVariable; value: string | undefined; defaultValue: string; onChange: (value: string) => void }) {
   const current = value ?? defaultValue;
-  const isModified = !!value && value !== defaultValue;
+  const isModified = Boolean(value);
   const isVariantOutline = variable.variable === '--ov25-highlight-color';
   return (
     <ControlRow label={variable.label} isModified={isModified} onReset={() => onChange('')}>
@@ -50,7 +50,7 @@ export function StyleColorControl({ variable, value, defaultValue, onChange }: {
 
 export function StyleCornerControl({ variable, value, defaultValue, onChange }: { variable: StyleVariable; value: string | undefined; defaultValue: string; onChange: (value: string) => void }) {
   const current = value || defaultValue;
-  const isModified = !!value && value !== defaultValue;
+  const isModified = Boolean(value);
   return (
     <ControlRow label={variable.label} isModified={isModified} onReset={() => onChange('')}>
       <div className="flex gap-1">
@@ -84,7 +84,7 @@ function parseNumericValue(val: string): number {
 export function StyleSliderControl({ variable, value, defaultValue, onChange }: { variable: StyleVariable; value: string | undefined; defaultValue: string; onChange: (value: string) => void }) {
   const current = value || defaultValue;
   const numericValue = parseNumericValue(current);
-  const isModified = !!value && value !== defaultValue;
+  const isModified = Boolean(value);
   // Empty string is intentional for unitless CSS values such as grid column counts.
   const unit = variable.sliderUnit ?? 'px';
   const min = variable.sliderMin ?? 0;
@@ -105,15 +105,20 @@ export function StyleSliderControl({ variable, value, defaultValue, onChange }: 
   );
 }
 
-export function StyleFontControl({ variable, value, defaultValue, onChange }: { variable: StyleVariable; value: string | undefined; defaultValue: string; onChange: (value: string) => void }) {
+export function StyleFontControl({ variable, value, defaultValue, onChange, fontOptions = [] }: { variable: StyleVariable; value: string | undefined; defaultValue: string; onChange: (value: string) => void; fontOptions?: {value: string; label: string}[] }) {
   const current = value || defaultValue;
-  const isModified = !!value && value !== defaultValue;
+  const isModified = Boolean(value);
+  const choices = [...fontOptions, ...FONT_OPTIONS];
+  if (!choices.some(font => font.value === current)) {
+    choices.push({value: current, label: current.split(',')[0].replace(/['"]/g, '')});
+  }
+  const uniqueChoices = choices.filter((font, index) => choices.findIndex(item => item.value === font.value) === index);
   return (
     <ControlRow label={variable.label} isModified={isModified} onReset={() => onChange('')}>
       <Select value={current} onValueChange={onChange}>
         <SelectTrigger className="h-7 w-[130px] text-xs"><SelectValue /></SelectTrigger>
         <SelectContent>
-          {FONT_OPTIONS.map((font) => (
+          {uniqueChoices.map((font) => (
             <SelectItem key={font.value} value={font.value}><span style={{ fontFamily: font.value }}>{font.label}</span></SelectItem>
           ))}
         </SelectContent>
@@ -122,13 +127,21 @@ export function StyleFontControl({ variable, value, defaultValue, onChange }: { 
   );
 }
 
-export function StyleControl({ variable, value, onChange }: { variable: StyleVariable; value: string | undefined; onChange: (value: string) => void }) {
+export function StyleControl({ variable, value, onChange, fontOptions }: { variable: StyleVariable; value: string | undefined; onChange: (value: string) => void; fontOptions?: {value: string; label: string}[] }) {
   const props = { variable, value, defaultValue: variable.defaultValue, onChange };
   switch (variable.control) {
     case 'color': return <StyleColorControl {...props} />;
     case 'corner': return <StyleCornerControl {...props} />;
     case 'slider': return <StyleSliderControl {...props} />;
-    case 'font': return <StyleFontControl {...props} />;
+    case 'font': return <StyleFontControl {...props} fontOptions={fontOptions} />;
+    case 'select': return (
+      <ControlRow label={variable.label} isModified={Boolean(value)} onReset={() => onChange('')}>
+        <Select value={value || variable.defaultValue} onValueChange={onChange}>
+          <SelectTrigger className="h-7 w-[130px] text-xs"><SelectValue /></SelectTrigger>
+          <SelectContent>{variable.options?.map(option => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectContent>
+        </Select>
+      </ControlRow>
+    );
   }
 }
 

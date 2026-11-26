@@ -5,6 +5,7 @@ import sofaImage from '../src/images/sofa.png';
 import '../src/index.css';
 
 const DEMO_RETAILER_APIKEY = import.meta.env.VITE_DEMO_RETAILER_APIKEY;
+const BRANDED_FURNITURE_APIKEY = import.meta.env.VITE_THE_BRANDED_FURNITURE_APIKEY;
 
 /**
  * The strip reads: material shot, first host image, 360, four cutouts, then the remaining host
@@ -27,8 +28,8 @@ const maxImages = Number.parseInt(qs.get('maxImages') ?? '', 10) || 8;
 const galleryLayout = qs.get('layout') === 'stacked' ? 'stacked' : 'carousel';
 
 const config = /** @type {import('ov25-ui').InjectConfiguratorInput} */ ({
-  apiKey: () => DEMO_RETAILER_APIKEY,
-  productLink: () => '58',
+  apiKey: () => BRANDED_FURNITURE_APIKEY,
+  productLink: () => '6432',
   images: DEMO_GALLERY_IMAGES,
   selectors: {
     gallery: { selector: '.configurator-container', replace: true },
