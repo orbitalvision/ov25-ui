@@ -9,9 +9,9 @@ import { buildFormStateFromInitialPayload } from '../../setup/src/components/Con
 const font = { family: 'Theme Serif', url: 'https://cdn.example.com/serif.woff2', weight: '400' };
 
 describe('theme fonts', () => {
-  it('accepts observed HTTPS and loopback font sources but refuses unsafe URLs and descriptors', () => {
-    expect(normalizeBrandingFonts([font, {...font, url: 'http://localhost:3000/font.woff2'}])).toHaveLength(2);
-    for (const url of ['data:font/woff;base64,a', 'javascript:alert(1)', 'http://example.com/font.woff2', 'https://user:secret@example.com/font.woff2', '//example.com/font.woff2']) {
+  it('accepts observed HTTPS font sources and refuses unsafe URLs and descriptors', () => {
+    expect(normalizeBrandingFonts([font, {...font, url: 'https://cdn.example.com/serif-italic.woff2'}])).toHaveLength(2);
+    for (const url of ['data:font/woff;base64,a', 'javascript:alert(1)', 'http://example.com/font.woff2', 'http://localhost:3000/font.woff2', 'http://127.0.0.1:3008/font.woff2', 'https://user:secret@example.com/font.woff2', '//example.com/font.woff2']) {
       expect(normalizeBrandingFonts([{...font, url}])).toEqual([]);
     }
     expect(normalizeBrandingFonts([{...font, weight: '400);color:red'}, {...font, family: "Font'; background: red"}])).toEqual([]);

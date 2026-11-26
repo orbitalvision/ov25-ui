@@ -4,8 +4,8 @@ import settings from './iframe-framing-settings.json';
 const params = new URLSearchParams(window.location.search);
 const modes = ['sticky', 'sheet', 'carousel', 'stacked'];
 const mode = modes.includes(params.get('mode')) ? params.get('mode') : 'sticky';
-// Public storefront embed key for the original small-model reproduction product.
-const key = '161-7de66a5fc09a77028f1755e92dfe7cc22d9270592ec96607e21f9a139062f6cd';
+// The storefront embed key for the original small-model reproduction product, kept out of the repository.
+const key = import.meta.env.VITE_IFRAME_FRAMING_APIKEY;
 const product = '10127';
 const plain = document.querySelector('#framing-plain');
 const output = document.querySelector('#framing-measurements');
@@ -62,6 +62,7 @@ const timer = setInterval(sample, 50);
 window.addEventListener('pagehide', () => clearInterval(timer), { once: true });
 if (import.meta.hot) import.meta.hot.dispose(() => clearInterval(timer));
 
+if (!key) log('Set VITE_IFRAME_FRAMING_APIKEY in ov25-ui/.env, then restart Vite.');
 injectConfigurator({
   apiKey: () => key,
   productLink: () => product,

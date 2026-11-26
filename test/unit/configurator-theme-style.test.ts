@@ -89,7 +89,7 @@ describe('theme styling contract', () => {
     for (const style of [{ customCss: 'body{display:none}' }, { '--ov25-variants-per-row': '6' }, { '--ov25-cta-color': '#000000; color:red' }, { '--ov25-360-font-family': 'url(https://example.com)' }]) {
       expect(() => validateThemeStyleProposal({ ...proposal, style })).toThrow();
     }
-    for (const url of ['javascript:alert(1)', 'http://public.example.com/font.woff2', 'file:///tmp/font.woff2', 'https://user:pass@example.com/a']) {
+    for (const url of ['javascript:alert(1)', 'http://public.example.com/font.woff2', 'http://localhost:3000/font.woff2', 'file:///tmp/font.woff2', 'https://user:pass@example.com/a']) {
       expect(() => validateThemeStyleProposal({ ...proposal, fonts: [{ family: 'Font', url }] })).toThrow();
     }
     expect(() => validateThemeStyleProposal({ ...proposal, source: { ...proposal.source, label: {} as string } })).toThrow();
