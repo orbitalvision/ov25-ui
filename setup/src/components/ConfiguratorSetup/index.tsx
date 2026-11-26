@@ -148,7 +148,7 @@ export function LivePreviewAction({ config, state, simple, primary, toolbar }: {
     }
   };
   const retryOnClick = simple && unavailable && !!config.onRetry;
-  const previewButton = <Button type="button" variant={primary ? 'default' : 'outline'} size={toolbar ? 'sm' : undefined} className={toolbar || (simple && config.mobile) ? undefined : 'w-full'} disabled={pending || config.disabled || checking || (unavailable && !retryOnClick)} onClick={retryOnClick ? retry : request}>
+  const previewButton = <Button type="button" variant={primary ? 'default' : 'outline'} size={toolbar ? 'sm' : undefined} className={toolbar ? 'h-8 gap-1.5 rounded-full border-input bg-white px-3 text-xs font-medium shadow-none hover:bg-accent [&_svg]:size-3.5' : simple && config.mobile ? undefined : 'w-full'} disabled={pending || config.disabled || checking || (unavailable && !retryOnClick)} onClick={retryOnClick ? retry : request}>
       {pending || checking ? <Spinner aria-hidden size={16} /> : <ExternalLink className="h-4 w-4" />}
       {checking ? (simple ? 'Checking…' : 'Checking site preview…') : pending ? (simple ? 'Opening…' : 'Opening site preview…') : config.label ?? (config.status === 'ready' && !autoUpdate ? 'Update site preview' : 'Open site preview')}
     </Button>;
