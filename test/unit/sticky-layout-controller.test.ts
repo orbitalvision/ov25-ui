@@ -6,6 +6,7 @@ import {
   findSufficientStickyBoundary,
   getStickyHostNaturalDocumentTop,
   observeStickyHostNaturalDocumentTop,
+  setNativeStickyGalleryWrapperActive,
   OV25_INJECTOR_OWNED_ATTRIBUTE,
   STICKY_OPTION_HEADER_PINNED_ATTRIBUTE,
   type StickyLayoutDiagnostic,
@@ -905,6 +906,218 @@ describe('sticky layout controller lifecycle', () => {
     expect(layout.variants.style.getPropertyValue('--ov25-sticky-option-header-height')).toBe(
       '27px',
     );
+  });
+
+  it('keeps the mobile gallery inset steady as a header scrolls away and tracks it again when pinned', () => {
+    const { header, gallery, product, variants } = installLayout();
+    product.prepend(gallery);
+    gallery.setAttribute('data-ov25-inline-sticky-mobile', 'true');
+    header.style.cssText = 'position: sticky; top: auto; bottom: auto';
+    const controller = createStickyLayoutController({
+      document, galleryHost: gallery, variantsHost: variants, topGapOverride: 0,
+      onDiagnostic: () => {},
+    });
+    const galleryTop = () => gallery.style.getPropertyValue('--ov25-sticky-top');
+    controller.start();
+    flushFrame();
+    expect(galleryTop()).toBe('0px');
+
+    vi.mocked(header.getBoundingClientRect).mockReturnValue(domRect(-40, 72));
+    vi.mocked(product.getBoundingClientRect).mockReturnValue(domRect(-140, 900));
+    controller.scheduleMeasure();
+    flushFrame();
+    expect(controller.getSnapshot().headerOffset).toBe(32);
+    expect(galleryTop()).toBe('0px');
+
+    header.style.top = '0px';
+    controller.scheduleMeasure();
+    flushFrame();
+    expect(galleryTop()).toContain('var(--ov25-sticky-header-offset');
+    controller.destroy();
+  });
+
+  it('scopes mobile gallery offsets to headings and restores them across list and viewport changes', () => {
+    const layout = installLayout();
+    layout.gallery.dataset.ov25InlineStickyMobile = 'true';
+    const shadow = layout.variants.attachShadow({ mode: 'open' });
+    shadow.innerHTML = `<div class="ov25-inline-sticky-list-mobile">
+      <h3 class="ov25-option-header">Fabrics</h3>
+      <h4 class="ov25-group-header">Linens</h4>
+      <div class="ov25-variant-card-grid"><button>Fabric</button></div>
+    </div>`;
+    const option = shadow.querySelector<HTMLElement>('h3')!;
+    const group = shadow.querySelector<HTMLElement>('h4')!;
+    const property = '--ov25-sticky-gallery-bottom';
+    group.style.setProperty(property, '20px', 'important');
+    const controller = createStickyLayoutController({
+      document,
+      galleryHost: layout.gallery,
+      variantsHost: layout.variants,
+      optionHeader: option,
+      onDiagnostic: () => {},
+    });
+    controller.start();
+    flushFrame();
+    expect(option.style.getPropertyValue(property)).toBe('500px');
+    expect(group.style.getPropertyValue(property)).toBe('500px');
+    expect(layout.gallery.style.getPropertyValue(property)).toBe('');
+    expect(layout.variants.style.getPropertyValue(property)).toBe('');
+
+    vi.mocked(layout.gallery.getBoundingClientRect).mockReturnValue(domRect(0, 400, 520, 80));
+    const newGroup = document.createElement('h4');
+    newGroup.className = 'ov25-group-header';
+    group.replaceWith(newGroup);
+    controller.scheduleMeasure();
+    flushFrame();
+    expect(option.style.getPropertyValue(property)).toBe('400px');
+    expect(newGroup.style.getPropertyValue(property)).toBe('400px');
+    expect(group.style.getPropertyValue(property)).toBe('20px');
+    expect(group.style.getPropertyPriority(property)).toBe('important');
+    expect(layout.variants.style.getPropertyValue(property)).toBe('');
+
+    delete layout.gallery.dataset.ov25InlineStickyMobile;
+    controller.scheduleMeasure();
+    flushFrame();
+    expect(option.style.getPropertyValue(property)).toBe('');
+    expect(newGroup.style.getPropertyValue(property)).toBe('');
+
+    layout.gallery.dataset.ov25InlineStickyMobile = 'true';
+    controller.scheduleMeasure();
+    flushFrame();
+    expect(option.style.getPropertyValue(property)).toBe('400px');
+    controller.destroy();
+    expect(option.style.getPropertyValue(property)).toBe('');
+    expect(newGroup.style.getPropertyValue(property)).toBe('');
+  });
+
+  it('scopes mobile header motion to headings without changing gallery offsets and restores desktop ownership', () => {
+    const layout = installLayout();
+    const property = '--ov25-sticky-header-offset';
+    layout.variants.style.setProperty(property, '7px', 'important');
+    const shadow = layout.variants.attachShadow({ mode: 'open' });
+    shadow.innerHTML = '<div class="ov25-inline-sticky-list-mobile"><h3 class="ov25-option-header">Fabrics</h3><h4 class="ov25-group-header">Linens</h4></div>';
+    const heading = shadow.querySelector<HTMLElement>('h3')!;
+    const group = shadow.querySelector<HTMLElement>('h4')!;
+    heading.style.setProperty(property, '3px', 'important');
+    heading.style.setProperty('--ov25-sticky-top', '9px', 'important');
+    const controller = createStickyLayoutController({
+      document, galleryHost: layout.gallery, variantsHost: layout.variants,
+      optionHeader: heading, onDiagnostic: () => {},
+    });
+    controller.start();
+    flushFrame();
+    expect(layout.variants.style.getPropertyValue(property)).toBe('72px');
+
+    layout.gallery.dataset.ov25InlineStickyMobile = 'true';
+    controller.scheduleMeasure();
+    flushFrame();
+    expect(layout.variants.style.getPropertyValue(property)).toBe('7px');
+    expect(layout.variants.style.getPropertyPriority(property)).toBe('important');
+    const hostWrites = vi.spyOn(layout.variants.style, 'setProperty');
+    vi.mocked(layout.header.getBoundingClientRect).mockReturnValue(domRect(-40, 72));
+    controller.scheduleMeasure();
+    flushFrame();
+    expect(controller.getSnapshot().headerOffset).toBe(32);
+    expect(layout.gallery.style.getPropertyValue(property)).toBe('32px');
+    expect(layout.variants.style.getPropertyValue(property)).toBe('7px');
+    expect(hostWrites.mock.calls.filter(([name]) => name === property)).toEqual([]);
+    for (const el of [heading, group]) {
+      expect(el.style.getPropertyValue(property)).toBe('32px');
+      expect(el.style.getPropertyValue('--ov25-sticky-top')).toContain('var(--ov25-sticky-header-offset');
+      expect(el.style.getPropertyValue('--ov25-sticky-gallery-bottom')).toBe('500px');
+    }
+
+    const replacement = document.createElement('h4');
+    replacement.className = 'ov25-group-header';
+    group.replaceWith(replacement);
+    controller.scheduleMeasure();
+    flushFrame();
+    expect(group.style.getPropertyValue(property)).toBe('');
+    expect(replacement.style.getPropertyValue(property)).toBe('32px');
+
+    delete layout.gallery.dataset.ov25InlineStickyMobile;
+    controller.scheduleMeasure();
+    flushFrame();
+    expect(layout.variants.style.getPropertyValue(property)).toBe('32px');
+    expect(heading.style.getPropertyValue(property)).toBe('3px');
+    expect(heading.style.getPropertyPriority(property)).toBe('important');
+    expect(heading.style.getPropertyValue('--ov25-sticky-top')).toBe('9px');
+    expect(heading.style.getPropertyPriority('--ov25-sticky-top')).toBe('important');
+
+    layout.gallery.dataset.ov25InlineStickyMobile = 'true';
+    controller.scheduleMeasure();
+    flushFrame();
+    const newHost = document.createElement('div');
+    layout.variants.after(newHost);
+    setRect(newHost, 100, 700, 520, 640);
+    newHost.style.setProperty(property, '11px', 'important');
+    newHost.innerHTML = '<div class="ov25-inline-sticky-list-mobile"><h3 class="ov25-option-header">Replacement</h3></div>';
+    const newHeading = newHost.querySelector<HTMLElement>('h3')!;
+    controller.setElements({ variantsHost: newHost, optionHeader: newHeading });
+    flushFrame();
+    expect(layout.variants.style.getPropertyValue(property)).toBe('7px');
+    expect(heading.style.getPropertyValue(property)).toBe('3px');
+    expect(newHost.style.getPropertyValue(property)).toBe('11px');
+    expect(newHeading.style.getPropertyValue(property)).toBe('32px');
+    controller.destroy();
+    expect(layout.variants.style.getPropertyValue(property)).toBe('7px');
+    expect(heading.style.getPropertyValue(property)).toBe('3px');
+    expect(replacement.style.getPropertyValue(property)).toBe('');
+    expect(newHost.style.getPropertyPriority(property)).toBe('important');
+    expect(newHeading.style.getPropertyValue(property)).toBe('');
+  });
+
+  it('retains live header offsets on shared gallery/controls hosts and mobile controls without page-scrolling headings', () => {
+    const layout = installLayout();
+    layout.gallery.dataset.ov25InlineStickyMobile = 'true';
+    const controller = createStickyLayoutController({
+      document, galleryHost: layout.gallery, variantsHost: layout.variants,
+      onDiagnostic: () => {},
+    });
+    controller.start();
+    flushFrame();
+    expect(layout.variants.style.getPropertyValue('--ov25-sticky-header-offset')).toBe('72px');
+    layout.gallery.innerHTML = '<div class="ov25-inline-sticky-list-mobile"><h3 class="ov25-option-header">Fabrics</h3></div>';
+    controller.setElements({ variantsHost: layout.gallery });
+    vi.mocked(layout.header.getBoundingClientRect).mockReturnValue(domRect(-40, 72));
+    flushFrame();
+    expect(layout.gallery.style.getPropertyValue('--ov25-sticky-header-offset')).toBe('32px');
+    controller.destroy();
+  });
+
+  it('keeps native mobile heading insets stable during scroll but follows gallery resizing', () => {
+    const layout = installLayout();
+    layout.gallery.dataset.ov25InlineStickyMobile = 'true';
+    const wrapper = document.createElement('div');
+    wrapper.style.cssText = 'position: sticky; top: 12px';
+    layout.gallery.before(wrapper);
+    wrapper.append(layout.gallery);
+    setRect(wrapper, 100, 400);
+    setNativeStickyGalleryWrapperActive(wrapper, true);
+    const shadow = layout.variants.attachShadow({ mode: 'open' });
+    shadow.innerHTML = '<div class="ov25-inline-sticky-list-mobile"><h3 class="ov25-option-header">Fabrics</h3></div>';
+    const header = shadow.querySelector<HTMLElement>('h3')!;
+    const controller = createStickyLayoutController({
+      document, galleryHost: layout.gallery, variantsHost: layout.variants,
+      optionHeader: header, onDiagnostic: () => {},
+    });
+    controller.start();
+    flushFrame();
+    expect(header.style.getPropertyValue('--ov25-sticky-gallery-bottom')).toBe('412px');
+    vi.mocked(layout.gallery.getBoundingClientRect).mockReturnValue(domRect(-80, 400));
+    controller.scheduleMeasure();
+    flushFrame();
+    expect(header.style.getPropertyValue('--ov25-sticky-gallery-bottom')).toBe('412px');
+    vi.mocked(layout.gallery.getBoundingClientRect).mockReturnValue(domRect(-80, 300));
+    controller.scheduleMeasure();
+    flushFrame();
+    expect(header.style.getPropertyValue('--ov25-sticky-gallery-bottom')).toBe('312px');
+    setNativeStickyGalleryWrapperActive(wrapper, false);
+    controller.scheduleMeasure();
+    flushFrame();
+    expect(header.style.getPropertyValue('--ov25-sticky-gallery-bottom')).toBe('220px');
+    controller.destroy();
+    expect(header.style.getPropertyValue('--ov25-sticky-gallery-bottom')).toBe('');
   });
 
   it('uses gap overrides and owns the measured viewport geometry', () => {

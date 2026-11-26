@@ -27,7 +27,7 @@ export interface SelectorDiscoveryTarget {
 /** A proposal contains selector strings and their evidence, never code or CSS. */
 export interface SelectorDiscoveryProposal {
   schemaVersion: 1;
-  source: { id: string; label: string; kind: 'local-theme'; fingerprint: string; files: string[] };
+  source: { id: string; label: string; kind: 'local-theme' | 'shopify-theme'; fingerprint: string; files: string[]; shopify?: { shopifyStoreId: number; themeId: string; templateFilename: string } };
   method: 'ai' | 'source';
   generatedAt: string;
   warnings: string[];
@@ -95,11 +95,18 @@ export function isSafeSelectorDiscoverySelector(selector: string): boolean {
 }
 
 /** Validate responses and cached proposals at the shared UI boundary. Unknown fields fail closed. */
+function validShopifyProvenance(value: unknown): boolean {
+  return isRecord(value) && hasOnlyKeys(value, ['shopifyStoreId', 'themeId', 'templateFilename'])
+    && Number.isSafeInteger(value.shopifyStoreId) && boundedText(value.themeId, 100) && boundedText(value.templateFilename, 200);
+}
+
 export function validateSelectorDiscoveryProposal(value: unknown): SelectorDiscoveryProposal {
   const invalid = () => new Error('The theme analysis returned invalid page placements. Please try again.');
   if (!isRecord(value) || !hasOnlyKeys(value, ['schemaVersion', 'source', 'method', 'generatedAt', 'warnings', 'targets']) ||
       value.schemaVersion !== 1 || !isRecord(value.source) ||
-      !hasOnlyKeys(value.source, ['id', 'label', 'kind', 'fingerprint', 'files']) || value.source.kind !== 'local-theme' ||
+      !hasOnlyKeys(value.source, ['id', 'label', 'kind', 'fingerprint', 'files', 'shopify']) || !['local-theme', 'shopify-theme'].includes(value.source.kind as string) ||
+      // Optional Shopify provenance the OV25 server adds (store, theme and template the suggestions were read from).
+      (value.source.shopify !== undefined && !validShopifyProvenance(value.source.shopify)) ||
       !boundedText(value.source.id, 100) || !boundedText(value.source.label, 200) || !boundedText(value.source.fingerprint, 128) ||
       !fileList(value.source.files) || !['ai', 'source'].includes(value.method as string) ||
       !boundedText(value.generatedAt, 100) || !Number.isFinite(Date.parse(value.generatedAt)) ||

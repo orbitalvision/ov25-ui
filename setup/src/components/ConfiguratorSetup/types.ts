@@ -21,7 +21,15 @@ export interface SelectorFormState {
   replace: boolean;
 }
 
+/** Per-theme placement overrides keyed by numeric Shopify theme id; only differing slots. */
+export type ThemeSelectorOverrides = Record<string, Partial<Record<keyof TypeSettings['selectors'], SelectorFormState>>>;
+
 export interface TypeSettings {
+  /**
+   * Overrides for themes other than the live one. `selectors` stays the live theme's values,
+   * so storefronts on plugin versions without theme lookup keep working.
+   */
+  themeSelectors?: ThemeSelectorOverrides;
   selectors: {
     gallery: SelectorFormState;
     price: SelectorFormState;
@@ -163,13 +171,14 @@ const DEFAULT_SNAP2_SETTINGS: TypeSettings = {
   },
 };
 
-/** Single-product bed flow: same shell as standard, with configure trigger and bed preview selectors. */
+/**
+ * Single-product bed flow: same shell and placements as standard. Its configure button used to default on, pointing
+ * at `#ov25-fullscreen-button` (an id only the dev test pages provide); it's off like Standard's, and the options
+ * slot carries the trigger in sheet, drawer and modal layouts. Settings saved with a button keep it.
+ */
 const DEFAULT_BED_CONFIGURATOR_SETTINGS: TypeSettings = {
   ...DEFAULT_STANDARD_SETTINGS,
-  selectors: {
-    ...DEFAULT_STANDARD_SETTINGS.selectors,
-    configureButton: { enabled: true, selector: '#ov25-fullscreen-button', replace: false },
-  },
+  selectors: { ...DEFAULT_STANDARD_SETTINGS.selectors },
   branding: {
     ...DEFAULT_STANDARD_SETTINGS.branding,
     cssString: 'ov25-selection-thumbnail: bg-white;',

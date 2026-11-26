@@ -1,9 +1,36 @@
 # Preset-first OV25 setup with client-site previews
 
-Status: implemented and being preserved on feature branches with draft pull requests across all three repositories. Awaiting review and development-store testing; nothing has been published or deployed.
-Last updated: 8 October 2026.
+Status: implemented on feature branches with draft pull requests in all three repositories (orbitalvision/OV25#530, orbitalvision/ov25-ui#11, orbitalvision/shopify-plugin#4); the most recent work is still uncommitted in the local checkouts. Development-store testing is under way on the dev retailer apps. Nothing has been released to production or deployed to a client store.
+Last updated: 20 November 2026.
 
 This is the master plan for changes across `ov25-ui`, `OV25`, and `shopify-plugin`. It supersedes the earlier live-preview branch proposals. The separate root `plan.md` remains the responsive-layout plan.
+
+## Current state — 20 November 2026
+
+The Shopify portal no longer walks merchants through the picker flow in the Summary below. It uses a two-step **guided setup**: **Choose theme** (copy or confirm a theme, activate the app embed, prepare the OV25 product template, product blocks, cart and checkout, and the OV25 Test Product), then **Automatic setup**. Each type starts from the In-page preset, Match my site runs automatically and applies straight to the draft with Undo, and the step is preview-first. The preset picker, Match my site and the editor described below remain the Advanced setup and non-Shopify path. The guided flow, its constraints and its "remove before release" list are in `OV25/docs/shopify-guided-setup-handoff-2026-10-29.md`.
+
+Added since 20 October (details in that handoff):
+
+- 29 October: the palette review screen and the placement review were removed. Only high-confidence placement suggestions on new setups, or theme overrides on a non-live theme, apply automatically. Sections below that describe those review screens are kept as history.
+- Theme preparation and theme copying, cart and checkout preparation, the OV25 Test Product, Link Products assigning the OV25 template, and Go live theme publishing.
+- Local storefront verification and **Ask for changes**: a sandboxed browser checks the storefront, and the agent can apply CSS or theme edits. It runs only on the local development server (see Release blockers).
+- Dev-store plugin builds are made from the local `ov25-ui` working tree and registered as `OV25/lib/shopify/runtime-builds/demo-local-vN.json`. The current prepared build is v25 (`shopify-16ec54f6dc33bfca955a0b7c`); see `shopify-plugin/DEV-STORE-DEPLOY.md`.
+- 20 November fixes, found in dev-store run-throughs and not yet retested there:
+  - Shopify can serve the old theme file for a few seconds after accepting a write. Theme writes now wait for Shopify's write job, and guided setup re-checks for up to 15 seconds before showing a manual fallback card such as "Product options".
+  - Browsers pause a background tab's animation frames, so a preview reloaded behind setup cannot mount until it is viewed. The plugin now counts its 25-second mount timeout only while the preview tab is visible, and setup no longer says "the storefront may need a plugin update" while a loaded tab is still mounting. The plugin part ships in v25.
+  - The activation step's demo video now waits for the loading overlay to clear.
+
+## Shopify theme integration update — 20 October 2026
+
+The production Shopify portal now wires **Match my site** through `useConfiguratorThemeStyling` and the authenticated `/api/shopify/configurator-theme` endpoint. This completes the host integration described as pending in the historical local-review sections below; matching real stores has not yet been tested.
+
+- Reads the published theme and the preview product's actual assigned template, falling back to the default product template only when no product is selected. Theme source remains read-only; setup never invokes the patcher.
+- Shares bounded source downloads between separate colour and selector analyses. A placement-analysis failure leaves the palette usable. Shopify source provenance is accepted by setup; remote font files are not downloaded and typography limitations are shown.
+- Direct keyed metafield reads classify existing/default/product/legacy settings. Persisted empty values count as existing; failed or incomplete reads stay unknown. Only confirmed absence permits automatic inclusion of untouched placement defaults, and all changes still wait for Apply to draft and Save.
+- Tracks manually changed or cleared host integration fields, keeps product editors' global fields read-only, and rechecks source/saved-state identities before and after AI analysis. Target changes cancel pending requests; stale contexts require retry.
+- Requires the connected store's `read_themes` or `write_themes` scope. Uses the existing Gemini configuration. Local tests mock both Shopify and AI; no live stores or production database were contacted.
+
+Remaining release work is tracked under Validation and rollout (status, release blockers and rollout order, updated 20 November). *Superseded:* password-protected storefronts no longer simply fail the anonymous preflight. It reports that the store needs unlocking, and preview support is checked after the merchant enters the password in the preview tab. As of 20 October, accepting a verified Shopify visitor preview link was a proposed dev-store follow-up and had not been implemented.
 
 ## Summary
 
@@ -19,7 +46,7 @@ OV25 is deployed centrally, while clients adopt Shopify-plugin and its bundled U
 
 | Preset | Standard / Bed: desktop → mobile | Snap2: desktop → mobile | Options |
 |---|---|---|---|
-| **In-page** | Standard: sticky inline → sticky inline; Bed: inline → inline | Inline → inline | Standard: list; Snap2/Bed: accordion |
+| **In-page** | Sticky inline → sticky inline (Bed matches Standard since 20 Nov) | Inline → inline | Standard/Bed: list; Snap2: accordion |
 | **Fullscreen** (Standard) / **Classic** (Snap2, Bed) | Sheet → drawer | Modal → drawer | Tree desktop, list mobile |
 | **Guided** | Modal → modal | Modal → modal | Wizard |
 | **Overview** | Sticky inline → sticky inline | Inline → inline | Guided overview |
@@ -149,15 +176,68 @@ The baseline is frozen. It does not advance when OV25 deploys, when new UI featu
 - Test that the fixed baseline does not gain future features automatically, including when a new field is added to setup defaults or a preset.
 - Test the first preview-capable release, subsequent protocol-compatible releases, unrecognised reported builds, stale cached reports, and plugin rollback.
 - Do not equate feature compatibility with theme-layout correctness; verify actual client selectors and styling in the site preview.
+- Run guided setup end to end for Standard, Snap2 and Bed: copied and existing themes, embed activation, automatic template and product blocks, cart and checkout preparation, the test product, automatic matching, the preview, Save, Link Products and Go live.
 - Run setup type checks, relevant unit/browser tests, React 19/React 18 builds, standalone/Shopify/WooCommerce host checks, and required OV25 permission checks.
+
+### Status at 26 November
+
+**Automated tests.** All pass on the three branches: OV25 8,356 unit tests (after merging `main`), ov25-ui 580, the plugin 116, and the storefront probe's own 131. OV25's full type check is clean; it needs more than Node's default memory since the merge, so the `type-check` script now sets it. The setup package's browser tests and end-to-end (Playwright) tests were not re-run.
+
+**Development store.** Guided Standard run-throughs on a dev retailer store (19–26 November) reached Automatic setup, the site preview, Ask for changes and Save. Snap2 reached its preview in a dialog. The store runs plugin v25; v28 is built and registered but not deployed (see `shopify-plugin/DEV-STORE-DEPLOY.md`).
+
+**Not yet verified on a real store:**
+
+- Plugin v26–v28: Snap2 previews no longer opening the dialog, Snap2 basket lines on the test product, and the empty price slot before a Snap2 dialog is opened.
+- Reopening a saved type (Edit) end to end, and Match my site again.
+- Bed guided setup with the In-page preset (sticky inline), and Bed visual QA. Bed fails like Snap2 did if the site match gives it no gallery placement.
+- The setup assistant on production infrastructure: only unit-tested with a fake table and a fake probe (see blocker 2).
+- OV25 cart pricing and checkout after cart preparation, without placing a real order.
+- The dedicated fabric samples page, Go live theme publishing and template assignment from Link Products.
+- The guided setup leave-page warning inside Shopify admin.
+- An old-plugin store: baseline presets and Save work, and site preview stays disabled.
+
+### Release blockers
+
+These must be resolved before the OV25 branch reaches production:
+
+1. **Production preview storage. Still to do (infrastructure).** The `shopify-configurator-previews` DynamoDB table does not exist yet. Its CloudFormation migration was generated on 22 October and has not been applied; see `OV25/docs/shopify-configurator-preview.md`. Neither site preview nor the setup assistant (which keeps its job records in the same table) can work in production without it. Other storage:
+   - **Postgres:** no migration. The objects the branch reuses, `organizations.organization_allowances` for assistant credit and the `shopify_theme_patch_state`, `_runs` and `_files` tables for theme preparation, already exist in production.
+   - **Shopify app access:** no change. The plugin branch leaves every app's access scopes as they are, so merchants won't need to re-approve the app.
+2. **Storefront agent. Built 26 November; needs a real run.** Final check and Ask for changes no longer require a development server. In production each run is a record in the preview DynamoDB table and is run by the internal `POST /api/shopify/storefront-agent/process` route (started with `after()`, `INTERNAL_API_SECRET`, `maxDuration = 800`), which settles the run's cost itself and frees the organisation. Details and decisions are in `OV25/docs/shopify-guided-setup-handoff-2026-10-29.md` (26 November). Differences from the 20 November plan: DynamoDB instead of the `aiJob` Postgres table (no migration, automatic expiry, no rows in the AI tools' lists); nothing sensitive stored at all (the password and run configuration travel only in the request that starts the worker); screenshots are not kept; a final check gets 12 minutes rather than 15. Before release:
+   - Confirm the production project has `INTERNAL_API_SECRET` (already used by other workers), and that the deployment's own OIDC identity may use AI Gateway and create Sandboxes.
+   - Do one real final check and one chat on the test organisation, on a production domain: the assistant refuses any other host (a Vercel preview deployment included), because the storefront only accepts drafts from OV25's own origins.
+   - Decide who watches for `[storefront-agent] run failed` in the logs. No alert is wired up.
+3. **Development-only code. Done, except the video.** The guided dev shortcuts and the temporary AI usage logging were removed on 26 November; `rg "REMOVE BEFORE RELEASE"` finds nothing.
+   - **Re-record the activation-step video** (`OV25/public/media/shopify-portal/activate-embed.m4v`) on a deployed site. It was recorded locally and shows Next.js's development badge throughout; a `BEFORE RELEASE` comment marks it in the portal page.
+4. **Local plugin builds. Still to do, after publishing.** Deregister them (Rollout order, step 4). They must stay until a build made against the published `ov25-ui` exists, or the dev stores lose site preview.
+5. **Merchant theme data sent to AI providers.** This is a business decision, not a code task. The note under Local source analysis records a development-time block: the coding agent's automatic review refused to send client theme snippets to Gemini without explicit approval. That was a tool restriction during development, not a decision about production use. What production does (checked 20 November):
+   - **Match my site** sends theme evidence to Google's Gemini Developer API, using API keys rather than Vertex AI (model `gemini-3.1-flash-lite`; production tries up to five backup keys in other Google Cloud projects before the main one). That evidence is at most 80 KiB of styling settings and CSS rules, plus sanitised markup outlines for placements; theme copy, URLs, scripts and secret-like settings are excluded. In guided setup it runs automatically when the merchant continues to Automatic setup.
+   - **Verify storefront and Ask for changes** send the merchant's request, the setup draft, up to 100 KB of the product template's theme files and storefront screenshots to OpenAI's Terra through Vercel AI Gateway, which can route each call to OpenAI, Azure or Amazon Bedrock.
+   - Merchants are not told: the guided flow does not mention AI analysis or any third party.
+
+   To decide before release:
+   - Whether OV25's merchant terms and privacy notice cover sending theme data, screenshots and requests to Google and OpenAI, or whether setup needs a notice or consent step. Check what Shopify's app terms require about sharing merchant data with third parties.
+   - Which Google terms apply to each Gemini key: under Google's Gemini API terms, free and paid use differ on whether content may be used to improve Google's products. Decide whether the backup keys' projects should receive merchant data at all.
+   - Whether to restrict AI Gateway to zero-data-retention providers: Gateway lists zero data retention for Terra's OpenAI and Azure endpoints, not Bedrock.
+6. **Findings from the 6 October review. Re-checked 26 November.**
+   - Changing between Snap2 Classic and In-page kept the old gallery and configure-button placements: fixed 20 November (the preset now decides which of the two is on, keeping the saved selectors).
+   - Setup drafts carrying over between stores: confirmed for Advanced setup when two stores or products have identical saved settings (their draft key is made from the settings alone). Fixed 26 November: the Shopify portal clears those drafts whenever its store or product changes. Guided setup's drafts were already scoped by store and theme.
+   - The compatibility check disabling Save after the portal hydrates from `_formState`: not reproduced and not changed. It needs a store on an older plugin build to check, which is also the old-plugin item under Status.
+
+Not blocking: skipping theme matching when the theme has not changed since the last match was agreed in principle and has not been built.
 
 ### Rollout order
 
-1. Ship backward-compatible embedded-preview improvements and the central host support, with old-client baseline behaviour in place.
-2. Ship the preset flow and optional setup interfaces without changing saved settings automatically.
-3. Build the reporting/preview-capable Shopify extension and publish its release manifest before deploying that build to any client.
-4. Prove the complete site-preview flow on one Shopify store, including draft updates and an old-plugin fallback.
-5. Update further clients independently. Site preview can be opened after a successful preflight and is confirmed only when the actual loaded runtime acknowledges the draft; clients not yet updated continue using baseline presets and the embedded demo.
+1. Finish the development-store checks above with the current local build, and bring all three branches up to date with `main`.
+2. Clear the release blockers.
+3. Publish `ov25-ui` (runtime and setup) and pin that version. The `update-ov25-ui-packages` workflow pushes the version bump straight to OV25 `main`, and `main`'s current Shopify portal loses its store and product controls after **Change preset** in the new setup. So that bump must not reach production before the OV25 branch does (step 5): pause the workflow for this release, or carry the bump on the OV25 branch.
+4. Build the reporting/preview-capable Shopify extension and publish its release manifest before deploying that build to any client.
+   - Build it against the **published** `ov25-ui` package (no `OV25_UI_LOCAL=1`), register only that manifest in `OV25/lib/shopify/runtime-builds`, and deploy it to the dev stores and the test organisation first.
+   - Then deregister every local development build before the OV25 branch merges: delete `demo-local-v*.json`, `browser-unlock-v1.json`, `preview-v1.json` and `preview-preflight-v1.json` (the last two are committed on the branch but were built against a local UI), and leave `index.ts` listing only release builds.
+   - The registry is read only by setup and site preview, never by storefronts. A store still running a deregistered build keeps rendering normally but loses site preview ("not been verified for preview support") and the newer style controls until it is redeployed.
+5. Merge and deploy OV25 with the old-client baseline behaviour in place, following OV25's shipping-to-production procedure (`.agents/skills/ov25-shipping-to-production/SKILL.md`).
+6. Prove the complete flow on one real store (the test organisation), including draft updates and an old-plugin fallback.
+7. Update further clients independently. Before updating a client's plugin, check their saved settings for `branding.hideLogo: true`: earlier plugins ignore it, the new one hides their logo. Site preview can be opened after a successful preflight and is confirmed only when the actual loaded runtime acknowledges the draft; clients not yet updated continue using baseline presets and the embedded demo.
 
 Defaults: four bundled presets per product type; no preset-management UI; embedded demo available unless hidden by the host; Shopify site preview in a separate tab with explicit updates; automatic build reporting rather than manual client-version tracking; fixed 29 September 2026 fallback feature baseline; Save remains the only action that publishes configuration changes.
 
@@ -180,6 +260,8 @@ Review the full-width picker, selection without application, Use preset, optiona
 
 The Shopify extension can be built against the existing local `ov25-ui/dist` with `OV25_UI_LOCAL=1 pnpm build` from `shopify-plugin/extensions/ov25-configurator`. Its generated `release-manifest.json` is copied into `OV25/lib/shopify/runtime-builds/preview-v1.json`. Recopy that manifest after any plugin/runtime rebuild that changes the build ID; future released manifests must be added rather than overwritten.
 
+*Superseded:* later local builds are registered as `demo-local-vN.json` (v25 on 20 November); the procedure is in `shopify-plugin/DEV-STORE-DEPLOY.md`. All local registrations, including `preview-v1.json`, are removed before release (Rollout order, step 4).
+
 Validation covers preset completeness and round trips, preserved settings, compatibility and reloads, actual Chromium editor flows, React 18 compatibility, Shopify host draft delivery and acknowledgements, session ownership/expiry/revisions/CORS, and the storefront adapter's normal and preview paths. Test files are under `ov25-ui/test/{unit,browser}`, `OV25/lib/shopify/configurator-preview`, `OV25/tests/unit/shopify-configurator-*`, and `shopify-plugin/tests/ov25-configurator`.
 
 Final local results: 102 setup unit tests; 20 browser tests run on both React 19 and React 18; 74 focused OV25 tests across the backend, demo and host; 33 Shopify adapter tests. The setup and local Shopify bundles build, and the complete OV25 TypeScript check passes. All eight Standard/Snap2 preset demos loaded real product data; their modal actions opened successfully. The desktop preview retains a desktop viewport when scaled into a narrow host.
@@ -188,9 +270,11 @@ Final local results: 102 setup unit tests; 20 browser tests run on both React 19
 
 The full real-store round trip still needs a Shopify store running the new extension. No client store has been updated in this task. An old extension without the rendered build marker should keep Open site preview disabled with support-not-detected guidance, while baseline presets and normal Save remain available. Runtime failures after a successful preflight must still time out without confirming draft application. Verify a successful initial preview, an explicit revision update, product-target changes, Global overrides, expiry and Exit preview when reviewing the updated extension.
 
-Temporary data uses the existing Dynamo temporary-store table, with namespaced keys and enforced 30-minute expiry. Enable its `ttl` cleanup attribute for eventual removal of abandoned rows. No Postgres migration is required. The OV25 permission coverage check still reports 25 unrelated pre-existing gaps; the new preview routes have registered coverage. The Shopify host page has seven pre-existing React-hook/compiler lint findings (eight on its original `HEAD`; removing the DOM portal eliminates one). New hook, backend and demo files pass their targeted lint checks, and the full OV25 TypeScript check passes. Protocol and deployment details live in `OV25/docs/shopify-configurator-preview.md` and `shopify-plugin/extensions/ov25-configurator/PREVIEW.md`.
+*Superseded:* previews now use the dedicated `shopify-configurator-previews` table (`dev-shopify-configurator-previews` with local DynamoDB), whose production provisioning is a release blocker. As originally implemented: temporary data uses the existing Dynamo temporary-store table, with namespaced keys and enforced 30-minute expiry. Enable its `ttl` cleanup attribute for eventual removal of abandoned rows. No Postgres migration is required. The OV25 permission coverage check still reports 25 unrelated pre-existing gaps; the new preview routes have registered coverage. The Shopify host page has seven pre-existing React-hook/compiler lint findings (eight on its original `HEAD`; removing the DOM portal eliminates one). New hook, backend and demo files pass their targeted lint checks, and the full OV25 TypeScript check passes. Protocol and deployment details live in `OV25/docs/shopify-configurator-preview.md` and `shopify-plugin/extensions/ov25-configurator/PREVIEW.md`.
 
 ## Theme colours and palette review — local implementation, 1 October 2026
+
+*Superseded 29 October:* the palette review screen (`ThemePalettePreview`), the Current/Suggested comparison and the `theme-palette` and `theme-button-animations` fixtures were removed (moved to `_to_delete/palette-removal-2026-10-29/`). Matching now applies straight to the draft with Undo, and the site preview is where the result is checked. The controls, fonts, button motion, compatibility rules and source analysis below still apply.
 
 ### Scope
 
@@ -216,7 +300,15 @@ Twenty-three new controls join the existing style registry:
 | Text | Compare-price and link colour |
 | Typography | Heading/button families; body/heading/button weights; button letter spacing and text case |
 
-Existing controls cover body font, page/viewer surfaces, primary/secondary button colours, hover/disabled backgrounds, corners and other colours. Every proposed style maps to a visible editor control; the agent never writes custom CSS. The setup serializer continues generating controlled CSS variables from these fields. Matching the outline colour also activates the existing solid-outline toggle.
+Existing controls cover body font, page/viewer surfaces, primary/secondary button colours, hover/disabled backgrounds, corners and other colours. Colour, shape and typography proposals map to visible editor controls. Button motion is the exception: it is saved in the existing Custom CSS field, with no additional controls. The setup serializer continues generating controlled CSS variables from the colour/style fields. Matching the outline colour also activates the existing solid-outline toggle.
+
+### Button motion through Custom CSS
+
+The palette response may include up to two source-backed animation recipes, one for action buttons and one for collection controls. Supported effects are colour fade, slight lift, sliding fill and animated underline. The AI supplies bounded duration/easing and optional effect parameters; it does not supply arbitrary CSS, JavaScript or selectors. Missing motion evidence produces no recipe. The CSS collector retains relevant transitions, transforms and pseudo-element visibility within the existing evidence limits.
+
+Setup generates CSS targeting existing OV25 button hooks and stores it in an identifiable block inside `branding.cssString`. Applying another palette replaces that block while preserving handwritten CSS. Old proposals without animation data preserve the current block; an explicit empty animation list removes it. Changing presets retains generated motion when retaining the matched theme styling. No Shopify theme source is modified.
+
+The palette board renders the same recipes with selectors scoped to that board; Current uses the draft's generated block. Disabled buttons remain unaffected, hover respects pointer capabilities, keyboard focus receives the same effects, and reduced-motion users receive immediate state changes without motion. Arbitrary handwritten CSS is still reviewed in the actual product preview. The separate local fixture `/tests/theme-button-animations.html` demonstrates all four recipes; these examples are handwritten tests, not AI results. Existing plugins keep their existing Custom CSS transport, with effects targeting only hooks present in their runtime.
 
 Optional `branding.fonts` descriptors contain observed family, URL, weight, style and optional Unicode range. The editor exposes font sources; the runtime loads them through a per-document deduplicated `FontFace` loader with isolated family aliases and system fallbacks. Fonts survive export/import. Harbour's downloaded font is served locally for this review; Arighi's external font stylesheet is not fetched, so its preview reports fallback typography.
 
@@ -231,11 +323,11 @@ Optional `branding.fonts` descriptors contain observed family, URL, weight, styl
 
 ### Local source analysis
 
-OV25's `lib/shopify/theme-style` has a fixed catalogue, a bounded source reader, an explicit style allowlist and a structured Gemini invocation using the existing GCP client pattern. It reads current settings, schema defaults, product-template settings and relevant CSS/Liquid snippets. Source is untrusted data. Freeform copy, URL-bearing CSS and secret-like settings are excluded. Reads are bounded to 24 files, 256 KiB/file, 2 MiB total and 80 KiB extracted evidence, with truncation warnings and path/symlink checks.
+OV25's `lib/shopify/theme-style` has a fixed catalogue, a bounded source reader, an explicit style allowlist and a structured Gemini invocation using the existing GCP client pattern. It reads current settings, schema defaults, product-template settings and relevant CSS/Liquid snippets. Source is untrusted data. Freeform copy, URL-bearing CSS and secret-like settings are excluded. Reads are bounded to 24 files, 256 KiB/file, 2 MiB total and 80 KiB extracted evidence, with truncation warnings and path/symlink checks. *Updated:* as of 20 November the read limits are 64 files, 2 MiB per file and 8 MiB in total (`THEME_STYLE_SOURCE_LIMITS`); the 80 KiB cap on what is sent to the model is unchanged.
 
 The agent is limited to two 25-second attempts, validates returned control keys/values, rejects invented font/source references, and applies deterministic contrast checks. Provider errors are sanitized. No database writes or production credentials reach the browser.
 
-**Actual Gemini analysis has not run.** Automatic approval review rejected sending private client theme snippets to Google's Gemini service without explicit destination approval. The review fixtures are labelled **Source-derived palette**, `method: "source"`; they use local settings and clearly mark inferred styling defaults. The AI path is implemented and tested with mocked provider responses, ready for an approved run.
+*Since superseded:* Gemini analysis has run locally since this was written (for example the AD Furnishings fixture, `source=ai`); production use is Release blocker 5. As originally written: **Actual Gemini analysis has not run.** Automatic approval review rejected sending private client theme snippets to Google's Gemini service without explicit destination approval. The review fixtures are labelled **Source-derived palette**, `method: "source"`; they use local settings and clearly mark inferred styling defaults. The AI path is implemented and tested with mocked provider responses, ready for an approved run.
 
 ### Local review
 
@@ -270,6 +362,8 @@ Focused validation covers proposal validation, contrast, source budgets, source-
 ## Theme-assisted page placement — local implementation, 5 October 2026
 
 Placement discovery is part of **Match my site**, with no extra onboarding step. One button invokes two focused analyses behind the host callback: colours/styles and page-placement selectors. Their evidence and prompts stay separate to avoid increasing the colour prompt or mixing its task with selector reasoning. Each request has independent limits and validation. Placement errors keep a valid palette usable and leave selectors unchanged.
+
+*Superseded 29 October:* the **Page placements** review described here was removed with the palette review; only high-confidence suggestions on new setups, or theme overrides on a non-live theme, are applied automatically. The production saved-state reads described in the last paragraphs were completed on 20 October (see that update).
 
 The palette response may carry an optional `placement` proposal with observed selectors, role labels, source files, confidence and warnings. A collapsed **Page placements** disclosure presents changes only when supported, enabled fields differ from the draft. Technical selector strings live under each suggestion's details. The host supplies `themeStyling.placement` with a store/theme/template context key, a scope label and explicit saved-state classification:
 

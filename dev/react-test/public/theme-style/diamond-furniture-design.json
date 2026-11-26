@@ -4,22 +4,22 @@
     "id": "diamond-furniture-design",
     "label": "Diamond Furniture Design (B2B)",
     "kind": "local-theme",
-    "fingerprint": "1db5bc2b941e5f149cc90f6230a4c61ddc55cfb1a149891c63a541d5603fca46",
+    "fingerprint": "b4f494b837aa36f4199550eee19a09830e1925e68ca701c56714b4262af9b9ab",
     "files": [
       "config/settings_data.json",
       "config/settings_schema.json",
-      "assets/owl.theme.default.css",
+      "assets/font-settings.css",
+      "snippets/css-variables.liquid",
       "assets/theme.css",
       "assets/custom-style.css",
-      "assets/font-settings.css",
       "assets/our-swatch-product-grid.css",
-      "assets/variable-products-load.css",
       "assets/variable-products.css",
-      "assets/variable-products.css.liquid",
-      "layout/theme.liquid"
+      "layout/theme.liquid",
+      "snippets/product-buttons.liquid",
+      "snippets/bss-label-style-css.liquid"
     ]
   },
-  "summary": "Diamond Furniture Design (B2B): observed theme colours with system fallback typography. Review the palette and button samples before applying.",
+  "summary": "Diamond Furniture Design (B2B): observed theme colours with observed typography. Review the palette and button samples before applying.",
   "style": {
     "--ov25-background-color": "#ffffff",
     "--ov25-secondary-background-color": "#f0ede7",
@@ -38,7 +38,7 @@
     "--ov25-button-border-radius": "5px",
     "--ov25-cta-color": "#8b634e",
     "--ov25-cta-text-color": "#ffffff",
-    "--ov25-cta-color-hover": "#3d2d30",
+    "--ov25-cta-color-hover": "#8b634e",
     "--ov25-cta-text-color-hover": "#ffffff",
     "--ov25-cta-color-light": "#f0ede7",
     "--ov25-cta-text-color-disabled": "#3d2d30",
@@ -64,9 +64,9 @@
     "--ov25-link-color": "#3d2d30",
     "--ov25-backdrop-color": "#000000",
     "--ov25-backdrop-opacity": "0.45",
-    "--ov25-360-font-family": "system-ui, sans-serif",
-    "--ov25-heading-font-family": "system-ui, sans-serif",
-    "--ov25-button-font-family": "system-ui, sans-serif",
+    "--ov25-360-font-family": "'GTAmerica Regular', sans-serif",
+    "--ov25-heading-font-family": "'GTAmerica Regular', sans-serif",
+    "--ov25-button-font-family": "'GTAmerica Regular', sans-serif",
     "--ov25-body-font-weight": "400",
     "--ov25-heading-font-weight": "400",
     "--ov25-button-font-weight": "400",
@@ -106,12 +106,13 @@
     }
   ],
   "warnings": [
-    "assets/theme.css was limited to 262144 bytes.",
-    "Source-only preview: no AI model was called. Colours use explicit local theme settings or global/button CSS; ambiguous styling uses review defaults.",
-    "Unspecified button shape, focus, selected and disabled states are suggested review defaults; confirm them against the client design.",
-    "Shopify font handles were not resolved or downloaded; this preview uses system typography."
+    "Product button markup contains Liquid conditions; the detected action styles need preview confirmation.",
+    "Some product button colours could not be resolved unambiguously from CSS; configured colours remain review defaults.",
+    "Model CSS evidence was compacted after full source inspection; product button colours were resolved before compaction.",
+    "Source-only preview: no AI model was called. Colours use explicit theme settings and supported product button CSS; ambiguous styling uses review defaults.",
+    "Unspecified button shape, focus, selected and disabled states are suggested review defaults; confirm them against the client design."
   ],
-  "generatedAt": "2026-10-07T13:36:36.923Z",
+  "generatedAt": "2026-10-21T10:02:26.947Z",
   "method": "source",
   "placement": {
     "schemaVersion": 1,
@@ -119,7 +120,7 @@
       "id": "diamond-furniture-design",
       "label": "Diamond Furniture Design (B2B)",
       "kind": "local-theme",
-      "fingerprint": "0ed8d5048d2dde3c67f09868de0fb506a8252a6c460540a708f49557fe74d244",
+      "fingerprint": "f54ad36778d4a3ae524713f31835817c6f216dc6ca12b3e6fb2206f45bc7a411",
       "files": [
         "templates/product.json",
         "layout/theme.liquid",
@@ -128,6 +129,7 @@
         "snippets/our-swatches-grid-popup.liquid",
         "snippets/product-title-price.liquid",
         "snippets/product-variant-options.liquid",
+        "sections/apps.liquid",
         "snippets/icon-arrow-small-down.liquid",
         "snippets/icon-media-model.liquid",
         "snippets/icon-media-video.liquid",
@@ -147,17 +149,8 @@
         "snippets/zoom-pswp.liquid",
         "snippets/cart-drawer.liquid",
         "snippets/icon-account.liquid",
-        "snippets/icon-arrow-down.liquid",
         "snippets/icon-cart.liquid",
-        "snippets/icon-close.liquid",
-        "snippets/icon-nav.liquid",
         "snippets/icon-search.liquid",
-        "snippets/nav-item-mobile.liquid",
-        "snippets/header-block.liquid",
-        "snippets/nav-item.liquid",
-        "snippets/search-predictive.liquid",
-        "snippets/select-currency.liquid",
-        "snippets/select-locale.liquid",
         "snippets/product-rating.liquid",
         "snippets/icon-animal-paw.liquid",
         "snippets/icon-animal.liquid",
@@ -168,35 +161,67 @@
         "snippets/icon-cart-message.liquid",
         "snippets/icon-chat.liquid",
         "snippets/icon-close-small.liquid",
-        "snippets/icon-copy.liquid"
+        "snippets/icon-close.liquid",
+        "snippets/icon-copy.liquid",
+        "snippets/icon-dollar.liquid",
+        "snippets/icon-earth.liquid",
+        "snippets/icon-email.liquid",
+        "snippets/icon-gluten-free.liquid",
+        "snippets/icon-iron.liquid",
+        "snippets/icon-leaf.liquid",
+        "snippets/icon-legal.liquid"
       ]
     },
     "method": "source",
-    "generatedAt": "2026-10-07T13:36:36.924Z",
+    "generatedAt": "2026-10-21T10:02:26.950Z",
     "warnings": [
       "Source evidence only: Liquid conditions, app blocks, JavaScript changes, visibility and selector match counts have not been verified in a rendered product page. Review before applying.",
       "Inspected templates/product.json; other product templates may use different targets.",
-      "The selected template uses app blocks whose markup is not present in the theme source. Their selectors cannot be inferred from app names.",
+      "The product template was chosen automatically from available files; its assignment to a product has not been verified. Choose a template explicitly when inspecting a custom integration.",
+      "The selected template uses an unknown app block whose markup is absent from the theme source. No selectors were inferred for it.",
       "Source budget reached; some referenced markup was not inspected.",
+      "Structural context budget reached; only a bounded sample of candidate occurrences was retained.",
+      "13 source candidates have no safely parsed structural outline; surrounding markup is unavailable for those choices.",
+      "Some structural outlines are partial because of source limits, Liquid or incomplete markup; they are not rendered DOM trees.",
       "Deterministic source review; no AI model was called.",
-      "No source-backed proposal for: gallery, name, configureButton, desktopCarouselSelector, mobileCarouselSelector, addToCartFormSelector. Existing choices should be kept or selected manually."
+      "No source-backed proposal for: configureButton, desktopCarouselSelector, mobileCarouselSelector, addToCartFormSelector. Existing choices should be kept or selected manually."
     ],
     "targets": [
       {
-        "key": "variants",
-        "selector": ".product__block__variants",
+        "key": "gallery",
+        "selector": ".product-page .product__media__wrapper",
         "confidence": "low",
         "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
         "sourceFiles": [
-          "snippets/product-variant-options.liquid"
+          "sections/product.liquid"
+        ]
+      },
+      {
+        "key": "variants",
+        "selector": ".product__inner .metafield-display-variants",
+        "confidence": "low",
+        "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
+        "sourceFiles": [
+          "sections/product.liquid"
         ]
       },
       {
         "key": "price",
-        "selector": "#was-price-metafieldText",
+        "selector": ".product__inner .price",
         "confidence": "low",
         "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
         "sourceFiles": [
+          "sections/product.liquid",
+          "snippets/product-title-price.liquid"
+        ]
+      },
+      {
+        "key": "name",
+        "selector": ".product__inner .product__title",
+        "confidence": "low",
+        "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
+        "sourceFiles": [
+          "sections/product.liquid",
           "snippets/product-title-price.liquid"
         ]
       },
@@ -212,8 +237,8 @@
       {
         "key": "headerSelector",
         "selector": "header",
-        "confidence": "medium",
-        "reason": "Observed semantic markup hook. Liquid conditions and rendered match counts remain unverified.",
+        "confidence": "low",
+        "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
         "sourceFiles": [
           "sections/header.liquid"
         ]

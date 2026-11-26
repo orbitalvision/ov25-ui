@@ -29,6 +29,12 @@ describe('page placement proposal contract', () => {
     expect(() => validateSelectorDiscoveryProposal({ ...proposal, source: { ...proposal.source, files: [...files, 'extra.liquid'] } })).toThrow();
   });
 
+  it('accepts authenticated Shopify theme placements without weakening the source contract', () => {
+    const shopify = { ...proposal, source: { ...proposal.source, kind: 'shopify-theme' as const } };
+    expect(validateSelectorDiscoveryProposal(shopify)).toEqual(shopify);
+    expect(() => validateSelectorDiscoveryProposal({ ...shopify, source: { ...shopify.source, kind: 'website' } })).toThrow();
+  });
+
   it.each(['body', 'html', '*', 'main', ':root', '#root', '.app', '[id="root"]', '[role="main"]', 'body.product-page', 'main#MainContent', '.product *', '.gallery, body', ':is(.gallery,body)', '.gallery::before', '\\62 ody', '.gallery{display:none}', '.gallery;', '[broken'])('rejects unsafe or overly broad selector %s', (selector) => {
     expect(isSafeSelectorDiscoverySelector(selector)).toBe(false);
     expect(() => validateSelectorDiscoveryProposal({ ...proposal, targets: [{ ...proposal.targets[0], selector }] })).toThrow();
@@ -90,5 +96,24 @@ describe('page placement proposal contract', () => {
     expect(result.style).toBe(settings.style);
     expect(result).not.toHaveProperty('headerSelector');
     expect(settings).toEqual(original);
+  });
+});
+
+describe('Shopify provenance on placement suggestions', () => {
+  // The OV25 server adds `source.shopify` (store, theme, template). It used to make the whole set of
+  // suggestions invalid, so Match my site silently dropped every placement (including per-theme overrides).
+  const shopifyProposal = {
+    schemaVersion: 1, method: 'ai', generatedAt: '2026-10-30T08:50:32.573Z', warnings: ['Source evidence only.'],
+    source: { id: 'shopify-2-2543be244b096f16fdbb9805', label: 'OV25 – Copy of Savor — templates/product.OV25_product.json', kind: 'shopify-theme',
+      fingerprint: 'a63dd95ea889da54fded79839334ffcdac7844a0dc62ffcf90cb5777e0552fd3',
+      files: ['templates/product.OV25_product.json', 'snippets/product-media-gallery-content.liquid'],
+      shopify: { shopifyStoreId: 2, themeId: 'gid://shopify/OnlineStoreTheme/192503709994', templateFilename: 'templates/product.OV25_product.json' } },
+    targets: [{ key: 'gallery', selector: 'media-gallery', confidence: 'medium', reason: 'Primary product media wrapper.', sourceFiles: ['snippets/product-media-gallery-content.liquid'] }],
+  };
+  it('accepts suggestions that carry Shopify provenance', () => {
+    expect(validateSelectorDiscoveryProposal(shopifyProposal).targets[0].selector).toBe('media-gallery');
+  });
+  it('still rejects malformed provenance', () => {
+    expect(() => validateSelectorDiscoveryProposal({ ...shopifyProposal, source: { ...shopifyProposal.source, shopify: { shopifyStoreId: 'two' } } })).toThrow();
   });
 });

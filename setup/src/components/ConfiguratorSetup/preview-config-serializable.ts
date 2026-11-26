@@ -8,6 +8,8 @@ export interface SerializableInjectConfig {
   apiKey: string;
   productLink: string;
   selectors: Record<string, string | { selector: string; replace: boolean }>;
+  /** Saved setup JSON only: per-theme placement overrides, resolved by plugins that support them. */
+  themeSelectors?: Record<string, Record<string, string | { selector: string; replace: boolean }>>;
   carousel?: {
     desktop: string;
     mobile: string;

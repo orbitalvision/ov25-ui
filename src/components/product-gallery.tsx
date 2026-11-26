@@ -307,6 +307,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
 
     const isModalMode = isMobile ? configuratorDisplayModeMobile === 'modal' : configuratorDisplayMode === 'modal';
     const stickyMobileGallery = stickyLayoutActive && isMobile;
+    const anchorStackedViewer = stickyMobileGallery && isProductGalleryStacked && !isDrawerOrDialogOpen;
     const snap2MobileDrawerOpen =
       isSnap2Mode &&
       isMobile &&
@@ -483,10 +484,39 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
     
 
 
+    // The portaled viewer and its thumbnail strip must scroll on the same layer.
+    // Only measure the slot on resize. Scrolling changes screen coordinates but
+    // leaves the slot's position relative to the shadow host unchanged.
+    useLayoutEffect(() => {
+        if (!anchorStackedViewer || !galleryShadowRoot) return;
+        const host = galleryHostRef.current;
+        const slot = containerRef.current;
+        if (!host || !slot) return;
+
+        const measureSlot = () => {
+            const box = slot.getBoundingClientRect();
+            const origin = host.getBoundingClientRect();
+            host.style.setProperty('--ov25-viewer-slot-top', `${box.top - origin.top - host.clientTop}px`);
+            host.style.setProperty('--ov25-viewer-slot-left', `${box.left - origin.left - host.clientLeft}px`);
+            host.style.setProperty('--ov25-viewer-slot-width', `${box.width}px`);
+            host.style.setProperty('--ov25-viewer-slot-height', `${box.height}px`);
+        };
+        measureSlot();
+        const observer = new ResizeObserver(measureSlot);
+        observer.observe(slot);
+        observer.observe(host);
+        return () => {
+            observer.disconnect();
+            for (const key of ['top', 'left', 'width', 'height']) {
+                host.style.removeProperty(`--ov25-viewer-slot-${key}`);
+            }
+        };
+    }, [anchorStackedViewer, galleryShadowRoot]);
+
     const stackedIframeReady = useStackedGalleryPositioning({
         enabled: isProductGalleryStacked,
         isOpen: isDrawerOrDialogOpen,
-        anchored: false,
+        anchored: anchorStackedViewer,
         shadowRoot: galleryShadowRoot,
         slotRef: containerRef,
         instantCloseRef: stackedGalleryCloseSyncImmediateRef,
@@ -644,6 +674,7 @@ export function ProductGallery({ isInModal = false, isPreloading = false }: Prod
           stickyLayoutActive && "ov25-inline-sticky-gallery-root",
           stickyDesktopGallery && "ov25-inline-sticky-gallery-root-desktop",
           stickyMobileGallery && "ov25-inline-sticky-gallery-root-mobile",
+          anchorStackedViewer && "ov25-inline-sticky-anchored-viewer",
           galleryUsesColumnFlexFill &&
             "ov:flex ov:flex-1 ov:flex-col ov:min-h-0 ov:h-full ov:max-h-full ov:overflow-hidden",
         )}

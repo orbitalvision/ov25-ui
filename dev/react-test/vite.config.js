@@ -28,6 +28,7 @@ const testPages = [
   'single-custom-css-snap2',
   'single-defer-threed-no-gallery',
   'range-no-groups',
+  'custom-filters',
   'range-with-groups',
   'range-with-hidden-size-buttons',
   'range-inline-variants-groups',
@@ -36,6 +37,7 @@ const testPages = [
   'Maze_snap2',
   'snap2-uuid',
   'bed-configurator',
+  'bed-configurator-diamond',
   'dining-configurator',
   'dining-configurator-full-page',
   'dining-configurator-no-attachment-points',
@@ -73,13 +75,15 @@ const testPages = [
   'inline-sticky-desktop-no-header',
   'inline-sticky-desktop-fixed-header',
   'inline-sticky-desktop-collapsing-header',
+  'inline-sticky-savor',
+  'performance-darlings-savor',
   'gallery-carousel-horizontal',
   'carousel-defer-threed-indexing',
   'gallery-carousel-stacked',
   'carousel-relocation',
   'gallery-no-carousel',
   'configurator-setup',
-  'theme-palette',
+  'shopify-guided-setup',
 ];
 
 const testInputs = Object.fromEntries(

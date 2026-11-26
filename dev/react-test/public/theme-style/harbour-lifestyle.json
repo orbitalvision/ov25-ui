@@ -4,20 +4,17 @@
     "id": "harbour-lifestyle",
     "label": "Harbour Lifestyle",
     "kind": "local-theme",
-    "fingerprint": "df29b0bbabe82c4090b73cc5c9d9d2be85366d8e924b1ec2cb017c1d5392e9b2",
+    "fingerprint": "0b7b09ce0dd5d1f12ba6449e52d2ce277b0b1a2ef1e59a6f569c1c513667d0f6",
     "files": [
       "config/settings_data.json",
       "config/settings_schema.json",
-      "templates/product.json",
       "assets/bundle.theme.css",
-      "assets/bundle.product.configurator.css",
-      "assets/bundle.product.css",
-      "assets/bundle.product.product-v2.css",
       "assets/dividebuy-style.css",
-      "layout/theme.liquid"
+      "assets/dividebuy-softcredit-search.css",
+      "templates/product.json"
     ]
   },
-  "summary": "Harbour Lifestyle: configured theme colours with observed typography. Review the palette and button samples before applying.",
+  "summary": "Harbour Lifestyle: observed theme colours with observed typography. Review the palette and button samples before applying.",
   "style": {
     "--ov25-background-color": "#ffffff",
     "--ov25-secondary-background-color": "#f9f9f9",
@@ -36,8 +33,8 @@
     "--ov25-button-border-radius": "0px",
     "--ov25-cta-color": "#f0d2d1",
     "--ov25-cta-text-color": "#282828",
-    "--ov25-cta-color-hover": "#282828",
-    "--ov25-cta-text-color-hover": "#ffffff",
+    "--ov25-cta-color-hover": "#f0d2d1",
+    "--ov25-cta-text-color-hover": "#282828",
     "--ov25-cta-color-light": "#f9f9f9",
     "--ov25-cta-text-color-disabled": "#282828",
     "--ov25-cta-border-color": "#f0d2d1",
@@ -85,11 +82,6 @@
   ],
   "palette": [
     {
-      "role": "Background",
-      "color": "#ffffff",
-      "source": "config/settings_data.json"
-    },
-    {
       "role": "Soft surface",
       "color": "#f9f9f9",
       "source": "config/settings_data.json"
@@ -111,11 +103,14 @@
     }
   ],
   "warnings": [
-    "assets/bundle.theme.css was limited to 262144 bytes.",
-    "Source-only preview: no AI model was called. Colours use explicit local theme settings; ambiguous styling uses review defaults.",
-    "Button shape, focus, selected and disabled states are suggested review defaults; confirm them against the client design."
+    "Product source discovery limit reached; some dependencies were not inspected.",
+    "Source inspection is incomplete; product button colours are unconfirmed and require review.",
+    "Model CSS evidence was compacted after full source inspection; product button colours were resolved before compaction.",
+    "Source-only preview: no AI model was called. Colours use explicit theme settings and supported product button CSS; ambiguous styling uses review defaults.",
+    "Unspecified button shape, focus, selected and disabled states are suggested review defaults; confirm them against the client design.",
+    "Some UI colours have no explicit source value and use suggested defaults; only observed colours appear in the palette."
   ],
-  "generatedAt": "2026-10-05T14:31:03.029Z",
+  "generatedAt": "2026-10-21T10:26:11.123Z",
   "method": "source",
   "placement": {
     "schemaVersion": 1,
@@ -123,7 +118,7 @@
       "id": "harbour-lifestyle",
       "label": "Harbour Lifestyle",
       "kind": "local-theme",
-      "fingerprint": "981802cbe892534112eabd7c6f10b23d6aae6eb06133d363ff2d0512b3dba1cc",
+      "fingerprint": "542ace052255a51e6b4a16c138ddfe34acfda14fcc064b71a8e1cbb12726d6bd",
       "files": [
         "templates/product.product-v2.json",
         "layout/theme.liquid",
@@ -176,58 +171,66 @@
       ]
     },
     "method": "source",
-    "generatedAt": "2026-10-05T14:31:03.030Z",
+    "generatedAt": "2026-10-21T10:26:11.127Z",
     "warnings": [
       "Source evidence only: Liquid conditions, app blocks, JavaScript changes, visibility and selector match counts have not been verified in a rendered product page. Review before applying.",
-      "Inspected product.product-v2.json; other product templates may use different targets.",
-      "The selected template uses app blocks whose markup is not present in the downloaded theme. Their selectors cannot be inferred from app names.",
+      "Inspected templates/product.product-v2.json; other product templates may use different targets.",
+      "The product template was chosen automatically from available files; its assignment to a product has not been verified. Choose a template explicitly when inspecting a custom integration.",
+      "The selected template uses an unknown app block whose markup is absent from the theme source. No selectors were inferred for it.",
       "Source budget reached; some referenced markup was not inspected.",
-      "Deterministic local source review; no AI model was called.",
+      "Structural context budget reached; only a bounded sample of candidate occurrences was retained.",
+      "Some structural outlines are partial because of source limits, Liquid or incomplete markup; they are not rendered DOM trees.",
+      "Deterministic source review; no AI model was called.",
       "No source-backed proposal for: configureButton, desktopCarouselSelector, mobileCarouselSelector. Existing choices should be kept or selected manually."
     ],
     "targets": [
       {
         "key": "gallery",
-        "selector": ".cb-product-gallery",
+        "selector": ".main-product .cb-product-gallery",
         "confidence": "low",
         "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
         "sourceFiles": [
+          "sections/main-product.liquid",
           "snippets/product-image-gallery.liquid"
         ]
       },
       {
         "key": "variants",
-        "selector": ".size-variant-list",
+        "selector": ".main-product .cb-variant-dropdown",
         "confidence": "low",
         "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
         "sourceFiles": [
-          "snippets/block-product-size-siblings.liquid"
+          "sections/main-product.liquid",
+          "snippets/variant-picker.liquid"
         ]
       },
       {
         "key": "price",
-        "selector": ".cb-block-product-price",
+        "selector": ".main-product .cb-block-product-price",
         "confidence": "low",
         "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
         "sourceFiles": [
+          "sections/main-product.liquid",
           "snippets/block-product-price.liquid"
         ]
       },
       {
         "key": "name",
-        "selector": ".cb-block-product-title",
-        "confidence": "medium",
-        "reason": "Observed semantic markup hook. Liquid conditions and rendered match counts remain unverified.",
+        "selector": ".main-product .cb-block-product-title",
+        "confidence": "low",
+        "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
         "sourceFiles": [
+          "sections/main-product.liquid",
           "snippets/block-product-title.liquid"
         ]
       },
       {
         "key": "swatches",
-        "selector": ".cb-variant-swatches",
-        "confidence": "medium",
-        "reason": "Observed semantic markup hook. Liquid conditions and rendered match counts remain unverified.",
+        "selector": ".main-product .cb-variant-swatches",
+        "confidence": "low",
+        "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
         "sourceFiles": [
+          "sections/main-product.liquid",
           "snippets/variant-picker.liquid"
         ]
       },
@@ -242,15 +245,15 @@
       },
       {
         "key": "addToCartFormSelector",
-        "selector": "form[data-type=\"add-to-cart-form\"]",
+        "selector": ".main-product form[data-type=\"add-to-cart-form\"]",
         "confidence": "low",
         "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
         "sourceFiles": [
+          "sections/main-product.liquid",
+          "snippets/block-option-configurator.liquid",
           "snippets/block-product-buy-buttons.liquid",
           "snippets/block-assembly-service-details.liquid",
-          "snippets/block-option-configurator.liquid",
-          "snippets/block-product-product-list.liquid",
-          "snippets/block-product-sticky-atc.liquid"
+          "snippets/block-product-product-list.liquid"
         ]
       }
     ]

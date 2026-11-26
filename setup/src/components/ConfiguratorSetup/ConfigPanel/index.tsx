@@ -1,4 +1,6 @@
 import { useState, useCallback } from 'react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../ui/select';
+import { effectiveSelectors, hasThemeSelectorOverrides, normalizeThemeId, promoteThemeSelectors, setThemeSelectorOverride, themeSelectorOverride, type SelectorOverrideTheme } from '../theme-selector-overrides';
 import { Copy, Check, Settings, Paintbrush, Plug, Save } from 'lucide-react';
 import { ScrollArea } from '../../ui/scroll-area';
 import { Label } from '../../ui/label';
@@ -32,7 +34,16 @@ interface ConfigPanelProps {
   storefrontIntegration?: StorefrontIntegrationConfig;
   hideProductType?: boolean;
   saveDisabled?: boolean;
+  /**
+   * Shopify hosts: themes whose placements can be overridden. Without it (e.g. WooCommerce)
+   * the selector editor behaves exactly as before.
+   */
+  selectorThemes?: SelectorOverrideTheme[];
+  /** Theme to edit first (guided setup's theme); defaults to "All themes". */
+  initialSelectorThemeId?: string;
 }
+
+const DEFAULT_SCOPE = 'default';
 
 const LAYOUT_OPTIONS: { value: PreviewLayoutType; label: string; description: string }[] = [
   { value: 'standard', label: 'Standard', description: 'Single product or range' },
@@ -272,45 +283,77 @@ function SelectorControl({
   settings,
   onToggle,
   onSelectorChange,
+  inherited,
+  onReset,
 }: {
   selectorKey: keyof TypeSettings['selectors'];
   label: string;
   settings: TypeSettings['selectors'][keyof TypeSettings['selectors']];
   onToggle: (enabled: boolean) => void;
   onSelectorChange: (selector: string) => void;
+  /** Theme scope only: true when this slot uses the default (no override for the theme). */
+  inherited?: boolean;
+  onReset?: () => void;
 }) {
   const inputId = `ov25-setup-selector-${selectorKey}`;
   return (
-    <div className="min-w-0 space-y-2 rounded-lg border border-border bg-background p-2.5">
+    <div className="min-w-0 space-y-2 rounded-lg border border-border bg-background p-2.5" data-ov25-selector-inherited={inherited || undefined}>
       <SwitchRow label={label} checked={settings.enabled} onCheckedChange={onToggle} />
       <div className="min-w-0">
-        <Label htmlFor={inputId} className="mb-1 text-[10px] text-muted-foreground">
-          CSS selector
-        </Label>
+        <div className="mb-1 flex items-center justify-between gap-2">
+          <Label htmlFor={inputId} className="text-[10px] text-muted-foreground">
+            CSS selector
+          </Label>
+          {inherited === true && <span className="text-[10px] text-muted-foreground">From default</span>}
+          {inherited === false && onReset && <button type="button" className="text-[10px] font-medium underline underline-offset-2" onClick={onReset}>Reset to default</button>}
+        </div>
         <Input
           id={inputId}
           type="text"
           value={settings.selector}
           onChange={(event) => onSelectorChange(event.target.value)}
           aria-label={`${label} selector`}
-          className="h-8 min-w-0 font-mono text-[11px]"
+          className={`h-8 min-w-0 font-mono text-[11px] ${inherited ? 'text-muted-foreground' : ''}`}
         />
       </div>
     </div>
   );
 }
 
-export function ConfigPanel({ formState, currentSettings, setLayout, updateSettings, updateNested, getExportJson, onSave, hideSaveButton, storefrontIntegration, hideProductType, saveDisabled }: ConfigPanelProps) {
+export function ConfigPanel({ formState, currentSettings, setLayout, updateSettings, updateNested, getExportJson, onSave, hideSaveButton, storefrontIntegration, hideProductType, saveDisabled, selectorThemes, initialSelectorThemeId }: ConfigPanelProps) {
   const isSnap2 = formState.layout === 'snap2';
   const isBed = formState.layout === 'bedConfigurator';
   const showSnap2DesktopPositionControls = isSnap2 && currentSettings.configurator.displayModeDesktop === 'modal';
   const showSnap2PositionControls = showSnap2DesktopPositionControls;
 
+  // "All themes" and the live theme both edit the defaults: the live theme's values must
+  // stay in `selectors` so plugins without theme lookup keep working.
+  const [selectorScope, setSelectorScope] = useState(() => {
+    const initial = normalizeThemeId(initialSelectorThemeId);
+    return initial && selectorThemes?.some(theme => normalizeThemeId(theme.id) === initial) ? initial : DEFAULT_SCOPE;
+  });
+  const scopedThemeId = selectorThemes?.some(theme => normalizeThemeId(theme.id) === selectorScope && !theme.live) ? selectorScope : undefined;
+  const shownSelectors = scopedThemeId ? effectiveSelectors(currentSettings, scopedThemeId) : currentSettings.selectors;
+  const setOverride = (key: keyof TypeSettings['selectors'], value: TypeSettings['selectors'][typeof key] | undefined) => {
+    updateSettings('themeSelectors', setThemeSelectorOverride(currentSettings, scopedThemeId!, key, value).themeSelectors);
+  };
+
+  // A theme with overrides was published: older plugins still read the defaults, so offer to promote them.
+  const liveThemeWithOverrides = selectorThemes?.find(theme => theme.live && hasThemeSelectorOverrides(currentSettings, theme.id));
+  const makeLiveDefault = () => {
+    if (!liveThemeWithOverrides) return;
+    const promoted = promoteThemeSelectors(currentSettings, liveThemeWithOverrides.id);
+    updateSettings('selectors', promoted.selectors);
+    updateSettings('themeSelectors', promoted.themeSelectors);
+  };
+
   const handleSelectorToggle = (key: keyof TypeSettings['selectors'], enabled: boolean) => {
+    if (scopedThemeId) return setOverride(key, { ...shownSelectors[key], enabled });
     updateNested('selectors', key, { ...currentSettings.selectors[key], enabled });
   };
 
   const handleSelectorChange = (key: keyof TypeSettings['selectors'], selector: string) => {
+    if (scopedThemeId) return setOverride(key, { ...shownSelectors[key], selector });
     updateNested('selectors', key, { ...currentSettings.selectors[key], selector });
   };
 
@@ -538,14 +581,30 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
                 title="Storefront selectors"
                 description="Choose the existing page elements OV25 should use or replace. These values are saved in setup JSON."
               >
+                {!!selectorThemes?.length && <div className="flex min-w-0 items-center justify-between gap-2" data-ov25-selector-theme-scope>
+                  <Label className="text-xs">Placements for</Label>
+                  <Select value={selectorScope} onValueChange={setSelectorScope}>
+                    <SelectTrigger className="h-8 min-w-0 max-w-[60%] text-xs" aria-label="Placements for theme"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value={DEFAULT_SCOPE}>All themes (default)</SelectItem>
+                      {selectorThemes.map(theme => normalizeThemeId(theme.id) && <SelectItem key={theme.id} value={normalizeThemeId(theme.id)!}>{theme.label}{theme.live ? ' (live)' : ''}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>}
+                {liveThemeWithOverrides && <div role="status" className="rounded-lg border border-amber-200 bg-amber-50 p-2.5 text-[11px] leading-relaxed text-amber-900" data-ov25-live-theme-overrides>
+                  {liveThemeWithOverrides.label} is now live and has its own placements. Make them the default so every version of the OV25 plugin uses them.
+                  <Button type="button" variant="outline" size="sm" className="mt-2 h-7 w-full text-[11px]" onClick={makeLiveDefault}>Make these the default</Button>
+                </div>}
+                {scopedThemeId && <p className="text-[11px] leading-relaxed text-muted-foreground">Changes here only apply to this theme. Other themes keep the default.</p>}
                 {ELEMENT_TOGGLES.map(({ key, label }) => (
                   <SelectorControl
-                    key={key}
+                    key={`${scopedThemeId ?? DEFAULT_SCOPE}:${key}`}
                     selectorKey={key}
                     label={label}
-                    settings={currentSettings.selectors[key]}
+                    settings={shownSelectors[key]}
                     onToggle={(enabled) => handleSelectorToggle(key, enabled)}
                     onSelectorChange={(selector) => handleSelectorChange(key, selector)}
+                    {...(scopedThemeId ? { inherited: !themeSelectorOverride(currentSettings, scopedThemeId, key), onReset: () => setOverride(key, undefined) } : {})}
                   />
                 ))}
               </SettingsSection>
@@ -586,7 +645,8 @@ export function ConfigPanel({ formState, currentSettings, setLayout, updateSetti
   );
 }
 
-export function SetupSaveControls({ formState, getExportJson, onSave, hideSaveButton, saveDisabled }: Pick<ConfigPanelProps, 'formState' | 'getExportJson' | 'onSave' | 'hideSaveButton' | 'saveDisabled'>) {
+/** `buttonClassName` renders a plain host-styled Save button instead of the package button. `label` replaces "Save". */
+export function SetupSaveControls({ formState, getExportJson, onSave, hideSaveButton, saveDisabled, buttonClassName, label = 'Save' }: Pick<ConfigPanelProps, 'formState' | 'getExportJson' | 'onSave' | 'hideSaveButton' | 'saveDisabled'> & { buttonClassName?: string; label?: string }) {
   const [saveModalOpen, setSaveModalOpen] = useState(false);
   const [exportMode, setExportMode] = useState<ExportMode>('current');
   const [modalCopied, setModalCopied] = useState(false);
@@ -614,11 +674,12 @@ export function SetupSaveControls({ formState, getExportJson, onSave, hideSaveBu
   }, [getExportString]);
 
   return <>
-      {!hideSaveButton && (
+      {!hideSaveButton && buttonClassName && <button type="button" className={buttonClassName} onClick={handleSave} disabled={saveDisabled}>{label}</button>}
+      {!hideSaveButton && !buttonClassName && (
         <div className="shrink-0 pt-3 pb-1">
           <Button size="lg" onClick={handleSave} disabled={saveDisabled} className="w-full">
             <Save className="h-4 w-4" />
-            Save
+            {label}
           </Button>
         </div>
       )}

@@ -194,8 +194,8 @@ export const PRESET_BASELINE: Record<PreviewLayoutType, TypeSettings> = {
         "replace": false
       },
       "configureButton": {
-        "enabled": true,
-        "selector": "#ov25-fullscreen-button",
+        "enabled": false,
+        "selector": "[data-ov25-configure-button]",
         "replace": false
       },
       "initialiseMenu": {

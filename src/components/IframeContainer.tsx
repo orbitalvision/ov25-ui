@@ -8,7 +8,7 @@ import Snap2ViewControls from './Snap2ViewControls.js'
 import { Ov25ShadowHost } from './Ov25ShadowHost.js'
 import { VariantsCloseButton } from './VariantSelectMenu/VariantsCloseButton.js'
 import { CONFIGURATOR_IFRAME_BACKGROUND_CSS_VAR } from '../lib/config/iframe-transition-snapshot.js'
-import { getResolvedConfiguratorIframeBackgroundColor } from '../utils/configurator-dom-queries.js'
+import { CONFIGURATOR_IFRAME_BACKGROUND_FALLBACK } from '../lib/config/iframe-transition-snapshot.js'
 import { CarouselDisplayMode } from '../types/config-enums.js'
 import { composeGalleryOrder } from '../lib/auto-cutouts.js'
 
@@ -42,18 +42,6 @@ function cssColorToHex(value: string | null | undefined): string | null {
     }
 
     return null;
-}
-
-function getIframeBackgroundColorFromCssString(cssString: string | undefined): string | null {
-    if (!cssString) return null;
-    const escapedVar = CONFIGURATOR_IFRAME_BACKGROUND_CSS_VAR.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const match = new RegExp(`${escapedVar}\\s*:\\s*([^;}\\n]+)`, 'i').exec(cssString);
-    return cssColorToHex(match?.[1]);
-}
-
-function getIframeBackgroundColorFromDom(): string | null {
-    const resolved = getResolvedConfiguratorIframeBackgroundColor();
-    return cssColorToHex(resolved);
 }
 
 type ConfiguratorTitleProduct = {
@@ -251,15 +239,36 @@ export const IframeContainer = ({ ready = true }: { ready?: boolean } = {}) => {
         (currentProduct as any)?.dimensionY &&
         (currentProduct as any)?.dimensionZ);
 
-    const initialHexBgColor = useMemo(
-        () => getIframeBackgroundColorFromCssString(cssString) ?? getIframeBackgroundColorFromDom(),
-        [cssString],
-    );
-    const [hexBgColor, setHexBgColor] = useState<string | null>(initialHexBgColor);
+    const viewerRef = useRef<HTMLDivElement>(null);
+    const [hexBgColor, setHexBgColor] = useState<string | null | undefined>(undefined);
 
     useLayoutEffect(() => {
-        const next = getIframeBackgroundColorFromCssString(cssString) ?? getIframeBackgroundColorFromDom();
-        setHexBgColor((current) => current === next ? current : next);
+        let frame: number | undefined;
+        const sync = () => {
+            const viewer = viewerRef.current;
+            if (!viewer) return;
+            const root = viewer.getRootNode() as Document | ShadowRoot;
+            const background = root.querySelector('#ov25-configurator-background-color') ?? viewer;
+            const computed = getComputedStyle(background);
+            // Use the browser's cascade (including overrides, specificity, !important,
+            // variables and active media queries), scoped to this configurator.
+            const next = cssColorToHex(computed.backgroundColor)
+                ?? cssColorToHex(computed.getPropertyValue(CONFIGURATOR_IFRAME_BACKGROUND_CSS_VAR))
+                ?? cssColorToHex(CONFIGURATOR_IFRAME_BACKGROUND_FALLBACK);
+            setHexBgColor(current => current === next ? current : next);
+        };
+        const schedule = () => {
+            if (frame !== undefined) cancelAnimationFrame(frame);
+            frame = requestAnimationFrame(sync);
+        };
+        sync();
+        // A parent's layout effect may adopt the new stylesheet after this effect.
+        schedule();
+        window.addEventListener('resize', schedule);
+        return () => {
+            if (frame !== undefined) cancelAnimationFrame(frame);
+            window.removeEventListener('resize', schedule);
+        };
     }, [cssString]);
 
     // Use the utility function to get the iframe src
@@ -290,7 +299,7 @@ export const IframeContainer = ({ ready = true }: { ready?: boolean } = {}) => {
     )
 
     return (
-        <div id="true-ov25-configurator-iframe-container"
+        <div ref={viewerRef} id="true-ov25-configurator-iframe-container"
             data-clarity-mask="true"
             className={cn(isStacked ? isStackedStyles : isInlineStyles)}>
             <iframe
@@ -307,7 +316,7 @@ export const IframeContainer = ({ ready = true }: { ready?: boolean } = {}) => {
                 ref={iframeRef}
                 id={uniqueId ? `ov25-configurator-iframe-${uniqueId}` : "ov25-configurator-iframe"}
                 title={iframeTitle}
-                src={ready ? iframeSrc : undefined}
+                src={ready && hexBgColor !== undefined ? iframeSrc : undefined}
                 className={`ov:w-full ov:bg-transparent ov:h-full ${iframeRadiusClass} ov:transform-gpu ov:backface-hidden ${galleryIndex === galleryIndexToUse ? 'ov:block' : 'ov:ov25-controls-hidden'}`}
                 allow="camera; accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; xr-spatial-tracking; fullscreen"
 

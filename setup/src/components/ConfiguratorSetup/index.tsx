@@ -1,24 +1,31 @@
+import { mergeSerializableIntoTypeSettings } from './initial-config-from-payload';
 import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
-import { ArrowLeft, ExternalLink, Loader2, Palette, SlidersHorizontal } from 'lucide-react';
+import { createPortal } from 'react-dom';
+import { effectiveSelectors, pruneThemeSelectorsInPayload, setThemeSelectorOverride, THEME_SELECTORS_FEATURE, type SelectorOverrideTheme } from './theme-selector-overrides';
+import { ArrowLeft, Check, Copy, ExternalLink, Palette, SlidersHorizontal, Smartphone, X } from 'lucide-react';
+import { Spinner } from '../ui/spinner';
 import { useConfiguratorSetup } from './useConfiguratorSetup';
 import type { ConfiguratorSetupOverrides, ConfiguratorSetupPayload } from './useConfiguratorSetup';
 import { ConfigPanel, ProductTypeSelector, SetupSaveControls } from './ConfigPanel';
 import { PreviewArea } from './PreviewArea';
 import { PresetPicker } from './PresetPicker';
 import { Button } from '../ui/button';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '../ui/dialog';
 import type { StorefrontIntegrationConfig } from './storefront-integration';
-import type { ConfiguratorSetupLivePreviewConfig } from './live-preview';
+import type { ConfiguratorSetupLivePreviewConfig, ConfiguratorSetupLivePreviewRequest, ConfiguratorSetupMobilePreviewConfig } from './live-preview';
 import { describeUnsupportedFeatures, unsupportedSetupFeatures, type ConfiguratorSetupCompatibility } from './compatibility';
 import { applySetupPreset, getDefaultPresetId, getPresetSettings, getSetupPresets, presentationFingerprint, type SetupPresetId } from './presets';
 import { buildConfiguratorSetupPayload, buildSerializableConfig } from './serialize-config';
-import type { ConfiguratorSetupFormState, PreviewLayoutType } from './types';
+import type { ConfiguratorSetupFormState, PreviewLayoutType, TypeSettings } from './types';
 import { ThemeStyleAction } from './ThemeStyleAction';
 import { isThemeStyleVariable, type ConfiguratorSetupThemeStyling } from './theme-style';
-import { getAvailableSelectorDiscoveryTargets, isSelectorDiscoveryLayoutKey } from './selector-discovery';
+import { getAvailableSelectorDiscoveryTargets, getSelectorDiscoveryCurrentValue, isSelectorDiscoveryLayoutKey } from './selector-discovery';
 import { PlacementValidation } from './PlacementValidation';
 
 export interface ConfiguratorSetupProps {
+  /** Host-owned verification and chat tools; never saves the draft automatically. */
+  renderStorefrontTools?: (context: { page?: { previewActions: ReactNode; advancedActions: ReactNode; previewProduct?: ReactNode; themeName?: string; preparation: 'preparing' | 'unavailable' | 'ready' | 'saved' }; actionsContainer?: HTMLElement | null; finalCheckContainer?: HTMLElement | null; request: { payload: ConfiguratorSetupPayload; activeLayout: PreviewLayoutType }; customCss: string; onCustomCssChange: (css: string) => void; onRuntimeConfigChange: (config: ConfiguratorSetupPayload[PreviewLayoutType]) => { payload: ConfiguratorSetupPayload; activeLayout: PreviewLayoutType } }) => ReactNode;
   apiKey?: ConfiguratorSetupOverrides['apiKey'];
   productLink?: ConfiguratorSetupOverrides['productLink'];
   /** Optional gallery images for each host-selected preview product. */
@@ -36,17 +43,41 @@ export interface ConfiguratorSetupProps {
   livePreview?: ConfiguratorSetupLivePreviewConfig;
   /** Host-owned store and preview-product controls, rendered outside the iframe. */
   previewToolbar?: ReactNode;
+  /** Guided step 2: shows and changes the product the site preview opens on. Settings still save to the selected target. */
+  previewProductControl?: ReactNode;
   /** Reports the hydrated product type so hosts can select its matching preview product. */
   onPreviewLayoutChange?: (layout: PreviewLayoutType) => void;
   compatibility?: ConfiguratorSetupCompatibility;
   /** Optional host-owned theme analysis; suggestions only change the local draft on approval. */
   themeStyling?: ConfiguratorSetupThemeStyling;
+  /**
+   * Guided host selection is presented for confirmation against the current draft. `resume`: the store finished this
+   * type before and is reopening it, so its saved settings (`initialConfig`) are kept as they are, with no preset.
+   */
+  guidedSelection?: { layout: PreviewLayoutType; preset: SetupPresetId; resume?: boolean };
+  /** Guided: match the site by itself now (the host sets this each time the store arrives at this step). */
+  guidedAutoMatch?: boolean;
+  /** Guided: the automatic match finished (applied or not), so the host can stop asking for it. */
+  onGuidedAutoMatchEnd?: () => void;
+  /**
+   * Shopify hosts: the store's themes, enabling per-theme placement overrides in the editor.
+   * `currentThemeId` is the theme being set up (guided setup); hosts without themes omit this.
+   */
+  selectorThemes?: { themes: SelectorOverrideTheme[]; currentThemeId?: string };
+  /** Host-owned element (e.g. a wizard footer) that receives the only Save button, styled with `className`. */
+  saveSlot?: { container: HTMLElement | null; className?: string };
+  /** Label for every Save button, e.g. "Finalise" when saving ends the host's setup flow. Defaults to "Save". */
+  saveLabel?: string;
   className?: string;
 }
 
 export type { ConfiguratorSetupPayload, StorefrontIntegrationConfig, ConfiguratorSetupLivePreviewConfig, ConfiguratorSetupCompatibility };
 
-export function LivePreviewAction({ config, state }: { config: ConfiguratorSetupLivePreviewConfig; state: ConfiguratorSetupFormState }) {
+/** How long after the last edit the full editor sends the draft to an open preview tab. */
+const AUTO_UPDATE_DELAY_MS = 1500;
+
+/** `simple` (guided setup): one button. Show blocking availability messages, what to do while a locked store is being unlocked, and a retry action. `primary`: the filled button style. */
+export function LivePreviewAction({ config, state, simple, primary }: { config: ConfiguratorSetupLivePreviewConfig; state: ConfiguratorSetupFormState; simple?: boolean; primary?: boolean }) {
   const [pending, setPending] = useState(false);
   const [retrying, setRetrying] = useState(false);
   const [error, setError] = useState<string>();
@@ -55,12 +86,27 @@ export function LivePreviewAction({ config, state }: { config: ConfiguratorSetup
   const mountedRef = useRef(true);
   useEffect(() => { mountedRef.current = true; return () => { mountedRef.current = false; }; }, []);
   const checking = retrying || config.availability === 'checking';
-  const unavailable = config.availability !== undefined && config.availability !== 'supported';
+  const unavailable = config.availability !== undefined && config.availability !== 'supported' && config.availability !== 'requires-unlock';
   const payload = useMemo(() => buildConfiguratorSetupPayload(state), [state]);
   const fingerprint = useMemo(() => JSON.stringify([state.layout, payload]), [state.layout, payload]);
   const report = config.placementValidation;
   const sameDraft = submitted?.fingerprint === fingerprint && submitted?.contextKey === config.contextKey;
   const currentReport = !pending && sameDraft && report?.activeLayout === state.layout && report.validationRunId !== submitted?.previousRunId ? report : undefined;
+  // Full editor: once a preview tab shows a draft, send later edits to it by themselves, shortly after editing stops.
+  // Guided setup (`simple`) refreshes its preview after each assistant change instead.
+  const autoUpdate = simple ? undefined : config.onAutoUpdate;
+  useEffect(() => {
+    if (!autoUpdate || config.status !== 'ready') return;
+    // A preview opened elsewhere (for example guided setup's chat) already shows the current draft, so its
+    // placement report applies to it too.
+    if (!submitted) { setSubmitted({ fingerprint, contextKey: config.contextKey }); return; }
+    if (sameDraft || pending || checking || unavailable || config.disabled) return;
+    const timer = setTimeout(() => {
+      setSubmitted({ fingerprint, contextKey: config.contextKey, previousRunId: report?.validationRunId });
+      void Promise.resolve(autoUpdate({ payload, activeLayout: state.layout })).catch(() => {});
+    }, AUTO_UPDATE_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, [autoUpdate, config.status, config.contextKey, config.disabled, submitted, sameDraft, pending, checking, unavailable, fingerprint, payload, state.layout, report?.validationRunId]);
   const request = async () => {
     if (pendingRef.current || config.disabled || checking || unavailable) return;
     pendingRef.current = true;
@@ -91,17 +137,67 @@ export function LivePreviewAction({ config, state }: { config: ConfiguratorSetup
       if (mountedRef.current) setRetrying(false);
     }
   };
+  const retryOnClick = simple && unavailable && !!config.onRetry;
+  const previewButton = <Button type="button" variant={primary ? 'default' : 'outline'} className={simple && config.mobile ? undefined : 'w-full'} disabled={pending || config.disabled || checking || (unavailable && !retryOnClick)} onClick={retryOnClick ? retry : request}>
+      {pending || checking ? <Spinner aria-hidden size={16} /> : <ExternalLink className="h-4 w-4" />}
+      {checking ? (simple ? 'Checking…' : 'Checking site preview…') : pending ? (simple ? 'Opening…' : 'Opening site preview…') : config.label ?? (config.status === 'ready' && !autoUpdate ? 'Update site preview' : 'Open site preview')}
+    </Button>;
   return <div className="shrink-0 border-t pt-3" data-ov25-setup-live-preview>
-    <Button type="button" variant="outline" className="w-full" disabled={pending || config.disabled || checking || unavailable} onClick={request}>
-      {pending || checking ? <Loader2 className="h-4 w-4 animate-spin motion-reduce:animate-none" /> : <ExternalLink className="h-4 w-4" />}
-      {checking ? 'Checking site preview…' : pending ? 'Opening site preview…' : config.label ?? (config.status === 'ready' ? 'Update site preview' : 'Open site preview')}
-    </Button>
-    {(error || config.message) && <p role={error || config.status === 'error' ? 'alert' : 'status'} className={`mt-2 text-xs leading-relaxed ${error || config.status === 'error' ? 'text-destructive' : 'text-muted-foreground'}`}>{error || config.message}</p>}
-    {currentReport ? <PlacementValidation report={currentReport} /> : !pending && (report || config.status === 'ready') && <p className="mt-2 text-xs leading-relaxed text-muted-foreground" data-ov25-placement-not-checked>
-      Page placement: Not checked. {submitted && !sameDraft ? 'Update the site preview to check your changed draft.' : report ? 'Update the site preview to check this draft.' : 'This preview did not report placement checks.'}
-    </p>}
-    {config.onRetry && <Button type="button" variant="ghost" className="mt-1 w-full" disabled={pending || checking} onClick={retry}>Retry check</Button>}
+    {simple && config.mobile
+      ? <div className="flex gap-2" data-ov25-setup-preview-row>{previewButton}<MobilePreviewAction mobile={config.mobile} request={{ payload, activeLayout: state.layout }} /></div>
+      : previewButton}
+    {(error || (config.message && (!simple || config.status === 'error' || config.disabled || unavailable || config.availability === 'requires-unlock'))) && <p role={error || config.status === 'error' ? 'alert' : 'status'} className={`mt-2 text-xs leading-relaxed ${error || config.status === 'error' ? 'text-destructive' : 'text-muted-foreground'}`}>{error || config.message}</p>}
+    {/* Placement checks only surface definite problems, in the full editor. */}
+    {currentReport && !simple && <PlacementValidation report={currentReport} />}
+    {config.onRetry && unavailable && <Button type="button" variant="ghost" className="mt-1 w-full" disabled={pending || checking} onClick={retry}>Retry check</Button>}
   </div>;
+}
+
+/** "View on phone": prepares the same draft preview and shows its link as a QR code. */
+// Never greyed out: if the link cannot be prepared, the popover says why. The popover renders
+// at the document root (above sticky headers) and flips to whichever side has room.
+function MobilePreviewAction({ mobile, request }: { mobile: ConfiguratorSetupMobilePreviewConfig; request: ConfiguratorSetupLivePreviewRequest }) {
+  const [open, setOpen] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [link, setLink] = useState<string>();
+  const [error, setError] = useState<string>();
+  const [copied, setCopied] = useState(false);
+  const show = async () => {
+    if (pending) return;
+    setPending(true); setError(undefined); setLink(undefined); setCopied(false);
+    try {
+      setLink(await mobile.onLink(request));
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : 'The phone preview could not be prepared. Try again.');
+    } finally {
+      setPending(false);
+    }
+  };
+  const copy = async () => {
+    if (!link) return;
+    try { await navigator.clipboard.writeText(link); setCopied(true); } catch { setError('Copy failed. Scan the code instead.'); }
+  };
+  return <Popover open={open} onOpenChange={next => { setOpen(next); if (next) void show(); }}>
+    <PopoverTrigger asChild>
+      <Button type="button" variant="outline" className="shrink-0" disabled={pending && !open} data-ov25-setup-mobile-preview>
+        {pending ? <Spinner aria-hidden size={16} /> : <Smartphone className="h-4 w-4" />}View on phone
+      </Button>
+    </PopoverTrigger>
+    <PopoverContent side="bottom" align="end" sideOffset={8} collisionPadding={16} aria-label="View on your phone" className="w-64 rounded-xl shadow-lg">
+      <div className="mb-3 flex items-start justify-between gap-2">
+        <p className="text-sm font-medium">Scan with your phone</p>
+        <button type="button" aria-label="Close" className="-m-1 rounded p-1 text-muted-foreground hover:text-foreground" onClick={() => setOpen(false)}><X className="h-4 w-4" /></button>
+      </div>
+      {pending && <div className="flex h-40 items-center justify-center"><Spinner aria-hidden size={24} className="text-muted-foreground" /></div>}
+      {link && <>
+        <div className="mx-auto w-fit rounded-lg bg-white p-2">{mobile.renderQrCode(link)}</div>
+        <p className="mt-3 text-xs leading-relaxed text-muted-foreground">Opens this draft on your product page. It updates as you make changes here.</p>
+        {mobile.note && <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{mobile.note}</p>}
+        <Button type="button" variant="ghost" size="sm" className="mt-2 w-full" onClick={copy}>{copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}{copied ? 'Copied' : 'Copy link'}</Button>
+      </>}
+      {error && <p role="alert" className="text-xs leading-relaxed text-destructive">{error}</p>}
+    </PopoverContent>
+  </Popover>;
 }
 
 export default function ConfiguratorSetup(props: ConfiguratorSetupProps) {
@@ -122,6 +218,11 @@ export default function ConfiguratorSetup(props: ConfiguratorSetupProps) {
   const [screen, setScreen] = useState<'picker' | 'theme' | 'summary' | 'editor' | null>(null);
   const [selectedPreset, setSelectedPreset] = useState<SetupPresetId>(() => getDefaultPresetId(formState.layout));
   const [confirmReplacement, setConfirmReplacement] = useState(false);
+  const [guidedError, setGuidedError] = useState<string>();
+  // Guided Match my site applies immediately; this captures what to put back on Undo.
+  const [actionsContainer, setActionsContainer] = useState<HTMLDivElement | null>(null);
+  const [finalCheckContainer, setFinalCheckContainer] = useState<HTMLDivElement | null>(null);
+  const [matchUndo, setMatchUndo] = useState<{ layout: PreviewLayoutType; settings: TypeSettings; progress: NonNullable<ConfiguratorSetupFormState['setupProgress']>[PreviewLayoutType]; integration: [string, string][] }>();
   const defaultScreen = !progress?.configured ? 'picker' : props.themeStyling && progress.themeStep === 'pending' ? 'theme' : 'summary';
   const activeScreen = screen === 'theme' && !props.themeStyling ? 'summary' : screen ?? defaultScreen;
   const onboarding = activeScreen === 'picker' || activeScreen === 'theme';
@@ -134,6 +235,30 @@ export default function ConfiguratorSetup(props: ConfiguratorSetupProps) {
   }, [activeScreen, setup.hasHydrated, formState.layout, onboarding]);
 
   useEffect(() => { setScreen(null); setSelectedPreset(getDefaultPresetId(formState.layout)); setConfirmReplacement(false); }, [setup.hydrationKey, formState.layout]);
+  const guidedApplied = useRef<string | undefined>(undefined);
+  useEffect(() => {
+    const selection = props.guidedSelection;
+    if (!setup.hasHydrated || !selection) return;
+    const key = `${setup.hydrationKey}:${selection.layout}:${selection.preset}:${!!selection.resume}`;
+    if (guidedApplied.current === key) return;
+    if (formState.layout !== selection.layout) {
+      setup.setLayout(selection.layout);
+      return;
+    }
+    guidedApplied.current = key;
+    setSelectedPreset(selection.preset);
+    const selected = selection.resume ? currentSettings : applySetupPreset(selection.layout, selection.preset, progress?.configured ? currentSettings : undefined, !!progress?.themeStyle);
+    const unavailable = describeUnsupportedFeatures(unsupportedSetupFeatures(selected, props.compatibility, setup.initialSettings?.[selection.layout]));
+    if (unavailable) {
+      setGuidedError(unavailable);
+      return;
+    }
+    setGuidedError(undefined);
+    // Preserve edits when the user returns to this step with the same preset, or reopens a finished type.
+    if (!selection.resume && progress?.presetId !== selection.preset) setup.applyPreset(selection.preset, !!props.themeStyling);
+    setScreen(props.themeStyling ? 'theme' : 'summary');
+  }, [setup.hasHydrated, setup.hydrationKey, setup.setLayout, setup.applyPreset, setup.initialSettings, formState.layout, progress, currentSettings, props.compatibility, props.themeStyling, props.guidedSelection?.layout, props.guidedSelection?.preset, props.guidedSelection?.resume]);
+
   const setLayout = (layout: PreviewLayoutType) => {
     if (layout === formState.layout) return;
     setScreen(null);
@@ -167,44 +292,162 @@ export default function ConfiguratorSetup(props: ConfiguratorSetupProps) {
   const changePreset = () => { setSelectedPreset(progress?.presetId ?? getDefaultPresetId(formState.layout)); setScreen('picker'); };
   const continueToPreview = () => { setup.completeThemeStep(); setScreen('summary'); };
 
-  return <div ref={rootRef} className={`ov25-setup ${props.className ?? 'h-screen'}`}>
+  const hideInlineSave = props.hideSaveButton || !!props.saveSlot;
+  // Guided step 5: until there are settings to show (saved before, saved now, or a match in the draft),
+  // only Match my site is available.
+  const [savedThisSession, setSavedThisSession] = useState(false);
+  const lockedUntilSettings = !!props.guidedSelection && !setup.initialSettings && !savedThisSession && !progress?.themeStyle;
+  const guidedSaveDisabled = !!saveUnavailable || lockedUntilSettings;
+  // Guided: the site preview comes first. Until it has been opened this visit (here, by an earlier click's tab, or on a
+  // phone), the step shows only the preview buttons; Ask for changes, Fine-tune, Final check and Save appear once it has.
+  // Only when the preview can actually be opened, so the store is never stuck behind a button that doesn't work.
+  const [previewOpened, setPreviewOpened] = useState(false);
+  const guidedPreview = props.guidedSelection ? props.livePreview : undefined;
+  const previewUsable = !!guidedPreview && !guidedPreview.disabled && !guidedSaveDisabled &&
+    (guidedPreview.availability === undefined || guidedPreview.availability === 'supported' || guidedPreview.availability === 'requires-unlock' || guidedPreview.availability === 'checking');
+  const chatPage = !!props.guidedSelection && !!props.renderStorefrontTools;
+  // After the host's first automatic match, the site is only matched again when the store asks: Match my site again
+  // on the chat page. After a match applies, the page talks about the fresh match rather than the saved settings.
+  const [matchingAgain, setMatchingAgain] = useState(false);
+  const [matchedThisVisit, setMatchedThisVisit] = useState(false);
+  const previewFirst = !chatPage && activeScreen === 'theme' && !previewOpened && previewUsable;
+  const guidedPreviewConfig = useMemo(() => guidedPreview && {
+    ...guidedPreview,
+    // Still called synchronously from the click, so the host can open the tab.
+    onRequest: (request: ConfiguratorSetupLivePreviewRequest) => { setPreviewOpened(true); return guidedPreview.onRequest(request); },
+    mobile: guidedPreview.mobile && { ...guidedPreview.mobile, onLink: (request: ConfiguratorSetupLivePreviewRequest) => { setPreviewOpened(true); return guidedPreview.mobile!.onLink(request); } },
+  }, [guidedPreview]);
+  // After Match my site is applied, open the site preview in the tab prepared during the click.
+  const [autoPreview, setAutoPreview] = useState(false);
+  useEffect(() => {
+    if (!autoPreview) return;
+    setAutoPreview(false);
+    const preview = props.livePreview;
+    if (!preview || preview.disabled || saveUnavailable) { preview?.onDiscardWindow?.(); return; }
+    setPreviewOpened(true);
+    void Promise.resolve(preview.onRequest({ payload: buildConfiguratorSetupPayload(formState), activeLayout: formState.layout })).catch(() => undefined);
+  // eslint-disable-next-line react-hooks/exhaustive-deps -- runs once, on the render that carries the applied match
+  }, [autoPreview]);
+  // Drop overrides for themes that were deleted from the store before saving.
+  const existingThemeIds = props.selectorThemes?.themes.map(theme => theme.id);
+  // Offer overrides only when the deployed plugin resolves them; keep existing ones reviewable after a downgrade.
+  // Unknown builds (no compatibility report) may support overrides; a recognised build must list the feature.
+  const themeOverridesSupported = !props.compatibility || props.compatibility.supportedFeatures.includes(THEME_SELECTORS_FEATURE);
+  const hasThemeOverrides = Object.values(formState.typeSettings).some(settings => settings.themeSelectors && Object.keys(settings.themeSelectors).length);
+  const selectorThemes = themeOverridesSupported || hasThemeOverrides ? props.selectorThemes : undefined;
+  const onSave = props.onSave && ((payload: ConfiguratorSetupPayload) => { props.onSave!(pruneThemeSelectorsInPayload(payload, existingThemeIds)); setSavedThisSession(true); });
+  // Guided Advanced setup takes over the window; its own bar saves and returns to Automatic setup.
+  const fullscreenEditor = !!props.guidedSelection && setup.hasHydrated && !onboarding && activeScreen === 'editor';
+  const backToAutomatic = () => setScreen(props.themeStyling ? 'theme' : 'summary');
+  const slotSave = props.saveSlot?.container && setup.hasHydrated && !previewFirst && !fullscreenEditor ? createPortal(<SetupSaveControls formState={formState} getExportJson={getExportJson} onSave={onSave} label={props.saveLabel} hideSaveButton={props.hideSaveButton} saveDisabled={guidedSaveDisabled} buttonClassName={props.saveSlot.className} />, props.saveSlot.container) : null;
+  const previewActions = props.guidedSelection ? (guidedPreviewConfig
+    ? <LivePreviewAction simple primary={previewFirst} config={{ ...guidedPreviewConfig, label: previewFirst ? 'Open preview' : 'Preview site', disabled: guidedPreviewConfig.disabled || guidedSaveDisabled }} state={formState} />
+    : <p role="status">Site preview is unavailable.</p>) : undefined;
+  // A click: the preview tab may open now, and fills once the match applies.
+  const matchAgain = chatPage && props.themeStyling && !props.themeStyling.disabled
+    ? () => { props.livePreview?.onPrepareWindow?.(); setMatchingAgain(true); } : undefined;
+  const advancedActions = props.guidedSelection ? <>
+    {matchAgain && <Button variant="ghost" size="sm" disabled={matchingAgain || !!props.guidedAutoMatch} onClick={matchAgain}><Palette className="h-4 w-4" />Match my site again</Button>}
+    <Button variant={chatPage ? 'ghost' : 'outline'} size={chatPage ? 'sm' : 'lg'} disabled={!chatPage && lockedUntilSettings} onClick={() => setScreen('editor')}><SlidersHorizontal className="h-4 w-4" />Advanced setup</Button>
+    <SetupSaveControls formState={formState} getExportJson={getExportJson} onSave={onSave} label={props.saveLabel} hideSaveButton={hideInlineSave} saveDisabled={guidedSaveDisabled} />
+  </> : undefined;
+  return <div ref={rootRef} className={`ov25-setup ${props.className ?? 'h-screen'}${fullscreenEditor ? ' ov25-setup-fullscreen' : ''}`}>
+    {slotSave}
+    {fullscreenEditor && <header className="ov25-setup-fullscreen-bar">
+      <Button variant="ghost" size="sm" autoFocus onClick={backToAutomatic}><ArrowLeft className="h-3.5 w-3.5" />Back to automatic setup</Button>
+      <h2 className="ov25-setup-fullscreen-title">Advanced setup</h2>
+      <SetupSaveControls formState={formState} getExportJson={getExportJson} onSave={onSave} label={props.saveLabel} hideSaveButton={props.hideSaveButton} saveDisabled={guidedSaveDisabled} buttonClassName={props.saveSlot?.className} />
+    </header>}
     {setup.hasHydrated && !onboarding && props.previewToolbar && <div className="shrink-0 border-b bg-white p-3" data-ov25-setup-preview-toolbar>{props.previewToolbar}</div>}
-    {!setup.hasHydrated ? <p role="status" className="p-5 text-sm text-muted-foreground">Loading your setup…</p> : onboarding ? <main className="ov25-setup-onboarding" data-ov25-setup-step={activeScreen}>
-      <header className="ov25-setup-onboarding-header">
+    {!setup.hasHydrated ? <p role="status" className="p-5 text-sm text-muted-foreground">Loading your setup…</p> : guidedError && props.guidedSelection ? <p role="alert" className="p-5 text-sm text-destructive">{guidedError} Return to Choose preset to select a compatible layout.</p> : onboarding ? <main className="ov25-setup-onboarding" data-ov25-setup-step={activeScreen}>
+      {!props.guidedSelection && <header className="ov25-setup-onboarding-header">
         <ol className="ov25-setup-steps" aria-label="Setup progress">
           <li aria-current={activeScreen === 'picker' ? 'step' : undefined}><span>1</span>Choose a preset</li>
           {props.themeStyling && <li aria-current={activeScreen === 'theme' ? 'step' : undefined}><span>2</span>Match my site</li>}
           <li><span>{props.themeStyling ? '3' : '2'}</span>Preview & edit</li>
         </ol>
         <ProductTypeSelector layout={formState.layout} onChange={setLayout} compact />
-      </header>
+      </header>}
       {activeScreen === 'picker' ? <PresetPicker layout={formState.layout} selected={selectedPreset} onSelect={setSelectedPreset} onApply={choose} onCancel={progress?.configured ? () => setScreen(defaultScreen === 'theme' ? 'theme' : 'summary') : undefined} unavailable={candidateUnavailable} /> : props.themeStyling && <div className="ov25-setup-theme-content">
         <ThemeStyleAction
           key={`${setup.hydrationKey}:${formState.layout}:${props.themeStyling.contextKey}`}
+          inlineStorefrontTools={chatPage}
+          onActionsContainer={props.renderStorefrontTools ? setActionsContainer : undefined}
+          onFinalCheckContainer={props.renderStorefrontTools ? setFinalCheckContainer : undefined}
+          storefrontTools={props.renderStorefrontTools?.({ page: chatPage ? {
+            previewActions, advancedActions, previewProduct: props.previewProductControl,
+            themeName: props.themeStyling.themeSelection?.options.find(option => option.value === props.themeStyling?.themeSelection?.value)?.label.replace(/\s*\(Live\)$/, ''),
+            preparation: props.guidedAutoMatch || matchingAgain ? 'preparing' : lockedUntilSettings ? 'unavailable' : props.guidedSelection?.resume && !matchedThisVisit ? 'saved' : 'ready',
+          } : undefined, actionsContainer, finalCheckContainer, request: { payload: buildConfiguratorSetupPayload(formState), activeLayout: formState.layout }, customCss: currentSettings.branding.cssString, onCustomCssChange: css => updateNested('branding', 'cssString', css), onRuntimeConfigChange: config => {
+            const settings = mergeSerializableIntoTypeSettings(currentSettings, config, formState.layout);
+            setup.restoreLayout(formState.layout, { settings, progress: { ...progress, configured: true } });
+            return { payload: buildConfiguratorSetupPayload({ ...formState, typeSettings: { ...formState.typeSettings, [formState.layout]: settings } }), activeLayout: formState.layout };
+          } })}
           config={props.themeStyling} layout={formState.layout} settings={currentSettings} integration={props.storefrontIntegration} compatibility={props.compatibility}
-          matchedLabel={progress?.themeStyle?.label} onBack={changePreset} onContinue={continueToPreview}
-          onApply={(proposal) => {
+          matchedLabel={progress?.themeStyle?.label} onBack={props.guidedSelection ? undefined : changePreset} onContinue={continueToPreview}
+          previewProduct={props.guidedSelection ? props.previewProductControl : undefined}
+          previewFirst={previewFirst}
+          themeAction={previewActions}
+          actions={advancedActions}
+          autoMatch={!!props.guidedSelection && (!!props.guidedAutoMatch || matchingAgain)}
+          onAutoMatchEnd={() => { setMatchingAgain(false); props.onGuidedAutoMatchEnd?.(); }}
+          onMatchStart={props.guidedSelection && props.livePreview && !props.livePreview.disabled ? () => props.livePreview?.onPrepareWindow?.() : undefined}
+          // Every successful guided entry opens or updates the preview, including restored/automatic entries.
+          onMatchEnd={props.guidedSelection ? (applied) => {
+            if (applied) { setAutoPreview(true); setMatchedThisVisit(true); }
+            else if (!applied) props.livePreview?.onDiscardWindow?.();
+          } : undefined}
+          onUndo={matchUndo && matchUndo.layout === formState.layout ? () => {
+            setup.restoreLayout(matchUndo.layout, { settings: matchUndo.settings, progress: { ...matchUndo.progress, configured: matchUndo.progress?.configured ?? true, themeStyle: undefined, themeStep: 'pending' } });
+            const integration = props.storefrontIntegration;
+            if (integration?.status === 'ready') for (const [key, value] of matchUndo.integration) integration.onChange(key as never, value);
+            setMatchUndo(undefined);
+          } : undefined}
+          onApply={(proposal, options) => {
             // Global placement values stay in the host's unsaved integration draft.
             const integration = props.storefrontIntegration;
+            const integrationBefore: [string, string][] = [];
             if (proposal.placement && integration?.status === 'ready') {
               for (const target of getAvailableSelectorDiscoveryTargets(proposal.placement, currentSettings, integration)) {
-                if (!isSelectorDiscoveryLayoutKey(target.key)) integration.onChange(target.key, target.selector);
+                if (!isSelectorDiscoveryLayoutKey(target.key)) {
+                  integrationBefore.push([target.key, getSelectorDiscoveryCurrentValue(target.key, currentSettings, integration) ?? '']);
+                  integration.onChange(target.key, target.selector);
+                }
               }
             }
+            setMatchUndo((previous) => previous?.layout === formState.layout ? previous : { layout: formState.layout, settings: currentSettings, progress: formState.setupProgress?.[formState.layout], integration: integrationBefore });
             setup.applyThemeStyle(formState.layout, proposal);
-            setScreen('summary');
+            // Placements for a theme that isn't live become that theme's overrides (live selectors untouched).
+            const themePlacement = options?.themePlacement;
+            if (themePlacement) {
+              let next = currentSettings;
+              const shown = effectiveSelectors(currentSettings, themePlacement.themeId);
+              for (const target of themePlacement.placement.targets) {
+                if (!isSelectorDiscoveryLayoutKey(target.key) || !shown[target.key].enabled) continue;
+                next = setThemeSelectorOverride(next, themePlacement.themeId, target.key, { ...shown[target.key], selector: target.selector });
+              }
+              setup.updateSettings('themeSelectors', next.themeSelectors);
+            }
+            setScreen(props.guidedSelection ? 'theme' : 'summary');
           }} />
       </div>}
+    </main> : props.guidedSelection && activeScreen !== 'editor' ? <main className="p-4" data-ov25-setup-step="guided-preview">
+      <p>Review your configuration on your site.</p>
+      {props.livePreview ? <LivePreviewAction config={{ ...props.livePreview, label: 'Continue to preview', disabled: props.livePreview.disabled || !!saveUnavailable }} state={formState} /> : <p role="status">Site preview is unavailable.</p>}
+      <Button variant="outline" onClick={() => setScreen('editor')}><SlidersHorizontal className="h-4 w-4" />Advanced setup</Button>
+      <SetupSaveControls formState={formState} getExportJson={getExportJson} onSave={onSave} label={props.saveLabel} hideSaveButton={hideInlineSave} saveDisabled={!!saveUnavailable} />
     </main> : <div className={`ov25-setup-layout ${props.hidePreview ? 'ov25-setup-no-preview' : ''}`}>
       {!props.hidePreview && <main className="ov25-setup-preview"><PreviewArea serializableConfig={serializableConfig} previewBaseUrl={props.previewBaseUrl} useLocalPreview={props.useLocalPreview} /></main>}
       <aside className="ov25-setup-sidebar">
-        <ProductTypeSelector layout={formState.layout} onChange={setLayout} />
+        {/* Guided setup chose the type and preset in earlier steps, so they aren't changed here. */}
+        {!props.guidedSelection && <ProductTypeSelector layout={formState.layout} onChange={setLayout} />}
         {activeScreen === 'editor' ? <>
-          <div className="flex shrink-0 items-center justify-between py-2">
+          {/* Guided setup returns from the full-screen bar above. */}
+          {!fullscreenEditor && <div className="flex shrink-0 items-center justify-between py-2">
             <Button variant="ghost" size="sm" onClick={() => setScreen('summary')}><ArrowLeft className="h-3.5 w-3.5" />Summary</Button>
             <Button variant="ghost" size="sm" onClick={changePreset}>Change preset</Button>
-          </div>
-          <ConfigPanel formState={formState} currentSettings={currentSettings} setLayout={setLayout} updateSettings={updateSettings} updateNested={updateNested} getExportJson={getExportJson} onSave={props.onSave} hideSaveButton={props.hideSaveButton} storefrontIntegration={props.storefrontIntegration} hideProductType saveDisabled={!!saveUnavailable} />
+          </div>}
+          <ConfigPanel selectorThemes={selectorThemes?.themes} initialSelectorThemeId={selectorThemes?.currentThemeId} formState={formState} currentSettings={currentSettings} setLayout={setLayout} updateSettings={updateSettings} updateNested={updateNested} getExportJson={getExportJson} onSave={onSave} hideSaveButton={hideInlineSave} storefrontIntegration={props.storefrontIntegration} hideProductType saveDisabled={!!saveUnavailable} />
           {saveUnavailable && <p role="alert" className="py-2 text-xs text-destructive">{saveUnavailable}</p>}
         </> : <>
           <div className="min-h-0 flex-1 overflow-auto py-6">
@@ -221,11 +464,11 @@ export default function ConfiguratorSetup(props: ConfiguratorSetupProps) {
             <Button variant="ghost" className="mt-2 w-full" onClick={changePreset}>Change preset</Button>
             {props.themeStyling && <>
               <Button variant="ghost" className="mt-2 w-full" onClick={() => setScreen('theme')}><Palette className="h-4 w-4" />Match my site</Button>
-              {progress?.themeStyle && <p className="mt-1 text-center text-xs text-muted-foreground">Palette matched: {progress.themeStyle.label}</p>}
+              {progress?.themeStyle && <p className="mt-1 text-center text-xs text-muted-foreground">Matched to {progress.themeStyle.label.split(' — ')[0]}</p>}
             </>}
             {saveUnavailable && <p role="alert" className="mt-4 text-sm text-destructive">{saveUnavailable}</p>}
           </div>
-          <SetupSaveControls formState={formState} getExportJson={getExportJson} onSave={props.onSave} hideSaveButton={props.hideSaveButton} saveDisabled={!!saveUnavailable} />
+          <SetupSaveControls formState={formState} getExportJson={getExportJson} onSave={onSave} label={props.saveLabel} hideSaveButton={hideInlineSave} saveDisabled={!!saveUnavailable} />
         </>}
         {props.livePreview && <LivePreviewAction key={`${setup.hydrationKey}:${formState.layout}`} config={{ ...props.livePreview, disabled: props.livePreview.disabled || !!saveUnavailable }} state={formState} />}
       </aside>

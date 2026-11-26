@@ -35,8 +35,8 @@ const PRESETS = {
       <>
         Inline-sticky gallery on a page that scrolls inside a wrapper (like Savor:{' '}
         <code>body {'{'} overflow: hidden {'}'}</code> + an <code>overflow: auto</code> page wrapper), so the
-        sticky gallery is lifted into the browser top layer. Hover a fabric swatch: the tooltip opens over the
-        gallery and must be fully visible. Scroll until the gallery sticks to see it enter the top layer.
+        gallery can use the document-level sticky track. Hover a fabric swatch: the tooltip opens over the
+        gallery and must be fully visible. Both top-layer indicators should stay at “no”.
       </>
     ),
     desktopDetails: 'tooltip',

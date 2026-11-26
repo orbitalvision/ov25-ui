@@ -271,6 +271,15 @@ or remounted.
   left in place with a diagnostic.
 - A measured placeholder preserves the gallery's original grid/flex participation.
 
+### Native sticky on the media wrapper
+
+Before relocation, OV25 can pin the gallery’s immediate wrapper when it contains only the
+gallery and sits directly inside a product boundary with room to scroll. The browser pins
+that wrapper inside the theme’s own scroll container. The inner gallery stays in flow and
+keeps its original iframe. The [Savor fixture](../dev/react-test/tests/inline-sticky-savor.html)
+covers window scrolling on mobile and a theme-owned scroll container on desktop.
+A wrapper with other content or an intervening scroll trap retains the existing fallback order.
+
 ### Popover strategy
 
 If the manual Popover API is available and `showPopover()` succeeds:

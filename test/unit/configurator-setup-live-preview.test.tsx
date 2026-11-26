@@ -57,11 +57,26 @@ describe('ConfiguratorSetup site-preview availability', () => {
     expect(screen.getByRole('button', { name: 'Update site preview' })).not.toBeDisabled();
   });
 
+  it('opens password-protected stores and lets the user resume without claiming readiness', async () => {
+    const onRequest = vi.fn();
+    const config: ConfiguratorSetupLivePreviewConfig = { onRequest, availability: 'requires-unlock', status: 'idle', message: 'Enter the storefront password in the preview tab.' };
+    const { rerender } = renderAction(config);
+    expect(screen.getByRole('button', { name: 'Open site preview' })).toBeEnabled();
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Open site preview' })); });
+    rerender(<LivePreviewAction config={{ ...config, label: 'Continue after unlocking' }} state={state} />);
+    expect(screen.getByRole('status')).toHaveTextContent('Enter the storefront password');
+    const resume = screen.getByRole('button', { name: 'Continue after unlocking' });
+    expect(resume).toBeEnabled();
+    expect(screen.queryByRole('button', { name: 'Update site preview' })).not.toBeInTheDocument();
+    await act(async () => { fireEvent.click(resume); });
+    expect(onRequest).toHaveBeenCalledTimes(2);
+  });
+
   it('blocks duplicate retry requests and reopening until the check resolves', async () => {
     let resolve!: () => void;
     const onRetry = vi.fn(() => new Promise<void>((done) => { resolve = done; }));
     const onRequest = vi.fn();
-    renderAction({ onRequest, onRetry, availability: 'supported' });
+    const { rerender } = renderAction({ onRequest, onRetry, availability: 'unverified' });
     const retry = screen.getByRole('button', { name: 'Retry check' });
     fireEvent.click(retry);
     fireEvent.click(retry);
@@ -69,7 +84,60 @@ describe('ConfiguratorSetup site-preview availability', () => {
     expect(onRetry).toHaveBeenCalledOnce();
     expect(onRequest).not.toHaveBeenCalled();
     await act(async () => { resolve(); });
+    rerender(<LivePreviewAction config={{ onRequest, onRetry, availability: 'supported' }} state={state} />);
     expect(screen.getByRole('button', { name: 'Open site preview' })).not.toBeDisabled();
+  });
+
+  it('offers Retry check only while the preview is unavailable', () => {
+    renderAction({ onRequest: vi.fn(), onRetry: vi.fn(), availability: 'supported', status: 'ready' });
+    expect(screen.queryByRole('button', { name: 'Retry check' })).not.toBeInTheDocument();
+  });
+
+  it('updates an open preview by itself shortly after edits stop, instead of offering Update site preview', async () => {
+    vi.useFakeTimers();
+    try {
+      const onRequest = vi.fn();
+      const onAutoUpdate = vi.fn();
+      const ready: ConfiguratorSetupLivePreviewConfig = { onRequest, onAutoUpdate, availability: 'supported', status: 'ready' };
+      const { rerender } = renderAction(ready);
+      expect(screen.getByRole('button', { name: 'Open site preview' })).toBeEnabled();
+      expect(screen.queryByRole('button', { name: 'Update site preview' })).not.toBeInTheDocument();
+      // A preview opened elsewhere already shows this draft: nothing to send yet.
+      await act(async () => { vi.advanceTimersByTime(5000); });
+      expect(onAutoUpdate).not.toHaveBeenCalled();
+
+      const edit = (selector: string) => ({ ...state, typeSettings: { standard: { selectors: { gallery: { selector } } } } } as ConfiguratorSetupFormState);
+      rerender(<LivePreviewAction config={ready} state={edit('.a')} />);
+      await act(async () => { vi.advanceTimersByTime(1000); });
+      rerender(<LivePreviewAction config={ready} state={edit('.ab')} />);
+      await act(async () => { vi.advanceTimersByTime(1000); });
+      expect(onAutoUpdate).not.toHaveBeenCalled();
+      await act(async () => { vi.advanceTimersByTime(600); });
+      expect(onAutoUpdate).toHaveBeenCalledOnce();
+      expect(onAutoUpdate).toHaveBeenCalledWith({ payload: { standard: { selectors: { gallery: { selector: '.ab' } } } }, activeLayout: 'standard' });
+      await act(async () => { vi.advanceTimersByTime(5000); });
+      expect(onAutoUpdate).toHaveBeenCalledOnce();
+      expect(onRequest).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('does not auto-update without an open preview, or in guided setup', async () => {
+    vi.useFakeTimers();
+    try {
+      const onAutoUpdate = vi.fn();
+      const changed = { ...state, typeSettings: { standard: { selectors: { gallery: { selector: '.b' } } } } } as ConfiguratorSetupFormState;
+      const { rerender } = render(<LivePreviewAction config={{ onRequest: vi.fn(), onAutoUpdate, availability: 'supported', status: 'idle' }} state={state} />);
+      rerender(<LivePreviewAction config={{ onRequest: vi.fn(), onAutoUpdate, availability: 'supported', status: 'idle' }} state={changed} />);
+      await act(async () => { vi.advanceTimersByTime(5000); });
+      const guided = render(<LivePreviewAction simple config={{ onRequest: vi.fn(), onAutoUpdate, availability: 'supported', status: 'ready' }} state={state} />);
+      guided.rerender(<LivePreviewAction simple config={{ onRequest: vi.fn(), onAutoUpdate, availability: 'supported', status: 'ready' }} state={changed} />);
+      await act(async () => { vi.advanceTimersByTime(5000); });
+      expect(onAutoUpdate).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('retains legacy hosts without an availability field and displays rejected requests', async () => {
@@ -91,96 +159,78 @@ function placementReport(overrides: Partial<ConfiguratorSetupPlacementValidation
   };
 }
 
-describe('ConfiguratorSetup live placement results', () => {
-  it('keeps older plugins explicitly unchecked after they acknowledge mounting', () => {
-    renderAction({ onRequest: vi.fn(), availability: 'supported', status: 'ready' });
-    expect(screen.getByText(/Page placement: Not checked/)).toHaveTextContent('This preview did not report placement checks.');
-    expect(screen.queryByText(/Page placement ·/)).not.toBeInTheDocument();
+describe('ConfiguratorSetup live placement warnings', () => {
+  const broken = { key: 'name' as const, selector: '#name', status: 'missing' as const, matchCount: 0, issues: ['no-match' as const] };
+
+  it('shows nothing about placement when every target is fine or the plugin reports no checks', () => {
+    const { rerender } = renderAction({ onRequest: vi.fn(), availability: 'supported', status: 'ready' });
+    expect(screen.queryByText(/Page placement/)).not.toBeInTheDocument();
+    render(<PlacementValidation report={placementReport()} />);
+    expect(document.querySelector('[data-ov25-placement-validation]')).toBeNull();
+    rerender(<LivePreviewAction config={{ onRequest: vi.fn(), availability: 'supported', status: 'ready' }} state={state} />);
+    expect(screen.queryByText(/Not checked/)).not.toBeInTheDocument();
   });
 
-  it('shows bounded target warnings and identifies the only viewport checked', async () => {
+  it('turns definite problems into plain sentences and leaves out borderline results', () => {
+    render(<PlacementValidation report={placementReport({ viewport: { width: 390, height: 844, mode: 'mobile' }, checks: [
+      { key: 'gallery', selector: '.product__media-wrapper', status: 'matched', matchCount: 1, issues: [] },
+      { key: 'price', selector: '.price', status: 'ambiguous', matchCount: 3, issues: ['multiple-matches'] },
+      { key: 'variants', selector: 'body', status: 'unsafe', matchCount: 1, issues: ['unsafe-target'] },
+      broken,
+      { key: 'swatches', selector: '.swatch', status: 'hidden', matchCount: 1, issues: ['not-visible'] },
+      { key: 'addToCartFormSelector', selector: 'form[', status: 'invalid', matchCount: 0, issues: ['invalid-selector'] },
+      { key: 'configureButton', selector: '', status: 'not-required', matchCount: 0, issues: ['disabled'] },
+    ] })} />);
+    expect(screen.getByText('OV25 couldn’t find the product name on your product page.')).toBeInTheDocument();
+    expect(screen.getByText('OV25 found where the swatches should go, but that part of your page is hidden on mobile.')).toBeInTheDocument();
+    expect(screen.getByText('The add to basket form placement isn’t a valid setting.')).toBeInTheDocument();
+    expect(screen.getByText('Check Settings › Storefront selectors and the Global tab.')).toBeInTheDocument();
+    expect(screen.queryByText(/price/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/option controls/)).not.toBeInTheDocument();
+    expect(screen.queryByText(/\.price|body|form\[/)).not.toBeInTheDocument();
+  });
+
+  it('shows warnings only for the exact draft the preview checked', async () => {
     const config: ConfiguratorSetupLivePreviewConfig = { onRequest: vi.fn(), availability: 'supported', contextKey: 'store:product:integration' };
     const { rerender } = renderAction(config);
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Open site preview' })); });
-    const report = placementReport({ checks: [
-      { key: 'gallery', selector: '.product__media-wrapper', status: 'matched', matchCount: 1, issues: [] },
-      { key: 'price', selector: '.price', status: 'ambiguous', matchCount: 3, issues: ['multiple-matches', 'not-visible'] },
-      { key: 'name', selector: '#name', status: 'missing', matchCount: 0, issues: ['no-match'] },
-      { key: 'swatches', selector: '', status: 'not-required', matchCount: 0, issues: ['disabled'] },
-    ] });
-    rerender(<LivePreviewAction config={{ ...config, status: 'ready', placementValidation: report }} state={state} />);
-    expect(screen.getByText('Page placement · 1 matched, 2 need review')).toBeInTheDocument();
-    expect(screen.getByText('Desktop · 1440 × 900')).toBeInTheDocument();
-    expect(screen.getByText('Theme 1234 · product.ov25')).toBeInTheDocument();
-    expect(screen.getByText(/Check mobile separately/)).toBeInTheDocument();
-    expect(screen.getByText('3 matches')).toBeInTheDocument();
-    expect(screen.getByText('The configurator uses the first match. Check that it is the intended element.')).toBeInTheDocument();
-    expect(screen.getByText('The first match is hidden in this viewport.')).toBeInTheDocument();
-    expect(screen.getByText('No element matches this selector.')).toBeInTheDocument();
-    expect(screen.getByText('Not required')).toBeInTheDocument();
-  });
-
-  it('hides checks for changed payloads and restores them only for the exact submitted draft', async () => {
-    const config: ConfiguratorSetupLivePreviewConfig = { onRequest: vi.fn(), availability: 'supported' };
-    const { rerender } = renderAction(config);
-    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Open site preview' })); });
-    const ready = { ...config, status: 'ready' as const, placementValidation: placementReport() };
+    const ready = { ...config, status: 'ready' as const, placementValidation: placementReport({ checks: [broken] }) };
+    const warning = 'OV25 couldn’t find the product name on your product page.';
     rerender(<LivePreviewAction config={ready} state={state} />);
-    expect(screen.getByText('Page placement · 1 matched')).toBeInTheDocument();
+    expect(screen.getByText(warning)).toBeInTheDocument();
     const changed = { ...state, typeSettings: { standard: { selectors: { gallery: { selector: '.new-gallery' } } } } } as ConfiguratorSetupFormState;
     rerender(<LivePreviewAction config={ready} state={changed} />);
-    expect(screen.queryByText('Page placement · 1 matched')).not.toBeInTheDocument();
-    expect(screen.getByText(/Page placement: Not checked/)).toHaveTextContent('Update the site preview to check your changed draft.');
+    expect(screen.queryByText(warning)).not.toBeInTheDocument();
     rerender(<LivePreviewAction config={ready} state={state} />);
-    expect(screen.getByText('Page placement · 1 matched')).toBeInTheDocument();
-  });
-
-  it('invalidates results when the layout or host store/product/integration context changes', async () => {
-    const config: ConfiguratorSetupLivePreviewConfig = { onRequest: vi.fn(), availability: 'supported', contextKey: 'store:product:old-selectors' };
-    const { rerender } = renderAction(config);
-    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Open site preview' })); });
-    const ready = { ...config, status: 'ready' as const, placementValidation: placementReport() };
-    rerender(<LivePreviewAction config={ready} state={{ ...state, layout: 'snap2' }} />);
-    expect(screen.queryByText('Page placement · 1 matched')).not.toBeInTheDocument();
+    expect(screen.getByText(warning)).toBeInTheDocument();
     rerender(<LivePreviewAction config={{ ...ready, contextKey: 'store:product:new-selectors' }} state={state} />);
-    expect(screen.queryByText('Page placement · 1 matched')).not.toBeInTheDocument();
-    expect(screen.getByText(/Page placement: Not checked/)).toBeInTheDocument();
+    expect(screen.queryByText(warning)).not.toBeInTheDocument();
   });
 
-  it('does not attach an existing report to a new request or trust it without a submitted draft', async () => {
+  it('keeps the open preview’s warnings when the editor joins a preview opened elsewhere', () => {
+    renderAction({ onRequest: vi.fn(), onAutoUpdate: vi.fn(), availability: 'supported', status: 'ready', placementValidation: placementReport({ checks: [broken] }) });
+    expect(screen.getByText('OV25 couldn’t find the product name on your product page.')).toBeInTheDocument();
+  });
+
+  it('does not attach an existing report to a new request', async () => {
     let resolve!: () => void;
     const onRequest = vi.fn(() => new Promise<void>((done) => { resolve = done; }));
-    const ready: ConfiguratorSetupLivePreviewConfig = { onRequest, status: 'ready', placementValidation: placementReport() };
+    const ready: ConfiguratorSetupLivePreviewConfig = { onRequest, status: 'ready', placementValidation: placementReport({ checks: [broken] }) };
+    const warning = 'OV25 couldn’t find the product name on your product page.';
     const { rerender } = renderAction(ready);
-    expect(screen.queryByText('Page placement · 1 matched')).not.toBeInTheDocument();
+    expect(screen.queryByText(warning)).not.toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: 'Update site preview' }));
-    expect(screen.queryByText('Page placement · 1 matched')).not.toBeInTheDocument();
     await act(async () => { resolve(); });
-    expect(screen.queryByText('Page placement · 1 matched')).not.toBeInTheDocument();
-    rerender(<LivePreviewAction config={{ ...ready, placementValidation: placementReport({ revision: 2, validationRunId: 'run-2' }) }} state={state} />);
-    expect(screen.getByText('Page placement · 1 matched')).toBeInTheDocument();
+    expect(screen.queryByText(warning)).not.toBeInTheDocument();
+    rerender(<LivePreviewAction config={{ ...ready, placementValidation: placementReport({ checks: [broken], revision: 2, validationRunId: 'run-2' }) }} state={state} />);
+    expect(screen.getByText(warning)).toBeInTheDocument();
   });
 
-  it('shows failure diagnostics without claiming that the preview mounted successfully', async () => {
-    const config: ConfiguratorSetupLivePreviewConfig = { onRequest: vi.fn() };
-    const { rerender } = renderAction(config);
-    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Open site preview' })); });
-    rerender(<LivePreviewAction config={{ ...config, status: 'error', message: 'The configurator could not mount.', placementValidation: placementReport({ checks: [{ key: 'gallery', selector: 'body', status: 'unsafe', matchCount: 1, issues: ['unsafe-target'] }] }) }} state={state} />);
-    expect(screen.getByRole('alert')).toHaveTextContent('The configurator could not mount.');
-    expect(screen.getByText('Page placement · 0 matched, 1 needs review')).toBeInTheDocument();
-    expect(screen.getByText('Replacing this element could remove other page content.')).toBeInTheDocument();
-  });
-
-  it('caps displayed selectors and counts and handles unknown theme context', () => {
-    const longSelector = '.a'.repeat(1500);
-    render(<PlacementValidation report={placementReport({
-      themeId: null, template: null, viewport: { width: 390, height: 844, mode: 'mobile' },
-      checks: [{ key: 'gallery', selector: longSelector, status: 'ambiguous', matchCount: 101, issues: ['multiple-matches', 'context-unverified'] }],
-    })} />);
-    expect(screen.getByText('101+ matches')).toBeInTheDocument();
-    expect(screen.getByText(longSelector.slice(0, 2048))).toBeInTheDocument();
-    expect(screen.queryByText(longSelector)).not.toBeInTheDocument();
-    expect(screen.getByText('Theme unknown · Template unknown')).toBeInTheDocument();
-    expect(screen.getByText(/Check desktop separately/)).toBeInTheDocument();
+  it('tells a guided store what to do while its locked storefront is being unlocked, and stays quiet otherwise', () => {
+    const unlocking = render(<LivePreviewAction simple config={{ onRequest: vi.fn(), availability: 'requires-unlock', status: 'waiting', message: 'Enter the storefront password in the preview tab, then come back here.' }} state={state} />);
+    expect(screen.getByText(/then come back here/)).toBeInTheDocument();
+    unlocking.unmount();
+    render(<LivePreviewAction simple config={{ onRequest: vi.fn(), availability: 'supported', status: 'ready', message: 'Your site preview is open and updates as you edit.' }} state={state} />);
+    expect(screen.queryByText(/updates as you edit/)).not.toBeInTheDocument();
   });
 });

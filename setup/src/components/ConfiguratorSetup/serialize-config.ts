@@ -238,6 +238,24 @@ export function buildSerializableConfig(
   return config;
 }
 
+/**
+ * Saved/preview payload only (not the embedded preview config): a sibling of `selectors`,
+ * never inside it, so older plugins that iterate `selectors` never see it.
+ */
+function serializeThemeSelectors(settings: TypeSettings): SerializableInjectConfig['themeSelectors'] {
+  const out: NonNullable<SerializableInjectConfig['themeSelectors']> = {};
+  for (const [themeId, overrides] of Object.entries(settings.themeSelectors ?? {})) {
+    const entry: Record<string, string | { selector: string; replace: boolean }> = {};
+    for (const [key, state] of Object.entries(overrides ?? {}) as [string, SelectorFormState][]) {
+      if (INTEGRATION_OWNED_SELECTOR_KEYS.has(key)) continue;
+      const val = toElementSelector(state);
+      if (val) entry[key] = val;
+    }
+    if (Object.keys(entry).length) out[themeId] = entry;
+  }
+  return Object.keys(out).length ? out : undefined;
+}
+
 export function buildConfiguratorSetupPayload(
   state: ConfiguratorSetupFormState,
   overrides?: ConfiguratorSetupSerializableOverrides,
@@ -246,7 +264,8 @@ export function buildConfiguratorSetupPayload(
   for (const type of Object.keys(state.typeSettings) as PreviewLayoutType[]) {
     const cfg = buildSerializableConfig(type, state.typeSettings[type], overrides);
     const { apiKey: _a, productLink: _p, images: _i, ...rest } = cfg;
-    (result as Record<string, unknown>)[type] = rest;
+    const themeSelectors = serializeThemeSelectors(state.typeSettings[type]);
+    (result as Record<string, unknown>)[type] = themeSelectors ? { ...rest, themeSelectors } : rest;
   }
   return result;
 }

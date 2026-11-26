@@ -33,18 +33,10 @@ describe('theme matching flow', () => {
     expect(screen.queryByText('Host product selector')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Open site preview' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Save', exact: true })).not.toBeInTheDocument();
+    // The match is applied straight to the draft (no palette review); the site preview is where it is checked.
     await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Match my site' })));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Local theme' })).toBeInTheDocument();
-    expect(screen.queryByTitle('Configurator preview')).not.toBeInTheDocument();
     expect(onRequest.mock.calls[0][0].activeLayout).toBe('standard');
-    expect(savedDraft()).toEqual(before);
-    fireEvent.click(screen.getByRole('button', { name: 'Cancel', exact: true }));
-    expect(savedDraft()).toEqual(before);
-    expect(screen.getByRole('button', { name: 'Match my site' })).toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: 'Apply to draft' })).not.toBeInTheDocument();
-    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Match my site' })));
-    fireEvent.click(screen.getByRole('button', { name: 'Apply to draft' }));
     expect(savedDraft().typeSettings.standard.style['--ov25-cta-color']).toBe('#243322');
     expect(savedDraft().typeSettings.snap2).toEqual(before.typeSettings.snap2);
     expect(savedDraft().setupProgress.standard.themeStep).toBe('complete');
@@ -84,13 +76,13 @@ describe('theme matching flow', () => {
     view.rerender(<ConfiguratorSetup hidePreview themeStyling={{ contextKey: 'second', onRequest }} />);
     expect(signal.aborted).toBe(true);
     await act(async () => resolve(proposal));
-    expect(screen.queryByRole('button', { name: 'Apply to draft' })).not.toBeInTheDocument();
+    expect(JSON.stringify(savedDraft().setupProgress ?? {})).not.toContain('themeStyle');
     fireEvent.click(screen.getByRole('button', { name: 'Match my site' }));
     const nextSignal = onRequest.mock.calls[1][0].signal;
     fireEvent.click(screen.getByRole('button', { name: /Snap2/ }));
     expect(nextSignal.aborted).toBe(true);
     await act(async () => resolve(proposal));
-    expect(screen.queryByRole('button', { name: 'Apply to draft' })).not.toBeInTheDocument();
+    expect(JSON.stringify(savedDraft().setupProgress ?? {})).not.toContain('themeStyle');
     expect(screen.getByRole('heading', { name: 'Choose a preset' })).toBeInTheDocument();
     fireEvent.click(screen.getByRole('button', { name: /Standard/ }));
     expect(screen.getByRole('button', { name: 'Match my site' })).toBeInTheDocument();
@@ -128,7 +120,7 @@ describe('theme matching flow', () => {
     expect(signal.aborted).toBe(true);
     expect(screen.getByTitle('Configurator preview')).toBeInTheDocument();
     await act(async () => resolve(proposal));
-    expect(screen.queryByRole('button', { name: 'Apply to draft' })).not.toBeInTheDocument();
+    expect(JSON.stringify(savedDraft().setupProgress ?? {})).not.toContain('themeStyle');
     expect(savedDraft().typeSettings).toEqual(before);
     expect(savedDraft().setupProgress.standard.themeStep).toBe('complete');
     second.unmount();
@@ -151,10 +143,9 @@ describe('theme matching flow', () => {
     const view = render(<ConfiguratorSetup hidePreview draftKey="theme-one" themeStyling={{ contextKey: 'one', onRequest }} />);
     fireEvent.click(screen.getByRole('button', { name: 'Use preset' }));
     await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Match my site' })));
-    fireEvent.click(screen.getByRole('button', { name: 'Apply to draft' }));
     view.rerender(<ConfiguratorSetup hidePreview draftKey="theme-two" themeStyling={{ contextKey: 'two', onRequest }} />);
     expect(screen.getByRole('heading', { name: 'Choose a preset' })).toBeInTheDocument();
     view.rerender(<ConfiguratorSetup hidePreview draftKey="theme-one" themeStyling={{ contextKey: 'one', onRequest }} />);
-    expect(screen.getByText(/Palette matched: Local theme/)).toBeInTheDocument();
+    expect(screen.getByText(/Matched to Local theme/)).toBeInTheDocument();
   });
 });

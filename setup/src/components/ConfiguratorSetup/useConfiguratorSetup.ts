@@ -52,6 +52,7 @@ export function mergeStoredTypeSettings(
     selectionDetailsMobileFallbackFromDesktop(savedSelectionDetailsDesktop),
   );
   return {
+    ...(saved.themeSelectors ? { themeSelectors: saved.themeSelectors } : defaults.themeSelectors ? { themeSelectors: defaults.themeSelectors } : {}),
     selectors: {
       gallery: { ...defaults.selectors.gallery, ...saved.selectors?.gallery },
       price: { ...defaults.selectors.price, ...saved.selectors?.price },
@@ -265,6 +266,15 @@ export function useConfiguratorSetup(overrides?: ConfiguratorSetupOverrides) {
     }));
   }, []);
 
+  /** Puts one layout's settings and progress back exactly as captured (guided Match my site undo). */
+  const restoreLayout = useCallback((layout: PreviewLayoutType, snapshot: { settings: TypeSettings; progress: NonNullable<ConfiguratorSetupFormState['setupProgress']>[PreviewLayoutType] }) => {
+    setFormState((prev) => ({
+      ...prev,
+      typeSettings: { ...prev.typeSettings, [layout]: snapshot.settings },
+      setupProgress: { ...prev.setupProgress, [layout]: snapshot.progress },
+    }));
+  }, []);
+
   const completeThemeStep = useCallback(() => {
     setFormState((prev) => ({
       ...prev,
@@ -312,6 +322,7 @@ export function useConfiguratorSetup(overrides?: ConfiguratorSetupOverrides) {
     getExportJson,
     applyPreset,
     applyThemeStyle,
+    restoreLayout,
     completeThemeStep,
     initialSettings,
     hydrationKey: storageKey,

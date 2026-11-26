@@ -1,11 +1,9 @@
-// fallback system used when ordinary CSS position: sticky cannot work because of client-theme layout constraints
-// First fallack (Popover): lifts the same host into the top layer without reparenting.
-// Second fallback (Body layer): uses Element.moveBefore() to move the same host into a bounded body-level sticky track while preserving node/iframe identity.
 import { useEffect, useLayoutEffect, useRef } from 'react';
 import {
   calculateStickyBodyFallbackGeometry,
   getStickyHostNaturalDocumentTop,
   observeStickyHostNaturalDocumentTop,
+  setNativeStickyGalleryWrapperActive,
 } from '../lib/sticky-layout-controller.js';
 import {
   BODY_STICKY_FULLSCREEN_PORTAL_Z_INDEX,
@@ -22,6 +20,7 @@ export interface StickyHostRelocationUpdate {
   enabled: boolean;
   stickyTop: number;
   occlusionTop?: number;
+  headerElements?: readonly Element[];
   boundary: HTMLElement | null;
   fullViewportWidth?: boolean;
   freeze?: boolean;
@@ -52,6 +51,111 @@ export const STICKY_BODY_LAYER_FULLSCREEN_Z_INDEX =
 const useBrowserLayoutEffect = typeof window === 'undefined' ? useEffect : useLayoutEffect;
 
 type StickyHostRelocationStrategy = 'popover' | 'body-layer';
+
+// Only promote a short, gallery-only column whose parent is the measured product
+// boundary. The theme's scroll container stays in charge of scrolling the iframe.
+function canPinGalleryWrapper(
+  wrapper: HTMLElement,
+  host: HTMLElement,
+  boundary: HTMLElement | null,
+  placeholder: HTMLElement | null,
+  view: Window,
+): boolean {
+  if (!boundary || wrapper.parentElement !== boundary || boundary === host.ownerDocument.body) return false;
+  const slot = placeholder ?? host;
+  const height = slot.getBoundingClientRect().height;
+  // Product options can arrive after the gallery. While the product is short the
+  // native wrapper simply stays in flow, and gains travel as those options render.
+  if (height <= 0 || boundary.clientHeight <= 0) return false;
+  // A grid column can be much taller than its gallery because the row stretches
+  // it. align-self:start lets such a column shrink to its content before pinning.
+  if (wrapper.offsetHeight > height + 2 &&
+      !view.getComputedStyle(boundary).display.includes('grid')) return false;
+  for (const child of Array.from(wrapper.childNodes)) {
+    if (child === host || child === placeholder || child.nodeType === Node.COMMENT_NODE) continue;
+    if (child.nodeType === Node.TEXT_NODE && !child.textContent?.trim()) continue;
+    if (child instanceof Element && child.matches('script, style, template')) continue;
+    return false;
+  }
+  const style = view.getComputedStyle(wrapper);
+  if (!['static', 'relative', 'sticky'].includes(style.position) ||
+      style.display === 'contents' || style.overflowY !== 'visible' ||
+      style.transform !== 'none' || style.contain !== 'none') return false;
+  // An overflowing, independently scrolling ancestor is a valid sticky scrollport.
+  // A clipped or non-scrolling overflow wrapper would trap the promoted column too.
+  for (let ancestor: HTMLElement | null = boundary; ancestor && ancestor !== host.ownerDocument.body; ancestor = ancestor.parentElement) {
+    const overflow = view.getComputedStyle(ancestor).overflowY;
+    if (overflow === 'visible' || overflow === 'clip') continue;
+    return /^(auto|scroll|overlay)$/.test(overflow) && ancestor.scrollHeight > ancestor.clientHeight;
+  }
+  return true;
+}
+
+// Undo only our own inline declarations, preserving client changes made while active.
+function headerMovesWithGallery(header: Element, wrapper: HTMLElement, view: Window): boolean {
+  if (view.getComputedStyle(header).position !== 'absolute') return false;
+  const scrollContainer = (element: Element): Element | null => {
+    for (let current: Element | null = element; current; current = current.parentElement) {
+      const style = view.getComputedStyle(current);
+      if (style.position === 'fixed' || style.position === 'sticky') return current;
+      if (/^(auto|scroll|hidden|overlay)$/.test(style.overflowY)) return current;
+    }
+    return null;
+  };
+  return scrollContainer(header) === scrollContainer(wrapper.parentElement ?? wrapper);
+}
+
+function temporaryStickyStyles(element: HTMLElement) {
+  const properties = new Map<string, { value: string; priority: string; applied: string; appliedPriority: string }>();
+  return {
+    set(property: string, value: string, priority = 'important') {
+      const current = element.style.getPropertyValue(property);
+      const currentPriority = element.style.getPropertyPriority(property);
+      if (current === value && currentPriority === priority) return;
+      const previous = properties.get(property) ?? { value: current, priority: currentPriority, applied: '', appliedPriority: '' };
+      element.style.setProperty(property, value, priority);
+      previous.applied = element.style.getPropertyValue(property);
+      previous.appliedPriority = element.style.getPropertyPriority(property);
+      properties.set(property, previous);
+    },
+    restore() {
+      for (const [property, previous] of properties) {
+        if (element.style.getPropertyValue(property) !== previous.applied ||
+            element.style.getPropertyPriority(property) !== previous.appliedPriority) continue;
+        if (previous.value) element.style.setProperty(property, previous.value, previous.priority);
+        else element.style.removeProperty(property);
+      }
+      properties.clear();
+    },
+  };
+}
+
+// Savor keeps its two stacked product rows in a grid on small screens. Pinning
+// its media row in that grid causes a visible jump at both sticky boundaries.
+function applyBlockFlowToStackedProduct(wrapper: HTMLElement, view: Window): (() => void) | undefined {
+  const grid = wrapper.parentElement;
+  const details = wrapper.nextElementSibling;
+  if (!grid?.matches('.product-information__grid') || !wrapper.matches('.product-information__media') ||
+      grid.childElementCount !== 2 || !(details instanceof HTMLElement)) return;
+
+  const gridStyle = view.getComputedStyle(grid);
+  if (gridStyle.display !== 'grid') return;
+  // A customised theme may still show columns, or reorder its rows.
+  if (details.offsetTop < wrapper.offsetTop + wrapper.offsetHeight - 1) return;
+
+  const gridStyles = temporaryStickyStyles(grid);
+  const detailsStyles = temporaryStickyStyles(details);
+  const rowGap = computedPixelLength(gridStyle.rowGap);
+  if (rowGap) {
+    const margin = parseFloat(view.getComputedStyle(details).marginBlockStart) || 0;
+    detailsStyles.set('margin-block-start', `${margin + rowGap}px`);
+  }
+  gridStyles.set('display', 'block');
+  return () => {
+    gridStyles.restore();
+    detailsStyles.restore();
+  };
+}
 
 function moveBeforeIfSupported(
   parent: ParentNode,
@@ -177,8 +281,14 @@ export function createStickyHostRelocation(
   let placeholder: HTMLDivElement | null = null;
   let strategy: StickyHostRelocationStrategy | null = null;
   let bodyLayerNormalZIndex = '1';
-  const relocationStyleSnapshots = new Map<string, { value: string; priority: string }>();
-  const relocationAppliedStyles = new Map<string, { value: string; priority: string }>();
+  const wrapper = host.parentElement;
+  const wrapperStyles = wrapper && temporaryStickyStyles(wrapper);
+  let wrapperPinned = false;
+  let restoreProductGrid: (() => void) | undefined;
+  let mobileProductGrid: HTMLElement | null = null;
+  const flowHeaders = new WeakSet<Element>();
+  let rejectedWrapperSize = '';
+  const { set: setRelocationStyle, restore: restoreRelocationStyles } = temporaryStickyStyles(host);
   let relocationPopoverAttribute: string | null = null;
   let hasRelocationSnapshot = false;
   let flowDocumentTop: number | null = null;
@@ -232,42 +342,6 @@ export function createStickyHostRelocation(
     bodyLayerNormalZIndex = '1';
   };
 
-  const setRelocationStyle = (
-    property: string,
-    value: string,
-    priority = 'important',
-  ): void => {
-    if (!relocationStyleSnapshots.has(property)) {
-      relocationStyleSnapshots.set(property, {
-        value: host.style.getPropertyValue(property),
-        priority: host.style.getPropertyPriority(property),
-      });
-    }
-    host.style.setProperty(property, value, priority);
-    relocationAppliedStyles.set(property, {
-      value: host.style.getPropertyValue(property),
-      priority: host.style.getPropertyPriority(property),
-    });
-  };
-
-  const restoreRelocationStyles = (): void => {
-    for (const [property, previous] of relocationStyleSnapshots) {
-      const applied = relocationAppliedStyles.get(property);
-      const currentValue = host.style.getPropertyValue(property);
-      const currentPriority = host.style.getPropertyPriority(property);
-      if (
-        applied &&
-        (currentValue !== applied.value || currentPriority !== applied.priority)
-      ) {
-        continue;
-      }
-      if (previous.value) host.style.setProperty(property, previous.value, previous.priority);
-      else host.style.removeProperty(property);
-    }
-    relocationStyleSnapshots.clear();
-    relocationAppliedStyles.clear();
-  };
-
   const captureRelocationState = (): void => {
     if (hasRelocationSnapshot) return;
     relocationPopoverAttribute = host.getAttribute('popover');
@@ -295,6 +369,15 @@ export function createStickyHostRelocation(
   };
 
   const restore = (): void => {
+    if (wrapperPinned) {
+      restoreProductGrid?.();
+      restoreProductGrid = undefined;
+      mobileProductGrid = null;
+      if (wrapper) setNativeStickyGalleryWrapperActive(wrapper, false);
+      wrapperStyles?.restore();
+      restoreRelocationStyles();
+      wrapperPinned = false;
+    }
     if (strategy === 'popover' && popoverShown) {
       try {
         (host as HTMLElement & { hidePopover: () => void }).hidePopover();
@@ -540,6 +623,7 @@ export function createStickyHostRelocation(
     setMode('fixed');
   };
 
+  // Prefer a native sticky parent before using a popover or a body-level track.
   const sync = (): void => {
     frameId = null;
     if (destroyed) return;
@@ -547,6 +631,53 @@ export function createStickyHostRelocation(
       restore();
       return;
     }
+    if (wrapper && wrapperStyles && host.parentElement === wrapper &&
+        canPinGalleryWrapper(wrapper, host, update.boundary, placeholder, windowObject)) {
+      const galleryHeight = (placeholder ?? host).getBoundingClientRect().height;
+      const size = [wrapper.offsetWidth, wrapper.offsetHeight, galleryHeight, update.boundary?.clientHeight].join('/');
+      if (size !== rejectedWrapperSize) {
+        wrapperStyles.set('align-self', 'start');
+        if (wrapper.offsetHeight <= galleryHeight + 2) {
+          if (isCurrentlyRelocated()) restore();
+          wrapperPinned = true;
+          setNativeStickyGalleryWrapperActive(wrapper, true);
+          const mobileGrid = host.dataset.ov25InlineStickyMobile === 'true' && windowObject.innerWidth < 750
+            ? wrapper.parentElement : null;
+          if (mobileGrid !== mobileProductGrid) {
+            restoreProductGrid?.();
+            restoreProductGrid = mobileGrid ? applyBlockFlowToStackedProduct(wrapper, windowObject) : undefined;
+            mobileProductGrid = mobileGrid;
+          }
+          wrapperStyles.set('position', 'sticky');
+          const headers = update.headerElements ?? [];
+          for (const header of headers) {
+            if (!flowHeaders.has(header) &&
+                headerMovesWithGallery(header, wrapper, windowObject) &&
+                wrapper.getBoundingClientRect().top >= header.getBoundingClientRect().bottom - 1) {
+              flowHeaders.add(header);
+            }
+          }
+          const headerMovesInFlow = headers.length > 0 && headers.every(
+            header => flowHeaders.has(header) && headerMovesWithGallery(header, wrapper, windowObject),
+          );
+          const nativeTop = headerMovesInFlow
+            ? Math.max(0, update.stickyTop - (update.occlusionTop ?? 0))
+            : update.stickyTop;
+          wrapperStyles.set('top', `${nativeTop}px`);
+          wrapperStyles.set('z-index', update.freeze ? String(update.zIndex ?? STICKY_BODY_LAYER_FULLSCREEN_Z_INDEX) : '1');
+          setRelocationStyle('position', 'relative');
+          setRelocationStyle('top', 'auto');
+          setRelocationStyle('margin-top', '0px');
+          setRelocationStyle('margin-bottom', '0px');
+          return;
+        }
+        // An explicitly sized column did not shrink. Restore it before trying
+        // the popover, and avoid repeating the layout probe until its size changes.
+        wrapperStyles.restore();
+        rejectedWrapperSize = size;
+      }
+    }
+    if (wrapperPinned) restore();
     const currentlyRelocated = isCurrentlyRelocated();
     const measuredDesktopHeight = resolveDesktopStickyRenderedHeight(host, windowObject);
     if (!currentlyRelocated && measuredDesktopHeight !== null) {
@@ -754,6 +885,7 @@ export function useStickyHostRelocation(options: {
   requiresBodyFallback: boolean;
   stickyTop: number;
   occlusionTop?: number;
+  headerElements?: readonly Element[];
   boundary: HTMLElement | null;
   overlayOpen: boolean;
   fullscreenOpen: boolean;
@@ -789,6 +921,7 @@ export function useStickyHostRelocation(options: {
         (!options.overlayOpen || options.fullscreenOpen),
       stickyTop: options.stickyTop,
       occlusionTop: options.occlusionTop,
+      headerElements: options.headerElements,
       boundary: options.boundary,
       fullViewportWidth: options.fullViewportWidth,
       freeze: options.fullscreenOpen,
@@ -804,6 +937,7 @@ export function useStickyHostRelocation(options: {
     options.requiresBodyFallback,
     options.stickyTop,
     options.occlusionTop,
+    options.headerElements,
     options.boundary,
     options.overlayOpen,
     options.fullscreenOpen,

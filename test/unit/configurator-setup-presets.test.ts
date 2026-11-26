@@ -5,6 +5,7 @@ import { SETUP_PRESETS, getPresetSettings, applySetupPreset } from '../../setup/
 import { LEGACY_SETUP_FEATURES, requiredSetupFeatures, unsupportedSetupFeatures } from '../../setup/src/components/ConfiguratorSetup/compatibility';
 import { buildConfiguratorSetupPayload } from '../../setup/src/components/ConfiguratorSetup/serialize-config';
 import { buildFormStateFromInitialPayload } from '../../setup/src/components/ConfiguratorSetup/initial-config-from-payload';
+import { extractThemeButtonAnimations, mergeThemeButtonAnimationCss, type ThemeButtonAnimation } from '../../setup/src/components/ConfiguratorSetup/button-animations';
 
 const layouts: PreviewLayoutType[] = ['standard', 'snap2', 'bedConfigurator'];
 function leafPaths(value: object, prefix = ''): string[] {
@@ -66,5 +67,56 @@ describe('setup preset catalogue', () => {
     (future.configurator as { variantDisplayDesktop: string }).variantDisplayDesktop = 'future-mode';
     expect(unsupportedSetupFeatures(future)).toEqual(['variants:future-mode']);
     expect(requiredSetupFeatures(future)).toContain('settings:legacy-2026-09-29');
+  });
+
+  it('keeps matched button effects across presets and imports while retaining the existing manual CSS reset policy', () => {
+    const current = getPresetSettings('standard', 'in-page');
+    const animations: ThemeButtonAnimation[] = [{ target: 'secondary', effect: 'underline', durationMs: 250, easing: 'ease', direction: 'right', source: 'assets/theme.css' }];
+    current.branding.cssString = mergeThemeButtonAnimationCss('.old-layout { width: 300px; }', animations);
+    const payload = buildConfiguratorSetupPayload({ layout: 'standard', typeSettings: { ...PRESET_BASELINE, standard: current } });
+    const imported = buildFormStateFromInitialPayload(payload).typeSettings.standard;
+    const changed = applySetupPreset('standard', 'guided', imported);
+    expect(extractThemeButtonAnimations(changed.branding.cssString)).toEqual(animations);
+    expect(changed.branding.cssString).not.toContain('.old-layout');
+    expect(applySetupPreset('standard', 'in-page', changed).branding.cssString).toBe(changed.branding.cssString);
+  });
+  it('bed: has no configure button unless one was saved', () => {
+    expect(DEFAULT_TYPE_SETTINGS.bedConfigurator.selectors).toEqual(DEFAULT_TYPE_SETTINGS.standard.selectors);
+    for (const preset of SETUP_PRESETS) expect(getPresetSettings('bedConfigurator', preset.id).selectors.configureButton.enabled).toBe(false);
+    const fresh = buildConfiguratorSetupPayload({ layout: 'bedConfigurator', typeSettings: { ...PRESET_BASELINE } });
+    expect((fresh.bedConfigurator.selectors as Record<string, unknown>).configureButton).toBeUndefined();
+    // A store that really has the old button saved it explicitly, and gets it back.
+    const saved = { ...fresh, bedConfigurator: { ...fresh.bedConfigurator, selectors: { ...fresh.bedConfigurator.selectors, configureButton: '#ov25-fullscreen-button' } } };
+    expect(buildFormStateFromInitialPayload(saved).typeSettings.bedConfigurator.selectors.configureButton).toEqual({ enabled: true, selector: '#ov25-fullscreen-button', replace: false });
+  });
+
+  it('bed: In-page presents like Standard In-page and keeps its saved placements', () => {
+    const bed = getPresetSettings('bedConfigurator', 'in-page');
+    const standard = getPresetSettings('standard', 'in-page');
+    expect(bed.configurator).toEqual(standard.configurator);
+    expect(bed.carousel).toEqual(standard.carousel);
+    const saved = getPresetSettings('bedConfigurator', 'classic');
+    saved.selectors.gallery.selector = '#saved-gallery';
+    const inPage = applySetupPreset('bedConfigurator', 'in-page', saved);
+    expect(inPage.configurator.displayModeDesktop).toBe('inline-sticky');
+    expect(inPage.configurator.variantDisplayMobile).toBe('list');
+    expect(inPage.selectors).toEqual(saved.selectors);
+  });
+
+  it('snap2: switching presets on saved settings moves it between the gallery slot and the button, keeping selectors', () => {
+    const inline = applySetupPreset('snap2', 'in-page', { ...DEFAULT_TYPE_SETTINGS.snap2, selectors: {
+      ...DEFAULT_TYPE_SETTINGS.snap2.selectors,
+      gallery: { enabled: true, selector: '.saved-gallery', replace: true },
+      configureButton: { enabled: false, selector: '.saved-button', replace: false },
+    } });
+    expect(inline.selectors.gallery).toEqual({ enabled: true, selector: '.saved-gallery', replace: true });
+    const dialog = applySetupPreset('snap2', 'classic', inline);
+    expect(dialog.configurator.displayModeDesktop).toBe('modal');
+    expect(dialog.selectors.gallery).toEqual({ enabled: false, selector: '.saved-gallery', replace: true });
+    expect(dialog.selectors.configureButton).toEqual({ enabled: true, selector: '.saved-button', replace: false });
+    expect(applySetupPreset('snap2', 'in-page', dialog).selectors.gallery.enabled).toBe(true);
+    // Other types keep every saved placement as it was.
+    const standard = { ...DEFAULT_TYPE_SETTINGS.standard, selectors: { ...DEFAULT_TYPE_SETTINGS.standard.selectors, gallery: { enabled: false, selector: '.x', replace: true } } };
+    expect(applySetupPreset('standard', 'classic', standard).selectors).toEqual(standard.selectors);
   });
 });

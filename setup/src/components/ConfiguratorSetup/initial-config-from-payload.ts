@@ -131,7 +131,7 @@ export function pullRootVariablesFromCss(css: string | undefined): { style: Reco
   return { style, rest: rest.replace(/\n{3,}/g, '\n\n').trim() };
 }
 
-function mergeSerializableIntoTypeSettings(base: TypeSettings, saved: SavedLayout, layout: LayoutType): TypeSettings {
+export function mergeSerializableIntoTypeSettings(base: TypeSettings, saved: SavedLayout, layout: LayoutType): TypeSettings {
   const merged: TypeSettings = {
     ...base,
     selectors: { ...base.selectors },
@@ -158,6 +158,20 @@ function mergeSerializableIntoTypeSettings(base: TypeSettings, saved: SavedLayou
         val as string | { selector: string; replace: boolean },
       );
     }
+  }
+
+  if (saved.themeSelectors && typeof saved.themeSelectors === 'object') {
+    const themeSelectors: NonNullable<TypeSettings['themeSelectors']> = {};
+    for (const [themeId, entry] of Object.entries(saved.themeSelectors)) {
+      if (!/^\d+$/.test(themeId) || !entry || typeof entry !== 'object') continue;
+      const overrides: NonNullable<TypeSettings['themeSelectors']>[string] = {};
+      for (const [rawKey, val] of Object.entries(entry)) {
+        if (!Object.prototype.hasOwnProperty.call(base.selectors, rawKey) || val === undefined) continue;
+        overrides[rawKey as keyof TypeSettings['selectors']] = deserializeSelector(val as string | { selector: string; replace: boolean });
+      }
+      if (Object.keys(overrides).length) themeSelectors[themeId] = overrides;
+    }
+    if (Object.keys(themeSelectors).length) merged.themeSelectors = themeSelectors;
   }
 
   if (saved.carousel) {

@@ -74,8 +74,27 @@ function App() {
     currencySymbol: '£',
   });
 
-  return (
+  // `?guided=standard|snap2|bedConfigurator`: guided mode in a portal-sized box with a host footer for Save.
+  const guided = params.get('guided');
+  const [footer, setFooter] = React.useState(null);
+
+  const setup = (
     <ConfiguratorSetup
+      guidedSelection={guided ? { layout: guided, preset: 'in-page' } : undefined}
+      saveSlot={guided ? { container: footer } : undefined}
+      // `&livePreview`: an open site preview that updates by itself and reports one missing placement.
+      livePreview={params.has('livePreview') ? {
+        onRequest: (request) => console.log('[fixture] open preview', request),
+        onAutoUpdate: (request) => console.log('[fixture] auto-update', request),
+        availability: 'supported', status: 'ready', message: 'Your site preview is open and updates as you edit.',
+        placementValidation: {
+          schemaVersion: 1, themeId: '1', template: 'product.ov25', viewport: { width: 1440, height: 900, mode: 'desktop' },
+          checks: [{ key: 'price', selector: '.price', status: 'missing', matchCount: 0, issues: ['no-match'] }],
+          sessionId: 'fixture', revision: 1, validationRunId: 'fixture', checkedAt: 0, activeLayout: 'standard', shopDomain: 'fixture.myshopify.com', productId: '1',
+        },
+      } : undefined}
+      className={guided ? 'h-full' : undefined}
+      onSave={guided ? () => {} : undefined}
       useLocalPreview
       previewBaseUrl={new URLSearchParams(window.location.search).get('previewBaseUrl') || undefined}
       apiKey={demoDefaults ? undefined : {
@@ -144,6 +163,14 @@ function App() {
         },
       }}
     />
+  );
+  if (!guided) return setup;
+  return (
+    <div style={{ maxWidth: 1100, margin: '40px auto', padding: '0 16px' }}>
+      <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 16 }}>Guided host page</h1>
+      <div style={{ height: 560, border: '1px solid #eaeaea', borderRadius: 14, overflow: 'hidden' }}>{setup}</div>
+      <div ref={setFooter} data-host-footer style={{ display: 'flex', justifyContent: 'flex-end', padding: '12px 0' }} />
+    </div>
   );
 }
 

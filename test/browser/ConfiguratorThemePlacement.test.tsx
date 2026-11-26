@@ -36,13 +36,10 @@ async function scan() {
 }
 
 describe('placements inside theme matching', () => {
-  it('stages fresh high-confidence defaults silently, commits with the palette, and keeps Save separate', async () => {
+  it('applies fresh high-confidence defaults with the match and keeps Save separate', async () => {
     const onChange = vi.fn(), onSave = vi.fn();
     render(<ConfiguratorSetup hidePreview onSave={onSave} storefrontIntegration={integration(onChange)} themeStyling={{ contextKey: 'local', placement: { contextKey: 'local', savedSettings: 'none', untouchedIntegrationKeys: ['headerSelector'] }, onRequest: async () => proposal }} />);
     await scan();
-    expect(draft().typeSettings.standard.selectors.gallery.selector).toBe('.configurator-container');
-    expect(onChange).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole('button', { name: 'Apply to draft' }));
     expect(draft().typeSettings.standard.selectors.gallery).toEqual({ selector: '#ov25-gallery', enabled: true, replace: true });
     expect(draft().typeSettings.standard.selectors.variants.selector).toBe('#ov25-controls');
     expect(draft().typeSettings.snap2.selectors.gallery.enabled).toBe(false);
@@ -53,11 +50,10 @@ describe('placements inside theme matching', () => {
     expect(onSave.mock.calls[0][0].standard).not.toHaveProperty('placement');
   });
 
-  it.each(['existing', 'unknown'] as const)('keeps %s placements unchanged when applying just the palette', async (savedSettings) => {
+  it.each(['existing', 'unknown'] as const)('keeps %s placements unchanged when applying the match', async (savedSettings) => {
     const onChange = vi.fn();
     render(<ConfiguratorSetup hidePreview storefrontIntegration={integration(onChange)} themeStyling={{ contextKey: 'local', placement: { contextKey: 'local', savedSettings }, onRequest: async () => proposal }} />);
     await scan();
-    fireEvent.click(screen.getByRole('button', { name: 'Apply to draft' }));
     expect(draft().typeSettings.standard.selectors.gallery.selector).toBe('.configurator-container');
     expect(draft().typeSettings.standard.style['--ov25-cta-color']).toBe('#243322');
     expect(onChange).not.toHaveBeenCalled();
@@ -71,45 +67,13 @@ describe('placements inside theme matching', () => {
     const onChange = vi.fn();
     render(<ConfiguratorSetup hidePreview storefrontIntegration={integration(onChange)} themeStyling={{ contextKey: 'local', placement: { contextKey: 'local', savedSettings: 'none' }, onRequest: async () => proposal }} />);
     await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Match my site', exact: true })));
-    fireEvent.click(screen.getByRole('button', { name: 'Apply to draft' }));
     expect(draft().typeSettings.standard.selectors.gallery.selector).toBe('');
     expect(onChange).not.toHaveBeenCalled();
   });
 
-  it('applies only explicitly included existing placements together with the palette', async () => {
-    const onChange = vi.fn();
-    render(<ConfiguratorSetup hidePreview storefrontIntegration={integration(onChange)} themeStyling={{ contextKey: 'local', placement: { contextKey: 'local', savedSettings: 'existing' }, onRequest: async () => proposal }} />);
-    await scan();
-    fireEvent.click(screen.getByText('Page placements', { exact: true }));
-    fireEvent.click(screen.getByRole('checkbox', { name: /Product gallery/ }));
-    fireEvent.click(screen.getByRole('button', { name: /Include selected placements/ }));
-    expect(draft().typeSettings.standard.selectors.gallery.selector).toBe('.configurator-container');
-    fireEvent.click(screen.getByRole('button', { name: 'Apply to draft' }));
-    expect(draft().typeSettings.standard.selectors.gallery.selector).toBe('#ov25-gallery');
-    expect(onChange).not.toHaveBeenCalled();
-  });
-
-  it('requires explicit inclusion for existing placements and cancellation still discards both suggestions', async () => {
-    const onChange = vi.fn();
-    render(<ConfiguratorSetup hidePreview storefrontIntegration={integration(onChange)} themeStyling={{ contextKey: 'local', placement: { contextKey: 'local', savedSettings: 'existing' }, onRequest: async () => proposal }} />);
-    await scan();
-    fireEvent.click(screen.getByText('Page placements', { exact: true }));
-    expect(screen.getByRole('note')).toHaveTextContent(/other product pages/);
-    fireEvent.click(screen.getByRole('checkbox', { name: /Product gallery/ }));
-    fireEvent.click(screen.getByRole('button', { name: /Include selected placements/ }));
-    expect(onChange).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole('button', { name: 'Cancel', exact: true }));
-    expect(draft().typeSettings.standard.selectors.gallery.selector).toBe('.configurator-container');
-    await act(async () => fireEvent.click(screen.getByRole('button', { name: 'Match my site', exact: true })));
-    fireEvent.click(screen.getByRole('button', { name: 'Apply to draft' }));
-    expect(draft().typeSettings.standard.selectors.gallery.selector).toBe('.configurator-container');
-  });
-
-  it('keeps the palette usable if placement suggestions are malformed or from another theme', async () => {
+  it('still applies the styling if placement suggestions are malformed or from another theme', async () => {
     render(<ConfiguratorSetup hidePreview themeStyling={{ contextKey: 'local', placement: { contextKey: 'local', savedSettings: 'none' }, onRequest: async () => ({ ...proposal, placement: { ...proposal.placement!, source: { ...proposal.placement!.source, id: 'wrong-store' } } }) }} />);
     await scan();
-    expect(screen.getByText(/Page placement suggestions could not be validated/)).toBeInTheDocument();
-    fireEvent.click(screen.getByRole('button', { name: 'Apply to draft' }));
     expect(draft().typeSettings.standard.selectors.gallery.selector).toBe('.configurator-container');
     expect(draft().typeSettings.standard.style['--ov25-cta-color']).toBe('#243322');
   });

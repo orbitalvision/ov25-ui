@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Monitor, Smartphone, RotateCcw, Loader2 } from 'lucide-react';
+import { Monitor, Smartphone, RotateCcw } from 'lucide-react';
+import { Spinner } from '../../ui/spinner';
 import { cn } from '../../../lib/utils';
 import {
   CONFIGURATOR_PREVIEW_LOCAL_BASE_URL,
@@ -152,7 +153,7 @@ export function PreviewArea({ serializableConfig, previewBaseUrl, useLocalPrevie
         className="relative flex-1 min-h-0 flex items-center justify-center rounded-xl overflow-hidden p-2"
         onWheel={(e) => e.stopPropagation()}
       >
-          {(status === 'loading' || status === 'initialising') && <div role="status" className="absolute left-1/2 top-5 z-10 flex -translate-x-1/2 items-center gap-2 rounded-full border bg-white px-4 py-2 text-xs shadow-sm"><Loader2 className="h-3.5 w-3.5 animate-spin motion-reduce:animate-none" />{status === 'initialising' ? 'Loading product…' : 'Loading demo…'}</div>}
+          {(status === 'loading' || status === 'initialising') && <div role="status" className="absolute left-1/2 top-5 z-10 flex -translate-x-1/2 items-center gap-2 rounded-full border bg-white px-4 py-2 text-xs shadow-sm"><Spinner aria-hidden size={16} />{status === 'initialising' ? 'Loading product…' : 'Loading demo…'}</div>}
           {status === 'error' && <div role="alert" className="absolute inset-x-5 top-5 z-10 rounded-xl border bg-white p-4 text-sm shadow-lg"><p>{error}</p><button type="button" onClick={() => setRetry((value) => value + 1)} className="mt-3 inline-flex items-center gap-2 font-medium"><RotateCcw className="h-4 w-4" />Retry demo</button><p className="mt-2 text-xs text-muted-foreground">You can continue editing and save your settings.</p></div>}
         <div
           className="relative"

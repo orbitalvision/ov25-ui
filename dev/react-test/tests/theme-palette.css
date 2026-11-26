@@ -2,6 +2,7 @@ html, body, #root { margin: 0; min-height: 100%; }
 body { background: #f3f2ee; color: #242620; font-family: Inter, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
 button, input, select { font: inherit; }
 .theme-demo { max-width: 1240px; margin: 0 auto; padding: 42px 36px 24px; }
+.theme-demo-wide { max-width: 1680px; }
 .theme-demo-header { display: flex; justify-content: space-between; align-items: end; gap: 28px; margin-bottom: 30px; }
 .theme-demo-eyebrow { color: #777a6b; font-size: 10px; letter-spacing: .16em; font-weight: 700; }
 .theme-demo-header h1 { margin: 14px 0 10px; font-size: clamp(26px, 3vw, 38px); font-weight: 500; letter-spacing: -.04em; line-height: 1.1; }
@@ -24,4 +25,26 @@ button, input, select { font: inherit; }
   .theme-demo-nav { flex-wrap: wrap; }
   .theme-demo-nav span { flex-basis: 100%; margin: 7px 0 0; }
   .theme-demo-source select { width: 100%; }
+}
+
+.theme-demo-methods { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.theme-demo-methods > span { margin-right: 8px; color: #74776c; font-size: 12px; }
+.theme-demo-methods button, .theme-demo-panel-header button, .theme-demo-message button { border: 1px solid #d9dacf; border-radius: 7px; background: #fafaf6; color: #42463b; padding: 9px 13px; font-size: 12px; cursor: pointer; }
+.theme-demo-methods button[aria-pressed=true] { border-color: #242620; color: #fff; background: #242620; }
+.theme-demo-comparison { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 22px; align-items: start; }
+.theme-demo-comparison-note { margin-bottom: 18px; color: #616658; font-size: 13px; line-height: 1.6; }
+.theme-demo-comparison-note p { margin: 0 0 6px; }
+.theme-demo-source-warning { color: #82622f; }
+.theme-demo-board { min-width: 0; }
+.theme-demo-board > .ov25-palette { box-sizing: border-box; }
+.theme-demo-panel-header { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 20px 24px; border-bottom: 1px solid #e8e9e1; background: #fafaf7; }
+.theme-demo-panel-header h2 { margin: 0 0 6px; font-size: 17px; font-weight: 600; }
+.theme-demo-panel-header p { margin: 0; color: #74776c; font-size: 11px; line-height: 1.6; }
+.theme-demo-panel-header button { flex-shrink: 0; }
+.theme-demo-message p { margin: 0 auto 18px; max-width: 50ch; line-height: 1.7; }
+@media (max-width: 1100px) {
+  .theme-demo-comparison { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 700px) {
+  .theme-demo-panel-header { align-items: flex-start; flex-direction: column; }
 }

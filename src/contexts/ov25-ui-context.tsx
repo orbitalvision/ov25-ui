@@ -1348,6 +1348,7 @@ export const OV25UIProvider: React.FC<{
     requiresBodyFallback: stickyLayoutSnapshot?.requiresBodyFallback ?? false,
     stickyTop: (stickyLayoutSnapshot?.headerOffset ?? 0) + stickyTopGap,
     occlusionTop: stickyLayoutSnapshot?.headerOffset ?? 0,
+    headerElements: stickyLayoutSnapshot?.headerElements,
     boundary: stickyLayoutSnapshot?.fallbackBoundary ?? null,
     // The sticky Popover's top layer otherwise sits above the swatch book's body portal.
     overlayOpen: isDrawerOrDialogOpen || isModalOpen || isSwatchBookOpen,

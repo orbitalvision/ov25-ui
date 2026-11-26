@@ -47,6 +47,13 @@
 }
 .ov25-setup-no-preview .ov25-setup-sidebar { width: 100%; flex: 1; min-height: 0; height: 100%; border-left: 0; }
 
+/* Guided Advanced setup takes over the window, with a bar to save or go back to Automatic setup.
+   Below dropdowns, dialogs and toasts (z-index 50 and up), above the host page. */
+.ov25-setup.ov25-setup-fullscreen { position: fixed; inset: 0; z-index: 40; overscroll-behavior: contain; }
+.ov25-setup-fullscreen-bar { display: flex; flex-shrink: 0; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 16px; border-bottom: 1px solid #e4e4e7; background: #fff; }
+.ov25-setup-fullscreen-title { margin: 0; font-size: 14px; font-weight: 600; }
+@container (max-width: 520px) { .ov25-setup-fullscreen-title { display: none; } }
+
 /* The first two steps use the whole setup surface. The viewer mounts only after them. */
 .ov25-setup-onboarding { display: flex; flex: 1; flex-direction: column; min-width: 0; min-height: 0; overflow: hidden; }
 .ov25-setup-onboarding[data-ov25-setup-step="picker"] {

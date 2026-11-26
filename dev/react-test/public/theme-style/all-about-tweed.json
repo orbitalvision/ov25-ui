@@ -4,12 +4,13 @@
     "id": "all-about-tweed",
     "label": "All About Tweed",
     "kind": "local-theme",
-    "fingerprint": "bbe315178d046bd1dad028227ebd14140a005e7d5616060b12a3040d68ed8da2",
+    "fingerprint": "f8826d59dd7dfa8f86ea78b56b4b256903ce454eda3b16394fbafe66ea4add30",
     "files": [
       "config/settings_data.json",
       "config/settings_schema.json",
       "assets/theme.css",
-      "assets/theme.css.liquid"
+      "snippets/css-variables.liquid",
+      "snippets/product-template.liquid"
     ]
   },
   "summary": "All About Tweed: observed theme colours with system fallback typography. Review the palette and button samples before applying.",
@@ -31,8 +32,8 @@
     "--ov25-button-border-radius": "0px",
     "--ov25-cta-color": "#283349",
     "--ov25-cta-text-color": "#ffffff",
-    "--ov25-cta-color-hover": "#353434",
-    "--ov25-cta-text-color-hover": "#fafafa",
+    "--ov25-cta-color-hover": "#283349",
+    "--ov25-cta-text-color-hover": "#ffffff",
     "--ov25-cta-color-light": "#fafafa",
     "--ov25-cta-text-color-disabled": "#353434",
     "--ov25-cta-border-color": "#283349",
@@ -99,13 +100,13 @@
     }
   ],
   "warnings": [
-    "assets/theme.css was limited to 262144 bytes.",
-    "assets/theme.css.liquid was limited to 262144 bytes.",
-    "Source-only preview: no AI model was called. Colours use explicit local theme settings or global/button CSS; ambiguous styling uses review defaults.",
+    "Could not parse CSS in snippets/font-face.liquid; styling inspection is incomplete.",
+    "Source inspection is incomplete; product button colours are unconfirmed and require review.",
+    "Source-only preview: no AI model was called. Colours use explicit theme settings and supported product button CSS; ambiguous styling uses review defaults.",
     "Unspecified button shape, focus, selected and disabled states are suggested review defaults; confirm them against the client design.",
     "Shopify font handles were not resolved or downloaded; this preview uses system typography."
   ],
-  "generatedAt": "2026-10-07T13:36:36.148Z",
+  "generatedAt": "2026-10-21T10:26:13.076Z",
   "method": "source",
   "placement": {
     "schemaVersion": 1,
@@ -113,9 +114,9 @@
       "id": "all-about-tweed",
       "label": "All About Tweed",
       "kind": "local-theme",
-      "fingerprint": "30c0eeaeec612b28697a36a63f032b26a4e6c5e3dea02da13d1165d68e317bb8",
+      "fingerprint": "6d4254d27686bd4cd6c85c62169c50a1d958589c05651669b5ec08dafcb17f1d",
       "files": [
-        "templates/product.json",
+        "templates/product.ov25_product.json",
         "layout/theme.liquid",
         "sections/main-product.liquid",
         "sections/header-group.json",
@@ -124,6 +125,7 @@
         "snippets/header-icons.liquid",
         "snippets/header-logo-block.liquid",
         "snippets/header-split-nav.liquid",
+        "sections/apps.liquid",
         "snippets/product-template.liquid",
         "snippets/product-form.liquid",
         "snippets/variant-button.liquid",
@@ -155,29 +157,43 @@
       ]
     },
     "method": "source",
-    "generatedAt": "2026-10-07T13:36:36.149Z",
+    "generatedAt": "2026-10-21T10:26:13.078Z",
     "warnings": [
       "Source evidence only: Liquid conditions, app blocks, JavaScript changes, visibility and selector match counts have not been verified in a rendered product page. Review before applying.",
-      "Inspected templates/product.json; other product templates may use different targets.",
-      "The selected template uses app blocks whose markup is not present in the theme source. Their selectors cannot be inferred from app names.",
+      "Inspected templates/product.ov25_product.json; other product templates may use different targets.",
+      "The product template was chosen automatically from available files; its assignment to a product has not been verified. Choose a template explicitly when inspecting a custom integration.",
+      "The selected template uses an unknown app block whose markup is absent from the theme source. No selectors were inferred for it.",
+      "Known OV25 app-block selectors come from the plugin mount contract, not downloaded markup. The deployed plugin version and whether the section renders each block must be verified on a rendered product page.",
+      "Structural context budget reached; only a bounded sample of candidate occurrences was retained.",
+      "3 source candidates have no safely parsed structural outline; surrounding markup is unavailable for those choices.",
+      "Some structural outlines are partial because of source limits, Liquid or incomplete markup; they are not rendered DOM trees.",
       "Deterministic source review; no AI model was called.",
-      "No source-backed proposal for: gallery, name, swatches, configureButton, desktopCarouselSelector, mobileCarouselSelector, addToCartFormSelector. Existing choices should be kept or selected manually."
+      "No source-backed proposal for: gallery, swatches, configureButton, desktopCarouselSelector, mobileCarouselSelector, addToCartFormSelector. Existing choices should be kept or selected manually."
     ],
     "targets": [
       {
         "key": "variants",
-        "selector": "#product-single__variants",
-        "confidence": "low",
-        "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
+        "selector": "#ov25-configurator-controls-container",
+        "confidence": "medium",
+        "reason": "Enabled ov25_configurator_controls declaration uses the known OV25 block selector. Deployed markup and rendered presence are unverified.",
         "sourceFiles": [
-          "snippets/product-form.liquid"
+          "templates/product.ov25_product.json"
         ]
       },
       {
         "key": "price",
-        "selector": ".grid-product__price",
+        "selector": ".product-section .product__price",
         "confidence": "low",
         "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
+        "sourceFiles": [
+          "snippets/product-template.liquid"
+        ]
+      },
+      {
+        "key": "name",
+        "selector": ".grid-product__title",
+        "confidence": "medium",
+        "reason": "Observed semantic markup hook. Liquid conditions and rendered match counts remain unverified.",
         "sourceFiles": [
           "snippets/product-grid-item.liquid"
         ]

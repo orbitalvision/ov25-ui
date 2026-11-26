@@ -4,17 +4,42 @@
     "id": "moy-furniture",
     "label": "Moy Furniture",
     "kind": "local-theme",
-    "fingerprint": "322a93abd77059766f0b404afb8d78d96cfad31202fbfc7ca6ae15f5569a4fe2",
+    "fingerprint": "7950f765e6a4ddbea9dec21943152d0604d5479ddd9ce9148462836022a213a6",
     "files": [
       "config/settings_data.json",
       "config/settings_schema.json",
-      "templates/product.json",
+      "layout/theme.liquid",
       "assets/base.css",
+      "assets/swiper.css",
+      "assets/custom.css",
+      "assets/responsive.css",
+      "assets/custom2.css",
+      "assets/component-cart-items.css",
+      "assets/component-cart-drawer.css",
+      "assets/component-cart.css",
+      "assets/component-price.css",
+      "assets/component-discounts.css",
+      "assets/component-localization-form.css",
+      "assets/component-predictive-search.css",
+      "templates/product.json",
       "assets/section-main-product.css",
-      "assets/component-complementary-products.css",
-      "assets/component-product-model.css",
+      "assets/component-slider.css",
+      "assets/component-rating.css",
+      "assets/component-deferred-media.css",
       "assets/component-product-variant-picker.css",
-      "layout/theme.liquid"
+      "assets/component-swatch-input.css",
+      "assets/component-swatch.css",
+      "assets/component-volume-pricing.css",
+      "assets/component-product-model.css",
+      "assets/component-model-viewer-ui.css",
+      "snippets/breadcrumbs.liquid",
+      "snippets/custom-product-variant-picker.liquid",
+      "assets/component-pickup-availability.css",
+      "assets/quick-order-list.css",
+      "assets/quantity-popover.css",
+      "assets/component-card.css",
+      "assets/component-complementary-products.css",
+      "assets/quick-add.css"
     ]
   },
   "summary": "Moy Furniture: product colour scheme scheme-1 with system fallback typography. Review the palette and button samples before applying.",
@@ -34,13 +59,13 @@
     "--ov25-button-hover-text-color": "#121212",
     "--ov25-button-border-width": "1px",
     "--ov25-button-border-radius": "0px",
-    "--ov25-cta-color": "#121212",
+    "--ov25-cta-color": "#000000",
     "--ov25-cta-text-color": "#ffffff",
-    "--ov25-cta-color-hover": "#121212",
+    "--ov25-cta-color-hover": "#808080",
     "--ov25-cta-text-color-hover": "#ffffff",
     "--ov25-cta-color-light": "#ffffff",
     "--ov25-cta-text-color-disabled": "#121212",
-    "--ov25-cta-border-color": "#121212",
+    "--ov25-cta-border-color": "#000000",
     "--ov25-cta-border-width": "1px",
     "--ov25-cta-border-radius": "0px",
     "--ov25-selected-background-color": "#121212",
@@ -67,9 +92,9 @@
     "--ov25-button-font-family": "system-ui, sans-serif",
     "--ov25-body-font-weight": "400",
     "--ov25-heading-font-weight": "400",
-    "--ov25-button-font-weight": "400",
+    "--ov25-button-font-weight": "700",
     "--ov25-button-letter-spacing": "0em",
-    "--ov25-button-text-transform": "none",
+    "--ov25-button-text-transform": "uppercase",
     "--ov25-configurator-qr-code-popup-background-color": "#ffffff",
     "--ov25-configurator-qr-code-popup-border-color": "#121212",
     "--ov25-configurator-qr-code-popup-title-text-color": "#121212",
@@ -94,21 +119,28 @@
     },
     {
       "role": "Action",
-      "color": "#121212",
-      "source": "config/settings_data.json"
+      "color": "#000000",
+      "source": "assets/custom.css"
     },
     {
       "role": "Accent",
-      "color": "#121212",
-      "source": "config/settings_data.json"
+      "color": "#000000",
+      "source": "assets/custom.css"
+    },
+    {
+      "role": "Action hover",
+      "color": "#808080",
+      "source": "assets/custom.css"
     }
   ],
   "warnings": [
-    "Source-only preview: no AI model was called. Colours use explicit local theme settings or global/button CSS; ambiguous styling uses review defaults.",
+    "Product button markup contains Liquid conditions; the detected action styles need preview confirmation.",
+    "Model CSS evidence was compacted after full source inspection; product button colours were resolved before compaction.",
+    "Source-only preview: no AI model was called. Colours use explicit theme settings and supported product button CSS; ambiguous styling uses review defaults.",
     "Unspecified button shape, focus, selected and disabled states are suggested review defaults; confirm them against the client design.",
     "Shopify font handles were not resolved or downloaded; this preview uses system typography."
   ],
-  "generatedAt": "2026-10-07T13:36:36.408Z",
+  "generatedAt": "2026-10-21T13:55:02.240Z",
   "method": "source",
   "placement": {
     "schemaVersion": 1,
@@ -116,7 +148,7 @@
       "id": "moy-furniture",
       "label": "Moy Furniture",
       "kind": "local-theme",
-      "fingerprint": "554a93b4fd0bcc635b12567fdf826bc45010deed24e09a152f7a410b4a39ba29",
+      "fingerprint": "2af39a3535e00afaa82b93a4ea10cda8ff438ae79980c13004c6361ce9c079d7",
       "files": [
         "templates/product.json",
         "layout/theme.liquid",
@@ -138,6 +170,7 @@
         "snippets/product-variant-options.liquid",
         "snippets/swatch.liquid",
         "snippets/swatch-input.liquid",
+        "sections/apps.liquid",
         "snippets/breadcrumbs.liquid",
         "snippets/card-product.liquid",
         "snippets/icon-accordion.liquid",
@@ -159,40 +192,57 @@
       ]
     },
     "method": "source",
-    "generatedAt": "2026-10-07T13:36:36.409Z",
+    "generatedAt": "2026-10-21T12:13:06.263Z",
     "warnings": [
       "Source evidence only: Liquid conditions, app blocks, JavaScript changes, visibility and selector match counts have not been verified in a rendered product page. Review before applying.",
       "Inspected templates/product.json; other product templates may use different targets.",
-      "The selected template uses app blocks whose markup is not present in the theme source. Their selectors cannot be inferred from app names.",
+      "The product template was chosen automatically from available files; its assignment to a product has not been verified. Choose a template explicitly when inspecting a custom integration.",
+      "The selected template uses an unknown app block whose markup is absent from the theme source. No selectors were inferred for it.",
+      "Structural context budget reached; only a bounded sample of candidate occurrences was retained.",
+      "4 source candidates have no safely parsed structural outline; surrounding markup is unavailable for those choices.",
+      "Some structural outlines are partial because of source limits, Liquid or incomplete markup; they are not rendered DOM trees.",
       "Deterministic source review; no AI model was called.",
-      "No source-backed proposal for: name, swatches, configureButton, desktopCarouselSelector, mobileCarouselSelector. Existing choices should be kept or selected manually."
+      "No source-backed proposal for: swatches, configureButton, desktopCarouselSelector, mobileCarouselSelector. Existing choices should be kept or selected manually."
     ],
     "targets": [
       {
         "key": "gallery",
-        "selector": ".quick-add__product-media",
+        "selector": ".product media-gallery",
         "confidence": "low",
         "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
         "sourceFiles": [
-          "snippets/card-product.liquid"
+          "sections/main-product.liquid",
+          "snippets/product-media-gallery.liquid"
         ]
       },
       {
         "key": "variants",
-        "selector": ".product__media-item--variant",
+        "selector": ".product__info-wrapper variant-selects",
         "confidence": "low",
         "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
         "sourceFiles": [
-          "snippets/product-media.liquid"
+          "sections/main-product.liquid",
+          "snippets/product-variant-picker.liquid",
+          "snippets/custom-product-variant-picker.liquid"
         ]
       },
       {
         "key": "price",
-        "selector": ".price",
+        "selector": ".product__info-wrapper .price",
         "confidence": "low",
         "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
         "sourceFiles": [
+          "sections/main-product.liquid",
           "snippets/price.liquid"
+        ]
+      },
+      {
+        "key": "name",
+        "selector": ".product__info-wrapper .product__title",
+        "confidence": "low",
+        "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
+        "sourceFiles": [
+          "sections/main-product.liquid"
         ]
       },
       {
@@ -206,12 +256,12 @@
       },
       {
         "key": "addToCartFormSelector",
-        "selector": "form[data-type=\"add-to-cart-form\"]",
+        "selector": ".product__info-wrapper form[data-type=\"add-to-cart-form\"]",
         "confidence": "low",
         "reason": "Observed semantic markup hook among multiple source candidates. Confirm the intended element on the rendered product.",
         "sourceFiles": [
-          "snippets/buy-buttons.liquid",
-          "snippets/card-product.liquid"
+          "sections/main-product.liquid",
+          "snippets/buy-buttons.liquid"
         ]
       }
     ]

@@ -573,6 +573,20 @@ html {
   overflow: hidden;
 }
 
+:host(.ov25-inline-sticky-anchored-viewer) {
+  position: relative;
+}
+
+/* Stacked galleries keep one iframe mounted across layouts. Override any
+   viewport coordinates left by the desktop or fullscreen layout. */
+:host(.ov25-inline-sticky-anchored-viewer) > #true-ov25-configurator-iframe-container {
+  position: absolute !important;
+  top: var(--ov25-viewer-slot-top, 0px) !important;
+  left: var(--ov25-viewer-slot-left, 0px) !important;
+  width: var(--ov25-viewer-slot-width, 100%) !important;
+  height: var(--ov25-viewer-slot-height, auto) !important;
+}
+
 :host(.ov25-inline-sticky-gallery-root-mobile) .ov25-inline-sticky-gallery-content {
   container-type: inline-size;
   max-height: var(--ov25-sticky-available-height);
@@ -625,6 +639,17 @@ html {
 
 .ov25-inline-sticky-list-mobile {
   isolation: isolate;
+}
+
+/* Page-scrolling mobile lists have natural height. Nested flex columns make
+   WebKit repeatedly size the entire options tree when a sticky heading moves.
+   Keep the bounded desktop/overlay layouts on their existing flex path. */
+[data-ov25-mobile-page-flow='true'],
+[data-ov25-mobile-page-flow='true'] > [data-ov25-inline-sticky-list-wrapper='true'],
+[data-ov25-mobile-page-flow='true'] .ov25-inline-sticky-list-mobile,
+[data-ov25-mobile-page-flow='true'] .ov25-inline-sticky-list-mobile > #ov25-variants-content-wrapper {
+  display: block;
+  height: auto;
 }
 
 .ov25-inline-sticky-list .ov25-option-header,

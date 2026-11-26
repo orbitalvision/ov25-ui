@@ -61,4 +61,28 @@ describe('Price loading state', () => {
     expect(screen.getByText('£1,299.00')).toBeInTheDocument();
     expect(document.getElementById('ov25-price-product-page')).not.toBeNull();
   });
+
+  it('shows nothing, not a skeleton, while a Snap2 dialog has not been opened', () => {
+    // Desktop dialog and mobile modal: the viewer (and so the price) only exists once Configure is pressed.
+    for (const snap2 of [{ isMobile: false, configuratorDisplayMode: 'modal' }, { isMobile: true, configuratorDisplayModeMobile: 'modal' }]) {
+      priceContext = { ...createContext(false), isSnap2Mode: true, configuratorDisplayMode: 'modal', configuratorDisplayModeMobile: 'drawer', ...snap2 };
+      const view = render(<Price />);
+      expect(screen.queryByRole('status')).not.toBeInTheDocument();
+      expect(view.container.querySelector('#ov25-configurator-price-container')).toHaveStyle({ display: 'none' });
+      view.unmount();
+    }
+    // Once a price arrives it shows as usual.
+    priceContext = { ...createContext(true), isSnap2Mode: true, isMobile: false, configuratorDisplayMode: 'modal' };
+    render(<Price />);
+    expect(screen.getByText('£1,299.00')).toBeInTheDocument();
+  });
+
+  it('keeps the skeleton where a Snap2 viewer loads with the page', () => {
+    for (const snap2 of [{ isMobile: false, configuratorDisplayMode: 'inline' }, { isMobile: false, configuratorDisplayMode: 'inline-sheet' }, { isMobile: true, configuratorDisplayModeMobile: 'drawer' }]) {
+      priceContext = { ...createContext(false), isSnap2Mode: true, configuratorDisplayMode: 'modal', configuratorDisplayModeMobile: 'modal', ...snap2 };
+      const view = render(<Price />);
+      expect(screen.getByRole('status')).toHaveAttribute('aria-busy', 'true');
+      view.unmount();
+    }
+  });
 });

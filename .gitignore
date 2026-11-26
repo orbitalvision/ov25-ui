@@ -14,3 +14,11 @@ review-screenshots/
 .pnpm-store
 /.worktrees/
 /.vitest-attachments/
+
+# Local investigation output (profiles, theme-style snapshots); not shipped
+/outputs/
+/dev/react-test/public/theme-style/history/
+# Local theme-style palettes, AI runs and client fonts kept for later checks; not shipped
+/dev/react-test/public/theme-style/ai/
+/dev/react-test/public/theme-style/ad-furnishings.json
+/dev/react-test/public/theme-style/fonts/harbour-lifestyle/GillSansNovaMedium.static.woff2

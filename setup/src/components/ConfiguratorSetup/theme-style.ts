@@ -3,6 +3,8 @@ import { OV25_VARIANT_RING_MODE_SOLID, OV25_VARIANT_THUMB_RING_MODE_VAR } from '
 import type { ConfiguratorSetupCompatibility } from './compatibility';
 import type { PreviewLayoutType, TypeSettings } from './types';
 import { validateSelectorDiscoveryProposal, type ConfiguratorSetupSelectorDiscovery, type SelectorDiscoveryProposal } from './selector-discovery';
+import { mergeThemeButtonAnimationCss, validateThemeButtonAnimations, type ThemeButtonAnimation } from './button-animations';
+export type { ThemeButtonAnimation } from './button-animations';
 
 export interface ThemeStyleFont {
   family: string;
@@ -12,13 +14,15 @@ export interface ThemeStyleFont {
   unicodeRange?: string;
 }
 
-/** Suggestions contain editable tokens, never executable CSS or brand/campaign content. */
+/** Suggestions contain editable tokens and bounded animation recipes, never executable CSS. */
 export interface ThemeStyleProposal {
   schemaVersion: 1;
-  source: { id: string; label: string; kind: 'local-theme'; fingerprint: string; files: string[] };
+  source: { id: string; label: string; kind: 'local-theme' | 'shopify-theme'; fingerprint: string; files: string[] };
   summary: string;
   style: Record<string, string>;
   fonts?: ThemeStyleFont[];
+  /** Converted to generated Custom CSS when applied; no runtime schema addition. */
+  animations?: ThemeButtonAnimation[];
   palette: { role: string; color: string; source: string }[];
   warnings: string[];
   generatedAt: string;
@@ -31,7 +35,16 @@ export interface ConfiguratorSetupThemeStyling {
   /** Change when the shop, product or source theme changes; cancels stale suggestions. */
   contextKey: string;
   sourceLabel?: string;
+  /** Host status and actionable context errors, preserved when the source changes. */
+  message?: string;
   disabled?: boolean;
+  /** Optional analysis-only theme choice supplied by the Shopify host. */
+  themeSelection?: {
+    value: string;
+    /** `live` marks the published theme; placement suggestions for other themes become theme overrides. */
+    options: { value: string; label: string; live?: boolean }[];
+    onChange: (value: string) => void;
+  };
   /** Host-confirmed saved-state and scope. Omit to keep placement suggestions inactive. */
   placement?: ConfiguratorSetupSelectorDiscovery;
   onRequest: (request: { activeLayout: PreviewLayoutType; signal: AbortSignal }) => Promise<ThemeStyleProposal>;
@@ -39,6 +52,8 @@ export interface ConfiguratorSetupThemeStyling {
 
 export const THEME_STYLE_FEATURE = 'styling:theme-v1';
 export const THEME_FONTS_FEATURE = 'branding:fonts-v1';
+// Keep provenance bounded and aligned with OV25's THEME_STYLE_SOURCE_LIMITS.files.
+const MAX_THEME_SOURCE_FILES = 64;
 /** These controls were introduced after the frozen September 2026 baseline. */
 export const NEW_THEME_STYLE_VARIABLES = new Set([
   '--ov25-selected-background-color', '--ov25-selected-text-color', '--ov25-selected-border-color',
@@ -85,9 +100,9 @@ export function isThemeFontUrl(value: string): boolean {
 /** Validate at the package boundary too: hosts and cached proposals can be stale or malformed. */
 export function validateThemeStyleProposal(value: ThemeStyleProposal): ThemeStyleProposal {
   const boundedText = (text: unknown, maximum: number) => typeof text === 'string' && text.length > 0 && text.length <= maximum;
-  if (!value || value.schemaVersion !== 1 || !value.source || value.source.kind !== 'local-theme' ||
+  if (!value || value.schemaVersion !== 1 || !value.source || !['local-theme', 'shopify-theme'].includes(value.source.kind) ||
       !['ai', 'source'].includes(value.method) || !boundedText(value.source.id, 100) || !boundedText(value.source.label, 200) ||
-      !boundedText(value.source.fingerprint, 128) || !Array.isArray(value.source.files) || value.source.files.length > 24 || value.source.files.some((v) => !boundedText(v, 500)) ||
+      !boundedText(value.source.fingerprint, 128) || !Array.isArray(value.source.files) || value.source.files.length > MAX_THEME_SOURCE_FILES || value.source.files.some((v) => !boundedText(v, 500)) ||
       !boundedText(value.summary, 1000) || !boundedText(value.generatedAt, 100) || !Number.isFinite(Date.parse(value.generatedAt)) ||
       !value.style || typeof value.style !== 'object' || Array.isArray(value.style) ||
       !Array.isArray(value.palette) || !Array.isArray(value.warnings) || value.warnings.length > 64 || value.warnings.some((v) => !boundedText(v, 1000))) {
@@ -109,6 +124,7 @@ export function validateThemeStyleProposal(value: ThemeStyleProposal): ThemeStyl
     throw new Error('The theme analysis returned an invalid font definition.');
   }
   const result = structuredClone(value);
+  if (value.animations !== undefined) result.animations = validateThemeButtonAnimations(value.animations, value.source.files);
   if (value.placement) {
     try {
       result.placement = validateSelectorDiscoveryProposal(value.placement);
@@ -138,12 +154,48 @@ export function compatibleThemeStyleProposal(proposal: ThemeStyleProposal, compa
   };
 }
 
+/** Check against the merged draft too: an otherwise valid partial proposal can collide with an existing colour. */
+export function ensureOverlayThemeContrast(proposal: ThemeStyleProposal, currentStyle: Record<string, string>): ThemeStyleProposal {
+  const fillKey = '--ov25-overlay-button-color';
+  const iconKey = '--ov25-configurator-view-controls-text-color';
+  const hoverKey = '--ov25-overlay-button-hover-color';
+  if (![fillKey, iconKey, hoverKey, '--ov25-background-color', '--ov25-text-color'].some(key => Object.hasOwn(proposal.style, key))) return proposal;
+  const merged = { ...currentStyle, ...proposal.style };
+  const fill = merged[fillKey] || merged['--ov25-background-color'] || '#ffffff';
+  const icon = merged[iconKey] || merged['--ov25-text-color'] || '#000000';
+  // Only adjust hover when this compatible proposal actually changes it. Older UI builds may
+  // not support the hover token, and unrelated existing hover values remain user-owned.
+  const hover = proposal.style[hoverKey];
+  const backgrounds = [fill, ...(hover ? [hover] : [])];
+  if (![icon, ...backgrounds].every(value => /^#[\da-f]{6}$/i.test(value))) return proposal;
+  const luminance = (hex: string) => {
+    const [r, g, b] = [1, 3, 5].map(index => parseInt(hex.slice(index, index + 2), 16) / 255)
+      .map(value => value <= .04045 ? value / 12.92 : ((value + .055) / 1.055) ** 2.4);
+    return r * .2126 + g * .7152 + b * .0722;
+  };
+  const contrast = (a: string, b: string) => {
+    const first = luminance(a), second = luminance(b);
+    return (Math.max(first, second) + .05) / (Math.min(first, second) + .05);
+  };
+  const minimum = (candidate: string) => Math.min(...backgrounds.map(background => contrast(candidate, background)));
+  if (minimum(icon) >= 3) return proposal;
+  const chosen = [icon, '#000000', '#ffffff'].reduce((best, candidate) => minimum(candidate) > minimum(best) ? candidate : best);
+  const canMatchBoth = minimum(chosen) >= 3;
+  const replacement = canMatchBoth ? chosen : contrast('#000000', fill) >= contrast('#ffffff', fill) ? '#000000' : '#ffffff';
+  const warning = 'Overlay icon or hover fill adjusted so the controls remain visible against their backgrounds.';
+  return { ...proposal, style: { ...proposal.style, [iconKey]: replacement, ...(!canMatchBoth && hover ? { [hoverKey]: fill } : {}) },
+    warnings: proposal.warnings.includes(warning) ? proposal.warnings : [...proposal.warnings, warning] };
+}
+
 export function applyThemeStyleProposal(settings: TypeSettings, proposal: ThemeStyleProposal): TypeSettings {
+  proposal = ensureOverlayThemeContrast(proposal, settings.style);
   return {
     ...settings,
     style: { ...settings.style, ...proposal.style,
       ...(proposal.style['--ov25-highlight-color'] ? { [OV25_VARIANT_THUMB_RING_MODE_VAR]: OV25_VARIANT_RING_MODE_SOLID } : {}),
     },
-    branding: { ...settings.branding, ...(proposal.fonts?.length ? { fonts: proposal.fonts } : {}) },
+    branding: { ...settings.branding, ...(proposal.fonts?.length ? { fonts: proposal.fonts } : {}),
+      cssString: mergeThemeButtonAnimationCss(settings.branding.cssString, proposal.animations),
+    },
   };
 }

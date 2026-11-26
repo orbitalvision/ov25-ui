@@ -1,6 +1,7 @@
 import type { PreviewLayoutType, TypeSettings } from './types';
 import { PRESET_BASELINE } from './preset-baseline';
 import { isThemeStyleVariable } from './theme-style';
+import { extractThemeButtonAnimationBlock } from './button-animations';
 
 export type SetupPresetId = 'classic' | 'in-page' | 'guided' | 'overview';
 export const PRESET_CATALOGUE_VERSION = 2;
@@ -44,7 +45,8 @@ export function getPresetSettings(layout: PreviewLayoutType, id: SetupPresetId):
     settings.carousel.desktop = id === 'overview' ? 'stacked' : 'carousel';
     settings.carousel.mobile = 'carousel';
   }
-  if (layout === 'standard' && id === 'in-page') {
+  // Bed's In-page is Standard's: sticky inline with a list of options.
+  if ((layout === 'standard' || layout === 'bedConfigurator') && id === 'in-page') {
     c.displayModeDesktop = c.displayModeMobile = 'inline-sticky';
     c.variantDisplayDesktop = c.variantDisplayMobile = 'list';
   }
@@ -57,6 +59,11 @@ export function getPresetSettings(layout: PreviewLayoutType, id: SetupPresetId):
   return settings;
 }
 
+/** Placements whose on/off state belongs to the preset rather than the store. */
+const PRESET_PLACEMENTS: Record<PreviewLayoutType, ('gallery' | 'configureButton')[]> = {
+  standard: [], snap2: ['gallery', 'configureButton'], bedConfigurator: [],
+};
+
 /** Reset presentation only; preserve merchant integration, rules and branding. */
 export function applySetupPreset(layout: PreviewLayoutType, id: SetupPresetId, current?: TypeSettings, preserveThemeStyle = false): TypeSettings {
   const preset = getPresetSettings(layout, id);
@@ -65,11 +72,17 @@ export function applySetupPreset(layout: PreviewLayoutType, id: SetupPresetId, c
   // Runtime exports intentionally omit editor provenance. Preserve semantic styling
   // after importing saved JSON too, so a fresh browser cannot erase a matched palette.
   const themeStyles = Object.fromEntries(Object.entries(preserved.style).filter(([key]) => isThemeStyleVariable(key)));
+  const matchedAnimationCss = extractThemeButtonAnimationBlock(preserved.branding.cssString);
+  // Some presets decide whether a placement is used at all (Snap2 in the gallery slot or from a button), so whether
+  // it's on comes from the preset. The store's selectors themselves are kept.
+  const selectors = { ...preserved.selectors };
+  for (const key of PRESET_PLACEMENTS[layout]) selectors[key] = { ...preserved.selectors[key], enabled: preset.selectors[key].enabled };
   return {
     ...preserved,
+    selectors,
     carousel: preset.carousel,
     configurator: { ...preset.configurator, variantHideOptionsCsv: preserved.configurator.variantHideOptionsCsv },
-    branding: { ...preserved.branding, cssString: preset.branding.cssString },
+    branding: { ...preserved.branding, cssString: [preset.branding.cssString, matchedAnimationCss].filter(Boolean).join('\n\n') },
     style: preserveThemeStyle || Object.keys(themeStyles).length ? { ...preset.style, ...themeStyles } : preset.style,
     elementStyles: preset.elementStyles,
   };
