@@ -50,6 +50,8 @@ export function getPresetSettings(layout: PreviewLayoutType, id: SetupPresetId):
     c.displayModeDesktop = c.displayModeMobile = 'inline-sticky';
     c.variantDisplayDesktop = c.variantDisplayMobile = 'list';
   }
+  // Standard's Guided keeps the product in view: the step-by-step options sit beside a sticky viewer, not in a modal.
+  if (layout === 'standard' && id === 'guided') c.displayModeDesktop = c.displayModeMobile = 'inline-sticky';
   if (isSnap2) {
     const inline = c.displayModeDesktop === 'inline';
     settings.selectors.gallery.enabled = inline;

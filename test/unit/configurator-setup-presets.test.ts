@@ -119,4 +119,11 @@ describe('setup preset catalogue', () => {
     const standard = { ...DEFAULT_TYPE_SETTINGS.standard, selectors: { ...DEFAULT_TYPE_SETTINGS.standard.selectors, gallery: { enabled: false, selector: '.x', replace: true } } };
     expect(applySetupPreset('standard', 'classic', standard).selectors).toEqual(standard.selectors);
   });
+  it('keeps the product in view for Standard\u2019s Guided preset, and leaves Bed and Snap2 opening a modal', () => {
+    const standard = getPresetSettings('standard', 'guided').configurator;
+    expect([standard.displayModeDesktop, standard.displayModeMobile]).toEqual(['inline-sticky', 'inline-sticky']);
+    expect([standard.variantDisplayDesktop, standard.variantDisplayMobile]).toEqual(['wizard', 'wizard']);
+    expect(getPresetSettings('bedConfigurator', 'guided').configurator.displayModeDesktop).toBe('modal');
+    expect(getPresetSettings('snap2', 'guided').configurator.displayModeDesktop).toBe('modal');
+  });
 });
