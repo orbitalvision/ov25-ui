@@ -246,7 +246,8 @@ describe('ConfiguratorSetup site preview in the toolbar', () => {
     const open = screen.getByRole('button', { name: 'Open site preview' });
     expect(open).not.toBeDisabled();
     expect(open).not.toHaveClass('w-full');
-    expect(open.parentElement).toHaveAttribute('title', message);
+    expect(open.parentElement?.querySelector('[data-ov25-setup-preview-hint]')).toHaveTextContent(message);
+    expect(open.parentElement).not.toHaveAttribute('title');
     // Available to assistive technology, but not laid out in the toolbar.
     expect(screen.getByRole('status')).toHaveClass('sr-only');
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
@@ -258,7 +259,7 @@ describe('ConfiguratorSetup site preview in the toolbar', () => {
     renderToolbar({ onRequest: vi.fn(), onRetry, availability: 'unsupported', disabled: true, message: 'Update or enable your plugin, then retry the check.' });
     const open = screen.getByRole('button', { name: 'Open site preview' });
     expect(open).toBeDisabled();
-    expect(open.parentElement).not.toHaveAttribute('title');
+    expect(open.parentElement?.querySelector('[data-ov25-setup-preview-hint]')).toBeNull();
     expect(screen.getByRole('status')).toHaveTextContent('Update or enable your plugin');
     expect(screen.getByRole('status')).not.toHaveClass('sr-only');
     fireEvent.click(screen.getByRole('button', { name: 'Retry check' }));
@@ -272,7 +273,8 @@ describe('ConfiguratorSetup site preview in the toolbar', () => {
     const { rerender } = renderToolbar(config);
     expect(screen.getByRole('status')).toHaveClass('sr-only');
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Open site preview' })); });
-    expect(screen.getByText(/Switch to it so the configurator can finish loading/)).not.toHaveClass('sr-only');
+    expect(screen.getByRole('status')).not.toHaveClass('sr-only');
+    expect(screen.getByRole('status')).toHaveTextContent(/Switch to it so the configurator can finish loading/);
     await act(async () => { finish(); });
     expect(screen.queryByText('Updates as you edit')).not.toBeInTheDocument();
     rerender(<LivePreviewAction config={{ ...config, status: 'ready', message: 'Your site preview is open and updates as you edit.' }} state={state} toolbar={{ reportContainer: null }} />);
@@ -286,7 +288,7 @@ describe('ConfiguratorSetup site preview in the toolbar', () => {
     renderToolbar({ onRequest, availability: 'supported', message: 'Opens your real product page with temporary settings.' });
     await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Open site preview' })); });
     expect(screen.getByRole('alert')).toHaveTextContent('Allow pop-ups for this page');
-    expect(screen.getByRole('button', { name: 'Open site preview' }).parentElement).not.toHaveAttribute('title');
+    expect(screen.getByRole('button', { name: 'Open site preview' }).parentElement?.querySelector('[data-ov25-setup-preview-hint]')).toBeNull();
   });
 
   it('puts placement warnings in the sidebar slot, not in the bar', () => {

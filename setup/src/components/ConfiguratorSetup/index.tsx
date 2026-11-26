@@ -164,8 +164,12 @@ export function LivePreviewAction({ config, state, simple, primary, toolbar }: {
     // With an open preview the button reads the same as with none, so say when edits are being sent to it.
     const live = !!autoUpdate && config.status === 'ready' && !failed && !blocked && !pending;
     return <div className="flex min-w-0 flex-wrap items-center justify-center gap-2" data-ov25-setup-live-preview="toolbar">
-      {/* The hint sits on a wrapper so it still shows while the button is disabled. */}
-      <span title={hint} className="inline-flex">{previewButton}</span>
+      {/* Shown at once on hover or keyboard focus (a native title waits about a second). On the wrapper, so it also works while the button is disabled.
+          Centred with a margin, not a translate: a host on Tailwind v3 defines the same translate class and the two would stack. */}
+      <span className="group/preview-hint relative inline-flex">
+        {previewButton}
+        {hint && <span aria-hidden data-ov25-setup-preview-hint className="pointer-events-none absolute left-1/2 top-full z-50 -ml-32 mt-2 w-64 rounded-md bg-foreground px-3 py-2 text-left text-xs font-normal leading-snug text-background opacity-0 shadow-md group-hover/preview-hint:opacity-100 group-focus-within/preview-hint:opacity-100">{hint}</span>}
+      </span>
       {hint && <span className="sr-only" role="status">{hint}</span>}
       {live && <span className="text-xs text-muted-foreground" data-ov25-setup-preview-live>Updates as you edit</span>}
       {config.onRetry && unavailable && <Button type="button" variant="ghost" size="sm" disabled={pending || checking} onClick={retry}>Retry check</Button>}
