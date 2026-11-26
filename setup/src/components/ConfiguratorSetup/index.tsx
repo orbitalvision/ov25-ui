@@ -76,8 +76,12 @@ export type { ConfiguratorSetupPayload, StorefrontIntegrationConfig, Configurato
 /** How long after the last edit the full editor sends the draft to an open preview tab. */
 const AUTO_UPDATE_DELAY_MS = 1500;
 
-/** `simple` (guided setup): one button. Show blocking availability messages, what to do while a locked store is being unlocked, and a retry action. `primary`: the filled button style. */
-export function LivePreviewAction({ config, state, simple, primary }: { config: ConfiguratorSetupLivePreviewConfig; state: ConfiguratorSetupFormState; simple?: boolean; primary?: boolean }) {
+/**
+ * `simple` (guided setup): one button. Show blocking availability messages, what to do while a locked store is being unlocked, and a retry action. `primary`: the filled button style.
+ * `toolbar` (full editor): a compact button for the bar above the preview. Its status message shows on hover, errors stay visible beside it,
+ * and placement warnings render into `toolbar.reportContainer` (the sidebar), next to the selectors they are about.
+ */
+export function LivePreviewAction({ config, state, simple, primary, toolbar }: { config: ConfiguratorSetupLivePreviewConfig; state: ConfiguratorSetupFormState; simple?: boolean; primary?: boolean; toolbar?: { reportContainer: HTMLElement | null } }) {
   const [pending, setPending] = useState(false);
   const [retrying, setRetrying] = useState(false);
   const [error, setError] = useState<string>();
@@ -107,6 +111,12 @@ export function LivePreviewAction({ config, state, simple, primary }: { config: 
     }, AUTO_UPDATE_DELAY_MS);
     return () => clearTimeout(timer);
   }, [autoUpdate, config.status, config.contextKey, config.disabled, submitted, sameDraft, pending, checking, unavailable, fingerprint, payload, state.layout, report?.validationRunId]);
+  const reportRunId = currentReport?.validationRunId;
+  const reportSlot = toolbar?.reportContainer;
+  useEffect(() => {
+    // In the narrow, stacked layout the sidebar sits away from the bar; bring new warnings into view.
+    if (reportRunId && reportSlot?.childElementCount) reportSlot.scrollIntoView?.({ block: 'nearest', behavior: 'smooth' });
+  }, [reportRunId, reportSlot]);
   const request = async () => {
     if (pendingRef.current || config.disabled || checking || unavailable) return;
     pendingRef.current = true;
@@ -138,10 +148,32 @@ export function LivePreviewAction({ config, state, simple, primary }: { config: 
     }
   };
   const retryOnClick = simple && unavailable && !!config.onRetry;
-  const previewButton = <Button type="button" variant={primary ? 'default' : 'outline'} className={simple && config.mobile ? undefined : 'w-full'} disabled={pending || config.disabled || checking || (unavailable && !retryOnClick)} onClick={retryOnClick ? retry : request}>
+  const previewButton = <Button type="button" variant={primary ? 'default' : 'outline'} size={toolbar ? 'sm' : undefined} className={toolbar || (simple && config.mobile) ? undefined : 'w-full'} disabled={pending || config.disabled || checking || (unavailable && !retryOnClick)} onClick={retryOnClick ? retry : request}>
       {pending || checking ? <Spinner aria-hidden size={16} /> : <ExternalLink className="h-4 w-4" />}
       {checking ? (simple ? 'Checking…' : 'Checking site preview…') : pending ? (simple ? 'Opening…' : 'Opening site preview…') : config.label ?? (config.status === 'ready' && !autoUpdate ? 'Update site preview' : 'Open site preview')}
     </Button>;
+  if (toolbar) {
+    const failed = !!error || config.status === 'error';
+    const problem = error || (failed ? config.message : undefined);
+    // A message the merchant must act on stays visible: the button is blocked, or a request is waiting on them
+    // (for example to bring the preview tab to the front). Anything else, such as "your store has a password",
+    // is a hover hint so the bar stays one line.
+    const blocked = (unavailable || !!config.disabled) && !checking;
+    const visible = !failed && (blocked || pending) ? config.message : undefined;
+    const hint = failed || visible ? undefined : config.message;
+    // With an open preview the button reads the same as with none, so say when edits are being sent to it.
+    const live = !!autoUpdate && config.status === 'ready' && !failed && !blocked && !pending;
+    return <div className="flex min-w-0 flex-wrap items-center justify-center gap-2" data-ov25-setup-live-preview="toolbar">
+      {/* The hint sits on a wrapper so it still shows while the button is disabled. */}
+      <span title={hint} className="inline-flex">{previewButton}</span>
+      {hint && <span className="sr-only" role="status">{hint}</span>}
+      {live && <span className="text-xs text-muted-foreground" data-ov25-setup-preview-live>Updates as you edit</span>}
+      {config.onRetry && unavailable && <Button type="button" variant="ghost" size="sm" disabled={pending || checking} onClick={retry}>Retry check</Button>}
+      {visible && <p role="status" className="max-w-sm text-xs leading-snug text-muted-foreground">{visible}</p>}
+      {problem && <p role="alert" className="max-w-sm text-xs leading-snug text-destructive">{problem}</p>}
+      {currentReport && toolbar.reportContainer && createPortal(<PlacementValidation report={currentReport} />, toolbar.reportContainer)}
+    </div>;
+  }
   return <div className="shrink-0 border-t pt-3" data-ov25-setup-live-preview>
     {simple && config.mobile
       ? <div className="flex gap-2" data-ov25-setup-preview-row>{previewButton}<MobilePreviewAction mobile={config.mobile} request={{ payload, activeLayout: state.layout }} /></div>
@@ -338,6 +370,9 @@ export default function ConfiguratorSetup(props: ConfiguratorSetupProps) {
   const onSave = props.onSave && ((payload: ConfiguratorSetupPayload) => { props.onSave!(pruneThemeSelectorsInPayload(payload, existingThemeIds)); setSavedThisSession(true); });
   // Guided Advanced setup takes over the window; its own bar saves and returns to Automatic setup.
   const fullscreenEditor = !!props.guidedSelection && setup.hasHydrated && !onboarding && activeScreen === 'editor';
+  // The full editor's site preview button lives in the bar above the preview. Guided setup's chat page has its own.
+  const toolbarPreview = !!props.livePreview && !(props.guidedSelection && activeScreen !== 'editor');
+  const [placementReportSlot, setPlacementReportSlot] = useState<HTMLElement | null>(null);
   const backToAutomatic = () => setScreen(props.themeStyling ? 'theme' : 'summary');
   const slotSave = props.saveSlot?.container && setup.hasHydrated && !previewFirst && !fullscreenEditor ? createPortal(<SetupSaveControls formState={formState} getExportJson={getExportJson} onSave={onSave} label={props.saveLabel} hideSaveButton={props.hideSaveButton} saveDisabled={guidedSaveDisabled} buttonClassName={props.saveSlot.className} />, props.saveSlot.container) : null;
   const previewActions = props.guidedSelection ? (guidedPreviewConfig
@@ -358,7 +393,10 @@ export default function ConfiguratorSetup(props: ConfiguratorSetupProps) {
       <h2 className="ov25-setup-fullscreen-title">Advanced setup</h2>
       <SetupSaveControls formState={formState} getExportJson={getExportJson} onSave={onSave} label={props.saveLabel} hideSaveButton={props.hideSaveButton} saveDisabled={guidedSaveDisabled} buttonClassName={props.saveSlot?.className} />
     </header>}
-    {setup.hasHydrated && !onboarding && props.previewToolbar && <div className="shrink-0 border-b bg-white p-3" data-ov25-setup-preview-toolbar>{props.previewToolbar}</div>}
+    {setup.hasHydrated && !onboarding && (props.previewToolbar || toolbarPreview) && <div className="flex shrink-0 flex-wrap items-center justify-center gap-2 border-b bg-white p-3" data-ov25-setup-preview-toolbar>
+      {props.previewToolbar}
+      {toolbarPreview && props.livePreview && <LivePreviewAction key={`${setup.hydrationKey}:${formState.layout}`} toolbar={{ reportContainer: placementReportSlot }} config={{ ...props.livePreview, disabled: props.livePreview.disabled || !!saveUnavailable }} state={formState} />}
+    </div>}
     {!setup.hasHydrated ? <p role="status" className="p-5 text-sm text-muted-foreground">Loading your setup…</p> : guidedError && props.guidedSelection ? <p role="alert" className="p-5 text-sm text-destructive">{guidedError} Return to Choose preset to select a compatible layout.</p> : onboarding ? <main className="ov25-setup-onboarding" data-ov25-setup-step={activeScreen}>
       {!props.guidedSelection && <header className="ov25-setup-onboarding-header">
         <ol className="ov25-setup-steps" aria-label="Setup progress">
@@ -470,7 +508,8 @@ export default function ConfiguratorSetup(props: ConfiguratorSetupProps) {
           </div>
           <SetupSaveControls formState={formState} getExportJson={getExportJson} onSave={onSave} label={props.saveLabel} hideSaveButton={hideInlineSave} saveDisabled={!!saveUnavailable} />
         </>}
-        {props.livePreview && <LivePreviewAction key={`${setup.hydrationKey}:${formState.layout}`} config={{ ...props.livePreview, disabled: props.livePreview.disabled || !!saveUnavailable }} state={formState} />}
+        {/* The site preview button is in the bar above the preview; its placement warnings land here. */}
+        <div ref={setPlacementReportSlot} className="shrink-0 empty:hidden" data-ov25-setup-placement-report />
       </aside>
     </div>}
     <Dialog open={confirmReplacement} onOpenChange={setConfirmReplacement}>

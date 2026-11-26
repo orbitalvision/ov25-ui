@@ -234,3 +234,71 @@ describe('ConfiguratorSetup live placement warnings', () => {
     expect(screen.queryByText(/updates as you edit/)).not.toBeInTheDocument();
   });
 });
+
+describe('ConfiguratorSetup site preview in the toolbar', () => {
+  function renderToolbar(config: ConfiguratorSetupLivePreviewConfig, reportContainer: HTMLElement | null = null) {
+    return render(<LivePreviewAction config={config} state={state} toolbar={{ reportContainer }} />);
+  }
+
+  it('keeps the status message as a hover hint instead of text in the bar', () => {
+    const message = 'Your storefront is password protected. Open site preview and enter the storefront password if prompted.';
+    const { container } = renderToolbar({ onRequest: vi.fn(), availability: 'requires-unlock', message });
+    const open = screen.getByRole('button', { name: 'Open site preview' });
+    expect(open).not.toBeDisabled();
+    expect(open).not.toHaveClass('w-full');
+    expect(open.parentElement).toHaveAttribute('title', message);
+    // Available to assistive technology, but not laid out in the toolbar.
+    expect(screen.getByRole('status')).toHaveClass('sr-only');
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
+    expect(container.querySelector('[data-ov25-setup-live-preview="toolbar"]')).toBeInTheDocument();
+  });
+
+  it('says why opening is blocked in the bar, with Retry check beside it', () => {
+    const onRetry = vi.fn();
+    renderToolbar({ onRequest: vi.fn(), onRetry, availability: 'unsupported', disabled: true, message: 'Update or enable your plugin, then retry the check.' });
+    const open = screen.getByRole('button', { name: 'Open site preview' });
+    expect(open).toBeDisabled();
+    expect(open.parentElement).not.toHaveAttribute('title');
+    expect(screen.getByRole('status')).toHaveTextContent('Update or enable your plugin');
+    expect(screen.getByRole('status')).not.toHaveClass('sr-only');
+    fireEvent.click(screen.getByRole('button', { name: 'Retry check' }));
+    expect(onRetry).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows the host’s instruction while a request is waiting, and marks an open preview that follows edits', async () => {
+    let finish: () => void = () => {};
+    const onRequest = vi.fn(() => new Promise<void>(resolve => { finish = resolve; }));
+    const config = { onRequest, onAutoUpdate: vi.fn(), availability: 'supported' as const, message: 'The preview tab is loading this draft. Switch to it so the configurator can finish loading.' };
+    const { rerender } = renderToolbar(config);
+    expect(screen.getByRole('status')).toHaveClass('sr-only');
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Open site preview' })); });
+    expect(screen.getByText(/Switch to it so the configurator can finish loading/)).not.toHaveClass('sr-only');
+    await act(async () => { finish(); });
+    expect(screen.queryByText('Updates as you edit')).not.toBeInTheDocument();
+    rerender(<LivePreviewAction config={{ ...config, status: 'ready', message: 'Your site preview is open and updates as you edit.' }} state={state} toolbar={{ reportContainer: null }} />);
+    expect(screen.getByText('Updates as you edit')).toBeInTheDocument();
+    rerender(<LivePreviewAction config={{ ...config, status: 'idle', message: 'Site preview closed. Open it again to see your changes.' }} state={state} toolbar={{ reportContainer: null }} />);
+    expect(screen.queryByText('Updates as you edit')).not.toBeInTheDocument();
+  });
+
+  it('shows a failure in the bar, not only on hover', async () => {
+    const onRequest = vi.fn().mockRejectedValue(new Error('Allow pop-ups for this page, then open the site preview again.'));
+    renderToolbar({ onRequest, availability: 'supported', message: 'Opens your real product page with temporary settings.' });
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Open site preview' })); });
+    expect(screen.getByRole('alert')).toHaveTextContent('Allow pop-ups for this page');
+    expect(screen.getByRole('button', { name: 'Open site preview' }).parentElement).not.toHaveAttribute('title');
+  });
+
+  it('puts placement warnings in the sidebar slot, not in the bar', () => {
+    const slot = document.body.appendChild(document.createElement('div'));
+    const { container } = renderToolbar({ onRequest: vi.fn(), onAutoUpdate: vi.fn(), availability: 'supported', status: 'ready', placementValidation: placementReport({ checks: [{ key: 'name', selector: '#name', status: 'missing', matchCount: 0, issues: ['no-match'] }] }) }, slot);
+    expect(slot).toHaveTextContent('OV25 couldn’t find the product name on your product page.');
+    expect(container).not.toHaveTextContent('OV25 couldn’t find the product name');
+    slot.remove();
+  });
+
+  it('shows a host-reported error in the bar', () => {
+    renderToolbar({ onRequest: vi.fn(), availability: 'supported', status: 'error', message: 'The preview could not load this draft.' });
+    expect(screen.getByRole('alert')).toHaveTextContent('The preview could not load this draft.');
+  });
+});
