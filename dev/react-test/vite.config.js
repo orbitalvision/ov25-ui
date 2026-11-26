@@ -83,7 +83,6 @@ const testPages = [
   'carousel-relocation',
   'gallery-no-carousel',
   'configurator-setup',
-  'shopify-guided-setup',
 ];
 
 const testInputs = Object.fromEntries(
